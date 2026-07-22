@@ -34,68 +34,33 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('service_request_category_types', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->foreignUuid('service_request_type_id')
-                    ->constrained('service_request_types', indexName: 'srct_service_request_type_id_foreign')
-                    ->cascadeOnDelete();
-                $table->foreignUuid('service_request_type_category_id')
-                    ->constrained('service_request_type_categories', indexName: 'srct_service_request_type_category_id_foreign')
-                    ->cascadeOnDelete();
-                $table->unsignedInteger('sort')->default(0);
-                $table->timestamps();
+        Schema::create('service_request_category_types', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('service_request_type_id')
+                ->constrained('service_request_types', indexName: 'srct_service_request_type_id_foreign')
+                ->cascadeOnDelete();
+            $table->foreignUuid('service_request_type_category_id')
+                ->constrained('service_request_type_categories', indexName: 'srct_service_request_type_category_id_foreign')
+                ->cascadeOnDelete();
+            $table->unsignedInteger('sort')->default(0);
+            $table->timestamps();
 
-                $table->unique(
-                    ['service_request_type_id', 'service_request_type_category_id'],
-                    'srct_type_category_unique',
-                );
-            });
-
-            DB::table('service_request_category_types')->insertUsing(
-                ['id', 'service_request_type_id', 'service_request_type_category_id', 'sort', 'created_at', 'updated_at'],
-                DB::table('service_request_types')
-                    ->whereNotNull('category_id')
-                    ->select([
-                        DB::raw('gen_random_uuid()'),
-                        'id',
-                        'category_id',
-                        'sort',
-                        DB::raw('now()'),
-                        DB::raw('now()'),
-                    ]),
+            $table->unique(
+                ['service_request_type_id', 'service_request_type_category_id'],
+                'srct_type_category_unique',
             );
-
-            ServiceRequestTypeMultipleCategoriesFeature::activate();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceRequestTypeMultipleCategoriesFeature::deactivate();
-
-            DB::statement(<<<'SQL'
-                update service_request_types
-                set category_id = (
-                    select service_request_type_category_id
-                    from service_request_category_types
-                    where service_request_category_types.service_request_type_id = service_request_types.id
-                    limit 1
-                )
-                where category_id is null
-                SQL);
-
-            Schema::dropIfExists('service_request_category_types');
-        });
+        Schema::dropIfExists('service_request_category_types');
     }
 };

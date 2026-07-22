@@ -42,7 +42,6 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -66,38 +65,32 @@ class GetServiceRequestFormController extends Controller
     /**
      * Resolve the category to show in the breadcrumb trail.
      *
-     * A type can belong to many categories, so when the feature is active the breadcrumb follows the
-     * category the contact navigated under (supplied by the frontend) rather than one derived from
-     * the type. This is display-only context and is not persisted with the submitted request.
+     * A type can belong to many categories, so the breadcrumb follows the category the contact
+     * navigated under (supplied by the frontend). This is display-only context and is not
+     * persisted with the submitted request.
      *
      * @return array<string, mixed>|null
      */
     private function breadcrumbCategory(Request $request, ServiceRequestType $type): ?array
     {
-        if (ServiceRequestTypeMultipleCategoriesFeature::active()) {
-            $categoryId = $request->query('category');
+        $categoryId = $request->query('category');
 
-            if (! is_string($categoryId) || $categoryId === '') {
-                return null;
-            }
+        if (! is_string($categoryId) || $categoryId === '') {
+            return null;
+        }
 
-            // Only follow a category the type actually belongs to, so an arbitrary id in the query
-            // string cannot surface an unrelated category's name or ancestry.
-            /** @var ServiceRequestTypeCategory|null $category */
-            $category = $type->categories()->whereKey($categoryId)->first();
+        // Only follow a category the type actually belongs to, so an arbitrary id in the query
+        // string cannot surface an unrelated category's name or ancestry.
+        /** @var ServiceRequestTypeCategory|null $category */
+        $category = $type->categories()->whereKey($categoryId)->first();
 
-            // Never expose a category the contact is not allowed to see, even if the type is
-            // reachable through another (visible) area.
-            if (
-                $category !== null
-                && ! $category->isVisibleToContactType(auth('contact')->user()?->type_id)
-            ) {
-                return null;
-            }
-        } else {
-            $type->load('category');
-
-            $category = $type->category;
+        // Never expose a category the contact is not allowed to see, even if the type is
+        // reachable through another (visible) area.
+        if (
+            $category !== null
+            && ! $category->isVisibleToContactType(auth('contact')->user()?->type_id)
+        ) {
+            return null;
         }
 
         if ($category === null) {

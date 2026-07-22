@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\ServiceRequestTypeMultipleCategoriesFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
@@ -314,10 +313,7 @@ class ListServiceRequests extends ListRecords
             ->groupBy('parent_id');
 
         $types = ServiceRequestType::query()
-            ->when(
-                ServiceRequestTypeMultipleCategoriesFeature::active(),
-                fn (Builder $query) => $query->with('categories:id'),
-            )
+            ->with('categories:id')
             ->orderBy('sort')
             ->get();
 

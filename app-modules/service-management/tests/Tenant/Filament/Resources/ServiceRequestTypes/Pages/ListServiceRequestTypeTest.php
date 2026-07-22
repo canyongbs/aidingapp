@@ -140,7 +140,6 @@ it('creates new category with a new type in one operation', function () {
                         'name' => 'Brand New Type',
                         'type' => 'type',
                         'sort' => 1,
-                        'category_id' => $tempCategory,
                     ],
                 ],
             ],
@@ -158,7 +157,6 @@ it('creates new category with a new type in one operation', function () {
             [
                 'temp_id' => $tempType,
                 'name' => 'Brand New Type',
-                'category_id' => $tempCategory,
                 'sort' => 1,
             ],
         ],
@@ -280,9 +278,9 @@ it('reorders types within a category', function () {
                 'parent_id' => null,
                 'children' => [],
                 'types' => [
-                    ['id' => $type3->id, 'name' => $type3->name, 'type' => 'type', 'sort' => 1, 'category_id' => $category->id],
-                    ['id' => $type1->id, 'name' => $type1->name, 'type' => 'type', 'sort' => 2, 'category_id' => $category->id],
-                    ['id' => $type2->id, 'name' => $type2->name, 'type' => 'type', 'sort' => 3, 'category_id' => $category->id],
+                    ['id' => $type3->id, 'name' => $type3->name, 'type' => 'type', 'sort' => 1],
+                    ['id' => $type1->id, 'name' => $type1->name, 'type' => 'type', 'sort' => 2],
+                    ['id' => $type2->id, 'name' => $type2->name, 'type' => 'type', 'sort' => 3],
                 ],
             ],
         ],
@@ -322,7 +320,7 @@ it('updates names for categories and types', function () {
                 'parent_id' => null,
                 'children' => [],
                 'types' => [
-                    ['id' => $type->id, 'name' => 'New Type Name', 'type' => 'type', 'sort' => 1, 'category_id' => $category->id],
+                    ['id' => $type->id, 'name' => 'New Type Name', 'type' => 'type', 'sort' => 1],
                 ],
             ],
         ],
@@ -463,8 +461,4 @@ it('shows a type under every category it belongs to in the hierarchical data', f
 
     expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
         ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
-
-    // Each placement reports the category it is nested under.
-    expect(collect($categoryAData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
-        ->and(collect($categoryBData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
 });
