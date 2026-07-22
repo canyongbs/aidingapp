@@ -41,7 +41,6 @@ use App\DataTransferObjects\LicenseManagement\LicenseData;
 use App\DataTransferObjects\LicenseManagement\LicenseLimitsData;
 use App\DataTransferObjects\LicenseManagement\LicenseSubscriptionData;
 use App\Enums\SubscriptionStatus;
-use App\Features\SubscriptionExpirationFeature;
 use App\Http\Requests\Tenants\SyncTenantRequest;
 use App\Jobs\UpdateTenantLicenseData;
 use App\Models\Tenant;
@@ -71,22 +70,20 @@ class SyncTenantController
         try {
             dispatch_sync(new UpdateTenantLicenseData($tenant, $licenseData));
 
-            if (SubscriptionExpirationFeature::active()) {
-                // Subscription status and the expiration banner both live in the landlord
-                // database, so they are committed together on the landlord connection.
-                DB::connection('landlord')->transaction(function () use ($request, $tenant): void {
-                    if (filled($subscriptionStatus = $request->validated('subscriptionStatus'))) {
-                        $tenant->subscription_status = SubscriptionStatus::from($subscriptionStatus);
-                        $tenant->save();
-                    }
+            // Subscription status and the expiration banner both live in the landlord
+            // database, so they are committed together on the landlord connection.
+            DB::connection('landlord')->transaction(function () use ($request, $tenant): void {
+                if (filled($subscriptionStatus = $request->validated('subscriptionStatus'))) {
+                    $tenant->subscription_status = SubscriptionStatus::from($subscriptionStatus);
+                    $tenant->save();
+                }
 
-                    if (filled($bannerText = $request->validated('expirationBannerText'))) {
-                        $settings = app(TenantExpirationSettings::class);
-                        $settings->period_2_banner_text = $bannerText;
-                        $settings->save();
-                    }
-                });
-            }
+                if (filled($bannerText = $request->validated('expirationBannerText'))) {
+                    $settings = app(TenantExpirationSettings::class);
+                    $settings->period_2_banner_text = $bannerText;
+                    $settings->save();
+                }
+            });
         } catch (Throwable $exception) {
             report($exception);
 

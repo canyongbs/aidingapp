@@ -66,7 +66,7 @@ class SyncTenantRequest extends FormRequest
             'addons.projectManagement' => ['required', 'boolean'],
             'addons.serviceMonitoring' => ['required', 'boolean'],
             'addons.advisoryManagement' => ['required', 'boolean'],
-            'subscriptionStatus' => ['nullable', Rule::enum(SubscriptionStatus::class)],
+            'subscriptionStatus' => ['required', Rule::enum(SubscriptionStatus::class)],
             'expirationBannerText' => ['nullable', 'string'],
         ];
     }
