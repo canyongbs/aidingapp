@@ -97,23 +97,23 @@ class ProjectFilesWidget extends TableWidget
                         'application/zip' => 'Zip File',
                     })
                     ->icon(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
-                        default => 'heroicon-o-paper-clip',
-                        'image/png' => 'heroicon-o-photo',
-                        'image/jpeg' => 'heroicon-o-camera',
-                        'image/gif' => 'heroicon-o-gif',
-                        'application/pdf' => 'heroicon-o-document-text',
-                        'application/msword' => 'heroicon-o-document-text',
-                        'text/csv' => 'heroicon-o-table-cells',
-                        'application/vnd.ms-excel' => 'heroicon-o-table-cells',
-                        'application/msexcel' => 'heroicon-o-table-cells',
-                        'application/ms-excel' => 'heroicon-o-table-cells',
-                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'heroicon-o-document-text',
-                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'heroicon-o-table-cells',
-                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-o-presentation-chart-bar',
-                        'text/plain' => 'heroicon-o-document-text',
-                        'audio/mpeg' => 'heroicon-o-musical-note',
-                        'video/mp4' => 'heroicon-o-video-camera',
-                        'application/zip' => 'heroicon-o-archive-box',
+                        default => 'heroicon-m-paper-clip',
+                        'image/png' => 'heroicon-m-photo',
+                        'image/jpeg' => 'heroicon-m-camera',
+                        'image/gif' => 'heroicon-m-gif',
+                        'application/pdf' => 'heroicon-m-document-text',
+                        'application/msword' => 'heroicon-m-document-text',
+                        'text/csv' => 'heroicon-m-table-cells',
+                        'application/vnd.ms-excel' => 'heroicon-m-table-cells',
+                        'application/msexcel' => 'heroicon-m-table-cells',
+                        'application/ms-excel' => 'heroicon-m-table-cells',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'heroicon-m-document-text',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'heroicon-m-table-cells',
+                        'application/vnd.openxmlformats-officedocument.presentationml.presentation' => 'heroicon-m-presentation-chart-bar',
+                        'text/plain' => 'heroicon-m-document-text',
+                        'audio/mpeg' => 'heroicon-m-musical-note',
+                        'video/mp4' => 'heroicon-m-video-camera',
+                        'application/zip' => 'heroicon-m-archive-box',
                     }),
                 TextColumn::make('created_at')
                     ->label('Created')
@@ -128,7 +128,7 @@ class ProjectFilesWidget extends TableWidget
             ])
             ->recordActions([
                 Action::make('download')
-                    ->icon('heroicon-o-arrow-down-on-square')
+                    ->icon('heroicon-m-arrow-down-on-square')
                     ->color('info')
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(

@@ -164,7 +164,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ? [
                         CreateAction::make('createEntryFromEmptyState')
                             ->label('Add Pipeline Entry')
-                            ->icon('heroicon-o-plus')
+                            ->icon('heroicon-m-plus')
                             ->slideOver()
                             ->model(PipelineEntry::class)
                             ->schema($this->entryFormSchema($pipeline))
@@ -173,7 +173,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     : [
                         Action::make('createPipelineFromEmptyState')
                             ->label('Add Pipeline')
-                            ->icon('heroicon-o-plus')
+                            ->icon('heroicon-m-plus')
                             ->slideOver()
                             ->schema($this->pipelineFormSchema())
                             ->action(fn (array $data) => $this->persistPipeline($data))
@@ -183,7 +183,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->headerActions([
                 CreateAction::make('createEntry')
                     ->label('New Pipeline Entry')
-                    ->icon('heroicon-o-plus')
+                    ->icon('heroicon-m-plus')
                     ->slideOver()
                     ->visible(fn (): bool => filled($this->selectedPipelineId))
                     ->model(PipelineEntry::class)

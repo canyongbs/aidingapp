@@ -39,22 +39,21 @@ namespace AidingApp\Project\Filament\Actions;
 use Filament\Actions\Action;
 use Illuminate\Contracts\View\View;
 
-class ProjectManageAccessAction extends Action
+class ProjectManageAccessAction
 {
-    protected function setUp(): void
+    public static function make(string $name = 'manageAccess'): Action
     {
-        parent::setUp();
-
-        $this->label('Manage Access')
+        return Action::make($name)
+            ->label('Manage Access')
             ->icon('heroicon-m-user-group')
             ->color('gray')
             ->slideOver()
             ->modalHeading('Manage Project Access')
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Close')
-            ->modalContent(fn (): View => view(
+            ->modalContent(fn (Action $action): View => view(
                 'project::filament.resources.projects.widgets.manage-access-modal',
-                ['project' => $this->record],
+                ['project' => $action->getRecord()],
             ));
     }
 }

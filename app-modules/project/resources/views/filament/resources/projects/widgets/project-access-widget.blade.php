@@ -39,12 +39,12 @@
         </x-slot>
 
         {{-- Managers (avatars) --}}
-        <div class="space-y-2">
+        <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Managers ({{ $this->managers->count() }})
+                Managers <span class="text-gray-400 dark:text-gray-500">({{ $this->managers->count() }})</span>
             </p>
             @if ($this->managers->isNotEmpty())
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-wrap gap-4">
                     @foreach ($this->managers as $user)
                         <x-project::avatar :user="$user" />
                     @endforeach
@@ -53,12 +53,12 @@
         </div>
 
         {{-- Auditors (avatars) --}}
-        <div class="space-y-2">
+        <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Auditors ({{ $this->auditors->count() }})
+                Auditors <span class="text-gray-400 dark:text-gray-500">({{ $this->auditors->count() }})</span>
             </p>
             @if ($this->auditors->isNotEmpty())
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-wrap gap-4">
                     @foreach ($this->auditors as $user)
                         <x-project::avatar :user="$user" />
                     @endforeach
@@ -67,12 +67,12 @@
         </div>
 
         {{-- Guests (initials - contacts) --}}
-        <div class="space-y-2">
+        <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Guests ({{ $this->guests->count() }})
+                Guests <span class="text-gray-400 dark:text-gray-500">({{ $this->guests->count() }})</span>
             </p>
             @if ($this->guests->isNotEmpty())
-                <div class="flex flex-wrap gap-3">
+                <div class="flex flex-wrap gap-4">
                     @foreach ($this->guests as $item)
                         @php
                             $isContact = $item instanceof \AidingApp\Contact\Models\Contact;
@@ -90,14 +90,20 @@
                             $color = $colors[crc32($item->getKey()) % count($colors)];
                         @endphp
 
-                        <div class="flex flex-col items-center gap-1">
+                        <div
+                            class="flex flex-col items-center gap-1"
+                            x-tooltip="{
+                                content: @js($name),
+                                theme: $store.theme,
+                            }"
+                        >
                             <div
-                                class="flex h-10 w-10 items-center justify-center rounded-full {{ $color }} text-sm font-semibold text-white ring-2 ring-white dark:ring-gray-800"
+                                class="flex h-12 w-12 items-center justify-center rounded-full {{ $color }} text-base font-semibold text-white ring-2 ring-white dark:ring-gray-800"
                             >
                                 {{ $initials }}
                             </div>
                             <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-                                {{ str($name)->limit(8) }}
+                                {{ $name }}
                             </span>
                         </div>
                     @endforeach

@@ -39,7 +39,7 @@
             <x-filament::link
                 tag="button"
                 wire:click="mountAction('selectPipeline')"
-                icon="heroicon-m-chevron-down"
+                icon="heroicon-c-chevron-down"
                 icon-position="after"
                 size="sm"
             >
@@ -47,7 +47,8 @@
             </x-filament::link>
 
             <x-filament::icon-button
-                icon="heroicon-m-plus"
+                icon="heroicon-c-plus"
+                icon-size="sm"
                 wire:click="mountAction('createPipeline')"
                 label="Create new pipeline"
                 tooltip="Create new pipeline"

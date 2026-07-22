@@ -31,24 +31,25 @@
     
     </COPYRIGHT>
 --}}
-@php
-    $gradient = $project->getGradient();
-@endphp
-
 <x-filament-widgets::widget>
-    <header class="flex flex-col gap-6">
+    <header>
         <div
             class="flex overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
         >
             <div
-                class="ml-4 my-4 flex w-24 shrink-0 items-center justify-center rounded-lg"
-                style="background: linear-gradient(to bottom, {{ $gradient['from'] }}, {{ $gradient['to'] }})"
+                class="my-4 ms-4 flex aspect-square w-24 shrink-0 items-center justify-center self-center rounded-lg bg-linear-to-b from-[var(--project-gradient-from)] to-[var(--project-gradient-to)] dark:from-[var(--project-gradient-from-dark)] dark:to-[var(--project-gradient-to-dark)]"
+                style="
+                    --project-gradient-from: {{ $gradient['from'] }};
+                    --project-gradient-to: {{ $gradient['to'] }};
+                    --project-gradient-from-dark: {{ $gradient['darkFrom'] }};
+                    --project-gradient-to-dark: {{ $gradient['darkTo'] }};
+                "
             >
                 @svg($project->icon ?? 'heroicon-o-clipboard-document-list', 'h-14 w-14 text-white')
             </div>
 
             <div class="flex-1 p-6">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div class="flex flex-col gap-4 sm:flex-row sm:justify-between {{ $project->description ? 'sm:items-start' : 'sm:items-center' }}">
                     <div class="flex-1">
                         <h2 class="text-xl font-bold text-gray-950 dark:text-white">
                             {{ $project->name }}
@@ -70,20 +71,20 @@
                 <div class="mt-5 border-t border-gray-200 dark:border-gray-700"></div>
 
                 <div
-                    class="mt-4 grid grid-cols-1 gap-x-5 gap-y-3 text-sm text-gray-500 sm:grid-cols-2 lg:grid-cols-4 dark:text-gray-400"
+                    class="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 text-sm text-gray-500 md:grid-cols-2 lg:flex lg:items-center lg:justify-between dark:text-gray-400"
                 >
                     <div class="flex items-center gap-1.5">
-                        @svg('heroicon-m-building-office', 'h-4 w-4 shrink-0')
+                        @svg('heroicon-c-building-office', 'h-4 w-4 shrink-0')
                         <span>Department: {{ $project->department?->name ?? 'N/A' }}</span>
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        @svg('heroicon-m-calendar', 'h-4 w-4 shrink-0')
+                        @svg('heroicon-c-calendar', 'h-4 w-4 shrink-0')
                         <span>Start Date: {{ $project->start_date?->format('M j, Y') ?? 'N/A' }}</span>
                     </div>
 
                     <div class="flex items-center gap-1.5">
-                        @svg('heroicon-m-flag', 'h-4 w-4 shrink-0')
+                        @svg('heroicon-c-flag', 'h-4 w-4 shrink-0')
                         <span>Target Go-Live: {{ $project->target_completion_date?->format('M j, Y') ?? 'N/A' }}</span>
                     </div>
 

@@ -46,6 +46,7 @@ use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
+use Filament\Support\Colors\Color;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
@@ -102,6 +103,24 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     }
 
     /**
+     * @return array<string, string>
+     */
+    protected function getGradient(): array
+    {
+        $palettes = Color::all();
+
+        /** @var array<int, string> $palette */
+        $palette = $palettes[$this->record->color->value ?? 'blue'] ?? $palettes['blue'];
+
+        return [
+            'from' => $palette[400],
+            'to' => $palette[700],
+            'darkFrom' => $palette[500],
+            'darkTo' => $palette[800],
+        ];
+    }
+
+    /**
      * @return array<string, mixed>
      */
     protected function getViewData(): array
@@ -109,6 +128,7 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
         return [
             'project' => $this->record,
             'progress' => $this->getProgress(),
+            'gradient' => $this->getGradient(),
         ];
     }
 }
