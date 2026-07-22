@@ -151,7 +151,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                 EditAction::make()
                     ->slideOver()
                     ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record)),
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
             ])
             ->emptyStateHeading($pipeline ? 'No pipeline entries' : 'No pipeline selected')
             ->emptyStateDescription(
@@ -168,7 +169,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->slideOver()
                             ->model(PipelineEntry::class)
                             ->schema($this->entryFormSchema($pipeline))
-                            ->authorize(fn (): bool => auth()->user()->can('update', $this->record)),
+                            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                            ->after(fn () => $this->dispatch('projectPipelineUpdated')),
                     ]
                     : [
                         Action::make('createPipelineFromEmptyState')
@@ -188,7 +190,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->visible(fn (): bool => (bool) $pipeline?->entries()->exists())
                     ->model(PipelineEntry::class)
                     ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record)),
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
             ]);
     }
 

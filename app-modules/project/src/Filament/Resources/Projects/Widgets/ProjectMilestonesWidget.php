@@ -108,6 +108,8 @@ class ProjectMilestonesWidget extends TableWidget
                     ->action(function (array $data): void {
                         $this->record->milestones()->create($data);
 
+                        $this->dispatch('projectMilestonesUpdated');
+
                         Notification::make()
                             ->success()
                             ->title('Milestone created')
@@ -120,7 +122,8 @@ class ProjectMilestonesWidget extends TableWidget
                     ->schema($this->formSchema())
                     ->authorize('update', $this->record),
                 DeleteAction::make()
-                    ->authorize('update', $this->record),
+                    ->authorize('update', $this->record)
+                    ->after(fn () => $this->dispatch('projectMilestonesUpdated')),
             ]);
     }
 

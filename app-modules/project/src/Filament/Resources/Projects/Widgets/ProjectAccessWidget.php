@@ -51,6 +51,7 @@ use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Collection;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
 {
@@ -68,6 +69,9 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
 
         return $user->can('viewAny', Project::class);
     }
+
+    #[On('projectAccessUpdated')]
+    public function refreshAccess(): void {}
 
     /**
      * @return Collection<int, User>

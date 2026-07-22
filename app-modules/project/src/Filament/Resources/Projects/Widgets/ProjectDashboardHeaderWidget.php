@@ -49,6 +49,7 @@ use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSchemas
 {
@@ -61,6 +62,9 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'project::filament.resources.projects.widgets.project-dashboard-header-widget';
+
+    #[On('projectPipelineUpdated')]
+    public function refreshOnPipelineUpdate(): void {}
 
     public function editProjectAction(): Action
     {

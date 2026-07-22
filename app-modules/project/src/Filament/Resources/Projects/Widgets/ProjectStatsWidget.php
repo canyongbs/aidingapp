@@ -42,6 +42,7 @@ use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
 class ProjectStatsWidget extends BaseWidget
 {
@@ -54,6 +55,10 @@ class ProjectStatsWidget extends BaseWidget
 
         return $user->can('viewAny', Project::class);
     }
+
+    #[On('projectPipelineUpdated')]
+    #[On('projectMilestonesUpdated')]
+    public function refreshStats(): void {}
 
     protected function getStats(): array
     {
