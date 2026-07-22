@@ -46,9 +46,8 @@ class ProjectManageAccessAction extends Action
         parent::setUp();
 
         $this->label('Manage Access')
-            ->icon('heroicon-o-user-group')
-            ->outlined()
-            ->color('info')
+            ->icon('heroicon-m-user-group')
+            ->color('gray')
             ->slideOver()
             ->modalHeading('Manage Project Access')
             ->modalSubmitAction(false)

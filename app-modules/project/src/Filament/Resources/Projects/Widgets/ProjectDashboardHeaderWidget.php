@@ -66,9 +66,8 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
     {
         return Action::make('editProject')
             ->label('Edit Project')
-            ->icon('heroicon-o-pencil')
-            ->outlined()
-            ->color('info')
+            ->icon('heroicon-m-pencil-square')
+            ->color('primary')
             ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
     }
 

@@ -31,49 +31,48 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-    use Filament\Facades\Filament;
-@endphp
-
 <x-filament-widgets::widget class="h-full">
-    <x-filament::section>
+    <x-filament::section divided>
         <x-slot name="heading">Project Access</x-slot>
         <x-slot name="afterHeader">
             <x-filament::button color="gray" wire:click="mountAction('manageAccess')">Manage</x-filament::button>
         </x-slot>
 
-        <div class="divide-y divide-gray-200 dark:divide-gray-700">
-            {{-- Managers (avatars) --}}
-            <div class="py-4 first:pt-0">
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Managers ({{ $this->managers->count() }})
-                </p>
-                <div class="mt-2 flex flex-wrap gap-3">
+        {{-- Managers (avatars) --}}
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Managers ({{ $this->managers->count() }})
+            </p>
+            @if ($this->managers->isNotEmpty())
+                <div class="flex flex-wrap gap-3">
                     @foreach ($this->managers as $user)
                         <x-project::avatar :user="$user" />
                     @endforeach
                 </div>
-            </div>
+            @endif
+        </div>
 
-            {{-- Auditors (avatars) --}}
-            <div class="py-4">
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Auditors ({{ $this->auditors->count() }})
-                </p>
-                <div class="mt-2 flex flex-wrap gap-3">
+        {{-- Auditors (avatars) --}}
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Auditors ({{ $this->auditors->count() }})
+            </p>
+            @if ($this->auditors->isNotEmpty())
+                <div class="flex flex-wrap gap-3">
                     @foreach ($this->auditors as $user)
                         <x-project::avatar :user="$user" />
                     @endforeach
                 </div>
-            </div>
+            @endif
+        </div>
 
-            {{-- Guests (initials - contacts) --}}
-            <div class="py-4">
-                <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                    Guests ({{ $this->guests->count() }})
-                </p>
-                <div class="mt-2 flex flex-wrap gap-3">
+        {{-- Guests (initials - contacts) --}}
+        <div class="space-y-2">
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                Guests ({{ $this->guests->count() }})
+            </p>
+            @if ($this->guests->isNotEmpty())
+                <div class="flex flex-wrap gap-3">
                     @foreach ($this->guests as $item)
                         @php
                             $isContact = $item instanceof \AidingApp\Contact\Models\Contact;
@@ -103,7 +102,7 @@
                         </div>
                     @endforeach
                 </div>
-            </div>
+            @endif
         </div>
     </x-filament::section>
 
