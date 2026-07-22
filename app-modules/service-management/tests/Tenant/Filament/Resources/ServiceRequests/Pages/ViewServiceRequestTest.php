@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Infolists\Components\TextEntry;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -79,6 +80,24 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->close_details,
             ]
         );
+});
+
+test('The Description entry has Markdown rendering enabled on the underlying component', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    asSuperAdmin();
+
+    $descriptionEntry = livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->instance()
+        ->getSchema('infolist')
+        ->getComponent(fn ($component): bool => $component instanceof TextEntry && $component->getName() === 'close_details');
+
+    expect($descriptionEntry)
+        ->not->toBeNull()
+        ->isMarkdown()->toBeTrue();
 });
 
 // Permission Tests

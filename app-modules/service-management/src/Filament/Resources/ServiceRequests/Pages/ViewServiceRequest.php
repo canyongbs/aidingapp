@@ -134,7 +134,8 @@ class ViewServiceRequest extends ViewRecord
                 Section::make('Description')
                     ->schema([
                         TextEntry::make('close_details')
-                            ->hiddenLabel(),
+                            ->hiddenLabel()
+                            ->markdown(),
                     ]),
                 Section::make('Uploaded Files')
                     ->schema(fn (ServiceRequest $record): array => [
