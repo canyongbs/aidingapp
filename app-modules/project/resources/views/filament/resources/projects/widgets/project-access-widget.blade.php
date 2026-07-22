@@ -41,7 +41,8 @@
         {{-- Managers (avatars) --}}
         <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Managers <span class="text-gray-400 dark:text-gray-500">({{ $this->managers->count() }})</span>
+                Managers
+                <span class="text-gray-400 dark:text-gray-500">({{ $this->managers->count() }})</span>
             </p>
             @if ($this->managers->isNotEmpty())
                 <div class="flex flex-wrap gap-4">
@@ -55,7 +56,8 @@
         {{-- Auditors (avatars) --}}
         <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Auditors <span class="text-gray-400 dark:text-gray-500">({{ $this->auditors->count() }})</span>
+                Auditors
+                <span class="text-gray-400 dark:text-gray-500">({{ $this->auditors->count() }})</span>
             </p>
             @if ($this->auditors->isNotEmpty())
                 <div class="flex flex-wrap gap-4">
@@ -69,7 +71,8 @@
         {{-- Guests (initials - contacts) --}}
         <div class="space-y-3">
             <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Guests <span class="text-gray-400 dark:text-gray-500">({{ $this->guests->count() }})</span>
+                Guests
+                <span class="text-gray-400 dark:text-gray-500">({{ $this->guests->count() }})</span>
             </p>
             @if ($this->guests->isNotEmpty())
                 <div class="flex flex-wrap gap-4">
