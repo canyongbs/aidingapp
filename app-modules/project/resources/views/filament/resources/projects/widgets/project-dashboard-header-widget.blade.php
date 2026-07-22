@@ -65,9 +65,7 @@
             </div>
 
             <div class="flex-1 p-6">
-                <div
-                    class="flex flex-col gap-4 sm:flex-row sm:justify-between {{ $project->description ? 'sm:items-start' : 'sm:items-center' }}"
-                >
+                <div class="flex flex-col gap-4 sm:flex-row sm:justify-between {{ $project->description ? 'sm:items-start' : 'sm:items-center' }}">
                     <div class="flex-1">
                         <h2 class="text-xl font-bold text-gray-950 dark:text-white">
                             {{ $project->name }}
@@ -86,7 +84,7 @@
                     </div>
                 </div>
 
-                <div class="mt-5 border-t border-gray-200 dark:border-gray-700"></div>
+                <div class="mt-4 border-t border-gray-200 dark:border-gray-700"></div>
 
                 <div
                     class="mt-4 grid grid-cols-1 gap-x-6 gap-y-3 text-sm text-gray-500 md:grid-cols-2 lg:flex lg:items-center lg:justify-between dark:text-gray-400"
