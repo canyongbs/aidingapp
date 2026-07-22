@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
-use App\Features\PipelineStageClassificationFeature;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Repeater;
@@ -74,7 +73,7 @@ class EditPipeline extends EditRecord
                     ->relationship('stages')
                     ->table([
                         TableColumn::make('Stage Name'),
-                        ...(PipelineStageClassificationFeature::active() ? [TableColumn::make('Classification')] : []),
+                        TableColumn::make('Classification'),
                     ])
                     ->schema([
                         TextInput::make('name')
@@ -87,8 +86,7 @@ class EditPipeline extends EditRecord
                             ->enum(PipelineStageClassification::class)
                             ->required()
                             ->native()
-                            ->default(PipelineStageClassification::Planning->value)
-                            ->visible(fn () => PipelineStageClassificationFeature::active()),
+                            ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->deleteAction(
                         function (Action $action) {

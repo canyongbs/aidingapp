@@ -33,36 +33,39 @@
 
 </COPYRIGHT>
 */
-
-namespace AidingApp\Contact\Tests\Tenant\Contact\RequestFactories;
-
-use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
+use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
-use Worksome\RequestFactories\RequestFactory;
 
-class CreateContactRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'type_id' => ContactType::factory()->create()->id,
-            'first_name' => $this->faker->firstName(),
-            'last_name' => $this->faker->lastName(),
-            'full_name' => fn (array $attributes): string => "{$attributes['first_name']} {$attributes['last_name']}",
-            'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
-            'email' => $this->faker->email(),
-            'mobile' => $this->faker->e164PhoneNumber(),
-            'sms_opt_out' => intval($this->faker->boolean()),
-            'email_bounce' => intval($this->faker->boolean()),
-            'phone' => $this->faker->e164PhoneNumber(),
-            'address' => $this->faker->streetAddress(),
-            'address_2' => $this->faker->secondaryAddress(),
-            'address_3' => $this->faker->secondaryAddress(),
-            'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
-            'postal' => $this->faker->postcode(),
-            'created_by_id' => User::factory()->create()->id,
-        ];
-    }
-}
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+
+it('populates the address fields when a suggestion is selected', function () {
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('contact.view-any', 'contact.create')
+    );
+
+    $address = new AutocompletedAddress(
+        address: '123 Main St',
+        city: 'Austin',
+        state: 'TX',
+        postalCode: '78701',
+        country: 'US',
+        label: '123 Main St, Austin, TX, 78701, US',
+    );
+
+    livewire(CreateContact::class)
+        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
+            'value' => $address->label,
+            'label' => $address->label,
+            'data' => ['data' => json_decode(json_encode($address), true)],
+        ]])
+        ->assertSchemaStateSet([
+            'address' => '123 Main St',
+            'city' => 'Austin',
+            'state' => 'TX',
+            'postal' => '78701',
+        ]);
+});
