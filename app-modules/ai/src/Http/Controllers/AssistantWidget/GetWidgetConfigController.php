@@ -37,13 +37,12 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Enums\Feature;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\URL;
 
 class GetWidgetConfigController extends Controller
@@ -59,7 +58,7 @@ class GetWidgetConfigController extends Controller
         $settings = app(PortalSettings::class);
 
         $serviceManagementEnabled = $settings->knowledge_management_portal_service_management
-            && Gate::check(Feature::ServiceManagement->getGateName());
+            && (bool) app(LicenseSettings::class)->data?->addons?->serviceManagement;
 
         $websocketsConfig = config('filament.broadcasting.echo');
 
