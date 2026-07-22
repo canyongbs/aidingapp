@@ -45,7 +45,7 @@
 
 <div x-data="{ tab: 'managers' }" class="space-y-6">
     <div class="flex justify-center">
-        <x-filament::tabs class>
+        <x-filament::tabs>
             <x-filament::tabs.item
                 tag="button"
                 x-on:click="tab = 'managers'"
