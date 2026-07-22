@@ -42,7 +42,6 @@ use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\NavigationGroup;
-use App\Features\ReportingFeature;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -87,7 +86,7 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
         /** @var User $user */
         $user = auth()->user();
 
-        return $user->can(ReportingFeature::active() ? 'reporting.view-any' : 'report-library.view-any');
+        return $user->can('reporting.view-any');
     }
 
     /**
@@ -175,7 +174,7 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
             ->label('Manage')
             ->icon('heroicon-m-user-group')
             ->slideOver()
-            ->authorize(fn (): bool => auth()->user()->can(ReportingFeature::active() ? 'reporting.*.update' : 'report-library.*.update'))
+            ->authorize(fn (): bool => auth()->user()->can('reporting.*.update'))
             ->modalHeading(fn (array $record): string => "Manage Access: {$record['name']}")
             ->modalDescription('Grant access to this report by assigning individual users and/or departments.')
             ->fillForm(fn (array $record): array => [

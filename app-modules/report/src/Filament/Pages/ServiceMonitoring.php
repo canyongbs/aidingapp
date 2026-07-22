@@ -40,7 +40,6 @@ use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Widgets\ServiceMonitorTable;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
-use App\Features\ReportingFeature;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
@@ -72,10 +71,6 @@ class ServiceMonitoring extends Dashboard
 
         /** @var User $user */
         $user = auth()->user();
-
-        if (! ReportingFeature::active()) {
-            return $user->can('report-library.view-any');
-        }
 
         return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
