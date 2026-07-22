@@ -68,9 +68,7 @@
 
         {{-- Guests (initials - contacts) --}}
         <div class="space-y-2">
-            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Guests ({{ $this->guests->count() }})
-            </p>
+            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Guests ({{ $this->guests->count() }})</p>
             @if ($this->guests->isNotEmpty())
                 <div class="flex flex-wrap gap-3">
                     @foreach ($this->guests as $item)
