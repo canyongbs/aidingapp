@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
-use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
 use App\Services\AwsGeoPlacesService;
 use Illuminate\Support\Facades\Exceptions;
@@ -43,63 +42,14 @@ use Mockery\MockInterface;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-function contactAddressAutocompleteUser(): User
-{
-    $user = User::factory()->create();
-    $user->givePermissionTo('contact.view-any');
-    $user->givePermissionTo('contact.create');
-
-    return $user;
-}
-
-function contactAddressSelectionPayload(): array
-{
-    $address = new AutocompletedAddress(
-        address: '123 Main St',
-        city: 'Austin',
-        state: 'TX',
-        postalCode: '78701',
-        country: 'US',
-        label: '123 Main St, Austin, TX, 78701, US',
+it('does not query the address suggestion service for searches shorter than three characters', function () {
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('contact.view-any', 'contact.create')
     );
 
-    return [
-        'value' => $address->label,
-        'label' => $address->label,
-        'data' => ['data' => json_decode(json_encode($address), true)],
-    ];
-}
-
-it('populates the address fields when a suggestion is selected', function () {
-    actingAs(contactAddressAutocompleteUser());
-
-    livewire(CreateContact::class)
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [contactAddressSelectionPayload()])
-        ->assertSchemaStateSet([
-            'address' => '123 Main St',
-            'city' => 'Austin',
-            'state' => 'TX',
-            'postal' => '78701',
-        ]);
-});
-
-it('limits the address to 255 characters', function () {
-    actingAs(contactAddressAutocompleteUser());
-
-    livewire(CreateContact::class)
-        ->fillForm([
-            'first_name' => 'Jane',
-            'last_name' => 'Doe',
-            'full_name' => 'Jane Doe',
-            'address' => str_repeat('a', 256),
-        ])
-        ->call('create')
-        ->assertHasFormErrors(['address']);
-});
-
-it('does not query the address suggestion service for searches shorter than three characters', function () {
-    actingAs(contactAddressAutocompleteUser());
-
+    /** @phpstan-ignore method.notFound */
     $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock) {
         $mock->shouldNotReceive('autocompleteComponents');
     });
@@ -112,10 +62,16 @@ it('does not query the address suggestion service for searches shorter than thre
 it('returns no suggestions and notifies the user when the address suggestion service fails', function () {
     Exceptions::fake();
 
-    actingAs(contactAddressAutocompleteUser());
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('contact.view-any', 'contact.create')
+    );
 
+    /** @phpstan-ignore method.notFound */
     $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock) {
         $mock->shouldReceive('autocompleteComponents')
+            /** @phpstan-ignore method.notFound */
             ->once()
             ->andThrow(new Exception('AWS GeoPlaces is unavailable'));
     });
@@ -126,4 +82,22 @@ it('returns no suggestions and notifies the user when the address suggestion ser
         ->assertReturned([]);
 
     Exceptions::assertReported(fn (Exception $exception): bool => $exception->getMessage() === 'AWS GeoPlaces is unavailable');
+});
+
+it('limits the address to 255 characters', function () {
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('contact.view-any', 'contact.create')
+    );
+
+    livewire(CreateContact::class)
+        ->fillForm([
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
+            'full_name' => 'Jane Doe',
+            'address' => str_repeat('a', 256),
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['address']);
 });

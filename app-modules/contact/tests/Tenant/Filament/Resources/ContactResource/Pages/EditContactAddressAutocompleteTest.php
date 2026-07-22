@@ -33,15 +33,23 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+use AidingApp\Contact\Models\Contact;
 use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-function organizationAddressSelectionPayload(): array
-{
+it('populates the address fields when a suggestion is selected', function () {
+    actingAs(
+        User::factory()
+            ->create()
+            ->givePermissionTo('contact.view-any', 'contact.*.update')
+    );
+
+    $contact = Contact::factory()->create();
+
     $address = new AutocompletedAddress(
         address: '123 Main St',
         city: 'Austin',
@@ -51,43 +59,18 @@ function organizationAddressSelectionPayload(): array
         label: '123 Main St, Austin, TX, 78701, US',
     );
 
-    return [
-        'value' => $address->label,
-        'label' => $address->label,
-        'data' => ['data' => json_decode(json_encode($address), true)],
-    ];
-}
-
-it('populates the address fields when a suggestion is selected', function () {
-    $user = User::factory()->create();
-    $user->givePermissionTo('organization.view-any');
-    $user->givePermissionTo('organization.create');
-
-    actingAs($user);
-
-    livewire(CreateOrganization::class)
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [organizationAddressSelectionPayload()])
+    livewire(EditContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
+            'value' => $address->label,
+            'label' => $address->label,
+            'data' => ['data' => json_decode(json_encode($address), true)],
+        ]])
         ->assertSchemaStateSet([
             'address' => '123 Main St',
             'city' => 'Austin',
             'state' => 'TX',
-            'postalcode' => '78701',
-            'country' => 'US',
+            'postal' => '78701',
         ]);
-});
-
-it('limits the address to 255 characters', function () {
-    $user = User::factory()->create();
-    $user->givePermissionTo('organization.view-any');
-    $user->givePermissionTo('organization.create');
-
-    actingAs($user);
-
-    livewire(CreateOrganization::class)
-        ->fillForm([
-            'name' => 'Acme Inc',
-            'address' => str_repeat('a', 256),
-        ])
-        ->call('create')
-        ->assertHasFormErrors(['address']);
 });
