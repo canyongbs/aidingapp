@@ -34,44 +34,48 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+namespace AidingApp\Project\Filament\Resources\Projects\Pages\Concerns;
 
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 
-class ManagerUsersRelationManager extends RelationManager
+trait HasProjectDashboardNavigation
 {
-    protected static string $relationship = 'managerUsers';
-
-    protected static ?string $title = 'Users';
-
-    public function table(Table $table): Table
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('managedProjects');
+        $resource = static::getResource();
+        /** @var Project $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('view', ['record' => $record]) => Str::limit($record->name, 16),
+            $this->getBreadcrumb(),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        /** @var Project $project */
+        $project = $this->getRecord();
+
+        return new HtmlString(
+            view('project::filament.pages.back-to-project', [
+                'url' => ProjectResource::getUrl('view', ['record' => $project]),
+            ])->render(),
+        );
     }
 }

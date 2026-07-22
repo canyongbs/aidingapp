@@ -58,15 +58,18 @@ class GuestOrganizationsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord())),
+                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('guestProjects');
     }

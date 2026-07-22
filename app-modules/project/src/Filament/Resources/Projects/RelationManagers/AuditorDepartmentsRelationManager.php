@@ -59,15 +59,18 @@ class AuditorDepartmentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize('update', Project::class),
+                    ->authorize('update', Project::class)
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->authorize('update', Project::class),
+                    ->authorize('update', Project::class)
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->authorize('update', Project::class),
+                    ->authorize('update', Project::class)
+                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('auditedProjects');
     }

@@ -34,44 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+namespace AidingApp\Project\Filament\Actions;
 
-use AidingApp\Project\Models\Project;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Actions\Action;
+use Illuminate\Contracts\View\View;
 
-class ManagerUsersRelationManager extends RelationManager
+class ProjectManageAccessAction
 {
-    protected static string $relationship = 'managerUsers';
-
-    protected static ?string $title = 'Users';
-
-    public function table(Table $table): Table
+    public static function make(string $name = 'manageAccess'): Action
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('managedProjects');
+        return Action::make($name)
+            ->label('Manage Access')
+            ->icon('heroicon-m-user-group')
+            ->color('gray')
+            ->authorize(fn (Action $action): bool => auth()->user()->can('update', $action->getRecord()))
+            ->slideOver()
+            ->modalHeading('Manage Project Access')
+            ->modalSubmitAction(false)
+            ->modalCancelActionLabel('Close')
+            ->modalContent(fn (Action $action): View => view(
+                'project::filament.resources.projects.widgets.manage-access-modal',
+                ['project' => $action->getRecord()],
+            ));
     }
 }

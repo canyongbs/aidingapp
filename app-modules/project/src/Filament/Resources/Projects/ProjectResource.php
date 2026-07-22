@@ -48,7 +48,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
 
@@ -59,20 +58,6 @@ class ProjectResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
 
     protected static ?int $navigationSort = 10;
-
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewProject::class,
-            EditProject::class,
-            ManageManagers::class,
-            ManageAuditors::class,
-            ManagePipelines::class,
-            ManageMilestones::class,
-            ManageFiles::class,
-            ManageGuests::class,
-        ]);
-    }
 
     public static function getPages(): array
     {

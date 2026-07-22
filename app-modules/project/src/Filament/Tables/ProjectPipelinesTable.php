@@ -34,44 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+namespace AidingApp\Project\Filament\Tables;
 
-use AidingApp\Project\Models\Project;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
+use AidingApp\Project\Models\Pipeline;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class ManagerUsersRelationManager extends RelationManager
+class ProjectPipelinesTable
 {
-    protected static string $relationship = 'managerUsers';
-
-    protected static ?string $title = 'Users';
-
-    public function table(Table $table): Table
+    public static function configure(Table $table): Table
     {
         return $table
-            ->recordTitleAttribute('name')
+            ->query(function () use ($table): Builder {
+                $projectId = $table->getArguments()['projectId'] ?? null;
+
+                return Pipeline::query()->where('project_id', $projectId);
+            })
             ->columns([
-                TextColumn::make('name'),
+                TextColumn::make('name')
+                    ->label('Pipeline')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('stages_count')
+                    ->label('Stages')
+                    ->counts('stages'),
+                TextColumn::make('entries_count')
+                    ->label('Entries')
+                    ->counts('entries'),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable(),
             ])
-            ->headerActions([
-                AttachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('managedProjects');
+            ->defaultSort('created_at');
     }
 }

@@ -34,44 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use Filament\Widgets\StatsOverviewWidget as BaseWidget;
+use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Locked;
+use Livewire\Attributes\On;
 
-class ManagerUsersRelationManager extends RelationManager
+class ProjectStatsWidget extends BaseWidget
 {
-    protected static string $relationship = 'managerUsers';
+    #[Locked]
+    public Project $record;
 
-    protected static ?string $title = 'Users';
-
-    public function table(Table $table): Table
+    public static function canView(): bool
     {
-        return $table
-            ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->authorize('update', Project::class)
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('managedProjects');
+        $user = auth()->user();
+
+        return $user->can('viewAny', Project::class);
+    }
+
+    #[On('projectPipelineUpdated')]
+    #[On('projectMilestonesUpdated')]
+    public function refreshStats(): void {}
+
+    protected function getStats(): array
+    {
+        $project = $this->record;
+
+        return [
+            Stat::make('Files', $project->files()->count()),
+            Stat::make('Pipeline Tasks', PipelineEntry::query()
+                ->whereHas(
+                    'pipelineStage.pipeline',
+                    fn (Builder $query) => $query->where('project_id', $project->getKey()),
+                )
+                ->count()),
+            Stat::make('Milestones', $project->milestones()->count()),
+        ];
     }
 }

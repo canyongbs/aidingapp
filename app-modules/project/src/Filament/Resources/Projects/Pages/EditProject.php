@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
+use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -45,6 +46,8 @@ use Filament\Schemas\Schema;
 
 class EditProject extends EditRecord
 {
+    use HasProjectDashboardNavigation;
+
     protected static string $resource = ProjectResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
