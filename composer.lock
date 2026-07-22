@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "efc68ac5f78f44ff12fb15338bd8f606",
+    "content-hash": "ab7b1c9656a0093bac9481fd0c65aa5b",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -3732,7 +3732,7 @@
         },
         {
             "name": "filament/actions",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/actions.git",
@@ -3781,7 +3781,7 @@
         },
         {
             "name": "filament/filament",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/panels.git",
@@ -3838,7 +3838,7 @@
         },
         {
             "name": "filament/forms",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/forms.git",
@@ -3888,7 +3888,7 @@
         },
         {
             "name": "filament/infolists",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/infolists.git",
@@ -3933,7 +3933,7 @@
         },
         {
             "name": "filament/notifications",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/notifications.git",
@@ -3980,7 +3980,7 @@
         },
         {
             "name": "filament/query-builder",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/query-builder.git",
@@ -4026,7 +4026,7 @@
         },
         {
             "name": "filament/schemas",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/schemas.git",
@@ -4071,7 +4071,7 @@
         },
         {
             "name": "filament/spatie-laravel-media-library-plugin",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/spatie-laravel-media-library-plugin.git",
@@ -4108,7 +4108,7 @@
         },
         {
             "name": "filament/spatie-laravel-settings-plugin",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/spatie-laravel-settings-plugin.git",
@@ -4152,16 +4152,16 @@
         },
         {
             "name": "filament/support",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/support.git",
-                "reference": "b271075b090f1dbbe03797604e4d7201fc060309"
+                "reference": "cab11d40653378f5e07d69961d19f9384c70661f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/filamentphp/support/zipball/b271075b090f1dbbe03797604e4d7201fc060309",
-                "reference": "b271075b090f1dbbe03797604e4d7201fc060309",
+                "url": "https://api.github.com/repos/filamentphp/support/zipball/cab11d40653378f5e07d69961d19f9384c70661f",
+                "reference": "cab11d40653378f5e07d69961d19f9384c70661f",
                 "shasum": ""
             },
             "require": {
@@ -4206,11 +4206,11 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-07-22T16:54:40+00:00"
+            "time": "2026-07-22T19:47:33+00:00"
         },
         {
             "name": "filament/tables",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/tables.git",
@@ -4256,7 +4256,7 @@
         },
         {
             "name": "filament/widgets",
-            "version": "v4.12.2",
+            "version": "v4.12.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/filamentphp/widgets.git",
