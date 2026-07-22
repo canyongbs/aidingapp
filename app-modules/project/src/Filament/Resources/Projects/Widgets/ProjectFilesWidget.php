@@ -130,6 +130,7 @@ class ProjectFilesWidget extends TableWidget
                 Action::make('download')
                     ->icon('heroicon-m-arrow-down-on-square')
                     ->color('info')
+                    ->authorize('view')
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(
                         fn (ProjectFile $record) => Storage::disk('s3')

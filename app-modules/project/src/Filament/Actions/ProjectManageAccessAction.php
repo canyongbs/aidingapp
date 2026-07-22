@@ -47,6 +47,7 @@ class ProjectManageAccessAction
             ->label('Manage Access')
             ->icon('heroicon-m-user-group')
             ->color('gray')
+            ->authorize(fn (Action $action): bool => auth()->user()->can('update', $action->getRecord()))
             ->slideOver()
             ->modalHeading('Manage Project Access')
             ->modalSubmitAction(false)

@@ -47,15 +47,17 @@
                 {{ $pipeline->name }}
             </x-filament::link>
 
-            <x-filament::icon-button
-                icon="heroicon-c-plus"
-                icon-size="sm"
-                wire:click="mountAction('createPipeline')"
-                label="Create new pipeline"
-                tooltip="Create new pipeline"
-                color="gray"
-                size="sm"
-            />
+            @if ($this->createPipelineAction->isVisible())
+                <x-filament::icon-button
+                    icon="heroicon-c-plus"
+                    icon-size="sm"
+                    wire:click="mountAction('createPipeline')"
+                    label="Create new pipeline"
+                    tooltip="Create new pipeline"
+                    color="gray"
+                    size="sm"
+                />
+            @endif
         </div>
     @endif
 </div>

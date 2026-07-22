@@ -35,7 +35,9 @@
     <x-filament::section divided>
         <x-slot name="heading">Project Access</x-slot>
         <x-slot name="afterHeader">
-            <x-filament::button color="gray" wire:click="mountAction('manageAccess')">Manage</x-filament::button>
+            @if ($this->manageAccessAction->isVisible())
+                <x-filament::button color="gray" wire:click="mountAction('manageAccess')">Manage</x-filament::button>
+            @endif
         </x-slot>
 
         {{-- Managers (avatars) --}}

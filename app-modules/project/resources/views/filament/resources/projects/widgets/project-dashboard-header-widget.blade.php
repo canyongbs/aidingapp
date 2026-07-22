@@ -79,8 +79,13 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        {{ $this->manageAccessAction }}
-                        {{ $this->editProjectAction }}
+                        @if ($this->manageAccessAction->isVisible())
+                            {{ $this->manageAccessAction }}
+                        @endif
+
+                        @if ($this->editProjectAction->isVisible())
+                            {{ $this->editProjectAction }}
+                        @endif
                     </div>
                 </div>
 

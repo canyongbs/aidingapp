@@ -197,7 +197,7 @@ it('can view a record', function () {
 });
 
 it('can render the project access widget and mount the manage access action', function () {
-    loginAsUserWithProjectViewPermissions();
+    asSuperAdmin();
 
     $project = Project::factory()->create();
 

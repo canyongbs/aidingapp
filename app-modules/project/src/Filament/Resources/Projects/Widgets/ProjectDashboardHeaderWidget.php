@@ -69,6 +69,7 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
             ->icon('heroicon-m-pencil-square')
             ->color('primary')
             ->extraAttributes(['class' => 'grow'])
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
     }
 
