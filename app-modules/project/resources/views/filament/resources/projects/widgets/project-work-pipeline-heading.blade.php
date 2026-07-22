@@ -41,6 +41,7 @@
                 wire:click="mountAction('selectPipeline')"
                 icon="heroicon-c-chevron-down"
                 icon-position="after"
+                color="gray"
                 size="sm"
             >
                 {{ $pipeline->name }}

@@ -60,17 +60,14 @@ class ProjectStatsWidget extends BaseWidget
         $project = $this->record;
 
         return [
-            Stat::make('files', $project->files()->count())
-                ->label('Files'),
-            Stat::make('pipeline_tasks', PipelineEntry::query()
+            Stat::make('Files', $project->files()->count()),
+            Stat::make('Pipeline Tasks', PipelineEntry::query()
                 ->whereHas(
                     'pipelineStage.pipeline',
                     fn (Builder $query) => $query->where('project_id', $project->getKey()),
                 )
-                ->count())
-                ->label('Pipeline Tasks'),
-            Stat::make('milestones', $project->milestones()->count())
-                ->label('Milestones'),
+                ->count()),
+            Stat::make('Milestones', $project->milestones()->count()),
         ];
     }
 }

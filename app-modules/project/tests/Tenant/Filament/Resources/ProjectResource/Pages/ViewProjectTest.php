@@ -408,6 +408,8 @@ it('can create a pipeline entry through the widget header create action', functi
 
     $stage = $pipeline->stages->first();
 
+    PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
+
     $contact = Contact::factory()->create();
 
     livewire(ProjectWorkPipelineWidget::class, [
@@ -427,6 +429,23 @@ it('can create a pipeline entry through the widget header create action', functi
             ->where('pipeline_stage_id', $stage->getKey())
             ->exists()
     )->toBeTrue();
+});
+
+it('hides the header create entry action while the pipeline has no entries', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionHidden('createEntry')
+        ->assertSee('Add Pipeline Entry');
 });
 
 it('shows the empty state when the project has no pipelines', function () {

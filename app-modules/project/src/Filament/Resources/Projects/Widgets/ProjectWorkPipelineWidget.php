@@ -185,7 +185,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->label('New Pipeline Entry')
                     ->icon('heroicon-m-plus')
                     ->slideOver()
-                    ->visible(fn (): bool => filled($this->selectedPipelineId))
+                    ->visible(fn (): bool => (bool) $pipeline?->entries()->exists())
                     ->model(PipelineEntry::class)
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize('update', $this->record),
@@ -330,6 +330,8 @@ class ProjectWorkPipelineWidget extends TableWidget
         }
 
         $this->selectedPipelineId = (string) $pipeline->getKey();
+
+        $this->resetTable();
 
         Notification::make()
             ->success()

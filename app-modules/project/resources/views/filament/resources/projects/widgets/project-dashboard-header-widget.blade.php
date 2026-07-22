@@ -31,13 +31,29 @@
     
     </COPYRIGHT>
 --}}
+@php
+    use Filament\Support\Colors\Color;
+    use Filament\Support\Facades\FilamentColor;
+
+    $color = $project->color?->value;
+    $palettes = Color::all();
+    $palette = FilamentColor::getColor($color ?? 'blue') ?? $palettes[$color ?? 'blue'] ?? $palettes['blue'];
+
+    $gradient = [
+        'from' => $palette[400],
+        'to' => $palette[700],
+        'darkFrom' => $palette[500],
+        'darkTo' => $palette[800],
+    ];
+@endphp
+
 <x-filament-widgets::widget>
     <header>
         <div
-            class="flex overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-900"
+            class="flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white sm:flex-row dark:border-gray-700 dark:bg-gray-900"
         >
             <div
-                class="my-4 ms-4 flex aspect-square w-24 shrink-0 items-center justify-center self-center rounded-lg bg-linear-to-b from-[var(--project-gradient-from)] to-[var(--project-gradient-to)] dark:from-[var(--project-gradient-from-dark)] dark:to-[var(--project-gradient-to-dark)]"
+                class="mt-4 flex aspect-square w-24 shrink-0 items-center justify-center self-center rounded-lg bg-linear-to-b from-[var(--project-gradient-from)] to-[var(--project-gradient-to)] sm:my-4 sm:ms-4 dark:from-[var(--project-gradient-from-dark)] dark:to-[var(--project-gradient-to-dark)]"
                 style="
                     --project-gradient-from: {{ $gradient['from'] }};
                     --project-gradient-to: {{ $gradient['to'] }};
@@ -62,7 +78,7 @@
                         @endif
                     </div>
 
-                    <div class="flex shrink-0 items-center gap-2">
+                    <div class="flex flex-wrap items-center gap-2">
                         {{ $this->manageAccessAction }}
                         {{ $this->editProjectAction }}
                     </div>

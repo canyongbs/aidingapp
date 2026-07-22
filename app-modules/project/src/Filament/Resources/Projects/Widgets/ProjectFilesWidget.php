@@ -70,7 +70,7 @@ class ProjectFilesWidget extends TableWidget
         return $table
             ->query(fn (): Builder => $this->record->files()->getQuery())
             ->recordTitleAttribute('description')
-            ->heading('Files')
+            ->heading('Project Files')
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
             ->columns([
@@ -146,7 +146,7 @@ class ProjectFilesWidget extends TableWidget
                     ->label('Manage')
                     ->authorize('create', $this->record)
                     ->color('gray')
-                    ->url(fn (): string => ProjectResource::getUrl('manage-files', ['record' => $this->record]), true),
+                    ->url(fn (): string => ProjectResource::getUrl('manage-files', ['record' => $this->record])),
             ]);
     }
 }
