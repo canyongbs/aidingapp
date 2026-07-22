@@ -1376,8 +1376,6 @@ document.addEventListener('alpine:init', () => {
             const type = this.removeTypeFromSpecificLocation(typeId, sourceCategoryId);
             if (!type) return;
 
-            type.category_id = newCategoryId;
-
             if (newCategoryId) {
                 const category = this.findCategoryById(newCategoryId);
                 if (category) {
@@ -1692,7 +1690,6 @@ document.addEventListener('alpine:init', () => {
             if (this.treeData.uncategorized_types) {
                 this.treeData.uncategorized_types.forEach((type, index) => {
                     type.sort = index + 1;
-                    type.category_id = null;
                 });
             }
         },
@@ -1701,7 +1698,6 @@ document.addEventListener('alpine:init', () => {
             if (category.types) {
                 category.types.forEach((type, index) => {
                     type.sort = index + 1;
-                    type.category_id = category.id;
                 });
             }
 
@@ -1739,7 +1735,6 @@ document.addEventListener('alpine:init', () => {
                             newTypes.push({
                                 temp_id: type.id,
                                 name: type.name,
-                                category_id: category.id,
                                 sort: typeIndex + 1,
                             });
                         }
@@ -1764,7 +1759,6 @@ document.addEventListener('alpine:init', () => {
                         newTypes.push({
                             temp_id: type.id,
                             name: type.name,
-                            category_id: null,
                             sort: index + 1,
                         });
                     }
@@ -2031,7 +2025,6 @@ document.addEventListener('alpine:init', () => {
                         name: name.trim(),
                         type: 'type',
                         sort: 0,
-                        category_id: categoryId,
                         service_requests_count: 0,
                     },
                     categoryId,
@@ -2053,7 +2046,6 @@ document.addEventListener('alpine:init', () => {
                     name: archivedType.name,
                     type: 'type',
                     sort: 0,
-                    category_id: categoryId,
                     service_requests_count: archivedType.service_requests_count,
                     view_url: archivedType.view_url,
                     _restore: true,
@@ -2095,7 +2087,6 @@ document.addEventListener('alpine:init', () => {
                     name: type.name,
                     type: 'type',
                     sort: 0,
-                    category_id: categoryId,
                     service_requests_count: type.service_requests_count ?? 0,
                     view_url: type.view_url ?? '',
                 },
@@ -2383,7 +2374,6 @@ document.addEventListener('alpine:init', () => {
                 name: source.name,
                 type: 'type',
                 sort: 0,
-                category_id: categoryId,
                 service_requests_count: source.service_requests_count ?? 0,
                 view_url: source.view_url ?? '',
                 is_visibility_restricted: source.is_visibility_restricted ?? false,

@@ -563,7 +563,6 @@ class ListServiceRequestTypes extends ListRecords
                 'name' => $type->name,
                 'type' => 'type',
                 'sort' => $this->resolveTypeSort($type, $contextCategoryId),
-                'category_id' => $contextCategoryId,
                 'service_requests_count' => $type->service_requests_count ?? 0,
                 'view_url' => ServiceRequestTypeResource::getUrl('view', ['record' => $type]),
                 'is_visibility_restricted' => (bool) $type->is_visibility_restricted,
@@ -596,8 +595,8 @@ class ListServiceRequestTypes extends ListRecords
     /**
      * Resolve the id to persist for a type node in the saved tree.
      *
-        * Existing types return their own id. A brand-new type (temp id) is mapped to the real id
-        * created earlier in the save.
+     * Existing types return their own id. A brand-new type (temp id) is mapped to the real id
+     * created earlier in the save.
      *
      * @param array<string, string> $newTypeIds
      */

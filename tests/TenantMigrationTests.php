@@ -34,16 +34,6 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Support\Facades\DB;
-
-function columnNativeType(string $table, string $column): ?string
-{
-    return DB::selectOne(
-        'SELECT udt_name FROM information_schema.columns WHERE table_name = ? AND column_name = ?',
-        [$table, $column],
-    )?->udt_name;
-}
-
 // Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {

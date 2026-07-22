@@ -89,7 +89,6 @@ function typeNode(ServiceRequestType $type, ServiceRequestTypeCategory $category
         'name' => $type->name,
         'type' => 'type',
         'sort' => $sort,
-        'category_id' => $category->id,
     ];
 }
 
@@ -186,7 +185,6 @@ it('detaches every membership when a type becomes uncategorized', function () {
                 'name' => $type->name,
                 'type' => 'type',
                 'sort' => 1,
-                'category_id' => null,
             ],
         ],
     );
@@ -268,7 +266,6 @@ it('stores the per-area sort for a newly created type', function () {
                     'name' => 'Brand New',
                     'type' => 'type',
                     'sort' => 3,
-                    'category_id' => $category->id,
                 ],
             ],
         ],
@@ -277,7 +274,6 @@ it('stores the per-area sort for a newly created type', function () {
         [
             'temp_id' => 'temp_1',
             'name' => 'Brand New',
-            'category_id' => $category->id,
             'sort' => 3,
         ],
     ];
