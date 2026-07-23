@@ -33,8 +33,8 @@
 -->
 <script setup>
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import HeroSearch from '@common/portal/HeroSearch.vue';
     import HelpCenter from '@common/portal/home/HelpCenter.vue';
+    import HeroSearch from '@common/portal/HeroSearch.vue';
     import Page from '@common/portal/Page.vue';
     import SearchResults from '@common/portal/SearchResults.vue';
     import { computed, defineProps, nextTick, onMounted, ref, watch } from 'vue';
@@ -42,7 +42,6 @@
     import { consumer } from '../Services/Consumer.js';
     import { useAuthStore } from '../Stores/auth.js';
     import { useFeatureStore } from '../Stores/feature.js';
-    import { globalSearchQuery } from '../Stores/globalState.js';
 
     const props = defineProps({
         searchUrl: {
@@ -147,7 +146,6 @@
             loadingResults.value = false;
             setPagination(response.data.data.articles.meta);
         });
-        globalSearchQuery.value = '';
     }, 500);
 
     const { user } = useAuthStore();
