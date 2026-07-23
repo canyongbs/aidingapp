@@ -32,9 +32,6 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import truncate from 'lodash/truncate';
-    import { computed, defineProps, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
     import BaseButton from '@common/BaseButton.vue';
     import AppLoading from '@common/portal/AppLoading.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
@@ -46,6 +43,9 @@
     import ArticleContent from '@common/portal/article/ArticleContent.vue';
     import ArticleFeedback from '@common/portal/article/ArticleFeedback.vue';
     import ArticleMeta from '@common/portal/article/ArticleMeta.vue';
+    import truncate from 'lodash/truncate';
+    import { computed, defineProps, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
