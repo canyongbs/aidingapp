@@ -32,11 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
-    import { RouterView, useRoute, useRouter } from 'vue-router';
     import AppLoading from '@common/portal/AppLoading.vue';
     import Footer from '@common/portal/Footer.vue';
     import Header from '@common/portal/Header.vue';
+    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { RouterView, useRoute, useRouter } from 'vue-router';
     import axios from './Globals/Axios.js';
     import Login from './Pages/Login.vue';
     import { consumer } from './Services/Consumer.js';
