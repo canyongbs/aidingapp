@@ -32,19 +32,19 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import AppLoading from '@common/portal/AppLoading.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Article from '@common/portal/category/Article.vue';
+    import SubCategories from '@common/portal/category/SubCategories.vue';
+    import HeroSearch from '@common/portal/HeroSearch.vue';
+    import Page from '@common/portal/Page.vue';
+    import Pagination from '@common/portal/Pagination.vue';
+    import SearchResults from '@common/portal/SearchResults.vue';
+    import Subheading from '@common/portal/Subheading.vue';
+    import Tabs from '@common/portal/Tabs.vue';
     import { DocumentTextIcon } from '@heroicons/vue/24/outline';
     import { computed, defineProps, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import AppLoading from '../Components/AppLoading.vue';
-    import Article from '../Components/Article.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import HeroSearch from '../Components/HeroSearch.vue';
-    import Page from '../Components/Page.vue';
-    import Pagination from '../Components/Pagination.vue';
-    import SearchResults from '../Components/SearchResults.vue';
-    import SubCategories from '../Components/SubCategories.vue';
-    import Subheading from '../Components/Subheading.vue';
-    import Tabs from '../Components/Tabs.vue';
     import { consumer } from '../Services/Consumer.js';
 
     const route = useRoute();
@@ -83,6 +83,37 @@
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
+
+    const articlesWithRoutes = computed(() =>
+        (articles.value ?? []).map((article) => ({
+            ...article,
+            to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
+        })),
+    );
+
+    const subCategoriesWithRoutes = computed(() =>
+        (category.value?.subCategories ?? []).map((subCategory) => ({
+            ...subCategory,
+            key: subCategory.slug,
+            to: { name: 'view-category', params: { categorySlug: subCategory.slug } },
+        })),
+    );
+
+    const searchResultArticles = computed(() =>
+        (searchResults.value?.data?.articles?.data ?? []).map((article) => ({
+            ...article,
+            key: article.id,
+            to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
+        })),
+    );
+
+    const searchResultCategories = computed(() =>
+        (searchResults.value?.data?.categories ?? []).map((searchCategory) => ({
+            ...searchCategory,
+            key: searchCategory.slug,
+            to: { name: 'view-category', params: { categorySlug: searchCategory.slug } },
+        })),
+    );
     const filter = ref('');
     const fromSearch = ref(false);
 
@@ -332,8 +363,10 @@
                 <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
                     <SearchResults
                         :searchQuery="searchQuery"
-                        :searchResults="searchResults"
+                        :articles="searchResultArticles"
+                        :categories="searchResultCategories"
                         :loadingResults="loadingeSearchResults"
+                        :filter-tabs="filterTabs"
                         @change-filter="changeSearchFilter"
                         :selected-filter="filter"
                         :currentPage="currentPage"
@@ -355,7 +388,7 @@
                         </div>
                         <SubCategories
                             v-if="category.subCategories.length > 0"
-                            :subCategories="category.subCategories"
+                            :subCategories="subCategoriesWithRoutes"
                         ></SubCategories>
                         <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
@@ -367,8 +400,13 @@
 
                             <div v-if="articles.length > 0">
                                 <ul role="list" class="divide-y">
-                                    <li v-for="article in articles" :key="article.id">
-                                        <Article :article="article" />
+                                    <li v-for="article in articlesWithRoutes" :key="article.id">
+                                        <Article
+                                            :to="article.to"
+                                            :name="article.name"
+                                            :tags="article.tags"
+                                            :featured="article.featured"
+                                        />
                                     </li>
                                 </ul>
                                 <Pagination

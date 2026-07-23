@@ -32,11 +32,21 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import AppLoading from '@common/portal/AppLoading.vue';
+    import Footer from '@common/portal/Footer.vue';
+    import Header from '@common/portal/Header.vue';
+    import {
+        CubeIcon,
+        DocumentTextIcon,
+        FolderIcon,
+        HomeIcon,
+        ShieldExclamationIcon,
+        SignalIcon,
+        WrenchScrewdriverIcon,
+    } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
-    import AppLoading from './Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
-    import Header from './Components/Header.vue';
     import axios from './Globals/Axios.js';
     import Login from './Pages/Login.vue';
     import { consumer } from './Services/Consumer.js';
@@ -141,6 +151,70 @@
 
     const route = useRoute();
     const router = useRouter();
+
+    const { user } = storeToRefs(useAuthStore());
+
+    const menuItems = computed(() =>
+        [
+            { label: 'Home', routeName: 'home', icon: HomeIcon },
+            {
+                label: 'Service',
+                routeName: 'service',
+                icon: WrenchScrewdriverIcon,
+                visible: hasServiceManagement.value && user.value !== null,
+            },
+            {
+                label: 'Status',
+                routeName: 'status',
+                icon: SignalIcon,
+                visible: isStatusEnabled.value && user.value !== null,
+            },
+            {
+                label: 'Advisories',
+                routeName: 'advisories',
+                icon: ShieldExclamationIcon,
+                visible: isAdvisoryEnabled.value && user.value !== null,
+            },
+            {
+                label: 'Assets',
+                routeName: 'assets',
+                icon: CubeIcon,
+                visible: isAssetEnabled.value && hasAssets.value && user.value !== null,
+            },
+            {
+                label: 'Licenses',
+                routeName: 'licenses',
+                icon: DocumentTextIcon,
+                visible: isLicenseEnabled.value && hasLicense.value && user.value !== null,
+            },
+            {
+                label: 'Projects',
+                routeName: 'projects',
+                icon: FolderIcon,
+                visible: hasProjects.value && user.value !== null,
+            },
+        ].filter((item) => item.visible !== false),
+    );
+
+    const hideHeaderSearch = computed(() => ['home', 'view-category'].includes(route.name));
+
+    function onHeaderSearch(query) {
+        router.push({ name: 'home', query: { search: query } });
+    }
+
+    function logout() {
+        const { post } = consumer();
+
+        post(props.apiUrl + '/logout').then((response) => {
+            if (!response.data.success) {
+                return;
+            }
+
+            const { removeToken } = useTokenStore();
+            removeToken();
+            window.location.href = response.data.redirect_url;
+        });
+    }
 
     const assistantWidgetLoaderUrl = ref(null);
     const assistantWidgetConfigUrl = ref(null);
@@ -629,15 +703,21 @@
                 :requires-authentication="requiresAuthentication"
                 :header-logo="headerLogo"
                 :footer-logo="footerLogo"
+                :app-name="appName"
                 @authenticate="authenticate"
                 @cancel="showLogin = false"
             />
             <div v-else class="min-h-screen flex flex-col">
                 <Header
-                    :api-url="apiUrl"
-                    @show-login="showLogin = true"
                     :header-logo="headerLogo"
                     :app-name="appName"
+                    :user="user"
+                    :requires-authentication="requiresAuthentication"
+                    :menu-items="menuItems"
+                    :hide-search="hideHeaderSearch"
+                    @show-login="showLogin = true"
+                    @logout="logout"
+                    @search="onHeaderSearch"
                 />
 
                 <main class="flex-1">
@@ -656,7 +736,7 @@
                     />
                 </main>
 
-                <Footer :logo="footerLogo"></Footer>
+                <Footer :logo="footerLogo" :app-name="appName"></Footer>
             </div>
         </div>
     </div>
