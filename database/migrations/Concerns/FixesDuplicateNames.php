@@ -39,10 +39,51 @@ namespace Database\Migrations\Concerns;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
-// @phpstan-ignore trait.unused
 trait FixesDuplicateNames
 {
+    /**
+     * Order duplicate records so the first one is kept and the rest are renamed.
+     * Defaults to keeping the oldest record.
+     */
+    protected function orderDuplicateRecords(Builder $query): Builder
+    {
+        return $query
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc');
+    }
+
+    protected function ignoresNullValues(): bool
+    {
+        return false;
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    protected function existingValueMatchPatterns(string $baseValue): array
+    {
+        $lower = Str::lower($baseValue);
+
+        return [$lower, $lower . '-%'];
+    }
+
+    protected function buildDeduplicatedValue(string $originalValue, int $counter): string
+    {
+        return "{$originalValue}-{$counter}";
+    }
+
+    protected function deduplicatedValuePattern(): string
+    {
+        return '-[0-9]+$';
+    }
+
+    protected function stripDeduplicatedSuffix(string $value): string
+    {
+        return preg_replace('/-\d+$/', '', $value) ?? $value;
+    }
+
     private function fixDuplicates(): void
     {
         /** @var array<int, string> $groupByColumns */
@@ -58,7 +99,7 @@ trait FixesDuplicateNames
             $query->whereNull('deleted_at');
         }
 
-        if ($this->ignoreNullValues ?? false) { // @phpstan-ignore property.notFound
+        if ($this->ignoresNullValues()) {
             $query->whereNotNull($this->column);
         }
 
@@ -97,10 +138,7 @@ trait FixesDuplicateNames
             $recordsQuery->whereNull('deleted_at');
         }
 
-        $records = $recordsQuery
-            ->orderBy('created_at', 'asc')
-            ->orderBy('id', 'asc')
-            ->get();
+        $records = $this->orderDuplicateRecords($recordsQuery)->get();
 
         if ($records->count() <= 1) {
             return;
@@ -119,15 +157,17 @@ trait FixesDuplicateNames
             $existingNamesQuery->where($col, $groupValues[$col]);
         }
 
+        [$existingExact, $existingLike] = $this->existingValueMatchPatterns($baseName);
+
         /** @var array<string, int> $existingNames */
         $existingNames = $existingNamesQuery
-            ->where(function (Builder $query) use ($baseName) {
-                $query->whereRaw("LOWER({$this->column}) = ?", [strtolower($baseName)])
-                    ->orWhereRaw("LOWER({$this->column}) LIKE ?", [strtolower($baseName) . '-%']);
+            ->where(function (Builder $query) use ($existingExact, $existingLike) {
+                $query->whereRaw("LOWER({$this->column}) = ?", [$existingExact])
+                    ->orWhereRaw("LOWER({$this->column}) LIKE ?", [$existingLike]);
             })
             ->pluck($this->column)
             /** @phpstan-ignore argument.type */
-            ->map(fn (mixed $name): string => strtolower(strval($name)))
+            ->map(fn (mixed $name): string => Str::lower(strval($name)))
             ->flip()
             ->all();
 
@@ -137,15 +177,15 @@ trait FixesDuplicateNames
         foreach ($records->skip(1) as $record) {
             /** @var string $originalName */
             $originalName = $record->{$this->column};
-            $newName = "{$originalName}-{$counter}";
+            $newName = $this->buildDeduplicatedValue($originalName, $counter);
 
-            while (isset($existingNames[strtolower($newName)])) {
+            while (isset($existingNames[Str::lower($newName)])) {
                 $counter++;
-                $newName = "{$originalName}-{$counter}";
+                $newName = $this->buildDeduplicatedValue($originalName, $counter);
             }
 
             $updates[$record->id] = $newName;
-            $existingNames[strtolower($newName)] = true;
+            $existingNames[Str::lower($newName)] = true;
             $counter++;
 
             if (count($updates) >= $this->chunkSize) {
@@ -194,7 +234,7 @@ trait FixesDuplicateNames
 
         $query = DB::table($this->table)
             ->select(['id', $this->column, ...$groupByColumns])
-            ->whereRaw("{$this->column} ~ '-[0-9]+$'");
+            ->whereRaw("{$this->column} ~ ?", [$this->deduplicatedValuePattern()]);
 
         if ($this->usesSoftDeletes) {
             $query->whereNull('deleted_at');
@@ -209,10 +249,10 @@ trait FixesDuplicateNames
                     /** @var string $currentName */
                     $currentName = $record->{$this->column};
                     /** @var string $originalName */
-                    $originalName = preg_replace('/-\d+$/', '', $currentName);
+                    $originalName = $this->stripDeduplicatedSuffix($currentName);
 
                     $conflictQuery = DB::table($this->table)
-                        ->whereRaw("LOWER({$this->column}) = ?", [strtolower(strval($originalName))]);
+                        ->whereRaw("LOWER({$this->column}) = ?", [Str::lower(strval($originalName))]);
 
                     foreach ($groupByColumns as $col) {
                         $conflictQuery->where($col, $record->{$col});
