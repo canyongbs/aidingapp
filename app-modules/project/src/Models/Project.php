@@ -48,6 +48,7 @@ use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -132,6 +133,20 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
+     * Combined list of users who manage this project, whether assigned
+     * directly or through membership in a manager department.
+     *
+     * @return Collection<int, User>
+     */
+    public function allManagers(): Collection
+    {
+        return $this->managerUsers
+            ->concat($this->managerDepartments->flatMap(fn (Department $department): Collection => $department->users))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
      * @return BelongsToMany<User, $this, ProjectAuditorUser>
      */
     public function auditorUsers(): BelongsToMany
@@ -202,5 +217,18 @@ class Project extends BaseModel implements Auditable
             ->morphedByMany(Organization::class, 'guest', 'project_guests', 'project_id', 'guest_id')
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    /**
+     * Calculates the percentage of pipeline entries that have reached a
+     * "complete" classification stage, rounded to the nearest whole percent.
+     */
+    public static function calculateProgressPercentage(int $totalEntries, int $completeEntries): int
+    {
+        if ($totalEntries === 0) {
+            return 0;
+        }
+
+        return (int) round(($completeEntries / $totalEntries) * 100);
     }
 }

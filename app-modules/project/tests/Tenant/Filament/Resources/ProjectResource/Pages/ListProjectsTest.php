@@ -35,7 +35,11 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -206,4 +210,132 @@ it('only shows the bulk delete action to a user with the project.delete permissi
 
     livewire(ListProjects::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('displays project name, manager(s), department, start date, target date, and progress columns', function () {
+    asSuperAdmin();
+
+    $department = Department::factory()->create(['name' => 'Enrollment']);
+    $manager = User::factory()->create(['name' => 'Casey Manager']);
+
+    $project = Project::factory()->create([
+        'department_id' => $department->getKey(),
+        'start_date' => '2026-01-15',
+        'target_completion_date' => null,
+    ]);
+
+    $project->managerUsers()->attach($manager->getKey());
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $completeStage = PipelineStage::factory()->for($pipeline)->create([
+        'classification' => PipelineStageClassification::Complete,
+    ]);
+    $planningStage = PipelineStage::factory()->for($pipeline)->create([
+        'classification' => PipelineStageClassification::Planning,
+    ]);
+    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $completeStage->getKey()]);
+    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $planningStage->getKey()]);
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->assertSee('Project Name')
+        ->assertSee('Manager(s)')
+        ->assertSee('Department')
+        ->assertSee('Start Date')
+        ->assertSee('Target Date')
+        ->assertSee('Progress')
+        ->assertSee('Casey Manager')
+        ->assertSee('Enrollment')
+        ->assertSee('Indefinite')
+        ->assertSee('Progress: 50%');
+});
+
+it('shows N/A when a project has no managers, no department, or no start date', function () {
+    asSuperAdmin();
+
+    Project::factory()->create([
+        'department_id' => null,
+        'start_date' => null,
+    ]);
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->assertSeeHtml('N/A');
+});
+
+it('can search projects by project name, manager name, and department name', function () {
+    asSuperAdmin();
+
+    $matchingByName = Project::factory()->create(['name' => 'Onboarding Revamp']);
+    $matchingByManager = Project::factory()->create(['name' => 'Unrelated Project']);
+    $manager = User::factory()->create(['name' => 'Jordan Searchable']);
+    $matchingByManager->managerUsers()->attach($manager->getKey());
+
+    $department = Department::factory()->create(['name' => 'Searchable Department']);
+    $matchingByDepartment = Project::factory()->create([
+        'name' => 'Another Project',
+        'department_id' => $department->getKey(),
+    ]);
+
+    $otherDepartment = Department::factory()->create(['name' => 'Other Department']);
+    $departmentManagerUser = User::factory()->create([
+        'name' => 'Taylor Delegate',
+        'department_id' => $otherDepartment->getKey(),
+    ]);
+    $matchingByDepartmentManager = Project::factory()->create(['name' => 'Yet Another Project']);
+    $matchingByDepartmentManager->managerDepartments()->attach($otherDepartment->getKey());
+
+    $notMatching = Project::factory()->create(['name' => 'Completely Different']);
+
+    livewire(ListProjects::class)
+        ->searchTable('onboarding revamp')
+        ->assertCanSeeTableRecords([$matchingByName])
+        ->assertCanNotSeeTableRecords([$matchingByManager, $notMatching]);
+
+    livewire(ListProjects::class)
+        ->searchTable('jordan searchable')
+        ->assertCanSeeTableRecords([$matchingByManager])
+        ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
+
+    livewire(ListProjects::class)
+        ->searchTable('searchable department')
+        ->assertCanSeeTableRecords([$matchingByDepartment])
+        ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
+
+    livewire(ListProjects::class)
+        ->searchTable('taylor delegate')
+        ->assertCanSeeTableRecords([$matchingByDepartmentManager])
+        ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
+
+    expect($departmentManagerUser)->not->toBeNull();
+});
+
+it('ranks project name matches above manager or department matches when searching', function () {
+    asSuperAdmin();
+
+    $namedTest = Project::factory()->create(['name' => 'Test']);
+
+    $managerNamedTest = User::factory()->create(['name' => 'Test']);
+    $projectWithManagerNamedTest = Project::factory()->create(['name' => 'Something Else']);
+    $projectWithManagerNamedTest->managerUsers()->attach($managerNamedTest->getKey());
+
+    livewire(ListProjects::class)
+        ->searchTable('Test')
+        ->assertCanSeeTableRecords([$namedTest, $projectWithManagerNamedTest], inOrder: true);
+});
+
+it('can filter projects by department', function () {
+    asSuperAdmin();
+
+    $department = Department::factory()->create();
+    $otherDepartment = Department::factory()->create();
+
+    $projectInDepartment = Project::factory()->create(['department_id' => $department->getKey()]);
+    $projectInOtherDepartment = Project::factory()->create(['department_id' => $otherDepartment->getKey()]);
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$projectInDepartment, $projectInOtherDepartment])
+        ->filterTable('department', [$department->getKey()])
+        ->assertCanSeeTableRecords([$projectInDepartment])
+        ->assertCanNotSeeTableRecords([$projectInOtherDepartment]);
 });

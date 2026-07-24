@@ -94,10 +94,6 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
 
         $totalEntriesCount = $entries->clone()->count();
 
-        if ($totalEntriesCount === 0) {
-            return 0;
-        }
-
         $completeEntriesCount = $entries->clone()
             ->whereHas(
                 'pipelineStage',
@@ -105,7 +101,7 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
             )
             ->count();
 
-        return (int) round(($completeEntriesCount / $totalEntriesCount) * 100);
+        return Project::calculateProgressPercentage($totalEntriesCount, $completeEntriesCount);
     }
 
     /**

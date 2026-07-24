@@ -31,30 +31,16 @@
     
     </COPYRIGHT>
 --}}
-
-@props([
-    'user',
-    'showName' => true,
-])
 @php
-    use Filament\Facades\Filament;
+    use AidingApp\Project\Models\Project;
+
+    /** @var Project $record */
+    $record = $getRecord();
+
+    $progress = Project::calculateProgressPercentage(
+        (int) ($record->total_pipeline_entries_count ?? 0),
+        (int) ($record->complete_pipeline_entries_count ?? 0),
+    );
 @endphp
 
-<div
-    class="flex flex-col items-center gap-1"
-    x-tooltip="{
-        content: @js($user->name),
-        theme: $store.theme,
-    }"
->
-    <img
-        src="{{ Filament::getUserAvatarUrl($user) }}"
-        alt="{{ $user->name }}"
-        class="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
-    />
-    @if ($showName)
-        <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-            {{ str($user->name)->before(' ') }}
-        </span>
-    @endif
-</div>
+<x-project::progress-circle :progress="$progress" />

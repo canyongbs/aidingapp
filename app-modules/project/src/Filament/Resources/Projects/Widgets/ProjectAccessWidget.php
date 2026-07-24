@@ -79,10 +79,7 @@ class ProjectAccessWidget extends Widget implements HasActions, HasSchemas
     #[Computed]
     public function managers(): Collection
     {
-        return $this->record->managerUsers
-            ->concat($this->record->managerDepartments->flatMap(fn (Department $department): Collection => $department->users))
-            ->unique('id')
-            ->values();
+        return $this->record->allManagers();
     }
 
     /**

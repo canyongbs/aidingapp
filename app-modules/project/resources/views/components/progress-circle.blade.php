@@ -33,28 +33,33 @@
 --}}
 
 @props([
-    'user',
-    'showName' => true,
+    'progress' => 0,
 ])
-@php
-    use Filament\Facades\Filament;
-@endphp
 
-<div
-    class="flex flex-col items-center gap-1"
-    x-tooltip="{
-        content: @js($user->name),
-        theme: $store.theme,
-    }"
->
-    <img
-        src="{{ Filament::getUserAvatarUrl($user) }}"
-        alt="{{ $user->name }}"
-        class="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
-    />
-    @if ($showName)
-        <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-            {{ str($user->name)->before(' ') }}
-        </span>
-    @endif
+<div class="flex items-center gap-1.5">
+    <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20">
+        <circle
+            cx="10"
+            cy="10"
+            r="8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="5"
+            class="text-gray-200 dark:text-gray-700"
+        />
+        <circle
+            cx="10"
+            cy="10"
+            r="8"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="5"
+            stroke-linecap="round"
+            stroke-dasharray="{{ 2 * 3.14159 * 8 }}"
+            stroke-dashoffset="{{ 2 * 3.14159 * 8 * (1 - $progress / 100) }}"
+            transform="rotate(-90 10 10)"
+            class="text-primary-600 dark:text-primary-500"
+        />
+    </svg>
+    <span>Progress: {{ $progress }}%</span>
 </div>
