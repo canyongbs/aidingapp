@@ -89,6 +89,30 @@ test('it sends authentication for an existing contact', function () {
     });
 });
 
+test('it resolves an existing contact when the email case differs', function () {
+    Notification::fake();
+
+    $contact = Contact::factory()->create([
+        'email' => 'Contact@Example.com',
+    ]);
+
+    $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
+
+    $response = postJson($url, [
+        'email' => 'contact@example.com',
+    ]);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('message', "We've sent an authentication code to contact@example.com.");
+
+    $authentication = PortalAuthentication::query()->latest('id')->first();
+
+    expect($authentication)
+        ->not->toBeNull()
+        ->and($authentication?->educatable_id)->toBe($contact->getKey());
+});
+
 test('it allows registration flow when email domain matches an organization domain', function () {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,

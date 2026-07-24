@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,31 +31,22 @@
 
 </COPYRIGHT>
 */
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+/**
+ * `displayTimezone` is filled only when the authenticated contact is a managed
+ * contact (see the backend `display_timezone` payload); otherwise null, in which
+ * case date formatting falls back to the viewer's browser timezone (read directly
+ * from `Intl.DateTimeFormat().resolvedOptions().timeZone` where needed — it is
+ * synchronous and cheap, so there is no need to cache it here).
+ */
+export const useTimezoneStore = defineStore('timezone', () => {
+    const displayTimezone = ref(null);
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
-class LicenseManagementPortalController extends Controller
-{
-    public function __invoke(Request $request): JsonResponse
-    {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->withWhereHas('product:id,name,version')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
-            )->values(),
-            'expiredLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
-            )->values(),
-        ]);
+    function setDisplayTimezone(value) {
+        displayTimezone.value = value ?? null;
     }
-}
+
+    return { displayTimezone, setDisplayTimezone };
+});

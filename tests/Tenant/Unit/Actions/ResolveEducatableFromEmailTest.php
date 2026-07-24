@@ -34,30 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+use AidingApp\Contact\Models\Contact;
+use App\Actions\ResolveEducatableFromEmail;
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+it('resolves a contact regardless of the email case', function (string $lookup) {
+    $contact = Contact::factory()->create(['email' => 'Person@Example.com']);
 
-class LicenseManagementPortalController extends Controller
-{
-    public function __invoke(Request $request): JsonResponse
-    {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->withWhereHas('product:id,name,version')
-            ->get();
+    $resolved = app(ResolveEducatableFromEmail::class)($lookup);
 
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
-            )->values(),
-            'expiredLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
-            )->values(),
-        ]);
-    }
-}
+    expect($resolved)->not->toBeNull()
+        ->and($resolved->getKey())->toBe($contact->getKey());
+})->with([
+    'lowercase' => 'person@example.com',
+    'uppercase' => 'PERSON@EXAMPLE.COM',
+    'mixed case' => 'pErSoN@ExAmPlE.cOm',
+    'exact case' => 'Person@Example.com',
+]);
+
+it('returns null when no contact matches the email', function () {
+    Contact::factory()->create(['email' => 'someone@example.com']);
+
+    expect(app(ResolveEducatableFromEmail::class)('nobody@example.com'))->toBeNull();
+});
+
+it('returns null for a blank email', function () {
+    expect(app(ResolveEducatableFromEmail::class)(null))->toBeNull();
+});

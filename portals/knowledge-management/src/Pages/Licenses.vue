@@ -41,6 +41,7 @@
     import Page from '../Components/Page.vue';
     import PageCard from '../Components/PageCard.vue';
     import { consumer } from '../Services/Consumer';
+    import formatDateTime from '../Services/FormatDateTime.js';
 
     const productLicenses = ref({});
     const { get } = consumer();
@@ -146,7 +147,12 @@
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
                                     <span class="font-normal text-gray-700">
-                                        {{ activeLicense.formatted_expiration_date ?? 'No Expiration' }}
+                                        {{
+                                            formatDateTime(activeLicense.expiration_date, {
+                                                dateOnly: true,
+                                                utc: true,
+                                            }) ?? 'No Expiration'
+                                        }}
                                     </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">
@@ -193,7 +199,12 @@
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
                                     <span class="font-normal text-gray-700">
-                                        {{ expiredLicense.formatted_expiration_date }}
+                                        {{
+                                            formatDateTime(expiredLicense.expiration_date, {
+                                                dateOnly: true,
+                                                utc: true,
+                                            })
+                                        }}
                                     </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">

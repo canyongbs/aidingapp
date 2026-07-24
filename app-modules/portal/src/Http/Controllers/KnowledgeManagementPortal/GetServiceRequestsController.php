@@ -74,7 +74,7 @@ class GetServiceRequestsController extends Controller
                             'statusName' => $serviceRequest->status?->name,
                             'statusColor' => $serviceRequest->status?->color->value,
                             'icon' => $serviceRequest->priority->type->icon ? svg($serviceRequest->priority->type->icon, 'h-6 w-6')->toHtml() : null,
-                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->format('M j, Y g:i a (T)') : $serviceRequest->created_at->format('M j, Y g:i a (T)'),
+                            'updatedAt' => count($serviceRequest->serviceRequestUpdates) > 0 ? $serviceRequest->serviceRequestUpdates()->latest('updated_at')->first()->updated_at->toIso8601String() : $serviceRequest->created_at->toIso8601String(),
                         ]);
                     })
                     ->toArray()
@@ -105,8 +105,8 @@ class GetServiceRequestsController extends Controller
                 'statusName' => $serviceRequest->status?->name,
                 'statusColor' => $serviceRequest->status?->color->value,
                 'typeName' => $serviceRequest->priority?->type?->name,
-                'dateOpened' => $serviceRequest->created_at->format('M j, Y g:i a (T)'),
-                'lastUpdated' => $serviceRequest->updated_at->format('M j, Y g:i a (T)'),
+                'dateOpened' => $serviceRequest->created_at->toIso8601String(),
+                'lastUpdated' => $serviceRequest->updated_at->toIso8601String(),
             ],
             'acceptedMimeTypes' => (new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes,
             'serviceRequestUpdates' => $serviceRequest
@@ -119,7 +119,7 @@ class GetServiceRequestsController extends Controller
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,
                         'created_by_type' => $serviceRequestUpdate->created_by_type,
-                        'created_at' => $serviceRequestUpdate->created_at->format('M j, Y g:i a (T)'),
+                        'created_at' => $serviceRequestUpdate->created_at->toIso8601String(),
                         'media' => $serviceRequestUpdate->getUploadedMedia(),
                     ];
                 })

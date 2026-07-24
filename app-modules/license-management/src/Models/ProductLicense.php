@@ -54,8 +54,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @property string $formatted_expiration_date
- *
  * @mixin IdeHelperProductLicense
  */
 #[ObservedBy(ProductLicenseObserver::class)] #[ScopedBy(AuthorizeLicensesScope::class)]

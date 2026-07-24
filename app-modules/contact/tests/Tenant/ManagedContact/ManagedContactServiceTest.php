@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 it('creates a managed contact synchronized from the user', function () {
     $type = ContactType::factory()->create();
@@ -143,6 +144,44 @@ it('links and overrides an existing contact with the same email instead of dupli
     expect(Contact::query()->where('email', 'match@example.com')->count())->toBe(1);
 });
 
+it('links an existing contact whose email differs only in case instead of duplicating', function () {
+    $type = ContactType::factory()->create();
+
+    $existing = Contact::factory()->create([
+        'email' => 'Match@Example.com',
+        'first_name' => 'Old',
+    ]);
+
+    $user = User::factory()->create([
+        'name' => 'New Person',
+        'email' => 'match@example.com',
+    ]);
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->getKey())->toBe($existing->getKey())
+        ->and($contact->user_id)->toBe($user->getKey())
+        ->and($contact->first_name)->toBe('New')
+        ->and($contact->type_id)->toBe($type->getKey());
+
+    expect(Contact::query()->count())->toBe(1);
+});
+
+it('links an existing lower-case contact to a mixed-case user email instead of duplicating', function () {
+    $type = ContactType::factory()->create();
+
+    $existing = Contact::factory()->create(['email' => 'match@example.com']);
+
+    $user = User::factory()->create(['email' => 'Match@Example.COM']);
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->getKey())->toBe($existing->getKey())
+        ->and($contact->user_id)->toBe($user->getKey());
+
+    expect(Contact::query()->count())->toBe(1);
+});
+
 it('restores a soft-deleted contact when linking by email', function () {
     $type = ContactType::factory()->create();
 
@@ -158,18 +197,24 @@ it('restores a soft-deleted contact when linking by email', function () {
         ->and($contact->user_id)->toBe($user->getKey());
 });
 
-it('does not steal a contact already managed by a different user', function () {
+it('does not reassign a contact managed by a different user', function () {
     $type = ContactType::factory()->create();
 
-    $otherUser = User::factory()->create();
+    $otherUser = User::factory()->create(['email' => 'other@example.com']);
     $otherContact = app(ManagedContactService::class)->enable($otherUser, $type->getKey());
-    $otherContact->update(['email' => 'shared@example.com']);
 
-    $user = User::factory()->create(['email' => 'shared@example.com']);
+    $user = User::factory()->create(['email' => 'new-user@example.com']);
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
     expect($contact->getKey())->not->toBe($otherContact->getKey())
         ->and($otherContact->fresh()->user_id)->toBe($otherUser->getKey());
+});
+
+it('enforces a unique contact email case-insensitively', function () {
+    Contact::factory()->create(['email' => 'shared@example.com']);
+
+    expect(fn () => Contact::factory()->create(['email' => 'Shared@Example.com']))
+        ->toThrow(UniqueConstraintViolationException::class);
 });
 
 it('unlinks the managed contact when disabled but keeps it editable', function () {
