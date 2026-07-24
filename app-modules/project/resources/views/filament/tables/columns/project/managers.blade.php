@@ -40,9 +40,11 @@
 @endphp
 
 @if ($managers->isNotEmpty())
-    <div class="flex flex-wrap items-center gap-1">
+    <div class="flex flex-wrap items-center gap-1 px-3 py-4">
         @foreach ($managers as $user)
             <x-project::avatar :user="$user" :show-name="false" size="sm" />
         @endforeach
     </div>
+@else
+    <span class="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">N/A</span>
 @endif

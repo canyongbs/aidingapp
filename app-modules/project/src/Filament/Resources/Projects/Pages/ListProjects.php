@@ -85,10 +85,12 @@ class ListProjects extends ListRecords
                     }),
                 TextColumn::make('department.name')
                     ->label('Department')
+                    ->placeholder('N/A')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('start_date')
                     ->label('Start Date')
+                    ->placeholder('N/A')
                     ->date()
                     ->sortable(),
                 TextColumn::make('target_completion_date')

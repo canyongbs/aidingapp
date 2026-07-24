@@ -43,4 +43,6 @@
     );
 @endphp
 
-<x-project::progress-circle :progress="$progress" />
+<div class="px-3 py-4">
+    <x-project::progress-circle :progress="$progress" />
+</div>
