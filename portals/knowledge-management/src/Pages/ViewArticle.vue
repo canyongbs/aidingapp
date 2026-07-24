@@ -46,6 +46,7 @@
     import PageCard from '../Components/PageCard.vue';
     import Tags from '../Components/Tags.vue';
     import { consumer } from '../Services/Consumer.js';
+    import formatDateTime from '../Services/FormatDateTime.js';
 
     const route = useRoute();
     const router = useRouter();
@@ -193,7 +194,7 @@
                 </div>
                 <div class="flex items-center gap-x-1.5">
                     <ClockIcon class="size-4 shrink-0" aria-hidden="true" />
-                    <span>Last updated: {{ article.lastUpdated }}</span>
+                    <span>Last updated: {{ formatDateTime(article.lastUpdated) ?? '—' }}</span>
                 </div>
             </div>
         </template>

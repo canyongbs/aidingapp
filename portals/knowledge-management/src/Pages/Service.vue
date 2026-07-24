@@ -37,6 +37,7 @@
     import BaseButton from '../../../../resources/js/components/BaseButton.vue';
     import ResourceList from '../Components/ResourceList.vue';
     import ResourceListItem from '../Components/ResourceListItem.vue';
+    import formatDateTime from '../Services/FormatDateTime.js';
     import Breadcrumbs from './../Components/Breadcrumbs.vue';
     import EmptyState from './../Components/EmptyState.vue';
     import Page from './../Components/Page.vue';
@@ -73,7 +74,7 @@
                 </template>
                 <template #primary>{{ serviceRequest.title }}</template>
                 <template #secondary>{{ serviceRequest.number }}</template>
-                <template #description>Last Updated: {{ serviceRequest.updated_at }}</template>
+                <template #description>Last Updated: {{ formatDateTime(serviceRequest.updated_at) ?? '—' }}</template>
                 <template #badge>
                     <BaseBadge v-if="serviceRequest.status_name" :color="serviceRequest.status_color?.toLowerCase()">
                         {{ serviceRequest.status_name }}

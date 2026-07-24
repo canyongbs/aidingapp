@@ -40,6 +40,7 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
+use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
@@ -104,6 +105,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
             'success' => true,
             'token' => $token->plainTextToken,
             'user' => auth('contact')->user(),
+            'display_timezone' => app(ResolvePortalDisplayTimezone::class)(),
             'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
             'service_monitoring_enabled' => $addons?->serviceMonitoring,
             'advisory_management_enabled' => $addons?->advisoryManagement,

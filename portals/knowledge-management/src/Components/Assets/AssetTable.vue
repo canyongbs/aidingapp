@@ -33,6 +33,7 @@
 -->
 <script setup>
     import BaseBadge from '../../../../../resources/js/components/BaseBadge.vue';
+    import formatDateTime from '../../Services/FormatDateTime.js';
     import Pagination from '../Pagination.vue';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
@@ -155,11 +156,11 @@
                         </BaseTableCell>
 
                         <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ item.checked_out_at ?? '—' }}
+                            {{ formatDateTime(item.checked_out_at) ?? '—' }}
                         </BaseTableCell>
 
                         <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ item.checked_in_at ?? '' }}
+                            {{ formatDateTime(item.checked_in_at) ?? '' }}
                         </BaseTableCell>
                     </BaseTableRow>
                 </BaseTableBody>

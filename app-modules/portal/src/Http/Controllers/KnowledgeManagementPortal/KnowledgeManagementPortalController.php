@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Models\PipelineEntry;
@@ -73,6 +74,7 @@ class KnowledgeManagementPortalController extends Controller
                 conversionName: 'portal_favicon',
             ),
             'app_name' => config('app.name'),
+            'display_timezone' => app(ResolvePortalDisplayTimezone::class)(),
             'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])
                 ->map(Color::convertToRgb(...))
                 ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))

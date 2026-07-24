@@ -40,6 +40,7 @@
     import EmptyState from '../Components/EmptyState.vue';
     import Page from '../Components/Page.vue';
     import { consumer } from '../Services/Consumer';
+    import formatDateTime from '../Services/FormatDateTime.js';
 
     const advisories = ref([]);
     const { get } = consumer();
@@ -61,20 +62,6 @@
     onMounted(() => {
         fetchAdvisories();
     });
-
-    const formatDate = (date) => {
-        const d = new Date(date);
-        return d
-            .toLocaleString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric',
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true,
-            })
-            .replace(' at', '');
-    };
 
     const loadMore = () => {
         if (nextPageUrl.value) {
@@ -173,7 +160,7 @@
                     >
                         {{ advisory.description }}
                     </p>
-                    <time class="text-xs text-gray-400">{{ formatDate(advisory.created_at) }}</time>
+                    <time class="text-xs text-gray-400">{{ formatDateTime(advisory.created_at) }}</time>
                 </div>
 
                 <template v-if="advisory.advisory_updates?.length">
@@ -189,7 +176,7 @@
                                 class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white -inset-s-1.5"
                             ></div>
                             <time class="block text-sm font-normal leading-none text-gray-400">{{
-                                formatDate(updateData.created_at)
+                                formatDateTime(updateData.created_at)
                             }}</time>
                             <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
                         </li>
