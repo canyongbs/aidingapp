@@ -149,7 +149,7 @@ test('CreateContact does not apply the unique form rule when the feature is disa
     ]));
 
     actingAs($user);
-    
+
     expect(fn () => livewire(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create'))
