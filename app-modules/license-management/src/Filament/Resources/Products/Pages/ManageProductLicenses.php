@@ -138,12 +138,12 @@ class ManageProductLicenses extends ManageRelatedRecords
                 TextColumn::make('start_date')
                     ->label('Start Date')
                     ->sortable()
-                    ->dateTime(),
+                    ->date(),
                 TextColumn::make('expiration_date')
                     ->label('Expiration Date')
                     ->placeholder('No Expiration')
                     ->sortable()
-                    ->dateTime(),
+                    ->date(),
                 TextColumn::make('Status')
                     ->label('Status'),
             ])

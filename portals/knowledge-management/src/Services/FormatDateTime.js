@@ -35,13 +35,12 @@ import { useTimezoneStore } from '../Stores/timezone.js';
 
 /**
  * Resolve the timezone to display dates in: the managed-contact `display_timezone`
- * when available, otherwise the viewer's browser timezone (detected on load). The
- * live `Intl` lookup is only a safety net for the rare render before detection ran.
+ * when available, otherwise the viewer's browser timezone. `Intl.DateTimeFormat`
+ * is synchronous and cheap, so the browser timezone is read directly rather than
+ * cached.
  */
 function resolveTimezone() {
-    const store = useTimezoneStore();
-
-    return store.displayTimezone ?? store.browserTimezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return useTimezoneStore().displayTimezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 
 /**

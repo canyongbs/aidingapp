@@ -235,7 +235,6 @@
     });
 
     onMounted(async () => {
-        useTimezoneStore().detectBrowserTimezone();
         await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
             userIsAuthenticated.value = response;
         });

@@ -35,24 +35,18 @@ import { defineStore } from 'pinia';
 import { ref } from 'vue';
 
 /**
- * Holds the timezones the portal uses to display dates.
- * - `displayTimezone` is filled only when the authenticated contact is a managed
- *   contact (see the backend `display_timezone` payload); otherwise null.
- * - `browserTimezone` is the viewer's browser timezone, detected once on load via
- *   `Intl.DateTimeFormat().resolvedOptions().timeZone` (the same call the booking
- *   page uses), and is the fallback when `displayTimezone` is null.
+ * `displayTimezone` is filled only when the authenticated contact is a managed
+ * contact (see the backend `display_timezone` payload); otherwise null, in which
+ * case date formatting falls back to the viewer's browser timezone (read directly
+ * from `Intl.DateTimeFormat().resolvedOptions().timeZone` where needed — it is
+ * synchronous and cheap, so there is no need to cache it here).
  */
 export const useTimezoneStore = defineStore('timezone', () => {
     const displayTimezone = ref(null);
-    const browserTimezone = ref(null);
 
     function setDisplayTimezone(value) {
         displayTimezone.value = value ?? null;
     }
 
-    function detectBrowserTimezone() {
-        browserTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    }
-
-    return { displayTimezone, browserTimezone, setDisplayTimezone, detectBrowserTimezone };
+    return { displayTimezone, setDisplayTimezone };
 });
