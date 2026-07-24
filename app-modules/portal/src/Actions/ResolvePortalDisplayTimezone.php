@@ -34,30 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\Portal\Actions;
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
-class LicenseManagementPortalController extends Controller
+class ResolvePortalDisplayTimezone
 {
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(): ?string
     {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->withWhereHas('product:id,name,version')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
-            )->values(),
-            'expiredLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
-            )->values(),
-        ]);
+        return auth('contact')->user()?->managedByUser?->getTimezone();
     }
 }

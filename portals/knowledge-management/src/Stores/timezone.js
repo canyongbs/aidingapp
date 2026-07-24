@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,31 +31,28 @@
 
 </COPYRIGHT>
 */
+import { defineStore } from 'pinia';
+import { ref } from 'vue';
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+/**
+ * Holds the timezones the portal uses to display dates.
+ * - `displayTimezone` is filled only when the authenticated contact is a managed
+ *   contact (see the backend `display_timezone` payload); otherwise null.
+ * - `browserTimezone` is the viewer's browser timezone, detected once on load via
+ *   `Intl.DateTimeFormat().resolvedOptions().timeZone` (the same call the booking
+ *   page uses), and is the fallback when `displayTimezone` is null.
+ */
+export const useTimezoneStore = defineStore('timezone', () => {
+    const displayTimezone = ref(null);
+    const browserTimezone = ref(null);
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-
-class LicenseManagementPortalController extends Controller
-{
-    public function __invoke(Request $request): JsonResponse
-    {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->withWhereHas('product:id,name,version')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
-            )->values(),
-            'expiredLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
-            )->values(),
-        ]);
+    function setDisplayTimezone(value) {
+        displayTimezone.value = value ?? null;
     }
-}
+
+    function detectBrowserTimezone() {
+        browserTimezone.value = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    }
+
+    return { displayTimezone, browserTimezone, setDisplayTimezone, detectBrowserTimezone };
+});

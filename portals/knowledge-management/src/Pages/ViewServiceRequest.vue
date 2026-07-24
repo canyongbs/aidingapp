@@ -48,6 +48,7 @@
     import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
     import BaseTableRow from '../Components/ui/BaseTableRow.vue';
     import { consumer } from '../Services/Consumer.js';
+    import formatDateTime from '../Services/FormatDateTime.js';
 
     const route = useRoute();
 
@@ -231,10 +232,10 @@
                         <span v-else class="text-sm text-gray-400">—</span>
                     </BaseTableCell>
                     <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                        {{ serviceRequest.dateOpened ?? '—' }}
+                        {{ formatDateTime(serviceRequest.dateOpened) ?? '—' }}
                     </BaseTableCell>
                     <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                        {{ serviceRequest.lastUpdated ?? '—' }}
+                        {{ formatDateTime(serviceRequest.lastUpdated) ?? '—' }}
                     </BaseTableCell>
                 </BaseTableRow>
             </BaseTableBody>
@@ -284,8 +285,8 @@
                 :class="['flex', serviceRequestUpdate.created_by_type === 'contact' ? 'bg-white' : 'bg-gray-50']"
             >
                 <div class="w-28 shrink-0 border-r border-gray-100 px-5 py-4 text-xs leading-relaxed text-gray-400">
-                    <div>{{ serviceRequestUpdate.created_at.split(' ')[0] }}</div>
-                    <div>{{ serviceRequestUpdate.created_at.split(' ').slice(1).join(' ') }}</div>
+                    <div>{{ formatDateTime(serviceRequestUpdate.created_at, { dateOnly: true }) }}</div>
+                    <div>{{ formatDateTime(serviceRequestUpdate.created_at, { timeOnly: true }) }}</div>
                 </div>
                 <div class="flex-1 px-5 py-4 text-sm text-gray-700">
                     <div class="whitespace-pre-line">{{ serviceRequestUpdate.update }}</div>
