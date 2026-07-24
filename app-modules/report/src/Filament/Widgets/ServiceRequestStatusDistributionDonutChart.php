@@ -77,11 +77,12 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
+        $types = $this->getServiceRequestTypes();
 
-        $shouldBypassCache = filled($startDate) || filled($endDate);
+        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types);
 
         $serviceRequestByStatus = $shouldBypassCache
-            ? $this->getServiceRequestStatusData($startDate, $endDate)
+            ? $this->getServiceRequestStatusData($startDate, $endDate, $types)
             : Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-status-distribution', now()->addHours(24), function (): Collection {
                 return $this->getServiceRequestStatusData();
             });
@@ -105,15 +106,20 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
     }
 
     /**
+     * @param array<int, string>|null $types
+     *
      * @return Collection<int, ServiceRequestStatus>
      */
-    private function getServiceRequestStatusData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
+    private function getServiceRequestStatusData(?Carbon $startDate = null, ?Carbon $endDate = null, ?array $types = null): Collection
     {
         $serviceRequestByStatusData = ServiceRequestStatus::withCount([
-            'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
+            'serviceRequests' => function (Builder $query) use ($startDate, $endDate, $types) {
                 $query->when(
                     $startDate && $endDate,
                     fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate])
+                )->when(
+                    $types,
+                    fn (Builder $query): Builder => $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types))
                 );
             },
         ])->get(['id', 'name']);

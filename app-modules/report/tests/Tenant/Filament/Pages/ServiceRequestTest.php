@@ -34,16 +34,47 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
+use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
+use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
+use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
+use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
+use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
+use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+
+/**
+ * Enable the Service Management addon and grant the given user access to the
+ * Service Requests report so the page can be mounted in tests.
+ */
+function grantServiceRequestsReportAccess(User $user): void
+{
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    ReportUserAccess::factory()->create([
+        'report_key' => ReportAccessKey::ServiceRequests->value,
+        'user_id' => $user->getKey(),
+    ]);
+}
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -88,4 +119,305 @@ it('grants access to a user belonging to a department that has been granted acce
     ]);
 
     livewire(ServiceRequests::class)->assertOk();
+});
+
+it('renders the service request types filter and quick-load controls', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    livewire(ServiceRequests::class)
+        ->assertOk()
+        ->assertSee('Service Request Types')
+        ->assertSee('My Affiliated Types')
+        ->assertSee('Clear');
+});
+
+it('groups the type options by the service catalog hierarchy', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null, 'name' => 'Parent Category']);
+    $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->getKey(), 'name' => 'Child Category']);
+
+    $categorisedType = ServiceRequestType::factory()->create(['name' => 'Nested Type']);
+    $childCategory->types()->attach($categorisedType->getKey(), ['sort' => 1]);
+
+    $uncategorisedType = ServiceRequestType::factory()->create(['name' => 'Loner Type']);
+
+    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+
+    expect($options)
+        ->toHaveKey('Parent Category › Child Category')
+        ->toHaveKey('Uncategorized');
+
+    expect($options['Parent Category › Child Category'])->toHaveKey($categorisedType->getKey());
+    expect($options['Uncategorized'])->toHaveKey($uncategorisedType->getKey());
+});
+
+it('excludes archived types from the filter options', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $activeType = ServiceRequestType::factory()->create(['name' => 'Active Type']);
+    $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
+    $archivedType->delete();
+
+    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+
+    $flattenedIds = collect($options)->flatMap(fn (array $group): array => array_keys($group))->all();
+
+    expect($flattenedIds)
+        ->toContain($activeType->getKey())
+        ->not->toContain($archivedType->getKey());
+});
+
+it('resolves every type the user manages or audits as an affiliated type', function () {
+    $department = Department::factory()->create();
+
+    $user = User::factory()->create(['timezone' => 'UTC', 'department_id' => $department->getKey()]);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $managerUserType = ServiceRequestType::factory()->create();
+    $managerUserType->managerUsers()->attach($user);
+
+    $auditorUserType = ServiceRequestType::factory()->create();
+    $auditorUserType->auditorUsers()->attach($user);
+
+    $managerDepartmentType = ServiceRequestType::factory()->create();
+    $managerDepartmentType->managerDepartments()->attach($department);
+
+    $auditorDepartmentType = ServiceRequestType::factory()->create();
+    $auditorDepartmentType->auditorDepartments()->attach($department);
+
+    $unaffiliatedType = ServiceRequestType::factory()->create();
+
+    $ids = livewire(ServiceRequests::class)->instance()->getAffiliatedServiceRequestTypeIds();
+
+    expect($ids)
+        ->toEqualCanonicalizing([
+            $managerUserType->getKey(),
+            $auditorUserType->getKey(),
+            $managerDepartmentType->getKey(),
+            $auditorDepartmentType->getKey(),
+        ])
+        ->not->toContain($unaffiliatedType->getKey());
+});
+
+it('populates the filter with affiliated types via the My Affiliated Types action', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $affiliatedType = ServiceRequestType::factory()->create();
+    $affiliatedType->managerUsers()->attach($user);
+
+    ServiceRequestType::factory()->create();
+
+    livewire(ServiceRequests::class)
+        ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
+});
+
+it('clears the selected types via the Clear action', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ServiceRequests::class)
+        ->set('filters.serviceRequestTypes', [$type->getKey()])
+        ->callAction(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->assertSet('filters.serviceRequestTypes', []);
+});
+
+it('filters the service requests table by the selected types', function () {
+    $typeA = ServiceRequestType::factory()->create(['name' => 'Type A']);
+    $typeB = ServiceRequestType::factory()->create(['name' => 'Type B']);
+
+    $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->getKey()])->create();
+    $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->getKey()])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    $requestA = ServiceRequest::factory()->state([
+        'priority_id' => $priorityA->getKey(),
+        'status_id' => $status->getKey(),
+        'respondent_id' => Contact::factory(),
+    ])->create();
+
+    $requestB = ServiceRequest::factory()->state([
+        'priority_id' => $priorityB->getKey(),
+        'status_id' => $status->getKey(),
+        'respondent_id' => Contact::factory(),
+    ])->create();
+
+    livewire(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-type-filter',
+        'pageFilters' => ['serviceRequestTypes' => [$typeA->getKey()]],
+    ])
+        ->assertCanSeeTableRecords(collect([$requestA]))
+        ->assertCanNotSeeTableRecords(collect([$requestB]));
+
+    livewire(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-type-filter-all',
+        'pageFilters' => [],
+    ])
+        ->assertCanSeeTableRecords(collect([$requestA, $requestB]));
+});
+
+it('filters the request types table by the selected types', function () {
+    $typeA = ServiceRequestType::factory()->create(['name' => 'Type A']);
+    $typeB = ServiceRequestType::factory()->create(['name' => 'Type B']);
+
+    livewire(ServiceRequestTypesTable::class, [
+        'cacheTag' => 'test-service-request-types-table-type-filter',
+        'pageFilters' => ['serviceRequestTypes' => [$typeA->getKey()]],
+    ])
+        ->assertCanSeeTableRecords(collect([$typeA]))
+        ->assertCanNotSeeTableRecords(collect([$typeB]));
+});
+
+it('respects the selected types in the service requests stats', function () {
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->getKey()])->create();
+    $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->getKey()])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priorityA->getKey(),
+        'status_id' => $status->getKey(),
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priorityB->getKey(),
+        'status_id' => $status->getKey(),
+    ])->create();
+
+    $widget = new ServiceRequestsStats();
+    $widget->cacheTag = 'test-service-requests-stats-type-filter';
+    $widget->pageFilters = ['serviceRequestTypes' => [$typeA->getKey()]];
+
+    $stats = $widget->getStats();
+
+    expect($stats[0]->getValue())->toEqual('2');
+});
+
+it('respects the selected types in the status distribution chart', function () {
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->getKey()])->create();
+    $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->getKey()])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'name' => 'Open',
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priorityA->getKey(),
+        'status_id' => $status->getKey(),
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priorityB->getKey(),
+        'status_id' => $status->getKey(),
+    ])->create();
+
+    $widget = new ServiceRequestStatusDistributionDonutChart();
+    $widget->cacheTag = 'test-service-request-status-type-filter';
+    $widget->pageFilters = ['serviceRequestTypes' => [$typeA->getKey()]];
+
+    $data = $widget->getData();
+
+    expect(array_sum($data['datasets'][0]['data']->all()))->toBe(2);
+});
+
+it('respects the selected types in the category distribution chart', function () {
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->getKey()])->create();
+    $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->getKey()])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priorityA->getKey(),
+        'status_id' => $status->getKey(),
+        'category' => ServiceRequestCategory::Incident,
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priorityB->getKey(),
+        'status_id' => $status->getKey(),
+        'category' => ServiceRequestCategory::Request,
+    ])->create();
+
+    $widget = new ServiceRequestCategoryDistributionDonutChart();
+    $widget->cacheTag = 'test-service-request-category-type-filter';
+    $widget->pageFilters = ['serviceRequestTypes' => [$typeA->getKey()]];
+
+    $data = $widget->getData();
+
+    expect($data['labels']->all())->toBe([(string) ServiceRequestCategory::Incident->getLabel()])
+        ->and(array_sum($data['datasets'][0]['data']->all()))->toBe(2);
+});
+
+it('respects the selected types in the requests over time chart', function () {
+    $typeA = ServiceRequestType::factory()->create();
+    $typeB = ServiceRequestType::factory()->create();
+
+    $priorityA = ServiceRequestPriority::factory()->state(['type_id' => $typeA->getKey()])->create();
+    $priorityB = ServiceRequestPriority::factory()->state(['type_id' => $typeB->getKey()])->create();
+
+    $status = ServiceRequestStatus::factory()->state([
+        'classification' => SystemServiceRequestClassification::Open,
+    ])->create();
+
+    ServiceRequest::factory()->count(2)->state([
+        'priority_id' => $priorityA->getKey(),
+        'status_id' => $status->getKey(),
+        'created_at' => now()->subMonth(),
+    ])->create();
+
+    ServiceRequest::factory()->count(3)->state([
+        'priority_id' => $priorityB->getKey(),
+        'status_id' => $status->getKey(),
+        'created_at' => now()->subMonth(),
+    ])->create();
+
+    $widget = new ServiceRequestsOverTimeBarChart();
+    $widget->cacheTag = 'test-service-requests-over-time-type-filter';
+    $widget->pageFilters = ['serviceRequestTypes' => [$typeA->getKey()]];
+
+    $data = $widget->getData();
+
+    expect(array_sum($data['datasets'][0]['data']))->toBe(2);
 });
