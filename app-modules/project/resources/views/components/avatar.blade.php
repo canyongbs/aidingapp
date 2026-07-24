@@ -35,9 +35,15 @@
 @props([
     'user',
     'showName' => true,
+    'size' => 'md',
 ])
 @php
     use Filament\Facades\Filament;
+
+    $imageSizeClasses = match ($size) {
+        'sm' => 'h-8 w-8',
+        default => 'h-12 w-12',
+    };
 @endphp
 
 <div
@@ -50,7 +56,7 @@
     <img
         src="{{ Filament::getUserAvatarUrl($user) }}"
         alt="{{ $user->name }}"
-        class="h-12 w-12 rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
+        class="{{ $imageSizeClasses }} rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
     />
     @if ($showName)
         <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">

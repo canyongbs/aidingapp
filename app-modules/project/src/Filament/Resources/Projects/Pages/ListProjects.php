@@ -64,6 +64,8 @@ class ListProjects extends ListRecords
                 IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Project Name')
+                    ->limit(80)
+                    ->wrap()
                     ->description(fn (Project $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
@@ -83,14 +85,12 @@ class ListProjects extends ListRecords
                     }),
                 TextColumn::make('department.name')
                     ->label('Department')
-                    ->placeholder('N/A')
                     ->sortable()
                     ->searchable(),
                 TextColumn::make('start_date')
                     ->label('Start Date')
                     ->date()
-                    ->sortable()
-                    ->placeholder('N/A'),
+                    ->sortable(),
                 TextColumn::make('target_completion_date')
                     ->label('Target Date')
                     ->date()
