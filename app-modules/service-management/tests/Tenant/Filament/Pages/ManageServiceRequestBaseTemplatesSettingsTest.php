@@ -36,8 +36,9 @@
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
-use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplates;
+use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplatesSettings;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -48,14 +49,14 @@ use function Tests\asSuperAdmin;
 test('it prevents access when the user does not have permission', function () {
     actingAs(User::factory()->create());
 
-    get(ManageServiceRequestBaseTemplates::getUrl())
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
         ->assertForbidden();
 });
 
 test('it allows access for super admins', function () {
     asSuperAdmin();
 
-    get(ManageServiceRequestBaseTemplates::getUrl())
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
         ->assertSuccessful();
 });
 
@@ -92,7 +93,7 @@ test('it saves the example subject and body without touching ai instructions', f
         ],
     ];
 
-    livewire(ManageServiceRequestBaseTemplates::class)
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
         ->fillForm([
             "templates.{$existing->type->value}.{$existing->role->value}.subject" => $subject,
             "templates.{$existing->type->value}.{$existing->role->value}.body" => $body,
@@ -105,4 +106,71 @@ test('it saves the example subject and body without touching ai instructions', f
     expect($existing->subject)->toEqual($subject);
     expect($existing->body)->toEqual($body);
     expect($existing->ai_instructions)->toBe('Keep it friendly.');
+});
+
+test('it persists example subject/body and ai instructions correctly when saved from both pages', function () {
+    asSuperAdmin();
+
+    $type = ServiceRequestEmailTemplateType::Created;
+    $role = ServiceRequestTypeEmailTemplateRole::Customer;
+
+    expect(ServiceRequestNotificationAutomationEmailTemplate::query()
+        ->where('type', $type)
+        ->where('role', $role)
+        ->exists())->toBeFalse();
+
+    $subject = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Subject'],
+                ],
+            ],
+        ],
+    ];
+
+    $body = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Body'],
+                ],
+            ],
+        ],
+    ];
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->fillForm([
+            "templates.{$type->value}.{$role->value}.subject" => $subject,
+            "templates.{$type->value}.{$role->value}.body" => $body,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $template = ServiceRequestNotificationAutomationEmailTemplate::query()
+        ->where('type', $type)
+        ->where('role', $role)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual($subject);
+    expect($template->body)->toEqual($body);
+    expect($template->ai_instructions)->toBeNull();
+
+    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+        ->fillForm([
+            'is_enabled' => true,
+            "templates.{$type->value}.{$role->value}.ai_instructions" => 'Be concise and friendly.',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $template->refresh();
+
+    expect($template->subject)->toEqual($subject);
+    expect($template->body)->toEqual($body);
+    expect($template->ai_instructions)->toBe('Be concise and friendly.');
 });

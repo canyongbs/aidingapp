@@ -59,7 +59,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class ManageServiceRequestBaseTemplates extends SettingsPage
+class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
 {
     protected static string $settings = ServiceRequestNotificationAutomationSettings::class;
 
