@@ -34,20 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Pages;
+namespace App\Filament\Clusters\GlobalServiceManagementCluster\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
+use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
-use App\Filament\Clusters\GlobalArtificialIntelligence;
+use App\Filament\Clusters\GlobalServiceManagementCluster;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\RichEditor;
+use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -56,39 +59,26 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
-class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
+class ManageServiceRequestBaseTemplates extends SettingsPage
 {
     protected static string $settings = ServiceRequestNotificationAutomationSettings::class;
 
-    protected static ?string $title = 'Communication Automation';
+    protected static ?string $cluster = GlobalServiceManagementCluster::class;
 
-    protected static ?string $cluster = GlobalArtificialIntelligence::class;
-
-    protected static ?int $navigationSort = 60;
-
-    protected ?bool $hasUnsavedDataChangesAlert = false;
+    protected static ?string $title = 'Base Templates';
 
     public static function canAccess(): bool
     {
-        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
-            return false;
-        }
-
         $user = auth()->user();
         assert($user instanceof User);
 
-        return $user->canAccessAiSettings();
+        return Gate::check(Feature::ServiceManagement->getGateName()) && $user->isSuperAdmin();
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Toggle::make('is_enabled')
-                    ->label('Enable Communication Automation')
-                    ->helperText('When enabled, base email templates and AI instructions can be configured for automatic generation of service request email templates.')
-                    ->live()
-                    ->columnSpanFull(),
                 Tabs::make('Event templates')
                     ->persistTab()
                     ->id('event-template-tabs')
@@ -100,16 +90,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                                     ->id("role-template-tabs-{$type->value}")
                                     ->tabs(array_map(
                                         fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                                            ->schema([
-                                                Textarea::make('ai_instructions')
-                                                    ->label('AI Instructions')
-                                                    ->placeholder('Provide guidance for how the AI should customize this template...')
-                                                    ->helperText('Natural language instructions for the AI when generating this specific event and role template.')
-                                                    ->rows(3)
-                                                    ->autosize()
-                                                    ->live(onBlur: true)
-                                                    ->columnSpanFull(),
-                                            ])
+                                            ->schema($this->getTemplateFormSchema($type, $role))
                                             ->statePath("templates.{$type->value}.{$role->value}"),
                                         $type === ServiceRequestEmailTemplateType::SurveyResponse
                                             ? [ServiceRequestTypeEmailTemplateRole::Customer]
@@ -119,46 +100,15 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
-                    ->visible(fn (Get $get) => $get('is_enabled'))
                     ->columnSpanFull(),
-                RichEditor::make('ai_prompt')
-                    ->label('AI Prompt')
-                    ->helperText('The prompt sent to the AI model when generating templates. Use merge tags to inject context at generation time.')
-                    ->toolbarButtons([])
-                    ->activePanel('mergeTags')
-                    ->mergeTags([
-                        'example subject',
-                        'example body',
-                        'user instructions',
-                        'available merge tags',
-                        'available custom blocks',
-                        'type name',
-                        'type description',
-                        'event name',
-                        'role name',
-                    ])
-                    ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->visible(fn (Get $get) => $get('is_enabled'))
-                    ->json()
-                    ->columnSpanFull(),
-            ])
-            ->disabled(! auth()->user()->canAccessAiSettings());
+            ]);
     }
 
     public function save(): void
     {
-        if (! auth()->user()->canAccessAiSettings()) {
-            return;
-        }
-
         $state = $this->form->getState();
 
         DB::transaction(function () use ($state): void {
-            $settings = app(ServiceRequestNotificationAutomationSettings::class);
-            $settings->is_enabled = $state['is_enabled'];
-            $settings->ai_prompt = $state['ai_prompt'] ?? [];
-            $settings->save();
-
             $templates = $state['templates'] ?? [];
 
             foreach ($templates as $typeValue => $roles) {
@@ -169,7 +119,8 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                             'role' => $roleValue,
                         ],
                         [
-                            'ai_instructions' => trim($templateData['ai_instructions'] ?? '') ?: null,
+                            'subject' => $templateData['subject'] ?? null,
+                            'body' => $templateData['body'] ?? null,
                         ],
                     );
                 }
@@ -184,7 +135,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->canAccessAiSettings()) {
+        if (! auth()->user()->isSuperAdmin()) {
             return [];
         }
 
@@ -193,11 +144,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
     protected function fillForm(): void
     {
-        $settings = app(ServiceRequestNotificationAutomationSettings::class);
-
         $state = [
-            'is_enabled' => $settings->is_enabled,
-            'ai_prompt' => $settings->ai_prompt ?: ServiceRequestNotificationAutomationSettings::defaultAiPrompt(),
             'templates' => [],
         ];
 
@@ -205,10 +152,76 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
         foreach ($templates as $template) {
             $state['templates'][$template->type->value][$template->role->value] = [
-                'ai_instructions' => $template->ai_instructions ?? '',
+                'subject' => $template->subject,
+                'body' => $template->body,
             ];
         }
 
         $this->form->fill($state);
+    }
+
+    /**
+     * @return array<int, RichEditor|Textarea>
+     */
+    protected function getTemplateFormSchema(ServiceRequestEmailTemplateType $type, ServiceRequestTypeEmailTemplateRole $role): array
+    {
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
+
+        if ($type !== ServiceRequestEmailTemplateType::Update) {
+            unset($mergeTags['recent update']);
+        }
+
+        $hasAnyContent = function (Get $get): bool {
+            return $this->richEditorHasContent($get('subject'))
+                || $this->richEditorHasContent($get('body'));
+        };
+
+        return [
+            RichEditor::make('subject')
+                ->label('Example Subject')
+                ->placeholder('Enter the example email subject here...')
+                ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
+                ->toolbarButtons([])
+                ->mergeTags($mergeTags)
+                ->helperText('The example subject template the AI will customize for each service request type.')
+                ->required(fn (Get $get): bool => $hasAnyContent($get))
+                ->live(onBlur: true)
+                ->json(),
+            RichEditor::make('body')
+                ->label('Example Body')
+                ->placeholder('Enter the example email body here...')
+                ->extraInputAttributes(['style' => 'min-height: 12rem;'])
+                ->toolbarButtons([
+                    ['bold', 'italic', 'link'],
+                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
+                    ['textColor', 'small'],
+                    ['mergeTags', 'customBlocks'],
+                    ['clearFormatting'],
+                    ['undo', 'redo'],
+                ])
+                ->mergeTags($mergeTags)
+                ->customBlocks([
+                    ServiceRequestTypeEmailTemplateButtonBlock::class,
+                    SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
+                ])
+                ->columnSpanFull()
+                ->required(fn (Get $get): bool => $hasAnyContent($get))
+                ->live(onBlur: true)
+                ->json(),
+        ];
+    }
+
+    protected function richEditorHasContent(mixed $value): bool
+    {
+        if (! is_array($value)) {
+            return false;
+        }
+
+        $isEmpty = (($value['type'] ?? null) === 'doc')
+            && (count($value['content'] ?? []) === 1)
+            && (($value['content'][0]['type'] ?? null) === 'paragraph')
+            && blank($value['content'][0]['content'] ?? []);
+
+        return ! $isEmpty;
     }
 }
