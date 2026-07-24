@@ -66,7 +66,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
 
     public static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::EmailTemplates;
 
-    protected ?bool $hasUnsavedDataChangesAlert = true;
+    protected ?bool $hasUnsavedDataChangesAlert = false;
 
     public function getRelationManagers(): array
     {

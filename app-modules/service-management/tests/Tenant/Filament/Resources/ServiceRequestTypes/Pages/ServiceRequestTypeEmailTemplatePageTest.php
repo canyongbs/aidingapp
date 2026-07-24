@@ -105,3 +105,13 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
     expect($emailTemplate->subject)->toEqualCanonicalizing($request['subject'])
         ->and($emailTemplate->body)->toEqualCanonicalizing($request['body']);
 });
+
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+    $page = new ServiceRequestTypeEmailTemplatePage();
+
+    $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
+        ->getProperty('hasUnsavedDataChangesAlert')
+        ->getValue($page);
+
+    expect($hasUnsavedDataChangesAlert)->toBeFalse();
+});

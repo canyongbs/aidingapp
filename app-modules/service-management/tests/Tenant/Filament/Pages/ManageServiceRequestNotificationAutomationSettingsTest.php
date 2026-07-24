@@ -54,3 +54,13 @@ test('it allows access for super admins', function () {
     get(ManageServiceRequestNotificationAutomationSettings::getUrl())
         ->assertSuccessful();
 });
+
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+    $page = new ManageServiceRequestNotificationAutomationSettings();
+
+    $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
+        ->getProperty('hasUnsavedDataChangesAlert')
+        ->getValue($page);
+
+    expect($hasUnsavedDataChangesAlert)->toBeFalse();
+});
