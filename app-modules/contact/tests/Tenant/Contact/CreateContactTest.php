@@ -149,9 +149,7 @@ test('CreateContact does not apply the unique form rule when the feature is disa
     ]));
 
     actingAs($user);
-
-    // With the feature off the form has no unique rule, so validation passes and the create
-    // falls through to the database unique index instead of surfacing a friendly form error.
+    
     expect(fn () => livewire(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create'))
