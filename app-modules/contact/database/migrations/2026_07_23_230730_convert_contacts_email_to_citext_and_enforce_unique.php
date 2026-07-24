@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Features\ContactEmailUniquenessFeature;
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
@@ -56,13 +57,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            /*
-             * TODO: After feature is stable:
-             * - Remove the $this->fixDuplicates() call below
-             * - Remove the revertDuplicates() call in down()
-             * - Remove the $chunkSize and $usesSoftDeletes properties
-             * - Remove the FixesDuplicateNames trait and the email-specific override methods below
-             */
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -71,12 +65,16 @@ return new class () extends Migration {
                 $table->uniqueIndex($this->column, 'contacts_email_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
+
+            ContactEmailUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
+            ContactEmailUniquenessFeature::deactivate();
+
             DB::statement('DROP INDEX IF EXISTS contacts_email_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
