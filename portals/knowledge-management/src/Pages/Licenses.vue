@@ -147,7 +147,12 @@
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
                                     <span class="font-normal text-gray-700">
-                                        {{ formatDateTime(activeLicense.expiration_date, { dateOnly: true, utc: true }) ?? 'No Expiration' }}
+                                        {{
+                                            formatDateTime(activeLicense.expiration_date, {
+                                                dateOnly: true,
+                                                utc: true,
+                                            }) ?? 'No Expiration'
+                                        }}
                                     </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">
@@ -194,7 +199,12 @@
                                 <p class="mb-2 font-semibold text-gray-800">
                                     Expiration:
                                     <span class="font-normal text-gray-700">
-                                        {{ formatDateTime(expiredLicense.expiration_date, { dateOnly: true, utc: true }) }}
+                                        {{
+                                            formatDateTime(expiredLicense.expiration_date, {
+                                                dateOnly: true,
+                                                utc: true,
+                                            })
+                                        }}
                                     </span>
                                 </p>
                                 <p class="flex gap-2 font-semibold text-gray-800">

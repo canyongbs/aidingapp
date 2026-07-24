@@ -54,7 +54,10 @@ function resolveTimezone() {
  * @param {boolean} [options.withZone=true]
  * @returns {string|null}
  */
-export default function formatDateTime(value, { dateOnly = false, timeOnly = false, utc = false, withZone = true } = {}) {
+export default function formatDateTime(
+    value,
+    { dateOnly = false, timeOnly = false, utc = false, withZone = true } = {},
+) {
     if (!value) {
         return null;
     }
