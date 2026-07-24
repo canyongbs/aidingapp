@@ -34,6 +34,73 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use App\Models\User;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Artisan;
+
+describe('2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique', function () {
+    $migrationPath = 'app-modules/contact/database/migrations/2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique.php';
+
+    it('rewrites case-insensitive duplicate emails with plus-addressing and keeps the oldest', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $first = Contact::factory()->create(['email' => 'Match@Example.com', 'created_at' => now()->subMinutes(3)]);
+                $second = Contact::factory()->create(['email' => 'match@example.com', 'created_at' => now()->subMinutes(2)]);
+                $third = Contact::factory()->create(['email' => 'MATCH@EXAMPLE.COM', 'created_at' => now()->subMinutes(1)]);
+                $unique = Contact::factory()->create(['email' => 'solo@example.com', 'created_at' => now()->subMinutes(4)]);
+
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($first->refresh()->email)->toBe('Match@Example.com')
+                    ->and($second->refresh()->email)->toBe('match+2@example.com')
+                    ->and($third->refresh()->email)->toBe('MATCH+3@EXAMPLE.COM')
+                    ->and($unique->refresh()->email)->toBe('solo@example.com');
+            }
+        );
+    });
+
+    it('keeps the managed contact and rewrites the unmanaged duplicate', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $user = User::factory()->create();
+
+                $older = Contact::factory()->create(['email' => 'Shared@Example.com', 'created_at' => now()->subMinutes(5)]);
+                $managed = Contact::factory()->create(['email' => 'shared@example.com', 'user_id' => $user->getKey(), 'created_at' => now()->subMinute()]);
+
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($managed->refresh()->email)->toBe('shared@example.com')
+                    ->and($older->refresh()->email)->toBe('Shared+2@Example.com');
+            }
+        );
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $kept = Contact::factory()->create(['email' => 'dupe@example.com', 'created_at' => now()->subMinutes(2)]);
+                $trashed = Contact::factory()->create(['email' => 'Dupe@Example.com', 'created_at' => now()->subMinute()]);
+                $trashed->delete();
+
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($kept->refresh()->email)->toBe('dupe@example.com')
+                    ->and($trashed->refresh()->email)->toBe('Dupe@Example.com');
+            }
+        );
+    });
+});
+
 // Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {

@@ -37,6 +37,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
+use App\Features\ContactEmailUniquenessFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -99,4 +100,31 @@ test('EditContact is gated with proper access control', function () {
         ->and($contact->fresh()->phone)->toEqual($request->get('phone'))
         ->and($contact->fresh()->address)->toEqual($request->get('address'))
         ->and($contact->fresh()->address_2)->toEqual($request->get('address_2'));
+});
+
+test('EditContact keeps its own email but rejects another contact\'s email case-insensitively', function () {
+    ContactEmailUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.update');
+
+    Contact::factory()->create(['email' => 'other@example.com']);
+    $contact = Contact::factory()->create(['email' => 'mine@example.com']);
+
+    actingAs($user);
+
+    livewire(EditContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->fillForm(['email' => 'Mine@Example.com'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    livewire(EditContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->fillForm(['email' => 'Other@Example.com'])
+        ->call('save')
+        ->assertHasFormErrors(['email']);
 });
