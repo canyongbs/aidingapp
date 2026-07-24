@@ -41,6 +41,7 @@ use AidingApp\Ai\Services\TestAiService;
 use AidingApp\Ai\Settings\AiIntegrationsSettings;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGpt54MiniService;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGpt54NanoService;
+use AidingApp\IntegrationOpenAi\Services\OpenAiGpt56LunaService;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGpt5MiniService;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGpt5NanoService;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGpt5Service;
@@ -60,6 +61,8 @@ enum AiModel: string implements HasLabel
 
     case OpenAiGpt54Nano = 'openai_gpt_54_nano';
 
+    case OpenAiGpt56Luna = 'openai_gpt_56_luna';
+
     case OpenAiGptTest = 'openai_gpt_test';
 
     case LlamaParse = 'llamaparse';
@@ -76,6 +79,7 @@ enum AiModel: string implements HasLabel
             self::OpenAiGpt54Mini => $aiIntegrationSettings->open_ai_gpt_54_mini_model_name ?? 'Canyon 5.4 mini',
             self::OpenAiGpt5Nano => $aiIntegrationSettings->open_ai_gpt_5_nano_model_name ?? 'Canyon 5 nano',
             self::OpenAiGpt54Nano => $aiIntegrationSettings->open_ai_gpt_54_nano_model_name ?? 'Canyon 5.4 nano',
+            self::OpenAiGpt56Luna => $aiIntegrationSettings->open_ai_gpt_56_luna_model_name ?? 'Canyon 5.6 luna',
             self::LlamaParse => $aiIntegrationSettings->llamaparse_model_name ?? 'Canyon Parsing Service',
             self::OpenAiGptTest => 'Canyon Test',
             self::Test => 'Test',
@@ -95,6 +99,7 @@ enum AiModel: string implements HasLabel
             self::OpenAiGpt54Mini => $aiIntegrationSettings->open_ai_gpt_54_mini_applicable_features,
             self::OpenAiGpt5Nano => $aiIntegrationSettings->open_ai_gpt_5_nano_applicable_features,
             self::OpenAiGpt54Nano => $aiIntegrationSettings->open_ai_gpt_54_nano_applicable_features,
+            self::OpenAiGpt56Luna => $aiIntegrationSettings->open_ai_gpt_56_luna_applicable_features,
             self::LlamaParse => [],
             self::OpenAiGptTest => app()->hasDebugModeEnabled() ? AiModelApplicabilityFeature::cases() : [],
             self::Test => app()->hasDebugModeEnabled() ? AiModelApplicabilityFeature::cases() : [],
@@ -122,6 +127,7 @@ enum AiModel: string implements HasLabel
             self::OpenAiGpt5Nano => OpenAiGpt5NanoService::class,
             self::OpenAiGpt54Mini => OpenAiGpt54MiniService::class,
             self::OpenAiGpt54Nano => OpenAiGpt54NanoService::class,
+            self::OpenAiGpt56Luna => OpenAiGpt56LunaService::class,
             self::OpenAiGptTest => OpenAiGptTestService::class,
             self::Test => TestAiService::class,
             default => throw new Exception('No Service class found for this model.'),
