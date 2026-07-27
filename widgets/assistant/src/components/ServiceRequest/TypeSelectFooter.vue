@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ArrowRightIcon } from '@heroicons/vue/16/solid';
     import BaseButton from '@common/BaseButton.vue';
+    import { ArrowRightIcon } from '@heroicons/vue/16/solid';
 
     defineProps({
         selectedType: { type: Object, required: true },
