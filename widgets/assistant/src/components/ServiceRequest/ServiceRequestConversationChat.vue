@@ -36,7 +36,7 @@
     import { UserIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
     import { nextTick, onMounted, ref, watch } from 'vue';
-    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
+    import BaseButton from '@common/BaseButton.vue';
     import { useConversationMessages } from '../../composables/useConversationMessages.js';
     import { getAuthHeaders } from '../../utils/token.js';
 

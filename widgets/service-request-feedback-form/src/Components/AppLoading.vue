@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
 </script>
 
 <template>

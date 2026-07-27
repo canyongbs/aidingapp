@@ -34,7 +34,7 @@
 <script setup>
     import { ArrowLeftIcon, ChatBubbleLeftRightIcon } from '@heroicons/vue/16/solid';
     import { onMounted, ref, watch } from 'vue';
-    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
+    import BaseButton from '@common/BaseButton.vue';
     import { useServiceRequestConversation } from '../../composables/useServiceRequestConversation.js';
     import ServiceRequestConversationChat from './ServiceRequestConversationChat.vue';
 

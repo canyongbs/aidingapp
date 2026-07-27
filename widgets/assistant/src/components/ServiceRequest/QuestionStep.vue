@@ -36,8 +36,8 @@
     import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
-    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
-    import LoadingSpinner from '../../../../../resources/js/components/LoadingSpinner.vue';
+    import BaseButton from '@common/BaseButton.vue';
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
     import { getAuthHeaders } from '../../utils/token.js';
 
     const props = defineProps({
