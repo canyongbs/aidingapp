@@ -38,6 +38,8 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplatesSettings;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -277,4 +279,79 @@ test('it persists example subject/body and ai instructions correctly when saved 
     expect($template->subject)->toEqual($subject);
     expect($template->body)->toEqual($body);
     expect($template->ai_instructions)->toBe('Be concise and friendly.');
+});
+
+test('it applies base templates to all service request types by default', function (int $typeIndex) {
+    asSuperAdmin();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $types = [
+        ServiceRequestType::factory()->create(),
+        ServiceRequestType::factory()->create(),
+    ];
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertHasNoFormErrors();
+
+    $template = ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $types[$typeIndex]->getKey())
+        ->where('type', $baseTemplate->type)
+        ->where('role', $baseTemplate->role)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual($baseTemplate->subject);
+    expect($template->body)->toEqual($baseTemplate->body);
+})->with([
+    'first type' => 0,
+    'second type' => 1,
+]);
+
+test('it applies base templates only to the selected service request types', function () {
+    asSuperAdmin();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $selectedType = ServiceRequestType::factory()->create();
+    $otherType = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates', data: [
+            'apply_to' => 'select',
+            'service_request_type_ids' => [$selectedType->getKey()],
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $selectedType->getKey())
+        ->where('type', $baseTemplate->type)
+        ->where('role', $baseTemplate->role)
+        ->exists())->toBeTrue();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $otherType->getKey())
+        ->exists())->toBeFalse();
+});
+
+test('it requires at least one selected service request type when applying to a selection', function () {
+    asSuperAdmin();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates', data: [
+            'apply_to' => 'select',
+            'service_request_type_ids' => [],
+        ])
+        ->assertHasFormErrors(['service_request_type_ids' => ['required']]);
 });
