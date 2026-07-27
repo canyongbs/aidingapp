@@ -69,7 +69,7 @@ test('it disables the unsaved data changes alert to avoid false positives on thi
 
     expect($hasUnsavedDataChangesAlert)->toBeFalse();
 });
-    
+
 test('it saves is_enabled, ai_prompt, and ai instructions without touching the example subject and body', function () {
     asSuperAdmin();
 
