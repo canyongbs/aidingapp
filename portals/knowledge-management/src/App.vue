@@ -53,6 +53,7 @@
     import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import { useAuthStore } from './Stores/auth.js';
     import { useFeatureStore } from './Stores/feature.js';
+    import { useTimezoneStore } from './Stores/timezone.js';
     import { useTokenStore } from './Stores/token.js';
 
     /**
@@ -356,6 +357,8 @@
 
                 const { setRequiresAuthentication } = useAuthStore();
 
+                const { setDisplayTimezone } = useTimezoneStore();
+
                 const {
                     setHasServiceManagement,
                     setHasAssets,
@@ -366,6 +369,8 @@
                     setIsAssetEnabled,
                     setIsLicenseEnabled,
                 } = useFeatureStore();
+
+                setDisplayTimezone(response.data.display_timezone);
 
                 portalPrimaryColor.value = response.data.primary_color;
 
@@ -533,6 +538,7 @@
 
         const { setToken } = useTokenStore();
         const { setUser } = useAuthStore();
+        const { setDisplayTimezone } = useTimezoneStore();
 
         const {
             setHasServiceManagement,
@@ -585,6 +591,7 @@
                     if (response.data.success === true) {
                         setToken(response.data.token);
                         setUser(response.data.user);
+                        setDisplayTimezone(response.data.display_timezone);
 
                         setHasServiceManagement(response.data.service_management_enabled).then(() => {
                             hasServiceManagement.value = response.data.service_management_enabled;

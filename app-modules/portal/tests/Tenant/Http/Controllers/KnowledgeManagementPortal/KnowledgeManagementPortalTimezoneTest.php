@@ -34,33 +34,56 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Tests\asSuperAdmin;
 
-test('it prevents access when the user does not have permission', function () {
-    actingAs(User::factory()->create());
+test('portal returns a null display_timezone for a guest', function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
-        ->assertForbidden();
+    $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
+    $response = get($url);
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('display_timezone', null);
 });
 
-test('it allows access for super admins', function () {
-    asSuperAdmin();
+test('portal returns a null display_timezone for a contact that is not managed', function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-    get(ManageServiceRequestNotificationAutomationSettings::getUrl())
-        ->assertSuccessful();
+    $contact = Contact::factory()->create();
+
+    actingAs($contact, 'contact');
+
+    $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
+    $response = get($url);
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('display_timezone', null);
 });
 
-test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
-    $page = new ManageServiceRequestNotificationAutomationSettings();
+test('portal returns the managing user timezone for a managed contact', function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-    $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
-        ->getProperty('hasUnsavedDataChangesAlert')
-        ->getValue($page);
+    $user = User::factory()->create(['timezone' => 'America/New_York']);
 
-    expect($hasUnsavedDataChangesAlert)->toBeFalse();
+    $contact = Contact::factory()->create(['user_id' => $user->getKey()]);
+
+    actingAs($contact, 'contact');
+
+    $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
+    $response = get($url);
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('display_timezone', 'America/New_York');
 });

@@ -92,10 +92,10 @@ class AssetManagementPortalController extends Controller
                 'id' => $checkOut->getKey(),
                 'status' => $isReturned ? 'returned' : 'checked_out',
                 'checked_out_at' => $checkOut->getRawOriginal('checked_out_at') !== null
-                    ? $checkOut->checked_out_at->format('M j, Y g:i a (T)')
+                    ? $checkOut->checked_out_at->toIso8601String()
                     : null,
                 'checked_in_at' => $checkOut->checkIn !== null && $checkOut->checkIn->getRawOriginal('checked_in_at') !== null
-                    ? $checkOut->checkIn->checked_in_at->format('M j, Y g:i a (T)')
+                    ? $checkOut->checkIn->checked_in_at->toIso8601String()
                     : null,
                 'asset' => [
                     'id' => $checkOut->asset->getKey(),

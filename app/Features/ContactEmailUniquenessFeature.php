@@ -34,30 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace App\Features;
 
-use AidingApp\LicenseManagement\Enums\ProductLicenseStatus;
-use AidingApp\LicenseManagement\Models\ProductLicense;
-use App\Http\Controllers\Controller;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use App\Support\AbstractFeatureFlag;
 
-class LicenseManagementPortalController extends Controller
+class ContactEmailUniquenessFeature extends AbstractFeatureFlag
 {
-    public function __invoke(Request $request): JsonResponse
+    public function resolve(mixed $scope): mixed
     {
-        $licenses = auth('contact')->user()->productLicenses()
-            ->withWhereHas('product:id,name,version')
-            ->get();
-
-        return response()->json([
-            'success' => true,
-            'activeLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Active
-            )->values(),
-            'expiredLicense' => $licenses->filter(
-                fn (ProductLicense $license): bool => $license->status === ProductLicenseStatus::Expired
-            )->values(),
-        ]);
+        return false;
     }
 }

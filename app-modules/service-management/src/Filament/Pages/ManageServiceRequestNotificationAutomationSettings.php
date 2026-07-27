@@ -70,7 +70,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
     protected static ?int $navigationSort = 60;
 
-    protected ?bool $hasUnsavedDataChangesAlert = true;
+    protected ?bool $hasUnsavedDataChangesAlert = false;
 
     public static function canAccess(): bool
     {

@@ -37,7 +37,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
+use App\Features\ContactEmailUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -82,4 +84,74 @@ test('CreateContact is gated with proper access control', function () {
     assertCount(1, Contact::all());
 
     assertDatabaseHas(Contact::class, $request->toArray());
+});
+
+test('CreateContact rejects a duplicate email case-insensitively', function () {
+    ContactEmailUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->create(['email' => 'taken@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'Taken@Example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    livewire(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['email']);
+
+    assertCount(1, Contact::all());
+});
+
+test('CreateContact allows reusing a soft-deleted contact email', function () {
+    ContactEmailUniquenessFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->create(['email' => 'reuse@example.com'])->delete();
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'Reuse@Example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    livewire(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Contact::query()->where('email', 'reuse@example.com')->exists())->toBeTrue();
+});
+
+test('CreateContact does not apply the unique form rule when the feature is disabled', function () {
+    ContactEmailUniquenessFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->create(['email' => 'taken@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'Taken@Example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    expect(fn () => livewire(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create'))
+        ->toThrow(UniqueConstraintViolationException::class);
 });
