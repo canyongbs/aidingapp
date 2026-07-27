@@ -33,8 +33,8 @@
 -->
 <script setup>
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import HelpCenter from '@common/portal/home/HelpCenter.vue';
     import HeroSearch from '@common/portal/HeroSearch.vue';
+    import HelpCenter from '@common/portal/home/HelpCenter.vue';
     import Page from '@common/portal/Page.vue';
     import SearchResults from '@common/portal/SearchResults.vue';
     import { computed, defineProps, nextTick, onMounted, ref, watch } from 'vue';
