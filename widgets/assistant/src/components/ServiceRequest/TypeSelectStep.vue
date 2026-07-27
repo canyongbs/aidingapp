@@ -32,10 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
     import { MagnifyingGlassIcon, XMarkIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { ref } from 'vue';
-    import LoadingSpinner from '@common/LoadingSpinner.vue';
     import { useServiceRequestTypes } from '../../composables/useServiceRequestTypes.js';
     import { getAuthHeaders } from '../../utils/token.js';
     import BaseTab from '../BaseTab.vue';

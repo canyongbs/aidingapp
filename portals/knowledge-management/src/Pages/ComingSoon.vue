@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
     import { HomeIcon } from '@heroicons/vue/16/solid';
     import { useRouter } from 'vue-router';
-    import BaseButton from '@common/BaseButton.vue';
     const router = useRouter();
     const goHome = () => {
         router.push({ name: 'home' });
