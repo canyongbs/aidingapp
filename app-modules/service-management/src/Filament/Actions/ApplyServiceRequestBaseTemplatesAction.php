@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
+use AidingApp\ServiceManagement\Filament\Concerns\HasRichContentEmptyCheck;
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestTypesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -55,6 +56,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ApplyServiceRequestBaseTemplatesAction extends Action
 {
+    use HasRichContentEmptyCheck;
+
     protected function setUp(): void
     {
         parent::setUp();
