@@ -31,36 +31,34 @@
     
     </COPYRIGHT>
 --}}
-
-@props([
-    'user',
-    'showName' => true,
-    'size' => 'md',
-])
 @php
-    use Filament\Facades\Filament;
+    $visibleManagerLimit = 5;
 
-    $imageSizeClasses = match ($size) {
-        'sm' => 'h-8 w-8',
-        default => 'h-12 w-12',
-    };
+    $managers = $getState();
+    $visibleManagers = $managers->take($visibleManagerLimit);
+    $hiddenManagers = $managers->skip($visibleManagerLimit);
 @endphp
 
-<div
-    class="flex shrink-0 flex-col items-center gap-1"
-    x-tooltip="{
-        content: @js($user->name),
-        theme: $store.theme,
-    }"
->
-    <img
-        src="{{ Filament::getUserAvatarUrl($user) }}"
-        alt="{{ $user->name }}"
-        class="{{ $imageSizeClasses }} rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
-    />
-    @if ($showName)
-        <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-            {{ str($user->name)->before(' ') }}
-        </span>
-    @endif
-</div>
+@if ($managers->isNotEmpty())
+    <div class="fi-ta-text flex items-center gap-1">
+        @foreach ($visibleManagers as $user)
+            <x-project::avatar :user="$user" :show-name="false" size="sm" />
+        @endforeach
+
+        @if ($hiddenManagers->isNotEmpty())
+            <div
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600 ring-2 ring-white dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800"
+                x-tooltip="{
+                    content: @js($hiddenManagers->pluck('name')->implode(', ')),
+                    theme: $store.theme,
+                }"
+            >
+                +{{ $hiddenManagers->count() }}
+            </div>
+        @endif
+    </div>
+@else
+    <div class="fi-ta-text">
+        <span class="fi-ta-placeholder">N/A</span>
+    </div>
+@endif

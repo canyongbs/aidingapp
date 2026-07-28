@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -46,7 +47,11 @@ use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ListProjects extends ListRecords
 {
@@ -58,18 +63,131 @@ class ListProjects extends ListRecords
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
+                    ->label('Project Name')
+                    ->limit(80)
+                    ->wrap()
                     ->description(fn (Project $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('files_count')
-                    ->counts('files')
-                    ->label('Files'),
-                TextColumn::make('pipelines_count')
-                    ->counts('pipelines')
-                    ->label('Pipelines'),
-                TextColumn::make('milestones_count')
-                    ->counts('milestones')
-                    ->label('Milestones'),
+                ViewColumn::make('managers')
+                    ->label('Manager(s)')
+                    ->state(fn (Project $record): Collection => $record->allManagers())
+                    ->default(fn (): Collection => new Collection())
+                    ->view('project::filament.tables.columns.project.managers')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query
+                            ->whereHas(
+                                'managerUsers',
+                                fn (Builder $query) => $query->where('name', 'ilike', "%{$search}%"),
+                            )
+                            ->orWhereHas(
+                                'managerDepartments.users',
+                                fn (Builder $query) => $query->where('name', 'ilike', "%{$search}%"),
+                            );
+                    }),
+                TextColumn::make('department.name')
+                    ->label('Department')
+                    ->placeholder('N/A')
+                    ->sortable()
+                    ->searchable(),
+                TextColumn::make('start_date')
+                    ->label('Start Date')
+                    ->placeholder('N/A')
+                    ->date()
+                    ->sortable(),
+                TextColumn::make('target_completion_date')
+                    ->label('Target Date')
+                    ->date()
+                    ->sortable()
+                    ->placeholder('Indefinite'),
+                ViewColumn::make('progress')
+                    ->label('Progress')
+                    ->state(fn (Project $record): int => $record->getProgressPercentage())
+                    ->view('project::filament.tables.columns.project.progress'),
+            ])
+            ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
+                $query
+                    ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
+                    ->tap(new WithProgressCounts());
+
+                $search = $livewire->getTableSearch();
+
+                if (blank($search) || filled($livewire->getTableSortColumn())) {
+                    return $query;
+                }
+
+                $bindings = [];
+
+                $searchWords = array_filter(
+                    str_getcsv(
+                        preg_replace('/(\s|\x{3164}|\x{1160})+/u', ' ', $search),
+                        separator: ' ',
+                        escape: '\\',
+                    ),
+                    fn (?string $word): bool => filled($word),
+                );
+
+                if (empty($searchWords)) {
+                    return $query;
+                }
+
+                $matchesEveryWord = function (string $column) use ($searchWords, &$bindings): string {
+                    $conditions = [];
+
+                    foreach ($searchWords as $word) {
+                        $conditions[] = "{$column} ILIKE ?";
+                        $bindings[] = '%' . $word . '%';
+                    }
+
+                    return implode(' AND ', $conditions);
+                };
+
+                $nameMatch = $matchesEveryWord('projects.name');
+                $managerUserMatch = $matchesEveryWord('users.name');
+                $managerDepartmentUserMatch = $matchesEveryWord('users.name');
+                $departmentMatch = $matchesEveryWord('departments.name');
+
+                return $query
+                    ->selectRaw(
+                        <<<SQL
+                        CASE
+                            WHEN {$nameMatch} THEN 0
+                            WHEN EXISTS (
+                                SELECT 1
+                                FROM project_manager_users
+                                INNER JOIN users ON users.id = project_manager_users.user_id
+                                WHERE project_manager_users.project_id = projects.id
+                                AND users.deleted_at IS NULL
+                                AND ({$managerUserMatch})
+                            ) THEN 1
+                            WHEN EXISTS (
+                                SELECT 1
+                                FROM project_manager_departments
+                                INNER JOIN users ON users.department_id = project_manager_departments.department_id
+                                WHERE project_manager_departments.project_id = projects.id
+                                AND users.deleted_at IS NULL
+                                AND ({$managerDepartmentUserMatch})
+                            ) THEN 1
+                            WHEN EXISTS (
+                                SELECT 1
+                                FROM departments
+                                WHERE departments.id = projects.department_id
+                                AND ({$departmentMatch})
+                            ) THEN 2
+                            ELSE 3
+                        END AS search_rank
+                        SQL,
+                        $bindings,
+                    )
+                    ->orderBy('search_rank')
+                    ->orderBy('projects.name');
+            })
+            ->filters([
+                SelectFilter::make('department')
+                    ->relationship('department', 'name')
+                    ->multiple()
+                    ->preload()
+                    ->label('Department'),
             ])
             ->recordActions([
                 ViewAction::make(),
