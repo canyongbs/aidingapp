@@ -57,6 +57,10 @@ class PipelineResource extends Resource
 
     public static function getRecordSubNavigation(Page $page): array
     {
+        if ($page instanceof ManagePipelineEntries && filled($page->project)) {
+            return [];
+        }
+
         return $page->generateNavigationItems([
             ViewPipeline::class,
             EditPipeline::class,

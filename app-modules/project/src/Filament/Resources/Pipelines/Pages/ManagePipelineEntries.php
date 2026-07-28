@@ -39,19 +39,25 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
+use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\TextInput;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
@@ -78,7 +84,29 @@ class ManagePipelineEntries extends ManageRelatedRecords
     public function mount(int | string $record): void
     {
         parent::mount($record);
-        $this->viewType = session('pipeline-view-type') ?? 'table';
+
+        if (filled($this->project)) {
+            $this->viewType = 'kanban';
+
+            return;
+        }
+
+        $requestedViewType = request()->query('viewType');
+
+        $this->setViewType(filled($requestedViewType) ? $requestedViewType : (session('pipeline-view-type') ?? 'table'));
+    }
+
+    public function getSubheading(): string | Htmlable | null
+    {
+        if (blank($this->project)) {
+            return null;
+        }
+
+        return new HtmlString(
+            view('project::filament.pages.back-to-project', [
+                'url' => ProjectResource::getUrl('view', ['record' => $this->project]),
+            ])->render(),
+        );
     }
 
     /**
@@ -92,15 +120,22 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
         $project = $pipeline->project;
 
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
+        if (filled($this->project) && $project) {
+            $breadcrumbs = [
+                ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
-            ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
+            ];
+        } else {
+            $breadcrumbs = [
+                ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
+                ...($project ? [
+                    ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
+                    ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
+                ] : []),
+                PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
+                ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+            ];
+        }
 
         if (filled($cluster = static::getCluster())) {
             return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
@@ -113,6 +148,45 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         $this->viewType = $viewType;
         session(['pipeline-view-type' => $viewType]);
+    }
+
+    public function selectPipelineAction(): Action
+    {
+        $pipeline = $this->getOwnerRecord();
+        assert($pipeline instanceof Pipeline);
+
+        return Action::make('selectPipeline')
+            ->label('Select Pipeline')
+            ->modalHeading('Select Pipeline')
+            ->modalSubmitActionLabel('Select')
+            ->visible(fn (): bool => filled($this->project))
+            ->fillForm(fn (): array => ['pipeline_id' => $pipeline->getKey()])
+            ->schema([
+                TableSelect::make('pipeline_id')
+                    ->hiddenLabel()
+                    ->tableConfiguration(ProjectPipelinesTable::class)
+                    ->tableArguments(['projectId' => $this->project])
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                $pipelineId = $data['pipeline_id'];
+
+                if (blank($pipelineId) || ! Pipeline::where('project_id', $this->project)->whereKey($pipelineId)->exists()) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Invalid pipeline selection')
+                        ->body('The selected pipeline does not belong to this project.')
+                        ->send();
+
+                    return;
+                }
+
+                $this->redirect(static::getUrl([
+                    'record' => $pipelineId,
+                    'project' => $this->project,
+                    'viewType' => $this->viewType,
+                ]));
+            });
     }
 
     public function table(Table $table): Table
