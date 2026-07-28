@@ -32,11 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import AppLoading from '@common/portal/AppLoading.vue';
+    import Footer from '@common/portal/Footer.vue';
     import { FormKit } from '@formkit/vue';
     import { defineProps, onMounted, ref } from 'vue';
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
-    import AppLoading from '@common/portal/AppLoading.vue';
-    import Footer from '@common/portal/Footer.vue';
 
     const props = defineProps({
         entryUrl: {

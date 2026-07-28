@@ -81,7 +81,9 @@ export function useKnowledgeManagementSearch() {
     const fromArticle = ref(0);
     const toArticle = ref(0);
 
-    const isSearchActive = computed(() => !!(searchQuery.value && searchQuery.value.trim()) || selectedTags.value.length > 0);
+    const isSearchActive = computed(
+        () => !!(searchQuery.value && searchQuery.value.trim()) || selectedTags.value.length > 0,
+    );
 
     const searchResultArticles = computed(() =>
         (searchResults.value?.data?.articles?.data ?? []).map((article) => ({

@@ -32,17 +32,17 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { createMessage, getNode } from '@formkit/core';
-    import { FormKitSchema } from '@formkit/vue';
-    import { storeToRefs } from 'pinia';
-    import DOMPurify from 'dompurify';
-    import { marked } from 'marked';
-    import { computed, nextTick, reactive, ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
     import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { createMessage, getNode } from '@formkit/core';
+    import { FormKitSchema } from '@formkit/vue';
+    import DOMPurify from 'dompurify';
+    import { marked } from 'marked';
+    import { storeToRefs } from 'pinia';
+    import { computed, nextTick, reactive, ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
     import wizard from '../FormKit/wizard.js';
     import { apiPost } from '../Services/api.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -285,10 +285,9 @@
                 const formNode = getNode('form');
                 const formData = formNode ? formNode.value : {};
 
-                response = await apiPost(
-                    '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
-                    { formData },
-                );
+                response = await apiPost('/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution', {
+                    formData,
+                });
             }
 
             if (response.confidence_score !== undefined) {
@@ -395,7 +394,9 @@
 
         const groups = sections
             .filter((sectionNode) => sectionNode && sectionNode.$el === 'section')
-            .map((section) => (Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0]))
+            .map((section) =>
+                Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0],
+            )
             .filter(Boolean);
 
         const stepNames = groups.map((group) => group.name || group.id).filter(Boolean);
@@ -462,8 +463,8 @@
                 <template v-if="wasAiResolved">
                     <p>Great! We're glad the AI was able to resolve your issue.</p>
                     <p class="text-sm text-gray-600">
-                        A record of this interaction has been saved. If you need further assistance, feel free
-                        to submit a new request.
+                        A record of this interaction has been saved. If you need further assistance, feel free to submit
+                        a new request.
                     </p>
                 </template>
                 <template v-else>
@@ -508,8 +509,8 @@
                     <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
 
                     <p class="text-gray-600 mb-4">
-                        Our AI has considered your request and may be able to answer it immediately. Please
-                        review the potential answer below:
+                        Our AI has considered your request and may be able to answer it immediately. Please review the
+                        potential answer below:
                     </p>
 
                     <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -520,8 +521,8 @@
                     </div>
 
                     <p class="text-gray-600 mb-6">
-                        Please tell us if this resolved your issue. If not, we will escalate this ticket to a
-                        support team member.
+                        Please tell us if this resolved your issue. If not, we will escalate this ticket to a support
+                        team member.
                     </p>
 
                     <div class="flex gap-3">

@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, watch } from 'vue';
-    import { useRoute } from 'vue-router';
     import BaseBadge from '@common/BaseBadge.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { ref, watch } from 'vue';
+    import { useRoute } from 'vue-router';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';

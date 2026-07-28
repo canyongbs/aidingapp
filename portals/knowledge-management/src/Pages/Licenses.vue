@@ -32,14 +32,14 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/16/solid';
-    import { Card } from 'primevue';
-    import { computed, ref } from 'vue';
     import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/16/solid';
+    import { Card } from 'primevue';
+    import { computed, ref } from 'vue';
     import formatDateTime from '../Services/FormatDateTime.js';
     import { useLicensesData } from './loaders.js';
 

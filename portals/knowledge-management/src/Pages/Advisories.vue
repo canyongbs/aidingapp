@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, watch } from 'vue';
     import BaseBadge from '@common/BaseBadge.vue';
     import BaseButton from '@common/BaseButton.vue';
     import LoadingSpinner from '@common/LoadingSpinner.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
+    import { ref, watch } from 'vue';
     import { apiGet } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
     import { useAdvisoriesData } from './loaders.js';

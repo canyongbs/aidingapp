@@ -32,12 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { storeToRefs } from 'pinia';
-    import { computed, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { storeToRefs } from 'pinia';
+    import { computed, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import { useAuthStore } from '../Stores/auth.js';
     import { useServiceRequestTypesData } from './loaders.js';
 
@@ -206,7 +206,9 @@
                         <div class="flex items-center gap-x-3">
                             <div class="shrink-0">
                                 <!-- Folder icon for categories (neutral color) -->
-                                <div class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70">
+                                <div
+                                    class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
+                                >
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         fill="none"
@@ -229,7 +231,10 @@
                                     {{ category.name }}
                                 </h3>
                             </div>
-                            <span class="pointer-events-none text-white/60 group-hover:text-white/80" aria-hidden="true">
+                            <span
+                                class="pointer-events-none text-white/60 group-hover:text-white/80"
+                                aria-hidden="true"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -238,7 +243,11 @@
                                     stroke="currentColor"
                                     class="w-6 h-6"
                                 >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5 15.75 12 8.25 19.5" />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="M8.25 4.5 15.75 12 8.25 19.5"
+                                    />
                                 </svg>
                             </span>
                         </div>
@@ -252,7 +261,9 @@
                         <div class="flex items-center gap-x-3">
                             <div class="shrink-0">
                                 <!-- Type icon container; fall back to a document icon when no custom icon is provided -->
-                                <div class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600">
+                                <div
+                                    class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
+                                >
                                     <span v-if="type.icon" v-html="type.icon"></span>
                                     <svg
                                         v-else
@@ -286,7 +297,10 @@
                                 </h3>
                                 <p class="mt-2 text-sm text-gray-500">{{ type.description }}</p>
                             </div>
-                            <span class="pointer-events-none text-gray-300 group-hover:text-brand-600" aria-hidden="true">
+                            <span
+                                class="pointer-events-none text-gray-300 group-hover:text-brand-600"
+                                aria-hidden="true"
+                            >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
                                     fill="none"
@@ -295,7 +309,11 @@
                                     stroke="currentColor"
                                     class="w-6 h-6"
                                 >
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                                    />
                                 </svg>
                             </span>
                         </div>

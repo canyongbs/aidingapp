@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import AppLoading from '@common/portal/AppLoading.vue';
+    import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Article from '@common/portal/category/Article.vue';
     import SubCategories from '@common/portal/category/SubCategories.vue';
@@ -44,7 +44,6 @@
     import SearchResults from '@common/portal/SearchResults.vue';
     import Subheading from '@common/portal/Subheading.vue';
     import Tabs from '@common/portal/Tabs.vue';
-    import BaseButton from '@common/BaseButton.vue';
     import { DocumentTextIcon } from '@heroicons/vue/24/outline';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
@@ -132,7 +131,8 @@
             activeFilter.value,
             currentPage.value,
         ],
-        query: () => apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
+        query: () =>
+            apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
         enabled: () => !isDefaultView.value,
     });
 
@@ -248,9 +248,7 @@
                 <template #heading>Category Not Found</template>
                 <template #description>The category you are looking for does not exist or has been removed.</template>
                 <template #actions>
-                    <BaseButton :to="{ name: 'home' }" variant="outline">
-                        Return to Home
-                    </BaseButton>
+                    <BaseButton :to="{ name: 'home' }" variant="outline"> Return to Home </BaseButton>
                 </template>
             </EmptyState>
         </PageCard>
