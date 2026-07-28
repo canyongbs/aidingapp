@@ -36,22 +36,27 @@
 
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
+use AidingApp\ServiceManagement\Filament\Concerns\HasRichContentEmptyCheck;
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestTypesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use App\Enums\Feature;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\Collection as SupportCollection;
+use Illuminate\Support\Facades\Gate;
 
 class ApplyServiceRequestBaseTemplatesAction extends Action
 {
+    use HasRichContentEmptyCheck;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -59,10 +64,19 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
         $this
             ->label('Apply')
             ->icon('heroicon-m-arrow-down-on-square-stack')
+            ->authorize(function (): bool {
+                if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+                    return false;
+                }
+
+                $user = auth()->user();
+
+                return $user instanceof User && $user->isSuperAdmin();
+            })
             ->slideOver()
             ->modalHeading('Apply base templates')
+            ->modalDescription('Applying base templates will overwrite any existing customized templates for the affected service request type(s). This action cannot be undone.')
             ->modalSubmitActionLabel('Apply')
-            ->modalWidth(Width::Medium)
             ->schema([
                 ToggleButtons::make('apply_to')
                     ->label('Apply to')
@@ -164,7 +178,7 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
     {
         $now = now();
 
-        $baseTemplates = $baseTemplates->map(function ($baseTemplate) {
+        $baseTemplates = $baseTemplates->map(function (ServiceRequestNotificationAutomationEmailTemplate $baseTemplate) {
             return [
                 'type' => $baseTemplate->type->value,
                 'role' => $baseTemplate->role->value,
@@ -208,19 +222,5 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
     protected function encodeRichContent(?array $value): ?string
     {
         return is_null($value) ? null : json_encode($value);
-    }
-
-    protected function richContentHasContent(mixed $value): bool
-    {
-        if (! is_array($value)) {
-            return false;
-        }
-
-        $isEmpty = (($value['type'] ?? null) === 'doc')
-            && (count($value['content'] ?? []) === 1)
-            && (($value['content'][0]['type'] ?? null) === 'paragraph')
-            && blank($value['content'][0]['content'] ?? []);
-
-        return ! $isEmpty;
     }
 }

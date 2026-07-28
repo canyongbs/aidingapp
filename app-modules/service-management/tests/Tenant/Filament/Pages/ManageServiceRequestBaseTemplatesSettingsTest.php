@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplatesSettings;
 use App\Models\Authenticatable;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -354,4 +355,87 @@ test('it requires at least one selected service request type when applying to a 
             'service_request_type_ids' => [],
         ])
         ->assertHasFormErrors(['service_request_type_ids' => ['required']]);
+});
+
+test('it warns when there are no base templates with content to apply', function () {
+    asSuperAdmin();
+
+    $emptyDoc = [
+        'type' => 'doc',
+        'content' => [
+            ['type' => 'paragraph'],
+        ],
+    ];
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'subject' => $emptyDoc,
+        'body' => $emptyDoc,
+    ]);
+
+    ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertNotified('No base templates to apply');
+
+    expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
+});
+
+test('it warns when there are no service request types to apply templates to', function () {
+    asSuperAdmin();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    expect(ServiceRequestType::query()->exists())->toBeFalse();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertNotified('No service request types found');
+
+    expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
+});
+
+test('it prevents applying base templates when the service management feature is disabled', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = false;
+    $settings->save();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
+        ->assertForbidden();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
+});
+
+test('it prevents applying base templates for authenticated users who are not super admins', function () {
+    actingAs(User::factory()->create());
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
+        ->assertForbidden();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
 });

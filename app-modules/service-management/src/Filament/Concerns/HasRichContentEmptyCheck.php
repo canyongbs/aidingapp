@@ -34,33 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Tables;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-
-class ServiceRequestTypesTable
+trait HasRichContentEmptyCheck
 {
-    public static function configure(Table $table): Table
+    protected function richContentHasContent(mixed $value): bool
     {
-        return $table
-            ->query(fn (): Builder => ServiceRequestType::query())
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('description')
-                    ->label('Description')
-                    ->limit(60)
-                    ->tooltip(fn (?string $state): ?string => $state)
-                    ->searchable()
-                    ->toggleable(),
-            ])
-            ->defaultSort('name');
+        if (! is_array($value)) {
+            return false;
+        }
+
+        $isEmpty = (($value['type'] ?? null) === 'doc')
+            && (count($value['content'] ?? []) === 1)
+            && (($value['content'][0]['type'] ?? null) === 'paragraph')
+            && blank($value['content'][0]['content'] ?? []);
+
+        return ! $isEmpty;
     }
 }
