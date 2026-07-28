@@ -42,12 +42,14 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use AidingApp\Project\Observers\ProjectObserver;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -132,6 +134,20 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
+     * Combined list of users who manage this project, whether assigned
+     * directly or through membership in a manager department.
+     *
+     * @return Collection<int, User>
+     */
+    public function allManagers(): Collection
+    {
+        return $this->managerUsers
+            ->concat($this->managerDepartments->flatMap(fn (Department $department): Collection => $department->users))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
      * @return BelongsToMany<User, $this, ProjectAuditorUser>
      */
     public function auditorUsers(): BelongsToMany
@@ -202,5 +218,22 @@ class Project extends BaseModel implements Auditable
             ->morphedByMany(Organization::class, 'guest', 'project_guests', 'project_id', 'guest_id')
             ->using(ProjectGuest::class)
             ->withTimestamps();
+    }
+
+    /**
+     * Percentage of pipeline entries that have reached a "complete" classification
+     * stage, rounded to the nearest whole percent. Requires {@see WithProgressCounts}.
+     */
+    public function getProgressPercentage(): int
+    {
+        $totalEntries = (int) ($this->total_pipeline_entries_count ?? 0);
+
+        if ($totalEntries === 0) {
+            return 0;
+        }
+
+        $completeEntries = (int) ($this->complete_pipeline_entries_count ?? 0);
+
+        return (int) round(($completeEntries / $totalEntries) * 100);
     }
 }

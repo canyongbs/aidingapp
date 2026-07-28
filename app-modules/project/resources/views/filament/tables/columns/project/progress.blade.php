@@ -31,36 +31,6 @@
     
     </COPYRIGHT>
 --}}
-
-@props([
-    'user',
-    'showName' => true,
-    'size' => 'md',
-])
-@php
-    use Filament\Facades\Filament;
-
-    $imageSizeClasses = match ($size) {
-        'sm' => 'h-8 w-8',
-        default => 'h-12 w-12',
-    };
-@endphp
-
-<div
-    class="flex shrink-0 flex-col items-center gap-1"
-    x-tooltip="{
-        content: @js($user->name),
-        theme: $store.theme,
-    }"
->
-    <img
-        src="{{ Filament::getUserAvatarUrl($user) }}"
-        alt="{{ $user->name }}"
-        class="{{ $imageSizeClasses }} rounded-full object-cover ring-2 ring-white dark:ring-gray-800"
-    />
-    @if ($showName)
-        <span class="max-w-16 truncate text-xs text-gray-600 dark:text-gray-400">
-            {{ str($user->name)->before(' ') }}
-        </span>
-    @endif
+<div class="fi-ta-text">
+    <x-project::progress-circle :progress="$getState()" />
 </div>
