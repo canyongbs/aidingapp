@@ -36,18 +36,16 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
-use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Contracts\HasSchemas;
 use Filament\Widgets\Widget;
-use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\On;
 
@@ -86,22 +84,11 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
 
     public function getProgress(): int
     {
-        $entries = PipelineEntry::query()
-            ->whereHas(
-                'pipelineStage.pipeline',
-                fn (Builder $query) => $query->where('project_id', $this->record->getKey()),
-            );
-
-        $totalEntriesCount = $entries->clone()->count();
-
-        $completeEntriesCount = $entries->clone()
-            ->whereHas(
-                'pipelineStage',
-                fn (Builder $query) => $query->where('classification', PipelineStageClassification::Complete->value),
-            )
-            ->count();
-
-        return Project::calculateProgressPercentage($totalEntriesCount, $completeEntriesCount);
+        return Project::query()
+            ->tap(new WithProgressCounts())
+            ->whereKey($this->record->getKey())
+            ->first()
+            ?->getProgressPercentage() ?? 0;
     }
 
     /**

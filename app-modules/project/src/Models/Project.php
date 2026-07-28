@@ -42,6 +42,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Database\Factories\ProjectFactory;
 use AidingApp\Project\Models\Scopes\ProjectVisibilityScope;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use AidingApp\Project\Observers\ProjectObserver;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -220,14 +221,18 @@ class Project extends BaseModel implements Auditable
     }
 
     /**
-     * Calculates the percentage of pipeline entries that have reached a
-     * "complete" classification stage, rounded to the nearest whole percent.
+     * Percentage of pipeline entries that have reached a "complete" classification
+     * stage, rounded to the nearest whole percent. Requires {@see WithProgressCounts}.
      */
-    public static function calculateProgressPercentage(int $totalEntries, int $completeEntries): int
+    public function getProgressPercentage(): int
     {
+        $totalEntries = (int) ($this->total_pipeline_entries_count ?? 0);
+
         if ($totalEntries === 0) {
             return 0;
         }
+
+        $completeEntries = (int) ($this->complete_pipeline_entries_count ?? 0);
 
         return (int) round(($completeEntries / $totalEntries) * 100);
     }

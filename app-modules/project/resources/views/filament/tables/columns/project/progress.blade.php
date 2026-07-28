@@ -31,18 +31,6 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\Project\Models\Project;
-
-    /** @var Project $record */
-    $record = $getRecord();
-
-    $progress = Project::calculateProgressPercentage(
-        (int) ($record->total_pipeline_entries_count ?? 0),
-        (int) ($record->complete_pipeline_entries_count ?? 0),
-    );
-@endphp
-
-<div class="px-3 py-4">
-    <x-project::progress-circle :progress="$progress" />
+<div class="fi-ta-text">
+    <x-project::progress-circle :progress="$getState()" />
 </div>

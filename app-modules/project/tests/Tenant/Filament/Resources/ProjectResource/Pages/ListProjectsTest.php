@@ -37,6 +37,8 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
@@ -44,6 +46,7 @@ use AidingApp\Project\Models\Project;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Filament\Tables\Columns\Column;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -216,51 +219,89 @@ it('displays project name, manager(s), department, start date, target date, and 
     asSuperAdmin();
 
     $department = Department::factory()->create(['name' => 'Enrollment']);
-    $manager = User::factory()->create(['name' => 'Casey Manager']);
 
-    $project = Project::factory()->create([
-        'department_id' => $department->getKey(),
-        'start_date' => '2026-01-15',
-        'target_completion_date' => null,
-    ]);
-
-    $project->managerUsers()->attach($manager->getKey());
+    $project = Project::factory()
+        ->for($department)
+        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->create([
+            'start_date' => '2026-01-15',
+            'target_completion_date' => null,
+        ]);
 
     $pipeline = Pipeline::factory()->for($project)->create();
-    $completeStage = PipelineStage::factory()->for($pipeline)->create([
-        'classification' => PipelineStageClassification::Complete,
-    ]);
-    $planningStage = PipelineStage::factory()->for($pipeline)->create([
-        'classification' => PipelineStageClassification::Planning,
-    ]);
-    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $completeStage->getKey()]);
-    PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $planningStage->getKey()]);
+
+    PipelineEntry::factory()
+        ->for(
+            PipelineStage::factory()->for($pipeline)->state(['classification' => PipelineStageClassification::Complete]),
+            'pipelineStage',
+        )
+        ->create();
+
+    PipelineEntry::factory()
+        ->for(
+            PipelineStage::factory()->for($pipeline)->state(['classification' => PipelineStageClassification::Planning]),
+            'pipelineStage',
+        )
+        ->create();
 
     livewire(ListProjects::class)
         ->assertSuccessful()
-        ->assertSee('Project Name')
-        ->assertSee('Manager(s)')
-        ->assertSee('Department')
-        ->assertSee('Start Date')
-        ->assertSee('Target Date')
-        ->assertSee('Progress')
-        ->assertSee('Casey Manager')
-        ->assertSee('Enrollment')
-        ->assertSee('Indefinite')
-        ->assertSee('Progress: 50%');
+        ->assertCanSeeTableRecords([$project])
+        ->assertTableColumnExists('name', fn (Column $column): bool => $column->getLabel() === 'Project Name')
+        ->assertTableColumnExists('managers', fn (Column $column): bool => $column->getLabel() === 'Manager(s)')
+        ->assertTableColumnExists('department.name', fn (Column $column): bool => $column->getLabel() === 'Department')
+        ->assertTableColumnExists('start_date', fn (Column $column): bool => $column->getLabel() === 'Start Date')
+        ->assertTableColumnExists('target_completion_date', fn (Column $column): bool => $column->getLabel() === 'Target Date')
+        ->assertTableColumnExists('progress', fn (Column $column): bool => $column->getLabel() === 'Progress')
+        ->assertTableColumnStateSet('name', $project->name, $project)
+        ->assertTableColumnHasDescription('name', $project->description, $project)
+        ->assertTableColumnStateSet('department.name', 'Enrollment', $project)
+        ->assertTableColumnStateSet('start_date', $project->start_date, $project)
+        ->assertTableColumnStateSet('target_completion_date', null, $project)
+        ->assertTableColumnStateSet('progress', 50, $project)
+        ->assertTableColumnExists(
+            'managers',
+            fn (Column $column): bool => $column->getState()->pluck('name')->all() === ['Casey Manager'],
+            $project,
+        )
+        ->assertTableColumnExists(
+            'target_completion_date',
+            fn (Column $column): bool => $column->getPlaceholder() === 'Indefinite',
+            $project,
+        )
+        ->assertTableColumnDoesNotExist('files_count')
+        ->assertTableColumnDoesNotExist('pipelines_count')
+        ->assertTableColumnDoesNotExist('milestones_count');
 });
 
 it('shows N/A when a project has no managers, no department, or no start date', function () {
     asSuperAdmin();
 
-    Project::factory()->create([
+    $project = Project::factory()->create([
         'department_id' => null,
         'start_date' => null,
     ]);
 
     livewire(ListProjects::class)
         ->assertSuccessful()
-        ->assertSeeHtml('N/A');
+        ->assertCanSeeTableRecords([$project])
+        ->assertTableColumnStateSet('department.name', null, $project)
+        ->assertTableColumnStateSet('start_date', null, $project)
+        ->assertTableColumnExists(
+            'department.name',
+            fn (Column $column): bool => $column->getPlaceholder() === 'N/A',
+            $project,
+        )
+        ->assertTableColumnExists(
+            'start_date',
+            fn (Column $column): bool => $column->getPlaceholder() === 'N/A',
+            $project,
+        )
+        ->assertTableColumnExists(
+            'managers',
+            fn (Column $column): bool => $column->getState()->isEmpty(),
+            $project,
+        );
 });
 
 it('can search projects by project name, manager name, and department name', function () {
@@ -272,18 +313,14 @@ it('can search projects by project name, manager name, and department name', fun
     $matchingByManager->managerUsers()->attach($manager->getKey());
 
     $department = Department::factory()->create(['name' => 'Searchable Department']);
-    $matchingByDepartment = Project::factory()->create([
-        'name' => 'Another Project',
-        'department_id' => $department->getKey(),
-    ]);
+    $matchingByDepartment = Project::factory()->for($department)->create(['name' => 'Another Project']);
 
     $otherDepartment = Department::factory()->create(['name' => 'Other Department']);
-    $departmentManagerUser = User::factory()->create([
-        'name' => 'Taylor Delegate',
-        'department_id' => $otherDepartment->getKey(),
-    ]);
-    $matchingByDepartmentManager = Project::factory()->create(['name' => 'Yet Another Project']);
-    $matchingByDepartmentManager->managerDepartments()->attach($otherDepartment->getKey());
+    User::factory()->for($otherDepartment)->create(['name' => 'Taylor Delegate']);
+
+    $matchingByDepartmentManager = Project::factory()
+        ->hasAttached($otherDepartment, relationship: 'managerDepartments')
+        ->create(['name' => 'Yet Another Project']);
 
     $notMatching = Project::factory()->create(['name' => 'Completely Different']);
 
@@ -306,22 +343,155 @@ it('can search projects by project name, manager name, and department name', fun
         ->searchTable('taylor delegate')
         ->assertCanSeeTableRecords([$matchingByDepartmentManager])
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
-
-    expect($departmentManagerUser)->not->toBeNull();
 });
 
-it('ranks project name matches above manager or department matches when searching', function () {
+it('shows the same managers on the list as the project dashboard', function () {
     asSuperAdmin();
+
+    $department = Department::factory()
+        ->has(User::factory()->count(2), 'users')
+        ->create();
+
+    $project = Project::factory()
+        ->hasAttached(User::factory()->count(2), relationship: 'managerUsers')
+        ->hasAttached($department, relationship: 'managerDepartments')
+        ->create();
+
+    $dashboardManagers = livewire(ProjectAccessWidget::class, ['record' => $project])
+        ->instance()
+        ->managers()
+        ->pluck('id')
+        ->sort()
+        ->values()
+        ->all();
+
+    expect($dashboardManagers)->toHaveCount(4);
+
+    livewire(ListProjects::class)
+        ->assertTableColumnExists(
+            'managers',
+            fn (Column $column): bool => $column->getState()->pluck('id')->sort()->values()->all() === $dashboardManagers,
+            $project,
+        );
+});
+
+it('shows the same progress on the list as the project dashboard', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    PipelineEntry::factory()
+        ->count(3)
+        ->for(
+            PipelineStage::factory()->for($pipeline)->state(['classification' => PipelineStageClassification::Planning]),
+            'pipelineStage',
+        )
+        ->create();
+
+    PipelineEntry::factory()
+        ->for(
+            PipelineStage::factory()->for($pipeline)->state(['classification' => PipelineStageClassification::Complete]),
+            'pipelineStage',
+        )
+        ->create();
+
+    $dashboardProgress = livewire(ProjectDashboardHeaderWidget::class, ['record' => $project])
+        ->instance()
+        ->getProgress();
+
+    expect($dashboardProgress)->toBe(25);
+
+    livewire(ListProjects::class)
+        ->assertTableColumnStateSet('progress', $dashboardProgress, $project);
+});
+
+it('ranks a project named Test above a project managed by someone named Test', function () {
+    asSuperAdmin();
+
+    $managedByTest = Project::factory()
+        ->hasAttached(User::factory()->state(['name' => 'Test']), relationship: 'managerUsers')
+        ->create(['name' => 'Something Else']);
 
     $namedTest = Project::factory()->create(['name' => 'Test']);
 
-    $managerNamedTest = User::factory()->create(['name' => 'Test']);
-    $projectWithManagerNamedTest = Project::factory()->create(['name' => 'Something Else']);
-    $projectWithManagerNamedTest->managerUsers()->attach($managerNamedTest->getKey());
+    livewire(ListProjects::class)
+        ->searchTable('Test')
+        ->assertCanSeeTableRecords([$namedTest, $managedByTest], inOrder: true);
+});
+
+it('ranks project name matches above manager matches, and manager matches above department matches, when searching', function () {
+    asSuperAdmin();
+
+    $matchingByDepartment = Project::factory()
+        ->for(Department::factory()->state(['name' => 'Test Department']))
+        ->create(['name' => 'Gamma']);
+
+    $matchingByManager = Project::factory()
+        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->create(['name' => 'Beta']);
+
+    $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
 
     livewire(ListProjects::class)
         ->searchTable('Test')
-        ->assertCanSeeTableRecords([$namedTest, $projectWithManagerNamedTest], inOrder: true);
+        ->assertCanSeeTableRecords(
+            [$matchingByName, $matchingByManager, $matchingByDepartment],
+            inOrder: true,
+        );
+});
+
+it('ranks project name matches first when the search words are given in another order', function () {
+    asSuperAdmin();
+
+    $matchingByManager = Project::factory()
+        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->create(['name' => 'Alpha']);
+
+    $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Onboarding Manager']);
+
+    livewire(ListProjects::class)
+        ->searchTable('Manager Casey')
+        ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
+});
+
+it('ranks project name matches first when the search is a quoted phrase', function () {
+    asSuperAdmin();
+
+    $matchingByManager = Project::factory()
+        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->create(['name' => 'Alpha']);
+
+    $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Manager Report']);
+
+    livewire(ListProjects::class)
+        ->searchTable('"Casey Manager"')
+        ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
+});
+
+it('does not fail when the search contains no searchable words', function () {
+    asSuperAdmin();
+
+    Project::factory()->create(['name' => 'Alpha']);
+
+    livewire(ListProjects::class)
+        ->searchTable('""')
+        ->assertSuccessful();
+});
+
+it('sorts by the selected column instead of search relevance when a sort is applied', function () {
+    asSuperAdmin();
+
+    $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
+
+    $matchingByManager = Project::factory()
+        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->create(['name' => 'Zulu Project']);
+
+    livewire(ListProjects::class)
+        ->searchTable('Test')
+        ->sortTable('name', 'desc')
+        ->assertCanSeeTableRecords([$matchingByManager, $matchingByName], inOrder: true);
 });
 
 it('can filter projects by department', function () {
@@ -330,8 +500,8 @@ it('can filter projects by department', function () {
     $department = Department::factory()->create();
     $otherDepartment = Department::factory()->create();
 
-    $projectInDepartment = Project::factory()->create(['department_id' => $department->getKey()]);
-    $projectInOtherDepartment = Project::factory()->create(['department_id' => $otherDepartment->getKey()]);
+    $projectInDepartment = Project::factory()->for($department)->create();
+    $projectInOtherDepartment = Project::factory()->for($otherDepartment)->create();
 
     livewire(ListProjects::class)
         ->assertCanSeeTableRecords([$projectInDepartment, $projectInOtherDepartment])

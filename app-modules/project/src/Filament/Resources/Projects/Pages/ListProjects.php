@@ -36,10 +36,9 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -52,6 +51,7 @@ use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 class ListProjects extends ListRecords
 {
@@ -71,6 +71,8 @@ class ListProjects extends ListRecords
                     ->sortable(),
                 ViewColumn::make('managers')
                     ->label('Manager(s)')
+                    ->state(fn (Project $record): Collection => $record->allManagers())
+                    ->default(fn (): Collection => new Collection())
                     ->view('project::filament.tables.columns.project.managers')
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query
@@ -100,63 +102,85 @@ class ListProjects extends ListRecords
                     ->placeholder('Indefinite'),
                 ViewColumn::make('progress')
                     ->label('Progress')
+                    ->state(fn (Project $record): int => $record->getProgressPercentage())
                     ->view('project::filament.tables.columns.project.progress'),
             ])
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
-                $query->with(['managerUsers', 'managerDepartments.users', 'department']);
-
-                $query->addSelect([
-                    'total_pipeline_entries_count' => PipelineEntry::query()
-                        ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
-                        ->join('pipelines', 'pipelines.id', '=', 'pipeline_stages.pipeline_id')
-                        ->whereColumn('pipelines.project_id', 'projects.id')
-                        ->selectRaw('count(*)'),
-                    'complete_pipeline_entries_count' => PipelineEntry::query()
-                        ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
-                        ->join('pipelines', 'pipelines.id', '=', 'pipeline_stages.pipeline_id')
-                        ->whereColumn('pipelines.project_id', 'projects.id')
-                        ->where('pipeline_stages.classification', PipelineStageClassification::Complete->value)
-                        ->selectRaw('count(*)'),
-                ]);
+                $query
+                    ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
+                    ->tap(new WithProgressCounts());
 
                 $search = $livewire->getTableSearch();
 
-                if (blank($search)) {
+                if (blank($search) || filled($livewire->getTableSortColumn())) {
                     return $query;
                 }
 
-                $likeSearch = "%{$search}%";
+                $bindings = [];
+
+                $searchWords = array_filter(
+                    str_getcsv(
+                        preg_replace('/(\s|\x{3164}|\x{1160})+/u', ' ', $search),
+                        separator: ' ',
+                        escape: '\\',
+                    ),
+                    fn (?string $word): bool => filled($word),
+                );
+
+                if (empty($searchWords)) {
+                    return $query;
+                }
+
+                $matchesEveryWord = function (string $column) use ($searchWords, &$bindings): string {
+                    $conditions = [];
+
+                    foreach ($searchWords as $word) {
+                        $conditions[] = "{$column} ILIKE ?";
+                        $bindings[] = '%' . $word . '%';
+                    }
+
+                    return implode(' AND ', $conditions);
+                };
+
+                $nameMatch = $matchesEveryWord('projects.name');
+                $managerUserMatch = $matchesEveryWord('users.name');
+                $managerDepartmentUserMatch = $matchesEveryWord('users.name');
+                $departmentMatch = $matchesEveryWord('departments.name');
 
                 return $query
                     ->selectRaw(
-                        <<<'SQL'
+                        <<<SQL
                         CASE
-                            WHEN projects.name ILIKE ? THEN 0
+                            WHEN {$nameMatch} THEN 0
                             WHEN EXISTS (
                                 SELECT 1
                                 FROM project_manager_users
                                 INNER JOIN users ON users.id = project_manager_users.user_id
                                 WHERE project_manager_users.project_id = projects.id
-                                AND users.name ILIKE ?
+                                AND users.deleted_at IS NULL
+                                AND ({$managerUserMatch})
                             ) THEN 1
                             WHEN EXISTS (
                                 SELECT 1
                                 FROM project_manager_departments
                                 INNER JOIN users ON users.department_id = project_manager_departments.department_id
                                 WHERE project_manager_departments.project_id = projects.id
-                                AND users.name ILIKE ?
+                                AND users.deleted_at IS NULL
+                                AND ({$managerDepartmentUserMatch})
                             ) THEN 1
-                            WHEN (
-                                SELECT name
+                            WHEN EXISTS (
+                                SELECT 1
                                 FROM departments
                                 WHERE departments.id = projects.department_id
-                            ) ILIKE ? THEN 2
+                                AND ({$departmentMatch})
+                            ) THEN 2
                             ELSE 3
                         END AS search_rank
                         SQL,
-                        [$likeSearch, $likeSearch, $likeSearch, $likeSearch],
+                        $bindings,
                     )
-                    ->orderBy('search_rank');
+                    ->orderBy('search_rank')
+                    ->orderBy('projects.name');
             })
             ->filters([
                 SelectFilter::make('department')

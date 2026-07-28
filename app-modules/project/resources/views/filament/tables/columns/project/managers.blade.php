@@ -32,19 +32,17 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\Project\Models\Project;
-
-    /** @var Project $record */
-    $record = $getRecord();
-    $managers = $record->allManagers();
+    $managers = $getState();
 @endphp
 
 @if ($managers->isNotEmpty())
-    <div class="flex flex-wrap items-center gap-1 px-3 py-4">
+    <div class="fi-ta-text flex flex-wrap items-center gap-1">
         @foreach ($managers as $user)
             <x-project::avatar :user="$user" :show-name="false" size="sm" />
         @endforeach
     </div>
 @else
-    <span class="px-3 py-4 text-sm text-gray-500 dark:text-gray-400">N/A</span>
+    <div class="fi-ta-text">
+        <span class="fi-ta-placeholder">N/A</span>
+    </div>
 @endif
