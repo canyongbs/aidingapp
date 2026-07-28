@@ -345,6 +345,28 @@ it('can search projects by project name, manager name, and department name', fun
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
 });
 
+it('caps the manager avatars it renders but keeps every manager searchable', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()
+        ->hasAttached(User::factory()->count(24), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['name' => 'Wilhelmina Ashgrove']), relationship: 'managerUsers')
+        ->create(['name' => 'Crowded Project']);
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->assertTableColumnExists(
+            'managers',
+            fn (Column $column): bool => $column->getState()->count() === 25,
+            $project,
+        )
+        ->assertSeeHtml('+20');
+
+    livewire(ListProjects::class)
+        ->searchTable('Wilhelmina Ashgrove')
+        ->assertCanSeeTableRecords([$project]);
+});
+
 it('shows the same managers on the list as the project dashboard', function () {
     asSuperAdmin();
 

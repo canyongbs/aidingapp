@@ -32,14 +32,30 @@
     </COPYRIGHT>
 --}}
 @php
+    $visibleManagerLimit = 5;
+
     $managers = $getState();
+    $visibleManagers = $managers->take($visibleManagerLimit);
+    $hiddenManagers = $managers->skip($visibleManagerLimit);
 @endphp
 
 @if ($managers->isNotEmpty())
-    <div class="fi-ta-text flex flex-wrap items-center gap-1">
-        @foreach ($managers as $user)
+    <div class="fi-ta-text flex items-center gap-1">
+        @foreach ($visibleManagers as $user)
             <x-project::avatar :user="$user" :show-name="false" size="sm" />
         @endforeach
+
+        @if ($hiddenManagers->isNotEmpty())
+            <div
+                class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600 ring-2 ring-white dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800"
+                x-tooltip="{
+                    content: @js($hiddenManagers->pluck('name')->implode(', ')),
+                    theme: $store.theme,
+                }"
+            >
+                +{{ $hiddenManagers->count() }}
+            </div>
+        @endif
     </div>
 @else
     <div class="fi-ta-text">

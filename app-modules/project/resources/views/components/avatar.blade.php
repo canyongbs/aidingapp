@@ -47,7 +47,7 @@
 @endphp
 
 <div
-    class="flex flex-col items-center gap-1"
+    class="flex shrink-0 flex-col items-center gap-1"
     x-tooltip="{
         content: @js($user->name),
         theme: $store.theme,
