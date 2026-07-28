@@ -70,8 +70,9 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
                 }
 
                 $user = auth()->user();
+                assert($user instanceof User);
 
-                return $user instanceof User && $user->isSuperAdmin();
+                return $user->isSuperAdmin();
             })
             ->slideOver()
             ->modalHeading('Apply base templates')
