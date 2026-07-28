@@ -38,7 +38,6 @@ export default {
     content: [
         './src/**/*.vue',
         './src/**/*.js',
-        '../../resources/js/components/**/*.vue',
         '../../vendor/canyongbs/common/resources/js/components/**/*.vue',
     ],
 };

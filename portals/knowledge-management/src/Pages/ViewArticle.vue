@@ -33,7 +33,6 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
-    import AppLoading from '@common/portal/AppLoading.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
@@ -44,37 +43,41 @@
     import ArticleFeedback from '@common/portal/article/ArticleFeedback.vue';
     import ArticleMeta from '@common/portal/article/ArticleMeta.vue';
     import truncate from 'lodash/truncate';
-    import { computed, defineProps, ref, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import { consumer } from '../Services/Consumer.js';
+    import { apiPost } from '../Services/api.js';
+    import { useArticleData } from './loaders.js';
 
     const route = useRoute();
     const router = useRouter();
 
-    const { get, post } = consumer();
+    const { data: articleData } = useArticleData();
 
-    const props = defineProps({
-        searchUrl: {
-            type: String,
-            required: true,
-        },
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-        categories: {
-            type: Object,
-            required: true,
-        },
-    });
+    const category = computed(() => articleData.value?.category ?? null);
+    const article = computed(() => articleData.value?.article ?? null);
+    const parentCategory = computed(() => articleData.value?.category?.parentCategory ?? null);
+    const portalViewCount = computed(() => articleData.value?.portal_view_count ?? 0);
 
-    const loading = ref(true);
-    const category = ref(null);
-    const article = ref(null);
-    const portalViewCount = ref(0);
     const feedback = ref(null);
     const helpfulVotePercentage = ref(0);
-    const parentCategory = ref(null);
+
+    watch(
+        articleData,
+        (data) => {
+            feedback.value = data?.article?.vote ? data.article.vote.is_helpful : null;
+            helpfulVotePercentage.value = data?.helpful_vote_percentage ?? 0;
+
+            // The API may resolve to a canonical category slug for the article; keep the
+            // URL in sync without triggering a fresh navigation/loader run.
+            if (data?.category && data.category.slug !== route.params.categorySlug) {
+                router.replace({
+                    name: 'view-article',
+                    params: { categorySlug: data.category.slug, articleId: route.params.articleId },
+                });
+            }
+        },
+        { immediate: true },
+    );
 
     const breadcrumbs = computed(() => {
         if (article.value && category.value) {
@@ -102,86 +105,30 @@
         return [];
     });
 
-    const currentCrumb = computed(() => {
-        return article.value
-            ? truncate(article.value.name, {
-                  length: 16,
-              })
-            : 'Not Found';
-    });
+    const currentCrumb = computed(() => (article.value ? truncate(article.value.name, { length: 16 }) : 'Not Found'));
 
-    watch(
-        route,
-        function (newRouteValue) {
-            getData();
-        },
-        {
-            immediate: true,
-        },
-    );
-
-    function getData() {
-        loading.value = true;
-
-        get(props.apiUrl + '/categories/' + route.params.categorySlug + '/articles/' + route.params.articleId)
-            .then((response) => {
-                if (response.data) {
-                    if (response.data.category.slug !== route.params.categorySlug) {
-                        router.replace({
-                            name: 'view-article',
-                            params: {
-                                categorySlug: response.data.category.slug,
-                                articleId: route.params.articleId,
-                            },
-                        });
-                    }
-
-                    category.value = response.data.category;
-                    article.value = response.data.article;
-                    parentCategory.value = response.data.category.parentCategory;
-                    portalViewCount.value = response.data.portal_view_count;
-                    feedback.value = response.data.article.vote ? response.data.article.vote.is_helpful : null;
-                    helpfulVotePercentage.value = response.data.helpful_vote_percentage;
-                }
-
-                loading.value = false;
-            })
-            .catch((error) => {
-                if (error.response && (error.response.status === 401 || error.response.status === 404)) {
-                    loading.value = false;
-                } else {
-                    console.log('An error occurred', error);
-                }
-            });
-    }
     async function toggleFeedback(type) {
-        await post(props.apiUrl + '/knowledge_base_article_vote/store', {
-            article_vote: feedback.value === type ? null : type,
-            article_id: route.params.articleId,
-        })
-            .then((response) => {
-                if (response.status === 200) {
-                    if (response.data.hasOwnProperty('is_helpful') && response.data.is_helpful !== null) {
-                        feedback.value = response.data.is_helpful;
-                    } else {
-                        feedback.value = null;
-                    }
-                }
-
-                helpfulVotePercentage.value = response.data.helpful_vote_percentage;
-            })
-            .catch((error) => {
-                console.error('Error submitting feedback:', error);
+        try {
+            const data = await apiPost('/knowledge_base_article_vote/store', {
+                article_vote: feedback.value === type ? null : type,
+                article_id: route.params.articleId,
             });
+
+            if (data.hasOwnProperty('is_helpful') && data.is_helpful !== null) {
+                feedback.value = data.is_helpful;
+            } else {
+                feedback.value = null;
+            }
+
+            helpfulVotePercentage.value = data.helpful_vote_percentage;
+        } catch (error) {
+            console.error('Error submitting feedback:', error);
+        }
     }
 </script>
 
 <template>
-    <div v-if="loading">
-        <AppLoading />
-    </div>
-
-    <Page v-if="!loading && category && article">
+    <Page v-if="category && article">
         <template #heading>
             {{ article.name }}
         </template>
@@ -213,7 +160,7 @@
         </PageCard>
     </Page>
 
-    <Page v-if="!loading && (!category || !article)">
+    <Page v-if="!category || !article">
         <template #heading> 404 Not Found </template>
 
         <PageCard>

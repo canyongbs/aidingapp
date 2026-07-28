@@ -32,40 +32,31 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, onMounted, ref } from 'vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
-    import Page from '../Components/Page.vue';
-    import Pagination from '../Components/Pagination.vue';
+    import BaseButton from '@common/BaseButton.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
+    import Page from '@common/portal/Page.vue';
+    import Pagination from '@common/portal/Pagination.vue';
+    import { computed, ref, watch } from 'vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
-    import { consumer } from '../Services/Consumer.js';
+    import { apiGet } from '../Services/api.js';
+    import { useServiceMonitorData } from './loaders.js';
 
-    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
+    // Page 1 arrives via the route data loader; subsequent pages are fetched on demand.
+    const { data: initialData } = useServiceMonitorData();
 
     const result = ref([]);
-    const { get } = consumer();
-    const loading = ref(true);
+    const loading = ref(false);
 
     const currentPage = ref(1);
-    const nextPageUrl = ref(null);
-    const prevPageUrl = ref(null);
-    const lastPage = ref(null);
+    const lastPage = ref(1);
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
 
-    const props = defineProps({
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-    });
-
     const okTitle = 'All systems operational';
     const okMessage =
         'All systems are functioning seamlessly, with no disruptions or downtime reported. Every component, from critical infrastructure to auxiliary services is running at full capacity, ensuring optimal performance and reliability.';
-
     const issueTitle = 'Some systems are experiencing issues';
     const issueMessage = 'One or more services are currently experiencing disruptions or downtime.';
 
@@ -78,58 +69,52 @@
     const systemTitle = computed(() => (hasIssues.value ? issueTitle : okTitle));
     const systemMessage = computed(() => (hasIssues.value ? issueMessage : okMessage));
 
-    const setPagination = (pagination) => {
+    function setPagination(pagination) {
         currentPage.value = pagination.current_page;
-        prevPageUrl.value = pagination.prev_page_url;
-        nextPageUrl.value = pagination.next_page_url;
         lastPage.value = pagination.last_page;
         totalArticles.value = pagination.total;
         fromArticle.value = pagination.from;
         toArticle.value = pagination.to;
-    };
+    }
 
-    const fetchNextPage = () => {
-        loading.value = true;
-        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getServiceMonitors(currentPage.value);
-    };
-
-    const fetchPreviousPage = () => {
-        loading.value = true;
-        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getServiceMonitors(currentPage.value);
-    };
-
-    const fetchPage = (page) => {
-        loading.value = true;
-        getServiceMonitors(page);
-    };
-
-    async function fetchData(page = 1) {
-        const response = await get(`${props.apiUrl}/status?page=${page}`);
-
-        if (response.error) {
-            throw new Error(response.error);
+    function applyResponse(response) {
+        if (!response) {
+            return;
         }
 
-        return response.data;
+        result.value = response.data;
+        setPagination(response.meta);
     }
+
+    watch(initialData, applyResponse, { immediate: true });
 
     async function getServiceMonitors(page = 1) {
-        await fetchData(page)
-            .then((response) => {
-                loading.value = false;
-                result.value = response.data;
-                setPagination(response.meta);
-            })
-            .catch((error) => {
-                console.error('Error fetching service monitors:', error);
-            });
+        loading.value = true;
+
+        try {
+            applyResponse(await apiGet('/status', { page }));
+        } catch (error) {
+            console.error('Error fetching service monitors:', error);
+        } finally {
+            loading.value = false;
+        }
     }
 
-    onMounted(async () => {
-        getServiceMonitors();
-    });
+    function fetchNextPage() {
+        if (currentPage.value < lastPage.value) {
+            getServiceMonitors(currentPage.value + 1);
+        }
+    }
+
+    function fetchPreviousPage() {
+        if (currentPage.value > 1) {
+            getServiceMonitors(currentPage.value - 1);
+        }
+    }
+
+    function fetchPage(page) {
+        getServiceMonitors(page);
+    }
 </script>
 
 <template>

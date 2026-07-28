@@ -32,13 +32,12 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { defineProps, ref, watch } from 'vue';
+    import { ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
-    import AppLoading from '../Components/AppLoading.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import Page from '../Components/Page.vue';
-    import Pagination from '../Components/Pagination.vue';
+    import BaseBadge from '@common/BaseBadge.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Page from '@common/portal/Page.vue';
+    import Pagination from '@common/portal/Pagination.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';
@@ -47,29 +46,20 @@
     import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
     import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
     import BaseTableRow from '../Components/ui/BaseTableRow.vue';
-    import { consumer } from '../Services/Consumer.js';
+    import { apiGet, apiPost, getApiBaseUrl } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
+    import { useServiceRequestData } from './loaders.js';
 
     const route = useRoute();
 
-    const props = defineProps({
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-        serviceRequest: {
-            type: Object,
-            required: true,
-        },
-        serviceRequestUpdates: {
-            type: Array,
-            required: true,
-        },
-    });
+    // The current service request (page 1 of its updates) arrives via the route data
+    // loader; paginating the updates fetches on demand.
+    const { data: initialData } = useServiceRequestData();
+
+    const uploadUrl = getApiBaseUrl() + '/service-request/request-upload-url';
 
     const serviceRequest = ref(null);
     const serviceRequestUpdates = ref([]);
-    const loadingResults = ref(false);
     const authorizationError = ref(null);
     const currentPage = ref(1);
     const nextPageUrl = ref(null);
@@ -92,38 +82,26 @@
         toRecord.value = pagination.to;
     };
 
-    watch(
-        route.params.serviceRequestId,
-        function (newRouteValue) {
-            getData();
-        },
-        {
-            immediate: true,
-        },
-    );
-
-    function getData(page = 1, fromPagination = false) {
-        if (!fromPagination) {
-            loadingResults.value = true;
+    function applyResponse(response) {
+        if (!response) {
+            return;
         }
 
-        const { get } = consumer();
+        serviceRequest.value = response.serviceRequestDetails;
+        serviceRequestUpdates.value = response.serviceRequestUpdates.data || [];
+        acceptedMimeTypes.value = response.acceptedMimeTypes || [];
+        setPagination(response.serviceRequestUpdates);
+    }
 
-        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
-            serviceRequest.value = response.data.serviceRequestDetails;
-            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
-            acceptedMimeTypes.value = response.data.acceptedMimeTypes || [];
-            if (!fromPagination) {
-                loadingResults.value = false;
-            }
-            setPagination(response.data.serviceRequestUpdates);
-        });
+    watch(initialData, applyResponse, { immediate: true });
+
+    function getData(page = 1) {
+        apiGet('/service-request/' + route.params.serviceRequestId, { page }).then(applyResponse);
     }
 
     async function submitUpdate(formValues, node) {
         try {
             isSubmitting.value = true;
-            const { post } = consumer();
 
             let data = {
                 description: formValues.description,
@@ -134,14 +112,10 @@
                 data.files = formValues.files;
             }
 
-            const response = await post(props.apiUrl + '/service-request-update/store', data, {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-            });
+            const response = await apiPost('/service-request-update/store', data);
 
-            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
-            setPagination(response.data.serviceRequestUpdates);
+            serviceRequestUpdates.value = response.serviceRequestUpdates.data || [];
+            setPagination(response.serviceRequestUpdates);
 
             updateFormKey.value++;
         } catch (error) {
@@ -159,17 +133,17 @@
 
     const fetchNextPage = () => {
         currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getData(currentPage.value, true);
+        getData(currentPage.value);
     };
 
     const fetchPreviousPage = () => {
         currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getData(currentPage.value, true);
+        getData(currentPage.value);
     };
 
     const fetchPage = (page) => {
         currentPage.value = page;
-        getData(currentPage.value, true);
+        getData(currentPage.value);
     };
 
     const breadcrumbs = [
@@ -182,11 +156,7 @@
 </script>
 
 <template>
-    <div v-if="loadingResults">
-        <AppLoading />
-    </div>
-
-    <Page v-else>
+    <Page v-if="serviceRequest">
         <template #heading>Service Request Details</template>
         <template #description> View the details and status of your request </template>
 
@@ -271,7 +241,7 @@
                     :accept="acceptedMimeTypes"
                     :classes="{ outer: 'mb-4' }"
                     :size="10"
-                    :upload-url="props.apiUrl + '/service-request/request-upload-url'"
+                    :upload-url="uploadUrl"
                 />
                 <FormKit type="submit" label="Submit Update" :disabled="isSubmitting" :classes="{ input: 'mt-2' }" />
             </FormKit>

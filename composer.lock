@@ -1619,23 +1619,23 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.32.0",
+            "version": "2.33.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "027e01eafd312d3eb3d1a0bd47c7f05b6ac65111"
+                "reference": "057403e9c952ad1b646222ba6f53c134fbb100b4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/027e01eafd312d3eb3d1a0bd47c7f05b6ac65111",
-                "reference": "027e01eafd312d3eb3d1a0bd47c7f05b6ac65111",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/057403e9c952ad1b646222ba6f53c134fbb100b4",
+                "reference": "057403e9c952ad1b646222ba6f53c134fbb100b4",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^4.11.6 || ^5.0",
-                "internachi/modular": "^2.0 || ^3.0",
+                "internachi/modular": "^3.0",
                 "internachi/modularize": "^1.1",
-                "laravel/framework": "^11.0|^12.0|^13.0",
+                "laravel/framework": "^12.0|^13.0",
                 "laravel/pennant": "^1.0",
                 "laravel/prompts": "^0.3",
                 "php": "8.4.*|8.5.*",
@@ -1646,14 +1646,14 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.75",
                 "larastan/larastan": "^3.0",
-                "orchestra/testbench": "^10.4",
+                "orchestra/testbench": "^10.4 || ^11.0",
                 "orrison/meliorstan": "^0.3.2",
-                "pestphp/pest": "^3.8.5",
-                "pestphp/pest-plugin-laravel": "^3.2",
+                "pestphp/pest": "^4.0",
+                "pestphp/pest-plugin-laravel": "^4.0",
                 "php-coveralls/php-coveralls": "^0.1.0",
                 "php-mock/php-mock-phpunit": "^2.13",
                 "phpstan/phpstan": "^2.1",
-                "phpunit/phpunit": "^11.5.50",
+                "phpunit/phpunit": "^12.0",
                 "rector/rector": "^2.0"
             },
             "type": "package",
@@ -1681,9 +1681,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.32.0"
+                "source": "https://github.com/canyongbs/common/tree/2.33.0"
             },
-            "time": "2026-07-22T16:38:32+00:00"
+            "time": "2026-07-28T03:15:36+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",

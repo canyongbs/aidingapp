@@ -35,8 +35,8 @@
     import { FormKit } from '@formkit/vue';
     import { defineProps, onMounted, ref } from 'vue';
     import axios from '../../../portals/knowledge-management/src/Globals/Axios.js';
-    import AppLoading from '../src/Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
+    import AppLoading from '@common/portal/AppLoading.vue';
+    import Footer from '@common/portal/Footer.vue';
 
     const props = defineProps({
         entryUrl: {

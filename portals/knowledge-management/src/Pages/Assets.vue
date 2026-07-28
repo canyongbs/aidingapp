@@ -32,26 +32,22 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed, onMounted, ref, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
-    import { consumer } from '../Services/Consumer';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
+    import { apiGet } from '../Services/api.js';
+    import { useAssetsData } from './loaders.js';
 
-    const props = defineProps({
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-    });
-
-    const { get } = consumer();
+    // The default "all" filter, page 1, arrives via the route data loader; changing the
+    // filter or page fetches on demand.
+    const { data: initialData } = useAssetsData();
 
     const activeFilter = ref('all');
-    const loading = ref(true);
+    const loading = ref(false);
 
     const assets = ref([]);
     const counts = ref({ total: 0, checked_out: 0, returned: 0 });
@@ -68,25 +64,28 @@
         { key: 'returned', label: 'Returned' },
     ]);
 
+    function applyEnvelope(envelope) {
+        if (!envelope) {
+            return;
+        }
+
+        assets.value = envelope.data ?? [];
+        counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
+
+        currentPage.value = envelope.meta?.current_page ?? 1;
+        lastPage.value = envelope.meta?.last_page ?? 1;
+        fromItem.value = envelope.meta?.from ?? 0;
+        toItem.value = envelope.meta?.to ?? 0;
+        totalItems.value = envelope.meta?.total ?? 0;
+    }
+
+    watch(initialData, applyEnvelope, { immediate: true });
+
     async function fetchAssets(page = 1) {
         loading.value = true;
 
         try {
-            const response = await get(`${props.apiUrl}/assets`, {
-                filter: activeFilter.value,
-                page,
-            });
-
-            const envelope = response.data;
-
-            assets.value = envelope.data ?? [];
-            counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
-
-            currentPage.value = envelope.meta?.current_page ?? 1;
-            lastPage.value = envelope.meta?.last_page ?? 1;
-            fromItem.value = envelope.meta?.from ?? 0;
-            toItem.value = envelope.meta?.to ?? 0;
-            totalItems.value = envelope.meta?.total ?? 0;
+            applyEnvelope(await apiGet('/assets', { filter: activeFilter.value, page }));
         } catch (error) {
             assets.value = [];
             console.error('Error fetching assets:', error);
@@ -96,8 +95,6 @@
     }
 
     watch(activeFilter, () => fetchAssets(1));
-
-    onMounted(() => fetchAssets(1));
 </script>
 
 <template>
