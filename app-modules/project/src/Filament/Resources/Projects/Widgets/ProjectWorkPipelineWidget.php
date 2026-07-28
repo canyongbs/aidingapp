@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
@@ -183,6 +184,15 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ],
             )
             ->headerActions([
+                Action::make('kanban')
+                    ->label('Kanban')
+                    ->icon('heroicon-m-view-columns')
+                    ->url(fn (): string => PipelineResource::getUrl('manage-entries', [
+                        'record' => $pipeline?->getKey(),
+                        'project' => $this->record->getKey(),
+                        'viewType' => 'kanban',
+                    ]))
+                    ->visible(fn (): bool => (bool) $pipeline),
                 CreateAction::make('createEntry')
                     ->label('New Pipeline Entry')
                     ->icon('heroicon-m-plus')
