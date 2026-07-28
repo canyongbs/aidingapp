@@ -110,7 +110,7 @@
                         @endphp
 
                         <div class="flex flex-col gap-1 xl:w-32">
-                            <div class="xl:hidden">{{ $templateRole->getLabel() }}s</div>
+                            <div class="xl:hidden">{{ $templateRole->getLabel() }}</div>
 
                             <div
                                 class="divide-gray-950/5 grid h-full grid-cols-2 gap-1 xl:gap-0 xl:divide-x dark:divide-white/10"
