@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestBaseTemplatesAction;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use AidingApp\ServiceManagement\Filament\Concerns\HasRichContentEmptyCheck;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
@@ -62,6 +63,8 @@ use Illuminate\Support\Facades\Gate;
 
 class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
 {
+    use HasRichContentEmptyCheck;
+
     protected static string $settings = ServiceRequestNotificationAutomationSettings::class;
 
     protected static ?string $cluster = GlobalServiceManagementCluster::class;
