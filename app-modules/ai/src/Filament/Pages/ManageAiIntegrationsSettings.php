@@ -211,13 +211,13 @@ class ManageAiIntegrationsSettings extends SettingsPage
                                     ->multiple()
                                     ->nestedRecursiveRules([Rule::enum(AiModelApplicabilityFeature::class)]),
                             ]),
-                        Section::make('GPT 5.6 luna')
+                        Section::make('GPT 5.6 Luna')
                             ->collapsible()
                             ->visible(Gpt56LunaFeature::active())
                             ->schema([
                                 TextInput::make('open_ai_gpt_56_luna_model_name')
                                     ->label('Model Name')
-                                    ->placeholder('Canyon 5.6 luna')
+                                    ->placeholder('Canyon 5.6 Luna')
                                     ->string()
                                     ->maxLength(255)
                                     ->nullable(),

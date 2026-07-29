@@ -79,7 +79,7 @@ enum AiModel: string implements HasLabel
             self::OpenAiGpt54Mini => $aiIntegrationSettings->open_ai_gpt_54_mini_model_name ?? 'Canyon 5.4 mini',
             self::OpenAiGpt5Nano => $aiIntegrationSettings->open_ai_gpt_5_nano_model_name ?? 'Canyon 5 nano',
             self::OpenAiGpt54Nano => $aiIntegrationSettings->open_ai_gpt_54_nano_model_name ?? 'Canyon 5.4 nano',
-            self::OpenAiGpt56Luna => $aiIntegrationSettings->open_ai_gpt_56_luna_model_name ?? 'Canyon 5.6 luna',
+            self::OpenAiGpt56Luna => $aiIntegrationSettings->open_ai_gpt_56_luna_model_name ?? 'Canyon 5.6 Luna',
             self::LlamaParse => $aiIntegrationSettings->llamaparse_model_name ?? 'Canyon Parsing Service',
             self::OpenAiGptTest => 'Canyon Test',
             self::Test => 'Test',
