@@ -79,7 +79,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if(! ProloadServiceRequestTypeFeature::active()) {
+        if (! ProloadServiceRequestTypeFeature::active()) {
             return false;
         }
 
