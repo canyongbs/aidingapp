@@ -163,15 +163,22 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
             foreach ($templates as $typeValue => $roles) {
                 foreach ($roles as $roleValue => $templateData) {
-                    ServiceRequestNotificationAutomationEmailTemplate::updateOrCreate(
-                        [
-                            'type' => $typeValue,
-                            'role' => $roleValue,
-                        ],
-                        [
-                            'ai_instructions' => trim($templateData['ai_instructions'] ?? '') ?: null,
-                        ],
-                    );
+                    $template = ServiceRequestNotificationAutomationEmailTemplate::firstOrNew([
+                        'type' => $typeValue,
+                        'role' => $roleValue,
+                    ]);
+
+                    $template->ai_instructions = trim($templateData['ai_instructions'] ?? '') ?: null;
+
+                    if (blank($template->ai_instructions) && blank($template->subject) && blank($template->body)) {
+                        if ($template->exists) {
+                            $template->delete();
+                        }
+
+                        continue;
+                    }
+
+                    $template->save();
                 }
             }
         });

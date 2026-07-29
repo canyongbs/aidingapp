@@ -50,7 +50,7 @@ class ManageAuditSettings extends SettingsPage
 {
     protected static ?string $navigationLabel = 'Auditing';
 
-    protected static ?int $navigationSort = 20;
+    protected static ?int $navigationSort = 30;
 
     protected static string $settings = AuditSettings::class;
 

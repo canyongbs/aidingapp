@@ -46,11 +46,11 @@ use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSet
 use App\Enums\Feature;
 use App\Filament\Clusters\GlobalServiceManagementCluster;
 use App\Models\User;
+use App\Support\RichContentDocument;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
-use Filament\Forms\Components\Textarea;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -66,6 +66,8 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
     protected static ?string $cluster = GlobalServiceManagementCluster::class;
 
     protected static ?string $title = 'Base Templates';
+
+    protected ?bool $hasUnsavedDataChangesAlert = false;
 
     public static function canAccess(): bool
     {
@@ -113,16 +115,27 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
 
             foreach ($templates as $typeValue => $roles) {
                 foreach ($roles as $roleValue => $templateData) {
-                    ServiceRequestNotificationAutomationEmailTemplate::updateOrCreate(
-                        [
-                            'type' => $typeValue,
-                            'role' => $roleValue,
-                        ],
-                        [
-                            'subject' => $templateData['subject'] ?? null,
-                            'body' => $templateData['body'] ?? null,
-                        ],
-                    );
+                    $template = ServiceRequestNotificationAutomationEmailTemplate::firstOrNew([
+                        'type' => $typeValue,
+                        'role' => $roleValue,
+                    ]);
+
+                    $template->subject = RichContentDocument::hasContent($templateData['subject'] ?? null)
+                        ? $templateData['subject']
+                        : null;
+                    $template->body = RichContentDocument::hasContent($templateData['body'] ?? null)
+                        ? $templateData['body']
+                        : null;
+
+                    if (blank($template->subject) && blank($template->body) && blank($template->ai_instructions)) {
+                        if ($template->exists) {
+                            $template->delete();
+                        }
+
+                        continue;
+                    }
+
+                    $template->save();
                 }
             }
         });
@@ -161,7 +174,7 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
     }
 
     /**
-     * @return array<int, RichEditor|Textarea>
+     * @return array<int, RichEditor>
      */
     protected function getTemplateFormSchema(ServiceRequestEmailTemplateType $type, ServiceRequestTypeEmailTemplateRole $role): array
     {
@@ -172,8 +185,8 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
         }
 
         $hasAnyContent = function (Get $get): bool {
-            return $this->richEditorHasContent($get('subject'))
-                || $this->richEditorHasContent($get('body'));
+            return RichContentDocument::hasContent($get('subject'))
+                || RichContentDocument::hasContent($get('body'));
         };
 
         return [
@@ -209,19 +222,5 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
                 ->live(onBlur: true)
                 ->json(),
         ];
-    }
-
-    protected function richEditorHasContent(mixed $value): bool
-    {
-        if (! is_array($value)) {
-            return false;
-        }
-
-        $isEmpty = (($value['type'] ?? null) === 'doc')
-            && (count($value['content'] ?? []) === 1)
-            && (($value['content'][0]['type'] ?? null) === 'paragraph')
-            && blank($value['content'][0]['content'] ?? []);
-
-        return ! $isEmpty;
     }
 }

@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplatesSettings;
+use App\Models\Authenticatable;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -53,11 +54,114 @@ test('it prevents access when the user does not have permission', function () {
         ->assertForbidden();
 });
 
+test('it prevents access for ai admins', function () {
+    $user = User::factory()->create();
+    $user->assignRole(Authenticatable::AI_ADMIN_ROLE);
+
+    actingAs($user);
+
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
+        ->assertForbidden();
+});
+
 test('it allows access for super admins', function () {
     asSuperAdmin();
 
     get(ManageServiceRequestBaseTemplatesSettings::getUrl())
         ->assertSuccessful();
+});
+
+test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
+    $page = new ManageServiceRequestBaseTemplatesSettings();
+
+    $hasUnsavedDataChangesAlert = (new ReflectionClass($page))
+        ->getProperty('hasUnsavedDataChangesAlert')
+        ->getValue($page);
+
+    expect($hasUnsavedDataChangesAlert)->toBeFalse();
+});
+
+test('it leaves existing templates untouched when saving without changes', function () {
+    asSuperAdmin();
+
+    $existing = collect([
+        [ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, 'Keep it friendly.'],
+        [ServiceRequestEmailTemplateType::Assigned, ServiceRequestTypeEmailTemplateRole::Manager, null],
+        [ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Auditor, 'Be brief.'],
+        [ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, null],
+    ])->map(fn (array $attributes) => ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => $attributes[0],
+        'role' => $attributes[1],
+        'ai_instructions' => $attributes[2],
+    ]));
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceRequestNotificationAutomationEmailTemplate::count())->toBe(4);
+
+    foreach ($existing as $template) {
+        $fresh = ServiceRequestNotificationAutomationEmailTemplate::query()->findOrFail($template->getKey());
+
+        expect($fresh->subject)->toEqual($template->subject);
+        expect($fresh->body)->toEqual($template->body);
+        expect($fresh->ai_instructions)->toBe($template->ai_instructions);
+    }
+});
+
+test('it does not create empty templates when nothing has been filled in', function () {
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceRequestNotificationAutomationEmailTemplate::query()->exists())->toBeFalse();
+});
+
+test('it deletes a template that is left with no example subject, body, or ai instructions', function () {
+    asSuperAdmin();
+
+    $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'ai_instructions' => null,
+    ]);
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->fillForm([
+            "templates.{$existing->type->value}.{$existing->role->value}.subject" => null,
+            "templates.{$existing->type->value}.{$existing->role->value}.body" => null,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceRequestNotificationAutomationEmailTemplate::query()->whereKey($existing->getKey())->exists())->toBeFalse();
+});
+
+test('it keeps a template with ai instructions when the example subject and body are cleared', function () {
+    asSuperAdmin();
+
+    $existing = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'ai_instructions' => 'Keep it friendly.',
+    ]);
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->fillForm([
+            "templates.{$existing->type->value}.{$existing->role->value}.subject" => null,
+            "templates.{$existing->type->value}.{$existing->role->value}.body" => null,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $existing->refresh();
+
+    expect($existing->subject)->toBeNull();
+    expect($existing->body)->toBeNull();
+    expect($existing->ai_instructions)->toBe('Keep it friendly.');
 });
 
 test('it saves the example subject and body without touching ai instructions', function () {
