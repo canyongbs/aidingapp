@@ -44,5 +44,5 @@ class ProductIntegrations extends Cluster
 {
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 60;
 }

@@ -46,5 +46,5 @@ class GlobalArtificialIntelligence extends Cluster
 
     protected static ?string $title = 'Artificial Intelligence';
 
-    protected static ?int $navigationSort = 70;
+    protected static ?int $navigationSort = 80;
 }
