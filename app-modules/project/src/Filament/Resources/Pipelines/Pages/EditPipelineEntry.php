@@ -85,6 +85,10 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+            abort(404);
+        }
+
         $this->fillForm();
     }
 

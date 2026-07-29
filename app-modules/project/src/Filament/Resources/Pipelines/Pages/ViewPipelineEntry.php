@@ -81,6 +81,10 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
+        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+            abort(404);
+        }
+
         if (request()->has('from')) {
             session(['pipeline_entry_source' => request('from')]);
         }

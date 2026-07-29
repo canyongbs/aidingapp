@@ -84,6 +84,13 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         parent::mount($record);
 
+        $pipeline = $this->getOwnerRecord();
+        assert($pipeline instanceof Pipeline);
+
+        if (filled($this->project) && (string) $pipeline->project?->getKey() !== $this->project) {
+            abort(404);
+        }
+
         if (filled($this->project)) {
             $this->viewType = 'kanban';
 
@@ -119,22 +126,15 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
         $project = $pipeline->project;
 
-        if (filled($this->project) && $project) {
-            $breadcrumbs = [
-                ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
+        $breadcrumbs = [
+            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
+            ...($project ? [
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-            ];
-        } else {
-            $breadcrumbs = [
-                ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-                ...($project ? [
-                    ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                    ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
-                ] : []),
-                PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
-                ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-            ];
-        }
+                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
+            ] : []),
+            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
 
         if (filled($cluster = static::getCluster())) {
             return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
