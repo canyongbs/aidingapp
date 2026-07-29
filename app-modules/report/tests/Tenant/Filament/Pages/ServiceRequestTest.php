@@ -160,6 +160,43 @@ it('groups the type options by the service catalog hierarchy', function () {
     expect($options['Uncategorized'])->toHaveKey($uncategorisedType->getKey());
 });
 
+it('orders grouped type options by category sort and pivot sort', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $laterRoot = ServiceRequestTypeCategory::factory()->create(['parent_id' => null, 'name' => 'Later Root', 'sort' => 20]);
+    $earlierRoot = ServiceRequestTypeCategory::factory()->create(['parent_id' => null, 'name' => 'Earlier Root', 'sort' => 10]);
+    $earlierChild = ServiceRequestTypeCategory::factory()->create(['parent_id' => $earlierRoot->getKey(), 'name' => 'Earlier Child', 'sort' => 5]);
+
+    $earlierRootSecondType = ServiceRequestType::factory()->create(['name' => 'Second In Root']);
+    $earlierRoot->types()->attach($earlierRootSecondType->getKey(), ['sort' => 20]);
+
+    $earlierRootFirstType = ServiceRequestType::factory()->create(['name' => 'First In Root']);
+    $earlierRoot->types()->attach($earlierRootFirstType->getKey(), ['sort' => 10]);
+
+    $childType = ServiceRequestType::factory()->create(['name' => 'Child Type']);
+    $earlierChild->types()->attach($childType->getKey(), ['sort' => 5]);
+
+    $laterRootType = ServiceRequestType::factory()->create(['name' => 'Later Root Type']);
+    $laterRoot->types()->attach($laterRootType->getKey(), ['sort' => 1]);
+
+    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+
+    expect(array_keys($options))->toBe([
+        'Earlier Root',
+        'Earlier Root › Earlier Child',
+        'Later Root',
+    ]);
+
+    expect(array_keys($options['Earlier Root']))->toBe([
+        $earlierRootFirstType->getKey(),
+        $earlierRootSecondType->getKey(),
+    ]);
+});
+
 it('excludes archived types from the filter options', function () {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
@@ -201,6 +238,10 @@ it('resolves every type the user manages or audits as an affiliated type', funct
     $auditorDepartmentType = ServiceRequestType::factory()->create();
     $auditorDepartmentType->auditorDepartments()->attach($department);
 
+    $archivedAffiliatedType = ServiceRequestType::factory()->create();
+    $archivedAffiliatedType->managerUsers()->attach($user);
+    $archivedAffiliatedType->delete();
+
     $unaffiliatedType = ServiceRequestType::factory()->create();
 
     $ids = livewire(ServiceRequests::class)->instance()->getAffiliatedServiceRequestTypeIds();
@@ -212,6 +253,7 @@ it('resolves every type the user manages or audits as an affiliated type', funct
             $managerDepartmentType->getKey(),
             $auditorDepartmentType->getKey(),
         ])
+        ->not->toContain($archivedAffiliatedType->getKey())
         ->not->toContain($unaffiliatedType->getKey());
 });
 
@@ -225,11 +267,30 @@ it('populates the filter with affiliated types via the My Affiliated Types actio
     $affiliatedType = ServiceRequestType::factory()->create();
     $affiliatedType->managerUsers()->attach($user);
 
+    $archivedAffiliatedType = ServiceRequestType::factory()->create();
+    $archivedAffiliatedType->managerUsers()->attach($user);
+    $archivedAffiliatedType->delete();
+
     ServiceRequestType::factory()->create();
 
     livewire(ServiceRequests::class)
         ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
+});
+
+it('disables clear action until at least one type is selected', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ServiceRequests::class)
+        ->assertActionDisabled(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->set('filters.serviceRequestTypes', [$type->getKey()])
+        ->assertActionEnabled(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'));
 });
 
 it('clears the selected types via the Clear action', function () {

@@ -161,49 +161,74 @@ class ServiceRequests extends Dashboard
     public function getServiceRequestTypeOptions(): array
     {
         $categories = ServiceRequestTypeCategory::query()
-            ->get(['id', 'name', 'parent_id', 'sort'])
-            ->keyBy('id');
+            ->orderBy('sort')
+            ->get(['id', 'name', 'parent_id', 'sort']);
 
-        $buildPath = function (ServiceRequestTypeCategory $category) use ($categories): string {
-            $segments = [];
-            $current = $category;
+        $categoryChildren = [];
 
-            while ($current instanceof ServiceRequestTypeCategory) {
-                array_unshift($segments, $current->name);
+        foreach ($categories as $category) {
+            $categoryChildren[$category->parent_id ?? '__root__'][] = $category;
+        }
 
-                $current = filled($current->parent_id) ? $categories->get($current->parent_id) : null;
+        $orderedCategoryPaths = [];
+
+        $walkCategories = function (?string $parentId, array $segments = []) use (&$walkCategories, $categoryChildren, &$orderedCategoryPaths): void {
+            foreach ($categoryChildren[$parentId ?? '__root__'] ?? [] as $category) {
+                $nextSegments = [...$segments, $category->name];
+
+                $orderedCategoryPaths[$category->getKey()] = implode(' › ', $nextSegments);
+
+                $walkCategories($category->getKey(), $nextSegments);
             }
-
-            return implode(' › ', $segments);
         };
 
-        $grouped = [];
+        $walkCategories(null);
+
+        $groupedByCategory = [];
         $uncategorized = [];
 
         ServiceRequestType::query()
             ->withoutArchived()
+            ->orderBy('sort')
             ->with('categories:id')
-            ->orderBy('name')
-            ->get(['id', 'name'])
-            ->each(function (ServiceRequestType $type) use (&$grouped, &$uncategorized, $categories, $buildPath): void {
-                if ($type->categories->isEmpty()) {
+            ->get(['id', 'name', 'sort'])
+            ->each(function (ServiceRequestType $type) use (&$groupedByCategory, &$uncategorized, $orderedCategoryPaths): void {
+                $categorySortMap = $type->categorySortMap();
+
+                if (blank($categorySortMap)) {
                     $uncategorized[$type->getKey()] = $type->name;
 
                     return;
                 }
 
-                foreach ($type->categories as $category) {
-                    $resolvedCategory = $categories->get($category->getKey());
-
-                    if (! $resolvedCategory instanceof ServiceRequestTypeCategory) {
+                foreach ($categorySortMap as $categoryId => $sort) {
+                    if (! array_key_exists($categoryId, $orderedCategoryPaths)) {
                         continue;
                     }
 
-                    $grouped[$buildPath($resolvedCategory)][$type->getKey()] = $type->name;
+                    $groupedByCategory[$categoryId][] = [
+                        'id' => $type->getKey(),
+                        'name' => $type->name,
+                        'sort' => (int) $sort,
+                    ];
                 }
             });
 
-        ksort($grouped);
+        $grouped = [];
+
+        foreach ($orderedCategoryPaths as $categoryId => $path) {
+            if (! array_key_exists($categoryId, $groupedByCategory) || blank($groupedByCategory[$categoryId])) {
+                continue;
+            }
+
+            $types = $groupedByCategory[$categoryId];
+
+            usort($types, fn (array $left, array $right): int => [$left['sort'], $left['name']] <=> [$right['sort'], $right['name']]);
+
+            $grouped[$path] = collect($types)
+                ->mapWithKeys(fn (array $type): array => [$type['id'] => $type['name']])
+                ->all();
+        }
 
         if (filled($uncategorized)) {
             $grouped['Uncategorized'] = $uncategorized;
@@ -225,6 +250,7 @@ class ServiceRequests extends Dashboard
         $departmentId = $user->department?->getKey();
 
         return ServiceRequestType::query()
+            ->withoutArchived()
             ->where(function (Builder $query) use ($user): void {
                 $query->whereHas('managerUsers', fn (Builder $query) => $query->whereKey($user->getKey()))
                     ->orWhereHas('auditorUsers', fn (Builder $query) => $query->whereKey($user->getKey()));
