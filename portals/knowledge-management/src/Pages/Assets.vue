@@ -75,7 +75,6 @@
     const assets = ref([]);
     const counts = ref({ total: 0, checked_out: 0, returned: 0 });
 
-
     const tabs = computed(() => [
         { key: 'all', label: 'All' },
         { key: 'checked_out', label: 'Checked Out' },
