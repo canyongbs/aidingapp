@@ -67,7 +67,7 @@
     @endunless
 
     @if ($project)
-        <div class="flex w-full justify-start">
+        <div class="flex w-full justify-center">
             <x-filament::link
                 tag="button"
                 wire:click="mountAction('selectPipeline')"
@@ -121,6 +121,7 @@
             'project::livewire.pipeline-entry-kanban',
             [
                 'pipeline' => $this->getOwnerRecord(),
+                'project' => $project,
             ]
         )
     @endif

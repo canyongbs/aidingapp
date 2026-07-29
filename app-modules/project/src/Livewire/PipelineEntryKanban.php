@@ -63,11 +63,14 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public Pipeline $pipeline;
 
+    public ?string $project = null;
+
     public ?PipelineEntry $currentPipelineEntry = null;
 
-    public function mount(Pipeline $pipeline): void
+    public function mount(Pipeline $pipeline, ?string $project = null): void
     {
         $this->pipeline = $pipeline;
+        $this->project = $project;
     }
 
     /**
@@ -201,10 +204,16 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
     {
-        $this->redirect(PipelineResource::getUrl('view-pipeline-entry', [
+        $params = [
             'record' => $this->pipeline->getKey(),
             'pipelineEntry' => $pipelineEntry->getKey(),
             'from' => 'kanban',
-        ]));
+        ];
+
+        if (filled($this->project)) {
+            $params['project'] = $this->project;
+        }
+
+        $this->redirect(PipelineResource::getUrl('view-pipeline-entry', $params));
     }
 }

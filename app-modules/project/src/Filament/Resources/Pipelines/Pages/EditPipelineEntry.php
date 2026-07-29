@@ -124,7 +124,7 @@ class EditPipelineEntry extends Page
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
                 ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
             ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit('Pipelines', 16),
+            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 

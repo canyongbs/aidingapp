@@ -36,21 +36,18 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
+use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
-use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -64,6 +61,8 @@ use Livewire\Attributes\Url;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
+    use HasPipelineSwitcherAction;
+
     protected static string $resource = PipelineResource::class;
 
     protected static string $relationship = 'entries';
@@ -150,45 +149,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
         session(['pipeline-view-type' => $viewType]);
     }
 
-    public function selectPipelineAction(): Action
-    {
-        $pipeline = $this->getOwnerRecord();
-        assert($pipeline instanceof Pipeline);
-
-        return Action::make('selectPipeline')
-            ->label('Select Pipeline')
-            ->modalHeading('Select Pipeline')
-            ->modalSubmitActionLabel('Select')
-            ->visible(fn (): bool => filled($this->project))
-            ->fillForm(fn (): array => ['pipeline_id' => $pipeline->getKey()])
-            ->schema([
-                TableSelect::make('pipeline_id')
-                    ->hiddenLabel()
-                    ->tableConfiguration(ProjectPipelinesTable::class)
-                    ->tableArguments(['projectId' => $this->project])
-                    ->required(),
-            ])
-            ->action(function (array $data): void {
-                $pipelineId = $data['pipeline_id'];
-
-                if (blank($pipelineId) || ! Pipeline::where('project_id', $this->project)->whereKey($pipelineId)->exists()) {
-                    Notification::make()
-                        ->danger()
-                        ->title('Invalid pipeline selection')
-                        ->body('The selected pipeline does not belong to this project.')
-                        ->send();
-
-                    return;
-                }
-
-                $this->redirect(static::getUrl([
-                    'record' => $pipelineId,
-                    'project' => $this->project,
-                    'viewType' => $this->viewType,
-                ]));
-            });
-    }
-
     public function table(Table $table): Table
     {
         $pipeline = $this->getOwnerRecord();
@@ -239,5 +199,24 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ]),
             ])
             ->defaultSort('created_at', 'desc');
+    }
+
+    protected function getPipelineSwitcherProjectId(): ?string
+    {
+        return $this->project;
+    }
+
+    protected function getPipelineSwitcherCurrentPipelineId(): ?string
+    {
+        return (string) $this->getOwnerRecord()->getKey();
+    }
+
+    protected function onPipelineSwitcherSelected(string $pipelineId): void
+    {
+        $this->redirect(static::getUrl([
+            'record' => $pipelineId,
+            'project' => $this->project,
+            'viewType' => $this->viewType,
+        ]));
     }
 }

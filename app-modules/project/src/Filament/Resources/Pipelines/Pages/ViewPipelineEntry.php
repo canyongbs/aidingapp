@@ -102,7 +102,7 @@ class ViewPipelineEntry extends Page
         }
 
         if ($source === 'kanban') {
-            return PipelineResource::getUrl('manage-entries', $params);
+            $params['viewType'] = 'kanban';
         }
 
         return PipelineResource::getUrl('manage-entries', $params);
@@ -122,7 +122,7 @@ class ViewPipelineEntry extends Page
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
                 ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
             ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit('Pipelines', 16),
+            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
@@ -156,6 +156,9 @@ class ViewPipelineEntry extends Page
                         TextEntry::make('organizable_type')
                             ->label('Organization Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                            ->badge(),
+                        TextEntry::make('pipelineStage.name')
+                            ->label('Stage')
                             ->badge(),
                         TextEntry::make('description')
                             ->label('Description')
