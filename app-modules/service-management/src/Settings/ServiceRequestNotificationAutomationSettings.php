@@ -42,6 +42,8 @@ class ServiceRequestNotificationAutomationSettings extends Settings
 {
     public bool $is_enabled = false;
 
+    public bool $preload_new_service_request_types = false;
+
     /**
      * This property is type `array<string, mixed>`, but the settings package throws an error when attempting to parse this.
      *

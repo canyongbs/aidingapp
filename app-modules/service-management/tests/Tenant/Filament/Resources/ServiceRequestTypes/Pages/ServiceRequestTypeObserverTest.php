@@ -34,8 +34,13 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 
 it('cascade deletes priorities when a service request type is deleted', function () {
     $serviceRequestType = ServiceRequestType::factory()
@@ -57,4 +62,69 @@ it('cascade deletes priorities when a service request type is deleted', function
     foreach ($serviceRequestType->priorities as $priority) {
         expect($priority->deleted_at)->not()->toBeNull();
     }
+});
+
+it('preloads base templates onto a new service request type when preloading is enabled', function () {
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->preload_new_service_request_types = true;
+    $settings->save();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $template = ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->where('type', $baseTemplate->type)
+        ->where('role', $baseTemplate->role)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual($baseTemplate->subject);
+    expect($template->body)->toEqual($baseTemplate->body);
+});
+
+it('does not preload base templates onto a new service request type when preloading is disabled', function () {
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->preload_new_service_request_types = false;
+    $settings->save();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
+});
+
+it('does not preload base templates that have no content', function () {
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->preload_new_service_request_types = true;
+    $settings->save();
+
+    $emptyDoc = [
+        'type' => 'doc',
+        'content' => [
+            ['type' => 'paragraph'],
+        ],
+    ];
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'subject' => $emptyDoc,
+        'body' => $emptyDoc,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
 });
