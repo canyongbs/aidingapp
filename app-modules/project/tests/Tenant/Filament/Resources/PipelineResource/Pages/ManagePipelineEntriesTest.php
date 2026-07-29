@@ -237,6 +237,24 @@ it('defaults to the kanban view when the viewType query parameter is kanban', fu
         ->assertSee('Drag pipeline entry here');
 });
 
+it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'project' => $otherProject->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
 it('shows a back to project link only when accessed with a project context', function () {
     asSuperAdmin();
 
