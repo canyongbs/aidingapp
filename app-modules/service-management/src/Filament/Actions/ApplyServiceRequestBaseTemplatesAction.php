@@ -36,13 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
-use AidingApp\ServiceManagement\Filament\Concerns\HasRichContentEmptyCheck;
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestTypesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\Feature;
 use App\Models\User;
+use App\Support\RichContentDocument;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\ToggleButtons;
@@ -55,8 +55,6 @@ use Illuminate\Support\Facades\Gate;
 
 class ApplyServiceRequestBaseTemplatesAction extends Action
 {
-    use HasRichContentEmptyCheck;
-
     protected function setUp(): void
     {
         parent::setUp();
@@ -100,8 +98,8 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
                 $baseTemplates = ServiceRequestNotificationAutomationEmailTemplate::query()
                     ->select(['id', 'type', 'role', 'subject', 'body'])
                     ->cursor()
-                    ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => $this->richContentHasContent($template->subject)
-                        || $this->richContentHasContent($template->body))
+                    ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
+                        || RichContentDocument::hasContent($template->body))
                     ->collect();
 
                 if ($baseTemplates->isEmpty()) {
