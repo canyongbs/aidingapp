@@ -34,17 +34,20 @@
 </COPYRIGHT>
 */
 
-use App\Features\ProloadServiceRequestTypeFeature;
-use Illuminate\Database\Migrations\Migration;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-return new class () extends Migration {
+return new class () extends SettingsMigration {
     public function up(): void
     {
-        ProloadServiceRequestTypeFeature::activate();
+        try {
+            $this->migrator->add('service-request-notification-automation.use_custom_templates', false);
+        } catch (SettingAlreadyExists) {
+        }
     }
 
     public function down(): void
     {
-        ProloadServiceRequestTypeFeature::deactivate();
+        $this->migrator->deleteIfExists('service-request-notification-automation.use_custom_templates');
     }
 };

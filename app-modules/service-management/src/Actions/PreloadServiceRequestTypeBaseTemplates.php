@@ -36,9 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Support\RichContentDocument;
 
 class PreloadServiceRequestTypeBaseTemplates
@@ -47,12 +49,18 @@ class PreloadServiceRequestTypeBaseTemplates
     {
         $now = now();
 
-        $rows = ServiceRequestNotificationAutomationEmailTemplate::query()
+        $useCustomTemplates = app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates;
+
+        $sourceQuery = $useCustomTemplates
+            ? ServiceRequestCustomEmailTemplate::query()
+            : ServiceRequestNotificationAutomationEmailTemplate::query();
+
+        $rows = $sourceQuery
             ->select(['type', 'role', 'subject', 'body'])
             ->cursor()
-            ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
+            ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
                 || RichContentDocument::hasContent($template->body))
-            ->map(fn (ServiceRequestNotificationAutomationEmailTemplate $template): array => [
+            ->map(fn (ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template): array => [
                 'service_request_type_id' => $serviceRequestType->getKey(),
                 'type' => $template->type->value,
                 'role' => $template->role->value,

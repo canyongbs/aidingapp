@@ -36,24 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
-use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestTypesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use App\Enums\Feature;
-use App\Models\User;
-use App\Support\RichContentDocument;
-use Filament\Actions\Action;
-use Filament\Forms\Components\TableSelect;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Collection as SupportCollection;
-use Illuminate\Support\Facades\Gate;
 
-class ApplyServiceRequestBaseTemplatesAction extends Action
+class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
 {
     protected function setUp(): void
     {
@@ -150,82 +136,20 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
     }
 
     /**
-     * @param array<string, mixed> $data
-     *
-     * @return ?Builder<ServiceRequestType>
+     * @return Builder<ServiceRequestNotificationAutomationEmailTemplate>
      */
-    protected function getServiceRequestTypesQuery(array $data): ?Builder
+    protected function getSourceTemplatesQuery(): Builder
     {
-        if (($data['apply_to'] ?? 'all') !== 'select') {
-            return ServiceRequestType::query();
-        }
-
-        $typeIds = array_filter((array) ($data['service_request_type_ids'] ?? []));
-
-        if (blank($typeIds)) {
-            return null;
-        }
-
-        return ServiceRequestType::query()->whereKey($typeIds);
+        return ServiceRequestNotificationAutomationEmailTemplate::query();
     }
 
-    /**
-     * @param Builder<ServiceRequestType> $serviceRequestTypesQuery
-     * @param SupportCollection<int, ServiceRequestNotificationAutomationEmailTemplate> $baseTemplates
-     */
-    protected function applyTemplates(Builder $serviceRequestTypesQuery, SupportCollection $baseTemplates): void
+    protected function getSourceLabel(): string
     {
-        $now = now();
-
-        $baseTemplates = $baseTemplates->map(function (ServiceRequestNotificationAutomationEmailTemplate $baseTemplate) {
-            return [
-                'type' => $baseTemplate->type->value,
-                'role' => $baseTemplate->role->value,
-                'subject' => $this->encodeRichContent($baseTemplate->subject),
-                'body' => $this->encodeRichContent($baseTemplate->body),
-            ];
-        });
-
-        $serviceRequestTypesQuery
-            ->select('id')
-            ->chunkById(100, function (Collection $serviceRequestTypes) use ($baseTemplates, $now): void {
-                $rows = [];
-
-                foreach ($serviceRequestTypes as $serviceRequestType) {
-                    foreach ($baseTemplates as $baseTemplate) {
-                        $rows[] = [
-                            'service_request_type_id' => $serviceRequestType->getKey(),
-                            'type' => $baseTemplate['type'],
-                            'role' => $baseTemplate['role'],
-                            'subject' => $baseTemplate['subject'],
-                            'body' => $baseTemplate['body'],
-                            'created_at' => $now,
-                            'updated_at' => $now,
-                        ];
-                    }
-                }
-
-                foreach (array_chunk($rows, 1000) as $chunk) {
-                    ServiceRequestTypeEmailTemplate::query()->upsert(
-                        $chunk,
-                        ['service_request_type_id', 'type', 'role'],
-                        ['subject', 'body', 'updated_at'],
-                    );
-                }
-            });
+        return 'base templates';
     }
 
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    protected function encodeRichContent(array|string|null $value): ?string
+    protected function getNoContentBodyMessage(): string
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
+        return 'Add an Example Subject or Example Body before applying templates to service request types.';
     }
 }

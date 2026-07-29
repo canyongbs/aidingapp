@@ -34,69 +34,85 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Clusters\GlobalServiceManagementCluster\Pages;
+namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestBaseTemplatesAction;
+use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestCustomTemplatesAction;
 use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestTemplateEditorSchema;
-use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
-use App\Filament\Clusters\GlobalServiceManagementCluster;
-use App\Models\User;
+use App\Enums\ServiceManagementAdministrationNavigationGroup;
+use App\Features\ProloadServiceRequestTypeFeature;
+use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Support\RichContentDocument;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
+use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use UnitEnum;
 
-class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
+class ServiceRequestTypeTemplates extends SettingsPage
 {
     use HasServiceRequestTemplateEditorSchema;
 
     protected static string $settings = ServiceRequestNotificationAutomationSettings::class;
 
-    protected static ?string $cluster = GlobalServiceManagementCluster::class;
+    protected static string | UnitEnum | null $navigationGroup = ServiceManagementAdministrationNavigationGroup::ServiceRequests;
 
-    protected static ?string $title = 'Base Templates';
+    protected static ?int $navigationSort = 50;
+
+    protected static ?string $cluster = ServiceManagementAdministration::class;
+
+    protected static ?string $title = 'Templates';
+
+    protected static ?string $navigationLabel = 'Templates';
 
     protected ?bool $hasUnsavedDataChangesAlert = false;
 
     public static function canAccess(): bool
     {
-        $user = auth()->user();
-        assert($user instanceof User);
+        if(! ProloadServiceRequestTypeFeature::active()) {
+            return false;
+        }
 
-        return Gate::check(Feature::ServiceManagement->getGateName()) && $user->isSuperAdmin();
+        if (! Gate::check(Feature::ServiceManagement->getGateName())) {
+            return false;
+        }
+
+        return (bool) auth()->user()?->can('settings.view-any');
     }
 
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Toggle::make('use_custom_templates')
+                    ->label('Override Defaults')
+                    ->helperText('When enabled, these custom templates are used instead of the default base templates for all service request types.')
+                    ->live()
+                    ->columnSpanFull(),
                 Tabs::make('Event templates')
                     ->persistTab()
-                    ->id('event-template-tabs')
+                    ->id('service-request-type-template-event-tabs')
                     ->tabs(array_map(
                         fn (ServiceRequestEmailTemplateType $type) => Tab::make($type->getLabel())
                             ->schema([
                                 Tabs::make('Role templates')
                                     ->persistTab()
-                                    ->id("role-template-tabs-{$type->value}")
+                                    ->id("service-request-type-template-role-tabs-{$type->value}")
                                     ->tabs(array_map(
                                         fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
                                             ->schema($this->getServiceRequestTemplateEditorSchema(
                                                 $type,
-                                                subjectLabel: 'Example Subject',
-                                                subjectPlaceholder: 'Enter the example email subject here...',
-                                                subjectHelperText: 'The example subject template the AI will customize for each service request type.',
-                                                bodyLabel: 'Example Body',
-                                                bodyPlaceholder: 'Enter the example email body here...',
+                                                subjectHelperText: 'You may use “merge tags” to substitute information about a service request into your subject line.',
                                             ))
                                             ->statePath("templates.{$type->value}.{$role->value}"),
                                         $type === ServiceRequestEmailTemplateType::SurveyResponse
@@ -107,6 +123,7 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
+                    ->visible(fn (Get $get): bool => (bool) $get('use_custom_templates'))
                     ->columnSpanFull(),
             ]);
     }
@@ -116,23 +133,23 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
         $state = $this->form->getState();
 
         DB::transaction(function () use ($state): void {
+            $settings = app(ServiceRequestNotificationAutomationSettings::class);
+            $settings->use_custom_templates = (bool) ($state['use_custom_templates'] ?? false);
+            $settings->save();
+
             $templates = $state['templates'] ?? [];
 
             foreach ($templates as $typeValue => $roles) {
                 foreach ($roles as $roleValue => $templateData) {
-                    $template = ServiceRequestNotificationAutomationEmailTemplate::firstOrNew([
+                    $subject = $templateData['subject'] ?? null;
+                    $body = $templateData['body'] ?? null;
+
+                    $template = ServiceRequestCustomEmailTemplate::firstOrNew([
                         'type' => $typeValue,
                         'role' => $roleValue,
                     ]);
 
-                    $template->subject = RichContentDocument::hasContent($templateData['subject'] ?? null)
-                        ? $templateData['subject']
-                        : null;
-                    $template->body = RichContentDocument::hasContent($templateData['body'] ?? null)
-                        ? $templateData['body']
-                        : null;
-
-                    if (blank($template->subject) && blank($template->body) && blank($template->ai_instructions)) {
+                    if (! RichContentDocument::hasContent($subject) && ! RichContentDocument::hasContent($body)) {
                         if ($template->exists) {
                             $template->delete();
                         }
@@ -140,6 +157,8 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
                         continue;
                     }
 
+                    $template->subject = $subject;
+                    $template->body = $body;
                     $template->save();
                 }
             }
@@ -166,19 +185,20 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
     protected function getHeaderActions(): array
     {
         return [
-            ApplyServiceRequestBaseTemplatesAction::make(),
+            ApplyServiceRequestCustomTemplatesAction::make(),
         ];
     }
 
     protected function fillForm(): void
     {
+        $settings = app(ServiceRequestNotificationAutomationSettings::class);
+
         $state = [
+            'use_custom_templates' => $settings->use_custom_templates,
             'templates' => [],
         ];
 
-        $templates = ServiceRequestNotificationAutomationEmailTemplate::all();
-
-        foreach ($templates as $template) {
+        foreach (ServiceRequestCustomEmailTemplate::all() as $template) {
             $state['templates'][$template->type->value][$template->role->value] = [
                 'subject' => $template->subject,
                 'body' => $template->body,

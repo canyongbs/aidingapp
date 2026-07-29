@@ -36,6 +36,7 @@
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -127,4 +128,32 @@ it('does not preload base templates that have no content', function () {
     expect(ServiceRequestTypeEmailTemplate::query()
         ->where('service_request_type_id', $serviceRequestType->getKey())
         ->exists())->toBeFalse();
+});
+
+it('preloads custom templates instead of base templates onto a new service request type when custom templates are enabled', function () {
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->preload_new_service_request_types = true;
+    $settings->use_custom_templates = true;
+    $settings->save();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $template = ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->where('type', $customTemplate->type)
+        ->where('role', $customTemplate->role)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual($customTemplate->subject);
+    expect($template->body)->toEqual($customTemplate->body);
 });
