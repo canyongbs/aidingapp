@@ -36,7 +36,7 @@ import { PiniaColada } from '@pinia/colada';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, RouterView } from 'vue-router';
 import { DataLoaderPlugin } from 'vue-router/experimental';
 import VueSignaturePad from 'vue-signature-pad';
 import { codeBlocksDirective } from '../../../resources/js/utils/enhanceCodeBlocks.js';
@@ -127,40 +127,48 @@ customElements.define(
                         },
                     },
                     {
-                        path: baseUrl + '/service-request-type/select/:categoryId?',
-                        name: 'create-service-request',
-                        component: () => import('./Pages/SelectServiceRequestType.vue'),
-                        meta: {
-                            requiresAuth: true,
-                            loaders: [useServiceRequestTypesData],
-                        },
-                    },
-                    {
-                        path: baseUrl + '/service-request/create/:typeId',
-                        name: 'create-service-request-from-type',
-                        component: () => import('./Pages/CreateServiceRequest.vue'),
-                        meta: {
-                            requiresAuth: true,
-                            loaders: [useCreateServiceRequestData],
-                        },
-                    },
-                    {
-                        path: baseUrl + '/service-request/:serviceRequestId',
-                        name: 'view-service-request',
-                        component: () => import('./Pages/ViewServiceRequest.vue'),
-                        meta: {
-                            requiresAuth: true,
-                            loaders: [useServiceRequestData],
-                        },
-                    },
-                    {
                         path: baseUrl + '/service',
-                        name: 'service',
-                        component: () => import('./Pages/Service.vue'),
-                        meta: {
-                            requiresAuth: true,
-                            loaders: [useServiceRequestsData],
-                        },
+                        name: 'service-parent',
+                        redirect: { name: 'service' },
+                        component: { render: () => h(RouterView) },
+                        children: [
+                            {
+                                path: '',
+                                name: 'service',
+                                component: () => import('./Pages/Service.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestsData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request-type/select/:categoryId?',
+                                name: 'create-service-request',
+                                component: () => import('./Pages/SelectServiceRequestType.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestTypesData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request/create/:typeId',
+                                name: 'create-service-request-from-type',
+                                component: () => import('./Pages/CreateServiceRequest.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useCreateServiceRequestData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request/:serviceRequestId',
+                                name: 'view-service-request',
+                                component: () => import('./Pages/ViewServiceRequest.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestData],
+                                },
+                            },
+                        ],
                     },
                     {
                         path: baseUrl + '/status',

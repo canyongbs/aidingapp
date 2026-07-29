@@ -136,7 +136,7 @@
             { label: 'Home', routeName: 'home', icon: HomeIcon },
             {
                 label: 'Service',
-                routeName: 'service',
+                routeName: 'service-parent',
                 icon: WrenchScrewdriverIcon,
                 visible: hasServiceManagement.value && user.value !== null,
             },
@@ -328,7 +328,7 @@
                     :header-logo="headerLogo"
                     :app-name="appName"
                     :user="user"
-                    :requires-authentication="requiresAuthentication"
+                    :requires-authentication="requiresAuthentication || hasServiceManagement"
                     :menu-items="menuItems"
                     :hide-search="hideHeaderSearch"
                     @show-login="showLogin = true"

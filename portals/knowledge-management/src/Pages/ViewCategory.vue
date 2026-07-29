@@ -119,9 +119,22 @@
     // Tab filter for browsing a category's own articles. The route data loader always
     // resolves page 1 of the default ("all articles") view, so any other filter + page
     // combination is fetched (and cached) client-side via Pinia Colada.
-    const activeFilter = computed(() => route.query.filter || 'all-articles');
-    const currentPage = computed(() => parseInt(route.query.page) || 1);
+    const activeFilter = ref(route.query.filter || 'all-articles');
+    const currentPage = ref(parseInt(route.query.page) || 1);
     const isDefaultView = computed(() => activeFilter.value === 'all-articles' && currentPage.value === 1);
+
+    function syncUrl() {
+        const resolved = router.resolve({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: currentPage.value > 1 ? currentPage.value : undefined,
+                filter: activeFilter.value === 'all-articles' ? undefined : activeFilter.value,
+            },
+        });
+        history.replaceState(history.state, '', resolved.href);
+    }
 
     const pageQuery = useQuery({
         key: () => [
@@ -187,15 +200,9 @@
     });
 
     function pushArticlesQuery(page, filter) {
-        router.push({
-            name: route.name,
-            params: route.params,
-            query: {
-                ...route.query,
-                page,
-                filter: filter === 'all-articles' ? undefined : filter,
-            },
-        });
+        currentPage.value = page;
+        activeFilter.value = filter;
+        syncUrl();
     }
 
     function changeFilter(value) {

@@ -36,6 +36,7 @@
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import { computed, ref, watch } from 'vue';
+    import { useRoute, useRouter } from 'vue-router';
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
@@ -46,17 +47,34 @@
     // filter or page fetches on demand.
     const { data: initialData } = useAssetsData();
 
-    const activeFilter = ref('all');
+    const route = useRoute();
+    const router = useRouter();
+
+    const activeFilter = ref(route.query.filter || 'all');
     const loading = ref(false);
 
-    const assets = ref([]);
-    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
-
-    const currentPage = ref(1);
+    const currentPage = ref(parseInt(route.query.page) || 1);
     const lastPage = ref(1);
     const fromItem = ref(0);
     const toItem = ref(0);
     const totalItems = ref(0);
+
+    function syncUrl() {
+        const resolved = router.resolve({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page: currentPage.value > 1 ? currentPage.value : undefined,
+                filter: activeFilter.value === 'all' ? undefined : activeFilter.value,
+            },
+        });
+        history.replaceState(history.state, '', resolved.href);
+    }
+
+    const assets = ref([]);
+    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
+
 
     const tabs = computed(() => [
         { key: 'all', label: 'All' },
@@ -86,6 +104,7 @@
 
         try {
             applyEnvelope(await apiGet('/assets', { filter: activeFilter.value, page }));
+            syncUrl();
         } catch (error) {
             assets.value = [];
             console.error('Error fetching assets:', error);
