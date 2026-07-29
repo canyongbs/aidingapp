@@ -41,6 +41,7 @@ use App\Health\Checks\AzureCredentialsExpiringCheck;
 use CanyonGBS\Common\Health\Checks\OpcacheCachedFilesCheck;
 use CanyonGBS\Common\Health\Checks\OpcacheHitRateCheck;
 use CanyonGBS\Common\Health\Services\OpcacheStatusService;
+use Filament\Facades\Filament;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Health\Checks\Checks\CacheCheck;
@@ -83,8 +84,9 @@ class HealthServiceProvider extends ServiceProvider
                 ->unless($local || app()->environment('staging')),
             // cloudflare dns
             PingCheck::new()
-                ->url($parsedUrl['host'])
-                ->timeout(2),
+                ->url((string) Filament::getPanel('admin')->getUrl())
+                ->timeout(5)
+                ->unless($local),
             QueueCheck::new()
                 ->failAfterMinutes(3),
             RedisCheck::new(),
@@ -101,12 +103,12 @@ class HealthServiceProvider extends ServiceProvider
                     filled($azureSsoSettings->tenant_id);
                 })
                 ->daily(),
-            OpcacheHitRateCheck::new()
-                ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
-                ->label('OPcache Hit Rate'),
-            OpcacheCachedFilesCheck::new()
-                ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
-                ->label('OPcache Cached Files'),
+            // OpcacheHitRateCheck::new()
+            //     ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
+            //     ->label('OPcache Hit Rate'),
+            // OpcacheCachedFilesCheck::new()
+            //     ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
+            //     ->label('OPcache Cached Files'),
             // ScheduleCheck::new()
             //     ->heartbeatMaxAgeInMinutes(2),
         ]);
