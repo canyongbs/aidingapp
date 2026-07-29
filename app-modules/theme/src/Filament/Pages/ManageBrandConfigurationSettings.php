@@ -52,7 +52,7 @@ class ManageBrandConfigurationSettings extends SettingsPage
 {
     protected static ?string $navigationLabel = 'Branding';
 
-    protected static ?int $navigationSort = 30;
+    protected static ?int $navigationSort = 40;
 
     protected static string $settings = ThemeSettings::class;
 

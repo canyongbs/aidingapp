@@ -34,37 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks;
+namespace App\Filament\Clusters;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhooks;
-use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
-use AidingApp\Webhook\Models\InboundWebhook;
 use App\Enums\NavigationGroup;
-use App\Models\User;
-use Filament\Resources\Resource;
+use Filament\Clusters\Cluster;
 use UnitEnum;
 
-class InboundWebhookResource extends Resource
+class GlobalServiceManagementCluster extends Cluster
 {
-    protected static ?string $model = InboundWebhook::class;
+    protected static ?int $navigationSort = 10;
 
-    protected static ?int $navigationSort = 50;
+    protected static ?string $title = 'Service Management';
 
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
-
-    public static function canAccess(): bool
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        return $user->isSuperAdmin() && parent::canAccess();
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListInboundWebhooks::route('/'),
-            'view' => ViewInboundWebhook::route('/{record}'),
-        ];
-    }
 }

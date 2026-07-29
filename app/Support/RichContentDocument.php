@@ -34,37 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks;
+namespace App\Support;
 
-use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ListInboundWebhooks;
-use AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages\ViewInboundWebhook;
-use AidingApp\Webhook\Models\InboundWebhook;
-use App\Enums\NavigationGroup;
-use App\Models\User;
-use Filament\Resources\Resource;
-use UnitEnum;
-
-class InboundWebhookResource extends Resource
+class RichContentDocument
 {
-    protected static ?string $model = InboundWebhook::class;
+    /**
+     * @var array<int, string>
+     */
+    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
 
-    protected static ?int $navigationSort = 50;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::GlobalAdmin;
-
-    public static function canAccess(): bool
+    public static function hasContent(mixed $document): bool
     {
-        /** @var User $user */
-        $user = auth()->user();
+        if (! is_array($document)) {
+            return false;
+        }
 
-        return $user->isSuperAdmin() && parent::canAccess();
+        return static::nodesHaveContent($document['content'] ?? []);
     }
 
-    public static function getPages(): array
+    /**
+     * @param  array<int, mixed>  $nodes
+     */
+    protected static function nodesHaveContent(array $nodes): bool
     {
-        return [
-            'index' => ListInboundWebhooks::route('/'),
-            'view' => ViewInboundWebhook::route('/{record}'),
-        ];
+        foreach ($nodes as $node) {
+            if (! is_array($node)) {
+                continue;
+            }
+
+            if (filled(trim((string) ($node['text'] ?? '')))) {
+                return true;
+            }
+
+            if (array_key_exists('content', $node)) {
+                if (static::nodesHaveContent($node['content'] ?? [])) {
+                    return true;
+                }
+
+                continue;
+            }
+
+            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
