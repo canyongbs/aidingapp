@@ -36,15 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Filament\Concerns\HasRichContentEmptyCheck;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
+use App\Support\RichContentDocument;
 
 class PreloadServiceRequestTypeBaseTemplates
 {
-    use HasRichContentEmptyCheck;
-
     public function execute(ServiceRequestType $serviceRequestType): void
     {
         $now = now();
@@ -52,8 +50,8 @@ class PreloadServiceRequestTypeBaseTemplates
         $rows = ServiceRequestNotificationAutomationEmailTemplate::query()
             ->select(['type', 'role', 'subject', 'body'])
             ->cursor()
-            ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => $this->richContentHasContent($template->subject)
-                || $this->richContentHasContent($template->body))
+            ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
+                || RichContentDocument::hasContent($template->body))
             ->map(fn (ServiceRequestNotificationAutomationEmailTemplate $template): array => [
                 'service_request_type_id' => $serviceRequestType->getKey(),
                 'type' => $template->type->value,
