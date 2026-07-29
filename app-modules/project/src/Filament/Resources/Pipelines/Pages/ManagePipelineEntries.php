@@ -76,6 +76,8 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static ?string $title = 'Manage Pipeline Entries';
 
+    protected static ?string $breadcrumb = 'Pipeline Entries';
+
     protected string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
