@@ -99,7 +99,7 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
                     ->select(['id', 'type', 'role', 'subject', 'body'])
                     ->cursor()
                     ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
-                        || RichContentDocument::hasContent($template->body))
+                        && RichContentDocument::hasContent($template->body))
                     ->collect();
 
                 if ($baseTemplates->isEmpty()) {
@@ -218,8 +218,14 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
     /**
      * @param array<string, mixed>|null $value
      */
-    protected function encodeRichContent(?array $value): ?string
+    protected function encodeRichContent(array|string|null $value): ?string
     {
-        return is_null($value) ? null : json_encode($value);
+        if ($value === null) {
+            return null;
+        }
+
+        return is_array($value)
+            ? json_encode($value)
+            : $value;
     }
 }

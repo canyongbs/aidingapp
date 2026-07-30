@@ -44,6 +44,7 @@ use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequ
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -311,6 +312,58 @@ test('it applies base templates to all service request types by default', functi
     'first type' => 0,
     'second type' => 1,
 ]);
+
+test('it does not double encode the subject and body when applying base templates', function () {
+    asSuperAdmin();
+
+    $subject = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Subject'],
+                ],
+            ],
+        ],
+    ];
+
+    $body = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Body'],
+                ],
+            ],
+        ],
+    ];
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'subject' => $subject,
+        'body' => $body,
+    ]);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertHasNoFormErrors();
+
+    $rawTemplate = DB::table('service_request_type_email_templates')
+        ->selectRaw('subject::text as subject, body::text as body')
+        ->where('service_request_type_id', $type->getKey())
+        ->where('type', $baseTemplate->type->value)
+        ->where('role', $baseTemplate->role->value)
+        ->firstOrFail();
+
+    // If the value were double encoded, decoding it once would yield a JSON string rather than the original array.
+    expect(json_decode($rawTemplate->subject, associative: true))->toEqual($subject);
+    expect(json_decode($rawTemplate->body, associative: true))->toEqual($body);
+});
 
 test('it applies base templates only to the selected service request types', function () {
     asSuperAdmin();
