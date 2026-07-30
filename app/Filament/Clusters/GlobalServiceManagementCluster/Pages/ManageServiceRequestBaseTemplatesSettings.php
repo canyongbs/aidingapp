@@ -38,6 +38,7 @@ namespace App\Filament\Clusters\GlobalServiceManagementCluster\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestBaseTemplatesAction;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
@@ -153,6 +154,16 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            ApplyServiceRequestBaseTemplatesAction::make(),
+        ];
     }
 
     protected function fillForm(): void

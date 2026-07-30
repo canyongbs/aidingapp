@@ -38,9 +38,13 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationAutomationSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Filament\Clusters\GlobalServiceManagementCluster\Pages\ManageServiceRequestBaseTemplatesSettings;
 use App\Models\Authenticatable;
 use App\Models\User;
+use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
@@ -277,4 +281,214 @@ test('it persists example subject/body and ai instructions correctly when saved 
     expect($template->subject)->toEqual($subject);
     expect($template->body)->toEqual($body);
     expect($template->ai_instructions)->toBe('Be concise and friendly.');
+});
+
+test('it applies base templates to all service request types by default', function (int $typeIndex) {
+    asSuperAdmin();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $types = [
+        ServiceRequestType::factory()->create(),
+        ServiceRequestType::factory()->create(),
+    ];
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertHasNoFormErrors();
+
+    $template = ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $types[$typeIndex]->getKey())
+        ->where('type', $baseTemplate->type)
+        ->where('role', $baseTemplate->role)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual($baseTemplate->subject);
+    expect($template->body)->toEqual($baseTemplate->body);
+})->with([
+    'first type' => 0,
+    'second type' => 1,
+]);
+
+test('it does not double encode the subject and body when applying base templates', function () {
+    asSuperAdmin();
+
+    $subject = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Subject'],
+                ],
+            ],
+        ],
+    ];
+
+    $body = [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'paragraph',
+                'content' => [
+                    ['type' => 'text', 'text' => 'Example Body'],
+                ],
+            ],
+        ],
+    ];
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'subject' => $subject,
+        'body' => $body,
+    ]);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertHasNoFormErrors();
+
+    $rawTemplate = DB::table('service_request_type_email_templates')
+        ->selectRaw('subject::text as subject, body::text as body')
+        ->where('service_request_type_id', $type->getKey())
+        ->where('type', $baseTemplate->type->value)
+        ->where('role', $baseTemplate->role->value)
+        ->firstOrFail();
+
+    // If the value were double encoded, decoding it once would yield a JSON string rather than the original array.
+    expect(json_decode($rawTemplate->subject, associative: true))->toEqual($subject);
+    expect(json_decode($rawTemplate->body, associative: true))->toEqual($body);
+});
+
+test('it applies base templates only to the selected service request types', function () {
+    asSuperAdmin();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $selectedType = ServiceRequestType::factory()->create();
+    $otherType = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates', data: [
+            'apply_to' => 'select',
+            'service_request_type_ids' => [$selectedType->getKey()],
+        ])
+        ->assertHasNoFormErrors();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $selectedType->getKey())
+        ->where('type', $baseTemplate->type)
+        ->where('role', $baseTemplate->role)
+        ->exists())->toBeTrue();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $otherType->getKey())
+        ->exists())->toBeFalse();
+});
+
+test('it requires at least one selected service request type when applying to a selection', function () {
+    asSuperAdmin();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates', data: [
+            'apply_to' => 'select',
+            'service_request_type_ids' => [],
+        ])
+        ->assertHasFormErrors(['service_request_type_ids' => ['required']]);
+});
+
+test('it warns when there are no base templates with content to apply', function () {
+    asSuperAdmin();
+
+    $emptyDoc = [
+        'type' => 'doc',
+        'content' => [
+            ['type' => 'paragraph'],
+        ],
+    ];
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+        'subject' => $emptyDoc,
+        'body' => $emptyDoc,
+    ]);
+
+    ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertNotified('No base templates to apply');
+
+    expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
+});
+
+test('it warns when there are no service request types to apply templates to', function () {
+    asSuperAdmin();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    expect(ServiceRequestType::query()->exists())->toBeFalse();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertNotified('No service request types found');
+
+    expect(ServiceRequestTypeEmailTemplate::query()->exists())->toBeFalse();
+});
+
+test('it prevents applying base templates when the service management feature is disabled', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = false;
+    $settings->save();
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
+        ->assertForbidden();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
+});
+
+test('it prevents applying base templates for authenticated users who are not super admins', function () {
+    actingAs(User::factory()->create());
+
+    ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    get(ManageServiceRequestBaseTemplatesSettings::getUrl())
+        ->assertForbidden();
+
+    expect(ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $serviceRequestType->getKey())
+        ->exists())->toBeFalse();
 });
