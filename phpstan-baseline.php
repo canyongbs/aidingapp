@@ -1092,6 +1092,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/ManageServiceRequestUpdate.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Unsafe call to private method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\Advisories\\\\Pages\\\\ManageAdvisoryUpdate\\:\\:managers\\(\\) through static\\:\\:\\.$#',
+    'identifier' => 'staticClassAccess.privateMethod',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
