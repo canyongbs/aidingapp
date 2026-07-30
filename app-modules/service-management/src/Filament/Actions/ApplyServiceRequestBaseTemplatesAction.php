@@ -106,7 +106,7 @@ class ApplyServiceRequestBaseTemplatesAction extends Action
                     Notification::make()
                         ->warning()
                         ->title('No base templates to apply')
-                        ->body('Add an Example Subject or Example Body before applying templates to service request types.')
+                        ->body('Add an Example Subject and Example Body before applying templates to service request types.')
                         ->send();
 
                     return;
