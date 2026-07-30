@@ -68,6 +68,7 @@ it('can render with proper permission', function () {
     get(PipelineResource::getUrl('view-pipeline-entry', [
         'record' => $pipeline->getRouteKey(),
         'pipelineEntry' => $pipelineEntry->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertForbidden();
 
@@ -81,6 +82,7 @@ it('can render with proper permission', function () {
     get(PipelineResource::getUrl('view-pipeline-entry', [
         'record' => $pipeline->getRouteKey(),
         'pipelineEntry' => $pipelineEntry->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
 });
@@ -107,6 +109,7 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
     get(PipelineResource::getUrl('view-pipeline-entry', [
         'record' => $pipeline->getRouteKey(),
         'pipelineEntry' => $pipelineEntry->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertNotFound();
 });
@@ -128,6 +131,7 @@ it('can view a pipeline entry', function () {
     livewire(ViewPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $pipelineEntry,
+        'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
@@ -154,6 +158,7 @@ it('displays correct pipeline entry details', function () {
     livewire(ViewPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $pipelineEntry,
+        'parentRecord' => $project,
     ])
         ->assertSuccessful()
         ->assertSee('Test Entry Name')
@@ -161,7 +166,7 @@ it('displays correct pipeline entry details', function () {
         ->assertSee($pipeline->stages->first()->name);
 });
 
-it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -202,6 +207,7 @@ it('shows the pipeline name in the breadcrumb', function () {
     get(PipelineResource::getUrl('view-pipeline-entry', [
         'record' => $pipeline->getRouteKey(),
         'pipelineEntry' => $pipelineEntry->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding');
@@ -230,6 +236,7 @@ it('displays related service requests as number with title', function () {
     livewire(ViewPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $pipelineEntry,
+        'parentRecord' => $project,
     ])
         ->assertSuccessful()
         ->assertSee("({$serviceRequest->service_request_number}) Unable to log in");
@@ -258,6 +265,7 @@ it('displays related service requests by number even when the title is null', fu
     livewire(ViewPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $pipelineEntry,
+        'parentRecord' => $project,
     ])
         ->assertSuccessful()
         ->assertSee("({$serviceRequest->service_request_number})");
@@ -280,6 +288,7 @@ it('can delete pipeline entry', function () {
     livewire(ViewPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $pipelineEntry,
+        'parentRecord' => $project,
     ])
         ->callAction('delete')
         ->assertRedirect();
