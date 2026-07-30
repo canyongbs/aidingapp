@@ -51,17 +51,13 @@
         @livewire(ProjectStatsWidget::class, ['record' => $record])
     @endif
 
-    <div class="grid grid-cols-1 items-stretch gap-8 lg:grid-cols-2">
-        @if (ProjectAccessWidget::canView())
-            @livewire(ProjectAccessWidget::class, ['record' => $record])
-        @endif
+    @if (ProjectAccessWidget::canView())
+        @livewire(ProjectAccessWidget::class, ['record' => $record])
+    @endif
 
-        <div class="h-full">
-            @if (auth()->user()?->can('viewAny', [ProjectMilestone::class, $record]))
-                @livewire(ProjectMilestonesWidget::class, ['record' => $record])
-            @endif
-        </div>
-    </div>
+    @if (auth()->user()?->can('viewAny', [ProjectMilestone::class, $record]))
+        @livewire(ProjectMilestonesWidget::class, ['record' => $record])
+    @endif
 
     @if (ProjectWorkPipelineWidget::canView())
         @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
