@@ -34,65 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-class RichContentDocument
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<ServiceRequestCustomEmailTemplate>
+ */
+class ServiceRequestCustomEmailTemplateFactory extends Factory
 {
     /**
-     * @var array<int, string>
+     * @return array<string, mixed>
      */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+    public function definition(): array
     {
-        if (! is_array($document)) {
-            return false;
-        }
-
-        return static::nodesHaveContent($document['content'] ?? []);
-    }
-
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    public static function encodeRichContent(array|string|null $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
-    }
-
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
-    {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return [
+            'type' => $this->faker->randomElement(ServiceRequestEmailTemplateType::cases()),
+            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
+                ? ServiceRequestTypeEmailTemplateRole::Customer
+                : $this->faker->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
+        ];
     }
 }

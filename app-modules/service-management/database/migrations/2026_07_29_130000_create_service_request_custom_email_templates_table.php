@@ -34,65 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-class RichContentDocument
-{
-    /**
-     * @var array<int, string>
-     */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! is_array($document)) {
-            return false;
-        }
+        Schema::create('service_request_custom_email_templates', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->string('role');
+            $table->jsonb('subject')->nullable();
+            $table->jsonb('body')->nullable();
+            $table->timestamps();
 
-        return static::nodesHaveContent($document['content'] ?? []);
+            $table->unique(['type', 'role']);
+        });
     }
 
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    public static function encodeRichContent(array|string|null $value): ?string
+    public function down(): void
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
+        Schema::dropIfExists('service_request_custom_email_templates');
     }
-
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
-    {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-}
+};

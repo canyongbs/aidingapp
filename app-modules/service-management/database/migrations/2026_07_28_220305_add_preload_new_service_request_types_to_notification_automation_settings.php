@@ -34,65 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-class RichContentDocument
-{
-    /**
-     * @var array<int, string>
-     */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        if (! is_array($document)) {
-            return false;
-        }
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('service-request-notification-automation.preload_new_service_request_types', false);
+            } catch (SettingAlreadyExists) {
+            }
 
-        return static::nodesHaveContent($document['content'] ?? []);
+            try {
+                $this->migrator->add('service-request-notification-automation.use_custom_templates', false);
+            } catch (SettingAlreadyExists) {
+            }
+        });
     }
 
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    public static function encodeRichContent(array|string|null $value): ?string
+    public function down(): void
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
+        DB::transaction(function () {
+            $this->migrator->deleteIfExists('service-request-notification-automation.preload_new_service_request_types');
+            $this->migrator->deleteIfExists('service-request-notification-automation.use_custom_templates');
+        });
     }
-
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
-    {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-}
+};
