@@ -51,7 +51,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 class EditPipeline extends EditRecord
 {
@@ -118,34 +117,6 @@ class EditPipeline extends EditRecord
                     ->minItems(1)
                     ->maxItems(5),
             ]);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $pipeline = $this->getRecord();
-
-        assert($pipeline instanceof Pipeline);
-
-        $project = $pipeline->project;
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
-            Str::limit($this->getRecordTitle(), 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
     }
 
     protected function getHeaderActions(): array

@@ -37,49 +37,45 @@
         'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
     ])
 >
-    @unless ($project)
-        <div class="flex w-full justify-center">
-            <div class="grid max-w-xs grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800" role="group">
-                <button
-                    type="button"
-                    @class([
-                        'px-5 py-1.5 text-xs font-medium rounded-lg',
-                        'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'table',
-                        'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'table',
-                    ])
-                    wire:click="setViewType('table')"
-                >
-                    <x-filament::icon class="h-6 w-6" icon="heroicon-m-table-cells" />
-                </button>
-                <button
-                    type="button"
-                    @class([
-                        'px-5 py-1.5 text-xs font-medium rounded-lg',
-                        'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'kanban',
-                        'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'kanban',
-                    ])
-                    wire:click="setViewType('kanban')"
-                >
-                    <x-filament::icon class="h-6 w-6" icon="heroicon-m-view-columns" />
-                </button>
-            </div>
-        </div>
-    @endunless
-
-    @if ($project)
-        <div class="flex w-full justify-center">
-            <x-filament::link
-                tag="button"
-                wire:click="mountAction('selectPipeline')"
-                icon="heroicon-c-chevron-down"
-                icon-position="after"
-                color="gray"
-                size="sm"
+    <div class="flex w-full justify-center">
+        <div class="grid max-w-xs grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800" role="group">
+            <button
+                type="button"
+                @class([
+                    'px-5 py-1.5 text-xs font-medium rounded-lg',
+                    'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'table',
+                    'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'table',
+                ])
+                wire:click="setViewType('table')"
             >
-                {{ $this->getOwnerRecord()->name }}
-            </x-filament::link>
+                <x-filament::icon class="h-6 w-6" icon="heroicon-m-table-cells" />
+            </button>
+            <button
+                type="button"
+                @class([
+                    'px-5 py-1.5 text-xs font-medium rounded-lg',
+                    'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'kanban',
+                    'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'kanban',
+                ])
+                wire:click="setViewType('kanban')"
+            >
+                <x-filament::icon class="h-6 w-6" icon="heroicon-m-view-columns" />
+            </button>
         </div>
-    @endif
+    </div>
+
+    <div class="flex w-full justify-center">
+        <x-filament::link
+            tag="button"
+            wire:click="mountAction('selectPipeline')"
+            icon="heroicon-c-chevron-down"
+            icon-position="after"
+            color="gray"
+            size="sm"
+        >
+            {{ $this->getOwnerRecord()->name }}
+        </x-filament::link>
+    </div>
 
     @if ($viewType === 'table')
         @if ($this->table->getColumns())
@@ -121,7 +117,7 @@
             'project::livewire.pipeline-entry-kanban',
             [
                 'pipeline' => $this->getOwnerRecord(),
-                'project' => $project,
+                'project' => $this->getParentRecord()?->getKey(),
             ]
         )
     @endif

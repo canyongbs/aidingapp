@@ -42,6 +42,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
 use BackedEnum;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -56,8 +57,6 @@ use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
@@ -68,9 +67,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
     protected static string $relationship = 'entries';
 
     public ?string $viewType = null;
-
-    #[Locked, Url]
-    public ?string $project = null;
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-vertical';
 
@@ -86,19 +82,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         parent::mount($record);
 
-        $pipeline = $this->getOwnerRecord();
-        assert($pipeline instanceof Pipeline);
-
-        if (filled($this->project) && (string) $pipeline->project?->getKey() !== $this->project) {
-            abort(404);
-        }
-
-        if (filled($this->project)) {
-            $this->viewType = 'kanban';
-
-            return;
-        }
-
         $requestedViewType = request()->query('viewType');
 
         $this->setViewType(filled($requestedViewType) ? $requestedViewType : (session('pipeline-view-type') ?? 'table'));
@@ -106,13 +89,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     public function getSubheading(): string | Htmlable | null
     {
-        if (blank($this->project)) {
-            return null;
-        }
-
         return new HtmlString(
             view('project::filament.pages.back-to-project', [
-                'url' => ProjectResource::getUrl('view', ['record' => $this->project]),
+                'url' => ProjectResource::getUrl('view', ['record' => $this->getParentRecord()]),
             ])->render(),
         );
     }
@@ -122,19 +101,15 @@ class ManagePipelineEntries extends ManageRelatedRecords
      */
     public function getBreadcrumbs(): array
     {
-        $pipeline = $this->getOwnerRecord();
+        $project = $this->getParentRecord();
 
-        assert($pipeline instanceof Pipeline);
-
-        $project = $pipeline->project;
+        assert($project instanceof Project);
 
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
-            Str::limit($this->getRecordTitle(), 16),
+            ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
+            ProjectResource::getUrl('pipelines', ['record' => $project]) => 'Pipelines',
+            PipelineResource::getUrl('view', ['record' => $this->getRecord(), 'project' => $project]) => Str::limit($this->getRecordTitle(), 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
@@ -155,6 +130,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         $pipeline = $this->getOwnerRecord();
         assert($pipeline instanceof Pipeline);
+
+        $project = $this->getParentRecord();
+        assert($project instanceof Project);
 
         return $table
             ->columns([
@@ -182,6 +160,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->url(fn (PipelineEntry $record): string => PipelineResource::getUrl('view-pipeline-entry', [
                         'record' => $pipeline->getKey(),
                         'pipelineEntry' => $record->getKey(),
+                        'project' => $project,
                         'from' => 'table',
                     ])),
                 DeleteAction::make(),
@@ -205,7 +184,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected function getPipelineSwitcherProjectId(): ?string
     {
-        return $this->project;
+        $project = $this->getParentRecord();
+
+        return $project ? (string) $project->getKey() : null;
     }
 
     protected function getPipelineSwitcherCurrentPipelineId(): ?string
@@ -217,7 +198,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         $this->redirect(static::getUrl([
             'record' => $pipelineId,
-            'project' => $this->project,
+            'project' => $this->getParentRecord(),
             'viewType' => $this->viewType,
         ]));
     }
