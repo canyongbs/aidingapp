@@ -46,6 +46,11 @@ class ApplyServiceRequestCustomTemplatesAction extends AbstractApplyServiceReque
         return 'applyCustomTemplates';
     }
 
+    protected function isAuthorizedForSource(): bool
+    {
+        return (bool) auth()->user()?->can('settings.view-any');
+    }
+
     /**
      * @return Builder<ServiceRequestCustomEmailTemplate>
      */

@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmail
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\Feature;
-use App\Models\User;
 use App\Support\RichContentDocument;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
@@ -71,10 +70,7 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
                     return false;
                 }
 
-                $user = auth()->user();
-                assert($user instanceof User);
-
-                return $user->isSuperAdmin();
+                return $this->isAuthorizedForSource();
             })
             ->slideOver()
             ->modalHeading("Apply {$sourceLabel}")
@@ -152,6 +148,11 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
 
     /** @phpstan-ignore missingType.generics (Intentionally generic-free so concrete subclasses can specify their own model generics without a childReturnType conflict.) */
     abstract protected function getSourceTemplatesQuery(): Builder;
+
+    /**
+     * Whether the current user is authorized to apply this source's templates.
+     */
+    abstract protected function isAuthorizedForSource(): bool;
 
     /**
      * The lowercase label used in messages, e.g. "base templates" or "custom templates".

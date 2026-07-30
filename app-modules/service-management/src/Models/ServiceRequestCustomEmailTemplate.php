@@ -41,19 +41,21 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use App\Models\BaseModel;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @mixin IdeHelperServiceRequestCustomEmailTemplate
  */
-class ServiceRequestCustomEmailTemplate extends BaseModel implements HasRichContent
+class ServiceRequestCustomEmailTemplate extends Model implements HasRichContent
 {
     /** @use HasFactory<ServiceRequestCustomEmailTemplateFactory> */
     use HasFactory;
 
+    use HasUuids;
     use InteractsWithRichContent;
 
     protected $fillable = [

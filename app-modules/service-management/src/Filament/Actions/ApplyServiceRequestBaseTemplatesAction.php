@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
 class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
@@ -44,6 +45,14 @@ class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequest
     public static function getDefaultName(): ?string
     {
         return 'applyBaseTemplates';
+    }
+
+    protected function isAuthorizedForSource(): bool
+    {
+        $user = auth()->user();
+        assert($user instanceof User);
+
+        return $user->isSuperAdmin();
     }
 
     /**

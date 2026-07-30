@@ -53,6 +53,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -93,6 +94,10 @@ class ServiceRequestTypeTemplates extends SettingsPage
     {
         return $schema
             ->components([
+                Toggle::make('preload_new_service_request_types')
+                    ->label('Preload New Service Request Types')
+                    ->helperText('When selected, new service request types will inherit the base templates.')
+                    ->columnSpanFull(),
                 Toggle::make('use_custom_templates')
                     ->label('Override Defaults')
                     ->helperText('When enabled, these custom templates are used instead of the default base templates for all service request types.')
@@ -122,6 +127,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
+                    ->visible(fn (Get $get) => $get('use_custom_templates'))
                     ->columnSpanFull(),
             ]);
     }
@@ -133,6 +139,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
         DB::transaction(function () use ($state): void {
             $settings = app(ServiceRequestNotificationAutomationSettings::class);
             $settings->use_custom_templates = (bool) ($state['use_custom_templates'] ?? false);
+            $settings->preload_new_service_request_types = (bool) ($state['preload_new_service_request_types'] ?? false);
             $settings->save();
 
             $templates = $state['templates'] ?? [];
@@ -170,7 +177,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
      */
     public function getFormActions(): array
     {
-        if (! auth()->user()->isSuperAdmin()) {
+        if (! (bool) auth()->user()?->can('settings.view-any')) {
             return [];
         }
 
@@ -183,7 +190,8 @@ class ServiceRequestTypeTemplates extends SettingsPage
     protected function getHeaderActions(): array
     {
         return [
-            ApplyServiceRequestCustomTemplatesAction::make(),
+            ApplyServiceRequestCustomTemplatesAction::make()
+                ->visible(fn (): bool => (bool) ($this->data['use_custom_templates'] ?? false)),
         ];
     }
 
@@ -193,6 +201,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
 
         $state = [
             'use_custom_templates' => $settings->use_custom_templates,
+            'preload_new_service_request_types' => $settings->preload_new_service_request_types,
             'templates' => [],
         ];
 

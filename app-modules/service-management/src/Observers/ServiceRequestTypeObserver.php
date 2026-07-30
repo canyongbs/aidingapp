@@ -55,7 +55,7 @@ class ServiceRequestTypeObserver
 
     public function created(ServiceRequestType $serviceRequestType): void
     {
-        if (ProloadServiceRequestTypeFeature::active() && (app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types || app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates)) {
+        if (ProloadServiceRequestTypeFeature::active() && app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
             app(PreloadServiceRequestTypeBaseTemplates::class)->execute($serviceRequestType);
         }
     }
