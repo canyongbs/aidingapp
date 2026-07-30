@@ -104,7 +104,7 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
                     ->cursor()
                     ->filter(function (Model $template): bool {
                         /** @var ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template */
-                        return RichContentDocument::hasContent($template->subject) || RichContentDocument::hasContent($template->body);
+                        return RichContentDocument::hasContent($template->subject) && RichContentDocument::hasContent($template->body);
                     })
                     ->collect();
 
