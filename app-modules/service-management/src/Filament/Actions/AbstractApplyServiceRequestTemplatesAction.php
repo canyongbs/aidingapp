@@ -37,6 +37,8 @@
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestTypesTable;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\Feature;
@@ -49,6 +51,7 @@ use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Get;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection as SupportCollection;
 use Illuminate\Support\Facades\Gate;
 
@@ -99,10 +102,10 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
                 $sourceTemplates = $this->getSourceTemplatesQuery()
                     ->select(['id', 'type', 'role', 'subject', 'body'])
                     ->cursor()
-                    ->filter(fn (mixed $template): bool => RichContentDocument::hasContent($template->subject)
-                        /** @phpstan-ignore property.notFound (Both concrete source template models declare a subject property; the abstract action intentionally works against any of them.) */
-                        || RichContentDocument::hasContent($template->body))
-                    /** @phpstan-ignore property.notFound (Both concrete source template models declare a body property; the abstract action intentionally works against any of them.) */
+                    ->filter(function (Model $template): bool {
+                        /** @var ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template */
+                        return RichContentDocument::hasContent($template->subject) || RichContentDocument::hasContent($template->body);
+                    })
                     ->collect();
 
                 if ($sourceTemplates->isEmpty()) {
