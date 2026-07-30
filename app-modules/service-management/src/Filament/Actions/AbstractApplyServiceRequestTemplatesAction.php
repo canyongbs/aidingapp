@@ -195,8 +195,8 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
             return [
                 'type' => $sourceTemplate->type->value,
                 'role' => $sourceTemplate->role->value,
-                'subject' => $this->encodeRichContent($sourceTemplate->subject),
-                'body' => $this->encodeRichContent($sourceTemplate->body),
+                'subject' => RichContentDocument::encodeRichContent($sourceTemplate->subject),
+                'body' => RichContentDocument::encodeRichContent($sourceTemplate->body),
             ];
         });
 
@@ -227,13 +227,5 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
                     );
                 }
             });
-    }
-
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    protected function encodeRichContent(?array $value): ?string
-    {
-        return is_null($value) ? null : json_encode($value);
     }
 }

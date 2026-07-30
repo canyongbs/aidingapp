@@ -64,8 +64,8 @@ class PreloadServiceRequestTypeBaseTemplates
                 'service_request_type_id' => $serviceRequestType->getKey(),
                 'type' => $template->type->value,
                 'role' => $template->role->value,
-                'subject' => $this->encodeRichContent($template->subject),
-                'body' => $this->encodeRichContent($template->body),
+                'subject' => RichContentDocument::encodeRichContent($template->subject),
+                'body' => RichContentDocument::encodeRichContent($template->body),
                 'created_at' => $now,
                 'updated_at' => $now,
             ])
@@ -83,19 +83,5 @@ class PreloadServiceRequestTypeBaseTemplates
                 ['subject', 'body', 'updated_at'],
             );
         }
-    }
-
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    protected function encodeRichContent(array|string|null $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
     }
 }
