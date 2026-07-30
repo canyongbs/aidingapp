@@ -61,6 +61,13 @@ test('it prevents access when the user does not have permission', function () {
 });
 
 test('it allows access for a user with permission', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+    get(ServiceRequestTypeTemplates::getUrl())
+        ->assertSuccessful();
+
     asSuperAdmin();
 
     get(ServiceRequestTypeTemplates::getUrl())
@@ -69,6 +76,8 @@ test('it allows access for a user with permission', function () {
 
 test('it saves the override flag and custom template content', function () {
     asSuperAdmin();
+
+    expect(app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates)->toBeFalse();
 
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
@@ -88,6 +97,31 @@ test('it saves the override flag and custom template content', function () {
 
     expect($template->subject)->toEqual(serviceRequestTypeTemplatesDoc('Hello'));
     expect($template->body)->toEqual(serviceRequestTypeTemplatesDoc('Body'));
+});
+
+test('it saves the preload new service request types setting', function () {
+    asSuperAdmin();
+
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    expect($settings->preload_new_service_request_types)->toBeFalse();
+
+    livewire(ServiceRequestTypeTemplates::class)
+        ->fillForm([
+            'preload_new_service_request_types' => true,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types)->toBeTrue();
+
+    livewire(ServiceRequestTypeTemplates::class)
+        ->fillForm([
+            'preload_new_service_request_types' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect(app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types)->toBeFalse();
 });
 
 test('it deletes a custom template when its subject and body are cleared', function () {

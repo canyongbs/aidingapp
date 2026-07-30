@@ -94,14 +94,15 @@ class ServiceRequestTypeTemplates extends SettingsPage
     {
         return $schema
             ->components([
-                Toggle::make('preload_new_service_request_types')
-                    ->label('Preload New Service Request Types')
-                    ->helperText('When selected, new service request types will inherit the base templates.')
-                    ->columnSpanFull(),
                 Toggle::make('use_custom_templates')
                     ->label('Override Defaults')
                     ->helperText('When enabled, these custom templates are used instead of the default base templates for all service request types.')
                     ->live()
+                    ->columnSpanFull(),
+                Toggle::make('preload_new_service_request_types')
+                    ->label('Preload New Service Request Types')
+                    ->helperText('When selected, new service request types will inherit the base templates.')
+                    ->visible(fn (Get $get) => $get('use_custom_templates'))
                     ->columnSpanFull(),
                 Tabs::make('Event templates')
                     ->persistTab()
