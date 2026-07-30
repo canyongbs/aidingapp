@@ -59,7 +59,7 @@ class PreloadServiceRequestTypeBaseTemplates
             ->select(['type', 'role', 'subject', 'body'])
             ->cursor()
             ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
-                || RichContentDocument::hasContent($template->body))
+                && RichContentDocument::hasContent($template->body))
             ->map(fn (ServiceRequestNotificationAutomationEmailTemplate|ServiceRequestCustomEmailTemplate $template): array => [
                 'service_request_type_id' => $serviceRequestType->getKey(),
                 'type' => $template->type->value,
@@ -88,8 +88,14 @@ class PreloadServiceRequestTypeBaseTemplates
     /**
      * @param array<string, mixed>|null $value
      */
-    protected function encodeRichContent(?array $value): ?string
+    protected function encodeRichContent(array|string|null $value): ?string
     {
-        return is_null($value) ? null : json_encode($value);
+        if ($value === null) {
+            return null;
+        }
+
+        return is_array($value)
+            ? json_encode($value)
+            : $value;
     }
 }
