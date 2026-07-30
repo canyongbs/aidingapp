@@ -44,10 +44,16 @@ return new class () extends SettingsMigration {
             $this->migrator->add('service-request-notification-automation.preload_new_service_request_types', false);
         } catch (SettingAlreadyExists) {
         }
+
+        try {
+            $this->migrator->add('service-request-notification-automation.use_custom_templates', false);
+        } catch (SettingAlreadyExists) {
+        }
     }
 
     public function down(): void
     {
         $this->migrator->deleteIfExists('service-request-notification-automation.preload_new_service_request_types');
+        $this->migrator->deleteIfExists('service-request-notification-automation.use_custom_templates');
     }
 };
