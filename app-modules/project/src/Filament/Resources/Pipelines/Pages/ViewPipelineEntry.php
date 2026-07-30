@@ -77,9 +77,9 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
-        $project = $this->getParentRecord();
+        $projectRouteKey = request()->route('project');
 
-        if ($project && (string) $this->record->project?->getKey() !== (string) $project->getKey()) {
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
     }

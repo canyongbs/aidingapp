@@ -82,6 +82,12 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        $projectRouteKey = request()->route('project');
+
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
+            abort(404);
+        }
+
         $this->fillForm();
     }
 
