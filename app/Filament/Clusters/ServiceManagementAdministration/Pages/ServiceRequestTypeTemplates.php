@@ -123,7 +123,6 @@ class ServiceRequestTypeTemplates extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
-                    ->visible(fn (Get $get): bool => (bool) $get('use_custom_templates'))
                     ->columnSpanFull(),
             ]);
     }
