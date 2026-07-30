@@ -214,7 +214,7 @@ it('orders grouped type options by category sort and pivot sort', function () {
     // Types within Earlier Root should include both types
     $typeNodes = collect($earlierRootChildren)->filter(fn (array $node): bool => ! str_starts_with($node['value'], 'category_'));
     $typeIds = $typeNodes->map(fn (array $node): string => $node['value'])->values()->all();
-    
+
     expect($typeIds)->toContain($earlierRootFirstType->getKey());
     expect($typeIds)->toContain($earlierRootSecondType->getKey());
 });

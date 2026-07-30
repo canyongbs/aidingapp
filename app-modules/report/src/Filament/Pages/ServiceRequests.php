@@ -153,7 +153,6 @@ class ServiceRequests extends Dashboard
         ]);
     }
 
-
     /**
      * The ids of every Service Request Type the current user manages or audits.
      *
