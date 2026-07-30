@@ -115,6 +115,10 @@ test('it deletes a custom template when its subject and body are cleared', funct
 test('it applies custom templates to all service request types by default', function () {
     asSuperAdmin();
 
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->use_custom_templates = true;
+    $settings->save();
+
     $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
@@ -144,6 +148,10 @@ test('it applies custom templates to all service request types by default', func
 test('it applies custom templates only to the selected service request types', function () {
     asSuperAdmin();
 
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->use_custom_templates = true;
+    $settings->save();
+
     $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
@@ -172,6 +180,10 @@ test('it applies custom templates only to the selected service request types', f
 
 test('it warns when there are no custom templates with content to apply', function () {
     asSuperAdmin();
+
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->use_custom_templates = true;
+    $settings->save();
 
     ServiceRequestType::factory()->create();
 
