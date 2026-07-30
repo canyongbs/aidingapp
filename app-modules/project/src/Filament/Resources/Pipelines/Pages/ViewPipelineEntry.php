@@ -76,6 +76,12 @@ class ViewPipelineEntry extends Page
         if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
             abort(404);
         }
+
+        $project = $this->getParentRecord();
+
+        if ($project && (string) $this->record->project?->getKey() !== (string) $project->getKey()) {
+            abort(404);
+        }
     }
 
     public function getTitle(): string | Htmlable
