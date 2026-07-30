@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
+use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -49,6 +50,24 @@ use Filament\Schemas\Schema;
 class ViewAdvisoryUpdate extends ViewRecord
 {
     protected static string $resource = AdvisoryUpdateResource::class;
+
+    public function getSubNavigationParameters(): array
+    {
+        return ['record' => $this->getParentRecord()];
+    }
+
+    public function getResourceBreadcrumbs(): array
+    {
+        $parentRecord = $this->getParentRecord();
+
+        assert($parentRecord instanceof Advisory);
+
+        return [
+            AdvisoryResource::getUrl() => AdvisoryResource::getBreadcrumb(),
+            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->title,
+            AdvisoryResource::getUrl('manage-advisory-update', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
+        ];
+    }
 
     public function infolist(Schema $schema): Schema
     {
