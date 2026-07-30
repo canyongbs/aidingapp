@@ -107,6 +107,7 @@ test('it saves the preload new service request types setting', function () {
 
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
+            'use_custom_templates' => true,
             'preload_new_service_request_types' => true,
         ])
         ->call('save')
@@ -116,6 +117,7 @@ test('it saves the preload new service request types setting', function () {
 
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
+            'use_custom_templates' => true,
             'preload_new_service_request_types' => false,
         ])
         ->call('save')
