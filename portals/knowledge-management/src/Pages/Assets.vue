@@ -35,8 +35,8 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
-    import { useRoute, useRouter } from 'vue-router';
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
@@ -44,37 +44,11 @@
     import { useAssetsData } from './loaders.js';
 
     // The default "all" filter, page 1, arrives via the route data loader; changing the
-    // filter or page fetches on demand.
+    // filter or page fetches (and caches) on demand via Pinia Colada.
     const { data: initialData } = useAssetsData();
 
-    const route = useRoute();
-    const router = useRouter();
-
-    const activeFilter = ref(route.query.filter || 'all');
-    const loading = ref(false);
-
-    const currentPage = ref(parseInt(route.query.page) || 1);
-    const lastPage = ref(1);
-    const fromItem = ref(0);
-    const toItem = ref(0);
-    const totalItems = ref(0);
-
-    function syncUrl() {
-        const resolved = router.resolve({
-            name: route.name,
-            params: route.params,
-            query: {
-                ...route.query,
-                page: currentPage.value > 1 ? currentPage.value : undefined,
-                filter: activeFilter.value === 'all' ? undefined : activeFilter.value,
-            },
-        });
-        history.replaceState(history.state, '', resolved.href);
-    }
-
-    const assets = ref([]);
-    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
-
+    const activeFilter = ref('all');
+    const currentPage = ref(1);
 
     const tabs = computed(() => [
         { key: 'all', label: 'All' },
@@ -82,38 +56,46 @@
         { key: 'returned', label: 'Returned' },
     ]);
 
-    function applyEnvelope(envelope) {
-        if (!envelope) {
-            return;
+    const isDefaultView = computed(() => activeFilter.value === 'all' && currentPage.value === 1);
+
+    const pageQuery = useQuery({
+        key: () => ['knowledge-management', 'assets', activeFilter.value, currentPage.value],
+        query: () => apiGet('/assets', { filter: activeFilter.value, page: currentPage.value }),
+        enabled: () => !isDefaultView.value,
+    });
+
+    const currentEnvelope = computed(() => (isDefaultView.value ? initialData.value : (pageQuery.data.value ?? null)));
+
+    const shownEnvelope = ref(null);
+    watch(
+        currentEnvelope,
+        (envelope) => {
+            if (envelope) {
+                shownEnvelope.value = envelope;
+            }
+        },
+        { immediate: true },
+    );
+
+    const loading = computed(() => !isDefaultView.value && pageQuery.isLoading.value);
+
+    const assets = computed(() => shownEnvelope.value?.data ?? []);
+    const counts = computed(() => shownEnvelope.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
+
+    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
+    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
+    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
+    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
+
+    watch(activeFilter, () => {
+        currentPage.value = 1;
+    });
+
+    function fetchPage(page) {
+        if (page !== currentPage.value) {
+            currentPage.value = page;
         }
-
-        assets.value = envelope.data ?? [];
-        counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
-
-        currentPage.value = envelope.meta?.current_page ?? 1;
-        lastPage.value = envelope.meta?.last_page ?? 1;
-        fromItem.value = envelope.meta?.from ?? 0;
-        toItem.value = envelope.meta?.to ?? 0;
-        totalItems.value = envelope.meta?.total ?? 0;
     }
-
-    watch(initialData, applyEnvelope, { immediate: true });
-
-    async function fetchAssets(page = 1) {
-        loading.value = true;
-
-        try {
-            applyEnvelope(await apiGet('/assets', { filter: activeFilter.value, page }));
-            syncUrl();
-        } catch (error) {
-            assets.value = [];
-            console.error('Error fetching assets:', error);
-        } finally {
-            loading.value = false;
-        }
-    }
-
-    watch(activeFilter, () => fetchAssets(1));
 </script>
 
 <template>
@@ -139,7 +121,7 @@
                 :from-item="fromItem"
                 :to-item="toItem"
                 :total-items="totalItems"
-                @fetchPage="fetchAssets"
+                @fetchPage="fetchPage"
             />
         </PageCard>
     </Page>

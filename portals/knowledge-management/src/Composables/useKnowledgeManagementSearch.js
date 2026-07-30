@@ -31,6 +31,8 @@
 
 </COPYRIGHT>
 */
+
+import { useQuery } from '@pinia/colada';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { apiPostUrl } from '../Services/api.js';
@@ -41,15 +43,6 @@ export const searchFilterTabs = [
     { label: 'Featured', value: 'featured' },
     { label: 'Most Viewed', value: 'most-viewed' },
 ];
-
-function debounce(func, delay) {
-    let timerId;
-
-    return function (...args) {
-        if (timerId) clearTimeout(timerId);
-        timerId = setTimeout(() => func(...args), delay);
-    };
-}
 
 /**
  * Shared knowledge management search behaviour, used by both the homepage and the
@@ -69,24 +62,55 @@ export function useKnowledgeManagementSearch() {
     const config = useConfigStore();
 
     const searchQuery = ref('');
+    const activeSearchQuery = ref('');
     const selectedTags = ref([]);
-    const filter = ref('');
-    const loadingResults = ref(false);
-    const searchResults = ref(null);
+    const activeTags = ref([]);
+    const filter = ref('all-articles');
     const globalSearchInput = ref(null);
 
     const currentPage = ref(1);
-    const lastPage = ref(1);
-    const totalArticles = ref(0);
-    const fromArticle = ref(0);
-    const toArticle = ref(0);
 
     const isSearchActive = computed(
-        () => !!(searchQuery.value && searchQuery.value.trim()) || selectedTags.value.length > 0,
+        () => !!(activeSearchQuery.value && activeSearchQuery.value.trim()) || activeTags.value.length > 0,
     );
 
+    const pageQuery = useQuery({
+        key: () => [
+            'knowledge-management',
+            'search',
+            activeSearchQuery.value,
+            activeTags.value.join(','),
+            filter.value,
+            currentPage.value,
+        ],
+        query: () =>
+            apiPostUrl(config.searchUrl, {
+                search: JSON.stringify(activeSearchQuery.value ?? ''),
+                tags: activeTags.value.join(','),
+                filter: filter.value,
+                page: currentPage.value,
+            }),
+        enabled: isSearchActive,
+    });
+
+    const shownEnvelope = ref(null);
+
+    watch(
+        pageQuery.data,
+        (envelope) => {
+            if (envelope) {
+                shownEnvelope.value = envelope;
+            } else if (!isSearchActive.value) {
+                shownEnvelope.value = null;
+            }
+        },
+        { immediate: true },
+    );
+
+    const loadingResults = computed(() => isSearchActive.value && pageQuery.isLoading.value);
+
     const searchResultArticles = computed(() =>
-        (searchResults.value?.data?.articles?.data ?? []).map((article) => ({
+        (shownEnvelope.value?.data?.articles?.data ?? []).map((article) => ({
             ...article,
             key: article.id,
             to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
@@ -94,20 +118,17 @@ export function useKnowledgeManagementSearch() {
     );
 
     const searchResultCategories = computed(() =>
-        (searchResults.value?.data?.categories ?? []).map((category) => ({
+        (shownEnvelope.value?.data?.categories ?? []).map((category) => ({
             ...category,
             key: category.slug,
             to: { name: 'view-category', params: { categorySlug: category.slug } },
         })),
     );
 
-    function setPagination(pagination) {
-        currentPage.value = pagination.current_page;
-        lastPage.value = pagination.last_page;
-        totalArticles.value = pagination.total;
-        fromArticle.value = pagination.from;
-        toArticle.value = pagination.to;
-    }
+    const lastPage = computed(() => shownEnvelope.value?.data?.articles?.meta?.last_page ?? 1);
+    const totalArticles = computed(() => shownEnvelope.value?.data?.articles?.meta?.total ?? 0);
+    const fromArticle = computed(() => shownEnvelope.value?.data?.articles?.meta?.from ?? 0);
+    const toArticle = computed(() => shownEnvelope.value?.data?.articles?.meta?.to ?? 0);
 
     function syncUrl() {
         const resolved = router.resolve({
@@ -116,53 +137,13 @@ export function useKnowledgeManagementSearch() {
             query: {
                 ...route.query,
                 page: currentPage.value > 1 ? currentPage.value : undefined,
-                search: searchQuery.value || undefined,
-                tags: selectedTags.value.join(',') || undefined,
-                filter: filter.value || undefined,
+                search: activeSearchQuery.value || undefined,
+                tags: activeTags.value.join(',') || undefined,
+                filter: filter.value && filter.value !== 'all-articles' ? filter.value : undefined,
             },
         });
 
         history.replaceState(history.state, '', resolved.href);
-    }
-
-    const fetchResults = debounce((page) => {
-        if (!isSearchActive.value) {
-            searchResults.value = null;
-            loadingResults.value = false;
-
-            return;
-        }
-
-        apiPostUrl(config.searchUrl, {
-            search: JSON.stringify(searchQuery.value ?? ''),
-            tags: selectedTags.value.join(','),
-            filter: filter.value,
-            page,
-        })
-            .then((body) => {
-                searchResults.value = body;
-                setPagination(body.data.articles.meta);
-            })
-            .finally(() => {
-                loadingResults.value = false;
-            });
-    }, 500);
-
-    function runSearch({ page = 1, focus = false } = {}) {
-        if (!isSearchActive.value) {
-            searchResults.value = null;
-            loadingResults.value = false;
-
-            return;
-        }
-
-        loadingResults.value = true;
-
-        if (focus) {
-            nextTick(() => globalSearchInput.value?.focus());
-        }
-
-        fetchResults(page);
     }
 
     function toggleTag(tag) {
@@ -174,20 +155,18 @@ export function useKnowledgeManagementSearch() {
     }
 
     function changeSearchFilter(value) {
-        filter.value = value;
-        currentPage.value = 1;
-        syncUrl();
-        runSearch({ page: 1 });
+        if (filter.value !== value) {
+            filter.value = value;
+            currentPage.value = 1;
+            syncUrl();
+        }
     }
 
     function fetchPage(page) {
-        if (page === currentPage.value) {
-            return;
+        if (page !== currentPage.value) {
+            currentPage.value = page;
+            syncUrl();
         }
-
-        currentPage.value = page;
-        syncUrl();
-        runSearch({ page });
     }
 
     function fetchNextPage() {
@@ -202,13 +181,22 @@ export function useKnowledgeManagementSearch() {
         }
     }
 
-    // A change in the search box or selected tags resets to page 1 and refetches.
+    let timerId;
     watch(
         () => [searchQuery.value, [...selectedTags.value]],
-        () => {
-            currentPage.value = 1;
-            syncUrl();
-            runSearch({ page: 1 });
+        ([newSearch, newTags]) => {
+            if (timerId) clearTimeout(timerId);
+            timerId = setTimeout(() => {
+                const searchChanged = newSearch !== activeSearchQuery.value;
+                const tagsChanged = newTags.join(',') !== activeTags.value.join(',');
+
+                if (searchChanged || tagsChanged) {
+                    activeSearchQuery.value = newSearch;
+                    activeTags.value = newTags;
+                    currentPage.value = 1;
+                    syncUrl();
+                }
+            }, 500);
         },
     );
 
@@ -226,14 +214,16 @@ export function useKnowledgeManagementSearch() {
         const initialSearch = route.query.search || '';
         const initialTags = route.query.tags ? route.query.tags.split(',') : [];
 
-        filter.value = route.query.filter || '';
+        filter.value = route.query.filter || 'all-articles';
         currentPage.value = parseInt(route.query.page) || 1;
 
         if (initialSearch || initialTags.length > 0) {
             searchQuery.value = initialSearch;
+            activeSearchQuery.value = initialSearch;
             selectedTags.value = initialTags;
+            activeTags.value = initialTags;
 
-            runSearch({ page: currentPage.value, focus: true });
+            nextTick(() => globalSearchInput.value?.focus());
         }
     });
 
