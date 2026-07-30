@@ -207,4 +207,3 @@ it('hides the pipeline resource sub navigation', function () {
 
     expect(PipelineResource::getRecordSubNavigation($component))->toBe([]);
 });
-
