@@ -76,10 +76,6 @@ class ViewPipelineEntry extends Page
         if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
             abort(404);
         }
-
-        if (request()->has('from')) {
-            session(['pipeline_entry_source' => request('from')]);
-        }
     }
 
     public function getTitle(): string | Htmlable
@@ -89,18 +85,10 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = [
+        return PipelineResource::getUrl('manage-entries', [
             'record' => $this->record,
             'project' => $this->getParentRecord(),
-        ];
-
-        if ($source === 'kanban') {
-            $params['viewType'] = 'kanban';
-        }
-
-        return PipelineResource::getUrl('manage-entries', $params);
+        ]);
     }
 
     /**

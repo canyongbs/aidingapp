@@ -191,7 +191,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->url(fn (): string => PipelineResource::getUrl('manage-entries', [
                         'record' => $pipeline?->getKey(),
                         'project' => $this->record->getKey(),
-                        'viewType' => 'kanban',
                     ]))
                     ->visible(fn (): bool => (bool) $pipeline),
                 CreateAction::make('createEntry')

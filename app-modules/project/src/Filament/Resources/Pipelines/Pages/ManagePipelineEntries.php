@@ -37,24 +37,12 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
-use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use BackedEnum;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 
@@ -66,8 +54,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static string $relationship = 'entries';
 
-    public ?string $viewType = null;
-
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-vertical';
 
     protected static ?string $title = 'Manage Pipeline Entries';
@@ -77,15 +63,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
     protected string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        $requestedViewType = request()->query('viewType');
-
-        $this->setViewType(filled($requestedViewType) ? $requestedViewType : (session('pipeline-view-type') ?? 'table'));
-    }
 
     public function getSubheading(): string | Htmlable | null
     {
@@ -120,68 +97,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
         return $breadcrumbs;
     }
 
-    public function setViewType(string $viewType): void
-    {
-        $this->viewType = $viewType;
-        session(['pipeline-view-type' => $viewType]);
-    }
-
-    public function table(Table $table): Table
-    {
-        $pipeline = $this->getOwnerRecord();
-        assert($pipeline instanceof Pipeline);
-
-        $project = $this->getParentRecord();
-        assert($project instanceof Project);
-
-        return $table
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->sortable()
-                    ->searchable(['pipeline_entries.name']),
-                TextColumn::make('pipelineStage.name')
-                    ->label('Stage')
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('stage')
-                    ->relationship('pipelineStage', 'name')
-                    ->multiple()
-                    ->preload(),
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->label('View')
-                    ->url(fn (PipelineEntry $record): string => PipelineResource::getUrl('view-pipeline-entry', [
-                        'record' => $pipeline->getKey(),
-                        'pipelineEntry' => $record->getKey(),
-                        'project' => $project,
-                        'from' => 'table',
-                    ])),
-                DeleteAction::make(),
-            ])
-            ->headerActions([
-                CreateAction::make()
-                    ->slideOver()
-                    ->schema([
-                        TextInput::make('name')
-                            ->required()
-                            ->maxLength(255),
-                        Select::make('pipeline_stage_id')
-                            ->label('Stage')
-                            ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
-                            ->required(),
-                        ...PipelineEntryForm::components($pipeline),
-                    ]),
-            ])
-            ->defaultSort('created_at', 'desc');
-    }
-
     protected function getPipelineSwitcherProjectId(): ?string
     {
         $project = $this->getParentRecord();
@@ -199,7 +114,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
         $this->redirect(static::getUrl([
             'record' => $pipelineId,
             'project' => $this->getParentRecord(),
-            'viewType' => $this->viewType,
         ]));
     }
 }

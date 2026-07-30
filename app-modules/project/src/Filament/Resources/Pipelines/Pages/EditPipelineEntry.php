@@ -92,16 +92,11 @@ class EditPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = [
+        return PipelineResource::getUrl('view-pipeline-entry', [
             'record' => $this->record,
             'pipelineEntry' => $this->pipelineEntry,
             'project' => $this->getParentRecord(),
-            'from' => $source,
-        ];
-
-        return PipelineResource::getUrl('view-pipeline-entry', $params);
+        ]);
     }
 
     /**
