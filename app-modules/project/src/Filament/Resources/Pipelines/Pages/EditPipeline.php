@@ -156,7 +156,7 @@ class EditPipeline extends EditRecord
 
         return [
             DeleteAction::make()
-                ->successRedirectUrl(ProjectResource::getUrl('manage-pipelines', ['record' => $pipeline->project])),
+                ->successRedirectUrl(ProjectResource::getUrl('pipelines', ['record' => $pipeline->project])),
         ];
     }
 }
