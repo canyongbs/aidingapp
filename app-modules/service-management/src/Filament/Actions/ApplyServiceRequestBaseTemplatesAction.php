@@ -41,95 +41,6 @@ use Illuminate\Database\Eloquent\Builder;
 
 class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this
-            ->label('Apply')
-            ->icon('heroicon-m-arrow-down-on-square-stack')
-            ->authorize(function (): bool {
-                if (! Gate::check(Feature::ServiceManagement->getGateName())) {
-                    return false;
-                }
-
-                $user = auth()->user();
-                assert($user instanceof User);
-
-                return $user->isSuperAdmin();
-            })
-            ->slideOver()
-            ->modalHeading('Apply base templates')
-            ->modalDescription('Applying base templates will overwrite any existing customized templates for the affected service request type(s). This action cannot be undone.')
-            ->modalSubmitActionLabel('Apply')
-            ->schema([
-                ToggleButtons::make('apply_to')
-                    ->label('Apply to')
-                    ->options([
-                        'all' => 'All',
-                        'select' => 'Select',
-                    ])
-                    ->default('all')
-                    ->inline()
-                    ->live()
-                    ->required(),
-                TableSelect::make('service_request_type_ids')
-                    ->label('Service Request Types')
-                    ->multiple()
-                    ->tableConfiguration(ServiceRequestTypesTable::class)
-                    ->visible(fn (Get $get): bool => $get('apply_to') === 'select')
-                    ->required(fn (Get $get): bool => $get('apply_to') === 'select'),
-            ])
-            ->action(function (array $data): void {
-                $baseTemplates = ServiceRequestNotificationAutomationEmailTemplate::query()
-                    ->select(['id', 'type', 'role', 'subject', 'body'])
-                    ->cursor()
-                    ->filter(fn (ServiceRequestNotificationAutomationEmailTemplate $template): bool => RichContentDocument::hasContent($template->subject)
-                        && RichContentDocument::hasContent($template->body))
-                    ->collect();
-
-                if ($baseTemplates->isEmpty()) {
-                    Notification::make()
-                        ->warning()
-                        ->title('No base templates to apply')
-                        ->body('Add an Example Subject and Example Body before applying templates to service request types.')
-                        ->send();
-
-                    return;
-                }
-
-                $serviceRequestTypesQuery = $this->getServiceRequestTypesQuery($data);
-
-                if ($serviceRequestTypesQuery === null) {
-                    Notification::make()
-                        ->warning()
-                        ->title('No service request types selected')
-                        ->send();
-
-                    return;
-                }
-
-                $serviceRequestTypesCount = $serviceRequestTypesQuery->count();
-
-                if ($serviceRequestTypesCount === 0) {
-                    Notification::make()
-                        ->warning()
-                        ->title('No service request types found')
-                        ->send();
-
-                    return;
-                }
-
-                $this->applyTemplates($serviceRequestTypesQuery, $baseTemplates);
-
-                Notification::make()
-                    ->success()
-                    ->title('Base templates applied')
-                    ->body("Applied base templates to {$serviceRequestTypesCount} service request type(s).")
-                    ->send();
-            });
-    }
-
     public static function getDefaultName(): ?string
     {
         return 'applyBaseTemplates';
@@ -150,6 +61,6 @@ class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequest
 
     protected function getNoContentBodyMessage(): string
     {
-        return 'Add an Example Subject or Example Body before applying templates to service request types.';
+        return 'Add an Example Subject and Example Body before applying templates to service request types.';
     }
 }

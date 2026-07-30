@@ -61,6 +61,6 @@ class ApplyServiceRequestCustomTemplatesAction extends AbstractApplyServiceReque
 
     protected function getNoContentBodyMessage(): string
     {
-        return 'Add a Subject or Body before applying templates to service request types.';
+        return 'Add a Subject and Body before applying templates to service request types.';
     }
 }
