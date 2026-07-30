@@ -49,6 +49,7 @@ test('The correct details are displayed on the ViewAdvisoryUpdate page', functio
         ->get(
             AdvisoryUpdateResource::getUrl('view', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )
         ->assertSuccessful()
@@ -75,9 +76,12 @@ test('ViewAdvisoryUpdate is gated with proper access control', function () {
         ->get(
             AdvisoryUpdateResource::getUrl('view', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertForbidden();
 
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory_update.view-any');
     $user->givePermissionTo('advisory_update.*.view');
 
@@ -85,6 +89,7 @@ test('ViewAdvisoryUpdate is gated with proper access control', function () {
         ->get(
             AdvisoryUpdateResource::getUrl('view', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertSuccessful();
 });
@@ -98,6 +103,8 @@ test('ViewAdvisoryUpdate is gated with proper feature access control', function 
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory_update.view-any');
     $user->givePermissionTo('advisory_update.*.view');
 
@@ -107,6 +114,7 @@ test('ViewAdvisoryUpdate is gated with proper feature access control', function 
         ->get(
             AdvisoryUpdateResource::getUrl('view', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertForbidden();
 
@@ -118,6 +126,7 @@ test('ViewAdvisoryUpdate is gated with proper feature access control', function 
         ->get(
             AdvisoryUpdateResource::getUrl('view', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertSuccessful();
 });
