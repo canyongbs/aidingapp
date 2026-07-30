@@ -44,16 +44,16 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Components\Actions;
@@ -105,9 +105,9 @@ class ServiceRequests extends Dashboard
         return $schema->components([
             Section::make()
                 ->schema([
-                    Select::make('serviceRequestTypes')
+                    SelectTree::make('serviceRequestTypes')
                         ->label('Service Request Types')
-                        ->options(fn (): array => $this->getServiceRequestTypeOptions())
+                        ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions())
                         ->multiple()
                         ->searchable()
                         ->live()
@@ -153,89 +153,6 @@ class ServiceRequests extends Dashboard
         ]);
     }
 
-    /**
-     * Build the Service Request Type options grouped by the service catalog hierarchy.
-     *
-     * @return array<string, array<string, string>>
-     */
-    public function getServiceRequestTypeOptions(): array
-    {
-        $categories = ServiceRequestTypeCategory::query()
-            ->orderBy('sort')
-            ->get(['id', 'name', 'parent_id', 'sort']);
-
-        $categoryChildren = [];
-
-        foreach ($categories as $category) {
-            $categoryChildren[$category->parent_id ?? '__root__'][] = $category;
-        }
-
-        $orderedCategoryPaths = [];
-
-        $walkCategories = function (?string $parentId, array $segments = []) use (&$walkCategories, $categoryChildren, &$orderedCategoryPaths): void {
-            foreach ($categoryChildren[$parentId ?? '__root__'] ?? [] as $category) {
-                $nextSegments = [...$segments, $category->name];
-
-                $orderedCategoryPaths[$category->getKey()] = implode(' › ', $nextSegments);
-
-                $walkCategories($category->getKey(), $nextSegments);
-            }
-        };
-
-        $walkCategories(null);
-
-        $groupedByCategory = [];
-        $uncategorized = [];
-
-        ServiceRequestType::query()
-            ->withoutArchived()
-            ->orderBy('sort')
-            ->with('categories:id')
-            ->get(['id', 'name', 'sort'])
-            ->each(function (ServiceRequestType $type) use (&$groupedByCategory, &$uncategorized, $orderedCategoryPaths): void {
-                $categorySortMap = $type->categorySortMap();
-
-                if (blank($categorySortMap)) {
-                    $uncategorized[$type->getKey()] = $type->name;
-
-                    return;
-                }
-
-                foreach ($categorySortMap as $categoryId => $sort) {
-                    if (! array_key_exists($categoryId, $orderedCategoryPaths)) {
-                        continue;
-                    }
-
-                    $groupedByCategory[$categoryId][] = [
-                        'id' => $type->getKey(),
-                        'name' => $type->name,
-                        'sort' => (int) $sort,
-                    ];
-                }
-            });
-
-        $grouped = [];
-
-        foreach ($orderedCategoryPaths as $categoryId => $path) {
-            if (! array_key_exists($categoryId, $groupedByCategory) || blank($groupedByCategory[$categoryId])) {
-                continue;
-            }
-
-            $types = $groupedByCategory[$categoryId];
-
-            usort($types, fn (array $left, array $right): int => [$left['sort'], $left['name']] <=> [$right['sort'], $right['name']]);
-
-            $grouped[$path] = collect($types)
-                ->mapWithKeys(fn (array $type): array => [$type['id'] => $type['name']])
-                ->all();
-        }
-
-        if (filled($uncategorized)) {
-            $grouped['Uncategorized'] = $uncategorized;
-        }
-
-        return $grouped;
-    }
 
     /**
      * The ids of every Service Request Type the current user manages or audits.

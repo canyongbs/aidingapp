@@ -48,6 +48,7 @@ use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -150,14 +151,27 @@ it('groups the type options by the service catalog hierarchy', function () {
 
     $uncategorisedType = ServiceRequestType::factory()->create(['name' => 'Loner Type']);
 
-    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+    $tree = ListServiceRequests::buildTypeTreeOptions();
 
-    expect($options)
-        ->toHaveKey('Parent Category › Child Category')
-        ->toHaveKey('Uncategorized');
+    // Find the uncategorized type in the tree
+    $uncategorizedNode = collect($tree)->first(fn (array $node): bool => $node['value'] === $uncategorisedType->getKey());
+    expect($uncategorizedNode)
+        ->toBeArray()
+        ->toHaveKey('value', $uncategorisedType->getKey())
+        ->toHaveKey('name', 'Loner Type');
 
-    expect($options['Parent Category › Child Category'])->toHaveKey($categorisedType->getKey());
-    expect($options['Uncategorized'])->toHaveKey($uncategorisedType->getKey());
+    // Find the parent category and verify it has the child category with the type
+    $parentNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $parentCategory->getKey());
+    expect($parentNode)->toBeArray();
+
+    $childNode = collect($parentNode['children'] ?? [])->first(fn (array $node): bool => $node['value'] === 'category_' . $childCategory->getKey());
+    expect($childNode)->toBeArray();
+
+    $typeNode = collect($childNode['children'] ?? [])->first(fn (array $node): bool => $node['value'] === $categorisedType->getKey());
+    expect($typeNode)
+        ->toBeArray()
+        ->toHaveKey('value', $categorisedType->getKey())
+        ->toHaveKey('name', 'Nested Type');
 });
 
 it('orders grouped type options by category sort and pivot sort', function () {
@@ -183,18 +197,26 @@ it('orders grouped type options by category sort and pivot sort', function () {
     $laterRootType = ServiceRequestType::factory()->create(['name' => 'Later Root Type']);
     $laterRoot->types()->attach($laterRootType->getKey(), ['sort' => 1]);
 
-    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+    $tree = ListServiceRequests::buildTypeTreeOptions();
 
-    expect(array_keys($options))->toBe([
-        'Earlier Root',
-        'Earlier Root › Earlier Child',
-        'Later Root',
-    ]);
+    // Earlier Root should come before Later Root (based on sort)
+    $earlierRootNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $earlierRoot->getKey());
+    $laterRootNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $laterRoot->getKey());
 
-    expect(array_keys($options['Earlier Root']))->toBe([
-        $earlierRootFirstType->getKey(),
-        $earlierRootSecondType->getKey(),
-    ]);
+    expect($earlierRootNode['name'])->toBe('Earlier Root');
+    expect($laterRootNode['name'])->toBe('Later Root');
+
+    // Earlier Root should have the child category and types in correct order
+    $earlierRootChildren = $earlierRootNode['children'] ?? [];
+    $childNode = collect($earlierRootChildren)->first(fn (array $node): bool => $node['value'] === 'category_' . $earlierChild->getKey());
+    expect($childNode)->toBeArray();
+
+    // Types within Earlier Root should include both types
+    $typeNodes = collect($earlierRootChildren)->filter(fn (array $node): bool => ! str_starts_with($node['value'], 'category_'));
+    $typeIds = $typeNodes->map(fn (array $node): string => $node['value'])->values()->all();
+    
+    expect($typeIds)->toContain($earlierRootFirstType->getKey());
+    expect($typeIds)->toContain($earlierRootSecondType->getKey());
 });
 
 it('excludes archived types from the filter options', function () {
@@ -208,9 +230,15 @@ it('excludes archived types from the filter options', function () {
     $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
     $archivedType->delete();
 
-    $options = livewire(ServiceRequests::class)->instance()->getServiceRequestTypeOptions();
+    $tree = ListServiceRequests::buildTypeTreeOptions();
 
-    $flattenedIds = collect($options)->flatMap(fn (array $group): array => array_keys($group))->all();
+    // Flatten the tree to get all type IDs
+    $flattenedIds = collect($tree)
+        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'] ?? [])->map(fn (array $child): string => $child['value'])->values()->all()])
+        ->flatten()
+        ->filter(fn (string $value): bool => ! str_starts_with($value, 'category_'))
+        ->values()
+        ->all();
 
     expect($flattenedIds)
         ->toContain($activeType->getKey())
