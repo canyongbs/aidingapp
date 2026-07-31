@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -51,9 +52,7 @@ class AssetManagementPortalController extends Controller
 
         $request->validate(['filter' => 'in:all,checked_out,returned']);
 
-        $filter = $request->input('filter', 'all');
-
-        $query = $contact->assetCheckOuts()
+        $baseQuery = fn () => $contact->assetCheckOuts()
             ->with([
                 'asset:id,name,serial_number,description,type_id,location_id,purchase_date',
                 'asset.type:id,name',
@@ -61,84 +60,109 @@ class AssetManagementPortalController extends Controller
                 'checkIn:id,checked_in_at',
             ]);
 
-        $totalCount = (clone $query)->count();
-        $checkedOutCount = (clone $query)->whereNull('asset_check_in_id')->count();
-        $returnedCount = (clone $query)->whereNotNull('asset_check_in_id')->count();
+        $totalCount = (clone $baseQuery())->count();
+        $checkedOutCount = (clone $baseQuery())->whereNull('asset_check_in_id')->count();
+        $returnedCount = (clone $baseQuery())->whereNotNull('asset_check_in_id')->count();
 
-        $filteredQuery = match ($filter) {
-            'checked_out' => (clone $query)->whereNull('asset_check_in_id'),
-            'returned' => (clone $query)->whereNotNull('asset_check_in_id'),
-            default => $query,
+        $counts = [
+            'total' => $totalCount,
+            'checked_out' => $checkedOutCount,
+            'returned' => $returnedCount,
+        ];
+
+        $mapItems = function (LengthAwarePaginator $paginator) {
+            /** @phpstan-ignore-next-line */
+            return $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
+                $isReturned = (bool) $checkOut->checkIn;
+
+                return [
+                    'id' => $checkOut->getKey(),
+                    'status' => $isReturned ? 'returned' : 'checked_out',
+                    'checked_out_at' => $checkOut->getRawOriginal('checked_out_at') !== null
+                        ? $checkOut->checked_out_at->toIso8601String()
+                        : null,
+                    'checked_in_at' => $checkOut->checkIn !== null && $checkOut->checkIn->getRawOriginal('checked_in_at') !== null
+                        ? $checkOut->checkIn->checked_in_at->toIso8601String()
+                        : null,
+                    'asset' => [
+                        'id' => $checkOut->asset->getKey(),
+                        'name' => $checkOut->asset->name,
+                        'description' => $checkOut->asset->description,
+                        'serial_number' => $checkOut->asset->serial_number,
+                        'purchase_age' => $checkOut->asset->getRawOriginal('purchase_date') !== null
+                            ? (function (Carbon $date) {
+                                if ($date->isFuture()) {
+                                    return '0 Years 0 Months';
+                                }
+
+                                $diff = $date->roundMonth()->diff(now());
+
+                                return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
+                                    $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
+                            })($checkOut->asset->purchase_date)
+                            : null,
+                        'type' => $checkOut->asset->getRawOriginal('type_id') !== null
+                            ? ['name' => $checkOut->asset->type->name]
+                            : null,
+                        'location' => $checkOut->asset->getRawOriginal('location_id') !== null
+                            ? ['name' => $checkOut->asset->location->name]
+                            : null,
+                    ],
+                ];
+            });
         };
 
-        if ($filter === 'returned') {
-            $paginator = $filteredQuery
-                ->orderByDesc(
-                    AssetCheckIn::select('checked_in_at')
-                        ->whereColumn('asset_check_ins.id', 'asset_check_outs.asset_check_in_id')
-                        ->limit(1)
-                )
-                ->paginate(10);
-        } else {
-            $paginator = $filteredQuery
+        $paginatorFor = function (string $filter) use ($baseQuery) {
+            $filteredQuery = match ($filter) {
+                'checked_out' => $baseQuery()->whereNull('asset_check_in_id'),
+                'returned' => $baseQuery()->whereNotNull('asset_check_in_id'),
+                default => $baseQuery(),
+            };
+
+            if ($filter === 'returned') {
+                return $filteredQuery
+                    ->orderByDesc(
+                        AssetCheckIn::select('checked_in_at')
+                            ->whereColumn('asset_check_ins.id', 'asset_check_outs.asset_check_in_id')
+                            ->limit(1)
+                    )
+                    ->paginate(10);
+            }
+
+            return $filteredQuery
                 ->orderByDesc('checked_out_at')
                 ->paginate(10);
-        }
+        };
 
-        $items = $paginator->getCollection()->map(function (AssetCheckOut $checkOut) {
-            $isReturned = (bool) $checkOut->checkIn;
+        $envelopeFor = function (string $filter) use ($paginatorFor, $mapItems) {
+            $paginator = $paginatorFor($filter);
 
+            /** @phpstan-ignore-next-line */
             return [
-                'id' => $checkOut->getKey(),
-                'status' => $isReturned ? 'returned' : 'checked_out',
-                'checked_out_at' => $checkOut->getRawOriginal('checked_out_at') !== null
-                    ? $checkOut->checked_out_at->toIso8601String()
-                    : null,
-                'checked_in_at' => $checkOut->checkIn !== null && $checkOut->checkIn->getRawOriginal('checked_in_at') !== null
-                    ? $checkOut->checkIn->checked_in_at->toIso8601String()
-                    : null,
-                'asset' => [
-                    'id' => $checkOut->asset->getKey(),
-                    'name' => $checkOut->asset->name,
-                    'description' => $checkOut->asset->description,
-                    'serial_number' => $checkOut->asset->serial_number,
-                    'purchase_age' => $checkOut->asset->getRawOriginal('purchase_date') !== null
-                        ? (function (Carbon $date) {
-                            if ($date->isFuture()) {
-                                return '0 Years 0 Months';
-                            }
-
-                            $diff = $date->roundMonth()->diff(now());
-
-                            return $diff->y . ' ' . ($diff->y === 1 ? 'Year' : 'Years') . ' ' .
-                                $diff->m . ' ' . ($diff->m === 1 ? 'Month' : 'Months');
-                        })($checkOut->asset->purchase_date)
-                        : null,
-                    'type' => $checkOut->asset->getRawOriginal('type_id') !== null
-                        ? ['name' => $checkOut->asset->type->name]
-                        : null,
-                    'location' => $checkOut->asset->getRawOriginal('location_id') !== null
-                        ? ['name' => $checkOut->asset->location->name]
-                        : null,
+                'data' => $mapItems($paginator),
+                'meta' => [
+                    'current_page' => $paginator->currentPage(),
+                    'last_page' => $paginator->lastPage(),
+                    'from' => $paginator->firstItem() ?? 0,
+                    'to' => $paginator->lastItem() ?? 0,
+                    'total' => $paginator->total(),
+                    'per_page' => $paginator->perPage(),
                 ],
             ];
-        });
+        };
+
+        if ($request->has('filter')) {
+            return response()->json([
+                ...$envelopeFor($request->input('filter', 'all')),
+                'counts' => $counts,
+            ]);
+        }
 
         return response()->json([
-            'data' => $items,
-            'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'last_page' => $paginator->lastPage(),
-                'from' => $paginator->firstItem() ?? 0,
-                'to' => $paginator->lastItem() ?? 0,
-                'total' => $paginator->total(),
-                'per_page' => $paginator->perPage(),
-            ],
-            'counts' => [
-                'total' => $totalCount,
-                'checked_out' => $checkedOutCount,
-                'returned' => $returnedCount,
-            ],
+            'all' => $envelopeFor('all'),
+            'checked_out' => $envelopeFor('checked_out'),
+            'returned' => $envelopeFor('returned'),
+            'counts' => $counts,
         ]);
     }
 }

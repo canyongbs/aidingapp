@@ -43,8 +43,8 @@
     import { apiGet } from '../Services/api.js';
     import { useAssetsData } from './loaders.js';
 
-    // The default "all" filter, page 1, arrives via the route data loader; changing the
-    // filter or page fetches (and caches) on demand via Pinia Colada.
+    // The route data loader resolves page 1 of every filter tab (all/checked out/
+    // returned) together, so any other page is fetched (and cached) client-side.
     const { data: initialData } = useAssetsData();
 
     const activeFilter = ref('all');
@@ -56,16 +56,19 @@
         { key: 'returned', label: 'Returned' },
     ]);
 
-    const isDefaultView = computed(() => activeFilter.value === 'all' && currentPage.value === 1);
-
     const pageQuery = useQuery({
         key: () => ['knowledge-management', 'assets', activeFilter.value, currentPage.value],
         query: () => apiGet('/assets', { filter: activeFilter.value, page: currentPage.value }),
-        enabled: () => !isDefaultView.value,
-        staleTime: 1000 * 60 * 5,
+        enabled: () => currentPage.value > 1,
     });
 
-    const currentEnvelope = computed(() => (isDefaultView.value ? initialData.value : (pageQuery.data.value ?? null)));
+    function firstPageFor(filter) {
+        return initialData.value?.[filter] ?? null;
+    }
+
+    const currentEnvelope = computed(() =>
+        currentPage.value > 1 ? (pageQuery.data.value ?? null) : firstPageFor(activeFilter.value),
+    );
 
     // Keeps the previous filter/page visible while a new one loads.
     const shownEnvelope = ref(null);
@@ -82,11 +85,11 @@
     // Only true before the first paint; filter/page switches keep showing `shownEnvelope`.
     const loading = computed(() => shownEnvelope.value === null);
 
-    const loadingEnvelope = computed(() => !isDefaultView.value && pageQuery.isLoading.value);
+    const loadingEnvelope = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
     const loadingPage = computed(() => (loadingEnvelope.value ? currentPage.value : null));
 
     const assets = computed(() => shownEnvelope.value?.data ?? []);
-    const counts = computed(() => shownEnvelope.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
+    const counts = computed(() => initialData.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
 
     const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
     const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);

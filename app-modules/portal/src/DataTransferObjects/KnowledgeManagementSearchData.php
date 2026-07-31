@@ -37,15 +37,28 @@
 namespace AidingApp\Portal\DataTransferObjects;
 
 use Spatie\LaravelData\Attributes\DataCollectionOf;
+use Spatie\LaravelData\Attributes\MapName;
 use Spatie\LaravelData\Data;
 use Spatie\LaravelData\DataCollection;
 use Spatie\LaravelData\PaginatedDataCollection;
 
 class KnowledgeManagementSearchData extends Data
 {
+    /** @var PaginatedDataCollection<int, KnowledgeBaseArticleData> */
     #[DataCollectionOf(KnowledgeBaseArticleData::class)]
     public PaginatedDataCollection $articles;
 
+    /** @var DataCollection<int, KnowledgeBaseCategoryData> */
     #[DataCollectionOf(KnowledgeBaseCategoryData::class)]
     public DataCollection $categories;
+
+    /** @var PaginatedDataCollection<int, KnowledgeBaseArticleData>|null */
+    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
+    #[MapName('featured_articles')]
+    public ?PaginatedDataCollection $featuredArticles = null;
+
+    /** @var PaginatedDataCollection<int, KnowledgeBaseArticleData>|null */
+    #[DataCollectionOf(KnowledgeBaseArticleData::class)]
+    #[MapName('most_viewed_articles')]
+    public ?PaginatedDataCollection $mostViewedArticles = null;
 }

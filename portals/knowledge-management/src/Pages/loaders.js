@@ -70,7 +70,6 @@ export const useTagsData = defineColadaLoader({
 export const useCategoryData = defineColadaLoader({
     key: (to) => ['knowledge-management', 'category', String(to.params.categorySlug)],
     query: (to) => tolerant(apiGet(`/categories/${to.params.categorySlug}`), { notFound: true }),
-    staleTime: fiveMinutes,
 });
 
 export const useArticleData = defineColadaLoader({
@@ -104,8 +103,7 @@ export const useAdvisoriesData = defineColadaLoader({
 
 export const useAssetsData = defineColadaLoader({
     key: () => ['knowledge-management', 'assets'],
-    query: () => tolerant(apiGet('/assets', { filter: 'all', page: 1 })),
-    staleTime: fiveMinutes,
+    query: () => tolerant(apiGet('/assets')),
 });
 
 export const useLicensesData = defineColadaLoader({

@@ -74,6 +74,18 @@ export function useKnowledgeManagementSearch() {
         () => !!(activeSearchQuery.value && activeSearchQuery.value.trim()) || activeTags.value.length > 0,
     );
 
+    // Page 1 of every filter tab (all/featured/most-viewed) arrives together via this
+    // query, so switching tabs at page 1 never needs an extra request.
+    const combinedQuery = useQuery({
+        key: () => ['knowledge-management', 'search', activeSearchQuery.value, activeTags.value.join(',')],
+        query: () =>
+            apiPostUrl(config.searchUrl, {
+                search: JSON.stringify(activeSearchQuery.value ?? ''),
+                tags: activeTags.value.join(','),
+            }),
+        enabled: isSearchActive,
+    });
+
     const pageQuery = useQuery({
         key: () => [
             'knowledge-management',
@@ -90,17 +102,34 @@ export function useKnowledgeManagementSearch() {
                 filter: filter.value,
                 page: currentPage.value,
             }),
-        enabled: isSearchActive,
-        staleTime: 1000 * 60 * 5,
+        enabled: () => isSearchActive.value && currentPage.value > 1,
     });
 
+    function firstPageArticles() {
+        const data = combinedQuery.data.value?.data;
+
+        if (!data) return null;
+
+        if (filter.value === 'featured') return data.featured_articles;
+        if (filter.value === 'most-viewed') return data.most_viewed_articles;
+
+        return data.articles;
+    }
+
+    const currentArticles = computed(() =>
+        currentPage.value > 1 ? (pageQuery.data.value?.data?.articles ?? null) : firstPageArticles(),
+    );
+
+    const currentCategories = computed(() => combinedQuery.data.value?.data?.categories ?? []);
+
+    // Keep the previously rendered results visible while a new page/filter loads.
     const shownEnvelope = ref(null);
 
     watch(
-        pageQuery.data,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
+        [currentArticles, currentCategories],
+        ([articles, categories]) => {
+            if (articles) {
+                shownEnvelope.value = { articles, categories };
             } else if (!isSearchActive.value) {
                 shownEnvelope.value = null;
             }
@@ -112,7 +141,7 @@ export function useKnowledgeManagementSearch() {
     const loadingResults = computed(() => isSearchActive.value && shownEnvelope.value === null);
 
     const searchResultArticles = computed(() =>
-        (shownEnvelope.value?.data?.articles?.data ?? []).map((article) => ({
+        (shownEnvelope.value?.articles?.data ?? []).map((article) => ({
             ...article,
             key: article.id,
             to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
@@ -120,17 +149,17 @@ export function useKnowledgeManagementSearch() {
     );
 
     const searchResultCategories = computed(() =>
-        (shownEnvelope.value?.data?.categories ?? []).map((category) => ({
+        (shownEnvelope.value?.categories ?? []).map((category) => ({
             ...category,
             key: category.slug,
             to: { name: 'view-category', params: { categorySlug: category.slug } },
         })),
     );
 
-    const lastPage = computed(() => shownEnvelope.value?.data?.articles?.meta?.last_page ?? 1);
-    const totalArticles = computed(() => shownEnvelope.value?.data?.articles?.meta?.total ?? 0);
-    const fromArticle = computed(() => shownEnvelope.value?.data?.articles?.meta?.from ?? 0);
-    const toArticle = computed(() => shownEnvelope.value?.data?.articles?.meta?.to ?? 0);
+    const lastPage = computed(() => shownEnvelope.value?.articles?.meta?.last_page ?? 1);
+    const totalArticles = computed(() => shownEnvelope.value?.articles?.meta?.total ?? 0);
+    const fromArticle = computed(() => shownEnvelope.value?.articles?.meta?.from ?? 0);
+    const toArticle = computed(() => shownEnvelope.value?.articles?.meta?.to ?? 0);
 
     function syncUrl() {
         const resolved = router.resolve({

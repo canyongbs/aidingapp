@@ -116,12 +116,10 @@
         })),
     );
 
-    // Tab filter for browsing a category's own articles. The route data loader always
-    // resolves page 1 of the default ("all articles") view, so any other filter + page
-    // combination is fetched (and cached) client-side via Pinia Colada.
+    // Tab filter for browsing a category's own articles. Page 1 of every filter tab
+    // arrives together via the route data loader; any other page is fetched client-side.
     const activeFilter = computed(() => route.query.filter || 'all-articles');
     const currentPage = computed(() => parseInt(route.query.page) || 1);
-    const isDefaultView = computed(() => activeFilter.value === 'all-articles' && currentPage.value === 1);
 
     const pageQuery = useQuery({
         key: () => [
@@ -133,12 +131,18 @@
         ],
         query: () =>
             apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
-        enabled: () => !isDefaultView.value,
-        staleTime: 1000 * 60 * 5,
+        enabled: () => currentPage.value > 1,
     });
 
+    function firstPageFor(filter) {
+        const key =
+            filter === 'featured' ? 'featured_articles' : filter === 'most-viewed' ? 'most_viewed_articles' : 'all_articles';
+
+        return categoryResponse.value?.[key] ?? null;
+    }
+
     const currentArticles = computed(() =>
-        isDefaultView.value ? (categoryResponse.value?.articles ?? null) : (pageQuery.data.value?.articles ?? null),
+        currentPage.value > 1 ? (pageQuery.data.value?.articles ?? null) : firstPageFor(activeFilter.value),
     );
 
     // Keep the previously rendered page visible while a new page/filter loads so
@@ -154,7 +158,7 @@
         { immediate: true },
     );
 
-    const loadingArticles = computed(() => !isDefaultView.value && pageQuery.isLoading.value);
+    const loadingArticles = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
     const loadingPage = computed(() => (loadingArticles.value ? currentPage.value : null));
 
     const articlesWithRoutes = computed(() =>

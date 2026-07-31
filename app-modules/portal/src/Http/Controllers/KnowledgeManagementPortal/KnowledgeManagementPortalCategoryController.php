@@ -69,6 +69,43 @@ class KnowledgeManagementPortalCategoryController extends Controller
 
     public function show(KnowledgeBaseCategory $category): JsonResponse
     {
+        $mapArticle = function (KnowledgeBaseItem $article) {
+            return [
+                'id' => $article->getKey(),
+                'categorySlug' => $article->category->slug,
+                'name' => $article->title,
+                'tags' => $article->tags()
+                    ->orderBy('name')
+                    ->select([
+                        'id',
+                        'name',
+                    ])
+                    ->get()
+                    ->toArray(),
+                'featured' => $article->is_featured,
+            ];
+        };
+
+        $articlesFor = function (string $filter) use ($category, $mapArticle) {
+            return $category->knowledgeBaseItems()
+                ->with('tags')
+                ->public()
+                ->when($filter === 'featured', function (Builder $query) {
+                    $query->where('is_featured', true);
+                })
+                ->when($filter === 'most-viewed', function (Builder $query) {
+                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
+                })
+                ->paginate(5)
+                ->through($mapArticle);
+        };
+
+        if (request()->has('filter')) {
+            return response()->json([
+                'articles' => $articlesFor((string) request()->get('filter')),
+            ]);
+        }
+
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
                 'slug' => $category->slug,
@@ -91,32 +128,9 @@ class KnowledgeManagementPortalCategoryController extends Controller
                         ]);
                     }),
             ]),
-            'articles' => $category->knowledgeBaseItems()
-                ->with('tags')
-                ->public()
-                ->when(request()->get('filter') === 'featured', function (Builder $query) {
-                    $query->where('is_featured', true);
-                })
-                ->when(request()->get('filter') === 'most-viewed', function (Builder $query) {
-                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
-                })
-                ->paginate(5)
-                ->through(function (KnowledgeBaseItem $article) {
-                    return [
-                        'id' => $article->getKey(),
-                        'categorySlug' => $article->category->slug,
-                        'name' => $article->title,
-                        'tags' => $article->tags()
-                            ->orderBy('name')
-                            ->select([
-                                'id',
-                                'name',
-                            ])
-                            ->get()
-                            ->toArray(),
-                        'featured' => $article->is_featured,
-                    ];
-                }),
+            'all_articles' => $articlesFor(''),
+            'featured_articles' => $articlesFor('featured'),
+            'most_viewed_articles' => $articlesFor('most-viewed'),
         ]);
     }
 }
