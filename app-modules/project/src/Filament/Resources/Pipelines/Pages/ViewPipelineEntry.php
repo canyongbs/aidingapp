@@ -40,50 +40,73 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
-use BackedEnum;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
 class ViewPipelineEntry extends Page
 {
-    protected static string $resource = PipelineResource::class;
+    use InteractsWithRecord;
+
+    protected static string $resource = PipelineEntryResource::class;
 
     protected static ?string $title = 'Pipeline Entry Details';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
     protected string $view = 'project::filament.pages.view-pipeline-entry';
-
-    public Pipeline $record;
-
-    public PipelineEntry $pipelineEntry;
 
     #[Locked, Url]
     public ?string $project = null;
 
-    public function mount(): void
+    public function mount(int | string $record): void
     {
-        if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
+        $this->record = $this->resolveRecord($record);
+
+        $pipeline = $this->getParentRecord();
+
+        if (! $pipeline instanceof Pipeline) {
+            abort(404);
+        }
+
+        if ($this->getPipelineEntry()->pipelineStage->pipeline_id !== $pipeline->id) {
             abort(404);
         }
 
         if (request()->has('from')) {
             session(['pipeline_entry_source' => request('from')]);
         }
+    }
+
+    public function getPipelineEntry(): PipelineEntry
+    {
+        $pipelineEntry = $this->getRecord();
+
+        assert($pipelineEntry instanceof PipelineEntry);
+
+        return $pipelineEntry;
+    }
+
+    public function getPipeline(): Pipeline
+    {
+        $pipeline = $this->getParentRecord();
+
+        assert($pipeline instanceof Pipeline);
+
+        return $pipeline;
     }
 
     public function getTitle(): string | Htmlable
@@ -93,50 +116,19 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = ['record' => $this->record];
+        $params = ['record' => $this->getPipeline()];
 
         if ($this->project) {
             $params['project'] = $this->project;
         }
 
-        if ($source === 'kanban') {
-            return PipelineResource::getUrl('manage-entries', $params);
-        }
-
-        return PipelineResource::getUrl('manage-entries', $params);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $pipeline = $this->record;
-        $project = $pipeline->project;
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
-            ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit('Pipelines', 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
+        return PipelineResource::getUrl('entries', $params);
     }
 
     public function entryDetailsInfolist(Schema $schema): Schema
     {
         return $schema
-            ->record($this->pipelineEntry)
+            ->record($this->getPipelineEntry())
             ->components([
                 Section::make()
                     ->columns(2)
@@ -179,7 +171,7 @@ class ViewPipelineEntry extends Page
                                 };
                             }),
                         TextEntry::make('assigned_to_type')
-                            ->visible(fn () => filled($this->pipelineEntry->assigned_to_type))
+                            ->visible(fn () => filled($this->getPipelineEntry()->assigned_to_type))
                             ->label('Assigned To Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
@@ -208,17 +200,17 @@ class ViewPipelineEntry extends Page
             Action::make('edit')
                 ->url(function (): string {
                     $params = [
-                        'record' => $this->record,
-                        'pipelineEntry' => $this->pipelineEntry,
+                        'record' => $this->getPipelineEntry(),
+                        'pipeline' => $this->getPipeline(),
                         'project' => $this->project,
                     ];
 
-                    return PipelineResource::getUrl('edit-pipeline-entry', $params);
+                    return PipelineEntryResource::getUrl('edit', $params);
                 }),
             DeleteAction::make()
                 ->label('Remove from Pipeline')
                 ->requiresConfirmation()
-                ->record($this->pipelineEntry)
+                ->record($this->getPipelineEntry())
                 ->successRedirectUrl(fn (): string => $this->getBackUrl()),
         ];
     }

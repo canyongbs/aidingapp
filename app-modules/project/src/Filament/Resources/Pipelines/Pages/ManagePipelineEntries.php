@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
@@ -59,6 +60,8 @@ use Livewire\Attributes\Url;
 class ManagePipelineEntries extends ManageRelatedRecords
 {
     protected static string $resource = PipelineResource::class;
+
+    protected static ?string $relatedResource = PipelineEntryResource::class;
 
     protected static string $relationship = 'entries';
 
@@ -143,9 +146,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ->recordActions([
                 ViewAction::make()
                     ->label('View')
-                    ->url(fn (PipelineEntry $record): string => PipelineResource::getUrl('view-pipeline-entry', [
-                        'record' => $pipeline->getKey(),
-                        'pipelineEntry' => $record->getKey(),
+                    ->url(fn (PipelineEntry $record): string => PipelineEntryResource::getUrl('view', [
+                        'record' => $record,
+                        'pipeline' => $pipeline,
                         'from' => 'table',
                     ])),
                 DeleteAction::make(),

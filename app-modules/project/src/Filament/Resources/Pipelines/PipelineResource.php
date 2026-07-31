@@ -38,14 +38,13 @@ namespace AidingApp\Project\Filament\Resources\Pipelines;
 
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\EditPipeline;
-use AidingApp\Project\Filament\Resources\Pipelines\Pages\EditPipelineEntry;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipeline;
-use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipelineEntry;
 use AidingApp\Project\Models\Pipeline;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 
 class PipelineResource extends Resource
 {
@@ -70,9 +69,16 @@ class PipelineResource extends Resource
             'create' => CreatePipeline::route('/create'),
             'view' => ViewPipeline::route('/{record}'),
             'edit' => EditPipeline::route('/{record}/edit'),
-            'manage-entries' => ManagePipelineEntries::route('/{record}/entries'),
-            'view-pipeline-entry' => ViewPipelineEntry::route('/{record}/entry/{pipelineEntry}/view'),
-            'edit-pipeline-entry' => EditPipelineEntry::route('/{record}/entry/{pipelineEntry}/edit'),
+            'entries' => ManagePipelineEntries::route('/{record}/entries'),
         ];
+    }
+
+    public static function getIndexUrl(array $parameters = [], bool $isAbsolute = true, ?string $panel = null, ?Model $tenant = null, bool $shouldGuessMissingParameters = false): string
+    {
+        if (isset($parameters['record'])) {
+            return static::getUrl('view', $parameters, $isAbsolute, $panel, $tenant, $shouldGuessMissingParameters);
+        }
+
+        return '';
     }
 }

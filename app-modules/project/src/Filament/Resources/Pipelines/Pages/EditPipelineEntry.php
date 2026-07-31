@@ -37,20 +37,20 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+ use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
@@ -60,18 +60,13 @@ use Livewire\Attributes\Url;
 class EditPipelineEntry extends Page
 {
     use InteractsWithFormActions;
+    use InteractsWithRecord;
 
-    protected static string $resource = PipelineResource::class;
+    protected static string $resource = PipelineEntryResource::class;
 
     protected static ?string $title = 'Edit Pipeline Entry';
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
-
-    #[Locked]
-    public Pipeline $record;
-
-    #[Locked]
-    public PipelineEntry $pipelineEntry;
 
     /** @var array<string, mixed> $data */
     public ?array $data = [];
@@ -79,13 +74,41 @@ class EditPipelineEntry extends Page
     #[Locked, Url]
     public ?string $project = null;
 
-    public function mount(): void
+    public function mount(int | string $record): void
     {
-        if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
+        $this->record = $this->resolveRecord($record);
+
+        abort_unless((bool) Filament::auth()->user()?->can('update', $this->getPipelineEntry()), 403);
+
+        $pipeline = $this->getParentRecord();
+
+        if (! $pipeline instanceof Pipeline) {
+            abort(404);
+        }
+
+        if ($this->getPipelineEntry()->pipelineStage->pipeline_id !== $pipeline->id) {
             abort(404);
         }
 
         $this->fillForm();
+    }
+
+    public function getPipelineEntry(): PipelineEntry
+    {
+        $pipelineEntry = $this->getRecord();
+
+        assert($pipelineEntry instanceof PipelineEntry);
+
+        return $pipelineEntry;
+    }
+
+    public function getPipeline(): Pipeline
+    {
+        $pipeline = $this->getParentRecord();
+
+        assert($pipeline instanceof Pipeline);
+
+        return $pipeline;
     }
 
     public function getTitle(): string | Htmlable
@@ -98,8 +121,8 @@ class EditPipelineEntry extends Page
         $source = session('pipeline_entry_source', 'list');
 
         $params = [
-            'record' => $this->record,
-            'pipelineEntry' => $this->pipelineEntry,
+            'record' => $this->getPipelineEntry(),
+            'pipeline' => $this->getPipeline(),
             'from' => $source,
         ];
 
@@ -107,36 +130,13 @@ class EditPipelineEntry extends Page
             $params['project'] = $this->project;
         }
 
-        return PipelineResource::getUrl('view-pipeline-entry', $params);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $pipeline = $this->record;
-        $project = $pipeline->project;
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
-            ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit('Pipelines', 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
+        return PipelineEntryResource::getUrl('view', $params);
     }
 
     public function form(Schema $schema): Schema
     {
+        $pipeline = $this->getPipeline();
+
         return $schema
             ->components([
                 Grid::make()->schema([
@@ -144,20 +144,24 @@ class EditPipelineEntry extends Page
                         ->label('Stage')
                         ->relationship('pipelineStage', 'name')
                         ->required()
-                        ->options(fn () => $this->record->stages->pluck('name', 'id')),
+                        ->options(fn () => $pipeline->stages->pluck('name', 'id')),
                     TextInput::make('name')
                         ->maxLength(255)
                         ->label('Name')
                         ->string(),
                 ]),
-                ...PipelineEntryForm::components($this->record),
+                ...PipelineEntryForm::components($pipeline),
             ])
             ->statePath('data')
-            ->model($this->pipelineEntry);
+            ->model($this->getPipelineEntry());
     }
 
     public function save(): void
     {
+        $pipelineEntry = $this->getPipelineEntry();
+
+        abort_unless((bool) Filament::auth()->user()?->can('update', $pipelineEntry), 403);
+
         $data = $this->form->getState();
 
         $milestones = $data['milestones'] ?? [];
@@ -165,11 +169,11 @@ class EditPipelineEntry extends Page
         $serviceRequests = $data['serviceRequests'] ?? [];
         unset($data['milestones'], $data['assets'], $data['serviceRequests']);
 
-        $this->pipelineEntry->update($data);
+        $pipelineEntry->update($data);
 
-        $this->pipelineEntry->milestones()->sync($milestones);
-        $this->pipelineEntry->assets()->sync($assets);
-        $this->pipelineEntry->serviceRequests()->sync($serviceRequests);
+        $pipelineEntry->milestones()->sync($milestones);
+        $pipelineEntry->assets()->sync($assets);
+        $pipelineEntry->serviceRequests()->sync($serviceRequests);
 
         Notification::make()
             ->success()
@@ -181,11 +185,13 @@ class EditPipelineEntry extends Page
 
     public function fillForm(): void
     {
-        $data = $this->pipelineEntry->attributesToArray();
+        $pipelineEntry = $this->getPipelineEntry();
 
-        $data['milestones'] = $this->pipelineEntry->milestones->pluck('id')->toArray();
-        $data['assets'] = $this->pipelineEntry->assets->pluck('id')->toArray();
-        $data['serviceRequests'] = $this->pipelineEntry->serviceRequests->pluck('id')->toArray();
+        $data = $pipelineEntry->attributesToArray();
+
+        $data['milestones'] = $pipelineEntry->milestones->pluck('id')->toArray();
+        $data['assets'] = $pipelineEntry->assets->pluck('id')->toArray();
+        $data['serviceRequests'] = $pipelineEntry->serviceRequests->pluck('id')->toArray();
 
         $this->form->fill($data);
     }
