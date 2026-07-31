@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Models\User;
@@ -202,15 +203,18 @@ describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_reque
     $migrationName = '2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_request_email_templates';
     $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
 
-    it('converts literal merge tags in the subject and body of both template tables', function () use ($migrationName, $migrationPath) {
+    it('converts literal merge tags in the subject and body of every template table', function () use ($migrationName, $migrationPath) {
         isolatedMigration($migrationName, function () use ($migrationPath) {
             $typeTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
             $automationTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create();
+            $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create();
 
             plantLiteralMergeTagContent($typeTemplate, 'subject', '{{ title }}');
             plantLiteralMergeTagContent($typeTemplate, 'body', "Hello {{ recipient's name }}!");
             plantLiteralMergeTagContent($automationTemplate, 'subject', '{{ title }}');
             plantLiteralMergeTagContent($automationTemplate, 'body', 'Assigned to {{ assigned manager }}');
+            plantLiteralMergeTagContent($customTemplate, 'subject', '{{ title }}');
+            plantLiteralMergeTagContent($customTemplate, 'body', "Hi {{ contact's name }}!");
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
@@ -228,6 +232,12 @@ describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_reque
                 ->and($automationTemplate->body)->toEqual(convertedMergeTagContent([
                     ['type' => 'text', 'text' => 'Assigned to '],
                     ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned staff name']],
+                ]))
+                ->and($customTemplate->refresh()->subject)->toEqual($expectedSubject)
+                ->and($customTemplate->body)->toEqual(convertedMergeTagContent([
+                    ['type' => 'text', 'text' => 'Hi '],
+                    ['type' => 'mergeTag', 'attrs' => ['id' => 'contact name']],
+                    ['type' => 'text', 'text' => '!'],
                 ]));
         });
     });
