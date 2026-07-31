@@ -45,7 +45,7 @@ class PipelineEntryServiceRequestsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn() => ServiceRequest::query())
+            ->query(fn () => ServiceRequest::query())
             ->columns([
                 TextColumn::make('service_request_number')
                     ->label('Number')

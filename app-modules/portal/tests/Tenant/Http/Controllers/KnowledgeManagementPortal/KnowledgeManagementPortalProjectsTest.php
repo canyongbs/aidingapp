@@ -43,46 +43,46 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
 test('portal returns has_projects as false when contact has no pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-  $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create();
 
-  actingAs($contact, 'contact');
+    actingAs($contact, 'contact');
 
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
+    $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
+    $response = get($url);
 
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', false);
+    $response->assertSuccessful();
+    $response->assertJsonPath('has_projects', false);
 });
 
 test('portal returns has_projects as true when contact has pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-  $contact = Contact::factory()->create();
+    $contact = Contact::factory()->create();
 
-  $project = Project::factory()->create();
-  $project->guestContacts()->attach($contact);
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
 
-  actingAs($contact, 'contact');
+    actingAs($contact, 'contact');
 
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
+    $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
+    $response = get($url);
 
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', true);
+    $response->assertSuccessful();
+    $response->assertJsonPath('has_projects', true);
 });
 
 test('portal projects route renders successfully', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
 
-  $response = get(route('portal.projects'));
+    $response = get(route('portal.projects'));
 
-  $response->assertSuccessful();
+    $response->assertSuccessful();
 });

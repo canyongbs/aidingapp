@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Tables;
 
-use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;

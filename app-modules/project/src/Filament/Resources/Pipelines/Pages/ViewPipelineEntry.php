@@ -171,7 +171,7 @@ class ViewPipelineEntry extends Page
                         TextEntry::make('assigned_to_type')
                             ->visible(fn () => filled($this->getPipelineEntry()->assigned_to_type))
                             ->label('Assigned To Type')
-                            ->formatStateUsing(fn(string $state): string => ucfirst($state))
+                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
                         IconEntry::make('is_visible_to_guests')
                             ->label('Visible to Guest')
@@ -184,8 +184,8 @@ class ViewPipelineEntry extends Page
                             ->badge(),
                         TextEntry::make('serviceRequests')
                             ->label('Related Service Requests')
-                            ->state(fn(PipelineEntry $record): array => $record->serviceRequests
-                                ->map(fn(ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
+                            ->state(fn (PipelineEntry $record): array => $record->serviceRequests
+                                ->map(fn (ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
                                 ->all())
                             ->badge(),
                     ]),

@@ -45,7 +45,7 @@ class PipelineEntryAssignedToUsersTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn() => User::query())
+            ->query(fn () => User::query())
             ->columns([
                 TextColumn::make('name')
                     ->searchable()

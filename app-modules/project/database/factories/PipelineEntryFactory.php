@@ -46,22 +46,22 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PipelineEntryFactory extends Factory
 {
-  /**
-   * Define the model's default state.
-   *
-   * @return array<string, mixed>
-   */
-  public function definition(): array
-  {
-    return [
-      'name' => $this->faker->word(),
-      'pipeline_stage_id' => PipelineStage::factory(),
-      'description' => $this->faker->sentence(3),
-      'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-      'assigned_to_type' => (new User())->getMorphClass(),
-      'assigned_to_id' => User::factory(),
-      'created_by' => User::factory(),
-      'is_visible_to_guests' => true,
-    ];
-  }
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'name' => $this->faker->word(),
+            'pipeline_stage_id' => PipelineStage::factory(),
+            'description' => $this->faker->sentence(3),
+            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
+            'assigned_to_type' => (new User())->getMorphClass(),
+            'assigned_to_id' => User::factory(),
+            'created_by' => User::factory(),
+            'is_visible_to_guests' => true,
+        ];
+    }
 }

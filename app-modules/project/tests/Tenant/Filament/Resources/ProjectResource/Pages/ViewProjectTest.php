@@ -385,7 +385,7 @@ it('can create a pipeline through the create pipeline action', function () {
             ],
         ])
         ->assertHasNoActionErrors()
-        ->assertSet('selectedPipelineId', fn(?string $state): bool => filled($state));
+        ->assertSet('selectedPipelineId', fn (?string $state): bool => filled($state));
 
     $pipeline = Pipeline::query()->where('name', 'Delivery Pipeline')->first();
 

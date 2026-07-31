@@ -45,7 +45,7 @@ class PipelineEntryAssetsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn() => Asset::query())
+            ->query(fn () => Asset::query())
             ->columns([
                 TextColumn::make('name')
                     ->searchable()

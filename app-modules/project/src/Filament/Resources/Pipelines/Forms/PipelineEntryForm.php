@@ -93,10 +93,10 @@ class PipelineEntryForm
                 ->placeholder('None')
                 ->native(false)
                 ->live()
-                ->afterStateUpdated(fn(Set $set) => $set('assigned_to_id', null)),
+                ->afterStateUpdated(fn (Set $set) => $set('assigned_to_id', null)),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
-                ->tableConfiguration(fn(Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
+                ->tableConfiguration(fn (Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
                     Contact::class => PipelineEntryAssignedToContactsTable::class,
                     default => PipelineEntryAssignedToUsersTable::class,
                 })
@@ -113,8 +113,8 @@ class PipelineEntryForm
 
                     return $record instanceof Contact ? $record->full_name : $record?->name;
                 })
-                ->visible(fn(Get $get): bool => filled($get('assigned_to_type')))
-                ->dehydrateStateUsing(fn(Get $get, mixed $state): mixed => filled($get('assigned_to_type')) ? $state : null)
+                ->visible(fn (Get $get): bool => filled($get('assigned_to_type')))
+                ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => filled($get('assigned_to_type')) ? $state : null)
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
             Toggle::make('is_visible_to_guests')
@@ -126,12 +126,12 @@ class PipelineEntryForm
                     name: 'milestones',
                     titleAttribute: 'title',
                     modifyQueryUsing: $pipeline
-                        ? fn(Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
                         : null,
                 )
                 ->tableConfiguration(PipelineEntryMilestonesTable::class)
                 ->tableArguments(['projectId' => $pipeline?->project_id])
-                ->tableSelect(fn(TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
+                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
                 ->multiple()
                 ->dehydrated(),
             ModalTableSelect::make('assets')
@@ -143,7 +143,7 @@ class PipelineEntryForm
             ModalTableSelect::make('serviceRequests')
                 ->label('Related Service Requests')
                 ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
-                ->getOptionLabelFromRecordUsing(fn(ServiceRequest $record): string => self::serviceRequestLabel($record))
+                ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record): string => self::serviceRequestLabel($record))
                 ->tableConfiguration(PipelineEntryServiceRequestsTable::class)
                 ->multiple()
                 ->dehydrated(),

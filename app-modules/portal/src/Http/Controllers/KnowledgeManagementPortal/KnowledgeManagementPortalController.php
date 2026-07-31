@@ -76,7 +76,7 @@ class KnowledgeManagementPortalController extends Controller
             'display_timezone' => app(ResolvePortalDisplayTimezone::class)(),
             'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])
                 ->map(Color::convertToRgb(...))
-                ->map(fn(string $value): string => (string) str($value)->after('rgb(')->before(')'))
+                ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,

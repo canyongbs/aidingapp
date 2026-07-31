@@ -303,7 +303,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn(?string $value, array $attributes) => $attributes[$this->displayNameKey()],
+            get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
     }
 }

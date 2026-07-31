@@ -45,7 +45,7 @@ class PipelineEntryAssignedToContactsTable
     public static function configure(Table $table): Table
     {
         return $table
-            ->query(fn() => Contact::query())
+            ->query(fn () => Contact::query())
             ->columns([
                 TextColumn::make('full_name')
                     ->label('Name')

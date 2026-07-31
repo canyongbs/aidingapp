@@ -40,8 +40,6 @@ use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
-use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
@@ -116,10 +114,10 @@ class ProjectWorkPipelineWidget extends TableWidget
                 }
 
                 return PipelineEntry::query()
-                    ->whereHas('pipelineStage', fn(Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+                    ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
                     ->with(['milestones', 'assets', 'serviceRequests', 'pipelineStage.pipeline.project']);
             })
-            ->heading(fn(): View => $this->getTableHeadingView($pipeline))
+            ->heading(fn (): View => $this->getTableHeadingView($pipeline))
             ->columns([
                 TextColumn::make('name')
                     ->label('Task Name')
@@ -156,8 +154,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->slideOver()
                     ->modalHeading('Edit Pipeline Task')
                     ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn(): bool => auth()->user()->can('update', $this->record))
-                    ->after(fn() => $this->dispatch('projectPipelineUpdated')),
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
             ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
@@ -175,8 +173,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->slideOver()
                             ->model(PipelineEntry::class)
                             ->schema($this->entryFormSchema($pipeline))
-                            ->authorize(fn(): bool => auth()->user()->can('update', $this->record))
-                            ->after(fn() => $this->dispatch('projectPipelineUpdated')),
+                            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                            ->after(fn () => $this->dispatch('projectPipelineUpdated')),
                     ]
                     : [
                         Action::make('createPipelineFromEmptyState')
@@ -184,8 +182,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->icon('heroicon-m-plus')
                             ->slideOver()
                             ->schema($this->pipelineFormSchema())
-                            ->action(fn(array $data) => $this->persistPipeline($data))
-                            ->authorize(fn(): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record)),
+                            ->action(fn (array $data) => $this->persistPipeline($data))
+                            ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record)),
                     ],
             )
             ->headerActions([
@@ -202,11 +200,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->modalHeading('Create Pipeline Task')
                     ->icon('heroicon-m-plus')
                     ->slideOver()
-                    ->visible(fn(): bool => (bool) $pipeline?->entries()->exists())
+                    ->visible(fn (): bool => (bool) $pipeline?->entries()->exists())
                     ->model(PipelineEntry::class)
                     ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn(): bool => auth()->user()->can('update', $this->record))
-                    ->after(fn() => $this->dispatch('projectPipelineUpdated')),
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
             ]);
     }
 
@@ -218,8 +216,8 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->modalSubmitActionLabel('Create')
             ->slideOver()
             ->schema($this->pipelineFormSchema())
-            ->action(fn(array $data) => $this->persistPipeline($data))
-            ->authorize(fn(): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record));
+            ->action(fn (array $data) => $this->persistPipeline($data))
+            ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record));
     }
 
     protected function getPipelineSwitcherProjectId(): ?string
@@ -284,7 +282,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         ->default(PipelineStageClassification::Planning->value),
                 ])
                 ->default(
-                    collect(PipelineStageClassification::cases())->map(fn(PipelineStageClassification $case): array => [
+                    collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case): array => [
                         'name' => $case->getLabel(),
                         'classification' => $case->value,
                     ])->all()
