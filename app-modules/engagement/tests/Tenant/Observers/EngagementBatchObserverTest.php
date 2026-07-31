@@ -34,43 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use AidingApp\Engagement\Models\EngagementBatch;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use function Tests\richContentText;
+use function Tests\richContentWith;
 
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
+it('converts a literal merge tag when creating', function () {
+    $batch = EngagementBatch::factory()->create([
+        'body' => richContentText('Hello {{ contact full name }}!'),
+    ]);
 
-    public function creating(Engagement $engagement): void
-    {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
+    expect($batch->body)->toEqual(richContentWith([
+        ['type' => 'text', 'text' => 'Hello '],
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
+        ['type' => 'text', 'text' => '!'],
+    ]));
+});
 
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
+it('leaves text that does not match a merge tag untouched', function () {
+    $body = richContentText('Hello {{ not a merge tag }}!');
 
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+    $batch = EngagementBatch::factory()->create([
+        'body' => $body,
+    ]);
 
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+    expect($batch->refresh()->body)->toEqual($body);
+});

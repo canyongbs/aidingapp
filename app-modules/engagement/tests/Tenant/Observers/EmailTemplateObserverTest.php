@@ -34,43 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use AidingApp\Engagement\Models\EmailTemplate;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use function Tests\richContentText;
+use function Tests\richContentWith;
 
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
+it('converts a literal merge tag when creating', function () {
+    $emailTemplate = EmailTemplate::factory()->create([
+        'content' => richContentText('Hello {{ contact full name }}!'),
+    ]);
 
-    public function creating(Engagement $engagement): void
-    {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
+    expect($emailTemplate->content)->toEqual(richContentWith([
+        ['type' => 'text', 'text' => 'Hello '],
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
+        ['type' => 'text', 'text' => '!'],
+    ]));
+});
 
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
+it('converts a literal merge tag when updating', function () {
+    $emailTemplate = EmailTemplate::factory()->create([
+        'content' => richContentText('Nothing to convert.'),
+    ]);
 
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+    $emailTemplate->update([
+        'content' => richContentText('Reach you at {{ contact email }}?'),
+    ]);
 
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
+    expect($emailTemplate->refresh()->content)->toEqual(richContentWith([
+        ['type' => 'text', 'text' => 'Reach you at '],
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'contact email']],
+        ['type' => 'text', 'text' => '?'],
+    ]));
+});
 
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+it('leaves text that does not match a merge tag untouched', function () {
+    $content = richContentText('Hello {{ not a merge tag }}!');
 
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+    $emailTemplate = EmailTemplate::factory()->create([
+        'content' => $content,
+    ]);
+
+    expect($emailTemplate->refresh()->content)->toEqual($content);
+});
