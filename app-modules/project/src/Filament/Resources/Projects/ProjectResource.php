@@ -86,7 +86,7 @@ class ProjectResource extends Resource
     {
         assert($record instanceof Project);
 
-        return new HtmlString(view('project::filament.global-search.title', [
+        return new HtmlString(view('project::filament.resources.projects.global-search-title', [
             'icon' => $record->icon,
             'name' => $record->name,
             'color' => $record->color?->value,
