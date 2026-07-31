@@ -49,7 +49,9 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 class ProjectResource extends Resource
@@ -78,6 +80,16 @@ class ProjectResource extends Resource
             'Start Date' => $record->start_date?->translatedFormat('M j, Y') ?? 'N/A',
             'Target Go-Live' => $record->target_completion_date?->translatedFormat('M j, Y') ?? 'Indefinite',
         ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        assert($record instanceof Project);
+
+        return new HtmlString(view('project::filament.global-search.title', [
+            'icon' => $record->icon,
+            'name' => $record->name,
+        ])->render());
     }
 
     public static function getPages(): array

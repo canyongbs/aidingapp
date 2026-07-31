@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Illuminate\Contracts\Support\Htmlable;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
@@ -218,4 +219,24 @@ test('global search result details fall back to N/A and Indefinite when fields a
         'Start Date' => 'N/A',
         'Target Go-Live' => 'Indefinite',
     ]);
+});
+
+test('global search result title renders the project icon and name', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create([
+        'name' => 'Campus Wifi Rollout',
+        'icon' => 'heroicon-o-folder',
+    ]);
+
+    $title = ProjectResource::getGlobalSearchResultTitle($project);
+
+    expect($title)->toBeInstanceOf(Htmlable::class);
+
+    $html = $title->toHtml();
+
+    expect($html)->toContain('Campus Wifi Rollout');
+    expect($html)->toContain('heroicon-o-folder');
 });
