@@ -74,7 +74,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
     }
 
     /**
-     * @return array<string, string>
+     * @return array<int|string, string>
      */
     public function getBreadcrumbs(): array
     {
@@ -85,8 +85,8 @@ class ManagePipelineEntries extends ManageRelatedRecords
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-            ProjectResource::getUrl('pipelines', ['record' => $project]) => 'Pipelines',
-            PipelineResource::getUrl('view', ['record' => $this->getRecord(), 'project' => $project]) => Str::limit($this->getRecordTitle(), 16),
+            'Pipelines',
+            Str::limit($this->getRecordTitle(), 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 

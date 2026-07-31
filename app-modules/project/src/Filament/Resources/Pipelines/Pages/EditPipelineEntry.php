@@ -118,8 +118,8 @@ class EditPipelineEntry extends Page
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-            ProjectResource::getUrl('pipelines', ['record' => $project]) => 'Pipelines',
-            PipelineResource::getUrl('view', ['record' => $this->record, 'project' => $project]) => Str::limit($pipeline->name ?? 'Pipeline', 16),
+            'Pipelines',
+            Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
