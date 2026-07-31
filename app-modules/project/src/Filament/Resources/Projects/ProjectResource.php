@@ -49,6 +49,7 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
 class ProjectResource extends Resource
@@ -66,6 +67,17 @@ class ProjectResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        assert($record instanceof Project);
+
+        return [
+            'Department' => $record->department?->name ?? 'N/A',
+            'Start Date' => $record->start_date?->translatedFormat('M j, Y') ?? 'N/A',
+            'Target Go-Live' => $record->target_completion_date?->translatedFormat('M j, Y') ?? 'Indefinite',
+        ];
     }
 
     public static function getPages(): array

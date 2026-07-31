@@ -177,3 +177,45 @@ test('global search result URL points to the project view page', function () {
     expect($url)->toContain('/projects/' . $project->getKey());
     expect($url)->not->toContain('/edit');
 });
+
+test('global search result details include department, start date, and target go-live', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $department = Department::factory()->create(['name' => 'Information Technology']);
+
+    $project = Project::factory()->create([
+        'department_id' => $department->getKey(),
+        'start_date' => '2026-01-15',
+        'target_completion_date' => '2026-06-30',
+    ]);
+
+    $details = ProjectResource::getGlobalSearchResultDetails($project);
+
+    expect($details)->toBe([
+        'Department' => 'Information Technology',
+        'Start Date' => 'Jan 15, 2026',
+        'Target Go-Live' => 'Jun 30, 2026',
+    ]);
+});
+
+test('global search result details fall back to N/A and Indefinite when fields are empty', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create([
+        'department_id' => null,
+        'start_date' => null,
+        'target_completion_date' => null,
+    ]);
+
+    $details = ProjectResource::getGlobalSearchResultDetails($project);
+
+    expect($details)->toBe([
+        'Department' => 'N/A',
+        'Start Date' => 'N/A',
+        'Target Go-Live' => 'Indefinite',
+    ]);
+});
