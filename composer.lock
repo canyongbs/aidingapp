@@ -1619,16 +1619,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.33.0",
+            "version": "2.35.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "057403e9c952ad1b646222ba6f53c134fbb100b4"
+                "reference": "ecb9750b8a985ac77f37a3d3ff64b105a85c3d19"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/057403e9c952ad1b646222ba6f53c134fbb100b4",
-                "reference": "057403e9c952ad1b646222ba6f53c134fbb100b4",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/ecb9750b8a985ac77f37a3d3ff64b105a85c3d19",
+                "reference": "ecb9750b8a985ac77f37a3d3ff64b105a85c3d19",
                 "shasum": ""
             },
             "require": {
@@ -1660,7 +1660,8 @@
             "extra": {
                 "laravel": {
                     "providers": [
-                        "CanyonGBS\\Common\\CommonServiceProvider"
+                        "CanyonGBS\\Common\\CommonServiceProvider",
+                        "CanyonGBS\\Common\\CommonBoostServiceProvider"
                     ]
                 }
             },
@@ -1681,9 +1682,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.33.0"
+                "source": "https://github.com/canyongbs/common/tree/2.35.0"
             },
-            "time": "2026-07-28T03:15:36+00:00"
+            "time": "2026-07-31T13:09:03+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",

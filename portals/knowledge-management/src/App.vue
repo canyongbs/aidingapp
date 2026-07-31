@@ -43,6 +43,7 @@
         SignalIcon,
         WrenchScrewdriverIcon,
     } from '@heroicons/vue/24/outline';
+    import { PlusIcon } from '@heroicons/vue/20/solid';
     import { storeToRefs } from 'pinia';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
@@ -139,6 +140,12 @@
                 routeName: 'service-parent',
                 icon: WrenchScrewdriverIcon,
                 visible: hasServiceManagement.value && user.value !== null,
+                activeRoutes: [
+                    'service',
+                    'create-service-request',
+                    'create-service-request-from-type',
+                    'view-service-request',
+                ],
             },
             {
                 label: 'Status',
@@ -334,7 +341,29 @@
                     @show-login="showLogin = true"
                     @logout="logout"
                     @search="onHeaderSearch"
-                />
+                >
+                    <template #actions>
+                        <router-link
+                            v-if="hasServiceManagement && user"
+                            :to="{ name: 'create-service-request' }"
+                            class="relative hidden sm:inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+                        >
+                            <PlusIcon class="size-5" />
+                            New Request
+                        </router-link>
+                    </template>
+                    <template #mobile-actions="{ closeSidebar }">
+                        <router-link
+                            v-if="hasServiceManagement && user"
+                            :to="{ name: 'create-service-request' }"
+                            @click="closeSidebar"
+                            class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                        >
+                            <PlusIcon class="size-5" />
+                            New Request
+                        </router-link>
+                    </template>
+                </Header>
 
                 <main class="flex-1">
                     <div v-if="errorLoading" class="text-center w-full">
