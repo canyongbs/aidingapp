@@ -91,6 +91,7 @@ export function useKnowledgeManagementSearch() {
                 page: currentPage.value,
             }),
         enabled: isSearchActive,
+        staleTime: 1000 * 60 * 5,
     });
 
     const shownEnvelope = ref(null);
@@ -107,7 +108,8 @@ export function useKnowledgeManagementSearch() {
         { immediate: true },
     );
 
-    const loadingResults = computed(() => isSearchActive.value && pageQuery.isLoading.value);
+    // Only true before the first result is shown; filter/page switches keep showing `shownEnvelope`.
+    const loadingResults = computed(() => isSearchActive.value && shownEnvelope.value === null);
 
     const searchResultArticles = computed(() =>
         (shownEnvelope.value?.data?.articles?.data ?? []).map((article) => ({
@@ -191,6 +193,7 @@ export function useKnowledgeManagementSearch() {
                 const tagsChanged = newTags.join(',') !== activeTags.value.join(',');
 
                 if (searchChanged || tagsChanged) {
+                    shownEnvelope.value = null;
                     activeSearchQuery.value = newSearch;
                     activeTags.value = newTags;
                     currentPage.value = 1;

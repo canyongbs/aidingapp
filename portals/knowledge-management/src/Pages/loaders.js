@@ -82,6 +82,7 @@ export const useArticleData = defineColadaLoader({
 export const useServiceRequestsData = defineColadaLoader({
     key: () => ['knowledge-management', 'service-requests'],
     query: () => tolerant(apiGet('/service-requests')),
+    staleTime: fiveMinutes,
 });
 
 export const useServiceRequestData = defineColadaLoader({
@@ -92,21 +93,25 @@ export const useServiceRequestData = defineColadaLoader({
 export const useServiceMonitorData = defineColadaLoader({
     key: () => ['knowledge-management', 'service-monitors'],
     query: () => tolerant(apiGet('/status', { page: 1 })),
+    staleTime: fiveMinutes,
 });
 
 export const useAdvisoriesData = defineColadaLoader({
     key: () => ['knowledge-management', 'advisories'],
     query: () => tolerant(apiGet('/advisories', { page: 1 })),
+    staleTime: fiveMinutes,
 });
 
 export const useAssetsData = defineColadaLoader({
     key: () => ['knowledge-management', 'assets'],
     query: () => tolerant(apiGet('/assets', { filter: 'all', page: 1 })),
+    staleTime: fiveMinutes,
 });
 
 export const useLicensesData = defineColadaLoader({
     key: () => ['knowledge-management', 'licenses'],
     query: () => tolerant(apiGet('/product-licenses')),
+    staleTime: fiveMinutes,
 });
 
 export const useServiceRequestTypesData = defineColadaLoader({

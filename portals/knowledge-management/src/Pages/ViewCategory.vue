@@ -134,6 +134,7 @@
         query: () =>
             apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
         enabled: () => !isDefaultView.value,
+        staleTime: 1000 * 60 * 5,
     });
 
     const currentArticles = computed(() =>

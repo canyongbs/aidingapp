@@ -62,10 +62,12 @@
         key: () => ['knowledge-management', 'assets', activeFilter.value, currentPage.value],
         query: () => apiGet('/assets', { filter: activeFilter.value, page: currentPage.value }),
         enabled: () => !isDefaultView.value,
+        staleTime: 1000 * 60 * 5,
     });
 
     const currentEnvelope = computed(() => (isDefaultView.value ? initialData.value : (pageQuery.data.value ?? null)));
 
+    // Keeps the previous filter/page visible while a new one loads.
     const shownEnvelope = ref(null);
     watch(
         currentEnvelope,
@@ -77,7 +79,11 @@
         { immediate: true },
     );
 
-    const loading = computed(() => !isDefaultView.value && pageQuery.isLoading.value);
+    // Only true before the first paint; filter/page switches keep showing `shownEnvelope`.
+    const loading = computed(() => shownEnvelope.value === null);
+
+    const loadingEnvelope = computed(() => !isDefaultView.value && pageQuery.isLoading.value);
+    const loadingPage = computed(() => (loadingEnvelope.value ? currentPage.value : null));
 
     const assets = computed(() => shownEnvelope.value?.data ?? []);
     const counts = computed(() => shownEnvelope.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
@@ -115,6 +121,7 @@
             <AssetTable
                 :assets="assets"
                 :loading="loading"
+                :loading-page="loadingPage"
                 :active-filter="activeFilter"
                 :current-page="currentPage"
                 :last-page="lastPage"

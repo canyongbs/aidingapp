@@ -54,6 +54,10 @@
             type: Boolean,
             required: true,
         },
+        loadingPage: {
+            type: Number,
+            default: null,
+        },
         activeFilter: {
             type: String,
             required: true,
@@ -170,9 +174,10 @@
                 v-if="lastPage > 1"
                 :current-page="currentPage"
                 :last-page="lastPage"
-                :from-article="fromItem"
-                :to-article="toItem"
-                :total-articles="totalItems"
+                :from-item="fromItem"
+                :to-item="toItem"
+                :total-items="totalItems"
+                :loading-page="loadingPage"
                 @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
                 @fetchNextPage="emit('fetchPage', currentPage + 1)"
                 @fetchPage="emit('fetchPage', $event)"
