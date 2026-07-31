@@ -46,44 +46,13 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 
-if (! function_exists('literalMergeTagContent')) {
-    /**
-     * @return array<string, mixed>
-     */
-    function literalMergeTagContent(string $text): array
-    {
-        return [
-            'type' => 'doc',
-            'content' => [[
-                'type' => 'paragraph',
-                'content' => [['type' => 'text', 'text' => $text]],
-            ]],
-        ];
-    }
-}
-
-if (! function_exists('convertedMergeTagContent')) {
-    /**
-     * @param array<int, mixed> $nodes
-     *
-     * @return array<string, mixed>
-     */
-    function convertedMergeTagContent(array $nodes): array
-    {
-        return [
-            'type' => 'doc',
-            'content' => [[
-                'type' => 'paragraph',
-                'content' => $nodes,
-            ]],
-        ];
-    }
-}
+use function Tests\richContentText;
+use function Tests\richContentWith;
 
 if (! function_exists('plantLiteralMergeTagContent')) {
     function plantLiteralMergeTagContent(Model $model, string $attribute, string $text): void
     {
-        $model->setAttribute($attribute, literalMergeTagContent($text));
+        $model->setAttribute($attribute, richContentText($text));
         $model->saveQuietly();
     }
 }
@@ -168,7 +137,7 @@ describe('2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_ri
 
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $expectedGreeting = convertedMergeTagContent([
+            $expectedGreeting = richContentWith([
                 ['type' => 'text', 'text' => 'Hello '],
                 ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
                 ['type' => 'text', 'text' => '!'],
@@ -176,7 +145,7 @@ describe('2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_ri
 
             expect($engagement->refresh()->body)->toEqual($expectedGreeting)
                 ->and($batch->refresh()->body)->toEqual($expectedGreeting)
-                ->and($emailTemplate->refresh()->content)->toEqual(convertedMergeTagContent([
+                ->and($emailTemplate->refresh()->content)->toEqual(richContentWith([
                     ['type' => 'text', 'text' => 'Reach you at '],
                     ['type' => 'mergeTag', 'attrs' => ['id' => 'contact email']],
                     ['type' => 'text', 'text' => '?'],
@@ -194,7 +163,7 @@ describe('2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_ri
 
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($engagement->refresh()->body)->toEqual(literalMergeTagContent('Hello {{ not a merge tag }}!'));
+            expect($engagement->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
         });
     });
 });
@@ -220,21 +189,21 @@ describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_reque
 
             expect($migrate)->toBe(Command::SUCCESS);
 
-            $expectedSubject = convertedMergeTagContent([['type' => 'mergeTag', 'attrs' => ['id' => 'title']]]);
+            $expectedSubject = richContentWith([['type' => 'mergeTag', 'attrs' => ['id' => 'title']]]);
 
             expect($typeTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($typeTemplate->body)->toEqual(convertedMergeTagContent([
+                ->and($typeTemplate->body)->toEqual(richContentWith([
                     ['type' => 'text', 'text' => 'Hello '],
                     ['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']],
                     ['type' => 'text', 'text' => '!'],
                 ]))
                 ->and($automationTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($automationTemplate->body)->toEqual(convertedMergeTagContent([
+                ->and($automationTemplate->body)->toEqual(richContentWith([
                     ['type' => 'text', 'text' => 'Assigned to '],
                     ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned staff name']],
                 ]))
                 ->and($customTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($customTemplate->body)->toEqual(convertedMergeTagContent([
+                ->and($customTemplate->body)->toEqual(richContentWith([
                     ['type' => 'text', 'text' => 'Hi '],
                     ['type' => 'mergeTag', 'attrs' => ['id' => 'contact name']],
                     ['type' => 'text', 'text' => '!'],
@@ -252,7 +221,7 @@ describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_reque
 
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($typeTemplate->refresh()->body)->toEqual(literalMergeTagContent('Hello {{ not a merge tag }}!'));
+            expect($typeTemplate->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
         });
     });
 });
