@@ -36,33 +36,8 @@
 
 use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 
-if (! function_exists('richContentWith')) {
-    /**
-     * @param array<int, mixed> $nodes
-     *
-     * @return array<string, mixed>
-     */
-    function richContentWith(array $nodes): array
-    {
-        return [
-            'type' => 'doc',
-            'content' => [[
-                'type' => 'paragraph',
-                'content' => $nodes,
-            ]],
-        ];
-    }
-}
-
-if (! function_exists('richContentText')) {
-    /**
-     * @return array<string, mixed>
-     */
-    function richContentText(string $text): array
-    {
-        return richContentWith([['type' => 'text', 'text' => $text]]);
-    }
-}
+use function Tests\richContentText;
+use function Tests\richContentWith;
 
 it('converts a literal merge tag label when creating', function () {
     $template = ServiceRequestCustomEmailTemplate::factory()->create([
