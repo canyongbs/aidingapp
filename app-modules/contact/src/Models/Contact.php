@@ -51,7 +51,6 @@ use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -271,18 +270,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return $this->hasMany(ProductLicense::class, 'assigned_to');
     }
 
-    /**
-     * @return MorphToMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): MorphToMany
-    {
-        return $this->morphToMany(
-            related: PipelineEntry::class,
-            name: 'organizable',
-            table: 'pipeline_entries',
-        )->withTimestamps();
-    }
-
     public static function getLabel(): string
     {
         return 'contact';
@@ -316,7 +303,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     protected function displayName(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
+            get: fn(?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
     }
 }

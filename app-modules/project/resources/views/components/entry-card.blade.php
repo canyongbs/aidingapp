@@ -43,10 +43,6 @@
                 {{ $entry->name }}
             </small>
             <br />
-            <x-filament::badge color="success">
-                {{ $entry->organizable?->full_name }}
-            </x-filament::badge>
-            <br />
         </div>
         <x-filament::icon-button
             class="fi-primary-color"

@@ -34,55 +34,22 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\Project\Models\Project;
-use Illuminate\Support\Facades\URL;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+return new class() extends Migration {
+    public function up(): void
+    {
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->dropMorphs('organizable');
+        });
+    }
 
-test('portal returns has_projects as false when contact has no pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
-
-  $contact = Contact::factory()->create();
-
-  actingAs($contact, 'contact');
-
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
-
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', false);
-});
-
-test('portal returns has_projects as true when contact has pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
-
-  $contact = Contact::factory()->create();
-
-  $project = Project::factory()->create();
-  $project->guestContacts()->attach($contact);
-
-  actingAs($contact, 'contact');
-
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
-
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', true);
-});
-
-test('portal projects route renders successfully', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
-
-  $response = get(route('portal.projects'));
-
-  $response->assertSuccessful();
-});
+    public function down(): void
+    {
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->uuidMorphs('organizable');
+        });
+    }
+};

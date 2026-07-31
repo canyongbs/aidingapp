@@ -149,20 +149,7 @@ class EditPipelineEntry extends Page
         $pipeline = $this->getPipeline();
 
         return $schema
-            ->components([
-                Grid::make()->schema([
-                    Select::make('pipeline_stage_id')
-                        ->label('Stage')
-                        ->relationship('pipelineStage', 'name')
-                        ->required()
-                        ->options(fn () => $pipeline->stages->pluck('name', 'id')),
-                    TextInput::make('name')
-                        ->maxLength(255)
-                        ->label('Name')
-                        ->string(),
-                ]),
-                ...PipelineEntryForm::components($pipeline),
-            ])
+            ->components(PipelineEntryForm::components($this->record))
             ->statePath('data')
             ->model($this->getPipelineEntry());
     }

@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
@@ -145,19 +144,6 @@ class ViewPipelineEntry extends Page
                         TextEntry::make('name')
                             ->label('Name')
                             ->extraAttributes(['class' => 'break-words']),
-                        TextEntry::make('organizable.full_name')
-                            ->label('Organization Name')
-                            ->url(function (PipelineEntry $record) {
-                                return match ($record->organizable->getMorphClass()) {
-                                    app(Contact::class)->getMorphClass() => ContactResource::getUrl('view', ['record' => $record->organizable_id]),
-                                    default => null,
-                                };
-                            })
-                            ->openUrlInNewTab(),
-                        TextEntry::make('organizable_type')
-                            ->label('Organization Type')
-                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
-                            ->badge(),
                         TextEntry::make('pipelineStage.name')
                             ->label('Stage')
                             ->badge(),
@@ -185,7 +171,7 @@ class ViewPipelineEntry extends Page
                         TextEntry::make('assigned_to_type')
                             ->visible(fn () => filled($this->getPipelineEntry()->assigned_to_type))
                             ->label('Assigned To Type')
-                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                            ->formatStateUsing(fn(string $state): string => ucfirst($state))
                             ->badge(),
                         IconEntry::make('is_visible_to_guests')
                             ->label('Visible to Guest')
@@ -198,8 +184,8 @@ class ViewPipelineEntry extends Page
                             ->badge(),
                         TextEntry::make('serviceRequests')
                             ->label('Related Service Requests')
-                            ->state(fn (PipelineEntry $record): array => $record->serviceRequests
-                                ->map(fn (ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
+                            ->state(fn(PipelineEntry $record): array => $record->serviceRequests
+                                ->map(fn(ServiceRequest $serviceRequest): string => PipelineEntryForm::serviceRequestLabel($serviceRequest))
                                 ->all())
                             ->badge(),
                     ]),

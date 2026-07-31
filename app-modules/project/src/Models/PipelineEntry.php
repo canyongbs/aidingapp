@@ -73,8 +73,6 @@ class PipelineEntry extends Model implements Auditable
     protected $fillable = [
         'name',
         'pipeline_stage_id',
-        'organizable_id',
-        'organizable_type',
         'description',
         'due',
         'assigned_to_id',
@@ -94,14 +92,6 @@ class PipelineEntry extends Model implements Auditable
     public function pipelineStage(): BelongsTo
     {
         return $this->belongsTo(PipelineStage::class);
-    }
-
-    /**
-     * @return MorphTo<Model, $this>
-     */
-    public function organizable(): MorphTo
-    {
-        return $this->morphTo();
     }
 
     /**

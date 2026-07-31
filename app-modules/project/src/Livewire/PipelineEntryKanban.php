@@ -44,7 +44,6 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -138,14 +137,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->label('Add pipeline entry')
             ->model(PipelineEntry::class)
             ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
-            ->schema([
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->required()
-                    ->string()
-                    ->columnSpanFull(),
-                ...PipelineEntryForm::components($this->pipeline),
-            ])
+            ->schema(PipelineEntryForm::components($this->pipeline, isStageVisible: false))
             ->action(function (array $data, array $arguments, Action $action) {
                 $stage = $this->pipeline->stages()->whereKey($arguments['stage'] ?? null)->first();
 

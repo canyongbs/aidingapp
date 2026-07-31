@@ -34,55 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\Project\Models\Project;
-use Illuminate\Support\Facades\URL;
+namespace AidingApp\Project\Filament\Tables;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use AidingApp\Project\Models\ProjectMilestone;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-test('portal returns has_projects as false when contact has no pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
+class PipelineEntryMilestonesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->query(function () use ($table): Builder {
+                $projectId = $table->getArguments()['projectId'] ?? null;
 
-  $contact = Contact::factory()->create();
-
-  actingAs($contact, 'contact');
-
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
-
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', false);
-});
-
-test('portal returns has_projects as true when contact has pipeline entries', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
-
-  $contact = Contact::factory()->create();
-
-  $project = Project::factory()->create();
-  $project->guestContacts()->attach($contact);
-
-  actingAs($contact, 'contact');
-
-  $url = URL::signedRoute(name: 'api.portal.define', absolute: false);
-  $response = get($url);
-
-  $response->assertSuccessful();
-  $response->assertJsonPath('has_projects', true);
-});
-
-test('portal projects route renders successfully', function () {
-  $settings = app(PortalSettings::class);
-  $settings->knowledge_management_portal_enabled = true;
-  $settings->save();
-
-  $response = get(route('portal.projects'));
-
-  $response->assertSuccessful();
-});
+                return ProjectMilestone::query()->where('project_id', $projectId);
+            })
+            ->columns([
+                TextColumn::make('title')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('target_date')
+                    ->date()
+                    ->placeholder('N/A'),
+            ])
+            ->paginated([5])
+            ->defaultSort('created_at');
+    }
+}

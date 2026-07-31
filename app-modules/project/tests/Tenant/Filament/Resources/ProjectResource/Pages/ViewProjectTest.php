@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
@@ -386,7 +385,7 @@ it('can create a pipeline through the create pipeline action', function () {
             ],
         ])
         ->assertHasNoActionErrors()
-        ->assertSet('selectedPipelineId', fn (?string $state): bool => filled($state));
+        ->assertSet('selectedPipelineId', fn(?string $state): bool => filled($state));
 
     $pipeline = Pipeline::query()->where('name', 'Delivery Pipeline')->first();
 
@@ -411,16 +410,12 @@ it('can create a pipeline entry through the widget header create action', functi
 
     PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
 
-    $contact = Contact::factory()->create();
-
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callTableAction('createEntry', data: [
             'name' => 'Kickoff Task',
             'pipeline_stage_id' => $stage->getKey(),
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ])
         ->assertHasNoTableActionErrors();
 

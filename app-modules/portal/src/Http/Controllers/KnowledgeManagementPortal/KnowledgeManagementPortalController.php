@@ -40,7 +40,6 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\Project\Models\PipelineEntry;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -77,7 +76,7 @@ class KnowledgeManagementPortalController extends Controller
             'display_timezone' => app(ResolvePortalDisplayTimezone::class)(),
             'primary_color' => collect(Color::all()[$settings->knowledge_management_portal_primary_color->value ?? 'blue'])
                 ->map(Color::convertToRgb(...))
-                ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
+                ->map(fn(string $value): string => (string) str($value)->after('rgb(')->before(')'))
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
@@ -88,12 +87,7 @@ class KnowledgeManagementPortalController extends Controller
             'asset_management_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'license_management_enabled' => $addons?->licenseManagement,
-            'has_projects' => auth()->guard('contact')->user()
-                ? PipelineEntry::query()
-                    ->where('organizable_type', auth()->guard('contact')->user()->getMorphClass())
-                    ->where('organizable_id', auth()->guard('contact')->user()->getKey())
-                    ->exists()
-                : false,
+            'has_projects' => auth()->guard('contact')->user()?->guestProjects()->exists() ?: false,
             'authentication_url' => URL::to(
                 URL::signedRoute(
                     name: 'api.portal.request-authentication',

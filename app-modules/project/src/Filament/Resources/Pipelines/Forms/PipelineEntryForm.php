@@ -37,16 +37,26 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Filament\Tables\PipelineEntryAssetsTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryAssignedToContactsTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryAssignedToUsersTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryMilestonesTable;
+use AidingApp\Project\Filament\Tables\PipelineEntryServiceRequestsTable;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
-use Filament\Forms\Components\MorphToSelect;
-use Filament\Forms\Components\MorphToSelect\Type;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Str;
 
 class PipelineEntryForm
@@ -56,68 +66,86 @@ class PipelineEntryForm
      *
      * @return array<int, mixed>
      */
-    public static function components(?Pipeline $pipeline = null): array
+    public static function components(?Pipeline $pipeline = null, bool $isStageVisible = true): array
     {
         return [
-            MorphToSelect::make('organizable')
-                ->types([
-                    Type::make(Contact::class)
-                        ->label('Contact')
-                        ->titleAttribute('full_name')
-                        ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                ])
-                ->searchable()
-                ->preload()
-                ->required(),
+            TextInput::make('name')
+                ->label('Task Name')
+                ->required()
+                ->maxLength(255),
             Textarea::make('description')
+                ->label('Task Description')
                 ->maxLength(65535),
+            TableSelect::make('pipeline_stage_id')
+                ->label('Stage')
+                ->tableConfiguration(ProjectPipelinesStageTable::class)
+                ->tableArguments(['pipelineId' => $pipeline?->getKey()])
+                ->visible($isStageVisible)
+                ->required(),
             DateTimePicker::make('due')
                 ->label('Due Date'),
-            MorphToSelect::make('assignedTo')
-                ->label('Assigned To')
-                ->types([
-                    Type::make(User::class)
-                        ->label('User')
-                        ->titleAttribute('name')
-                        ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
-                    Type::make(Contact::class)
-                        ->label('Contact')
-                        ->titleAttribute('full_name')
-                        ->modifyOptionsQueryUsing(fn (Builder $query) => $query->limit(50)),
+            Select::make('assigned_to_type')
+                ->label('Assigned To Type')
+                ->options([
+                    Relation::getMorphAlias(User::class) => 'User',
+                    Relation::getMorphAlias(Contact::class) => 'Contact',
                 ])
-                ->searchable()
-                ->preload()
-                ->typeSelectToggleButtons(),
+                ->placeholder('None')
+                ->native(false)
+                ->live()
+                ->afterStateUpdated(fn(Set $set) => $set('assigned_to_id', null)),
+            ModalTableSelect::make('assigned_to_id')
+                ->label('Assigned To')
+                ->tableConfiguration(fn(Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
+                    Contact::class => PipelineEntryAssignedToContactsTable::class,
+                    default => PipelineEntryAssignedToUsersTable::class,
+                })
+                ->getOptionLabelUsing(function (Get $get, mixed $state): ?string {
+                    $type = $get('assigned_to_type');
+
+                    if (blank($type) || blank($state)) {
+                        return null;
+                    }
+
+                    $modelClass = Relation::getMorphedModel($type) ?? $type;
+
+                    $record = $modelClass::query()->find($state);
+
+                    return $record instanceof Contact ? $record->full_name : $record?->name;
+                })
+                ->visible(fn(Get $get): bool => filled($get('assigned_to_type')))
+                ->dehydrateStateUsing(fn(Get $get, mixed $state): mixed => filled($get('assigned_to_type')) ? $state : null)
+                ->dehydrated()
+                ->dehydratedWhenHidden(),
             Toggle::make('is_visible_to_guests')
                 ->label('Visible to Guest')
                 ->default(true),
-            Select::make('milestones')
+            ModalTableSelect::make('milestones')
                 ->label('Related Milestones')
                 ->relationship(
                     name: 'milestones',
                     titleAttribute: 'title',
                     modifyQueryUsing: $pipeline
-                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        ? fn(Builder $query) => $query->where('project_id', $pipeline->project_id)
                         : null,
                 )
+                ->tableConfiguration(PipelineEntryMilestonesTable::class)
+                ->tableArguments(['projectId' => $pipeline?->project_id])
+                ->tableSelect(fn(TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
                 ->multiple()
-                ->searchable()
-                ->preload()
                 ->dehydrated(),
-            Select::make('assets')
+            ModalTableSelect::make('assets')
                 ->label('Related Assets')
                 ->relationship(name: 'assets', titleAttribute: 'name')
+                ->tableConfiguration(PipelineEntryAssetsTable::class)
                 ->multiple()
-                ->searchable()
-                ->preload()
                 ->dehydrated(),
-            Select::make('serviceRequests')
+            ModalTableSelect::make('serviceRequests')
                 ->label('Related Service Requests')
                 ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
-                ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record): string => self::serviceRequestLabel($record))
+                ->getOptionLabelFromRecordUsing(fn(ServiceRequest $record): string => self::serviceRequestLabel($record))
+                ->tableConfiguration(PipelineEntryServiceRequestsTable::class)
                 ->multiple()
-                ->searchable()
-                ->preload()
                 ->dehydrated(),
         ];
     }
