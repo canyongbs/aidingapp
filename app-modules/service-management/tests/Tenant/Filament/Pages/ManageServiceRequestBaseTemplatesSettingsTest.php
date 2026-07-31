@@ -365,6 +365,60 @@ test('it does not double encode the subject and body when applying base template
     expect(json_decode($rawTemplate->body, associative: true))->toEqual($body);
 });
 
+test('it converts literal merge tags when applying base templates', function () {
+    asSuperAdmin();
+
+    $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'type' => ServiceRequestEmailTemplateType::Created,
+        'role' => ServiceRequestTypeEmailTemplateRole::Customer,
+    ]);
+
+    $document = fn (string $text): array => [
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'paragraph',
+            'content' => [['type' => 'text', 'text' => $text]],
+        ]],
+    ];
+
+    $baseTemplate->subject = $document('Update on {{ service request number }}');
+    $baseTemplate->body = $document("Hi {{ recipient's name }}, thanks!");
+    $baseTemplate->saveQuietly();
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+        ->callAction('applyBaseTemplates')
+        ->assertHasNoFormErrors();
+
+    $template = ServiceRequestTypeEmailTemplate::query()
+        ->where('service_request_type_id', $type->getKey())
+        ->where('type', $baseTemplate->type->value)
+        ->where('role', $baseTemplate->role->value)
+        ->firstOrFail();
+
+    expect($template->subject)->toEqual([
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'paragraph',
+            'content' => [
+                ['type' => 'text', 'text' => 'Update on '],
+                ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+            ],
+        ]],
+    ])->and($template->body)->toEqual([
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'paragraph',
+            'content' => [
+                ['type' => 'text', 'text' => 'Hi '],
+                ['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']],
+                ['type' => 'text', 'text' => ', thanks!'],
+            ],
+        ]],
+    ]);
+});
+
 test('it applies base templates only to the selected service request types', function () {
     asSuperAdmin();
 

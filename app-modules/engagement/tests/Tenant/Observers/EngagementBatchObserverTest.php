@@ -34,43 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use AidingApp\Engagement\Models\EngagementBatch;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
-
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+if (! function_exists('richContentWith')) {
+    /**
+     * @param array<int, mixed> $nodes
+     *
+     * @return array<string, mixed>
+     */
+    function richContentWith(array $nodes): array
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+        return [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'paragraph',
+                'content' => $nodes,
+            ]],
+        ];
     }
 }
+
+if (! function_exists('richContentText')) {
+    /**
+     * @return array<string, mixed>
+     */
+    function richContentText(string $text): array
+    {
+        return richContentWith([['type' => 'text', 'text' => $text]]);
+    }
+}
+
+it('converts a literal merge tag when creating', function () {
+    $batch = EngagementBatch::factory()->create([
+        'body' => richContentText('Hello {{ contact full name }}!'),
+    ]);
+
+    expect($batch->body)->toEqual(richContentWith([
+        ['type' => 'text', 'text' => 'Hello '],
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
+        ['type' => 'text', 'text' => '!'],
+    ]));
+});
+
+it('leaves text that does not match a merge tag untouched', function () {
+    $body = richContentText('Hello {{ not a merge tag }}!');
+
+    $batch = EngagementBatch::factory()->create([
+        'body' => $body,
+    ]);
+
+    expect($batch->refresh()->body)->toEqual($body);
+});
