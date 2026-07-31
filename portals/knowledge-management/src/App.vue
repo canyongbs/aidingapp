@@ -34,6 +34,7 @@
 <script setup>
     import Footer from '@common/portal/Footer.vue';
     import Header from '@common/portal/Header.vue';
+    import { PlusIcon } from '@heroicons/vue/20/solid';
     import {
         CubeIcon,
         DocumentTextIcon,
@@ -43,7 +44,6 @@
         SignalIcon,
         WrenchScrewdriverIcon,
     } from '@heroicons/vue/24/outline';
-    import { PlusIcon } from '@heroicons/vue/20/solid';
     import { storeToRefs } from 'pinia';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
