@@ -136,7 +136,11 @@
 
     function firstPageFor(filter) {
         const key =
-            filter === 'featured' ? 'featured_articles' : filter === 'most-viewed' ? 'most_viewed_articles' : 'all_articles';
+            filter === 'featured'
+                ? 'featured_articles'
+                : filter === 'most-viewed'
+                  ? 'most_viewed_articles'
+                  : 'all_articles';
 
         return categoryResponse.value?.[key] ?? null;
     }
