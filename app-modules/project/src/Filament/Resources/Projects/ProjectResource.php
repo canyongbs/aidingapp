@@ -76,7 +76,7 @@ class ProjectResource extends Resource
         assert($record instanceof Project);
 
         return [
-            'Department' => $record->department?->name ?? 'N/A',
+            'Department' => $record->department->name ?? 'N/A',
             'Start Date' => $record->start_date?->translatedFormat('M j, Y') ?? 'N/A',
             'Target Go-Live' => $record->target_completion_date?->translatedFormat('M j, Y') ?? 'Indefinite',
         ];
