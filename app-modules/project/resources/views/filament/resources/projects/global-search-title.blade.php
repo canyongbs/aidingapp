@@ -47,7 +47,7 @@
 @endphp
 <span class="flex items-center gap-2" data-icon="{{ $icon }}">
     <span
-        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-linear-to-b from-[var(--project-gradient-from)] to-[var(--project-gradient-to)] dark:from-[var(--project-gradient-from-dark)] dark:to-[var(--project-gradient-to-dark)]"
+        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-linear-to-b from-(--project-gradient-from) to-(--project-gradient-to) dark:from-(--project-gradient-from-dark) dark:to-(--project-gradient-to-dark)"
         style="
             --project-gradient-from: {{ $gradient['from'] }};
             --project-gradient-to: {{ $gradient['to'] }};
