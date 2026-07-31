@@ -64,6 +64,8 @@ return new class () extends Migration {
         ['table' => 'service_request_type_email_templates', 'column' => 'body'],
         ['table' => 'service_request_notification_automation_email_templates', 'column' => 'subject'],
         ['table' => 'service_request_notification_automation_email_templates', 'column' => 'body'],
+        ['table' => 'service_request_custom_email_templates', 'column' => 'subject'],
+        ['table' => 'service_request_custom_email_templates', 'column' => 'body'],
     ];
 
     public function up(): void

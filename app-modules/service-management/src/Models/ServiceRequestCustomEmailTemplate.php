@@ -41,8 +41,10 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use AidingApp\ServiceManagement\Observers\ServiceRequestCustomEmailTemplateObserver;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -50,6 +52,7 @@ use Illuminate\Database\Eloquent\Model;
 /**
  * @mixin IdeHelperServiceRequestCustomEmailTemplate
  */
+#[ObservedBy([ServiceRequestCustomEmailTemplateObserver::class])]
 class ServiceRequestCustomEmailTemplate extends Model implements HasRichContent
 {
     /** @use HasFactory<ServiceRequestCustomEmailTemplateFactory> */
@@ -77,10 +80,12 @@ class ServiceRequestCustomEmailTemplate extends Model implements HasRichContent
         $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
         $this->registerRichContent('subject')
-            ->mergeTags($mergeTags);
+            ->mergeTags($mergeTags)
+            ->mergeTagLabels($mergeTags);
 
         $this->registerRichContent('body')
             ->mergeTags($mergeTags)
+            ->mergeTagLabels($mergeTags)
             ->customBlocks([
                 ServiceRequestTypeEmailTemplateButtonBlock::class,
                 SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
