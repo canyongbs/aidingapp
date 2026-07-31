@@ -41,10 +41,11 @@ use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipelineEntry;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use Illuminate\Database\Eloquent\Builder;
+use BackedEnum;
 use Filament\Resources\Pages\Page;
 use Filament\Resources\ParentResourceRegistration;
 use Filament\Resources\Resource;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
 class PipelineEntryResource extends Resource
@@ -55,7 +56,7 @@ class PipelineEntryResource extends Resource
 
     protected static ?string $breadcrumb = 'Pipeline Entries';
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 
