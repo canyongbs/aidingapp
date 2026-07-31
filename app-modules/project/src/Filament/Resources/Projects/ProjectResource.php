@@ -89,6 +89,7 @@ class ProjectResource extends Resource
         return new HtmlString(view('project::filament.global-search.title', [
             'icon' => $record->icon,
             'name' => $record->name,
+            'color' => $record->color?->value,
         ])->render());
     }
 

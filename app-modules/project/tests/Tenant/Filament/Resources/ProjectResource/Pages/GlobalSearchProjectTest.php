@@ -38,6 +38,8 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use CanyonGBS\Common\Enums\Color;
+use Filament\Support\Facades\FilamentColor;
 use Illuminate\Contracts\Support\Htmlable;
 
 use function Pest\Laravel\actingAs;
@@ -229,6 +231,7 @@ test('global search result title renders the project icon and name', function ()
     $project = Project::factory()->create([
         'name' => 'Campus Wifi Rollout',
         'icon' => 'heroicon-o-folder',
+        'color' => Color::Teal,
     ]);
 
     $title = ProjectResource::getGlobalSearchResultTitle($project);
@@ -239,4 +242,9 @@ test('global search result title renders the project icon and name', function ()
 
     expect($html)->toContain('Campus Wifi Rollout');
     expect($html)->toContain('heroicon-o-folder');
+
+    $palette = FilamentColor::getColor('teal');
+
+    expect($html)->toContain($palette[400]);
+    expect($html)->toContain($palette[700]);
 });

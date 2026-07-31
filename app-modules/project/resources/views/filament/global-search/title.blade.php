@@ -31,7 +31,31 @@
 
     </COPYRIGHT>
 --}}
+@php
+    use Filament\Support\Colors\Color;
+    use Filament\Support\Facades\FilamentColor;
+
+    $palettes = Color::all();
+    $palette = FilamentColor::getColor($color ?? 'blue') ?? ($palettes[$color ?? 'blue'] ?? $palettes['blue']);
+
+    $gradient = [
+        'from' => $palette[400],
+        'to' => $palette[700],
+        'darkFrom' => $palette[500],
+        'darkTo' => $palette[800],
+    ];
+@endphp
 <span class="flex items-center gap-2" data-icon="{{ $icon }}">
-    <x-filament::icon :icon="$icon" class="h-4 w-4 shrink-0" />
+    <span
+        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-linear-to-b from-[var(--project-gradient-from)] to-[var(--project-gradient-to)] dark:from-[var(--project-gradient-from-dark)] dark:to-[var(--project-gradient-to-dark)]"
+        style="
+            --project-gradient-from: {{ $gradient['from'] }};
+            --project-gradient-to: {{ $gradient['to'] }};
+            --project-gradient-from-dark: {{ $gradient['darkFrom'] }};
+            --project-gradient-to-dark: {{ $gradient['darkTo'] }};
+        "
+    >
+        <x-filament::icon :icon="$icon" class="h-4 w-4 shrink-0 text-white" />
+    </span>
     <span>{{ $name }}</span>
 </span>
