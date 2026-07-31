@@ -56,6 +56,8 @@ it('can render edit pipeline entry with proper permission', function () {
     actingAs($user);
 
     $project = Project::factory()->create();
+    $project->managerUsers()->attach($user->getKey());
+
     $pipeline = Pipeline::factory()
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
@@ -77,6 +79,7 @@ it('can render edit pipeline entry with proper permission', function () {
         ->assertForbidden();
 
     $user->givePermissionTo('pipeline.*.update');
+    $user->givePermissionTo('project.*.update');
     $user->refresh();
 
     livewire(EditPipelineEntry::class, [

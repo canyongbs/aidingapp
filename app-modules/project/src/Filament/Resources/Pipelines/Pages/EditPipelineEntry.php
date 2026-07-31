@@ -37,7 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
- use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Filament\Actions\Action;
@@ -51,6 +51,7 @@ use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
@@ -76,9 +77,11 @@ class EditPipelineEntry extends Page
 
     public function mount(int | string $record): void
     {
-        $this->record = $this->resolveRecord($record);
-
-        abort_unless((bool) Filament::auth()->user()?->can('update', $this->getPipelineEntry()), 403);
+        try {
+            $this->record = $this->resolveRecord($record);
+        } catch (ModelNotFoundException) {
+            abort(404);
+        }
 
         $pipeline = $this->getParentRecord();
 
@@ -89,6 +92,8 @@ class EditPipelineEntry extends Page
         if ($this->getPipelineEntry()->pipelineStage->pipeline_id !== $pipeline->id) {
             abort(404);
         }
+
+        abort_unless((bool) Filament::auth()->user()?->can('update', $pipeline), 403);
 
         $this->fillForm();
     }
@@ -159,8 +164,9 @@ class EditPipelineEntry extends Page
     public function save(): void
     {
         $pipelineEntry = $this->getPipelineEntry();
+        $pipeline = $this->getPipeline();
 
-        abort_unless((bool) Filament::auth()->user()?->can('update', $pipelineEntry), 403);
+        abort_unless((bool) Filament::auth()->user()?->can('update', $pipeline), 403);
 
         $data = $this->form->getState();
 
