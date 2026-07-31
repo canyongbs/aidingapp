@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
+use App\Support\RichContentDocument;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
@@ -167,31 +168,7 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
             return $content;
         }
 
-        $hasContent = false;
-
-        $walk = function (array $node) use (&$walk, &$hasContent): void {
-            if (! empty($node['text'])) {
-                $hasContent = true;
-
-                return;
-            }
-
-            if (in_array($node['type'] ?? null, ['image', 'customBlock', 'horizontalRule'], true)) {
-                $hasContent = true;
-
-                return;
-            }
-
-            foreach ($node['content'] ?? [] as $child) {
-                if (is_array($child)) {
-                    $walk($child);
-                }
-            }
-        };
-
-        $walk($content);
-
-        return $hasContent ? $content : null;
+        return RichContentDocument::hasContent($content) ? $content : null;
     }
 
     /** @return array<int, RichEditor> */
