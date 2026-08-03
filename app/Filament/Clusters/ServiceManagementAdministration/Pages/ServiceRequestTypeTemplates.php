@@ -39,6 +39,7 @@ namespace App\Filament\Clusters\ServiceManagementAdministration\Pages;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestCustomTemplatesAction;
+use AidingApp\ServiceManagement\Filament\Actions\PreloadBaseTemplatesAction;
 use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestTemplateEditorSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
@@ -98,6 +99,11 @@ class ServiceRequestTypeTemplates extends SettingsPage
                     ->label('Override Defaults')
                     ->helperText('When enabled, these custom templates are used instead of the default base templates for all service request types.')
                     ->live()
+                    ->afterStateUpdated(function (bool $state): void {
+                        if ($state) {
+                            $this->mountAction('preloadBaseTemplates');
+                        }
+                    })
                     ->columnSpanFull(),
                 Toggle::make('preload_new_service_request_types')
                     ->label('Preload New Service Request Types')
@@ -183,6 +189,11 @@ class ServiceRequestTypeTemplates extends SettingsPage
         }
 
         return parent::getFormActions();
+    }
+
+    public function preloadBaseTemplatesAction(): Action
+    {
+        return PreloadBaseTemplatesAction::make();
     }
 
     /**
