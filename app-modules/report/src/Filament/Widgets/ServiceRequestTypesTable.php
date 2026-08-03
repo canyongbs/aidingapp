@@ -124,7 +124,7 @@ class ServiceRequestTypesTable extends BaseWidget
 
                     $query->when(
                         $types,
-                        fn (Builder $query): Builder => $query->whereIn('id', $types)
+                        fn (Builder $query): Builder => $query->whereIn('service_request_types.id', $types)
                     );
 
                     return $query->orderBy('service_requests_count', 'desc');

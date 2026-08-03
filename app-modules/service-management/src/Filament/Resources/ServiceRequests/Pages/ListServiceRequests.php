@@ -303,9 +303,11 @@ class ListServiceRequests extends ListRecords
     }
 
     /**
+     * @param  bool  $withoutArchived
+     *
      * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
-    public static function buildTypeTreeOptions(): array
+    public static function buildTypeTreeOptions(bool $withoutArchived = false): array
     {
         $categories = ServiceRequestTypeCategory::query()
             ->orderBy('sort')
@@ -313,6 +315,7 @@ class ListServiceRequests extends ListRecords
             ->groupBy('parent_id');
 
         $types = ServiceRequestType::query()
+            ->when($withoutArchived, fn (Builder $query): Builder => $query->withoutArchived())
             ->with('categories:id')
             ->orderBy('sort')
             ->get();
@@ -323,21 +326,24 @@ class ListServiceRequests extends ListRecords
         $uncategorizedTypes = [];
 
         foreach ($types as $type) {
-            $categoryIds = $type->categoryIds();
+            $categorySortMap = $type->categorySortMap();
 
-            if ($categoryIds === []) {
+            if ($categorySortMap === []) {
                 $uncategorizedTypes[] = $type;
 
                 continue;
             }
 
-            foreach ($categoryIds as $categoryId) {
-                $typesByCategory[$categoryId][] = $type;
+            foreach ($categorySortMap as $categoryId => $sort) {
+                $typesByCategory[$categoryId][] = ['type' => $type, 'sort' => $sort];
             }
         }
 
         /** @var Collection<int|string, Collection<int, ServiceRequestType>> $typesByCategory */
-        $typesByCategory = collect($typesByCategory)->map(fn (array $group): Collection => collect($group));
+        $typesByCategory = collect($typesByCategory)->map(fn (array $group): Collection => collect($group)
+            ->sortBy('sort')
+            ->map(fn (array $entry): ServiceRequestType => $entry['type'])
+            ->values());
 
         $tree = collect($categories->get('', collect()))
             ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $typesByCategory))

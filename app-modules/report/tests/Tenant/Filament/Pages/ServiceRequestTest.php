@@ -199,24 +199,57 @@ it('orders grouped type options by category sort and pivot sort', function () {
 
     $tree = ListServiceRequests::buildTypeTreeOptions();
 
-    // Earlier Root should come before Later Root (based on sort)
+    $rootCategoryOrder = collect($tree)
+        ->filter(fn (array $node): bool => str_starts_with($node['value'], 'category_'))
+        ->map(fn (array $node): string => $node['name'])
+        ->values()
+        ->all();
+
+    expect($rootCategoryOrder)->toBe(['Earlier Root', 'Later Root']);
+
     $earlierRootNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $earlierRoot->getKey());
-    $laterRootNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $laterRoot->getKey());
 
-    expect($earlierRootNode['name'])->toBe('Earlier Root');
-    expect($laterRootNode['name'])->toBe('Later Root');
-
-    // Earlier Root should have the child category and types in correct order
-    $earlierRootChildren = $earlierRootNode['children'] ?? [];
-    $childNode = collect($earlierRootChildren)->first(fn (array $node): bool => $node['value'] === 'category_' . $earlierChild->getKey());
+    $childNode = collect($earlierRootNode['children'])->first(fn (array $node): bool => $node['value'] === 'category_' . $earlierChild->getKey());
     expect($childNode)->toBeArray();
 
-    // Types within Earlier Root should include both types
-    $typeNodes = collect($earlierRootChildren)->filter(fn (array $node): bool => ! str_starts_with($node['value'], 'category_'));
-    $typeIds = $typeNodes->map(fn (array $node): string => $node['value'])->values()->all();
+    $typeIds = collect($earlierRootNode['children'])
+        ->reject(fn (array $node): bool => str_starts_with($node['value'], 'category_'))
+        ->map(fn (array $node): string => $node['value'])
+        ->values()
+        ->all();
 
-    expect($typeIds)->toContain($earlierRootFirstType->getKey());
-    expect($typeIds)->toContain($earlierRootSecondType->getKey());
+    expect($typeIds)->toBe([
+        $earlierRootFirstType->getKey(),
+        $earlierRootSecondType->getKey(),
+    ]);
+});
+
+it('orders types within a category by pivot sort rather than the global sort', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null, 'name' => 'Area', 'sort' => 1]);
+
+    $globalFirst = ServiceRequestType::factory()->create(['name' => 'Global First', 'sort' => 1]);
+    $globalSecond = ServiceRequestType::factory()->create(['name' => 'Global Second', 'sort' => 2]);
+
+    $category->types()->attach($globalFirst->getKey(), ['sort' => 20]);
+    $category->types()->attach($globalSecond->getKey(), ['sort' => 10]);
+
+    $tree = ListServiceRequests::buildTypeTreeOptions();
+
+    $areaNode = collect($tree)->first(fn (array $node): bool => $node['value'] === 'category_' . $category->getKey());
+
+    $typeNames = collect($areaNode['children'])
+        ->reject(fn (array $node): bool => str_starts_with($node['value'], 'category_'))
+        ->map(fn (array $node): string => $node['name'])
+        ->values()
+        ->all();
+
+    expect($typeNames)->toBe(['Global Second', 'Global First']);
 });
 
 it('excludes archived types from the filter options', function () {
@@ -227,10 +260,14 @@ it('excludes archived types from the filter options', function () {
     actingAs($user);
 
     $activeType = ServiceRequestType::factory()->create(['name' => 'Active Type']);
-    $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
-    $archivedType->delete();
 
-    $tree = ListServiceRequests::buildTypeTreeOptions();
+    $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
+    $archivedType->archive();
+
+    $deletedType = ServiceRequestType::factory()->create(['name' => 'Deleted Type']);
+    $deletedType->delete();
+
+    $tree = ListServiceRequests::buildTypeTreeOptions(withoutArchived: true);
 
     // Flatten the tree to get all type IDs
     $flattenedIds = collect($tree)
@@ -242,7 +279,26 @@ it('excludes archived types from the filter options', function () {
 
     expect($flattenedIds)
         ->toContain($activeType->getKey())
-        ->not->toContain($archivedType->getKey());
+        ->not->toContain($archivedType->getKey())
+        ->not->toContain($deletedType->getKey());
+});
+
+it('keeps archived types available to the service requests list filter', function () {
+    $activeType = ServiceRequestType::factory()->create(['name' => 'Active Type']);
+
+    $archivedType = ServiceRequestType::factory()->create(['name' => 'Archived Type']);
+    $archivedType->archive();
+
+    $flattenedIds = collect(ListServiceRequests::buildTypeTreeOptions())
+        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'] ?? [])->map(fn (array $child): string => $child['value'])->values()->all()])
+        ->flatten()
+        ->reject(fn (string $value): bool => str_starts_with($value, 'category_'))
+        ->values()
+        ->all();
+
+    expect($flattenedIds)
+        ->toContain($activeType->getKey())
+        ->toContain($archivedType->getKey());
 });
 
 it('resolves every type the user manages or audits as an affiliated type', function () {
@@ -266,9 +322,17 @@ it('resolves every type the user manages or audits as an affiliated type', funct
     $auditorDepartmentType = ServiceRequestType::factory()->create();
     $auditorDepartmentType->auditorDepartments()->attach($department);
 
-    $archivedAffiliatedType = ServiceRequestType::factory()->create();
-    $archivedAffiliatedType->managerUsers()->attach($user);
-    $archivedAffiliatedType->delete();
+    $archivedUserAffiliatedType = ServiceRequestType::factory()->create();
+    $archivedUserAffiliatedType->managerUsers()->attach($user);
+    $archivedUserAffiliatedType->archive();
+
+    $archivedDepartmentAffiliatedType = ServiceRequestType::factory()->create();
+    $archivedDepartmentAffiliatedType->managerDepartments()->attach($department);
+    $archivedDepartmentAffiliatedType->archive();
+
+    $deletedAffiliatedType = ServiceRequestType::factory()->create();
+    $deletedAffiliatedType->managerUsers()->attach($user);
+    $deletedAffiliatedType->delete();
 
     $unaffiliatedType = ServiceRequestType::factory()->create();
 
@@ -281,7 +345,9 @@ it('resolves every type the user manages or audits as an affiliated type', funct
             $managerDepartmentType->getKey(),
             $auditorDepartmentType->getKey(),
         ])
-        ->not->toContain($archivedAffiliatedType->getKey())
+        ->not->toContain($archivedUserAffiliatedType->getKey())
+        ->not->toContain($archivedDepartmentAffiliatedType->getKey())
+        ->not->toContain($deletedAffiliatedType->getKey())
         ->not->toContain($unaffiliatedType->getKey());
 });
 
@@ -297,13 +363,65 @@ it('populates the filter with affiliated types via the My Affiliated Types actio
 
     $archivedAffiliatedType = ServiceRequestType::factory()->create();
     $archivedAffiliatedType->managerUsers()->attach($user);
-    $archivedAffiliatedType->delete();
+    $archivedAffiliatedType->archive();
 
     ServiceRequestType::factory()->create();
 
     livewire(ServiceRequests::class)
         ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
+});
+
+it('warns instead of changing the filter when the user has no affiliated types', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ServiceRequests::class)
+        ->set('filters.serviceRequestTypes', [$type->getKey()])
+        ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->assertNotified('You are not a manager or auditor of any Service Request Types')
+        ->assertSet('filters.serviceRequestTypes', [$type->getKey()]);
+});
+
+it('keeps the types selected by the My Affiliated Types action when the page is revisited', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $affiliatedType = ServiceRequestType::factory()->create();
+    $affiliatedType->managerUsers()->attach($user);
+
+    livewire(ServiceRequests::class)
+        ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
+
+    livewire(ServiceRequests::class)
+        ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
+});
+
+it('keeps the filter empty when the page is revisited after the Clear action', function () {
+    $user = User::factory()->create(['timezone' => 'UTC']);
+
+    grantServiceRequestsReportAccess($user);
+
+    actingAs($user);
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ServiceRequests::class)
+        ->set('filters.serviceRequestTypes', [$type->getKey()])
+        ->callAction(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
+        ->assertSet('filters.serviceRequestTypes', []);
+
+    livewire(ServiceRequests::class)
+        ->assertSet('filters.serviceRequestTypes', []);
 });
 
 it('disables clear action until at least one type is selected', function () {

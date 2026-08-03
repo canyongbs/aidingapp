@@ -124,10 +124,13 @@ class ServiceRequestStatusDistributionDonutChart extends ChartReportWidget
             },
         ])->get(['id', 'name']);
 
-        return $serviceRequestByStatusData->map(function (ServiceRequestStatus $status) {
-            $status['bg_color'] = $status->color->getRgb();
+        return $serviceRequestByStatusData
+            ->filter(fn (ServiceRequestStatus $status): bool => $status->service_requests_count > 0)
+            ->values()
+            ->map(function (ServiceRequestStatus $status) {
+                $status['bg_color'] = $status->color->getRgb();
 
-            return $status;
-        });
+                return $status;
+            });
     }
 }
