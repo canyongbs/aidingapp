@@ -34,65 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+namespace AidingApp\ServiceManagement\Filament\Tables;
 
-class RichContentDocument
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class ServiceRequestTypesTable
 {
-    /**
-     * @var array<int, string>
-     */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+    public static function configure(Table $table): Table
     {
-        if (! is_array($document)) {
-            return false;
-        }
-
-        return static::nodesHaveContent($document['content'] ?? []);
-    }
-
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    public static function encodeRichContent(array|string|null $value): ?string
-    {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
-    }
-
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
-    {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
+        return $table
+            ->query(fn (): Builder => ServiceRequestType::query())
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(60)
+                    ->tooltip(fn (?string $state): ?string => $state)
+                    ->searchable()
+                    ->toggleable(),
+            ])
+            ->defaultSort('name');
     }
 }

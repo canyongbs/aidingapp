@@ -34,65 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+use App\Features\ProloadServiceRequestTypeFeature;
+use Illuminate\Database\Migrations\Migration;
 
-class RichContentDocument
-{
-    /**
-     * @var array<int, string>
-     */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! is_array($document)) {
-            return false;
-        }
-
-        return static::nodesHaveContent($document['content'] ?? []);
+        ProloadServiceRequestTypeFeature::activate();
     }
 
-    /**
-     * @param array<string, mixed>|null $value
-     */
-    public static function encodeRichContent(array|string|null $value): ?string
+    public function down(): void
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
+        ProloadServiceRequestTypeFeature::deactivate();
     }
-
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
-    {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
-
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-}
+};

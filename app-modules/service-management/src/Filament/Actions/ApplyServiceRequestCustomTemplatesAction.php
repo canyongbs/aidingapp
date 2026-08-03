@@ -34,65 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace App\Support;
+namespace AidingApp\ServiceManagement\Filament\Actions;
 
-class RichContentDocument
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use Illuminate\Database\Eloquent\Builder;
+
+class ApplyServiceRequestCustomTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
 {
-    /**
-     * @var array<int, string>
-     */
-    protected const NODES_WITHOUT_INHERENT_CONTENT = ['paragraph', 'text', 'hardBreak'];
-
-    public static function hasContent(mixed $document): bool
+    public static function getDefaultName(): ?string
     {
-        if (! is_array($document)) {
-            return false;
-        }
+        return 'applyCustomTemplates';
+    }
 
-        return static::nodesHaveContent($document['content'] ?? []);
+    protected function isAuthorizedForSource(): bool
+    {
+        return (bool) auth()->user()?->can('settings.view-any');
     }
 
     /**
-     * @param array<string, mixed>|null $value
+     * @return Builder<ServiceRequestCustomEmailTemplate>
      */
-    public static function encodeRichContent(array|string|null $value): ?string
+    protected function getSourceTemplatesQuery(): Builder
     {
-        if ($value === null) {
-            return null;
-        }
-
-        return is_array($value)
-            ? json_encode($value)
-            : $value;
+        return ServiceRequestCustomEmailTemplate::query();
     }
 
-    /**
-     * @param  array<int, mixed>  $nodes
-     */
-    protected static function nodesHaveContent(array $nodes): bool
+    protected function getSourceLabel(): string
     {
-        foreach ($nodes as $node) {
-            if (! is_array($node)) {
-                continue;
-            }
+        return 'custom templates';
+    }
 
-            if (filled(trim((string) ($node['text'] ?? '')))) {
-                return true;
-            }
-
-            if (array_key_exists('content', $node)) {
-                if (static::nodesHaveContent($node['content'] ?? [])) {
-                    return true;
-                }
-
-                continue;
-            }
-
-            if (! in_array($node['type'] ?? null, static::NODES_WITHOUT_INHERENT_CONTENT, true)) {
-                return true;
-            }
-        }
-
-        return false;
+    protected function getNoContentBodyMessage(): string
+    {
+        return 'Add a Subject and Body before applying templates to service request types.';
     }
 }
