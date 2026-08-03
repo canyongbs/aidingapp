@@ -34,43 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
-
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('service-request-notification-automation.preload_new_service_request_types', false);
+            } catch (SettingAlreadyExists) {
+            }
+
+            try {
+                $this->migrator->add('service-request-notification-automation.use_custom_templates', false);
+            } catch (SettingAlreadyExists) {
+            }
+        });
     }
 
-    public function saving(Engagement $engagement): void
+    public function down(): void
     {
-        $this->convertLiteralMergeTags($engagement, ['body']);
+        DB::transaction(function () {
+            $this->migrator->deleteIfExists('service-request-notification-automation.preload_new_service_request_types');
+            $this->migrator->deleteIfExists('service-request-notification-automation.use_custom_templates');
+        });
     }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+};

@@ -83,6 +83,7 @@ class ServiceRequestsTable extends BaseWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
+        $types = $this->getServiceRequestTypes();
 
         return $table
             ->query(
@@ -96,6 +97,10 @@ class ServiceRequestsTable extends BaseWidget
                     ->when(
                         $startDate && $endDate,
                         fn (Builder $query) => $query->whereBetween('created_at', [$startDate, $endDate])
+                    )
+                    ->when(
+                        $types,
+                        fn (Builder $query) => $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types))
                     )
                     ->orderBy('created_at', 'desc')
             )

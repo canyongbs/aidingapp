@@ -34,43 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use App\Features\ProloadServiceRequestTypeFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
-
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+return new class () extends Migration {
+    public function up(): void
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
+        ProloadServiceRequestTypeFeature::activate();
     }
 
-    public function saving(Engagement $engagement): void
+    public function down(): void
     {
-        $this->convertLiteralMergeTags($engagement, ['body']);
+        ProloadServiceRequestTypeFeature::deactivate();
     }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+};

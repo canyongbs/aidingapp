@@ -34,43 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
-
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+return new class () extends Migration {
+    public function up(): void
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
+        Schema::create('service_request_custom_email_templates', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type');
+            $table->string('role');
+            $table->jsonb('subject')->nullable();
+            $table->jsonb('body')->nullable();
+            $table->timestamps();
+
+            $table->unique(['type', 'role']);
+        });
     }
 
-    public function saving(Engagement $engagement): void
+    public function down(): void
     {
-        $this->convertLiteralMergeTags($engagement, ['body']);
+        Schema::dropIfExists('service_request_custom_email_templates');
     }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+};

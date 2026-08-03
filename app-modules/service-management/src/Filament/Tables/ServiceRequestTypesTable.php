@@ -34,43 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace AidingApp\ServiceManagement\Filament\Tables;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class EngagementObserver
+class ServiceRequestTypesTable
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    public static function configure(Table $table): Table
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+        return $table
+            ->query(fn (): Builder => ServiceRequestType::query())
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->label('Description')
+                    ->limit(60)
+                    ->tooltip(fn (?string $state): ?string => $state)
+                    ->searchable()
+                    ->toggleable(),
+            ])
+            ->defaultSort('name');
     }
 }

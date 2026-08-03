@@ -36,37 +36,36 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Database\Factories\ServiceRequestNotificationAutomationEmailTemplateFactory;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestCustomEmailTemplateFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
-use AidingApp\ServiceManagement\Observers\ServiceRequestNotificationAutomationEmailTemplateObserver;
-use App\Models\BaseModel;
+use AidingApp\ServiceManagement\Observers\ServiceRequestCustomEmailTemplateObserver;
 use Filament\Forms\Components\RichEditor\Models\Concerns\InteractsWithRichContent;
 use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 
 /**
- * @mixin IdeHelperServiceRequestNotificationAutomationEmailTemplate
+ * @mixin IdeHelperServiceRequestCustomEmailTemplate
  */
-#[ObservedBy([ServiceRequestNotificationAutomationEmailTemplateObserver::class])]
-class ServiceRequestNotificationAutomationEmailTemplate extends BaseModel implements HasRichContent
+#[ObservedBy([ServiceRequestCustomEmailTemplateObserver::class])]
+class ServiceRequestCustomEmailTemplate extends Model implements HasRichContent
 {
-    /** @use HasFactory<ServiceRequestNotificationAutomationEmailTemplateFactory> */
+    /** @use HasFactory<ServiceRequestCustomEmailTemplateFactory> */
     use HasFactory;
 
+    use HasUuids;
     use InteractsWithRichContent;
-
-    protected $table = 'service_request_notification_automation_email_templates';
 
     protected $fillable = [
         'type',
         'role',
         'subject',
         'body',
-        'ai_instructions',
     ];
 
     protected $casts = [

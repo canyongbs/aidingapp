@@ -34,43 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class EngagementObserver
+/**
+ * @extends Factory<ServiceRequestCustomEmailTemplate>
+ */
+class ServiceRequestCustomEmailTemplateFactory extends Factory
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    /**
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+        return [
+            'type' => $this->faker->randomElement(ServiceRequestEmailTemplateType::cases()),
+            'role' => fn (array $attributes) => $attributes['type'] === ServiceRequestEmailTemplateType::SurveyResponse
+                ? ServiceRequestTypeEmailTemplateRole::Customer
+                : $this->faker->randomElement(ServiceRequestTypeEmailTemplateRole::cases()),
+            'subject' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->sentence()]]]]],
+            'body' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
+        ];
     }
 }

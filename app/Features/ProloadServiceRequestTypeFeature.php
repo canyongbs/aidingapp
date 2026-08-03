@@ -34,43 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace App\Features;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use App\Support\AbstractFeatureFlag;
 
-class EngagementObserver
+class ProloadServiceRequestTypeFeature extends AbstractFeatureFlag
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    public function resolve(mixed $scope): mixed
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+        return false;
     }
 }

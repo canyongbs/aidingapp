@@ -34,43 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace AidingApp\ServiceManagement\Filament\Actions;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 
-class EngagementObserver
+class ApplyServiceRequestBaseTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    public static function getDefaultName(): ?string
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
+        return 'applyBaseTemplates';
     }
 
-    public function saving(Engagement $engagement): void
+    protected function isAuthorizedForSource(): bool
     {
-        $this->convertLiteralMergeTags($engagement, ['body']);
+        $user = auth()->user();
+        assert($user instanceof User);
+
+        return $user->isSuperAdmin();
     }
 
-    public function created(Engagement $engagement): void
+    /**
+     * @return Builder<ServiceRequestNotificationAutomationEmailTemplate>
+     */
+    protected function getSourceTemplatesQuery(): Builder
     {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
+        return ServiceRequestNotificationAutomationEmailTemplate::query();
     }
 
-    public function deleted(Engagement $engagement): void
+    protected function getSourceLabel(): string
     {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+        return 'base templates';
+    }
 
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+    protected function getNoContentBodyMessage(): string
+    {
+        return 'Add an Example Subject and Example Body before applying templates to service request types.';
     }
 }

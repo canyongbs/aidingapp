@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
+use App\Features\ProloadServiceRequestTypeFeature;
 use App\Filament\Clusters\GlobalArtificialIntelligence;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -88,6 +89,11 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                     ->label('Enable Communication Automation')
                     ->helperText('When enabled, base email templates and AI instructions can be configured for automatic generation of service request email templates.')
                     ->live()
+                    ->columnSpanFull(),
+                Toggle::make('preload_new_service_request_types')
+                    ->label('Preload New Service Request Types')
+                    ->visible(fn (): bool => ProloadServiceRequestTypeFeature::active())
+                    ->helperText('When selected, new service request types will inherit the base templates.')
                     ->columnSpanFull(),
                 Tabs::make('Event templates')
                     ->persistTab()
@@ -156,6 +162,10 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
         DB::transaction(function () use ($state): void {
             $settings = app(ServiceRequestNotificationAutomationSettings::class);
             $settings->is_enabled = $state['is_enabled'];
+
+            if (ProloadServiceRequestTypeFeature::active()) {
+                $settings->preload_new_service_request_types = $state['preload_new_service_request_types'] ?? false;
+            }
             $settings->ai_prompt = $state['ai_prompt'] ?? [];
             $settings->save();
 
@@ -207,6 +217,10 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
             'ai_prompt' => $settings->ai_prompt ?: ServiceRequestNotificationAutomationSettings::defaultAiPrompt(),
             'templates' => [],
         ];
+
+        if (ProloadServiceRequestTypeFeature::active()) {
+            $state['preload_new_service_request_types'] = $settings->preload_new_service_request_types;
+        }
 
         $templates = ServiceRequestNotificationAutomationEmailTemplate::all();
 

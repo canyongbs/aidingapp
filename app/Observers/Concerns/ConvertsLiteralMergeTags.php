@@ -34,43 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace App\Observers\Concerns;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
+use CanyonGBS\Common\Support\ConvertLiteralMergeTags;
+use Filament\Forms\Components\RichEditor\Models\Contracts\HasRichContent;
 use Illuminate\Database\Eloquent\Model;
 
-class EngagementObserver
+trait ConvertsLiteralMergeTags
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    /**
+     * @param array<int, string> $attributes
+     */
+    protected function convertLiteralMergeTags(Model&HasRichContent $model, array $attributes): void
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
+        foreach ($attributes as $attribute) {
+            if (! $model->isDirty($attribute)) {
+                continue;
+            }
+
+            $content = $model->getAttribute($attribute);
+
+            if (! is_array($content)) {
+                continue;
+            }
+
+            $converted = app(ConvertLiteralMergeTags::class)(
+                $content,
+                $model->getRichContentAttribute($attribute)?->getMergeTags() ?? [],
+            );
+
+            if ($converted !== $content) {
+                $model->setAttribute($attribute, $converted);
+            }
         }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
-
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
-
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
     }
 }

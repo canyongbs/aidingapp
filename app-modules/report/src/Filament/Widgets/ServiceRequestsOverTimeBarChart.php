@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
 
 class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
@@ -69,11 +70,12 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
+        $types = $this->getServiceRequestTypes();
 
-        $shouldBypassCache = filled($startDate) || filled($endDate);
+        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types);
 
         $serviceRequestTotalPerMonth = $shouldBypassCache
-            ? $this->getServiceRequestsOverTimeData($startDate, $endDate)
+            ? $this->getServiceRequestsOverTimeData($startDate, $endDate, $types)
             : Cache::tags(["{{$this->cacheTag}}"])->remember('service-requests-over-time-bar-chart', now()->addHours(24), function (): array {
                 return $this->getServiceRequestsOverTimeData();
             });
@@ -90,11 +92,17 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
     }
 
     /**
+     * @param array<int, string>|null $types
+     *
      * @return array<string, int>
      */
-    private function getServiceRequestsOverTimeData(?Carbon $startDate = null, ?Carbon $endDate = null): array
+    private function getServiceRequestsOverTimeData(?Carbon $startDate = null, ?Carbon $endDate = null, ?array $types = null): array
     {
         $serviceRequestTotalPerMonthData = ServiceRequest::query()
+            ->when(
+                $types,
+                fn (Builder $query): Builder => $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types))
+            )
             ->toBase()
             ->selectRaw('date_trunc(\'month\', created_at) as month')
             ->selectRaw('COUNT(*) as total')

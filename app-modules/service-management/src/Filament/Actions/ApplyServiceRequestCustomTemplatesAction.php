@@ -34,43 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+namespace AidingApp\ServiceManagement\Filament\Actions;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use Illuminate\Database\Eloquent\Builder;
 
-class EngagementObserver
+class ApplyServiceRequestCustomTemplatesAction extends AbstractApplyServiceRequestTemplatesAction
 {
-    use ConvertsLiteralMergeTags;
-
-    public function creating(Engagement $engagement): void
+    public static function getDefaultName(): ?string
     {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
+        return 'applyCustomTemplates';
     }
 
-    public function saving(Engagement $engagement): void
+    protected function isAuthorizedForSource(): bool
     {
-        $this->convertLiteralMergeTags($engagement, ['body']);
+        return (bool) auth()->user()?->can('settings.view-any');
     }
 
-    public function created(Engagement $engagement): void
+    /**
+     * @return Builder<ServiceRequestCustomEmailTemplate>
+     */
+    protected function getSourceTemplatesQuery(): Builder
     {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
-
-        TimelineableRecordCreated::dispatch($entity, $engagement);
+        return ServiceRequestCustomEmailTemplate::query();
     }
 
-    public function deleted(Engagement $engagement): void
+    protected function getSourceLabel(): string
     {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+        return 'custom templates';
+    }
 
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
+    protected function getNoContentBodyMessage(): string
+    {
+        return 'Add a Subject and Body before applying templates to service request types.';
     }
 }
