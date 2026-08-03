@@ -441,7 +441,7 @@ it('hides the header create entry action while the pipeline has no entries', fun
         'record' => $project,
     ])
         ->assertTableActionHidden('createEntry')
-        ->assertSee('Add Pipeline Entry');
+        ->assertSee('Add Pipeline Task');
 });
 
 it('shows the empty state when the project has no pipelines', function () {

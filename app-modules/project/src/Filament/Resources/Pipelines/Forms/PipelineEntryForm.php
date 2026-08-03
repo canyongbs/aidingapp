@@ -53,6 +53,7 @@ use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
@@ -84,15 +85,21 @@ class PipelineEntryForm
                 ->required(),
             DateTimePicker::make('due')
                 ->label('Due Date'),
-            Select::make('assigned_to_type')
+            ToggleButtons::make('assigned_to_type')
                 ->label('Assigned To Type')
                 ->options([
+                    'none' => 'None',
                     Relation::getMorphAlias(User::class) => 'User',
                     Relation::getMorphAlias(Contact::class) => 'Contact',
                 ])
-                ->placeholder('None')
-                ->native(false)
+                ->default('none')
+                ->inline()
                 ->live()
+                ->afterStateHydrated(function ($state, Set $set) {
+                    if ($state === null) {
+                        $set('assigned_to_type', 'none');
+                    }
+                })
                 ->afterStateUpdated(fn (Set $set) => $set('assigned_to_id', null)),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
@@ -113,7 +120,7 @@ class PipelineEntryForm
 
                     return $record instanceof Contact ? $record->full_name : $record?->name;
                 })
-                ->visible(fn (Get $get): bool => filled($get('assigned_to_type')))
+                ->visible(fn (Get $get): bool => filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none')
                 ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => filled($get('assigned_to_type')) ? $state : null)
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
