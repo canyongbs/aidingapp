@@ -41,11 +41,10 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetCheckIn;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
 
 class AssetManagementPortalController extends Controller
 {
