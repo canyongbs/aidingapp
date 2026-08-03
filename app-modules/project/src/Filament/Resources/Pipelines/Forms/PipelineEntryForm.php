@@ -131,6 +131,29 @@ class PipelineEntryForm
             Toggle::make('is_visible_to_guests')
                 ->label('Visible to Guest')
                 ->default(true),
+
+            ToggleButtons::make('milestones_type')
+                ->label('Milestones Type')
+                ->options([
+                    'none' => 'None',
+                    'select' => 'Select',
+                ])
+                ->default('none')
+                ->inline()
+                ->live()
+                ->afterStateHydrated(function (Set $set, Get $get) {
+                    //TODO: Fix below first
+                    $state = $get('milestones');
+                    if ($state === null) {
+                        $set('milestones_type', 'none');
+                    }
+                })
+                ->dehydrated(false)
+                ->afterStateUpdated(function (?string $state, Set $set) {
+                    if ($state === 'none') {
+                        $set('milestones', []);
+                    }
+                }),
             ModalTableSelect::make('milestones')
                 ->label('Related Milestones')
                 ->relationship(
