@@ -132,9 +132,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ...($project ? [
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
+                'Pipelines',
             ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
+            Str::limit($this->getRecordTitle(), 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
