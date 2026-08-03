@@ -94,12 +94,12 @@ class PipelineEntryForm
                 ->default('none')
                 ->inline()
                 ->live()
-                ->afterStateHydrated(function ($state, Set $set) {
+                ->afterStateHydrated(function (string $state, Set $set) {
                     if ($state === null) {
                         $set('assigned_to_type', 'none');
                     }
                 })
-                ->afterStateUpdated(function ($state, Set $set) {
+                ->afterStateUpdated(function (string $state, Set $set) {
                     if ($state === 'none') {
                         $set('assigned_to_id', null);
                         $set('assigned_to_type', null);
