@@ -34,43 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Observers;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
-use Illuminate\Database\Eloquent\Model;
+use function Tests\richContentText;
+use function Tests\richContentWith;
 
-class EngagementObserver
-{
-    use ConvertsLiteralMergeTags;
+it('converts a literal merge tag label when creating', function () {
+    $template = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'body' => richContentText("Hello {{ contact's name }}!"),
+    ]);
 
-    public function creating(Engagement $engagement): void
-    {
-        if (is_null($engagement->user_id) && auth()->check()) {
-            $engagement->user_id = auth()->id();
-        }
-    }
+    expect($template->body)->toEqual(richContentWith([
+        ['type' => 'text', 'text' => 'Hello '],
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'contact name']],
+        ['type' => 'text', 'text' => '!'],
+    ]));
+});
 
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
-    }
+it('converts a literal merge tag identifier when updating', function () {
+    $template = ServiceRequestNotificationAutomationEmailTemplate::factory()->create();
 
-    public function created(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+    $template->update([
+        'subject' => richContentText('{{ service request number }}'),
+    ]);
 
-        TimelineableRecordCreated::dispatch($entity, $engagement);
-    }
+    expect($template->refresh()->subject)->toEqual(richContentWith([
+        ['type' => 'mergeTag', 'attrs' => ['id' => 'service request number']],
+    ]));
+});
 
-    public function deleted(Engagement $engagement): void
-    {
-        /** @var Model $entity */
-        $entity = $engagement->recipient;
+it('leaves text that does not match a merge tag untouched', function () {
+    $body = richContentText('Hello {{ not a merge tag }}!');
 
-        TimelineableRecordDeleted::dispatch($entity, $engagement);
-    }
-}
+    $template = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
+        'body' => $body,
+    ]);
+
+    expect($template->refresh()->body)->toEqual($body);
+});

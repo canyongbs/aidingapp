@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\Feature;
 use App\Support\RichContentDocument;
+use CanyonGBS\Common\Support\ConvertLiteralMergeTags;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\ToggleButtons;
@@ -192,12 +193,14 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
     {
         $now = now();
 
-        $sourceTemplates = $sourceTemplates->map(function (mixed $sourceTemplate) {
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
+
+        $sourceTemplates = $sourceTemplates->map(function (mixed $sourceTemplate) use ($mergeTags) {
             return [
                 'type' => $sourceTemplate->type->value,
                 'role' => $sourceTemplate->role->value,
-                'subject' => RichContentDocument::encodeRichContent($sourceTemplate->subject),
-                'body' => RichContentDocument::encodeRichContent($sourceTemplate->body),
+                'subject' => RichContentDocument::encodeRichContent($this->convertLiteralMergeTags($sourceTemplate->subject, $mergeTags)),
+                'body' => RichContentDocument::encodeRichContent($this->convertLiteralMergeTags($sourceTemplate->body, $mergeTags)),
             ];
         });
 
@@ -228,5 +231,20 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
                     );
                 }
             });
+    }
+
+    /**
+     * @param array<string, mixed>|string|null $value
+     * @param array<string, string> $mergeTags
+     *
+     * @return array<string, mixed>|string|null
+     */
+    protected function convertLiteralMergeTags(array|string|null $value, array $mergeTags): array|string|null
+    {
+        if (! is_array($value)) {
+            return $value;
+        }
+
+        return app(ConvertLiteralMergeTags::class)($value, $mergeTags);
     }
 }
