@@ -99,7 +99,12 @@ class PipelineEntryForm
                         $set('assigned_to_type', 'none');
                     }
                 })
-                ->afterStateUpdated(fn (Set $set) => $set('assigned_to_id', null)),
+                ->afterStateUpdated(function ($state, Set $set) {
+                    if ($state === 'none') {
+                        $set('assigned_to_id', null);
+                        $set('assigned_to_type', null);
+                    }
+                }),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
                 ->tableConfiguration(fn (Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {

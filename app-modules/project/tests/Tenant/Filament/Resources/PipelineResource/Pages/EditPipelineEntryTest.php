@@ -401,5 +401,5 @@ it('sets assigned_to_type to null when entry has no assigned user', function () 
         'record' => $entry->getRouteKey(),
         'parentRecord' => $pipeline,
     ])
-        ->assertSet('data.assigned_to_type', null);
+        ->assertSet('data.assigned_to_type', 'none');
 });
