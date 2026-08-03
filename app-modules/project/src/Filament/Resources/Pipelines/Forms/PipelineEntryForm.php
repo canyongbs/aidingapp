@@ -144,6 +144,7 @@ class PipelineEntryForm
                 ->afterStateHydrated(function (Set $set, Get $get) {
                     //TODO: Fix below first
                     $state = $get('milestones');
+
                     if ($state === null) {
                         $set('milestones_type', 'none');
                     }
