@@ -118,7 +118,7 @@ test('it does not mount the preload base templates confirmation when the overrid
 
     livewire(ServiceRequestTypeTemplates::class)
         ->set('data.use_custom_templates', false)
-        ->assertActionNotMounted('preloadBaseTemplates');
+        ->assertActionNotMounted();
 });
 
 test('confirming the preload base templates action loads the base templates into the form', function () {
