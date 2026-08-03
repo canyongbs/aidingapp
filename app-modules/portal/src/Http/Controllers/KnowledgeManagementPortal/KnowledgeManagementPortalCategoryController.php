@@ -50,7 +50,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
         return response()->json(
             KnowledgeBaseCategoryData::collect(
                 KnowledgeBaseCategory::query()
-                    ->where('parent_id', null)
+                    ->whereNull('parent_id')
                     ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
                     ->orderBy('sort')
                     ->get()
@@ -88,7 +88,6 @@ class KnowledgeManagementPortalCategoryController extends Controller
 
         $articlesFor = function (string $filter) use ($category, $mapArticle) {
             return $category->knowledgeBaseItems()
-                ->with('tags')
                 ->public()
                 ->when($filter === 'featured', function (Builder $query) {
                     $query->where('is_featured', true);

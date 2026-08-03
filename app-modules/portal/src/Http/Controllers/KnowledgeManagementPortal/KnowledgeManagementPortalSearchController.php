@@ -84,7 +84,6 @@ class KnowledgeManagementPortalSearchController extends Controller
             return KnowledgeBaseArticleData::collect(
                 KnowledgeBaseItem::query()
                     ->public()
-                    ->with('tags')
                     ->when(
                         $search->isNotEmpty(),
                         fn (Builder $query) => $query
