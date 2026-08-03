@@ -81,8 +81,9 @@ test('it saves the override flag and custom template content', function () {
     expect(app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates)->toBeFalse();
 
     livewire(ServiceRequestTypeTemplates::class)
+        ->set('data.use_custom_templates', true)
+        ->callMountedAction()
         ->fillForm([
-            'use_custom_templates' => true,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => serviceRequestTypeTemplatesDoc('Hello'),
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => serviceRequestTypeTemplatesDoc('Body'),
         ])
@@ -145,9 +146,23 @@ test('confirming the preload base templates action loads the base templates into
             'use_custom_templates' => true,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => $baseTemplate->subject,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => $baseTemplate->body,
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Manager->value . '.subject' => null,
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Manager->value . '.body' => null,
-        ]);
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $customerTemplate = ServiceRequestCustomEmailTemplate::query()
+        ->where('type', ServiceRequestEmailTemplateType::Created)
+        ->where('role', ServiceRequestTypeEmailTemplateRole::Customer)
+        ->firstOrFail();
+
+    expect($customerTemplate->subject)->toEqual($baseTemplate->subject);
+    expect($customerTemplate->body)->toEqual($baseTemplate->body);
+
+    // the stale manager template has no base equivalent, so overwriting blanks it and it is removed
+    expect(ServiceRequestCustomEmailTemplate::query()
+        ->where('type', ServiceRequestEmailTemplateType::Created)
+        ->where('role', ServiceRequestTypeEmailTemplateRole::Manager)
+        ->exists())->toBeFalse();
 });
 
 test('cancelling the preload base templates action reverts the override toggle', function () {
@@ -169,9 +184,11 @@ test('it saves the preload new service request types setting', function () {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     expect($settings->preload_new_service_request_types)->toBeFalse();
 
+    $settings->use_custom_templates = true;
+    $settings->save();
+
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
-            'use_custom_templates' => true,
             'preload_new_service_request_types' => true,
         ])
         ->call('save')
@@ -181,7 +198,6 @@ test('it saves the preload new service request types setting', function () {
 
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
-            'use_custom_templates' => true,
             'preload_new_service_request_types' => false,
         ])
         ->call('save')
@@ -193,6 +209,10 @@ test('it saves the preload new service request types setting', function () {
 test('it deletes a custom template when its subject and body are cleared', function () {
     asSuperAdmin();
 
+    $settings = app(ServiceRequestNotificationAutomationSettings::class);
+    $settings->use_custom_templates = true;
+    $settings->save();
+
     $existing = ServiceRequestCustomEmailTemplate::query()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
@@ -202,7 +222,6 @@ test('it deletes a custom template when its subject and body are cleared', funct
 
     livewire(ServiceRequestTypeTemplates::class)
         ->fillForm([
-            'use_custom_templates' => true,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => null,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => null,
         ])
