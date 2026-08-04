@@ -31,27 +31,32 @@
     
     </COPYRIGHT>
 --}}
-<div
-    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
-    data-pipeline="{{ $pipeline->getKey() }}"
-    data-entry="{{ $entry->getKey() }}"
-    wire:key="pipeline-entry-{{ $entry->getKey() }}"
->
-    <div class="flex items-center justify-between">
-        <div class="text-base font-semibold text-gray-900 dark:text-white">
-            <small class="capitalize">
-                {{ $entry->name }}
-            </small>
-            <br />
-            <x-filament::badge color="success">
-                {{ $entry->organizable?->full_name }}
-            </x-filament::badge>
-            <br />
-        </div>
-        <x-filament::icon-button
-            class="fi-primary-color"
-            wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
-            icon="heroicon-m-arrow-top-right-on-square"
-        />
-    </div>
-</div>
+@php
+    use Filament\Support\Colors\Color;
+    use Filament\Support\Facades\FilamentColor;
+
+    $palettes = Color::all();
+    $palette = FilamentColor::getColor($color ?? 'blue') ?? ($palettes[$color ?? 'blue'] ?? $palettes['blue']);
+
+    $gradient = [
+        'from' => $palette[400],
+        'to' => $palette[700],
+        'darkFrom' => $palette[500],
+        'darkTo' => $palette[800],
+    ];
+@endphp
+
+<span class="flex items-center gap-2" data-icon="{{ $icon }}">
+    <span
+        class="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-linear-to-b from-(--project-gradient-from) to-(--project-gradient-to) dark:from-(--project-gradient-from-dark) dark:to-(--project-gradient-to-dark)"
+        style="
+            --project-gradient-from: {{ $gradient['from'] }};
+            --project-gradient-to: {{ $gradient['to'] }};
+            --project-gradient-from-dark: {{ $gradient['darkFrom'] }};
+            --project-gradient-to-dark: {{ $gradient['darkTo'] }};
+        "
+    >
+        <x-filament::icon :icon="$icon" class="h-4 w-4 shrink-0 text-white" />
+    </span>
+    <span>{{ $name }}</span>
+</span>

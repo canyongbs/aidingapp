@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "cdadd72279a062fc97e5b017b8f3a49f",
+    "content-hash": "b188101e14f0f5ebaae0ca4df29fa041",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1619,16 +1619,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.35.1",
+            "version": "2.36.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "76c384e891929353016e1ab58c7b1fe2c9c86f82"
+                "reference": "f79dffde6153bbd077b5ea1d51720c8d0fd5c950"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/76c384e891929353016e1ab58c7b1fe2c9c86f82",
-                "reference": "76c384e891929353016e1ab58c7b1fe2c9c86f82",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/f79dffde6153bbd077b5ea1d51720c8d0fd5c950",
+                "reference": "f79dffde6153bbd077b5ea1d51720c8d0fd5c950",
                 "shasum": ""
             },
             "require": {
@@ -1646,6 +1646,7 @@
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.75",
                 "larastan/larastan": "^3.0",
+                "laravel/boost": "^2.4",
                 "orchestra/testbench": "^10.4 || ^11.0",
                 "orrison/meliorstan": "^0.3.2",
                 "pestphp/pest": "^4.0",
@@ -1682,9 +1683,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.35.1"
+                "source": "https://github.com/canyongbs/common/tree/2.36.1"
             },
-            "time": "2026-08-03T11:12:08+00:00"
+            "time": "2026-08-04T13:52:08+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",

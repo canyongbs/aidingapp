@@ -45,7 +45,7 @@
         "canyon-gbs/project": "*",
         "canyon-gbs/purchasing": "*",
         "canyon-gbs/report": "*",
-        "canyongbs/common": "^2.35.0",
+        "canyongbs/common": "^2.36.1",
         "canyongbs/model-state-machine": "^2.0.8",
         "cknow/laravel-money": "^8.1",
         "codewithdennis/filament-select-tree": "^4.0",
@@ -133,7 +133,9 @@
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
-            "@php artisan filament:upgrade"
+            "@php artisan filament:upgrade",
+            "@php artisan common:publish --ansi",
+            "@php -r \"if (getenv('COMPOSER_DEV_MODE') === '1') { passthru(PHP_BINARY . ' artisan boost:update --ansi', $code); exit($code); }\""
         ],
         "post-install-cmd": [
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
@@ -142,8 +144,7 @@
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
-            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\"",
-            "@php artisan boost:update --ansi"
+            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
