@@ -44,6 +44,7 @@ use Filament\Actions\Action;
 use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class ManageAssignmentAction
@@ -60,7 +61,11 @@ class ManageAssignmentAction
             ->schema([
                 Placeholder::make('currentAssignment')
                     ->label('Current Assignment')
-                    ->content(fn (): string => $serviceRequest->assignedTo?->user->name ?? 'Unassigned'),
+                    ->content(function () use ($serviceRequest): string {
+                        $assignedUser = $serviceRequest->assignedTo?->user;
+
+                        return $assignedUser === null ? 'Unassigned' : $assignedUser->name;
+                    }),
                 TableSelect::make('userId')
                     ->label('Reassign')
                     ->tableConfiguration(ManagersTable::class)
@@ -88,16 +93,18 @@ class ManageAssignmentAction
                     return;
                 }
 
-                $serviceRequest->assignments()->create([
-                    'user_id' => $data['userId'],
-                    'assigned_by_id' => auth()->user()?->getKey(),
-                    'assigned_by_type' => auth()->user()?->getMorphClass(),
-                    'assigned_at' => now(),
-                    'status' => ServiceRequestAssignmentStatus::Active,
-                    'service_request_status_id' => $data['status_id'],
-                ]);
+                DB::transaction(function () use ($serviceRequest, $data): void {
+                    $serviceRequest->assignments()->create([
+                        'user_id' => $data['userId'],
+                        'assigned_by_id' => auth()->user()?->getKey(),
+                        'assigned_by_type' => auth()->user()?->getMorphClass(),
+                        'assigned_at' => now(),
+                        'status' => ServiceRequestAssignmentStatus::Active,
+                        'service_request_status_id' => $data['status_id'],
+                    ]);
 
-                $serviceRequest->update(['status_id' => $data['status_id']]);
+                    $serviceRequest->update(['status_id' => $data['status_id']]);
+                });
 
                 $livewire->dispatch('assignment-history-refresh');
             });
