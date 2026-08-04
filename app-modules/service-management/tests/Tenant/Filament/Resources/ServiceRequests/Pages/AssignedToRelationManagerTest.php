@@ -755,3 +755,43 @@ test('submitting Manage Assignment with a non-manager user does not create an as
 
     expect($serviceRequest->assignments()->where('user_id', $nonManager->getKey())->exists())->toBeFalse();
 });
+
+test('submitting Manage Assignment without a status fails validation and does not create an assignment', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $manager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->setTableActionData([
+            'userId' => $manager->getKey(),
+            'status_id' => null,
+        ])
+        ->callMountedTableAction()
+        ->assertHasTableActionErrors(['status_id' => ['required']]);
+
+    expect($serviceRequest->assignments()->where('user_id', $manager->getKey())->exists())->toBeFalse();
+});

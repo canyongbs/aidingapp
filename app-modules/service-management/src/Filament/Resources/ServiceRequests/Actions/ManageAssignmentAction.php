@@ -61,6 +61,7 @@ class ManageAssignmentAction
             ->schema([
                 ServiceRequestStatusSelect::make($serviceRequest)
                     ->label('Update Status')
+                    ->required()
                     ->helperText('You may simultaneously update the status along with this change.'),
                 Placeholder::make('currentAssignment')
                     ->label('Current Assignment')
