@@ -195,7 +195,10 @@ class ServiceRequestTypeTemplates extends SettingsPage
         return parent::getFormActions();
     }
 
-    public function preloadBaseTemplates()
+    /**
+     * @return array<string, array<string, array{subject: mixed, body: mixed}>>
+     */
+    public function preloadBaseTemplates(): array
     {
         $existingTemplates = ServiceRequestNotificationAutomationEmailTemplate::all()
             ->keyBy(fn ($template) => "{$template->type->value}:{$template->role->value}");
