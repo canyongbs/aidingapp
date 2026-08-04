@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
@@ -616,4 +617,99 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
     ])
         ->assertTableActionVisible('manageAssignment')
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
+});
+
+test('submitting Manage Assignment assigns the selected manager and deactivates the prior assignment', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $firstManager = User::factory()->create();
+    $secondManager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach([$firstManager->getKey(), $secondManager->getKey()]);
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $priorAssignment = ServiceRequestAssignment::factory()->active()->state([
+        'service_request_id' => $serviceRequest->getKey(),
+        'user_id' => $firstManager->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->setTableActionData([
+            'userId' => $secondManager->getKey(),
+            'status_id' => $status->getKey(),
+        ])
+        ->callMountedTableAction()
+        ->assertHasNoTableActionErrors();
+
+    expect($serviceRequest->assignments()->where('user_id', $secondManager->getKey())->where('status', ServiceRequestAssignmentStatus::Active)->exists())->toBeTrue();
+
+    expect($priorAssignment->refresh()->status)->toBe(ServiceRequestAssignmentStatus::Inactive);
+});
+
+test('submitting Manage Assignment with a different status updates the service request status and snapshots it on the assignment', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $manager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $currentStatus = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+    $newStatus = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $currentStatus->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->setTableActionData([
+            'userId' => $manager->getKey(),
+            'status_id' => $newStatus->getKey(),
+        ])
+        ->callMountedTableAction()
+        ->assertHasNoTableActionErrors();
+
+    expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
+
+    $assignment = $serviceRequest->assignments()->where('user_id', $manager->getKey())->first();
+
+    expect($assignment->service_request_status_id)->toBe($newStatus->getKey());
 });
