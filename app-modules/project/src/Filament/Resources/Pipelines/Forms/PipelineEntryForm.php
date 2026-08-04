@@ -253,6 +253,7 @@ class PipelineEntryForm
 
     /**
      * @param array<string, mixed> $data
+     *
      * @return array<string, mixed>
      */
     protected function mutateFormDataBeforeSave(array $data): array
