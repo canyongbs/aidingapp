@@ -81,9 +81,8 @@ test('it saves the override flag and custom template content', function () {
     expect(app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates)->toBeFalse();
 
     livewire(ServiceRequestTypeTemplates::class)
-        ->set('data.use_custom_templates', true)
-        ->callMountedAction()
         ->fillForm([
+            'use_custom_templates' => true,
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => serviceRequestTypeTemplatesDoc('Hello'),
             'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => serviceRequestTypeTemplatesDoc('Body'),
         ])
@@ -101,27 +100,7 @@ test('it saves the override flag and custom template content', function () {
     expect($template->body)->toEqual(serviceRequestTypeTemplatesDoc('Body'));
 });
 
-test('it mounts the preload base templates confirmation when the override toggle is turned on', function () {
-    asSuperAdmin();
-
-    livewire(ServiceRequestTypeTemplates::class)
-        ->set('data.use_custom_templates', true)
-        ->assertActionMounted('preloadBaseTemplates');
-});
-
-test('it does not mount the preload base templates confirmation when the override toggle is turned off', function () {
-    asSuperAdmin();
-
-    $settings = app(ServiceRequestNotificationAutomationSettings::class);
-    $settings->use_custom_templates = true;
-    $settings->save();
-
-    livewire(ServiceRequestTypeTemplates::class)
-        ->set('data.use_custom_templates', false)
-        ->assertActionNotMounted();
-});
-
-test('confirming the preload base templates action loads the base templates into the form', function () {
+test('can preload basic templates when the override toggle is turned on', function () {
     asSuperAdmin();
 
     $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
@@ -139,13 +118,8 @@ test('confirming the preload base templates action loads the base templates into
     ]);
 
     livewire(ServiceRequestTypeTemplates::class)
-        ->set('data.use_custom_templates', true)
-        ->callMountedAction()
-        ->assertHasNoFormErrors()
-        ->assertFormSet([
+        ->fillForm([
             'use_custom_templates' => true,
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => $baseTemplate->subject,
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => $baseTemplate->body,
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -158,24 +132,10 @@ test('confirming the preload base templates action loads the base templates into
     expect($customerTemplate->subject)->toEqual($baseTemplate->subject);
     expect($customerTemplate->body)->toEqual($baseTemplate->body);
 
-    // the stale manager template has no base equivalent, so overwriting blanks it and it is removed
     expect(ServiceRequestCustomEmailTemplate::query()
         ->where('type', ServiceRequestEmailTemplateType::Created)
         ->where('role', ServiceRequestTypeEmailTemplateRole::Manager)
         ->exists())->toBeFalse();
-});
-
-test('cancelling the preload base templates action reverts the override toggle', function () {
-    asSuperAdmin();
-
-    livewire(ServiceRequestTypeTemplates::class)
-        ->set('data.use_custom_templates', true)
-        ->assertActionMounted('preloadBaseTemplates')
-        ->mountAction(['preloadBaseTemplates', 'cancel'])
-        ->callMountedAction()
-        ->assertFormSet([
-            'use_custom_templates' => false,
-        ]);
 });
 
 test('it saves the preload new service request types setting', function () {
