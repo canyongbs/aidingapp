@@ -27,7 +27,7 @@ jobs:
         timeout-minutes: 20
 
         env:
-            php-extensions: gd, gmp, redis, mailparse, pgsql
+            php-extensions: gd, gmp, redis, mailparse
             php-extensions-key: ext-cache-copilot-v1
             php-version: '8.4'
             DB_PORT: 5432
@@ -60,7 +60,7 @@ jobs:
 
         steps:
             - name: Create testing database
-              run: psql -h 127.0.0.1 -d testing_landlord -U root -c 'CREATE DATABASE testing;'
+              run: psql -h 127.0.0.1 -d testing_landlord -U root -c 'CREATE DATABASE testing_tenant;'
               env:
                   PGPASSWORD: root
 
