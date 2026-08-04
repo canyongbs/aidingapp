@@ -49,6 +49,9 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\HtmlString;
 use UnitEnum;
 
 class ProjectResource extends Resource
@@ -58,6 +61,37 @@ class ProjectResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Projects;
 
     protected static ?int $navigationSort = 10;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static bool $isGloballySearchable = true;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name'];
+    }
+
+    public static function getGlobalSearchResultDetails(Model $record): array
+    {
+        assert($record instanceof Project);
+
+        return [
+            'Department' => $record->department->name ?? 'N/A',
+            'Start Date' => $record->start_date?->translatedFormat('M j, Y') ?? 'N/A',
+            'Target Go-Live' => $record->target_completion_date?->translatedFormat('M j, Y') ?? 'Indefinite',
+        ];
+    }
+
+    public static function getGlobalSearchResultTitle(Model $record): string | Htmlable
+    {
+        assert($record instanceof Project);
+
+        return new HtmlString(view('project::filament.resources.projects.global-search-title', [
+            'icon' => $record->icon,
+            'name' => $record->name,
+            'color' => $record->color?->value,
+        ])->render());
+    }
 
     public static function getPages(): array
     {
