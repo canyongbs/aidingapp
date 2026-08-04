@@ -59,8 +59,6 @@ it('renders entry cards with their name and organizable name on the kanban board
     $entry = PipelineEntry::factory()->create([
         'name' => 'Kickoff Task',
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-        'organizable_type' => $contact->getMorphClass(),
-        'organizable_id' => $contact->getKey(),
     ]);
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
@@ -98,8 +96,6 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Second Column Entry',
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ], arguments: ['stage' => $secondStage->getKey()])
         ->assertHasNoActionErrors();
 
@@ -148,8 +144,6 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Invalid Stage Entry',
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ], arguments: ['stage' => $otherStage->getKey()])
         ->assertNotified('Pipeline entry could not be added');
 

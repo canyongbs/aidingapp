@@ -155,8 +155,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 $dataArray = [
                     'name' => $data['name'],
-                    'organizable_type' => $data['organizable_type'],
-                    'organizable_id' => $data['organizable_id'],
                     'pipeline_stage_id' => $stage->getKey(),
                 ];
 
