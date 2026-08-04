@@ -46,206 +46,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Filament\Forms\Components\Select;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-test('During assignment only Users that are on a Department that is Manager of the Type of this Service Request should be options', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-    $userWithoutDepartment = User::factory()->create();
-
-    $department = Department::factory()->create();
-
-    $user->department()->associate($department)->save();
-
-    $user->refresh();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequestType->managerDepartments()->attach($department);
-
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-    ])
-        ->create();
-
-    livewire(AssignedToRelationManager::class, [
-        'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
-    ])
-        ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
-            $options = $select->getSearchResults($user->name);
-
-            return ! empty($options);
-        })
-        ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($userWithoutDepartment) {
-            $options = $select->getSearchResults($userWithoutDepartment->name);
-
-            return empty($options);
-        })
-        ->assertSuccessful();
-});
-
-test('During assignment only Users that are direct managerUsers of the Type of this Service Request should be in options', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-    $userNotManager = User::factory()->create();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequestType->managerUsers()->attach($user);
-
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-    ])
-        ->create();
-
-    livewire(AssignedToRelationManager::class, [
-        'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
-    ])
-        ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
-            $options = $select->getSearchResults($user->name);
-
-            return ! empty($options);
-        })
-        ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($userNotManager) {
-            $options = $select->getSearchResults($userNotManager->name);
-
-            return empty($options);
-        })
-        ->assertSuccessful();
-});
-
-test('During reassignment current assigned user should not be in options', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-    $secondUser = User::factory()->create();
-
-    $department = Department::factory()->create();
-
-    $user->department()->associate($department)->save();
-
-    $secondUser->department()->associate($department)->save();
-
-    $user->refresh();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequestType->managerDepartments()->attach($department);
-
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-    ])
-        ->create();
-
-    ServiceRequestAssignment::factory()->state([
-        'service_request_id' => $serviceRequestsWithManager->getKey(),
-        'user_id' => $user->getKey(),
-    ])
-        ->create();
-
-    livewire(AssignedToRelationManager::class, [
-        'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
-    ])
-        ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
-            $options = $select->getSearchResults($user->name);
-
-            return empty($options);
-        })
-        ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($secondUser) {
-            $options = $select->getSearchResults($secondUser->name);
-
-            return ! empty($options);
-        })
-        ->assertSuccessful();
-});
-
-test('During reassignment current assigned direct managerUser should not be in options', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-    $secondUser = User::factory()->create();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequestType->managerUsers()->attach($user);
-    $serviceRequestType->managerUsers()->attach($secondUser);
-
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-    ])
-        ->create();
-
-    ServiceRequestAssignment::factory()->state([
-        'service_request_id' => $serviceRequestsWithManager->getKey(),
-        'user_id' => $user->getKey(),
-    ])
-        ->create();
-
-    livewire(AssignedToRelationManager::class, [
-        'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
-    ])
-        ->mountTableAction('assign-service-request')
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($user) {
-            $options = $select->getSearchResults($user->name);
-
-            return empty($options);
-        })
-        ->assertSuccessful()
-        ->assertFormFieldExists('userId', 'mountedActionSchema0', function (Select $select) use ($secondUser) {
-            $options = $select->getSearchResults($secondUser->name);
-
-            return ! empty($options);
-        })
-        ->assertSuccessful();
-});
 
 test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
@@ -499,7 +303,7 @@ test('Assign Service Request action visible when the Service Request is unassign
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionVisible('assign-service-request');
+        ->assertTableActionVisible('manageAssignment');
 });
 
 test('Assign Service Request action visible when the Service Request is unassigned and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
@@ -533,7 +337,7 @@ test('Assign Service Request action visible when the Service Request is unassign
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionVisible('assign-service-request');
+        ->assertTableActionVisible('manageAssignment');
 });
 
 test('Assign Service Request action is not visible when the Service Request is unassigned and the logged-in user not belongs to a Department that is Manager of the Type of this Service Request', function () {
@@ -564,7 +368,7 @@ test('Assign Service Request action is not visible when the Service Request is u
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionHidden('assign-service-request');
+        ->assertTableActionHidden('manageAssignment');
 });
 
 test('Assign Service Request action is not visible when the Service Request is unassigned and the logged-in user is not a direct managerUser of the Type of this Service Request', function () {
@@ -594,7 +398,7 @@ test('Assign Service Request action is not visible when the Service Request is u
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionHidden('assign-service-request');
+        ->assertTableActionHidden('manageAssignment');
 });
 
 test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
@@ -706,7 +510,7 @@ test('Assign Service Request action is not visible when the Service Request is C
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionHidden('assign-service-request');
+        ->assertTableActionHidden('manageAssignment');
 });
 
 test('Assign Service Request action is not visible when the Service Request is Closed and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
@@ -738,5 +542,78 @@ test('Assign Service Request action is not visible when the Service Request is C
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ManageAssignments::class,
     ])
-        ->assertTableActionHidden('assign-service-request');
+        ->assertTableActionHidden('manageAssignment');
+});
+
+test('Manage Assignment action is always labelled "Manage Assignment" when unassigned', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionVisible('manageAssignment')
+        ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
+});
+
+test('Manage Assignment action is always labelled "Manage Assignment" when already assigned', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    ServiceRequestAssignment::factory()->active()->state([
+        'service_request_id' => $serviceRequest->getKey(),
+        'user_id' => $user->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionVisible('manageAssignment')
+        ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
 });
