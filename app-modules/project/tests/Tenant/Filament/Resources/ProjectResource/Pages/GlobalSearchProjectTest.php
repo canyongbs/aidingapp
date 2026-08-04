@@ -37,6 +37,7 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Support\Facades\FilamentColor;

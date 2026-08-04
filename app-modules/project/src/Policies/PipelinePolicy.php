@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Pipeline;
+use App\Features\ProjectArchivingFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -52,7 +53,7 @@ class PipelinePolicy
 
     public function view(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
-        if ($pipeline->project?->isArchived()) {
+        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
             return Response::deny('You do not have permission to view this pipeline because its project is archived.');
         }
 
@@ -76,7 +77,7 @@ class PipelinePolicy
 
     public function update(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
-        if ($pipeline->project?->isArchived()) {
+        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
             return Response::deny('You do not have permission to update this pipeline because its project is archived.');
         }
 

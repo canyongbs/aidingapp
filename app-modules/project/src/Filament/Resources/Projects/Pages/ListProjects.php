@@ -39,6 +39,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
+use App\Features\ProjectArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\Action;
@@ -106,7 +107,7 @@ class ListProjects extends ListRecords
             ])
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
                 $query
-                    ->withoutArchived()
+                    ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived())
                     ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
                     ->tap(new WithProgressCounts());
 
@@ -198,6 +199,7 @@ class ListProjects extends ListRecords
                     ->modalIcon('heroicon-o-archive-box')
                     ->modalSubmitActionLabel('Archive')
                     ->successNotificationTitle('Archived')
+                    ->visible(fn (): bool => ProjectArchivingFeature::active())
                     ->hidden(fn (Project $record): bool => $record->isArchived())
                     ->requiresConfirmation()
                     ->action(fn (Project $record): bool => $record->archive())
@@ -206,6 +208,7 @@ class ListProjects extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     ArchiveBulkAction::make()
+                        ->visible(fn (): bool => ProjectArchivingFeature::active())
                         ->authorizeIndividualRecords('delete')
                         ->deselectRecordsAfterCompletion(),
                 ]),
