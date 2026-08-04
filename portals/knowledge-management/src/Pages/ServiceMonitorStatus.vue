@@ -46,7 +46,7 @@
     const { data: initialData } = useServiceMonitorData();
 
     const result = ref([]);
-    const loading = ref(false);
+    const loadingPage = ref(null);
 
     const currentPage = ref(1);
     const lastPage = ref(1);
@@ -89,14 +89,14 @@
     watch(initialData, applyResponse, { immediate: true });
 
     async function getServiceMonitors(page = 1) {
-        loading.value = true;
+        loadingPage.value = page;
 
         try {
             applyResponse(await apiGet('/status', { page }));
         } catch (error) {
             console.error('Error fetching service monitors:', error);
         } finally {
-            loading.value = false;
+            loadingPage.value = null;
         }
     }
 
@@ -126,59 +126,41 @@
             <Breadcrumbs :currentCrumb="'Status'" />
         </template>
 
-        <template v-if="!loading">
-            <template v-if="result.length > 0">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <ServiceMonitorCard
-                        v-for="(serviceMonitor, index) in result"
-                        :key="index"
-                        :name="serviceMonitor.name"
-                        :status="serviceMonitor.latest_history?.succeeded ?? true"
-                        :message="
-                            serviceMonitor.latest_history?.status_message ??
-                            'No known issues (monitoring not yet started).'
-                        "
-                    />
-                </div>
-
-                <Pagination
-                    v-if="lastPage > 1"
-                    :currentPage="currentPage"
-                    :lastPage="lastPage"
-                    :fromItem="fromArticle"
-                    :toItem="toArticle"
-                    :totalItems="totalArticles"
-                    @fetchNextPage="fetchNextPage"
-                    @fetchPreviousPage="fetchPreviousPage"
-                    @fetchPage="fetchPage"
+        <template v-if="result.length > 0">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <ServiceMonitorCard
+                    v-for="(serviceMonitor, index) in result"
+                    :key="index"
+                    :name="serviceMonitor.name"
+                    :status="serviceMonitor.latest_history?.succeeded ?? true"
+                    :message="
+                        serviceMonitor.latest_history?.status_message ??
+                        'No known issues (monitoring not yet started).'
+                    "
                 />
-            </template>
+            </div>
 
-            <EmptyState v-else>
-                <template #heading>There are no service monitors to display.</template>
-                <template #actions>
-                    <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
-                        Return Home
-                    </BaseButton>
-                </template>
-            </EmptyState>
+            <Pagination
+                v-if="lastPage > 1"
+                :currentPage="currentPage"
+                :lastPage="lastPage"
+                :fromItem="fromArticle"
+                :toItem="toArticle"
+                :totalItems="totalArticles"
+                :loadingPage="loadingPage"
+                @fetchNextPage="fetchNextPage"
+                @fetchPreviousPage="fetchPreviousPage"
+                @fetchPage="fetchPage"
+            />
         </template>
 
-        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            <div
-                v-for="n in 15"
-                :key="`service-monitor-skeleton-${n}`"
-                class="flex items-center gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 animate-pulse"
-            >
-                <div class="size-6 bg-gray-300 rounded-full shrink-0"></div>
-
-                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-                    <div class="h-4 bg-gray-300 rounded w-24"></div>
-                    <div class="h-3 bg-gray-200 rounded w-32"></div>
-                </div>
-
-                <div class="size-5 bg-gray-300 rounded-full shrink-0 self-center"></div>
-            </div>
-        </div>
+        <EmptyState v-else>
+            <template #heading>There are no service monitors to display.</template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
+                    Return Home
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

@@ -71,6 +71,7 @@
     const isSubmitting = ref(false);
     const acceptedMimeTypes = ref([]);
     const updateFormKey = ref(0);
+    const loadingPage = ref(null);
 
     const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
@@ -95,8 +96,16 @@
 
     watch(initialData, applyResponse, { immediate: true });
 
-    function getData(page = 1) {
-        apiGet('/service-request/' + route.params.serviceRequestId, { page }).then(applyResponse);
+    async function getData(page = 1) {
+        loadingPage.value = page;
+
+        try {
+            applyResponse(await apiGet('/service-request/' + route.params.serviceRequestId, { page }));
+        } catch (error) {
+            console.error('Error loading service request updates:', error);
+        } finally {
+            loadingPage.value = null;
+        }
     }
 
     async function submitUpdate(formValues, node) {
@@ -292,6 +301,7 @@
                     :fromItem="fromRecord"
                     :toItem="toRecord"
                     :totalItems="totalRecords"
+                    :loadingPage="loadingPage"
                     @fetchNextPage="fetchNextPage"
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"

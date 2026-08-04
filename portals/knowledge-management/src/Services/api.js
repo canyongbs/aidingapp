@@ -95,3 +95,16 @@ export async function apiPostUrl(url, body = null) {
 
     return data;
 }
+
+/**
+ * GET a fully-qualified URL rather than a path relative to the configured API base —
+ * used when the caller already holds an absolute API URL (e.g. an upload-url endpoint).
+ */
+export async function apiGetUrl(url, params = null) {
+    const { data } = await axios.get(url, {
+        headers: await authHeaders(),
+        params,
+    });
+
+    return data;
+}

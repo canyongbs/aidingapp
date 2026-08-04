@@ -193,6 +193,7 @@ customElements.define(
                         name: 'assets',
                         component: () => import('./Pages/Assets.vue'),
                         meta: {
+                            requiresAuth: true,
                             loaders: [useAssetsData],
                         },
                     },
@@ -201,6 +202,7 @@ customElements.define(
                         name: 'licenses',
                         component: () => import('./Pages/Licenses.vue'),
                         meta: {
+                            requiresAuth: true,
                             loaders: [useLicensesData],
                         },
                     },

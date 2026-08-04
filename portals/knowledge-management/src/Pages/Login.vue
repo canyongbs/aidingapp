@@ -59,7 +59,7 @@
         },
     });
 
-    defineEmits(['authenticate', 'cancel']);
+    const emit = defineEmits(['authenticate', 'cancel']);
 
     // Registration is app-specific business data (the Contact model's shape), so the
     // fields are supplied to the shared `LoginForm` as a FormKit schema array rather
@@ -164,7 +164,7 @@
         :form-kit="FormKit"
         :form-kit-schema="FormKitSchema"
         :registration-schema="registrationSchema"
-        @authenticate="(...args) => $emit('authenticate', ...args)"
-        @cancel="$emit('cancel')"
+        @authenticate="(...args) => emit('authenticate', ...args)"
+        @cancel="emit('cancel')"
     />
 </template>

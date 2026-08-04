@@ -95,7 +95,7 @@
                 name: category.value.name,
                 route: parentCategory.value ? 'view-subcategory' : 'view-category',
                 params: parentCategory.value
-                    ? { parentCategorySlug: parentCategory.value.slug, subCategorySlug: category.value.slug }
+                    ? { parentCategorySlug: parentCategory.value.slug, categorySlug: category.value.slug }
                     : { categorySlug: category.value.slug },
             });
 
@@ -114,7 +114,7 @@
                 article_id: route.params.articleId,
             });
 
-            if (data.hasOwnProperty('is_helpful') && data.is_helpful !== null) {
+            if (Object.prototype.hasOwnProperty.call(data, 'is_helpful') && data.is_helpful !== null) {
                 feedback.value = data.is_helpful;
             } else {
                 feedback.value = null;

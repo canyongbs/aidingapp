@@ -45,7 +45,7 @@
             required: true,
         },
         status: {
-            type: String,
+            type: Boolean,
             validator: (value) => [null, true, false].includes(value),
         },
     });

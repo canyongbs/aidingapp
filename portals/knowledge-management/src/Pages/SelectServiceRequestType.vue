@@ -256,7 +256,7 @@
                     <div
                         v-for="type in displayedTypes"
                         :key="type.id"
-                        class="group relative bg-white p-6 rounded shadow-xs border-l-4 border-transparent hover:border-brand-500"
+                        class="group relative bg-white p-6 rounded shadow-xs ring-1 ring-gray-950/5 border-l-4 border-transparent hover:border-brand-500"
                     >
                         <div class="flex items-center gap-x-3">
                             <div class="shrink-0">
