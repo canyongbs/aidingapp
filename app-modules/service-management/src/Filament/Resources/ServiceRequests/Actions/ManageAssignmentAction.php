@@ -41,8 +41,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Compo
 use AidingApp\ServiceManagement\Filament\Tables\ManagersTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TableSelect;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
@@ -63,9 +63,9 @@ class ManageAssignmentAction
                     ->label('Update Status')
                     ->required()
                     ->helperText('You may simultaneously update the status along with this change.'),
-                Placeholder::make('currentAssignment')
+                TextEntry::make('currentAssignment')
                     ->label('Current Assignment')
-                    ->content(function () use ($serviceRequest): string {
+                    ->state(function () use ($serviceRequest): string {
                         $assignedUser = $serviceRequest->assignedTo?->user;
 
                         return $assignedUser === null ? 'Unassigned' : $assignedUser->name;
