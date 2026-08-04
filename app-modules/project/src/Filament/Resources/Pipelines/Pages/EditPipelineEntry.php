@@ -88,6 +88,8 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        $this->authorize('update', $this->record);
+
         $this->fillForm();
     }
 

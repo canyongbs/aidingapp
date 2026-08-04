@@ -82,6 +82,8 @@ class ViewPipelineEntry extends Page
         if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
+
+        $this->authorize('view', $this->record);
     }
 
     public function getTitle(): string | Htmlable
