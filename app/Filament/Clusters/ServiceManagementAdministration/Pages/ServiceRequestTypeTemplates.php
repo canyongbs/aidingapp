@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestCustomTemplatesAction;
 use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestTemplateEditorSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
+use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
@@ -54,6 +55,7 @@ use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
@@ -98,6 +100,14 @@ class ServiceRequestTypeTemplates extends SettingsPage
                     ->label('Override Defaults')
                     ->helperText('When enabled, these custom templates are used instead of the default base templates for all service request types.')
                     ->live()
+                    ->afterStateUpdated(function (bool $state, Set $set): void {
+                        if ($state) {
+                            $set('templates', $this->preloadBaseTemplates());
+                        } else {
+                            $templates = $this->getServiceRequestCustomEmailTemplate()['templates'] ?? [];
+                            $set('templates', $templates);
+                        }
+                    })
                     ->columnSpanFull(),
                 Toggle::make('preload_new_service_request_types')
                     ->label('Preload New Service Request Types')
@@ -186,6 +196,34 @@ class ServiceRequestTypeTemplates extends SettingsPage
     }
 
     /**
+     * @return array<string, array<string, array{subject: mixed, body: mixed}>>
+     */
+    public function preloadBaseTemplates(): array
+    {
+        $existingTemplates = ServiceRequestNotificationAutomationEmailTemplate::all()
+            ->keyBy(fn ($template) => "{$template->type->value}:{$template->role->value}");
+
+        $templates = [];
+
+        foreach (ServiceRequestEmailTemplateType::cases() as $type) {
+            $roles = $type === ServiceRequestEmailTemplateType::SurveyResponse
+                ? [ServiceRequestTypeEmailTemplateRole::Customer]
+                : ServiceRequestTypeEmailTemplateRole::cases();
+
+            foreach ($roles as $role) {
+                $template = $existingTemplates->get("{$type->value}:{$role->value}");
+
+                $templates[$type->value][$role->value] = [
+                    'subject' => $template?->subject,
+                    'body' => $template?->body,
+                ];
+            }
+        }
+
+        return $templates;
+    }
+
+    /**
      * @return array<Action | ActionGroup>
      */
     protected function getHeaderActions(): array
@@ -205,6 +243,17 @@ class ServiceRequestTypeTemplates extends SettingsPage
             'preload_new_service_request_types' => $settings->preload_new_service_request_types,
             'templates' => [],
         ];
+        $state['templates'] = $this->getServiceRequestCustomEmailTemplate()['templates'] ?? [];
+
+        $this->form->fill($state);
+    }
+
+    /**
+     * @return array<string, array<string, array{subject: mixed, body: mixed}>>
+     */
+    protected function getServiceRequestCustomEmailTemplate(): array
+    {
+        $state = ['templates' => []];
 
         foreach (ServiceRequestCustomEmailTemplate::all() as $template) {
             $state['templates'][$template->type->value][$template->role->value] = [
@@ -213,6 +262,6 @@ class ServiceRequestTypeTemplates extends SettingsPage
             ];
         }
 
-        $this->form->fill($state);
+        return $state;
     }
 }
