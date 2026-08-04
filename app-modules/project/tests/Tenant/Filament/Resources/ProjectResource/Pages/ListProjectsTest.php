@@ -119,18 +119,18 @@ it('can list records', function () {
         ->assertSuccessful();
 });
 
-    it('does not list archived projects', function () {
-        asSuperAdmin();
+it('does not list archived projects', function () {
+    asSuperAdmin();
 
-        $activeProject = Project::factory()->create();
-        $archivedProject = Project::factory()->create();
-        $archivedProject->archive();
+    $activeProject = Project::factory()->create();
+    $archivedProject = Project::factory()->create();
+    $archivedProject->archive();
 
-        livewire(ListProjects::class)
+    livewire(ListProjects::class)
         ->assertCanSeeTableRecords([$activeProject])
         ->assertCanNotSeeTableRecords([$archivedProject])
         ->assertSuccessful();
-    });
+});
 
 it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
     $user = User::factory()->create();
