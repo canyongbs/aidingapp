@@ -106,6 +106,7 @@ class ListProjects extends ListRecords
                     ->view('project::filament.tables.columns.project.progress'),
             ])
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
+                /** @var Builder<Project> $query */
                 $query
                     ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived())
                     ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])

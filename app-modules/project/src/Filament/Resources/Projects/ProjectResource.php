@@ -83,15 +83,27 @@ class ProjectResource extends Resource
         return ['name'];
     }
 
+    /**
+     * @return Builder<Project>
+     */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()
+        /** @var Builder<Project> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query
             ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived());
     }
 
+    /**
+     * @return Builder<Project>
+     */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
-        return parent::getGlobalSearchEloquentQuery()
+        /** @var Builder<Project> $query */
+        $query = parent::getGlobalSearchEloquentQuery();
+
+        return $query
             ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived());
     }
 
