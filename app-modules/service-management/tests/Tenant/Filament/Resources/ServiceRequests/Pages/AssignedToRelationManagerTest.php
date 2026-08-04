@@ -466,6 +466,8 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     $department = Department::factory()->create();
 
     $user->department()->associate($department)->save();
@@ -504,6 +506,8 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
@@ -516,6 +520,38 @@ test('Manage Assignment action is not visible when the Service Request is Closed
         ])->getKey(),
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Closed,
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequestsWithManager,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertTableActionHidden('manageAssignment');
+});
+
+test('Manage Assignment action is not visible when the logged-in user is not a manager of the Type of the Service Request', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
     ])
         ->create();
