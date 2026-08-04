@@ -85,7 +85,11 @@ class ManagersTable
             ])
             ->filters([
                 SelectFilter::make('department')
-                    ->relationship('department', 'name'),
+                    ->label('Department')
+                    ->relationship('department', 'name')
+                    ->multiple()
+                    ->searchable()
+                    ->preload(),
             ])
             ->paginationPageOptions([5])
             ->defaultPaginationPageOption(5);
