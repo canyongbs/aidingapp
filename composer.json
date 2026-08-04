@@ -134,8 +134,7 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi",
             "@php artisan filament:upgrade",
-            "@php artisan common:publish --ansi",
-            "@php artisan boost:update --ansi"
+            "@php artisan common:publish --ansi"
         ],
         "post-install-cmd": [
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
