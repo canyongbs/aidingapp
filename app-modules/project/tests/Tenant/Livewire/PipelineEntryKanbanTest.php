@@ -41,7 +41,6 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -127,8 +126,11 @@ it('hides the add entry action without pipeline update permission', function () 
     $user->givePermissionTo('pipeline.*.view');
     $user->refresh();
 
+    expect($user->can('update', $pipeline))->toBeFalse();
+
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertActionHidden('addEntry');
+        ->assertActionHidden('addEntry')
+        ->assertDontSeeHtml('addEntry');
 });
 
 it('rejects adding a pipeline entry into a stage that does not belong to the pipeline', function () {
@@ -143,13 +145,13 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
 
     $contact = Contact::factory()->create();
 
-    expect(fn () => livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Invalid Stage Entry',
             'organizable_type' => $contact->getMorphClass(),
             'organizable_id' => $contact->getKey(),
-        ], arguments: ['stage' => $otherStage->getKey()]))
-        ->toThrow(ModelNotFoundException::class);
+        ], arguments: ['stage' => $otherStage->getKey()])
+        ->assertNotified('Pipeline entry could not be added');
 
     expect(PipelineEntry::query()->where('name', 'Invalid Stage Entry')->exists())->toBeFalse();
 });
@@ -194,7 +196,8 @@ it('denies moving a pipeline entry without pipeline update permission', function
     $user->refresh();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->call('movedEntry', $pipeline->getKey(), $entry->getKey(), $fromStage->getKey(), $toStage->getKey());
+        ->call('movedEntry', $pipeline->getKey(), $entry->getKey(), $fromStage->getKey(), $toStage->getKey())
+        ->assertForbidden();
 
     expect($entry->fresh()->pipeline_stage_id)->toBe($fromStage->getKey());
 });
@@ -229,9 +232,10 @@ it('rejects moving a pipeline entry that does not belong to the pipeline', funct
     $toStage = $pipeline->stages->first();
 
     $otherEntry = PipelineEntry::factory()->create();
+    $originalStageId = $otherEntry->pipeline_stage_id;
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->call('movedEntry', $pipeline->getKey(), $otherEntry->getKey(), $otherEntry->pipeline_stage_id, $toStage->getKey());
+        ->call('movedEntry', $pipeline->getKey(), $otherEntry->getKey(), $originalStageId, $toStage->getKey());
 
-    expect($otherEntry->fresh()->pipeline_stage_id)->toBe($otherEntry->pipeline_stage_id);
+    expect($otherEntry->fresh()->pipeline_stage_id)->toBe($originalStageId);
 });

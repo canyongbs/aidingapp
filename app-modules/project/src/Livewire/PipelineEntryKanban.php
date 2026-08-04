@@ -146,8 +146,20 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ->columnSpanFull(),
                 ...PipelineEntryForm::components($this->pipeline),
             ])
-            ->action(function (array $data, array $arguments) {
-                $stage = $this->pipeline->stages()->whereKey($arguments['stage'])->firstOrFail();
+            ->action(function (array $data, array $arguments, Action $action) {
+                $stage = $this->pipeline->stages()->whereKey($arguments['stage'] ?? null)->first();
+
+                if (! $stage) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Pipeline entry could not be added')
+                        ->body('The selected stage does not belong to this pipeline.')
+                        ->send();
+
+                    $action->halt();
+
+                    return;
+                }
 
                 $dataArray = [
                     'name' => $data['name'],
@@ -175,7 +187,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 Notification::make()
                     ->success()
-                    ->title('Entry Added\!')
+                    ->title('Entry Added!')
                     ->send();
             });
     }

@@ -89,6 +89,8 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        $this->authorize('update', $this->record);
+
         $this->fillForm();
     }
 
@@ -162,6 +164,8 @@ class EditPipelineEntry extends Page
 
     public function save(): void
     {
+        $this->authorize('update', $this->record);
+
         $data = $this->form->getState();
 
         $milestones = $data['milestones'] ?? [];

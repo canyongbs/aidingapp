@@ -74,9 +74,12 @@ it('can render edit pipeline entry with proper permission', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('project.*.update');
     $user->givePermissionTo('pipeline.view-any');
     $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
+
+    $project->managerUsers()->attach($user);
 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,

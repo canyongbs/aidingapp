@@ -85,6 +85,8 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
+        $this->authorize('view', $this->record);
+
         if (request()->has('from')) {
             session(['pipeline_entry_source' => request('from')]);
         }
@@ -213,6 +215,7 @@ class ViewPipelineEntry extends Page
     {
         return [
             Action::make('edit')
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                 ->url(function (): string {
                     $params = [
                         'record' => $this->record,
@@ -224,6 +227,7 @@ class ViewPipelineEntry extends Page
                 }),
             DeleteAction::make()
                 ->label('Remove from Pipeline')
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                 ->requiresConfirmation()
                 ->record($this->pipelineEntry)
                 ->successRedirectUrl(fn (): string => $this->getBackUrl()),
