@@ -85,6 +85,12 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+            abort(404);
+        }
+
+        $this->authorize('update', $this->record);
+
         $this->fillForm();
     }
 
@@ -122,9 +128,9 @@ class EditPipelineEntry extends Page
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ...($project ? [
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
+                'Pipelines',
             ] : []),
-            PipelineResource::getUrl('view', ['record' => $this->record]) => Str::limit('Pipelines', 16),
+            Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
@@ -158,6 +164,8 @@ class EditPipelineEntry extends Page
 
     public function save(): void
     {
+        $this->authorize('update', $this->record);
+
         $data = $this->form->getState();
 
         $milestones = $data['milestones'] ?? [];

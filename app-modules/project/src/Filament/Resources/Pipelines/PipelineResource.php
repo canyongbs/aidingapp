@@ -51,12 +51,18 @@ class PipelineResource extends Resource
 {
     protected static ?string $model = Pipeline::class;
 
+    protected static ?string $recordTitleAttribute = 'name';
+
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
     protected static bool $shouldRegisterNavigation = false;
 
     public static function getRecordSubNavigation(Page $page): array
     {
+        if ($page instanceof ManagePipelineEntries && filled($page->project)) {
+            return [];
+        }
+
         return $page->generateNavigationItems([
             ViewPipeline::class,
             EditPipeline::class,

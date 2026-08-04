@@ -47,6 +47,7 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -73,9 +74,12 @@ it('can render edit pipeline entry with proper permission', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('project.*.update');
     $user->givePermissionTo('pipeline.view-any');
     $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
+
+    $project->managerUsers()->attach($user);
 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
@@ -108,6 +112,50 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
         'pipelineEntry' => $entry,
     ])
         ->assertStatus(404);
+});
+
+it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+    ]);
+
+    get(EditPipelineEntry::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'pipelineEntry' => $entry->getRouteKey(),
+        'project' => $otherProject->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
+it('shows the pipeline name in the breadcrumb', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create(['name' => 'Onboarding']);
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+    ]);
+
+    get(EditPipelineEntry::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'pipelineEntry' => $entry->getRouteKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertSee('Onboarding');
 });
 
 it('can save pipeline entry with updated description and due date', function () {
