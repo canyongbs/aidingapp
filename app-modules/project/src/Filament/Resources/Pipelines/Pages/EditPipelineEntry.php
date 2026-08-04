@@ -62,7 +62,7 @@ class EditPipelineEntry extends Page
 
     protected static string $resource = PipelineEntryResource::class;
 
-    protected static ?string $title = 'Edit Pipeline Entry';
+    protected static ?string $title = 'Edit Pipeline Task';
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
@@ -112,7 +112,7 @@ class EditPipelineEntry extends Page
 
     public function getTitle(): string | Htmlable
     {
-        return 'Edit Pipeline Entry';
+        return 'Edit Pipeline Task';
     }
 
     public function getBackUrl(): string
@@ -173,7 +173,7 @@ class EditPipelineEntry extends Page
 
         Notification::make()
             ->success()
-            ->title('Pipeline entry updated successfully')
+            ->title('Pipeline task updated successfully')
             ->send();
 
         $this->redirect($this->getBackUrl());

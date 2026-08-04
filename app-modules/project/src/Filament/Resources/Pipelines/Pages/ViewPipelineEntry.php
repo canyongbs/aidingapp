@@ -62,7 +62,7 @@ class ViewPipelineEntry extends Page
 
     protected static string $resource = PipelineEntryResource::class;
 
-    protected static ?string $title = 'Pipeline Entry Details';
+    protected static ?string $title = 'Pipeline Task Details';
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
@@ -105,7 +105,7 @@ class ViewPipelineEntry extends Page
 
     public function getTitle(): string | Htmlable
     {
-        return 'Pipeline Entry Details';
+        return 'Pipeline Task Details';
     }
 
     public function getBackUrl(): string

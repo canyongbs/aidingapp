@@ -137,7 +137,7 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
         ->callAction('addEntry', data: [
             'name' => 'Invalid Stage Entry',
         ], arguments: ['stage' => $otherStage->getKey()])
-        ->assertNotified('Pipeline entry could not be added');
+        ->assertNotified('Pipeline task could not be added');
 
     expect(PipelineEntry::query()->where('name', 'Invalid Stage Entry')->exists())->toBeFalse();
 });

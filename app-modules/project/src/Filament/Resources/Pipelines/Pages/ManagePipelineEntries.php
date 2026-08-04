@@ -69,13 +69,13 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-vertical';
 
-    protected static ?string $title = 'Manage Pipeline Entries';
+    protected static ?string $title = 'Manage Pipeline Tasks';
 
-    protected static ?string $breadcrumb = 'Pipeline Entries';
+    protected static ?string $breadcrumb = 'Pipeline Tasks';
 
     protected string $view = 'project::filament.pages.manage-pipeline-entries';
 
-    protected static ?string $navigationLabel = 'Pipeline Entries';
+    protected static ?string $navigationLabel = 'Pipeline Tasks';
 
     public function getSubheading(): string | Htmlable | null
     {
