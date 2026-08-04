@@ -59,6 +59,9 @@ class ManageAssignmentAction
             ->modalSubmitActionLabel('Submit')
             ->visible(fn (): bool => auth()->user()->can('update', $serviceRequest))
             ->schema([
+                ServiceRequestStatusSelect::make($serviceRequest)
+                    ->label('Update Status')
+                    ->helperText('You may simultaneously update the status along with this change.'),
                 Placeholder::make('currentAssignment')
                     ->label('Current Assignment')
                     ->content(function () use ($serviceRequest): string {
@@ -74,9 +77,6 @@ class ManageAssignmentAction
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
-                ServiceRequestStatusSelect::make($serviceRequest)
-                    ->label('Update Status')
-                    ->helperText('You may simultaneously update the status along with this change.'),
             ])
             ->action(function (array $data, Component $livewire) use ($serviceRequest): void {
                 $isEligibleManager = ManagersTable::query($serviceRequest->priority->type_id)
