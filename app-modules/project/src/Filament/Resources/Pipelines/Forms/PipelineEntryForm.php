@@ -44,6 +44,7 @@ use AidingApp\Project\Filament\Tables\PipelineEntryMilestonesTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryServiceRequestsTable;
 use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
@@ -141,11 +142,12 @@ class PipelineEntryForm
                 ->default('none')
                 ->inline()
                 ->live()
-                ->afterStateHydrated(function (Set $set, Get $get) {
-                    //TODO: Fix below first
-                    $state = $get('milestones');
+                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
+                    $state = $record?->milestones()->exists();
 
-                    if ($state === null) {
+                    if (filled($state)) {
+                        $set('milestones_type', 'select');
+                    } else {
                         $set('milestones_type', 'none');
                     }
                 })
@@ -167,21 +169,76 @@ class PipelineEntryForm
                 ->tableConfiguration(PipelineEntryMilestonesTable::class)
                 ->tableArguments(['projectId' => $pipeline?->project_id])
                 ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
+                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->multiple()
-                ->dehydrated(),
+                ->dehydrated()
+                ->dehydratedWhenHidden(),
+
+            ToggleButtons::make('assets_type')
+                ->label('Assets Type')
+                ->options([
+                    'none' => 'None',
+                    'select' => 'Select',
+                ])
+                ->default('none')
+                ->inline()
+                ->live()
+                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
+                    $state = $record?->assets()->exists();
+
+                    if ($state) {
+                        $set('assets_type', 'select');
+                    } else {
+                        $set('assets_type', 'none');
+                    }
+                })
+                ->dehydrated(false)
+                ->afterStateUpdated(function (?string $state, Set $set) {
+                    if ($state === 'none') {
+                        $set('assets', []);
+                    }
+                }),
             ModalTableSelect::make('assets')
                 ->label('Related Assets')
                 ->relationship(name: 'assets', titleAttribute: 'name')
                 ->tableConfiguration(PipelineEntryAssetsTable::class)
+                ->visible(fn (Get $get): bool => filled($get('assets_type')) && $get('assets_type') !== 'none')
                 ->multiple()
-                ->dehydrated(),
+                ->dehydrated()
+                ->dehydratedWhenHidden(),
+            ToggleButtons::make('service_requests_type')
+                ->label('Service Requests Type')
+                ->options([
+                    'none' => 'None',
+                    'select' => 'Select',
+                ])
+                ->default('none')
+                ->inline()
+                ->live()
+                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
+                    $state = $record?->serviceRequests()->exists();
+
+                    if ($state) {
+                        $set('service_requests_type', 'select');
+                    } else {
+                        $set('service_requests_type', 'none');
+                    }
+                })
+                ->dehydrated(false)
+                ->afterStateUpdated(function (?string $state, Set $set) {
+                    if ($state === 'none') {
+                        $set('serviceRequests', []);
+                    }
+                }),
             ModalTableSelect::make('serviceRequests')
                 ->label('Related Service Requests')
                 ->relationship(name: 'serviceRequests', titleAttribute: 'service_request_number')
                 ->getOptionLabelFromRecordUsing(fn (ServiceRequest $record): string => self::serviceRequestLabel($record))
+                ->visible(fn (Get $get): bool => filled($get('service_requests_type')) && $get('service_requests_type') !== 'none')
                 ->tableConfiguration(PipelineEntryServiceRequestsTable::class)
                 ->multiple()
-                ->dehydrated(),
+                ->dehydrated()
+                ->dehydratedWhenHidden(),
         ];
     }
 
@@ -192,5 +249,26 @@ class PipelineEntryForm
             : '';
 
         return "({$serviceRequest->service_request_number}){$title}";
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (($data['milestones_type'] ?? null) === 'none') {
+            $data['milestones'] = [];
+        }
+
+        if (($data['assets_type'] ?? null) === 'none') {
+            $data['assets'] = [];
+        }
+
+        if (($data['service_requests_type'] ?? null) === 'none') {
+            $data['serviceRequests'] = [];
+        }
+
+        return $data;
     }
 }

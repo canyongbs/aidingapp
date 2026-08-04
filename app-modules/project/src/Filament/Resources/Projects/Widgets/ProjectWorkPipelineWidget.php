@@ -155,7 +155,13 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->modalHeading('Edit Pipeline Task')
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
+                    ->after(function (PipelineEntry $record, array $data): void {
+                        $record->milestones()->sync($data['milestones'] ?? []);
+                        $record->assets()->sync($data['assets'] ?? []);
+                        $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
+
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
             ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
