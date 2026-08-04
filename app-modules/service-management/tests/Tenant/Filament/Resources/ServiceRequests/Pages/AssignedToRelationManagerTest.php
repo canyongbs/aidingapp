@@ -215,6 +215,8 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     $department = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -224,6 +226,9 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     actingAs($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -247,6 +252,8 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
+    $user->givePermissionTo('service_request.*.update');
+
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($otherUser);
@@ -254,6 +261,9 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     actingAs($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
@@ -341,7 +351,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
         ->assertTableActionVisible('manageAssignment');
 });
 
-test('Manage Assignment action is not visible when the Service Request is unassigned and the logged-in user does not belong to a Department that is Manager of the Type of this Service Request', function () {
+test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function () {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -350,45 +360,16 @@ test('Manage Assignment action is not visible when the Service Request is unassi
 
     $user = User::factory()->create();
 
-    $department = Department::factory()->create();
-
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $serviceRequestType->managerDepartments()->attach($department);
+    $serviceRequestType->managerUsers()->attach($user);
 
     actingAs($user);
 
     $serviceRequestsWithManager = ServiceRequest::factory()->state([
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
-    ])
-        ->create();
-
-    livewire(AssignedToRelationManager::class, [
-        'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
-    ])
-        ->assertTableActionHidden('manageAssignment');
-});
-
-test('Manage Assignment action is not visible when the Service Request is unassigned and the logged-in user is not a direct managerUser of the Type of this Service Request', function () {
-    $settings = app(LicenseSettings::class);
-
-    $settings->data->addons->serviceManagement = true;
-
-    $settings->save();
-
-    $user = User::factory()->create();
-    $otherUser = User::factory()->create();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequestType->managerUsers()->attach($otherUser);
-
-    actingAs($user);
-
-    $serviceRequestsWithManager = ServiceRequest::factory()->state([
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
