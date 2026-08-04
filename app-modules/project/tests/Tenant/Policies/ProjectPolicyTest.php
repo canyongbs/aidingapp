@@ -34,53 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
-
-use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Filament\Actions\ArchiveAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Contracts\Support\Htmlable;
+use App\Models\User;
 
-class EditProject extends EditRecord
-{
-    use HasProjectDashboardNavigation;
+use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
-    protected static string $resource = ProjectResource::class;
+it('allows a super admin to archive any project', function () {
+    $user = User::factory()->create();
 
-    protected static ?string $navigationLabel = 'Edit';
+    asSuperAdmin($user);
 
-    public function getTitle(): string | Htmlable
-    {
-        $record = $this->getRecord();
+    $project = Project::factory()->create();
 
-        assert($record instanceof Project);
+    expect($user->can('archive', $project))->toBeTrue();
+});
 
-        return __('filament-panels::resources/pages/edit-record.title', [
-            'label' => $record->name,
-        ]);
-    }
+it('allows a project manager with the delete permission to archive the project', function () {
+    $user = User::factory()->create();
 
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ProjectForm::components(isEdit: true));
-    }
+    $user->givePermissionTo('project.*.delete');
 
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
-    }
+    actingAs($user);
 
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            ArchiveAction::make(),
-        ];
-    }
-}
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($user->getKey());
+
+    expect($user->can('archive', $project))->toBeTrue();
+});
+
+it('does not let a manager archive the project without the delete permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($user->getKey());
+
+    expect($user->can('archive', $project))->toBeFalse();
+});
+
+it('does not let a user with the delete permission archive a project they do not manage or create', function () {
+    $creator = User::factory()->create();
+
+    actingAs($creator);
+
+    $project = Project::factory()->create();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.delete');
+
+    actingAs($user);
+
+    expect($user->can('archive', $project))->toBeFalse();
+});

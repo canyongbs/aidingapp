@@ -91,6 +91,22 @@ it('can view a pipeline', function () {
         ->assertSuccessful();
 });
 
+it('cannot view a pipeline whose project is archived', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->create();
+
+    $project->archive();
+
+    get(PipelineResource::getUrl('view', [
+        'record' => $pipeline->getRouteKey(),
+    ]))
+        ->assertForbidden();
+});
+
 it('displays correct pipeline details', function () {
     asSuperAdmin();
 

@@ -50,6 +50,7 @@ use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -79,6 +80,16 @@ class ProjectResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name'];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withoutArchived();
+    }
+
+    public static function getGlobalSearchEloquentQuery(): Builder
+    {
+        return parent::getGlobalSearchEloquentQuery()->withoutArchived();
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array

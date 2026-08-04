@@ -40,11 +40,10 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
+use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -107,6 +106,7 @@ class ListProjects extends ListRecords
             ])
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
                 $query
+                    ->withoutArchived()
                     ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
                     ->tap(new WithProgressCounts());
 
@@ -189,14 +189,25 @@ class ListProjects extends ListRecords
                     ->preload()
                     ->label('Department'),
             ])
+            ->recordUrl(fn (Project $record): string => ProjectResource::getUrl('view', ['record' => $record]))
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                Action::make('archive')
+                    ->label('Archive')
+                    ->defaultColor('warning')
+                    ->icon('heroicon-m-archive-box')
+                    ->modalIcon('heroicon-o-archive-box')
+                    ->modalSubmitActionLabel('Archive')
+                    ->successNotificationTitle('Archived')
+                    ->hidden(fn (Project $record): bool => $record->isArchived())
+                    ->requiresConfirmation()
+                    ->action(fn (Project $record): bool => $record->archive())
+                    ->authorize(fn (Project $record): bool => ProjectResource::can('archive', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                    ArchiveBulkAction::make()
+                        ->authorizeIndividualRecords('delete')
+                        ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
     }

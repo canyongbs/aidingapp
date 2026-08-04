@@ -151,6 +151,19 @@ test('global search returns all projects for a super admin', function () {
     expect($results)->toHaveCount(2);
 });
 
+test('global search does not return archived projects', function () {
+    asSuperAdmin();
+
+    $activeProject = Project::factory()->create();
+    $archivedProject = Project::factory()->create();
+    $archivedProject->archive();
+
+    $results = ProjectResource::getGlobalSearchEloquentQuery()->get();
+
+    expect($results)->toHaveCount(1);
+    expect($results->first()->getKey())->toBe($activeProject->getKey());
+});
+
 test('global search does not return projects the user has no relation to', function () {
     $creator = User::factory()->create();
     $unrelatedUser = User::factory()->create();

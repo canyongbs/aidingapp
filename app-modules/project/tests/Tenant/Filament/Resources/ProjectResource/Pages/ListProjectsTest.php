@@ -49,6 +49,7 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -117,6 +118,19 @@ it('can list records', function () {
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
 });
+
+    it('does not list archived projects', function () {
+        asSuperAdmin();
+
+        $activeProject = Project::factory()->create();
+        $archivedProject = Project::factory()->create();
+        $archivedProject->archive();
+
+        livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$activeProject])
+        ->assertCanNotSeeTableRecords([$archivedProject])
+        ->assertSuccessful();
+    });
 
 it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
     $user = User::factory()->create();
@@ -197,22 +211,52 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the project.delete permission', function () {
-    Project::factory(15)->create();
-
+it('only shows archive actions to a user with the project.delete permission', function () {
     $user = User::factory()
         ->create()
         ->givePermissionTo('project.view-any', 'project.*.view');
 
     actingAs($user);
 
+    $project = Project::factory()->for($user, 'createdBy')->create();
+
     livewire(ListProjects::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+        ->assertActionHidden(TestAction::make('archive')->table($project))
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('project.*.delete');
 
     livewire(ListProjects::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+        ->assertActionVisible(TestAction::make('archive')->table($project))
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
+});
+
+it('can archive a project from the list row action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->callTableAction('archive', record: $project->getKey());
+
+    assertDatabaseHas('projects', [
+        'id' => $project->getKey(),
+    ]);
+
+    expect($project->fresh()?->isArchived())->toBeTrue();
+});
+
+it('can archive multiple projects from the list bulk action', function () {
+    asSuperAdmin();
+
+    $projects = Project::factory()->count(3)->create();
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->callTableBulkAction('archive', $projects);
+
+    $projects->each(fn (Project $project) => expect($project->fresh()?->isArchived())->toBeTrue());
 });
 
 it('displays project name, manager(s), department, start date, target date, and progress columns', function () {

@@ -179,6 +179,25 @@ class ProjectPolicy
         );
     }
 
+    public function archive(Authenticatable $authenticatable, Project $project): Response
+    {
+        if (! auth()->user()->isSuperAdmin()) {
+            $department = auth()->user()->department;
+
+            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
+
+            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+                return Response::deny("You don't have permission to archive this project because you're not manager, or creator of this project.");
+            }
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: 'project.*.delete',
+            denyResponse: 'You do not have permission to archive this project.'
+        );
+    }
+
     /**
      * @return array<Feature>
      */
