@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-it('renders entry cards with their name and organizable name on the kanban board', function () {
+it('renders entry cards with their name on the kanban board', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()

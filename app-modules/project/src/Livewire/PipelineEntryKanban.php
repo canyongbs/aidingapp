@@ -79,7 +79,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          * @var Collection<int, PipelineEntry> $entries
          */
         $entries = $this->pipeline->entries()
-            ->with('organizable')
             ->oldest()
             ->get();
 
