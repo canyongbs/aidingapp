@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -50,15 +51,7 @@ class ManagersTable
     public static function query(string $serviceRequestTypeId, ?string $excludeUserId = null): Builder
     {
         return User::query()
-            ->where(function (Builder $query) use ($serviceRequestTypeId): void {
-                $query
-                    ->whereHas('department.manageableServiceRequestTypes', function (Builder $query) use ($serviceRequestTypeId): void {
-                        $query->where('service_request_type_id', $serviceRequestTypeId);
-                    })
-                    ->orWhereHas('manageableServiceRequestTypes', function (Builder $query) use ($serviceRequestTypeId): void {
-                        $query->where('service_request_type_id', $serviceRequestTypeId);
-                    });
-            })
+            ->tap(new ManagesServiceRequestType($serviceRequestTypeId))
             ->when($excludeUserId, function (Builder $query) use ($excludeUserId): void {
                 $query->whereKeyNot($excludeUserId);
             });
