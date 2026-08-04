@@ -108,7 +108,9 @@ class ManageAssignmentAction
                         'service_request_status_id' => $data['status_id'],
                     ]);
 
-                    $serviceRequest->update(['status_id' => $data['status_id']]);
+                    $serviceRequest->status_id = $data['status_id'];
+                    $serviceRequest->unsetRelation('status');
+                    $serviceRequest->save();
                 });
 
                 $livewire->dispatch('assignment-history-refresh');
