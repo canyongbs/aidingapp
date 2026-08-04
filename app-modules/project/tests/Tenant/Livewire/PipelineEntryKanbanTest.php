@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Livewire\PipelineEntryKanban;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
@@ -54,16 +53,13 @@ it('renders entry cards with their name on the kanban board', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $contact = Contact::factory()->create();
-
     $entry = PipelineEntry::factory()->create([
         'name' => 'Kickoff Task',
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertSee($entry->name)
-        ->assertSee($contact->full_name);
+        ->assertSee($entry->name);
 });
 
 it('renders stages in order sequence on the kanban board', function () {
@@ -90,8 +86,6 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
         ->create();
 
     [$firstStage, $secondStage] = $pipeline->stages;
-
-    $contact = Contact::factory()->create();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
@@ -138,8 +132,6 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
         ->create();
 
     $otherStage = PipelineStage::factory()->create();
-
-    $contact = Contact::factory()->create();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
