@@ -55,6 +55,6 @@ class ServiceRequestStatusSelect
                     $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
                 ])))
             ->exists((new ServiceRequestStatus())->getTable(), 'id')
-            ->default(fn () => $serviceRequest->status->getKey());
+            ->default(fn () => $serviceRequest->status_id);
     }
 }

@@ -57,7 +57,8 @@ class ManageAssignmentAction
             ->slideOver()
             ->modalHeading('Manage Assignment')
             ->modalSubmitActionLabel('Submit')
-            ->visible(fn (): bool => auth()->user()->can('update', $serviceRequest))
+            ->visible(fn (): bool => $serviceRequest->priority?->type_id !== null
+                && auth()->user()->can('update', $serviceRequest))
             ->schema([
                 ServiceRequestStatusSelect::make($serviceRequest)
                     ->label('Update Status')
@@ -74,15 +75,18 @@ class ManageAssignmentAction
                     ->label('Reassign')
                     ->tableConfiguration(ManagersTable::class)
                     ->tableArguments([
-                        'serviceRequestTypeId' => $serviceRequest->priority->type_id,
+                        'serviceRequestTypeId' => $serviceRequest->priority?->type_id,
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
             ])
             ->action(function (array $data, Component $livewire) use ($serviceRequest): void {
-                $isEligibleManager = ManagersTable::query($serviceRequest->priority->type_id)
-                    ->whereKey($data['userId'])
-                    ->exists();
+                $serviceRequestTypeId = $serviceRequest->priority?->type_id;
+
+                $isEligibleManager = $serviceRequestTypeId !== null
+                    && ManagersTable::query($serviceRequestTypeId, $serviceRequest->assignedTo?->user_id)
+                        ->whereKey($data['userId'])
+                        ->exists();
 
                 if (! $isEligibleManager) {
                     Notification::make()

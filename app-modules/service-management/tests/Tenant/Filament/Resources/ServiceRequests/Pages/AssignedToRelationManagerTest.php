@@ -156,7 +156,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
     ])
         ->create();
 
-    $assignedServiceRequest = ServiceRequestAssignment::factory()->state([
+    ServiceRequestAssignment::factory()->state([
         'service_request_id' => $serviceRequestsWithManager->getKey(),
         'user_id' => $user->getKey(),
     ])
@@ -617,6 +617,34 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
     ])
         ->assertTableActionVisible('manageAssignment')
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
+});
+
+test('Manage Assignment action is hidden and the page renders when the Service Request has no priority or type to assign against', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => null,
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->assertSuccessful()
+        ->assertTableActionHidden('manageAssignment');
 });
 
 test('submitting Manage Assignment assigns the selected manager and deactivates the prior assignment', function () {

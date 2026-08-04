@@ -79,9 +79,10 @@ class AssignedToRelationManager extends RelationManager
                 Action::make('assign-to-me')
                     ->visible(function () {
                         $user = auth()->user();
-                        $type = $this->getOwnerRecord()->priority->type;
+                        $type = $this->getOwnerRecord()->priority?->type;
 
-                        return $user->can('update', $this->getOwnerRecord())
+                        return $type !== null
+                            && $user->can('update', $this->getOwnerRecord())
                             && is_null($this->getOwnerRecord()->assignedTo)
                             && (
                                 $type->managerUsers->contains('id', $user?->getKey()) ||
