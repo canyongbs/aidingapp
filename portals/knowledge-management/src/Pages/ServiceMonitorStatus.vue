@@ -134,8 +134,7 @@
                     :name="serviceMonitor.name"
                     :status="serviceMonitor.latest_history?.succeeded ?? true"
                     :message="
-                        serviceMonitor.latest_history?.status_message ??
-                        'No known issues (monitoring not yet started).'
+                        serviceMonitor.latest_history?.status_message ?? 'No known issues (monitoring not yet started).'
                     "
                 />
             </div>
@@ -157,9 +156,7 @@
         <EmptyState v-else>
             <template #heading>There are no service monitors to display.</template>
             <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
-                    Return Home
-                </BaseButton>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
             </template>
         </EmptyState>
     </Page>
