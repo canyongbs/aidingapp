@@ -713,3 +713,45 @@ test('submitting Manage Assignment with a different status updates the service r
 
     expect($assignment->service_request_status_id)->toBe($newStatus->getKey());
 });
+
+test('submitting Manage Assignment with a non-manager user does not create an assignment', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $manager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $nonManager = User::factory()->create();
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ManageAssignments::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->setTableActionData([
+            'userId' => $nonManager->getKey(),
+            'status_id' => $status->getKey(),
+        ])
+        ->callMountedTableAction()
+        ->assertNotified();
+
+    expect($serviceRequest->assignments()->where('user_id', $nonManager->getKey())->exists())->toBeFalse();
+});
