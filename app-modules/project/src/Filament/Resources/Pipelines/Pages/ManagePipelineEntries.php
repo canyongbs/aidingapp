@@ -145,6 +145,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ])
             ->defaultSort('created_at', 'desc');
     }
+
     protected function getPipelineSwitcherProjectId(): ?string
     {
         $project = $this->getParentRecord();

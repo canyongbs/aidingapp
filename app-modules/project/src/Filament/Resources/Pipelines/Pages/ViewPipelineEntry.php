@@ -43,7 +43,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use BackedEnum;
