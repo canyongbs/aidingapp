@@ -11,12 +11,7 @@
                     "tags": [
                         {
                             "id": "9dbe944d-330e-40c1-94b2-3312b07a1829",
-                            "name": "Education",
-                            "pivot": {
-                                "taggable_type": "knowledge_base_item",
-                                "taggable_id": "9dbe944d-330e-40c1-94b2-3312b07a7590",
-                                "tag_id": "9dbe944d-330e-40c1-94b2-3312b07a1829"
-                            }
+                            "name": "Education"
                         }
                     ],
                     "vote": null,
