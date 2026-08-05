@@ -52,6 +52,7 @@ use Filament\Resources\Resource;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use UnitEnum;
 
 class ProjectResource extends Resource
@@ -65,6 +66,15 @@ class ProjectResource extends Resource
     protected static ?string $recordTitleAttribute = 'name';
 
     protected static bool $isGloballySearchable = true;
+
+    public static function getRecordTitle(?Model $record): string | Htmlable | null
+    {
+        if (! $record instanceof Project) {
+            return parent::getRecordTitle($record);
+        }
+
+        return Str::limit($record->name, 16);
+    }
 
     public static function getGloballySearchableAttributes(): array
     {

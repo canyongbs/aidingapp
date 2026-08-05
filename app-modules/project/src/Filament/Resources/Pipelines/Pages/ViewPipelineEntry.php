@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -114,6 +115,23 @@ class ViewPipelineEntry extends Page
             'record' => $this->getPipeline(),
             'project' => $this->getPipeline()->project,
         ]);
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getResourceBreadcrumbs(): array
+    {
+        $pipeline = $this->getPipeline();
+        $project = $pipeline->project;
+
+        return [
+            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
+            ProjectResource::getUrl('view', ['record' => $project]) => ProjectResource::getRecordTitle($project),
+            '' => PipelineResource::getBreadcrumb(),
+            PipelineResource::getUrl('view', ['record' => $pipeline, 'project' => $project]) => $pipeline->name ?? '',
+            PipelineResource::getUrl('entries', ['record' => $pipeline, 'project' => $project]) => PipelineEntryResource::getBreadcrumb(),
+        ];
     }
 
     public function entryDetailsInfolist(Schema $schema): Schema
