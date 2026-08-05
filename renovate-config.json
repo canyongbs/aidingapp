@@ -9,7 +9,7 @@
     "platform": "github",
     "repositories": ["canyongbs/aidingapp"],
     "enabledManagers": ["custom.regex", "docker-compose"],
-    "reviewers": ["orrison"],
+    "reviewersFromCodeOwners": true,
     "prCreation": "not-pending",
     "vulnerabilityAlerts": {
         "enabled": true
