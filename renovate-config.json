@@ -10,6 +10,7 @@
     "repositories": ["canyongbs/aidingapp"],
     "enabledManagers": ["custom.regex", "docker-compose"],
     "reviewers": ["orrison"],
+    "prCreation": "not-pending",
     "vulnerabilityAlerts": {
         "enabled": true
     },
@@ -91,6 +92,18 @@
             "matchDatasources": ["github-releases", "node-version", "npm"],
             "isVulnerabilityAlert": true,
             "minimumReleaseAge": "0 days"
+        },
+        {
+            "description": "Group Docker digest updates into a single PR",
+            "matchDatasources": ["docker"],
+            "matchUpdateTypes": ["digest"],
+            "groupName": "docker-digests"
+        },
+        {
+            "description": "GHCR provides no release timestamps; disable age gating so images aren't held indefinitely",
+            "matchDatasources": ["docker"],
+            "matchPackageNames": ["ghcr.io/**"],
+            "minimumReleaseAge": null
         },
         {
             "description": "Constrain PostgreSQL to 16.x",
