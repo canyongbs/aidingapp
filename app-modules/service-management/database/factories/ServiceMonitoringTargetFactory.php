@@ -59,6 +59,14 @@ class ServiceMonitoringTargetFactory extends Factory
             'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
             'is_notified_via_database' => $this->faker->boolean(),
             'is_notified_via_email' => $this->faker->boolean(),
+            'is_confidential' => false,
         ];
+    }
+
+    public function confidential(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_confidential' => true,
+        ]);
     }
 }
