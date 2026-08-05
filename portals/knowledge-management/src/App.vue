@@ -32,40 +32,31 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import Footer from '@common/portal/Footer.vue';
+    import Header from '@common/portal/Header.vue';
+    import { PlusIcon } from '@heroicons/vue/20/solid';
+    import {
+        CubeIcon,
+        DocumentTextIcon,
+        FolderIcon,
+        HomeIcon,
+        ShieldExclamationIcon,
+        SignalIcon,
+        WrenchScrewdriverIcon,
+    } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
-    import AppLoading from './Components/AppLoading.vue';
-    import Footer from './Components/Footer.vue';
-    import Header from './Components/Header.vue';
-    import axios from './Globals/Axios.js';
+    import { useIsDataLoading } from 'vue-router/experimental';
+    import BootScreen from './Components/BootScreen.vue';
+    import NavigationProgress from './Components/NavigationProgress.vue';
+    import { usePortalAuth } from './Composables/usePortalAuth.js';
+    import { usePortalTheme } from './Composables/usePortalTheme.js';
     import Login from './Pages/Login.vue';
-    import { consumer } from './Services/Consumer.js';
-    import determineIfUserIsAuthenticated from './Services/DetermineIfUserIsAuthenticated.js';
     import { useAuthStore } from './Stores/auth.js';
+    import { useConfigStore } from './Stores/config.js';
     import { useFeatureStore } from './Stores/feature.js';
-    import { useTimezoneStore } from './Stores/timezone.js';
     import { useTokenStore } from './Stores/token.js';
-
-    /**
-     * Computes a perceptually-correct contrast colour for text placed on top of
-     * a given sRGB background expressed as "R G B" space-separated integers.
-     * Returns '#111827' (near-black) for light palettes (yellow, lime, amber, etc.)
-     * and 'white' for dark palettes, so primary-variant button text is always readable
-     * regardless of which static primary colour the admin has configured.
-     */
-    function contrastOnColor(rgbString) {
-        const parts = String(rgbString ?? '')
-            .trim()
-            .split(/\s+/)
-            .map(Number);
-        if (parts.length !== 3 || parts.some((n) => isNaN(n))) return 'white';
-        const [r, g, b] = parts.map((c) => {
-            const s = c / 255;
-            return s <= 0.04045 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
-        });
-        const luminance = 0.2126 * r + 0.7152 * g + 0.0722 * b;
-        return luminance > 0.35 ? '#111827' : 'white';
-    }
 
     const props = defineProps({
         url: {
@@ -103,54 +94,105 @@
         },
     });
 
-    const errorLoading = ref(false);
-    const loading = ref(true);
-    const userIsAuthenticated = ref(false);
-    const requiresAuthentication = ref(false);
-    const hasServiceManagement = ref(false);
-    const isStatusEnabled = ref(false);
-    const isAdvisoryEnabled = ref(false);
-    const isAssetEnabled = ref(false);
-    const isLicenseEnabled = ref(false);
-    const hasAssets = ref(false);
-    const hasLicense = ref(false);
-    const hasProjects = ref(false);
-    const showLogin = ref(false);
-
-    const portalPrimaryColor = ref('');
-    const portalRounding = ref('');
-
-    /** Contrast-safe text colour for primary-variant buttons (adapts to any static palette). */
-    const primaryOnColor = computed(() => contrastOnColor(portalPrimaryColor.value?.[500]));
-    const categories = ref({});
-    const serviceRequests = ref({});
-    const headerLogo = ref('');
-    const favicon = ref('');
-    const tags = ref({});
-    const appName = ref('');
-    const footerLogo = ref('');
-
-    const authentication = ref({
-        code: null,
-        email: null,
-        isRequested: false,
-        requestedMessage: null,
-        requestUrl: null,
-        url: null,
-        registrationAllowed: false,
-    });
-
     const route = useRoute();
     const router = useRouter();
 
-    const assistantWidgetLoaderUrl = ref(null);
-    const assistantWidgetConfigUrl = ref(null);
+    const config = useConfigStore();
+    const {
+        appName,
+        headerLogo,
+        footerLogo,
+        favicon,
+        assistantWidgetLoaderUrl,
+        assistantWidgetConfigUrl,
+        errorLoading,
+    } = storeToRefs(config);
 
-    const showSignIn = computed(() => {
-        return (
-            !userIsAuthenticated.value && (requiresAuthentication.value || showLogin.value || route.meta?.requiresAuth)
-        );
-    });
+    const authStore = useAuthStore();
+    const { user, requiresAuthentication, userIsAuthenticated } = storeToRefs(authStore);
+
+    const feature = useFeatureStore();
+    const {
+        hasServiceManagement,
+        hasAssets,
+        hasLicense,
+        hasProjects,
+        isStatusEnabled,
+        isAdvisoryEnabled,
+        isAssetEnabled,
+        isLicenseEnabled,
+    } = storeToRefs(feature);
+
+    const { themeStyles } = usePortalTheme();
+
+    const { authentication, authenticate, logout } = usePortalAuth();
+
+    const isNavigating = useIsDataLoading();
+
+    const loading = ref(true);
+    const showLogin = ref(false);
+
+    const menuItems = computed(() =>
+        [
+            { label: 'Home', routeName: 'home', icon: HomeIcon },
+            {
+                label: 'Service',
+                routeName: 'service-parent',
+                icon: WrenchScrewdriverIcon,
+                visible: hasServiceManagement.value && user.value !== null,
+                activeRoutes: [
+                    'service',
+                    'create-service-request',
+                    'create-service-request-from-type',
+                    'view-service-request',
+                ],
+            },
+            {
+                label: 'Status',
+                routeName: 'status',
+                icon: SignalIcon,
+                visible: isStatusEnabled.value && user.value !== null,
+            },
+            {
+                label: 'Advisories',
+                routeName: 'advisories',
+                icon: ShieldExclamationIcon,
+                visible: isAdvisoryEnabled.value && user.value !== null,
+            },
+            {
+                label: 'Assets',
+                routeName: 'assets',
+                icon: CubeIcon,
+                visible: isAssetEnabled.value && hasAssets.value && user.value !== null,
+            },
+            {
+                label: 'Licenses',
+                routeName: 'licenses',
+                icon: DocumentTextIcon,
+                visible: isLicenseEnabled.value && hasLicense.value && user.value !== null,
+            },
+            {
+                label: 'Projects',
+                routeName: 'projects',
+                icon: FolderIcon,
+                visible: hasProjects.value && user.value !== null,
+            },
+        ].filter((item) => item.visible !== false),
+    );
+
+    const showSignIn = computed(
+        () =>
+            !userIsAuthenticated.value && (requiresAuthentication.value || showLogin.value || route.meta?.requiresAuth),
+    );
+
+    // Hide navbar search on pages that already show their own hero search.
+    const hideHeaderSearch = computed(() => ['home', 'view-category', 'view-subcategory'].includes(route.name));
+
+    function onHeaderSearch(query) {
+        router.push({ name: 'home', query: { search: query } });
+    }
+
+    const assistantWidgetLoaded = ref(false);
 
     function loadAssistantWidget() {
         if (!assistantWidgetLoaderUrl.value || !assistantWidgetConfigUrl.value) {
@@ -201,13 +243,11 @@
     async function handleWidgetAuthenticated(event) {
         const { token } = event.detail ?? {};
         if (!token) return;
+
+        // Persist the token and re-boot the portal so the config + route loaders
+        // refetch in the authenticated state.
         await useTokenStore().setToken(token);
-        const isAuth = await determineIfUserIsAuthenticated(props.userAuthenticationUrl);
-        if (isAuth) {
-            userIsAuthenticated.value = true;
-            await getKnowledgeManagementPortal();
-            await getData();
-        }
+        window.location.reload();
     }
 
     window.addEventListener('assistant-widget:authenticated', handleWidgetAuthenticated);
@@ -217,435 +257,113 @@
         window.removeEventListener('assistant-widget:authenticated', handleWidgetAuthenticated);
     });
 
-    watch([showSignIn, assistantWidgetLoaderUrl], ([isSignIn]) => {
-        if (isSignIn) {
+    watch(
+        [showSignIn, assistantWidgetLoaderUrl],
+        ([isSignIn]) => {
             const widgetRoot = document.getElementById('assistant-widget-root');
-            if (widgetRoot) {
-                widgetRoot.style.display = 'none';
+
+            if (isSignIn) {
+                if (widgetRoot) {
+                    widgetRoot.style.display = 'none';
+                }
+
+                return;
             }
-        } else {
-            const widgetRoot = document.getElementById('assistant-widget-root');
+
             if (widgetRoot) {
                 widgetRoot.style.display = '';
                 updateWidgetServiceManagement();
             } else {
                 loadAssistantWidget();
             }
-        }
-    });
-
-    onMounted(async () => {
-        await determineIfUserIsAuthenticated(props.userAuthenticationUrl).then((response) => {
-            userIsAuthenticated.value = response;
-        });
-        document.title = props.appTitle;
-    });
-
-    watch(
-        route,
-        async () => {
-            await getKnowledgeManagementPortal().then(async () => {
-                const { requiresAuthentication } = useAuthStore();
-
-                if (userIsAuthenticated.value || !requiresAuthentication) {
-                    await getData();
-                    return;
-                }
-                loading.value = false;
-            });
         },
-        {
-            immediate: true,
-        },
+        { immediate: true },
     );
 
-    watch(favicon, async (newFavicon, oldFavicon) => {
-        if (newFavicon != oldFavicon) {
-            var link = document.querySelector("link[rel='icon']");
+    watch(favicon, (newFavicon, oldFavicon) => {
+        if (newFavicon && newFavicon !== oldFavicon) {
+            let link = document.querySelector("link[rel='icon']");
+
             if (!link) {
                 link = document.createElement('link');
                 link.rel = 'icon';
                 document.getElementsByTagName('head')[0].appendChild(link);
             }
-            link.href = favicon.value;
+
+            link.href = newFavicon;
         }
     });
 
-    async function getKnowledgeManagementPortal() {
-        await axios
-            .get(props.url)
-            .then((response) => {
-                errorLoading.value = false;
-
-                if (response.error) {
-                    throw new Error(response.error);
-                }
-
-                const { setRequiresAuthentication } = useAuthStore();
-
-                const { setDisplayTimezone } = useTimezoneStore();
-
-                const {
-                    setHasServiceManagement,
-                    setHasAssets,
-                    setHasLicense,
-                    setHasProjects,
-                    setIsStatusEnabled,
-                    setIsAdvisoryEnabled,
-                    setIsAssetEnabled,
-                    setIsLicenseEnabled,
-                } = useFeatureStore();
-
-                setDisplayTimezone(response.data.display_timezone);
-
-                portalPrimaryColor.value = response.data.primary_color;
-
-                headerLogo.value = response.data.header_logo;
-
-                favicon.value = response.data.favicon;
-
-                appName.value = response.data.app_name;
-
-                footerLogo.value = response.data.footer_logo;
-
-                setRequiresAuthentication(response.data.requires_authentication).then(() => {
-                    requiresAuthentication.value = response.data.requires_authentication;
-
-                    if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
-                        assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
-                        assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
-                    }
-                });
-
-                setHasServiceManagement(response.data.service_management_enabled).then(() => {
-                    hasServiceManagement.value = response.data.service_management_enabled;
-                });
-
-                setHasAssets(response.data.has_assets).then(() => {
-                    hasAssets.value = response.data.has_assets;
-                });
-
-                setHasLicense(response.data.has_license).then(() => {
-                    hasLicense.value = response.data.has_license;
-                });
-
-                setHasProjects(response.data.has_projects).then(() => {
-                    hasProjects.value = response.data.has_projects;
-                });
-
-                setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
-                    isStatusEnabled.value = response.data.service_monitoring_enabled;
-                });
-
-                setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
-                    isAdvisoryEnabled.value = response.data.advisory_management_enabled;
-                });
-
-                setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
-                    isAssetEnabled.value = response.data.asset_management_enabled;
-                });
-
-                setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
-                    isLicenseEnabled.value = response.data.license_management_enabled;
-                });
-
-                authentication.value.requestUrl = response.data.authentication_url ?? null;
-
-                portalRounding.value = {
-                    none: {
-                        sm: '0px',
-                        default: '0px',
-                        md: '0px',
-                        lg: '0px',
-                        full: '0px',
-                    },
-                    sm: {
-                        sm: '0.125rem',
-                        default: '0.25rem',
-                        md: '0.375rem',
-                        lg: '0.5rem',
-                        full: '9999px',
-                    },
-                    md: {
-                        sm: '0.25rem',
-                        default: '0.375rem',
-                        md: '0.5rem',
-                        lg: '0.75rem',
-                        full: '9999px',
-                    },
-                    lg: {
-                        sm: '0.375rem',
-                        default: '0.5rem',
-                        md: '0.75rem',
-                        lg: '1rem',
-                        full: '9999px',
-                    },
-                    full: {
-                        sm: '9999px',
-                        default: '9999px',
-                        md: '9999px',
-                        lg: '9999px',
-                        full: '9999px',
-                    },
-                }[response.data.rounding ?? 'md'];
-            })
-            .catch((error) => {
-                errorLoading.value = true;
-                console.error(`Help Center Embed ${error}`);
-            });
-    }
-
-    async function getData() {
-        await Promise.all([getKnowledgeManagementPortalCategories(), getTags(), getServiceRequests()])
-            .then((responses) => {
-                errorLoading.value = false;
-
-                if (responses[0].error) {
-                    throw new Error(responses[0].error);
-                }
-                categories.value = responses[0];
-
-                if (responses[1].error) {
-                    throw new Error(responses[1].error);
-                }
-                tags.value = responses[1];
-
-                if (responses[2].error) {
-                    throw new Error(responses[2].error);
-                }
-                serviceRequests.value = responses[2];
-
-                loading.value = false;
-            })
-            .catch((error) => {
-                errorLoading.value = true;
-                console.error(`Knowledge Management Portal Embed ${error}`);
-            });
-    }
-
-    async function getKnowledgeManagementPortalCategories() {
-        const { get } = consumer();
-
-        return get(`${props.apiUrl}/categories`).then((response) => {
-            if (response.error) {
-                throw new Error(response.error);
-            }
-
-            return response.data;
-        });
-    }
-
-    async function getServiceRequests() {
-        const { get } = consumer();
-
-        return get(`${props.apiUrl}/service-requests`).then((response) => {
-            if (response.error) {
-                throw new Error(response.error);
-            }
-
-            return response.data;
-        });
-    }
-
-    async function getTags() {
-        const { get } = consumer();
-
-        return get(`${props.apiUrl}/tags`).then((response) => {
-            if (response.error) {
-                throw new Error(response.error);
-            }
-
-            return response.data;
-        });
-    }
-
-    async function authenticate(formData, node, done) {
-        node.clearErrors();
-
-        const { setToken } = useTokenStore();
-        const { setUser } = useAuthStore();
-        const { setDisplayTimezone } = useTimezoneStore();
-
-        const {
-            setHasServiceManagement,
-            setHasAssets,
-            setHasLicense,
-            setIsStatusEnabled,
-            setIsAdvisoryEnabled,
-            setIsAssetEnabled,
-            setIsLicenseEnabled,
-        } = useFeatureStore();
-
-        if (authentication.value.isRequested) {
-            let data = {
-                code: formData.code,
-            };
-
-            if (authentication.value.registrationAllowed) {
-                data = {
-                    ...data,
-                    email: formData.email,
-                    first_name: formData.first_name,
-                    last_name: formData.last_name,
-                    preferred: formData.preferred,
-                    mobile: formData.mobile,
-                    phone: formData.phone,
-                    sms_opt_out: formData.sms_opt_out,
-                };
-            }
-
-            axios
-                .post(authentication.value.url, data)
-                .then((response) => {
-                    if (response.errors) {
-                        node.setErrors([], response.errors);
-
-                        return;
-                    }
-
-                    if (response.data.is_expired) {
-                        node.setErrors(['The authentication code expires after 24 hours. Please authenticate again.']);
-
-                        authentication.value.isRequested = false;
-                        authentication.value.requestedMessage = null;
-                        authentication.value.url = null;
-                        authentication.value.registrationAllowed = false;
-
-                        return;
-                    }
-
-                    if (response.data.success === true) {
-                        setToken(response.data.token);
-                        setUser(response.data.user);
-                        setDisplayTimezone(response.data.display_timezone);
-
-                        setHasServiceManagement(response.data.service_management_enabled).then(() => {
-                            hasServiceManagement.value = response.data.service_management_enabled;
-                        });
-
-                        setHasAssets(response.data.has_assets).then(() => {
-                            hasAssets.value = response.data.has_assets;
-                        });
-
-                        setHasLicense(response.data.has_license).then(() => {
-                            hasLicense.value = response.data.has_license;
-                        });
-
-                        setIsStatusEnabled(response.data.service_monitoring_enabled).then(() => {
-                            isStatusEnabled.value = response.data.service_monitoring_enabled;
-                        });
-
-                        setIsAdvisoryEnabled(response.data.advisory_management_enabled).then(() => {
-                            isAdvisoryEnabled.value = response.data.advisory_management_enabled;
-                        });
-
-                        setIsAssetEnabled(response.data.asset_management_enabled).then(() => {
-                            isAssetEnabled.value = response.data.asset_management_enabled;
-                        });
-
-                        setIsLicenseEnabled(response.data.license_management_enabled).then(() => {
-                            isLicenseEnabled.value = response.data.license_management_enabled;
-                        });
-
-                        if (response.data.assistant_widget_loader_url && response.data.assistant_widget_config_url) {
-                            assistantWidgetLoaderUrl.value = response.data.assistant_widget_loader_url;
-                            assistantWidgetConfigUrl.value = response.data.assistant_widget_config_url;
-                        }
-
-                        userIsAuthenticated.value = true;
-
-                        getData();
-                    }
-                })
-                .catch((error) => {
-                    node.setErrors([], error.response.data.errors);
-                })
-                .finally(() => done());
-
-            return;
+    onMounted(async () => {
+        if (props.appTitle) {
+            document.title = props.appTitle;
         }
 
-        axios
-            .post(authentication.value.requestUrl, {
-                email: formData.email,
-            })
-            .then((response) => {
-                if (!response.data.authentication_url) {
-                    node.setErrors([response.data.message]);
-
-                    return;
-                }
-
-                authentication.value.isRequested = true;
-                authentication.value.requestedMessage = response.data.message;
-                authentication.value.url = response.data.authentication_url;
-            })
-            .catch((error) => {
-                const status = error.response.status;
-                const data = error.response.data;
-
-                if (status === 404 && data.registrationAllowed === true) {
-                    authentication.value.registrationAllowed = true;
-                    authentication.value.isRequested = true;
-                    authentication.value.requestedMessage = data.message;
-                    authentication.value.url = data.authentication_url;
-
-                    return;
-                }
-
-                node.setErrors([], data.errors);
-            })
-            .finally(() => done());
-    }
+        try {
+            await router.isReady();
+        } catch {
+            // Initial navigation failed (e.g. unauthenticated); the sign-in screen handles it.
+        } finally {
+            loading.value = false;
+        }
+    });
 </script>
 
 <template>
-    <div
-        class="font-sans bg-gray-50 min-h-screen w-full max-w-full"
-        :style="{
-            '--primary-50': portalPrimaryColor[50],
-            '--primary-100': portalPrimaryColor[100],
-            '--primary-200': portalPrimaryColor[200],
-            '--primary-300': portalPrimaryColor[300],
-            '--primary-400': portalPrimaryColor[400],
-            '--primary-500': portalPrimaryColor[500],
-            '--primary-600': portalPrimaryColor[600],
-            '--primary-700': portalPrimaryColor[700],
-            '--primary-800': portalPrimaryColor[800],
-            '--primary-900': portalPrimaryColor[900],
-            '--primary-950': portalPrimaryColor[950],
-            '--primary-on-color': primaryOnColor.value,
-            '--rounding-sm': portalRounding.sm,
-            '--rounding': portalRounding.default,
-            '--rounding-md': portalRounding.md,
-            '--rounding-lg': portalRounding.lg,
-            '--rounding-full': portalRounding.full,
-        }"
-    >
+    <div class="font-sans bg-gray-50 min-h-screen w-full max-w-full" :style="themeStyles">
         <div>
-            <link rel="stylesheet" v-bind:href="cssUrl" />
-        </div>
-        <div v-if="loading">
-            <AppLoading />
+            <link rel="stylesheet" v-bind:href="props.cssUrl" />
         </div>
 
+        <BootScreen v-if="loading" label="Loading Help Center..." />
+
         <div v-else>
+            <NavigationProgress :active="isNavigating" />
+
             <Login
-                v-if="!userIsAuthenticated && (requiresAuthentication || showLogin || route.meta.requiresAuth)"
+                v-if="showSignIn"
                 v-model:authentication="authentication"
                 :requires-authentication="requiresAuthentication"
                 :header-logo="headerLogo"
                 :footer-logo="footerLogo"
+                :app-name="appName"
                 @authenticate="authenticate"
                 @cancel="showLogin = false"
             />
             <div v-else class="min-h-screen flex flex-col">
                 <Header
-                    :api-url="apiUrl"
-                    @show-login="showLogin = true"
                     :header-logo="headerLogo"
                     :app-name="appName"
-                />
+                    :user="user"
+                    :requires-authentication="requiresAuthentication || hasServiceManagement"
+                    :menu-items="menuItems"
+                    :hide-search="hideHeaderSearch"
+                    @show-login="showLogin = true"
+                    @logout="logout"
+                    @search="onHeaderSearch"
+                >
+                    <template #actions>
+                        <router-link
+                            v-if="hasServiceManagement && user"
+                            :to="{ name: 'create-service-request' }"
+                            class="relative hidden sm:inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-white text-gray-950 ring-1 ring-gray-950/10 hover:bg-gray-50 focus-visible:ring-2"
+                        >
+                            <PlusIcon class="size-5" />
+                            New Request
+                        </router-link>
+                    </template>
+                    <template #mobile-actions="{ closeSidebar }">
+                        <router-link
+                            v-if="hasServiceManagement && user"
+                            :to="{ name: 'create-service-request' }"
+                            @click="closeSidebar"
+                            class="relative inline-grid grid-flow-col items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm font-medium outline-none transition duration-75 bg-brand-600 text-white hover:bg-brand-500 focus-visible:ring-2 focus-visible:ring-brand-500/50"
+                        >
+                            <PlusIcon class="size-5" />
+                            New Request
+                        </router-link>
+                    </template>
+                </Header>
 
                 <main class="flex-1">
                     <div v-if="errorLoading" class="text-center w-full">
@@ -653,17 +371,12 @@
                         <p class="text-lg text-red-500">Please try again later</p>
                     </div>
 
-                    <RouterView
-                        :search-url="searchUrl"
-                        :api-url="apiUrl"
-                        :categories="categories"
-                        :service-requests="serviceRequests"
-                        :tags="tags"
-                        v-else
-                    />
+                    <RouterView v-else v-slot="{ Component, route: activeRoute }">
+                        <component :is="Component" :key="activeRoute.path" />
+                    </RouterView>
                 </main>
 
-                <Footer :logo="footerLogo"></Footer>
+                <Footer :logo="footerLogo" :app-name="appName" />
             </div>
         </div>
     </div>

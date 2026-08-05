@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ManagePipelineEntries;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
@@ -217,6 +218,192 @@ it('can switch view types', function () {
 
     expect($component->viewType)->toBe('kanban');
     expect(session('pipeline-view-type'))->toBe('kanban');
+});
+
+it('defaults to the kanban view when the viewType query parameter is kanban', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'viewType' => 'kanban',
+    ]))
+        ->assertSuccessful()
+        ->assertSee('Drag pipeline entry here');
+});
+
+it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'project' => $otherProject->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
+it('shows a back to project link only when accessed with a project context', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertSee('Back to Project');
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertDontSee('Back to Project');
+});
+
+it('shows the selected pipeline name on the pipeline switcher trigger', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create(['name' => 'Onboarding Pipeline']);
+
+    get(ManagePipelineEntries::getUrl([
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertSee('Onboarding Pipeline');
+});
+
+it('can switch to a different pipeline within the same project via the select pipeline action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipelineOne = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $pipelineTwo = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipelineOne->getRouteKey(),
+        'project' => $project->getKey(),
+    ])
+        ->assertActionVisible('selectPipeline')
+        ->callAction('selectPipeline', data: ['pipeline_id' => $pipelineTwo->getKey()])
+        ->assertRedirect(ManagePipelineEntries::getUrl([
+            'record' => $pipelineTwo->getRouteKey(),
+            'project' => $project->getKey(),
+            'viewType' => 'kanban',
+        ]));
+});
+
+it('always renders the kanban view without a table/kanban toggle when accessed within a project context', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getKey(),
+    ])
+        ->assertSet('viewType', 'kanban')
+        ->assertDontSeeHtml("wire:click=\"setViewType('table')\"")
+        ->assertDontSeeHtml("wire:click=\"setViewType('kanban')\"");
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+    ])
+        ->assertSet('viewType', 'table')
+        ->assertSeeHtml("wire:click=\"setViewType('table')\"")
+        ->assertSeeHtml("wire:click=\"setViewType('kanban')\"");
+});
+
+it('hides the select pipeline action when there is no project context', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+    ])
+        ->assertActionHidden('selectPipeline');
+});
+
+it('rejects switching to a pipeline that does not belong to the project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $foreignPipeline = Pipeline::factory()
+        ->for($otherProject)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getKey(),
+    ])
+        ->callAction('selectPipeline', data: ['pipeline_id' => $foreignPipeline->getKey()])
+        ->assertNotified('Invalid pipeline selection');
+});
+
+it('hides the pipeline resource sub navigation when accessed within a project context', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $withProject = livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getKey(),
+    ])->instance();
+
+    expect(PipelineResource::getRecordSubNavigation($withProject))->toBe([]);
+
+    $withoutProject = livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+    ])->instance();
+
+    expect(PipelineResource::getRecordSubNavigation($withoutProject))->not->toBeEmpty();
 });
 
 it('can create pipeline entry with description and due date', function () {

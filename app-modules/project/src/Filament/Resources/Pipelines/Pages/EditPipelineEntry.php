@@ -93,6 +93,10 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
+        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+            abort(404);
+        }
+
         abort_unless((bool) Filament::auth()->user()?->can('update', $pipeline), 403);
 
         $this->fillForm();
