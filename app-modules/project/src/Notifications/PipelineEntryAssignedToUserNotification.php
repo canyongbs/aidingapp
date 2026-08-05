@@ -37,7 +37,7 @@
 namespace AidingApp\Project\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Models\NotificationSetting;
 use App\Models\User;
@@ -76,17 +76,17 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
      */
     public function toDatabase(object $notifiable): array
     {
-        $url = PipelineResource::getUrl('view-pipeline-entry', [
-            'record' => $this->pipelineEntry->pipelineStage->pipeline_id,
-            'pipelineEntry' => $this->pipelineEntry,
+        $url = PipelineEntryResource::getUrl('view', [
+            'record' => $this->pipelineEntry,
+            'pipeline' => $this->pipelineEntry->pipelineStage->pipeline_id,
             'project' => $this->pipelineEntry->pipelineStage->pipeline->project_id,
         ]);
 
         $title = str($this->pipelineEntry->name)->limit();
 
         $message = filled($url)
-          ? "You have been assigned a new Pipeline Entry: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
-          : "You have been assigned a new Pipeline Entry: {$title}";
+            ? "You have been assigned a new Pipeline Entry: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
+            : "You have been assigned a new Pipeline Entry: {$title}";
 
         return FilamentNotification::make()
             ->success()

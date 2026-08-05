@@ -39,10 +39,12 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
 use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Project;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Contracts\Support\Htmlable;
 
 class EditProject extends EditRecord
 {
@@ -51,6 +53,17 @@ class EditProject extends EditRecord
     protected static string $resource = ProjectResource::class;
 
     protected static ?string $navigationLabel = 'Edit';
+
+    public function getTitle(): string | Htmlable
+    {
+        $record = $this->getRecord();
+
+        assert($record instanceof Project);
+
+        return __('filament-panels::resources/pages/edit-record.title', [
+            'label' => $record->name,
+        ]);
+    }
 
     public function form(Schema $schema): Schema
     {

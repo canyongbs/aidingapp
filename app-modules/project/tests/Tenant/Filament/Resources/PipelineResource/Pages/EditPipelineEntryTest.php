@@ -57,6 +57,8 @@ it('can render edit pipeline entry with proper permission', function () {
     actingAs($user);
 
     $project = Project::factory()->create();
+    $project->managerUsers()->attach($user->getKey());
+
     $pipeline = Pipeline::factory()
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
@@ -66,26 +68,27 @@ it('can render edit pipeline entry with proper permission', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->id,
     ]);
 
-    livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
-    ])
-        ->assertForbidden();
-
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
     $user->givePermissionTo('project.*.update');
     $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
 
     $project->managerUsers()->attach($user);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
+    ])
+        ->assertForbidden();
+
+    $user->givePermissionTo('pipeline.*.update');
+    $user->givePermissionTo('project.*.update');
+    $user->refresh();
+
+    livewire(EditPipelineEntry::class, [
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertSuccessful();
 });
@@ -110,9 +113,8 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
     ]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertStatus(404);
 });
@@ -133,9 +135,9 @@ it('returns 404 if the project route parameter does not match the pipeline\'s pr
     ]);
 
     get(EditPipelineEntry::getUrl([
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $entry->getRouteKey(),
-        'project' => $otherProject->getRouteKey(),
+        'record' => $entry,
+        'pipeline' => $pipeline,
+        'project' => $otherProject,
     ]))
         ->assertNotFound();
 });
@@ -154,9 +156,9 @@ it('shows the pipeline name in the breadcrumb', function () {
     ]);
 
     get(EditPipelineEntry::getUrl([
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $entry->getRouteKey(),
-        'project' => $project->getRouteKey(),
+        'record' => $entry,
+        'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding');
@@ -179,9 +181,8 @@ it('can save pipeline entry with updated description and due date', function () 
     $due = now()->addDays(14)->toDateTimeString();
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->fillForm([
             'description' => 'Updated description.',
@@ -214,9 +215,8 @@ it('persists related milestones, assets, and service requests on save', function
     $serviceRequest = ServiceRequest::factory()->create();
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->fillForm([
             'milestones' => [$milestone->id],
@@ -251,9 +251,8 @@ it('can save pipeline entry with an assigned user', function () {
     $user = User::factory()->create();
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->fillForm([
             'assigned_to_type' => 'user',
@@ -286,9 +285,8 @@ it('can save pipeline entry with an assigned contact', function () {
     $contact = Contact::factory()->create();
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->fillForm([
             'assigned_to_type' => 'contact',
@@ -320,9 +318,8 @@ it('can clear the assigned user on a pipeline entry', function () {
     ]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->fillForm([
             'assigned_to_type' => null,
@@ -354,9 +351,8 @@ it('sets assigned_to_type to contact when entry has an assigned contact', functi
     ]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertFormFieldExists('assigned_to_type')
         ->assertSet('data.assigned_to_type', 'contact');
@@ -379,9 +375,8 @@ it('sets assigned_to_type to user when entry has an assigned user', function () 
     ]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertFormFieldExists('assigned_to_type')
         ->assertSet('data.assigned_to_type', 'user');
@@ -403,9 +398,8 @@ it('sets assigned_to_type to null when entry has no assigned user', function () 
     ]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertSet('data.assigned_to_type', null);
 });

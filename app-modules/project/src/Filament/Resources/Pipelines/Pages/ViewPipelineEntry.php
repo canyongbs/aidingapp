@@ -40,10 +40,10 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use BackedEnum;
@@ -51,15 +51,17 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Illuminate\Support\Str;
 
 class ViewPipelineEntry extends Page
 {
-    protected static string $resource = PipelineResource::class;
+    use InteractsWithRecord;
+
+    protected static string $resource = PipelineEntryResource::class;
 
     protected static ?string $title = 'Pipeline Entry Details';
 
@@ -67,23 +69,39 @@ class ViewPipelineEntry extends Page
 
     protected string $view = 'project::filament.pages.view-pipeline-entry';
 
-    public Pipeline $record;
-
-    public PipelineEntry $pipelineEntry;
-
-    public function mount(): void
+    public function mount(int | string $record): void
     {
-        if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
+        $this->record = $this->resolveRecord($record);
+
+        $pipeline = $this->getParentRecord();
+
+        if (! $pipeline instanceof Pipeline) {
             abort(404);
         }
 
-        $projectRouteKey = request()->route('project');
-
-        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
+        if ($this->getPipelineEntry()->pipelineStage->pipeline_id !== $pipeline->id) {
             abort(404);
         }
 
-        $this->authorize('view', $this->record);
+        $this->authorize('view', $pipeline);
+    }
+
+    public function getPipelineEntry(): PipelineEntry
+    {
+        $pipelineEntry = $this->getRecord();
+
+        assert($pipelineEntry instanceof PipelineEntry);
+
+        return $pipelineEntry;
+    }
+
+    public function getPipeline(): Pipeline
+    {
+        $pipeline = $this->getParentRecord();
+
+        assert($pipeline instanceof Pipeline);
+
+        return $pipeline;
     }
 
     public function getTitle(): string | Htmlable
@@ -93,41 +111,33 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        return PipelineResource::getUrl('manage-entries', [
-            'record' => $this->record,
-            'project' => $this->getParentRecord(),
+        return PipelineResource::getUrl('entries', [
+            'record' => $this->getPipeline(),
+            'project' => $this->getPipeline()->project,
         ]);
     }
 
     /**
      * @return array<string>
      */
-    public function getBreadcrumbs(): array
+    public function getResourceBreadcrumbs(): array
     {
-        $pipeline = $this->record;
+        $pipeline = $this->getPipeline();
+        $project = $pipeline->project;
 
-        $project = $this->getParentRecord();
-        assert($project instanceof Project);
-
-        $breadcrumbs = [
+        return [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-            'Pipelines',
-            Str::limit($pipeline->name ?? 'Pipeline', 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+            ProjectResource::getUrl('view', ['record' => $project]) => ProjectResource::getRecordTitle($project),
+            '' => PipelineResource::getBreadcrumb(),
+            PipelineResource::getUrl('view', ['record' => $pipeline, 'project' => $project]) => $pipeline->name ?? '',
+            PipelineResource::getUrl('entries', ['record' => $pipeline, 'project' => $project]) => PipelineEntryResource::getBreadcrumb(),
         ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
     }
 
     public function entryDetailsInfolist(Schema $schema): Schema
     {
         return $schema
-            ->record($this->pipelineEntry)
+            ->record($this->getPipelineEntry())
             ->components([
                 Section::make()
                     ->columns(2)
@@ -173,7 +183,7 @@ class ViewPipelineEntry extends Page
                                 };
                             }),
                         TextEntry::make('assigned_to_type')
-                            ->visible(fn () => filled($this->pipelineEntry->assigned_to_type))
+                            ->visible(fn () => filled($this->getPipelineEntry()->assigned_to_type))
                             ->label('Assigned To Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
                             ->badge(),
@@ -200,21 +210,19 @@ class ViewPipelineEntry extends Page
     {
         return [
             Action::make('edit')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->getPipeline()))
                 ->url(function (): string {
-                    $params = [
-                        'record' => $this->record,
-                        'pipelineEntry' => $this->pipelineEntry,
-                        'project' => $this->getParentRecord(),
-                    ];
-
-                    return PipelineResource::getUrl('edit-pipeline-entry', $params);
+                    return PipelineEntryResource::getUrl('edit', [
+                        'record' => $this->getPipelineEntry(),
+                        'pipeline' => $this->getPipeline(),
+                        'project' => $this->getPipeline()->project,
+                    ]);
                 }),
             DeleteAction::make()
                 ->label('Remove from Pipeline')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->getPipeline()))
                 ->requiresConfirmation()
-                ->record($this->pipelineEntry)
+                ->record($this->getPipelineEntry())
                 ->successRedirectUrl(fn (): string => $this->getBackUrl()),
         ];
     }

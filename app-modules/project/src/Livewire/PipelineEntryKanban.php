@@ -37,7 +37,7 @@
 namespace AidingApp\Project\Livewire;
 
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Exception;
@@ -202,15 +202,10 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
     {
-        $params = [
-            'record' => $this->pipeline->getKey(),
-            'pipelineEntry' => $pipelineEntry->getKey(),
-        ];
-
-        if (filled($this->project)) {
-            $params['project'] = $this->project;
-        }
-
-        $this->redirect(PipelineResource::getUrl('view-pipeline-entry', $params));
+        $this->redirect(PipelineEntryResource::getUrl('view', [
+            'record' => $pipelineEntry,
+            'pipeline' => $this->pipeline,
+            'project' => $this->pipeline->project,
+        ]));
     }
 }

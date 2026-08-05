@@ -37,20 +37,33 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
+use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
+use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
     use HasPipelineSwitcherAction;
 
     protected static string $resource = PipelineResource::class;
+
+    protected static ?string $relatedResource = PipelineEntryResource::class;
 
     protected static string $relationship = 'entries';
 
@@ -73,28 +86,56 @@ class ManagePipelineEntries extends ManageRelatedRecords
         );
     }
 
-    /**
-     * @return array<int|string, string>
-     */
-    public function getBreadcrumbs(): array
+    public function table(Table $table): Table
     {
-        $project = $this->getParentRecord();
+        $pipeline = $this->getOwnerRecord();
+        assert($pipeline instanceof Pipeline);
 
-        assert($project instanceof Project);
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-            'Pipelines',
-            Str::limit($this->getRecordTitle(), 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->sortable()
+                    ->searchable(['pipeline_entries.name']),
+                TextColumn::make('pipelineStage.name')
+                    ->label('Stage')
+                    ->sortable(),
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->dateTime()
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('stage')
+                    ->relationship('pipelineStage', 'name')
+                    ->multiple()
+                    ->preload(),
+            ])
+            ->recordActions([
+                ViewAction::make()
+                    ->label('View')
+                    ->url(fn (PipelineEntry $record): string => PipelineEntryResource::getUrl('view', [
+                        'record' => $record,
+                        'pipeline' => $pipeline,
+                        'project' => $pipeline->project,
+                    ])),
+                DeleteAction::make(),
+            ])
+            ->headerActions([
+                CreateAction::make()
+                    ->slideOver()
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('pipeline_stage_id')
+                            ->label('Stage')
+                            ->relationship('pipelineStage', 'name', fn (Builder $query) => $query->where('pipeline_id', $pipeline->id))
+                            ->required(),
+                        ...PipelineEntryForm::components($pipeline),
+                    ]),
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     protected function getPipelineSwitcherProjectId(): ?string
