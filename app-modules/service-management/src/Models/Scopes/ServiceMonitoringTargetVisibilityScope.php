@@ -76,6 +76,5 @@ class ServiceMonitoringTargetVisibilityScope implements Scope
         }
 
         // Fallback for unauthenticated/unknown authenticatable types (e.g. queued jobs, console)
-        $builder->where('is_confidential', false);
-    }
+        return;
 }
