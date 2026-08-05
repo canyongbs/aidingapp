@@ -33,15 +33,15 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import ArticleAttachments from '@common/portal/article/ArticleAttachments.vue';
+    import ArticleContent from '@common/portal/article/ArticleContent.vue';
+    import ArticleFeedback from '@common/portal/article/ArticleFeedback.vue';
+    import ArticleMeta from '@common/portal/article/ArticleMeta.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import Tags from '@common/portal/Tags.vue';
-    import ArticleAttachments from '@common/portal/article/ArticleAttachments.vue';
-    import ArticleContent from '@common/portal/article/ArticleContent.vue';
-    import ArticleFeedback from '@common/portal/article/ArticleFeedback.vue';
-    import ArticleMeta from '@common/portal/article/ArticleMeta.vue';
     import truncate from 'lodash/truncate';
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
