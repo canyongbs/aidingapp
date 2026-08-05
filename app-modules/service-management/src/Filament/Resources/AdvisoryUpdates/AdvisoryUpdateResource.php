@@ -36,27 +36,15 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates;
 
-use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\CreateAdvisoryUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\EditAdvisoryUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\ListAdvisoryUpdates;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\ViewAdvisoryUpdate;
-use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Filament\Tables\Columns\IdColumn;
 use BackedEnum;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\TernaryFilter;
-use Filament\Tables\Table;
 
 class AdvisoryUpdateResource extends Resource
 {
@@ -66,19 +54,18 @@ class AdvisoryUpdateResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $parentResource = AdvisoryResource::class;
+
+    protected static ?string $recordTitleAttribute = 'update';
+
+    protected static ?string $slug = 'updates';
+
+    protected static ?string $breadcrumb = 'Updates';
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                Select::make('advisory_id')
-                    ->relationship('advisory', 'id')
-                    ->preload()
-                    ->label('Advisory')
-                    ->required()
-                    ->exists(
-                        table: (new Advisory())->getTable(),
-                        column: (new Advisory())->getKeyName()
-                    ),
                 Textarea::make('update')
                     ->label('Update')
                     ->rows(3)
@@ -91,40 +78,9 @@ class AdvisoryUpdateResource extends Resource
             ]);
     }
 
-    public static function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('advisory.title')
-                    ->label('Title')
-                    ->sortable()
-                    ->searchable(),
-                IconColumn::make('internal')
-                    ->boolean()
-                    ->label('Internal'),
-            ])
-            ->filters([
-                TernaryFilter::make('internal')
-                    ->label('Internal'),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                ]),
-            ]);
-    }
-
     public static function getPages(): array
     {
         return [
-            'index' => ListAdvisoryUpdates::route('/'),
-            'create' => CreateAdvisoryUpdate::route('/create'),
             'view' => ViewAdvisoryUpdate::route('/{record}'),
             'edit' => EditAdvisoryUpdate::route('/{record}/edit'),
         ];

@@ -36,26 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
-use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ManageAdvisoryUpdate extends ManageRelatedRecords
 {
@@ -68,70 +55,59 @@ class ManageAdvisoryUpdate extends ManageRelatedRecords
 
     protected static ?string $breadcrumb = 'Updates';
 
-    public function form(Schema $schema): Schema
+    public static function getNavigationItemActiveRoutePattern(): string | array
     {
-        assert($this->getOwnerRecord() instanceof Advisory);
-
-        return $schema
-            ->components([
-                Textarea::make('update')
-                    ->label('Update')
-                    ->rows(3)
-                    ->columnSpan('full')
-                    ->required()
-                    ->string(),
-                Toggle::make('internal')
-                    ->label('Internal')
-                    ->rule(['boolean'])
-                    ->columnSpan('full'),
-                Select::make('status_id')
-                    ->label('Status')
-                    ->options(fn () => AdvisoryStatus::orderBy('classification')
-                        ->orderBy('name')
-                        ->get(['id', 'name', 'classification'])
-                        ->groupBy(fn (AdvisoryStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')->map(
-                            fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
-                        )))
-                    ->exists((new AdvisoryStatus())->getTable(), 'id')
-                    ->default($this->getOwnerRecord()->status->getKey()),
-            ]);
+        return [
+            static::getRouteName(),
+            AdvisoryUpdateResource::getRouteBaseName() . '.*',
+        ];
     }
 
-    public function table(Table $table): Table
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
     {
-        assert($this->getOwnerRecord() instanceof Advisory);
+        $resource = static::getResource();
+        /** @var Advisory $record */
+        $record = $this->getRecord();
 
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make('update')
-                    ->label('Update')
-                    ->words(6),
-                IconColumn::make('internal')
-                    ->boolean(),
-                TextColumn::make('created_at')
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at', 'desc')
-            ->headerActions([
-                CreateAction::make()
-                    ->visible($this->getOwnerRecord()->status->classification === SystemAdvisoryStatusClassification::Resolved ? false : true)
-                    ->after(function (array $data, AdvisoryUpdate $advisoryUpdate) {
-                        $advisoryUpdate->advisory->update(['status_id' => $data['status_id']]);
-                    }),
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->url(fn (AdvisoryUpdate $advisoryUpdate) => AdvisoryUpdateResource::getUrl('view', ['record' => $advisoryUpdate])),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                ]),
-            ]);
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->title, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
+    }
+
+    public static function canAccess(array $arguments = []): bool
+    {
+        return (bool) count(static::managers($arguments['record'] ?? null));
+    }
+
+    /**
+     * @return array<string>
+     */
+    public function getRelationManagers(): array
+    {
+        return static::managers($this->getRecord());
+    }
+
+    /**
+     * @return array<string>
+     */
+    private static function managers(?Model $record = null): array
+    {
+        return collect([
+            AdvisoryUpdatesRelationManager::class,
+        ])
+            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
+            ->toArray();
     }
 }

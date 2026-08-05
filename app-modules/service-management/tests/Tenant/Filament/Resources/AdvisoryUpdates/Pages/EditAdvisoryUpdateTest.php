@@ -65,6 +65,7 @@ test('A successful action on the EditAdvisoryUpdate page', function () {
         ->get(
             AdvisoryUpdateResource::getUrl('edit', [
                 'record' => $advisoryUpdate->getRouteKey(),
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )
         ->assertSuccessful();
@@ -73,15 +74,13 @@ test('A successful action on the EditAdvisoryUpdate page', function () {
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(AdvisoryUpdate::class, $request->except('advisory_id')->toArray());
-
-    expect(AdvisoryUpdate::first()->advisory->getKey())
-        ->toEqual($request->get('advisory_id'));
+    assertDatabaseHas(AdvisoryUpdate::class, $request->toArray());
 });
 
 test('EditAdvisoryUpdate requires valid data', function ($data, $errors) {
@@ -99,6 +98,7 @@ test('EditAdvisoryUpdate requires valid data', function ($data, $errors) {
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->fillForm(EditAdvisoryUpdateRequestFactory::new($data)->create())
         ->call('save')
@@ -107,13 +107,8 @@ test('EditAdvisoryUpdate requires valid data', function ($data, $errors) {
     unset($advisoryUpdate->advisory);
 
     assertDatabaseHas(AdvisoryUpdate::class, $advisoryUpdate->toArray());
-
-    expect(AdvisoryUpdate::first()->advisory->getKey())
-        ->toEqual($advisoryUpdate->advisory->getKey());
 })->with(
     [
-        'advisory missing' => [EditAdvisoryUpdateRequestFactory::new()->state(['advisory_id' => null]), ['advisory_id' => 'required']],
-        'advisory not existing advisory_id id' => [EditAdvisoryUpdateRequestFactory::new()->state(['advisory_id' => fake()->uuid()]), ['advisory_id' => 'in']],
         'update missing' => [EditAdvisoryUpdateRequestFactory::new()->state(['update' => null]), ['update' => 'required']],
         'update is not a string' => [EditAdvisoryUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [EditAdvisoryUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],
@@ -139,14 +134,18 @@ test('EditAdvisoryUpdate is gated with proper access control', function () {
         ->get(
             AdvisoryUpdateResource::getUrl('edit', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertForbidden();
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->assertForbidden();
 
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory_update.view-any');
     $user->givePermissionTo('advisory_update.*.update');
 
@@ -154,6 +153,7 @@ test('EditAdvisoryUpdate is gated with proper access control', function () {
         ->get(
             AdvisoryUpdateResource::getUrl('edit', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertSuccessful();
 
@@ -161,15 +161,13 @@ test('EditAdvisoryUpdate is gated with proper access control', function () {
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->fillForm($request->toArray())
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(AdvisoryUpdate::class, $request->except('advisory_id')->toArray());
-
-    expect(AdvisoryUpdate::first()->advisory->getKey())
-        ->toEqual($request->get('advisory_id'));
+    assertDatabaseHas(AdvisoryUpdate::class, $request->toArray());
 });
 
 test('EditAdvisoryUpdate is gated with proper feature access control', function () {
@@ -181,6 +179,8 @@ test('EditAdvisoryUpdate is gated with proper feature access control', function 
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory_update.view-any');
     $user->givePermissionTo('advisory_update.*.update');
 
@@ -198,11 +198,13 @@ test('EditAdvisoryUpdate is gated with proper feature access control', function 
         ->get(
             AdvisoryUpdateResource::getUrl('edit', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertForbidden();
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->assertForbidden();
 
@@ -214,6 +216,7 @@ test('EditAdvisoryUpdate is gated with proper feature access control', function 
         ->get(
             AdvisoryUpdateResource::getUrl('edit', [
                 'record' => $advisoryUpdate,
+                'advisory' => $advisoryUpdate->advisory_id,
             ])
         )->assertSuccessful();
 
@@ -221,6 +224,7 @@ test('EditAdvisoryUpdate is gated with proper feature access control', function 
 
     livewire(EditAdvisoryUpdate::class, [
         'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
     ])
         ->fillForm($request->toArray())
         ->call('save')
