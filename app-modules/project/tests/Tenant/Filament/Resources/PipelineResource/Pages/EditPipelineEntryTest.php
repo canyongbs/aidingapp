@@ -257,6 +257,7 @@ it('clears related milestones, assets, and service requests when type is set to 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertSet('data.milestones_type', 'select')
         ->assertSet('data.assets_type', 'select')
@@ -423,7 +424,7 @@ it('sets assigned_to_type to user when entry has an assigned user', function () 
         ->assertSet('data.assigned_to_type', 'user');
 });
 
-it('sets assigned_to_type to null when entry has no assigned user', function () {
+it('sets assigned_to_type to none when entry has no assigned user', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();

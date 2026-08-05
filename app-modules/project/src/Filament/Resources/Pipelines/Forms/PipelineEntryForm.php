@@ -103,7 +103,6 @@ class PipelineEntryForm
                 ->afterStateUpdated(function (?string $state, Set $set) {
                     if ($state === 'none') {
                         $set('assigned_to_id', null);
-                        $set('assigned_to_type', null);
                     }
                 }),
             ModalTableSelect::make('assigned_to_id')
@@ -249,27 +248,5 @@ class PipelineEntryForm
             : '';
 
         return "({$serviceRequest->service_request_number}){$title}";
-    }
-
-    /**
-     * @param array<string, mixed> $data
-     *
-     * @return array<string, mixed>
-     */
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        if (($data['milestones_type'] ?? null) === 'none') {
-            $data['milestones'] = [];
-        }
-
-        if (($data['assets_type'] ?? null) === 'none') {
-            $data['assets'] = [];
-        }
-
-        if (($data['service_requests_type'] ?? null) === 'none') {
-            $data['serviceRequests'] = [];
-        }
-
-        return $data;
     }
 }

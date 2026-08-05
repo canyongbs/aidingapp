@@ -142,13 +142,13 @@ class ViewPipelineEntry extends Page
                     ->columns(2)
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Name')
+                            ->label('Task Name')
                             ->extraAttributes(['class' => 'break-words']),
                         TextEntry::make('pipelineStage.name')
                             ->label('Stage')
                             ->badge(),
                         TextEntry::make('description')
-                            ->label('Description')
+                            ->label('Task Description')
                             ->extraAttributes(['class' => 'break-words']),
                         TextEntry::make('due')
                             ->label('Due Date')

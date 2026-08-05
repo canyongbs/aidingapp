@@ -58,6 +58,7 @@ class ProjectPipelinesStageTable
                     ->sortable(),
                 TextColumn::make('classification'),
             ])
+            ->paginated([5])
             ->defaultSort('created_at');
     }
 }
