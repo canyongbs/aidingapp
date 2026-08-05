@@ -60,10 +60,6 @@ class ManageAssignmentAction
             ->visible(fn (): bool => $serviceRequest->priority?->type_id !== null
                 && auth()->user()->can('update', $serviceRequest))
             ->schema([
-                ServiceRequestStatusSelect::make($serviceRequest)
-                    ->label('Update Status')
-                    ->required()
-                    ->helperText('You may simultaneously update the status along with this change.'),
                 TextEntry::make('currentAssignment')
                     ->label('Current Assignment')
                     ->state(function () use ($serviceRequest): string {
@@ -79,6 +75,10 @@ class ManageAssignmentAction
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
+                ServiceRequestStatusSelect::make($serviceRequest)
+                    ->label('Update Status')
+                    ->required()
+                    ->helperText('You may simultaneously update the status along with this change.'),
             ])
             ->action(function (array $data, Component $livewire) use ($serviceRequest): void {
                 $serviceRequestTypeId = $serviceRequest->priority?->type_id;
