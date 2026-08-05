@@ -32,207 +32,157 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Article from '@common/portal/category/Article.vue';
+    import SubCategories from '@common/portal/category/SubCategories.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
+    import HeroSearch from '@common/portal/HeroSearch.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
+    import Pagination from '@common/portal/Pagination.vue';
+    import SearchResults from '@common/portal/SearchResults.vue';
+    import Subheading from '@common/portal/Subheading.vue';
+    import Tabs from '@common/portal/Tabs.vue';
     import { DocumentTextIcon } from '@heroicons/vue/24/outline';
-    import { computed, defineProps, ref, watch } from 'vue';
+    import { useQuery } from '@pinia/colada';
+    import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import AppLoading from '../Components/AppLoading.vue';
-    import Article from '../Components/Article.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import HeroSearch from '../Components/HeroSearch.vue';
-    import Page from '../Components/Page.vue';
-    import Pagination from '../Components/Pagination.vue';
-    import SearchResults from '../Components/SearchResults.vue';
-    import SubCategories from '../Components/SubCategories.vue';
-    import Subheading from '../Components/Subheading.vue';
-    import Tabs from '../Components/Tabs.vue';
-    import { consumer } from '../Services/Consumer.js';
+    import { searchFilterTabs, useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { apiGet } from '../Services/api.js';
+    import { useCategoryData, useTagsData } from './loaders.js';
 
     const route = useRoute();
     const router = useRouter();
 
-    const props = defineProps({
-        searchUrl: {
-            type: String,
-            required: true,
-        },
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-        categories: {
-            type: Object,
-            required: true,
-        },
-        tags: {
-            type: Object,
-            required: true,
-        },
-    });
+    const { data: categoryResponse } = useCategoryData();
+    const { data: tags } = useTagsData();
 
-    const loadingResults = ref(true);
-    const loadingeSearchResults = ref(true);
-    const category = ref(null);
-    const articles = ref(null);
-    const searchQuery = ref('');
-    const searchResults = ref(null);
-    const selectedTags = ref([]);
-    const currentPage = ref(1);
-    const nextPageUrl = ref(null);
-    const prevPageUrl = ref(null);
-    const lastPage = ref(null);
-    const totalArticles = ref(0);
-    const fromArticle = ref(0);
-    const toArticle = ref(0);
-    const filter = ref('');
-    const fromSearch = ref(false);
+    const category = computed(() => categoryResponse.value?.category ?? null);
 
-    const filterTabs = [
-        { label: 'All Articles', value: 'all-articles' },
-        { label: 'Featured', value: 'featured' },
-        { label: 'Most Viewed', value: 'most-viewed' },
-    ];
-
-    const debounceSearch = debounce((value, page = 1) => {
-        const { post } = consumer();
-
-        fromSearch.value = true;
-
-        if (!value && selectedTags.value.length < 1) {
-            searchQuery.value = null;
-            searchResults.value = null;
-            return;
-        }
-
-        loadingeSearchResults.value = true;
-
-        post(props.searchUrl, {
-            search: JSON.stringify(value),
-            tags: selectedTags.value.join(','),
-            filter: filter.value,
-            page: page,
-        }).then((response) => {
-            searchResults.value = response.data;
-            loadingeSearchResults.value = false;
-            setPagination(response.data.data.articles.meta);
-        });
-    }, 500);
-
-    const setPagination = (pagination) => {
-        currentPage.value = pagination.current_page;
-        prevPageUrl.value = pagination.prev_page_url;
-        nextPageUrl.value = pagination.next_page_url;
-        lastPage.value = pagination.last_page;
-        totalArticles.value = pagination.total;
-        fromArticle.value = pagination.from;
-        toArticle.value = pagination.to;
-    };
-
+    // Redirects to the canonical slug(s) returned by the API (e.g. if the URL slug
+    // casing doesn't exactly match), preserving the current route's shape.
     watch(
-        () => [searchQuery.value, [...selectedTags.value]],
-        ([newSearch, newTags]) => {
-            const urlSearch = route.query.search || '';
-            const urlTags = route.query.tags ? route.query.tags.split(',') : [];
+        category,
+        (categoryValue) => {
+            if (!categoryValue) return;
 
-            const isSearchChanged = newSearch !== urlSearch;
-            const isTagsChanged = newTags.length !== urlTags.length || newTags.some((tag, i) => tag !== urlTags[i]);
-
-            if (isSearchChanged || isTagsChanged) {
-                fromSearch.value = !!(newSearch || newTags.length);
-
-                router.push({
-                    name: route.name,
-                    params: route.params,
-                    query: {
-                        ...route.query,
-                        page: 1,
-                        search: newSearch || undefined,
-                        tags: newTags.join(',') || undefined,
-                        filter: filter.value || undefined,
+            if (route.params.parentCategorySlug) {
+                router.replace({
+                    name: 'view-subcategory',
+                    params: {
+                        parentCategorySlug: categoryValue.parentCategory.slug,
+                        categorySlug: categoryValue.slug,
                     },
+                    query: { ...route.query },
                 });
-
-                debounceSearch(newSearch, 1);
+            } else {
+                router.replace({
+                    name: 'view-category',
+                    params: { categorySlug: categoryValue.slug },
+                    query: { ...route.query },
+                });
             }
         },
-        { immediate: false },
+        { immediate: true },
     );
 
-    function debounce(func, delay) {
-        let timerId;
-        return function (...args) {
-            if (timerId) {
-                clearTimeout(timerId);
+    const {
+        searchQuery,
+        selectedTags,
+        filter: searchFilter,
+        loadingResults: loadingSearchResults,
+        globalSearchInput,
+        isSearchActive,
+        toggleTag,
+        changeSearchFilter,
+        searchResultArticles,
+        searchResultCategories,
+        currentPage: searchCurrentPage,
+        lastPage: searchLastPage,
+        totalArticles,
+        fromArticle,
+        toArticle,
+        fetchNextPage: fetchNextSearchPage,
+        fetchPreviousPage: fetchPreviousSearchPage,
+        fetchPage: fetchSearchPage,
+    } = useKnowledgeManagementSearch();
+
+    const subCategoriesWithRoutes = computed(() =>
+        (category.value?.subCategories ?? []).map((subCategory) => ({
+            ...subCategory,
+            key: subCategory.slug,
+            to: { name: 'view-category', params: { categorySlug: subCategory.slug } },
+        })),
+    );
+
+    // Tab filter for browsing a category's own articles. Page 1 of every filter tab
+    // arrives together via the route data loader; any other page is fetched client-side.
+    const activeFilter = computed(() => route.query.filter || 'all-articles');
+    const currentPage = computed(() => parseInt(route.query.page) || 1);
+
+    const pageQuery = useQuery({
+        key: () => [
+            'knowledge-management',
+            'category-articles',
+            String(route.params.categorySlug),
+            activeFilter.value,
+            currentPage.value,
+        ],
+        query: () =>
+            apiGet(`/categories/${route.params.categorySlug}`, { filter: activeFilter.value, page: currentPage.value }),
+        enabled: () => currentPage.value > 1,
+    });
+
+    function firstPageFor(filter) {
+        const key =
+            filter === 'featured'
+                ? 'featured_articles'
+                : filter === 'most-viewed'
+                  ? 'most_viewed_articles'
+                  : 'all_articles';
+
+        return categoryResponse.value?.[key] ?? null;
+    }
+
+    const currentArticles = computed(() =>
+        currentPage.value > 1 ? (pageQuery.data.value?.articles ?? null) : firstPageFor(activeFilter.value),
+    );
+
+    // Keep the previously rendered page visible while a new page/filter loads so
+    // content never disappears mid-pagination.
+    const shownArticles = ref(null);
+    watch(
+        currentArticles,
+        (articles) => {
+            if (articles) {
+                shownArticles.value = articles;
             }
-            timerId = setTimeout(() => {
-                func(...args);
-            }, delay);
-        };
-    }
+        },
+        { immediate: true },
+    );
 
-    function toggleTag(tag) {
-        if (selectedTags.value.includes(tag)) {
-            selectedTags.value = selectedTags.value.filter((t) => t !== tag);
-        } else {
-            selectedTags.value = [...selectedTags.value, tag];
-        }
-    }
+    const loadingArticles = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
+    const loadingPage = computed(() => (loadingArticles.value ? currentPage.value : null));
 
-    const fetchNextPage = () => {
-        if (currentPage.value < lastPage.value) {
-            const newPage = currentPage.value + 1;
-            fetchPage(newPage);
-        }
-    };
+    const articlesWithRoutes = computed(() =>
+        (shownArticles.value?.data ?? []).map((article) => ({
+            ...article,
+            key: article.id,
+            to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
+        })),
+    );
 
-    const fetchPreviousPage = () => {
-        if (currentPage.value > 1) {
-            const newPage = currentPage.value - 1;
-            fetchPage(newPage);
-        }
-    };
-
-    const fetchPage = (page) => {
-        if (page === currentPage.value) return;
-
-        router.push({
-            name: route.name,
-            params: route.params,
-            query: {
-                ...route.query,
-                page,
-                search: searchQuery.value || undefined,
-                tags: selectedTags.value.join(',') || undefined,
-                filter: filter.value || undefined,
-            },
-        });
-    };
-
-    const changeFilter = (value) => {
-        filter.value = value;
-
-        filterRouteChange();
-    };
-
-    const changeSearchFilter = (value) => {
-        filter.value = value;
-        filterRouteChange();
-        debounceSearch(searchQuery.value);
-    };
-
-    const filterRouteChange = () => {
-        router.push({
-            name: route.name,
-            params: route.params,
-            query: {
-                ...route.query,
-                page: 1,
-                filter: filter.value,
-            },
-        });
-    };
+    const articlePagination = computed(() => ({
+        currentPage: shownArticles.value?.current_page ?? 1,
+        lastPage: shownArticles.value?.last_page ?? 1,
+        total: shownArticles.value?.total ?? 0,
+        from: shownArticles.value?.from ?? 0,
+        to: shownArticles.value?.to ?? 0,
+    }));
 
     const breadcrumbs = computed(() => {
-        if (category.value.parentCategory) {
+        if (category.value?.parentCategory) {
             return [
                 {
                     name: category.value.parentCategory.name,
@@ -245,64 +195,40 @@
         return [];
     });
 
-    watch(
-        route,
-        async (newRoute) => {
-            const page = parseInt(newRoute.query.page) || 1;
-            const search = newRoute.query.search || '';
-            const tags = newRoute.query.tags ? newRoute.query.tags.split(',') : [];
-            const appliedFilter = newRoute.query.filter || '';
-            const isSearchMode = !!search || tags.length > 0;
+    function pushArticlesQuery(page, filter) {
+        router.push({
+            name: route.name,
+            params: route.params,
+            query: {
+                ...route.query,
+                page,
+                filter: filter === 'all-articles' ? undefined : filter,
+            },
+        });
+    }
 
-            currentPage.value = page;
-            searchQuery.value = search;
+    function changeFilter(value) {
+        pushArticlesQuery(1, value);
+    }
 
-            selectedTags.value.splice(0, selectedTags.value.length, ...tags);
-
-            filter.value = appliedFilter;
-            fromSearch.value = isSearchMode;
-            await getData(page);
-        },
-        { immediate: true },
-    );
-
-    async function getData(page = 1) {
-        if (fromSearch.value) {
-            loadingResults.value = false;
-            debounceSearch(searchQuery.value, page);
+    function goToPage(page) {
+        if (page === articlePagination.value.currentPage || loadingArticles.value) {
             return;
         }
 
-        loadingResults.value = true;
+        pushArticlesQuery(page, activeFilter.value);
+    }
 
-        const { get } = consumer();
+    function fetchNextPage() {
+        if (articlePagination.value.currentPage < articlePagination.value.lastPage) {
+            goToPage(articlePagination.value.currentPage + 1);
+        }
+    }
 
-        await get(props.apiUrl + '/categories/' + route.params.categorySlug, {
-            page: page,
-            filter: filter.value,
-        }).then((response) => {
-            if (route.params.categorySlug && route.params.parentCategorySlug) {
-                router.replace({
-                    name: 'view-subcategory',
-                    params: {
-                        parentCategorySlug: response.data.category.parentCategory.slug,
-                        categorySlug: response.data.category.slug,
-                    },
-                    query: { ...route.query },
-                });
-            } else if (route.params.categorySlug) {
-                router.replace({
-                    name: 'view-category',
-                    params: { categorySlug: response.data.category.slug },
-                    query: { ...route.query },
-                });
-            }
-
-            category.value = response.data.category;
-            articles.value = response.data.articles.data;
-            setPagination(response.data.articles);
-            loadingResults.value = false;
-        });
+    function fetchPreviousPage() {
+        if (articlePagination.value.currentPage > 1) {
+            goToPage(articlePagination.value.currentPage - 1);
+        }
     }
 </script>
 
@@ -313,37 +239,47 @@
         <template #description> Search our knowledge base for advice and answers </template>
 
         <template #belowHeaderContent>
-            <HeroSearch v-model="searchQuery" :tags="tags" :selectedTags="selectedTags" @toggle-tag="toggleTag" />
-        </template>
-
-        <template #breadcrumbs>
-            <Breadcrumbs
-                :currentCrumb="category.name"
-                :breadcrumbs="breadcrumbs"
-                v-if="!loadingResults && !(searchQuery || selectedTags.length > 0)"
+            <HeroSearch
+                ref="globalSearchInput"
+                v-model="searchQuery"
+                :tags="tags ?? {}"
+                :selectedTags="selectedTags"
+                @toggle-tag="toggleTag"
             />
         </template>
 
-        <div v-if="loadingResults">
-            <AppLoading />
-        </div>
+        <template #breadcrumbs>
+            <Breadcrumbs v-if="category && !isSearchActive" :currentCrumb="category.name" :breadcrumbs="breadcrumbs" />
+        </template>
+
+        <PageCard v-if="!category">
+            <EmptyState>
+                <template #heading>Category Not Found</template>
+                <template #description>The category you are looking for does not exist or has been removed.</template>
+                <template #actions>
+                    <BaseButton :to="{ name: 'home' }" variant="outline"> Return to Home </BaseButton>
+                </template>
+            </EmptyState>
+        </PageCard>
         <div v-else>
             <main class="flex flex-col gap-8">
-                <div v-if="searchQuery || selectedTags.length > 0" class="flex flex-col gap-6">
+                <div v-if="isSearchActive" class="flex flex-col gap-6">
                     <SearchResults
                         :searchQuery="searchQuery"
-                        :searchResults="searchResults"
-                        :loadingResults="loadingeSearchResults"
+                        :articles="searchResultArticles"
+                        :categories="searchResultCategories"
+                        :loadingResults="loadingSearchResults"
+                        :filter-tabs="searchFilterTabs"
                         @change-filter="changeSearchFilter"
-                        :selected-filter="filter"
-                        :currentPage="currentPage"
-                        :lastPage="lastPage"
+                        :selected-filter="searchFilter"
+                        :currentPage="searchCurrentPage"
+                        :lastPage="searchLastPage"
                         :fromItem="fromArticle"
                         :toItem="toArticle"
                         :totalItems="totalArticles"
-                        @fetchNextPage="fetchNextPage"
-                        @fetchPreviousPage="fetchPreviousPage"
-                        @fetchPage="fetchPage"
+                        @fetchNextPage="fetchNextSearchPage"
+                        @fetchPreviousPage="fetchPreviousSearchPage"
+                        @fetchPage="fetchSearchPage"
                     >
                     </SearchResults>
                 </div>
@@ -355,31 +291,37 @@
                         </div>
                         <SubCategories
                             v-if="category.subCategories.length > 0"
-                            :subCategories="category.subCategories"
+                            :subCategories="subCategoriesWithRoutes"
                         ></SubCategories>
                         <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
-                                :tabs="filterTabs"
-                                :modelValue="filter || 'all-articles'"
+                                :tabs="searchFilterTabs"
+                                :modelValue="activeFilter"
                                 @update:modelValue="changeFilter"
                                 :contained="true"
                             />
 
-                            <div v-if="articles.length > 0">
+                            <div v-if="articlesWithRoutes.length > 0">
                                 <ul role="list" class="divide-y">
-                                    <li v-for="article in articles" :key="article.id">
-                                        <Article :article="article" />
+                                    <li v-for="article in articlesWithRoutes" :key="article.key">
+                                        <Article
+                                            :to="article.to"
+                                            :name="article.name"
+                                            :tags="article.tags"
+                                            :featured="article.featured"
+                                        />
                                     </li>
                                 </ul>
                                 <Pagination
-                                    :currentPage="currentPage"
-                                    :lastPage="lastPage"
-                                    :fromItem="fromArticle"
-                                    :toItem="toArticle"
-                                    :totalItems="totalArticles"
+                                    :currentPage="articlePagination.currentPage"
+                                    :lastPage="articlePagination.lastPage"
+                                    :fromItem="articlePagination.from"
+                                    :toItem="articlePagination.to"
+                                    :totalItems="articlePagination.total"
+                                    :loadingPage="loadingPage"
                                     @fetchNextPage="fetchNextPage"
                                     @fetchPreviousPage="fetchPreviousPage"
-                                    @fetchPage="fetchPage"
+                                    @fetchPage="goToPage"
                                 />
                             </div>
                             <section v-else class="px-6 py-4 flex items-start gap-x-4">
