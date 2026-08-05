@@ -42,8 +42,7 @@ class ServiceMonitoringTargetObserver
 {
     public function creating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        // Pre-existing records confidentialized later will have no creator set; access relies solely on confidential grants
-        if (is_null($serviceMonitoringTarget->createdBy)) {
+        if (blank($serviceMonitoringTarget->getAttribute('created_by_id')) && auth()->check()) {
             $serviceMonitoringTarget->createdBy()->associate(auth()->user());
         }
     }
