@@ -45,8 +45,8 @@
             required: true,
         },
         status: {
-            type: String,
-            validator: (value) => [null, true, false].includes(value),
+            type: Boolean,
+            required: true,
         },
     });
 </script>

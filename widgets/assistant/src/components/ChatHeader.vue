@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseBadge from '@common/BaseBadge.vue';
     import { TicketIcon } from '@heroicons/vue/16/solid';
     import { ArrowLeftIcon, ChatBubbleLeftRightIcon, XMarkIcon } from '@heroicons/vue/24/outline';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
 
     const props = defineProps({
         serviceRequestEnabled: { type: Boolean, default: false },

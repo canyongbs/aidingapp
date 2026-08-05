@@ -32,14 +32,31 @@
 </COPYRIGHT>
 */
 import { defaultConfig, plugin } from '@formkit/vue';
+import { PiniaColada } from '@pinia/colada';
 import { createPinia } from 'pinia';
 import PrimeVue from 'primevue/config';
 import { createApp, defineCustomElement, getCurrentInstance, h } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHistory, RouterView } from 'vue-router';
+import { DataLoaderPlugin } from 'vue-router/experimental';
 import VueSignaturePad from 'vue-signature-pad';
 import { codeBlocksDirective } from '../../../resources/js/utils/enhanceCodeBlocks.js';
 import App from './App.vue';
+import { bootPortal } from './Composables/usePortalBoot.js';
 import config from './formkit.config.js';
+import {
+    useAdvisoriesData,
+    useArticleData,
+    useAssetsData,
+    useCategoriesData,
+    useCategoryData,
+    useCreateServiceRequestData,
+    useLicensesData,
+    useServiceMonitorData,
+    useServiceRequestData,
+    useServiceRequestsData,
+    useServiceRequestTypesData,
+    useTagsData,
+} from './Pages/loaders.js';
 import './portal.css';
 import getAppContext from './Services/GetAppContext.js';
 
@@ -51,6 +68,7 @@ customElements.define(
             const pinia = createPinia();
 
             app.use(pinia);
+            app.use(PiniaColada);
             app.use(VueSignaturePad);
             app.use(PrimeVue, {
                 theme: 'none',
@@ -60,72 +78,133 @@ customElements.define(
 
             const router = createRouter({
                 history: createWebHistory(),
+                scrollBehavior(to, from, savedPosition) {
+                    // Restore the previous position on back/forward navigation.
+                    if (savedPosition) {
+                        return savedPosition;
+                    }
+
+                    // Same page, only the query changed (pagination / tab switches) — leave
+                    // the scroll position where it is.
+                    if (to.path === from.path) {
+                        return false;
+                    }
+
+                    // Visiting a new page — start at the top.
+                    return { top: 0 };
+                },
                 routes: [
                     {
                         path: baseUrl + '/',
                         name: 'home',
                         component: () => import('./Pages/Home.vue'),
+                        meta: {
+                            loaders: [useCategoriesData, useTagsData],
+                        },
                     },
                     {
                         path: baseUrl + '/categories/:categorySlug',
                         name: 'view-category',
                         component: () => import('./Pages/ViewCategory.vue'),
+                        meta: {
+                            loaders: [useCategoryData, useTagsData],
+                        },
                     },
                     {
                         path: baseUrl + '/categories/:parentCategorySlug/:categorySlug',
                         name: 'view-subcategory',
                         component: () => import('./Pages/ViewCategory.vue'),
+                        meta: {
+                            loaders: [useCategoryData, useTagsData],
+                        },
                     },
                     {
                         path: baseUrl + '/categories/:categorySlug/articles/:articleId',
                         name: 'view-article',
                         component: () => import('./Pages/ViewArticle.vue'),
-                    },
-                    {
-                        path: baseUrl + '/service-request-type/select/:categoryId?',
-                        name: 'create-service-request',
-                        component: () => import('./Pages/SelectServiceRequestType.vue'),
-                        meta: { requiresAuth: true },
-                    },
-                    {
-                        path: baseUrl + '/service-request/create/:typeId',
-                        name: 'create-service-request-from-type',
-                        component: () => import('./Pages/CreateServiceRequest.vue'),
-                        meta: { requiresAuth: true },
-                    },
-                    {
-                        path: baseUrl + '/service-request/:serviceRequestId',
-                        name: 'view-service-request',
-                        component: () => import('./Pages/ViewServiceRequest.vue'),
-                        meta: { requiresAuth: true },
+                        meta: {
+                            loaders: [useArticleData],
+                        },
                     },
                     {
                         path: baseUrl + '/service',
-                        name: 'service',
-                        component: () => import('./Pages/Service.vue'),
-                        meta: { requiresAuth: true },
+                        name: 'service-parent',
+                        redirect: { name: 'service' },
+                        component: { render: () => h(RouterView) },
+                        children: [
+                            {
+                                path: '',
+                                name: 'service',
+                                component: () => import('./Pages/Service.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestsData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request-type/select/:categoryId?',
+                                name: 'create-service-request',
+                                component: () => import('./Pages/SelectServiceRequestType.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestTypesData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request/create/:typeId',
+                                name: 'create-service-request-from-type',
+                                component: () => import('./Pages/CreateServiceRequest.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useCreateServiceRequestData],
+                                },
+                            },
+                            {
+                                path: baseUrl + '/service-request/:serviceRequestId',
+                                name: 'view-service-request',
+                                component: () => import('./Pages/ViewServiceRequest.vue'),
+                                meta: {
+                                    requiresAuth: true,
+                                    loaders: [useServiceRequestData],
+                                },
+                            },
+                        ],
                     },
                     {
                         path: baseUrl + '/status',
                         name: 'status',
                         component: () => import('./Pages/ServiceMonitorStatus.vue'),
-                        meta: { requiresAuth: true },
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useServiceMonitorData],
+                        },
                     },
                     {
                         path: baseUrl + '/advisories',
                         name: 'advisories',
                         component: () => import('./Pages/Advisories.vue'),
-                        meta: { requiresAuth: true },
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useAdvisoriesData],
+                        },
                     },
                     {
                         path: baseUrl + '/assets',
                         name: 'assets',
                         component: () => import('./Pages/Assets.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useAssetsData],
+                        },
                     },
                     {
                         path: baseUrl + '/licenses',
                         name: 'licenses',
                         component: () => import('./Pages/Licenses.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useLicensesData],
+                        },
                     },
                     {
                         path: baseUrl + '/projects',
@@ -135,11 +214,15 @@ customElements.define(
                 ],
             });
 
+            // Gate navigation on portal boot so data loaders run with a resolved API and auth state.
+            const configReady = bootPortal(props, pinia);
+            router.beforeEach(() => configReady);
+
+            app.use(DataLoaderPlugin, { router });
             app.use(router);
 
             app.config.devtools = true;
 
-            // FormKit plugin
             app.use(plugin, defaultConfig(config));
 
             app.directive('code-blocks', codeBlocksDirective);
@@ -150,6 +233,16 @@ customElements.define(
 
             return () => h(App, props);
         },
-        props: ['url', 'userAuthenticationUrl', 'accessUrl', 'searchUrl', 'appUrl', 'apiUrl', 'tags'],
+        props: [
+            'url',
+            'userAuthenticationUrl',
+            'accessUrl',
+            'searchUrl',
+            'appUrl',
+            'apiUrl',
+            'appTitle',
+            'cssUrl',
+            'tags',
+        ],
     }),
 );

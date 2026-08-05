@@ -31,8 +31,8 @@
 
 </COPYRIGHT>
 */
+import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
 import { createInput } from '@formkit/vue';
-import OneTimePassword from './OneTimePassword.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 

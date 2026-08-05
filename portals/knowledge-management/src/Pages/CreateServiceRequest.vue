@@ -32,20 +32,21 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import Page from '@common/portal/Page.vue';
+    import PageCard from '@common/portal/PageCard.vue';
     import { createMessage, getNode } from '@formkit/core';
     import { FormKitSchema } from '@formkit/vue';
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
-    import { computed, defineProps, nextTick, onMounted, reactive, ref, watch } from 'vue';
+    import { storeToRefs } from 'pinia';
+    import { computed, nextTick, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import AppLoading from '../Components/AppLoading.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import Page from '../Components/Page.vue';
-    import PageCard from '../Components/PageCard.vue';
     import wizard from '../FormKit/wizard.js';
-    import { consumer } from '../Services/Consumer.js';
+    import { apiPost } from '../Services/api.js';
     import { useAuthStore } from '../Stores/auth.js';
+    import { useCreateServiceRequestData } from './loaders.js';
 
     marked.setOptions({
         breaks: true,
@@ -66,15 +67,13 @@
 
     const route = useRoute();
 
-    const props = defineProps({
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-    });
+    // The authenticated contact is resolved during portal boot, so it is available
+    // synchronously here.
+    const { user } = storeToRefs(useAuthStore());
 
-    const loadingResults = ref(true);
-    const user = ref(null);
+    // The form schema for the selected type arrives via the route data loader.
+    const { data: initialData } = useCreateServiceRequestData();
+
     const schema = ref([]);
     const submittedSuccess = ref(false);
     const wasAiResolved = ref(false);
@@ -89,13 +88,18 @@
     const preloadedResolutionPromise = ref(null);
 
     watch(
-        route,
-        function (newRouteValue) {
-            getData();
+        initialData,
+        (response) => {
+            if (!response) {
+                return;
+            }
+
+            schema.value = response.schema;
+
+            categoryData.value = response.category || null;
+            numberOfClarifyingQuestions.value = response.number_of_clarifying_questions ?? 1;
         },
-        {
-            immediate: true,
-        },
+        { immediate: true },
     );
 
     watch(activeStep, async function (newStep) {
@@ -106,11 +110,6 @@
         await checkAndGenerateQuestions(newStep);
     });
 
-    onMounted(function () {
-        getData();
-    });
-
-    // Computed property to build breadcrumbs from category data
     const categoryBreadcrumbs = computed(() => {
         if (!categoryData.value) return [];
 
@@ -136,30 +135,6 @@
 
         return breadcrumbs;
     });
-
-    async function getData() {
-        loadingResults.value = true;
-
-        const { getUser } = useAuthStore();
-
-        await getUser().then((authUser) => {
-            user.value = authUser;
-        });
-
-        const { get } = consumer();
-
-        const categoryQuery = route.query.category ? '?category=' + route.query.category : '';
-
-        get(props.apiUrl + '/service-request/create/' + route.params.typeId + categoryQuery).then((response) => {
-            loadingResults.value = false;
-
-            schema.value = response.data.schema;
-
-            // Set category data from API response
-            categoryData.value = response.data.category || null;
-            numberOfClarifyingQuestions.value = response.data.number_of_clarifying_questions ?? 1;
-        });
-    }
 
     const data = reactive({
         steps,
@@ -262,8 +237,6 @@
                 }
             }
 
-            const { post } = consumer();
-
             const submitData = { ...formData };
 
             if (aiResolutionAttempted.value) {
@@ -271,7 +244,7 @@
                 submitData.ai_resolution_confidence_score = aiResolutionAttempted.value.confidenceScore;
             }
 
-            post(props.apiUrl + '/service-request/create/' + route.params.typeId, submitData)
+            apiPost('/service-request/create/' + route.params.typeId, submitData)
                 .then((response) => {
                     submittedSuccess.value = true;
                 })
@@ -283,12 +256,11 @@
 
     async function preloadAiResolution() {
         try {
-            const { post } = consumer();
             const formNode = getNode('form');
             const formData = formNode ? formNode.value : {};
 
-            const response = await post(
-                props.apiUrl + '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
+            const response = await apiPost(
+                '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
                 { formData },
             );
 
@@ -310,27 +282,25 @@
             }
 
             if (!response) {
-                const { post } = consumer();
                 const formNode = getNode('form');
                 const formData = formNode ? formNode.value : {};
 
-                response = await post(
-                    props.apiUrl + '/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution',
-                    { formData },
-                );
+                response = await apiPost('/service-request/create/' + route.params.typeId + '/evaluate-ai-resolution', {
+                    formData,
+                });
             }
 
-            if (response.data.confidence_score !== undefined) {
+            if (response.confidence_score !== undefined) {
                 aiResolutionAttempted.value = {
-                    confidenceScore: response.data.confidence_score,
+                    confidenceScore: response.confidence_score,
                 };
             }
 
-            if (response.data.is_ai_resolution_available) {
+            if (response.is_ai_resolution_available) {
                 aiResolutionData.value = {
-                    confidenceScore: response.data.confidence_score,
-                    proposedAnswer: response.data.proposed_answer,
-                    encryptedProposedAnswer: response.data.encrypted_proposed_answer,
+                    confidenceScore: response.confidence_score,
+                    proposedAnswer: response.proposed_answer,
+                    encryptedProposedAnswer: response.encrypted_proposed_answer,
                 };
                 showAiResolutionStep.value = true;
                 return true;
@@ -346,12 +316,11 @@
     }
 
     async function handleAiResolutionAccepted() {
-        const { post } = consumer();
         const formNode = getNode('form');
         const formData = formNode ? formNode.value : {};
 
         try {
-            await post(props.apiUrl + '/service-request/create/' + route.params.typeId, {
+            await apiPost('/service-request/create/' + route.params.typeId, {
                 ...formData,
                 is_ai_resolution_attempted: true,
                 is_ai_resolution_successful: true,
@@ -369,12 +338,11 @@
     async function handleAiResolutionDeclined() {
         showAiResolutionStep.value = false;
 
-        const { post } = consumer();
         const formNode = getNode('form');
         const formData = formNode ? formNode.value : {};
 
         try {
-            await post(props.apiUrl + '/service-request/create/' + route.params.typeId, {
+            await apiPost('/service-request/create/' + route.params.typeId, {
                 ...formData,
                 is_ai_resolution_attempted: true,
                 is_ai_resolution_successful: false,
@@ -451,17 +419,16 @@
             preloadedResolutionPromise.value = preloadAiResolution();
 
             try {
-                const { post } = consumer();
                 const formNode = getNode('form');
                 const formData = formNode ? formNode.value : {};
 
-                const response = await post(
-                    props.apiUrl + '/service-request/create/' + route.params.typeId + '/generate-questions',
+                const response = await apiPost(
+                    '/service-request/create/' + route.params.typeId + '/generate-questions',
                     { step: stepName, formData },
                 );
 
-                if (response.data.fields && response.data.fields.length > 0) {
-                    stepSchema.children = response.data.fields;
+                if (response.fields && response.fields.length > 0) {
+                    stepSchema.children = response.fields;
                     hasGeneratedQuestions.value = true;
                 }
             } finally {
@@ -472,122 +439,107 @@
 </script>
 
 <template>
-    <div>
-        <div v-if="loadingResults">
-            <AppLoading />
-        </div>
-        <div v-else>
-            <Page :has-new-request-button="false">
-                <template #heading> Help Center </template>
+    <Page :has-new-request-button="false">
+        <template #heading> Help Center </template>
 
-                <template #description>
-                    <p>Welcome {{ user.first_name }}!</p>
-                    <p>Please fill out the following information to submit your request.</p>
+        <template #description>
+            <p>Welcome {{ user?.first_name }}!</p>
+            <p>Please fill out the following information to submit your request.</p>
+        </template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs
+                currentCrumb="Submit Form"
+                :breadcrumbs="[
+                    { name: 'Help Center', route: 'home' },
+                    { name: 'New Request', route: 'create-service-request' },
+                    ...categoryBreadcrumbs,
+                ]"
+            />
+        </template>
+
+        <PageCard>
+            <main class="grid gap-4" v-if="submittedSuccess">
+                <template v-if="wasAiResolved">
+                    <p>Great! We're glad the AI was able to resolve your issue.</p>
+                    <p class="text-sm text-gray-600">
+                        A record of this interaction has been saved. If you need further assistance, feel free to submit
+                        a new request.
+                    </p>
+                </template>
+                <template v-else>
+                    <p>Thank you. Your request has been submitted.</p>
                 </template>
 
-                <template #breadcrumbs>
-                    <Breadcrumbs
-                        currentCrumb="Submit Form"
-                        :breadcrumbs="[
-                            { name: 'Help Center', route: 'home' },
-                            { name: 'New Request', route: 'create-service-request' },
-                            ...categoryBreadcrumbs,
-                        ]"
-                    />
-                </template>
+                <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
+                    Submit Another Request
+                </BaseButton>
+            </main>
 
-                <PageCard>
-                    <main class="grid gap-4" v-if="submittedSuccess">
-                        <template v-if="wasAiResolved">
-                            <p>Great! We're glad the AI was able to resolve your issue.</p>
-                            <p class="text-sm text-gray-600">
-                                A record of this interaction has been saved. If you need further assistance, feel free
-                                to submit a new request.
-                            </p>
-                        </template>
-                        <template v-else>
-                            <p>Thank you. Your request has been submitted.</p>
-                        </template>
+            <main class="grid gap-4" v-else>
+                <div v-if="isGeneratingQuestions || isEvaluatingAiResolution" class="flex items-center justify-center">
+                    <div role="status" aria-live="polite" class="pointer-events-auto flex items-center gap-3 px-4 py-2">
+                        <svg
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            xmlns="http://www.w3.org/2000/svg"
+                            class="animate-spin h-4 w-4 text-brand-600"
+                        >
+                            <path
+                                clip-rule="evenodd"
+                                d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
+                                fill-rule="evenodd"
+                                fill="currentColor"
+                                opacity="0.2"
+                            ></path>
+                            <path
+                                d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
+                                fill="currentColor"
+                            ></path>
+                        </svg>
 
-                        <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
-                            Submit Another Request
+                        <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
+                            >Generating {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
+                        >
+                        <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
+                    </div>
+                </div>
+
+                <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-xs">
+                    <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
+
+                    <p class="text-gray-600 mb-4">
+                        Our AI has considered your request and may be able to answer it immediately. Please review the
+                        potential answer below:
+                    </p>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <div
+                            class="prose prose-sm max-w-none text-gray-800"
+                            v-html="renderMarkdown(aiResolutionData?.proposedAnswer)"
+                        ></div>
+                    </div>
+
+                    <p class="text-gray-600 mb-6">
+                        Please tell us if this resolved your issue. If not, we will escalate this ticket to a support
+                        team member.
+                    </p>
+
+                    <div class="flex gap-3">
+                        <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
+                            Yes (Resolved)
                         </BaseButton>
-                    </main>
+                        <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined"> No </BaseButton>
+                    </div>
+                </div>
 
-                    <main class="grid gap-4" v-else>
-                        <div
-                            v-if="isGeneratingQuestions || isEvaluatingAiResolution"
-                            class="flex items-center justify-center"
-                        >
-                            <div
-                                role="status"
-                                aria-live="polite"
-                                class="pointer-events-auto flex items-center gap-3 px-4 py-2"
-                            >
-                                <svg
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="animate-spin h-4 w-4 text-brand-600"
-                                >
-                                    <path
-                                        clip-rule="evenodd"
-                                        d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                        fill-rule="evenodd"
-                                        fill="currentColor"
-                                        opacity="0.2"
-                                    ></path>
-                                    <path
-                                        d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                                        fill="currentColor"
-                                    ></path>
-                                </svg>
-
-                                <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
-                                    >Generating
-                                    {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
-                                >
-                                <span v-else class="text-sm text-gray-700">Evaluating your request…</span>
-                            </div>
-                        </div>
-
-                        <div v-if="showAiResolutionStep" class="bg-white rounded-lg p-6 shadow-xs">
-                            <h3 class="text-lg font-semibold text-gray-900 mb-4">AI Resolution Available</h3>
-
-                            <p class="text-gray-600 mb-4">
-                                Our AI has considered your request and may be able to answer it immediately. Please
-                                review the potential answer below:
-                            </p>
-
-                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                                <div
-                                    class="prose prose-sm max-w-none text-gray-800"
-                                    v-html="renderMarkdown(aiResolutionData?.proposedAnswer)"
-                                ></div>
-                            </div>
-
-                            <p class="text-gray-600 mb-6">
-                                Please tell us if this resolved your issue. If not, we will escalate this ticket to a
-                                support team member.
-                            </p>
-
-                            <div class="flex gap-3">
-                                <BaseButton color="success" size="md" @click="handleAiResolutionAccepted">
-                                    Yes (Resolved)
-                                </BaseButton>
-                                <BaseButton color="gray" size="md" @click="handleAiResolutionDeclined"> No </BaseButton>
-                            </div>
-                        </div>
-
-                        <div
-                            class="prose max-w-none"
-                            v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
-                        >
-                            <FormKitSchema :schema="schema" :data="data" />
-                        </div>
-                    </main>
-                </PageCard>
-            </Page>
-        </div>
-    </div>
+                <div
+                    class="prose max-w-none"
+                    v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
+                >
+                    <FormKitSchema :schema="schema" :data="data" />
+                </div>
+            </main>
+        </PageCard>
+    </Page>
 </template>

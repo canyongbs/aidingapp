@@ -32,11 +32,11 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
     import { onMounted, ref } from 'vue';
-    import BaseButton from '../../../../../resources/js/components/BaseButton.vue';
-    import LoadingSpinner from '../../../../../resources/js/components/LoadingSpinner.vue';
     import { useMarkdown } from '../../composables/useMarkdown.js';
     import { getAuthHeaders } from '../../utils/token.js';
 
