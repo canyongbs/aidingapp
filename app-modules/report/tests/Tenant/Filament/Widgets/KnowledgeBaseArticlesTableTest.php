@@ -213,6 +213,32 @@ it('filters records by created_at using the table-level created after filter', f
         ->assertCanNotSeeTableRecords(collect([$oldArticle]));
 });
 
+it('sorts records by views instead of always defaulting to updated_at order', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $lowViewsRecentlyUpdated = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 1,
+        'updated_at' => now(),
+    ])->create();
+
+    $highViewsOlderUpdate = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 100,
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-sort-views',
+        'pageFilters' => [],
+    ])
+        ->sortTable('portal_view_count', 'desc')
+        ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentlyUpdated], inOrder: true);
+});
+
 it('filters records by updated_at using the table-level updated after filter', function () {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
