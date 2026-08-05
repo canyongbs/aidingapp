@@ -46,6 +46,7 @@
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
     import { apiPost } from '../Services/api.js';
+    import formatDateTime from '../Services/FormatDateTime.js';
     import { useArticleData } from './loaders.js';
 
     const route = useRoute();
@@ -134,7 +135,7 @@
         </template>
 
         <template #description>
-            <ArticleMeta :viewCount="portalViewCount" :lastUpdated="article.lastUpdated" />
+            <ArticleMeta :viewCount="portalViewCount" :lastUpdated="formatDateTime(article.lastUpdated) ?? '—'" />
         </template>
 
         <template #belowHeaderContent>
