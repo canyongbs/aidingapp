@@ -39,8 +39,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
+use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Resources\Pages\ManageRelatedRecords;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class ManageAdvisoryUpdate extends ManageRelatedRecords
 {
@@ -59,6 +61,29 @@ class ManageAdvisoryUpdate extends ManageRelatedRecords
             static::getRouteName(),
             AdvisoryUpdateResource::getRouteBaseName() . '.*',
         ];
+    }
+
+    /**
+     * @return array<int|string, string|null>
+     */
+    public function getBreadcrumbs(): array
+    {
+        $resource = static::getResource();
+        /** @var Advisory $record */
+        $record = $this->getRecord();
+
+        /** @var array<string, string> $breadcrumbs */
+        $breadcrumbs = [
+            $resource::getUrl() => $resource::getBreadcrumb(),
+            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->title, 16),
+            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
+        ];
+
+        if (filled($cluster = static::getCluster())) {
+            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
+        }
+
+        return $breadcrumbs;
     }
 
     public static function canAccess(array $arguments = []): bool

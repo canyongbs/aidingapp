@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Str;
 
 class EditAdvisoryUpdate extends EditRecord
 {
@@ -68,7 +69,7 @@ class EditAdvisoryUpdate extends EditRecord
 
         return [
             AdvisoryResource::getUrl() => AdvisoryResource::getBreadcrumb(),
-            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->title,
+            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => Str::limit($parentRecord->title, 16),
             AdvisoryResource::getUrl('manage-advisory-update', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
         ];
     }

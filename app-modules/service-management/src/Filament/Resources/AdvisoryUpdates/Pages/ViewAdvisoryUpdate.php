@@ -46,6 +46,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Str;
 
 class ViewAdvisoryUpdate extends ViewRecord
 {
@@ -64,7 +65,7 @@ class ViewAdvisoryUpdate extends ViewRecord
 
         return [
             AdvisoryResource::getUrl() => AdvisoryResource::getBreadcrumb(),
-            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->title,
+            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => Str::limit($parentRecord->title, 16),
             AdvisoryResource::getUrl('manage-advisory-update', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
         ];
     }
