@@ -37,17 +37,24 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use App\Features\ConfidentialServiceMonitoringFeature;
+use App\Features\ServiceMonitoringReportFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CreateServiceMonitoring extends CreateRecord
@@ -98,6 +105,59 @@ class CreateServiceMonitoring extends CreateRecord
                             ->label('Email Notifications')
                             ->default(false),
                     ])
+                    ->columns(2),
+                Section::make('Automated Reporting')
+                    ->schema([
+                        Toggle::make('is_reporting_active')
+                            ->label('Activate Reporting')
+                            ->default(false)
+                            ->live()
+                            ->columnSpanFull(),
+                        Radio::make('report_frequency')
+                            ->label('Frequency')
+                            ->options(ServiceMonitoringReportFrequency::class)
+                            ->enum(ServiceMonitoringReportFrequency::class)
+                            ->visible(fn (Get $get) => $get('is_reporting_active')),
+                        Hidden::make('is_reported_via_email')
+                            ->default(false),
+                        Hidden::make('is_reported_via_database')
+                            ->default(false),
+                        CheckboxList::make('report_channels')
+                            ->label('Channels')
+                            ->options([
+                                'is_reported_via_email' => 'Email',
+                                'is_reported_via_database' => 'Application',
+                            ])
+                            ->live()
+                            ->afterStateUpdated(function (Set $set, array $state = []): void {
+                                $set('is_reported_via_email', in_array('is_reported_via_email', $state, true));
+                                $set('is_reported_via_database', in_array('is_reported_via_database', $state, true));
+                            })
+                            ->visible(fn (Get $get) => $get('is_reporting_active')),
+                        Section::make('Recipients')
+                            ->schema([
+                                UserSelect::make('report_users')
+                                    ->relationship('reportUsers')
+                                    ->label('Users')
+                                    ->multiple()
+                                    ->preload(),
+                                Select::make('report_departments')
+                                    ->relationship('reportDepartments', 'name')
+                                    ->label('Departments')
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable(),
+                                Select::make('report_contacts')
+                                    ->relationship('reportContacts', 'full_name')
+                                    ->label('Contacts')
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable(),
+                            ])
+                            ->columns(3)
+                            ->visible(fn (Get $get) => $get('is_reporting_active')),
+                    ])
+                    ->visible(fn () => ServiceMonitoringReportFeature::active())
                     ->columns(2),
                 // The confidentiality columns may not exist yet for tenants whose migration has not run
                 ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make(

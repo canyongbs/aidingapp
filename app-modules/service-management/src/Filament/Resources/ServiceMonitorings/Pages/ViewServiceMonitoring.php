@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Features\ConfidentialServiceMonitoringFeature;
+use App\Features\ServiceMonitoringReportFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -92,6 +93,37 @@ class ViewServiceMonitoring extends ViewRecord
                             ])
                             ->visible(fn (ServiceMonitoringTarget $record): bool => $record->departments()->count() || $record->users()->count())
                             ->columns(),
+                        Section::make('Automated Reporting')
+                            ->schema([
+                                TextEntry::make('report_frequency')
+                                    ->label('Frequency'),
+                                IconEntry::make('is_reported_via_email')
+                                    ->label('Email')
+                                    ->boolean(),
+                                IconEntry::make('is_reported_via_database')
+                                    ->label('Application')
+                                    ->boolean(),
+                                TextEntry::make('reportUsers.name')
+                                    ->label('Users')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->reportUsers()->count()),
+                                TextEntry::make('reportDepartments.name')
+                                    ->label('Departments')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->reportDepartments()->count()),
+                                TextEntry::make('reportContacts.full_name')
+                                    ->label('Contacts')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->reportContacts()->count()),
+                            ])
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => ServiceMonitoringReportFeature::active() && $record->is_reporting_active)
+                            ->columns(3),
                         Section::make('Confidentiality')
                             ->schema([
                                 IconEntry::make('is_confidential')
