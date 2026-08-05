@@ -37,12 +37,15 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\IconPosition;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -57,7 +60,11 @@ class ListServiceMonitorings extends ListRecords
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->icon(fn (ServiceMonitoringTarget $record): ?Heroicon => $record->is_confidential ? Heroicon::LockClosed : null)
+                    ->iconColor('gray')
+                    ->iconPosition(IconPosition::After)
+                    ->tooltip(fn (ServiceMonitoringTarget $record): ?string => $record->is_confidential ? 'This service monitor is confidential and only visible to its creator and permitted users, departments, and contacts.' : null),
                 TextColumn::make('domain')
                     ->label('URL')
                     ->searchable()
