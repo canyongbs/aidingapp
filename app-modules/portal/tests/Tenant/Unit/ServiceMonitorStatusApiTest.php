@@ -74,3 +74,31 @@ test('returns all service monitoring targets with latest history when portal is 
     expect($response->status())->toBe(200);
     expect($response->json('data'))->toHaveCount(3);
 });
+
+test('excludes confidential service monitoring targets unless the contact is granted access', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Public Monitor']);
+
+    $confidentialTarget = ServiceMonitoringTarget::factory()->create([
+        'name' => 'Confidential Monitor',
+        'is_confidential' => true,
+    ]);
+
+    $url = URL::route(name: 'api.portal.status', absolute: false);
+
+    $response = get($url);
+    expect($response->json('data'))->toHaveCount(1);
+
+    $confidentialTarget->confidentialContacts()->attach($contact->getKey());
+
+    $response = get($url);
+    expect($response->json('data'))->toHaveCount(2);
+});

@@ -42,6 +42,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -138,4 +139,58 @@ test('Reset Monitoring button resets monitoring', function () {
 
     expect($serviceMonitoringTarget->histories()->count())
         ->toBe(0);
+});
+
+test('a confidential service monitoring is only visible to its creator, granted users/departments, and admins', function () {
+    $creator = User::factory()->create();
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.*.view');
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->for($creator, 'createdBy')
+        ->create(['is_confidential' => true]);
+
+    actingAs($user);
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertNotFound();
+
+    $serviceMonitoringTarget->confidentialUsers()->attach($user->getKey());
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertSuccessful();
+
+    $serviceMonitoringTarget->confidentialUsers()->detach($user->getKey());
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertNotFound();
+
+    $department = Department::factory()->create();
+
+    $user->department()->associate($department)->save();
+
+    $serviceMonitoringTarget->confidentialDepartments()->attach($department->getKey());
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertSuccessful();
+
+    $serviceMonitoringTarget->confidentialDepartments()->detach($department->getKey());
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertNotFound();
+
+    $creator->givePermissionTo('service_monitoring.view-any');
+    $creator->givePermissionTo('service_monitoring.*.view');
+
+    actingAs($creator);
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertSuccessful();
+
+    asSuperAdmin();
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertSuccessful();
 });

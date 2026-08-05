@@ -114,3 +114,13 @@ it('only shows the bulk delete action to a user with the service_monitoring.dele
     livewire(ListServiceMonitorings::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
+
+test('a confidential service monitoring is still listed for an admin', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => true]);
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$serviceMonitoringTarget])
+        ->assertSuccessful();
+});
