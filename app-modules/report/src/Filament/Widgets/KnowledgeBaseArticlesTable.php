@@ -188,6 +188,10 @@ class KnowledgeBaseArticlesTable extends BaseWidget
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
             ->paginationPageOptions([5, 10, 25])
-            ->defaultSort('updated_at', 'desc');
+            ->defaultSort(function (Builder $query): Builder {
+                return $query
+                    ->orderBy('portal_view_count', 'desc')
+                    ->orderBy('updated_at', 'desc');
+            });
     }
 }
