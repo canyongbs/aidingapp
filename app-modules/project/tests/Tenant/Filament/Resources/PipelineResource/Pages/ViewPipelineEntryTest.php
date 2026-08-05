@@ -68,6 +68,7 @@ it('can render with proper permission', function () {
     get(PipelineEntryResource::getUrl('view', [
         'record' => $pipelineEntry,
         'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertForbidden();
 
@@ -81,6 +82,7 @@ it('can render with proper permission', function () {
     get(PipelineEntryResource::getUrl('view', [
         'record' => $pipelineEntry,
         'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertSuccessful();
 });
@@ -107,6 +109,7 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
     get(PipelineEntryResource::getUrl('view', [
         'record' => $pipelineEntry,
         'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertNotFound();
 });
@@ -161,7 +164,7 @@ it('displays correct pipeline entry details', function () {
         ->assertSee($pipeline->stages->first()->name);
 });
 
-it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -177,10 +180,10 @@ it('returns 404 if the project query parameter does not match the pipeline\'s pr
             'pipeline_stage_id' => $pipeline->stages->first()->id,
         ]);
 
-    get(PipelineResource::getUrl('view-pipeline-entry', [
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $pipelineEntry->getRouteKey(),
-        'project' => $otherProject->getRouteKey(),
+    get(PipelineEntryResource::getUrl('view', [
+        'record' => $pipelineEntry,
+        'pipeline' => $pipeline,
+        'project' => $otherProject,
     ]))
         ->assertNotFound();
 });
@@ -199,9 +202,10 @@ it('shows the pipeline name in the breadcrumb', function () {
             'pipeline_stage_id' => $pipeline->stages->first()->id,
         ]);
 
-    get(PipelineResource::getUrl('view-pipeline-entry', [
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $pipelineEntry->getRouteKey(),
+    get(PipelineEntryResource::getUrl('view', [
+        'record' => $pipelineEntry,
+        'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding');

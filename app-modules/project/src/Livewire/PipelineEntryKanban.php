@@ -202,16 +202,10 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
     {
-        $params = [
+        $this->redirect(PipelineEntryResource::getUrl('view', [
             'record' => $pipelineEntry,
             'pipeline' => $this->pipeline,
-            'from' => 'kanban',
-        ];
-
-        if (filled($this->project)) {
-            $params['project'] = $this->project;
-        }
-
-        $this->redirect(PipelineEntryResource::getUrl('view', $params));
+            'project' => $this->pipeline->project,
+        ]));
     }
 }

@@ -55,8 +55,6 @@ use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 class ViewPipelineEntry extends Page
 {
@@ -69,9 +67,6 @@ class ViewPipelineEntry extends Page
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
     protected string $view = 'project::filament.pages.view-pipeline-entry';
-
-    #[Locked, Url]
-    public ?string $project = null;
 
     public function mount(int | string $record): void
     {
@@ -87,13 +82,7 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
-        $projectRouteKey = request()->route('project');
-
-        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
-            abort(404);
-        }
-
-        $this->authorize('view', $this->record);
+        $this->authorize('view', $pipeline);
     }
 
     public function getPipelineEntry(): PipelineEntry
@@ -121,19 +110,10 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'table');
-
-        $params = ['record' => $this->getPipeline()];
-
-        if ($this->project) {
-            $params['project'] = $this->project;
-        }
-
-        if ($source === 'kanban') {
-            $params['viewType'] = 'kanban';
-        }
-
-        return PipelineResource::getUrl('entries', $params);
+        return PipelineResource::getUrl('entries', [
+            'record' => $this->getPipeline(),
+            'project' => $this->getPipeline()->project,
+        ]);
     }
 
     public function entryDetailsInfolist(Schema $schema): Schema
@@ -212,19 +192,17 @@ class ViewPipelineEntry extends Page
     {
         return [
             Action::make('edit')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->getPipeline()))
                 ->url(function (): string {
-                    $params = [
+                    return PipelineEntryResource::getUrl('edit', [
                         'record' => $this->getPipelineEntry(),
                         'pipeline' => $this->getPipeline(),
-                        'project' => $this->project,
-                    ];
-
-                    return PipelineEntryResource::getUrl('edit', $params);
+                        'project' => $this->getPipeline()->project,
+                    ]);
                 }),
             DeleteAction::make()
                 ->label('Remove from Pipeline')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                ->authorize(fn (): bool => auth()->user()->can('update', $this->getPipeline()))
                 ->requiresConfirmation()
                 ->record($this->getPipelineEntry())
                 ->successRedirectUrl(fn (): string => $this->getBackUrl()),

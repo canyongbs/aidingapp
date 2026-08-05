@@ -52,8 +52,6 @@ use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 /**
  * @property Schema $form
@@ -72,9 +70,6 @@ class EditPipelineEntry extends Page
     /** @var array<string, mixed> $data */
     public ?array $data = [];
 
-    #[Locked, Url]
-    public ?string $project = null;
-
     public function mount(int | string $record): void
     {
         try {
@@ -90,12 +85,6 @@ class EditPipelineEntry extends Page
         }
 
         if ($this->getPipelineEntry()->pipelineStage->pipeline_id !== $pipeline->id) {
-            abort(404);
-        }
-
-        $projectRouteKey = request()->route('project');
-
-        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
 
@@ -129,19 +118,11 @@ class EditPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = [
+        return PipelineEntryResource::getUrl('view', [
             'record' => $this->getPipelineEntry(),
             'pipeline' => $this->getPipeline(),
-            'from' => $source,
-        ];
-
-        if ($this->project) {
-            $params['project'] = $this->project;
-        }
-
-        return PipelineEntryResource::getUrl('view', $params);
+            'project' => $this->getPipeline()->project,
+        ]);
     }
 
     public function form(Schema $schema): Schema

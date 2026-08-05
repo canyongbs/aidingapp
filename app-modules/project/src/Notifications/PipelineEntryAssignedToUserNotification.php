@@ -79,6 +79,7 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
         $url = PipelineEntryResource::getUrl('view', [
             'record' => $this->pipelineEntry,
             'pipeline' => $this->pipelineEntry->pipelineStage->pipeline_id,
+            'project' => $this->pipelineEntry->pipelineStage->pipeline->project_id,
         ]);
 
         $title = str($this->pipelineEntry->name)->limit();

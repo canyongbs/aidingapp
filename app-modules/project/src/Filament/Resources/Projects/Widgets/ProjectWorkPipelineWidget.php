@@ -188,7 +188,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                 Action::make('kanban')
                     ->label('Kanban')
                     ->icon('heroicon-m-view-columns')
-                    ->url(fn (): string => PipelineResource::getUrl('manage-entries', [
+                    ->url(fn (): string => PipelineResource::getUrl('entries', [
                         'record' => $pipeline?->getKey(),
                         'project' => $this->record->getKey(),
                     ]))

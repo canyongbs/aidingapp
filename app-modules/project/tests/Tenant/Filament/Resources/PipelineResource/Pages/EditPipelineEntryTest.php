@@ -119,7 +119,7 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
         ->assertStatus(404);
 });
 
-it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -135,9 +135,9 @@ it('returns 404 if the project query parameter does not match the pipeline\'s pr
     ]);
 
     get(EditPipelineEntry::getUrl([
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $entry->getRouteKey(),
-        'project' => $otherProject->getRouteKey(),
+        'record' => $entry,
+        'pipeline' => $pipeline,
+        'project' => $otherProject,
     ]))
         ->assertNotFound();
 });
@@ -156,8 +156,9 @@ it('shows the pipeline name in the breadcrumb', function () {
     ]);
 
     get(EditPipelineEntry::getUrl([
-        'record' => $pipeline->getRouteKey(),
-        'pipelineEntry' => $entry->getRouteKey(),
+        'record' => $entry,
+        'pipeline' => $pipeline,
+        'project' => $project,
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding');

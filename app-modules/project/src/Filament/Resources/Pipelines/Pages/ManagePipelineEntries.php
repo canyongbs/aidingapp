@@ -77,8 +77,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
 
-    public ?string $viewType = null;
-
     public function getSubheading(): string | Htmlable | null
     {
         return new HtmlString(
@@ -86,12 +84,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
                 'url' => ProjectResource::getUrl('view', ['record' => $this->getParentRecord()]),
             ])->render(),
         );
-    }
-
-    public function setViewType(string $viewType): void
-    {
-        $this->viewType = $viewType;
-        session(['pipeline-view-type' => $viewType]);
     }
 
     public function table(Table $table): Table
@@ -125,7 +117,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->url(fn (PipelineEntry $record): string => PipelineEntryResource::getUrl('view', [
                         'record' => $record,
                         'pipeline' => $pipeline,
-                        'from' => 'table',
+                        'project' => $pipeline->project,
                     ])),
                 DeleteAction::make(),
             ])

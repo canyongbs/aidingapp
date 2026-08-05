@@ -476,7 +476,7 @@ it('shows the kanban header action once a pipeline is selected and links to the 
         'record' => $project,
     ])
         ->assertTableActionVisible('kanban')
-        ->assertTableActionHasUrl('kanban', PipelineResource::getUrl('manage-entries', [
+        ->assertTableActionHasUrl('kanban', PipelineResource::getUrl('entries', [
             'record' => $pipeline->getKey(),
             'project' => $project->getKey(),
         ]));
