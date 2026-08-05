@@ -69,18 +69,18 @@ class KnowledgeManagementPortalCategoryController extends Controller
 
     public function show(KnowledgeBaseCategory $category): JsonResponse
     {
-        $mapArticle = function (KnowledgeBaseItem $article) {
+        $mapArticle = function (KnowledgeBaseItem $article) use ($category) {
             return [
                 'id' => $article->getKey(),
-                'categorySlug' => $article->category->slug,
+                'categorySlug' => $category->slug,
                 'name' => $article->title,
-                'tags' => $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
+                'tags' => $article->tags
+                    ->sortBy('name')
+                    ->map(fn ($tag) => [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
                     ])
-                    ->get()
+                    ->values()
                     ->toArray(),
                 'featured' => $article->is_featured,
             ];
@@ -88,6 +88,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
 
         $articlesFor = function (string $filter) use ($category, $mapArticle) {
             return $category->knowledgeBaseItems()
+                ->with('tags')
                 ->public()
                 ->when($filter === 'featured', function (Builder $query) {
                     $query->where('is_featured', true);

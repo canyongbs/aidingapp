@@ -68,13 +68,13 @@ class KnowledgeManagementPortalSearchController extends Controller
                 'id' => $article->getKey(),
                 'categorySlug' => $article->category->slug,
                 'name' => $article->title,
-                'tags' => $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
+                'tags' => $article->tags
+                    ->sortBy('name')
+                    ->map(fn ($tag) => [
+                        'id' => $tag->id,
+                        'name' => $tag->name,
                     ])
-                    ->get()
+                    ->values()
                     ->toArray(),
                 'featured' => $article->is_featured,
             ];
@@ -83,6 +83,7 @@ class KnowledgeManagementPortalSearchController extends Controller
         $articlesFor = function (string $filter) use ($search, $tags, $mapArticle) {
             return KnowledgeBaseArticleData::collect(
                 KnowledgeBaseItem::query()
+                    ->with(['category', 'tags'])
                     ->public()
                     ->when(
                         $search->isNotEmpty(),
