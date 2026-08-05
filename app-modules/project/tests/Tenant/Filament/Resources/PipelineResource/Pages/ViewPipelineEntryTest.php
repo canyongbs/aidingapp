@@ -157,7 +157,54 @@ it('displays correct pipeline entry details', function () {
     ])
         ->assertSuccessful()
         ->assertSee('Test Entry Name')
-        ->assertSee($contact->full_name);
+        ->assertSee($contact->full_name)
+        ->assertSee($pipeline->stages->first()->name);
+});
+
+it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $pipelineEntry = PipelineEntry::factory()
+        ->create([
+            'pipeline_stage_id' => $pipeline->stages->first()->id,
+        ]);
+
+    get(PipelineResource::getUrl('view-pipeline-entry', [
+        'record' => $pipeline->getRouteKey(),
+        'pipelineEntry' => $pipelineEntry->getRouteKey(),
+        'project' => $otherProject->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
+it('shows the pipeline name in the breadcrumb', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create(['name' => 'Onboarding']);
+
+    $pipelineEntry = PipelineEntry::factory()
+        ->create([
+            'pipeline_stage_id' => $pipeline->stages->first()->id,
+        ]);
+
+    get(PipelineResource::getUrl('view-pipeline-entry', [
+        'record' => $pipeline->getRouteKey(),
+        'pipelineEntry' => $pipelineEntry->getRouteKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertSee('Onboarding');
 });
 
 it('displays related service requests as number with title', function () {

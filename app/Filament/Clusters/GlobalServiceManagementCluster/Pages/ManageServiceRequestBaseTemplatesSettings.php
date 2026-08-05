@@ -38,10 +38,9 @@ namespace App\Filament\Clusters\GlobalServiceManagementCluster\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
-use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use AidingApp\ServiceManagement\Filament\Actions\ApplyServiceRequestBaseTemplatesAction;
+use AidingApp\ServiceManagement\Filament\Concerns\HasServiceRequestTemplateEditorSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
 use App\Filament\Clusters\GlobalServiceManagementCluster;
@@ -49,18 +48,17 @@ use App\Models\User;
 use App\Support\RichContentDocument;
 use Filament\Actions\Action;
 use Filament\Actions\ActionGroup;
-use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 
 class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
 {
+    use HasServiceRequestTemplateEditorSchema;
+
     protected static string $settings = ServiceRequestNotificationAutomationSettings::class;
 
     protected static ?string $cluster = GlobalServiceManagementCluster::class;
@@ -92,7 +90,14 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
                                     ->id("role-template-tabs-{$type->value}")
                                     ->tabs(array_map(
                                         fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
-                                            ->schema($this->getTemplateFormSchema($type, $role))
+                                            ->schema($this->getServiceRequestTemplateEditorSchema(
+                                                $type,
+                                                subjectLabel: 'Example Subject',
+                                                subjectPlaceholder: 'Enter the example email subject here...',
+                                                subjectHelperText: 'The example subject template the AI will customize for each service request type.',
+                                                bodyLabel: 'Example Body',
+                                                bodyPlaceholder: 'Enter the example email body here...',
+                                            ))
                                             ->statePath("templates.{$type->value}.{$role->value}"),
                                         $type === ServiceRequestEmailTemplateType::SurveyResponse
                                             ? [ServiceRequestTypeEmailTemplateRole::Customer]
@@ -155,6 +160,16 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
         return parent::getFormActions();
     }
 
+    /**
+     * @return array<Action | ActionGroup>
+     */
+    protected function getHeaderActions(): array
+    {
+        return [
+            ApplyServiceRequestBaseTemplatesAction::make(),
+        ];
+    }
+
     protected function fillForm(): void
     {
         $state = [
@@ -171,56 +186,5 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
         }
 
         $this->form->fill($state);
-    }
-
-    /**
-     * @return array<int, RichEditor>
-     */
-    protected function getTemplateFormSchema(ServiceRequestEmailTemplateType $type, ServiceRequestTypeEmailTemplateRole $role): array
-    {
-        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
-
-        if ($type !== ServiceRequestEmailTemplateType::Update) {
-            unset($mergeTags['recent update']);
-        }
-
-        $hasAnyContent = function (Get $get): bool {
-            return RichContentDocument::hasContent($get('subject'))
-                || RichContentDocument::hasContent($get('body'));
-        };
-
-        return [
-            RichEditor::make('subject')
-                ->label('Example Subject')
-                ->placeholder('Enter the example email subject here...')
-                ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
-                ->toolbarButtons([])
-                ->mergeTags($mergeTags)
-                ->helperText('The example subject template the AI will customize for each service request type.')
-                ->required(fn (Get $get): bool => $hasAnyContent($get))
-                ->live(onBlur: true)
-                ->json(),
-            RichEditor::make('body')
-                ->label('Example Body')
-                ->placeholder('Enter the example email body here...')
-                ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->toolbarButtons([
-                    ['bold', 'italic', 'link'],
-                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
-                    ['textColor', 'small'],
-                    ['mergeTags', 'customBlocks'],
-                    ['clearFormatting'],
-                    ['undo', 'redo'],
-                ])
-                ->mergeTags($mergeTags)
-                ->customBlocks([
-                    ServiceRequestTypeEmailTemplateButtonBlock::class,
-                    SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-                ])
-                ->columnSpanFull()
-                ->required(fn (Get $get): bool => $hasAnyContent($get))
-                ->live(onBlur: true)
-                ->json(),
-        ];
     }
 }

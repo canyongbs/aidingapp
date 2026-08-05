@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
@@ -459,6 +460,38 @@ it('shows the empty state when the project has no pipelines', function () {
         ->assertSet('selectedPipelineId', null)
         ->assertActionExists('createPipeline')
         ->assertSee('No pipeline selected');
+});
+
+it('shows the kanban header action once a pipeline is selected and links to the entries page in kanban mode', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionVisible('kanban')
+        ->assertTableActionHasUrl('kanban', PipelineResource::getUrl('manage-entries', [
+            'record' => $pipeline->getKey(),
+            'project' => $project->getKey(),
+            'viewType' => 'kanban',
+        ]));
+});
+
+it('hides the kanban header action when the project has no pipelines', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionHidden('kanban');
 });
 
 it('can list files in the project files widget', function () {

@@ -32,19 +32,22 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { onMounted, ref } from 'vue';
-    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
-    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
-    import LoadingSpinner from '../../../../resources/js/components/LoadingSpinner.vue';
-    import Breadcrumbs from '../Components/Breadcrumbs.vue';
-    import EmptyState from '../Components/EmptyState.vue';
-    import Page from '../Components/Page.vue';
-    import { consumer } from '../Services/Consumer';
+    import BaseBadge from '@common/BaseBadge.vue';
+    import BaseButton from '@common/BaseButton.vue';
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
+    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
+    import Page from '@common/portal/Page.vue';
+    import { ref, watch } from 'vue';
+    import { apiGet } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
+    import { useAdvisoriesData } from './loaders.js';
+
+    // Page 1 arrives via the route data loader; "Load More" appends further pages.
+    const { data: initialData } = useAdvisoriesData();
 
     const advisories = ref([]);
-    const { get } = consumer();
-    const loading = ref(true);
+    const loading = ref(false);
     const currentPage = ref(1);
     const nextPageUrl = ref(null);
     const prevPageUrl = ref(null);
@@ -52,23 +55,28 @@
     const perPage = ref(10);
     const hasMore = ref(false);
 
-    const props = defineProps({
-        apiUrl: {
-            type: String,
-            required: true,
-        },
-    });
+    function applyPage(response, { append = false } = {}) {
+        const data = response?.data;
 
-    onMounted(() => {
-        fetchAdvisories();
-    });
-
-    const loadMore = () => {
-        if (nextPageUrl.value) {
-            currentPage.value++;
-            fetchAdvisories();
+        if (!data) {
+            return;
         }
-    };
+
+        if (append) {
+            advisories.value.push(...data.data);
+        } else {
+            advisories.value = [...data.data];
+        }
+
+        currentPage.value = data.current_page;
+        nextPageUrl.value = data.next_page_url;
+        prevPageUrl.value = data.prev_page_url;
+        lastPage.value = data.last_page;
+        perPage.value = data.per_page;
+        hasMore.value = nextPageUrl.value !== null;
+    }
+
+    watch(initialData, (data) => applyPage(data), { immediate: true });
 
     const severityTextColor = (severity) => {
         const allowedColors = {
@@ -99,25 +107,19 @@
         return allowedColors[severity?.color] || 'text-gray-600';
     };
 
-    const fetchAdvisories = async () => {
+    const loadMore = async () => {
+        if (!nextPageUrl.value) {
+            return;
+        }
+
         loading.value = true;
+
         try {
-            const response = await get(
-                `${props.apiUrl}/advisories?page=${currentPage.value}&per_page=${perPage.value}`,
-            );
-
-            let data = response.data.data;
-
-            advisories.value.push(...data.data);
-            currentPage.value = data.current_page;
-            nextPageUrl.value = data.next_page_url;
-            prevPageUrl.value = data.prev_page_url;
-            lastPage.value = data.last_page;
-            perPage.value = data.per_page;
-            hasMore.value = nextPageUrl.value !== null;
-            loading.value = false;
+            const response = await apiGet('/advisories', { page: currentPage.value + 1, per_page: perPage.value });
+            applyPage(response, { append: true });
         } catch (error) {
-            advisories.value = [];
+            console.error('Error fetching advisories:', error);
+        } finally {
             loading.value = false;
         }
     };
@@ -131,11 +133,7 @@
             <Breadcrumbs :currentCrumb="'Advisories'" />
         </template>
 
-        <div v-if="loading && advisories.length === 0" class="flex justify-center py-12">
-            <LoadingSpinner label="Loading advisories..." />
-        </div>
-
-        <div v-else-if="advisories.length > 0" class="flex flex-col gap-3">
+        <div v-if="advisories.length > 0" class="flex flex-col gap-3">
             <div
                 v-for="(advisory, index) in advisories"
                 :key="advisory.id || index"
@@ -192,7 +190,7 @@
             </div>
         </div>
 
-        <EmptyState v-if="!loading && advisories.length === 0">
+        <EmptyState v-if="advisories.length === 0">
             <template #heading>There are no advisories to display.</template>
             <template #actions>
                 <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>

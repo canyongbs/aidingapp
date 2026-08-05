@@ -40,9 +40,9 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Actions\DraftServiceRequestUpdateWithAiAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
@@ -53,7 +53,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\Toggle;
@@ -64,7 +63,6 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
 
 class ServiceRequestUpdatesRelationManager extends RelationManager
 {
@@ -74,6 +72,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
 
     public function form(Schema $schema): Schema
     {
+        $serviceRequest = $this->getOwnerRecord();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
         return $schema
             ->components([
                 Textarea::make('update')
@@ -89,21 +91,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->label('Internal')
                     ->rule(['boolean'])
                     ->columnSpan('full'),
-                Select::make('status_id')
-                    ->label('Status')
-                    ->allowHtml()
-                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
-                        ->get(['id', 'name', 'classification', 'color'])
-                        ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                            $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                        ])))
-                    ->exists((new ServiceRequestStatus())->getTable(), 'id')
-                    ->default(function () {
-                        assert($this->getOwnerRecord() instanceof ServiceRequest);
-
-                        return $this->getOwnerRecord()->status->getKey();
-                    }),
+                ServiceRequestStatusSelect::make($serviceRequest),
                 Section::make('Uploads')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('uploads')

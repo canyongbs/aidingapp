@@ -53,6 +53,20 @@ class RichContentDocument
     }
 
     /**
+     * @param array<string, mixed>|null $value
+     */
+    public static function encodeRichContent(array|string|null $value): ?string
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        return is_array($value)
+            ? json_encode($value)
+            : $value;
+    }
+
+    /**
      * @param  array<int, mixed>  $nodes
      */
     protected static function nodesHaveContent(array $nodes): bool

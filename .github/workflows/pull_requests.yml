@@ -98,7 +98,7 @@ jobs:
             - run: npm install
 
             - name: Set up Ruby
-              uses: ruby/setup-ruby@a30dfa457ad68707b8b910ac3a244714b61c0626 # v1.320.0
+              uses: ruby/setup-ruby@95ef2b042f9d7a56d8268cba8559e2842e2ad01b # v1.321.0
 
             - name: Run Ruby Script
               run: ruby ./copyright.rb
@@ -181,7 +181,7 @@ jobs:
 
         services:
             redis:
-                image: redis:7.4@sha256:595cc6f2bb3af6e03347b90deb6123c6aa2c81dea05ce08128de8a174b6ac67b
+                image: redis:7.4@sha256:e9b2e45ecd47fbb69b877cf8d045d5cccaaaed52524b6e098b4abe8212994f73
                 ports:
                     - 6379:6379
                 options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
@@ -317,7 +317,7 @@ jobs:
 
         services:
             postgres:
-                image: postgres:16.14@sha256:33f923b05f64ca54ac4401c01126a6b92afe839a0aa0a52bc5aeb5cc958e5f20
+                image: postgres:16.14@sha256:95206741a5b214807675e14165369d05b93a9cf692223b616d07cca227e74b0b
                 ports:
                     - 5432:5432
                 env:
@@ -403,6 +403,48 @@ jobs:
               with:
                   path: .cache/phpstan
                   key: 'linting-result-cache-${{ github.run_id }}'
+
+    request-copilot-review:
+        name: Request Copilot Review
+        runs-on: ubuntu-22.04
+
+        permissions: {}
+
+        # Only request a review once code is green, so Copilot never reviews failing changes.
+        needs: [test, lint]
+
+        if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]' }}
+
+        timeout-minutes: 5
+
+        steps:
+            - name: Generate GitHub App Token
+              id: app-token
+              uses: actions/create-github-app-token@bcd2ba49218906704ab6c1aa796996da409d3eb1 # v3.2.0
+              with:
+                  client-id: ${{ secrets.CGBS_AUTOMATION_APP_CLIENT_ID }} # zizmor: ignore[secrets-outside-env]
+                  private-key: ${{ secrets.CGBS_AUTOMATION_APP_PRIVATE_KEY }} # zizmor: ignore[secrets-outside-env]
+                  permission-pull-requests: write
+
+            - name: Request review from Copilot
+              env:
+                  GH_TOKEN: ${{ steps.app-token.outputs.token }}
+                  GH_REPOSITORY: ${{ github.repository }}
+                  PR_NUMBER: ${{ github.event.pull_request.number }}
+              run: |
+                  existing=$(gh api "/repos/${GH_REPOSITORY}/pulls/${PR_NUMBER}/requested_reviewers" --jq '.users[].login')
+                  if echo "$existing" | grep -q 'copilot-pull-request-reviewer'; then
+                      echo 'Copilot review already requested.'
+                      exit 0
+                  fi
+                  if ! output=$(gh api \
+                      --method POST \
+                      -H 'Accept: application/vnd.github+json' \
+                      "/repos/${GH_REPOSITORY}/pulls/${PR_NUMBER}/requested_reviewers" \
+                      -f 'reviewers[]=copilot-pull-request-reviewer[bot]' 2>&1); then
+                      echo "$output"
+                      echo "$output" | grep -qiE 'already|not a collaborator|review cannot be requested' || exit 1
+                  fi
 
     renovate-config-validator:
         name: Renovate Config Validator
