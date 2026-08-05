@@ -213,16 +213,32 @@ it('filters records by created_at using the table-level created after filter', f
         ->assertCanNotSeeTableRecords(collect([$oldArticle]));
 });
 
-it('defaults to sorting by views (portal_view_count) in descending order', function () {
+it('defaults to sorting by updated_at in descending order', function () {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
-    $lowViewsRecentlyUpdated = KnowledgeBaseItem::factory()->state([
+    $recentlyUpdatedArticle = KnowledgeBaseItem::factory()->state([
         'status_id' => $status->id,
         'category_id' => $category->id,
-        'portal_view_count' => 1,
         'updated_at' => now(),
     ])->create();
+
+    $olderUpdatedArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-default-sort-views',
+        'pageFilters' => [],
+    ])
+        ->assertCanSeeTableRecords([$recentlyUpdatedArticle, $olderUpdatedArticle], inOrder: true);
+});
+
+it('allows sorting records by portal_view_count descending, overriding the default updated_at sort', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
 
     $highViewsOlderUpdate = KnowledgeBaseItem::factory()->state([
         'status_id' => $status->id,
@@ -231,28 +247,10 @@ it('defaults to sorting by views (portal_view_count) in descending order', funct
         'updated_at' => now()->subDays(10),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
-        'cacheTag' => 'test-kb-articles-table-default-sort-views',
-        'pageFilters' => [],
-    ])
-        ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentlyUpdated], inOrder: true);
-});
-
-it('breaks ties in the default sort using updated_at in descending order', function () {
-    $status = KnowledgeBaseStatus::factory()->create();
-    $category = KnowledgeBaseCategory::factory()->create();
-
-    $sameViewsOlderUpdate = KnowledgeBaseItem::factory()->state([
+    $lowViewsRecentUpdate = KnowledgeBaseItem::factory()->state([
         'status_id' => $status->id,
         'category_id' => $category->id,
-        'portal_view_count' => 50,
-        'updated_at' => now()->subDays(10),
-    ])->create();
-
-    $sameViewsRecentUpdate = KnowledgeBaseItem::factory()->state([
-        'status_id' => $status->id,
-        'category_id' => $category->id,
-        'portal_view_count' => 50,
+        'portal_view_count' => 1,
         'updated_at' => now(),
     ])->create();
 
@@ -260,10 +258,11 @@ it('breaks ties in the default sort using updated_at in descending order', funct
         'cacheTag' => 'test-kb-articles-table-default-sort-tiebreaker',
         'pageFilters' => [],
     ])
-        ->assertCanSeeTableRecords([$sameViewsRecentUpdate, $sameViewsOlderUpdate], inOrder: true);
+        ->sortTable('portal_view_count', 'desc')
+        ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentUpdate], inOrder: true);
 });
 
-it('allows sorting records by updated_at ascending, overriding the default views sort', function () {
+it('allows sorting records by updated_at ascending, overriding the default updated_at sort', function () {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
