@@ -181,7 +181,7 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     /**
      * @return array<string, string>
      */
-    public function casts(): array
+    protected function casts(): array
     {
         return [
             'is_notified_via_database' => 'boolean',
