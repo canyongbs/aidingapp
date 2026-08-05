@@ -41,6 +41,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -52,7 +53,6 @@ use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 /**
  * @property Schema $form
@@ -76,16 +76,15 @@ class EditPipelineEntry extends Page
     /** @var array<string, mixed> $data */
     public ?array $data = [];
 
-    #[Locked, Url]
-    public ?string $project = null;
-
     public function mount(): void
     {
         if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
             abort(404);
         }
 
-        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+        $projectRouteKey = request()->route('project');
+
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
 
@@ -101,19 +100,11 @@ class EditPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = [
+        return PipelineResource::getUrl('view-pipeline-entry', [
             'record' => $this->record,
             'pipelineEntry' => $this->pipelineEntry,
-            'from' => $source,
-        ];
-
-        if ($this->project) {
-            $params['project'] = $this->project;
-        }
-
-        return PipelineResource::getUrl('view-pipeline-entry', $params);
+            'project' => $this->getParentRecord(),
+        ]);
     }
 
     /**
@@ -122,14 +113,14 @@ class EditPipelineEntry extends Page
     public function getBreadcrumbs(): array
     {
         $pipeline = $this->record;
-        $project = $pipeline->project;
+
+        $project = $this->getParentRecord();
+        assert($project instanceof Project);
 
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
+            ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
+            'Pipelines',
             Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];

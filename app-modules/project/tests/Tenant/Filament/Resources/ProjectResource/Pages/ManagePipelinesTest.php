@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\PipelinesRelationManager;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
@@ -80,8 +81,9 @@ it('can list pipelines', function () {
         ->count(2)
         ->create();
 
-    livewire(ManagePipelines::class, [
-        'record' => $project->getRouteKey(),
+    livewire(PipelinesRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManagePipelines::class,
     ])
         ->assertCanSeeTableRecords($pipelines);
 });

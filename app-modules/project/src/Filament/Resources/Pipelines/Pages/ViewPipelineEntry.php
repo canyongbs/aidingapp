@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use BackedEnum;
@@ -55,8 +56,6 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 class ViewPipelineEntry extends Page
 {
@@ -72,24 +71,19 @@ class ViewPipelineEntry extends Page
 
     public PipelineEntry $pipelineEntry;
 
-    #[Locked, Url]
-    public ?string $project = null;
-
     public function mount(): void
     {
         if ($this->pipelineEntry->pipelineStage->pipeline_id !== $this->record->id) {
             abort(404);
         }
 
-        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+        $projectRouteKey = request()->route('project');
+
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
 
         $this->authorize('view', $this->record);
-
-        if (request()->has('from')) {
-            session(['pipeline_entry_source' => request('from')]);
-        }
     }
 
     public function getTitle(): string | Htmlable
@@ -99,19 +93,10 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'list');
-
-        $params = ['record' => $this->record];
-
-        if ($this->project) {
-            $params['project'] = $this->project;
-        }
-
-        if ($source === 'kanban') {
-            $params['viewType'] = 'kanban';
-        }
-
-        return PipelineResource::getUrl('manage-entries', $params);
+        return PipelineResource::getUrl('manage-entries', [
+            'record' => $this->record,
+            'project' => $this->getParentRecord(),
+        ]);
     }
 
     /**
@@ -120,14 +105,14 @@ class ViewPipelineEntry extends Page
     public function getBreadcrumbs(): array
     {
         $pipeline = $this->record;
-        $project = $pipeline->project;
+
+        $project = $this->getParentRecord();
+        assert($project instanceof Project);
 
         $breadcrumbs = [
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
+            ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
+            'Pipelines',
             Str::limit($pipeline->name ?? 'Pipeline', 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
@@ -220,7 +205,7 @@ class ViewPipelineEntry extends Page
                     $params = [
                         'record' => $this->record,
                         'pipelineEntry' => $this->pipelineEntry,
-                        'project' => $this->project,
+                        'project' => $this->getParentRecord(),
                     ];
 
                     return PipelineResource::getUrl('edit-pipeline-entry', $params);

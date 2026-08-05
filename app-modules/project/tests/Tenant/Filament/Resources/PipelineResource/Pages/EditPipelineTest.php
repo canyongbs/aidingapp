@@ -63,6 +63,7 @@ it('can render with proper permission.', function () {
 
     livewire(EditPipeline::class, [
         'record' => $pipeline->getKey(),
+        'parentRecord' => $project,
     ])
         ->assertForbidden();
 
@@ -75,6 +76,7 @@ it('can render with proper permission.', function () {
 
     livewire(EditPipeline::class, [
         'record' => $pipeline->getKey(),
+        'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
@@ -93,6 +95,7 @@ it('can validate edit pipeline inputs', function ($data, $errors) {
 
     livewire(EditPipeline::class, [
         'record' => $pipeline->getKey(),
+        'parentRecord' => $project,
     ])
         ->fillForm($request)
         ->call('save')
@@ -136,6 +139,7 @@ it('can edit pipelines', function () {
 
     livewire(EditPipeline::class, [
         'record' => $pipeline->getKey(),
+        'parentRecord' => $project,
     ])
         ->fillForm($requestData)
         ->call('save')
@@ -169,6 +173,7 @@ it('can delete pipelines', function () {
 
     livewire(EditPipeline::class, [
         'record' => $pipeline->getKey(),
+        'parentRecord' => $project,
     ])
         ->callAction('delete')
         ->assertRedirect();

@@ -69,6 +69,7 @@ it('can render edit pipeline entry with proper permission', function () {
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertForbidden();
 
@@ -84,6 +85,7 @@ it('can render edit pipeline entry with proper permission', function () {
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
@@ -110,11 +112,12 @@ it('returns 404 if pipeline entry does not belong to the pipeline', function () 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertStatus(404);
 });
 
-it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -153,6 +156,7 @@ it('shows the pipeline name in the breadcrumb', function () {
     get(EditPipelineEntry::getUrl([
         'record' => $pipeline->getRouteKey(),
         'pipelineEntry' => $entry->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding');
@@ -177,6 +181,7 @@ it('can save pipeline entry with updated description and due date', function () 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->fillForm([
             'description' => 'Updated description.',
@@ -211,6 +216,7 @@ it('persists related milestones, assets, and service requests on save', function
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->fillForm([
             'milestones' => [$milestone->id],
@@ -247,6 +253,7 @@ it('can save pipeline entry with an assigned user', function () {
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->fillForm([
             'assigned_to_type' => 'user',
@@ -281,6 +288,7 @@ it('can save pipeline entry with an assigned contact', function () {
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->fillForm([
             'assigned_to_type' => 'contact',
@@ -314,6 +322,7 @@ it('can clear the assigned user on a pipeline entry', function () {
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->fillForm([
             'assigned_to_type' => null,
@@ -347,6 +356,7 @@ it('sets assigned_to_type to contact when entry has an assigned contact', functi
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertFormFieldExists('assigned_to_type')
         ->assertSet('data.assigned_to_type', 'contact');
@@ -371,6 +381,7 @@ it('sets assigned_to_type to user when entry has an assigned user', function () 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertFormFieldExists('assigned_to_type')
         ->assertSet('data.assigned_to_type', 'user');
@@ -394,6 +405,7 @@ it('sets assigned_to_type to null when entry has no assigned user', function () 
     livewire(EditPipelineEntry::class, [
         'record' => $pipeline,
         'pipelineEntry' => $entry,
+        'parentRecord' => $project,
     ])
         ->assertSet('data.assigned_to_type', null);
 });

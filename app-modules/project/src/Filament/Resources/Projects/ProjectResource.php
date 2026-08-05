@@ -103,7 +103,7 @@ class ProjectResource extends Resource
             'manage-managers' => ManageManagers::route('/{record}/managers'),
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
             'manage-files' => ManageFiles::route('/{record}/files'),
-            'manage-pipelines' => ManagePipelines::route('/{record}/pipelines'),
+            'pipelines' => ManagePipelines::route('/{record}/pipelines'),
             'manage-milestones' => ManageMilestones::route('/{record}/milestones'),
             'manage-guests' => ManageGuests::route('/{record}/guests'),
         ];
