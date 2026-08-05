@@ -106,36 +106,6 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
         ->and($emailTemplate->body)->toEqualCanonicalizing($request['body']);
 });
 
-test('it keeps a template whose content consists only of merge tags', function () {
-    $content = [
-        'type' => 'doc',
-        'content' => [[
-            'type' => 'paragraph',
-            'content' => [['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']]],
-        ]],
-    ];
-
-    $emailTemplate = ServiceRequestTypeEmailTemplate::factory()->create([
-        'subject' => $content,
-        'body' => $content,
-    ]);
-
-    asSuperAdmin();
-
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
-        'record' => $emailTemplate->serviceRequestType->getKey(),
-        'type' => $emailTemplate->type,
-    ])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    $saved = ServiceRequestTypeEmailTemplate::query()->whereKey($emailTemplate->getKey())->first();
-
-    expect($saved)->not->toBeNull()
-        ->and($saved->subject)->toEqual($content)
-        ->and($saved->body)->toEqual($content);
-});
-
 test('it disables the unsaved data changes alert to avoid false positives on this complex form', function () {
     $page = new ServiceRequestTypeEmailTemplatePage();
 

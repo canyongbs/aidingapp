@@ -32,31 +32,40 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseButton from '@common/BaseButton.vue';
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
-    import Page from '@common/portal/Page.vue';
-    import Pagination from '@common/portal/Pagination.vue';
-    import { computed, ref, watch } from 'vue';
+    import { computed, onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
+    import Page from '../Components/Page.vue';
+    import Pagination from '../Components/Pagination.vue';
     import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
-    import { apiGet } from '../Services/api.js';
-    import { useServiceMonitorData } from './loaders.js';
+    import { consumer } from '../Services/Consumer.js';
 
-    // Page 1 arrives via the route data loader; subsequent pages are fetched on demand.
-    const { data: initialData } = useServiceMonitorData();
+    const emit = defineEmits(['fetchNextPage', 'fetchPreviousPage', 'fetchPage', 'change-filter']);
 
     const result = ref([]);
-    const loadingPage = ref(null);
+    const { get } = consumer();
+    const loading = ref(true);
 
     const currentPage = ref(1);
-    const lastPage = ref(1);
+    const nextPageUrl = ref(null);
+    const prevPageUrl = ref(null);
+    const lastPage = ref(null);
     const totalArticles = ref(0);
     const fromArticle = ref(0);
     const toArticle = ref(0);
 
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
     const okTitle = 'All systems operational';
     const okMessage =
         'All systems are functioning seamlessly, with no disruptions or downtime reported. Every component, from critical infrastructure to auxiliary services is running at full capacity, ensuring optimal performance and reliability.';
+
     const issueTitle = 'Some systems are experiencing issues';
     const issueMessage = 'One or more services are currently experiencing disruptions or downtime.';
 
@@ -69,52 +78,58 @@
     const systemTitle = computed(() => (hasIssues.value ? issueTitle : okTitle));
     const systemMessage = computed(() => (hasIssues.value ? issueMessage : okMessage));
 
-    function setPagination(pagination) {
+    const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
+        prevPageUrl.value = pagination.prev_page_url;
+        nextPageUrl.value = pagination.next_page_url;
         lastPage.value = pagination.last_page;
         totalArticles.value = pagination.total;
         fromArticle.value = pagination.from;
         toArticle.value = pagination.to;
-    }
+    };
 
-    function applyResponse(response) {
-        if (!response) {
-            return;
+    const fetchNextPage = () => {
+        loading.value = true;
+        currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
+        getServiceMonitors(currentPage.value);
+    };
+
+    const fetchPreviousPage = () => {
+        loading.value = true;
+        currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
+        getServiceMonitors(currentPage.value);
+    };
+
+    const fetchPage = (page) => {
+        loading.value = true;
+        getServiceMonitors(page);
+    };
+
+    async function fetchData(page = 1) {
+        const response = await get(`${props.apiUrl}/status?page=${page}`);
+
+        if (response.error) {
+            throw new Error(response.error);
         }
 
-        result.value = response.data;
-        setPagination(response.meta);
+        return response.data;
     }
-
-    watch(initialData, applyResponse, { immediate: true });
 
     async function getServiceMonitors(page = 1) {
-        loadingPage.value = page;
-
-        try {
-            applyResponse(await apiGet('/status', { page }));
-        } catch (error) {
-            console.error('Error fetching service monitors:', error);
-        } finally {
-            loadingPage.value = null;
-        }
+        await fetchData(page)
+            .then((response) => {
+                loading.value = false;
+                result.value = response.data;
+                setPagination(response.meta);
+            })
+            .catch((error) => {
+                console.error('Error fetching service monitors:', error);
+            });
     }
 
-    function fetchNextPage() {
-        if (currentPage.value < lastPage.value) {
-            getServiceMonitors(currentPage.value + 1);
-        }
-    }
-
-    function fetchPreviousPage() {
-        if (currentPage.value > 1) {
-            getServiceMonitors(currentPage.value - 1);
-        }
-    }
-
-    function fetchPage(page) {
-        getServiceMonitors(page);
-    }
+    onMounted(async () => {
+        getServiceMonitors();
+    });
 </script>
 
 <template>
@@ -126,38 +141,59 @@
             <Breadcrumbs :currentCrumb="'Status'" />
         </template>
 
-        <template v-if="result.length > 0">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <ServiceMonitorCard
-                    v-for="(serviceMonitor, index) in result"
-                    :key="index"
-                    :name="serviceMonitor.name"
-                    :status="serviceMonitor.latest_history?.succeeded ?? true"
-                    :message="
-                        serviceMonitor.latest_history?.status_message ?? 'No known issues (monitoring not yet started).'
-                    "
-                />
-            </div>
+        <template v-if="!loading">
+            <template v-if="result.length > 0">
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <ServiceMonitorCard
+                        v-for="(serviceMonitor, index) in result"
+                        :key="index"
+                        :name="serviceMonitor.name"
+                        :status="serviceMonitor.latest_history?.succeeded ?? true"
+                        :message="
+                            serviceMonitor.latest_history?.status_message ??
+                            'No known issues (monitoring not yet started).'
+                        "
+                    />
+                </div>
 
-            <Pagination
-                v-if="lastPage > 1"
-                :currentPage="currentPage"
-                :lastPage="lastPage"
-                :fromItem="fromArticle"
-                :toItem="toArticle"
-                :totalItems="totalArticles"
-                :loadingPage="loadingPage"
-                @fetchNextPage="fetchNextPage"
-                @fetchPreviousPage="fetchPreviousPage"
-                @fetchPage="fetchPage"
-            />
+                <Pagination
+                    v-if="lastPage > 1"
+                    :currentPage="currentPage"
+                    :lastPage="lastPage"
+                    :fromItem="fromArticle"
+                    :toItem="toArticle"
+                    :totalItems="totalArticles"
+                    @fetchNextPage="fetchNextPage"
+                    @fetchPreviousPage="fetchPreviousPage"
+                    @fetchPage="fetchPage"
+                />
+            </template>
+
+            <EmptyState v-else>
+                <template #heading>There are no service monitors to display.</template>
+                <template #actions>
+                    <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
+                        Return Home
+                    </BaseButton>
+                </template>
+            </EmptyState>
         </template>
 
-        <EmptyState v-else>
-            <template #heading>There are no service monitors to display.</template>
-            <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
-            </template>
-        </EmptyState>
+        <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <div
+                v-for="n in 15"
+                :key="`service-monitor-skeleton-${n}`"
+                class="flex items-center gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5 animate-pulse"
+            >
+                <div class="size-6 bg-gray-300 rounded-full shrink-0"></div>
+
+                <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
+                    <div class="h-4 bg-gray-300 rounded w-24"></div>
+                    <div class="h-3 bg-gray-200 rounded w-32"></div>
+                </div>
+
+                <div class="size-5 bg-gray-300 rounded-full shrink-0 self-center"></div>
+            </div>
+        </div>
     </Page>
 </template>

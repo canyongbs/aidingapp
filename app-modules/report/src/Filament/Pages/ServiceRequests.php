@@ -44,26 +44,17 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
-use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
-use CodeWithDennis\FilamentSelectTree\SelectTree;
-use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Notifications\Notification;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
-use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
@@ -106,50 +97,6 @@ class ServiceRequests extends Dashboard
         return $schema->components([
             Section::make()
                 ->schema([
-                    SelectTree::make('serviceRequestTypes')
-                        ->label('Service Request Types')
-                        ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(withoutArchived: true))
-                        ->multiple()
-                        ->searchable()
-                        ->live()
-                        ->placeholder('All'),
-                    Actions::make([
-                        Action::make('loadAffiliatedServiceRequestTypes')
-                            ->label('My Affiliated Types')
-                            ->icon(Heroicon::UserGroup)
-                            ->action(function (Set $set): void {
-                                $affiliatedTypeIds = $this->getAffiliatedServiceRequestTypeIds();
-
-                                if (blank($affiliatedTypeIds)) {
-                                    Notification::make()
-                                        ->title('You are not a manager or auditor of any Service Request Types')
-                                        ->warning()
-                                        ->send();
-
-                                    return;
-                                }
-
-                                $set('serviceRequestTypes', $affiliatedTypeIds);
-
-                                $this->updatedFilters();
-                            }),
-                        Action::make('clearServiceRequestTypes')
-                            ->label('Clear')
-                            ->color('gray')
-                            ->icon(Heroicon::XMark)
-                            ->disabled(fn (Get $get): bool => blank($get('serviceRequestTypes')))
-                            ->action(function (Set $set): void {
-                                $set('serviceRequestTypes', []);
-
-                                $this->updatedFilters();
-                            }),
-                    ])
-                        ->key('serviceRequestTypeActions'),
-                ])
-                ->columns(1)
-                ->columnSpanFull(),
-            Section::make()
-                ->schema([
                     DatePicker::make('startDate')
                         ->native(false)
                         ->maxDate(fn (Get $get) => $get('endDate') ?: now())
@@ -170,34 +117,6 @@ class ServiceRequests extends Dashboard
                 ])
                 ->columns(2),
         ]);
-    }
-
-    /**
-     * @return array<int, string>
-     */
-    public function getAffiliatedServiceRequestTypeIds(): array
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        $departmentId = $user->department?->getKey();
-
-        return ServiceRequestType::query()
-            ->withoutArchived()
-            ->where(function (Builder $query) use ($user, $departmentId): void {
-                $query->whereHas('managerUsers', fn (Builder $query) => $query->whereKey($user->getKey()))
-                    ->orWhereHas('auditorUsers', fn (Builder $query) => $query->whereKey($user->getKey()));
-
-                if (blank($departmentId)) {
-                    return;
-                }
-
-                $query->orWhereHas('managerDepartments', fn (Builder $query) => $query->whereKey($departmentId))
-                    ->orWhereHas('auditorDepartments', fn (Builder $query) => $query->whereKey($departmentId));
-            })
-            ->orderBy('name')
-            ->pluck('id')
-            ->all();
     }
 
     public function getWidgets(): array

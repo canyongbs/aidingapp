@@ -45,6 +45,7 @@ use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\actingAs;
@@ -81,13 +82,11 @@ it('can render create pipeline entry with proper permission', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
     $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertActionVisible('addEntry');
+        ->assertActionVisible(TestAction::make('addEntry')->table());
 });
 
 it('can create a pipeline entry via the kanban add entry action', function () {

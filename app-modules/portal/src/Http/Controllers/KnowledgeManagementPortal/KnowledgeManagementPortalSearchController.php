@@ -63,53 +63,48 @@ class KnowledgeManagementPortalSearchController extends Controller
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $mapArticle = function (KnowledgeBaseItem $article) {
-            return [
-                'id' => $article->getKey(),
-                'categorySlug' => $article->category->slug,
-                'name' => $article->title,
-                'tags' => $article->tags
-                    ->sortBy('name')
-                    ->map(fn ($tag) => [
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ])
-                    ->values()
-                    ->toArray(),
-                'featured' => $article->is_featured,
-            ];
-        };
-
-        $articlesFor = function (string $filter) use ($search, $tags, $mapArticle) {
-            return KnowledgeBaseArticleData::collect(
-                KnowledgeBaseItem::query()
-                    ->with(['category', 'tags'])
-                    ->public()
-                    ->when(
-                        $search->isNotEmpty(),
-                        fn (Builder $query) => $query
-                            ->whereRaw(
-                                "search_vector @@ websearch_to_tsquery('english', ?)",
-                                [$search]
-                            )
-                            ->orderByRaw(
-                                "ts_rank_cd(search_vector, websearch_to_tsquery('english', ?)) DESC",
-                                [$search]
-                            )
-                            ->orderBy('id')
-                    )
-                    ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
-                    ->when($filter === 'featured', function (Builder $query) {
-                        $query->where('is_featured', true);
-                    })
-                    ->when($filter === 'most-viewed', function (Builder $query) {
-                        $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
-                    })
-                    ->paginate(5)
-                    ->through($mapArticle)
-            );
-        };
-
+        $itemData = KnowledgeBaseArticleData::collect(
+            KnowledgeBaseItem::query()
+                ->public()
+                ->with('tags')
+                ->when(
+                    $search->isNotEmpty(),
+                    fn (Builder $query) => $query
+                        ->whereRaw(
+                            "search_vector @@ websearch_to_tsquery('english', ?)",
+                            [$search]
+                        )
+                        ->orderByRaw(
+                            "ts_rank_cd(search_vector, websearch_to_tsquery('english', ?)) DESC",
+                            [$search]
+                        )
+                        ->orderBy('id')
+                )
+                ->when($tags->isNotEmpty(), fn (Builder $query) => $query->whereHas('tags', fn (Builder $query) => $query->whereIn('id', $tags)))
+                ->when($request->get('filter') === 'featured', function (Builder $query) {
+                    $query->where('is_featured', true);
+                })
+                ->when($request->get('filter') === 'most-viewed', function (Builder $query) {
+                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
+                })
+                ->paginate(5)
+                ->through(function (KnowledgeBaseItem $article) {
+                    return [
+                        'id' => $article->getKey(),
+                        'categorySlug' => $article->category->slug,
+                        'name' => $article->title,
+                        'tags' => $article->tags()
+                            ->orderBy('name')
+                            ->select([
+                                'id',
+                                'name',
+                            ])
+                            ->get()
+                            ->toArray(),
+                        'featured' => $article->is_featured,
+                    ];
+                })
+        );
         $categoryData = KnowledgeBaseCategoryData::collect(
             KnowledgeBaseCategory::query()
                 ->tap(new SearchBy('name', $search))
@@ -124,18 +119,11 @@ class KnowledgeManagementPortalSearchController extends Controller
                 ->toArray()
         );
 
-        if ($request->has('filter')) {
-            return KnowledgeManagementSearchData::from([
-                'articles' => $articlesFor((string) $request->get('filter')),
-                'categories' => $categoryData,
-            ])->wrap('data');
-        }
-
-        return KnowledgeManagementSearchData::from([
-            'articles' => $articlesFor(''),
+        $searchResults = KnowledgeManagementSearchData::from([
+            'articles' => $itemData,
             'categories' => $categoryData,
-            'featured_articles' => $articlesFor('featured'),
-            'most_viewed_articles' => $articlesFor('most-viewed'),
-        ])->wrap('data');
+        ]);
+
+        return $searchResults->wrap('data');
     }
 }

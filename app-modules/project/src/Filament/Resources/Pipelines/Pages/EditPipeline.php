@@ -135,9 +135,9 @@ class EditPipeline extends EditRecord
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ...($project ? [
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
+                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
             ] : []),
-            Str::limit($this->getRecordTitle(), 16),
+            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 

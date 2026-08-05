@@ -37,21 +37,13 @@
 namespace AidingApp\Engagement\Observers;
 
 use AidingApp\Engagement\Models\EngagementBatch;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
 
 class EngagementBatchObserver
 {
-    use ConvertsLiteralMergeTags;
-
     public function creating(EngagementBatch $batch): void
     {
         if (empty($batch->user_id) && auth()->check()) {
             $batch->user_id = auth()->id();
         }
-    }
-
-    public function saving(EngagementBatch $batch): void
-    {
-        $this->convertLiteralMergeTags($batch, ['body']);
     }
 }

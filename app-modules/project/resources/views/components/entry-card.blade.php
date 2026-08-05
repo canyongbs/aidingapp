@@ -35,7 +35,7 @@
     class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
-    wire:key="pipeline-entry-{{ $entry->getKey() }}"
+    wire:key="pipeline-{{ $pipeline->getKey() }}-{{ time() }}"
 >
     <div class="flex items-center justify-between">
         <div class="text-base font-semibold text-gray-900 dark:text-white">

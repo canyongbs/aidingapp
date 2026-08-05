@@ -40,7 +40,6 @@ use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 
@@ -78,12 +77,11 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
-        $types = $this->getServiceRequestTypes();
 
-        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types);
+        $shouldBypassCache = filled($startDate) || filled($endDate);
 
         $serviceRequestByCategory = $shouldBypassCache
-            ? $this->getServiceRequestCategoryData($startDate, $endDate, $types)
+            ? $this->getServiceRequestCategoryData($startDate, $endDate)
             : Cache::tags(["{{$this->cacheTag}}"])->remember('service-request-category-distribution', now()->addHours(24), function (): Collection {
                 return $this->getServiceRequestCategoryData();
             });
@@ -107,11 +105,9 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
     }
 
     /**
-     * @param array<int, string>|null $types
-     *
      * @return Collection<int, array{label: string, count: int, bg_color: string}>
      */
-    private function getServiceRequestCategoryData(?Carbon $startDate = null, ?Carbon $endDate = null, ?array $types = null): Collection
+    private function getServiceRequestCategoryData(?Carbon $startDate = null, ?Carbon $endDate = null): Collection
     {
         $counts = [];
 
@@ -120,10 +116,6 @@ class ServiceRequestCategoryDistributionDonutChart extends ChartReportWidget
 
             if ($startDate && $endDate) {
                 $query->whereBetween('created_at', [$startDate, $endDate]);
-            }
-
-            if ($types) {
-                $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types));
             }
 
             $count = $query->count();

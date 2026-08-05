@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -49,6 +50,7 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -61,14 +63,11 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public Pipeline $pipeline;
 
-    public ?string $project = null;
-
     public ?PipelineEntry $currentPipelineEntry = null;
 
-    public function mount(Pipeline $pipeline, ?string $project = null): void
+    public function mount(Pipeline $pipeline): void
     {
         $this->pipeline = $pipeline;
-        $this->project = $project;
     }
 
     /**
@@ -79,10 +78,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
         /**
          * @var Collection<int, PipelineEntry> $entries
          */
-        $entries = $this->pipeline->entries()
-            ->with('organizable')
-            ->oldest()
-            ->get();
+        $entries = $this->pipeline->entries()->get();
 
         return $entries->groupBy(function (PipelineEntry $entry): string {
             /** @var int|string|null $stageId */
@@ -97,24 +93,19 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
      */
     public function getStages(): Collection
     {
-        return $this->pipeline->stages()
-            ->orderBy('order')
+        return PipelineStage::whereHas('pipeline', function (Builder $query) {
+            return $query->where('id', $this->pipeline->getKey());
+        })
             ->pluck('name', 'id');
     }
 
-    public function movedEntry(string $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
+    public function moveEntry(Pipeline $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
     {
-        $this->authorize('update', $this->pipeline);
-
         try {
-            $stage = $this->pipeline->stages()->whereKey($toStage)->firstOrFail();
-
-            $this->pipeline->entries()
-                ->whereKey($entryId)
-                ->where('pipeline_stage_id', $fromStage)
-                ->firstOrFail()
+            PipelineEntry::where('pipeline_stage_id', $fromStage)
+                ->where('id', $entryId)
                 ->update([
-                    'pipeline_stage_id' => $stage->getKey(),
+                    'pipeline_stage_id' => $toStage,
                 ]);
         } catch (Exception $exception) {
             report($exception);
@@ -137,7 +128,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->slideOver()
             ->label('Add pipeline entry')
             ->model(PipelineEntry::class)
-            ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
             ->schema([
                 TextInput::make('name')
                     ->maxLength(255)
@@ -146,26 +136,12 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     ->columnSpanFull(),
                 ...PipelineEntryForm::components($this->pipeline),
             ])
-            ->action(function (array $data, array $arguments, Action $action) {
-                $stage = $this->pipeline->stages()->whereKey($arguments['stage'] ?? null)->first();
-
-                if (! $stage) {
-                    Notification::make()
-                        ->danger()
-                        ->title('Pipeline entry could not be added')
-                        ->body('The selected stage does not belong to this pipeline.')
-                        ->send();
-
-                    $action->halt();
-
-                    return;
-                }
-
+            ->action(function (array $data, array $arguments) {
                 $dataArray = [
                     'name' => $data['name'],
                     'organizable_type' => $data['organizable_type'],
                     'organizable_id' => $data['organizable_id'],
-                    'pipeline_stage_id' => $stage->getKey(),
+                    'pipeline_stage_id' => $arguments['stage'],
                 ];
 
                 $dataArray = [
@@ -192,6 +168,29 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             });
     }
 
+    public function movedEntry(Pipeline $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
+    {
+        try {
+            PipelineEntry::where('pipeline_stage_id', $fromStage)
+                ->where('id', $entryId)
+                ->update([
+                    'pipeline_stage_id' => $toStage,
+                ]);
+        } catch (Exception $exception) {
+            report($exception);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Pipline could not be moved. Something went wrong, if this continues please contact support.',
+            ], ResponseAlias::HTTP_BAD_REQUEST);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Pipeline stage updated successfully.',
+        ], ResponseAlias::HTTP_OK);
+    }
+
     public function render(): View
     {
         return view('project::livewire.pipeline-entry-kanban', [
@@ -202,16 +201,10 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
     {
-        $params = [
+        $this->redirect(PipelineEntryResource::getUrl('view', [
             'record' => $pipelineEntry,
             'pipeline' => $this->pipeline,
             'from' => 'kanban',
-        ];
-
-        if (filled($this->project)) {
-            $params['project'] = $this->project;
-        }
-
-        $this->redirect(PipelineEntryResource::getUrl('view', $params));
+        ]));
     }
 }

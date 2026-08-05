@@ -50,7 +50,7 @@ class KnowledgeManagementPortalCategoryController extends Controller
         return response()->json(
             KnowledgeBaseCategoryData::collect(
                 KnowledgeBaseCategory::query()
-                    ->whereNull('parent_id')
+                    ->where('parent_id', null)
                     ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
                     ->orderBy('sort')
                     ->get()
@@ -69,43 +69,6 @@ class KnowledgeManagementPortalCategoryController extends Controller
 
     public function show(KnowledgeBaseCategory $category): JsonResponse
     {
-        $mapArticle = function (KnowledgeBaseItem $article) use ($category) {
-            return [
-                'id' => $article->getKey(),
-                'categorySlug' => $category->slug,
-                'name' => $article->title,
-                'tags' => $article->tags
-                    ->sortBy('name')
-                    ->map(fn ($tag) => [
-                        'id' => $tag->id,
-                        'name' => $tag->name,
-                    ])
-                    ->values()
-                    ->toArray(),
-                'featured' => $article->is_featured,
-            ];
-        };
-
-        $articlesFor = function (string $filter) use ($category, $mapArticle) {
-            return $category->knowledgeBaseItems()
-                ->with('tags')
-                ->public()
-                ->when($filter === 'featured', function (Builder $query) {
-                    $query->where('is_featured', true);
-                })
-                ->when($filter === 'most-viewed', function (Builder $query) {
-                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
-                })
-                ->paginate(5)
-                ->through($mapArticle);
-        };
-
-        if (request()->has('filter')) {
-            return response()->json([
-                'articles' => $articlesFor((string) request()->get('filter')),
-            ]);
-        }
-
         return response()->json([
             'category' => KnowledgeBaseCategoryData::from([
                 'slug' => $category->slug,
@@ -128,9 +91,32 @@ class KnowledgeManagementPortalCategoryController extends Controller
                         ]);
                     }),
             ]),
-            'all_articles' => $articlesFor(''),
-            'featured_articles' => $articlesFor('featured'),
-            'most_viewed_articles' => $articlesFor('most-viewed'),
+            'articles' => $category->knowledgeBaseItems()
+                ->with('tags')
+                ->public()
+                ->when(request()->get('filter') === 'featured', function (Builder $query) {
+                    $query->where('is_featured', true);
+                })
+                ->when(request()->get('filter') === 'most-viewed', function (Builder $query) {
+                    $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
+                })
+                ->paginate(5)
+                ->through(function (KnowledgeBaseItem $article) {
+                    return [
+                        'id' => $article->getKey(),
+                        'categorySlug' => $article->category->slug,
+                        'name' => $article->title,
+                        'tags' => $article->tags()
+                            ->orderBy('name')
+                            ->select([
+                                'id',
+                                'name',
+                            ])
+                            ->get()
+                            ->toArray(),
+                        'featured' => $article->is_featured,
+                    ];
+                }),
         ]);
     }
 }

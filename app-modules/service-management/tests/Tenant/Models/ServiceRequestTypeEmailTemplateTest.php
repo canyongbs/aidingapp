@@ -166,5 +166,5 @@ it('renders the contact recipient full name into an educatable notification body
 
     $message = (new SendEducatableServiceRequestOpenedNotification($serviceRequest, $template))->toMail($contact);
 
-    expect($message->viewData['content'])->toContain(e($contact->{$contact::displayNameKey()}));
+    expect($message->viewData['content'])->toContain($contact->{$contact::displayNameKey()});
 });

@@ -32,23 +32,35 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
-    import { useQuery } from '@pinia/colada';
-    import { computed, ref, watch } from 'vue';
+    import { computed, onMounted, ref, watch } from 'vue';
     import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
-    import { apiGet } from '../Services/api.js';
-    import { useAssetsData } from './loaders.js';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
+    import { consumer } from '../Services/Consumer';
 
-    // The route data loader resolves page 1 of every filter tab (all/checked out/
-    // returned) together, so any other page is fetched (and cached) client-side.
-    const { data: initialData } = useAssetsData();
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
+    const { get } = consumer();
 
     const activeFilter = ref('all');
+    const loading = ref(true);
+
+    const assets = ref([]);
+    const counts = ref({ total: 0, checked_out: 0, returned: 0 });
+
     const currentPage = ref(1);
+    const lastPage = ref(1);
+    const fromItem = ref(0);
+    const toItem = ref(0);
+    const totalItems = ref(0);
 
     const tabs = computed(() => [
         { key: 'all', label: 'All' },
@@ -56,55 +68,36 @@
         { key: 'returned', label: 'Returned' },
     ]);
 
-    const pageQuery = useQuery({
-        key: () => ['knowledge-management', 'assets', activeFilter.value, currentPage.value],
-        query: () => apiGet('/assets', { filter: activeFilter.value, page: currentPage.value }),
-        enabled: () => currentPage.value > 1,
-    });
+    async function fetchAssets(page = 1) {
+        loading.value = true;
 
-    function firstPageFor(filter) {
-        return initialData.value?.[filter] ?? null;
-    }
+        try {
+            const response = await get(`${props.apiUrl}/assets`, {
+                filter: activeFilter.value,
+                page,
+            });
 
-    const currentEnvelope = computed(() =>
-        currentPage.value > 1 ? (pageQuery.data.value ?? null) : firstPageFor(activeFilter.value),
-    );
+            const envelope = response.data;
 
-    // Keeps the previous filter/page visible while a new one loads.
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
+            assets.value = envelope.data ?? [];
+            counts.value = envelope.counts ?? { total: 0, checked_out: 0, returned: 0 };
 
-    // Only true before the first paint; filter/page switches keep showing `shownEnvelope`.
-    const loading = computed(() => shownEnvelope.value === null);
-
-    const loadingEnvelope = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
-    const loadingPage = computed(() => (loadingEnvelope.value ? currentPage.value : null));
-
-    const assets = computed(() => shownEnvelope.value?.data ?? []);
-    const counts = computed(() => initialData.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
-
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
-
-    watch(activeFilter, () => {
-        currentPage.value = 1;
-    });
-
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
+            currentPage.value = envelope.meta?.current_page ?? 1;
+            lastPage.value = envelope.meta?.last_page ?? 1;
+            fromItem.value = envelope.meta?.from ?? 0;
+            toItem.value = envelope.meta?.to ?? 0;
+            totalItems.value = envelope.meta?.total ?? 0;
+        } catch (error) {
+            assets.value = [];
+            console.error('Error fetching assets:', error);
+        } finally {
+            loading.value = false;
         }
     }
+
+    watch(activeFilter, () => fetchAssets(1));
+
+    onMounted(() => fetchAssets(1));
 </script>
 
 <template>
@@ -124,14 +117,13 @@
             <AssetTable
                 :assets="assets"
                 :loading="loading"
-                :loading-page="loadingPage"
                 :active-filter="activeFilter"
                 :current-page="currentPage"
                 :last-page="lastPage"
                 :from-item="fromItem"
                 :to-item="toItem"
                 :total-items="totalItems"
-                @fetchPage="fetchPage"
+                @fetchPage="fetchAssets"
             />
         </PageCard>
     </Page>

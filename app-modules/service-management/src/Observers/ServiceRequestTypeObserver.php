@@ -36,10 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\ServiceManagement\Actions\PreloadServiceRequestTypeBaseTemplates;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
-use App\Features\ProloadServiceRequestTypeFeature;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestTypeObserver
@@ -51,13 +48,6 @@ class ServiceRequestTypeObserver
         }
 
         $serviceRequestType->sort = DB::raw('(select coalesce(max(sort), 0) + 1 from service_request_types)'); /** @phpstan-ignore assign.propertyType (Assigns a DB raw Expression so the next global sort value is computed atomically in SQL, which the property's int|null type does not allow.) */
-    }
-
-    public function created(ServiceRequestType $serviceRequestType): void
-    {
-        if (ProloadServiceRequestTypeFeature::active() && app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
-            app(PreloadServiceRequestTypeBaseTemplates::class)->execute($serviceRequestType);
-        }
     }
 
     public function deleted(ServiceRequestType $serviceRequestType): void

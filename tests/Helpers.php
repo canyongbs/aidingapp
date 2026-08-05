@@ -67,27 +67,3 @@ function replaceKeyInFixture(mixed $fixture, string $key, mixed $value): mixed
 
     return $fixture;
 }
-
-/**
- * @param array<int, mixed> $nodes
- *
- * @return array<string, mixed>
- */
-function richContentWith(array $nodes): array
-{
-    return [
-        'type' => 'doc',
-        'content' => [[
-            'type' => 'paragraph',
-            'content' => $nodes,
-        ]],
-    ];
-}
-
-/**
- * @return array<string, mixed>
- */
-function richContentText(string $text): array
-{
-    return richContentWith([['type' => 'text', 'text' => $text]]);
-}

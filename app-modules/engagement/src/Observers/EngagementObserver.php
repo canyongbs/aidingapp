@@ -39,23 +39,15 @@ namespace AidingApp\Engagement\Observers;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
 use Illuminate\Database\Eloquent\Model;
 
 class EngagementObserver
 {
-    use ConvertsLiteralMergeTags;
-
     public function creating(Engagement $engagement): void
     {
         if (is_null($engagement->user_id) && auth()->check()) {
             $engagement->user_id = auth()->id();
         }
-    }
-
-    public function saving(Engagement $engagement): void
-    {
-        $this->convertLiteralMergeTags($engagement, ['body']);
     }
 
     public function created(Engagement $engagement): void

@@ -87,12 +87,6 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
-        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
-            abort(404);
-        }
-
-        $this->authorize('view', $this->record);
-
         if (request()->has('from')) {
             session(['pipeline_entry_source' => request('from')]);
         }
@@ -123,16 +117,10 @@ class ViewPipelineEntry extends Page
 
     public function getBackUrl(): string
     {
-        $source = session('pipeline_entry_source', 'table');
-
         $params = ['record' => $this->getPipeline()];
 
         if ($this->project) {
             $params['project'] = $this->project;
-        }
-
-        if ($source === 'kanban') {
-            $params['viewType'] = 'kanban';
         }
 
         return PipelineResource::getUrl('entries', $params);
@@ -161,9 +149,6 @@ class ViewPipelineEntry extends Page
                         TextEntry::make('organizable_type')
                             ->label('Organization Type')
                             ->formatStateUsing(fn (string $state): string => ucfirst($state))
-                            ->badge(),
-                        TextEntry::make('pipelineStage.name')
-                            ->label('Stage')
                             ->badge(),
                         TextEntry::make('description')
                             ->label('Description')
@@ -214,7 +199,6 @@ class ViewPipelineEntry extends Page
     {
         return [
             Action::make('edit')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                 ->url(function (): string {
                     $params = [
                         'record' => $this->getPipelineEntry(),
@@ -226,7 +210,6 @@ class ViewPipelineEntry extends Page
                 }),
             DeleteAction::make()
                 ->label('Remove from Pipeline')
-                ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                 ->requiresConfirmation()
                 ->record($this->getPipelineEntry())
                 ->successRedirectUrl(fn (): string => $this->getBackUrl()),

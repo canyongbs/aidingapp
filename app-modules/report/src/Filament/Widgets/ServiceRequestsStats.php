@@ -60,15 +60,13 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
-        $types = $this->getServiceRequestTypes();
         $intervalStart = now()->subDays($this->daysAgo);
 
-        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types);
+        $shouldBypassCache = filled($startDate) || filled($endDate);
 
-        $applyFilters = function (Builder $query) use ($startDate, $endDate, $types) {
+        $applyFilters = function (Builder $query) use ($startDate, $endDate) {
             return $query
-                ->when($startDate && $endDate, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]))
-                ->when($types, fn (Builder $query): Builder => $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types)));
+                ->when($startDate && $endDate, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]));
         };
 
         [$currentAllServiceRequests, $allServiceRequestsPercentageChange, $allServiceRequestsIcon, $allServiceRequestsColor] = $shouldBypassCache

@@ -44,15 +44,13 @@
                                         {{ $stage }}
                                     </div>
 
-                                    @can('update', $pipeline)
-                                        <x-filament::link
-                                            tag="button"
-                                            icon="heroicon-m-plus"
-                                            :wire:click="'mountAction(\'addEntry\', { stage:\'' . $stageKey . '\' })'"
-                                        >
-                                            {{ __('Add') }}
-                                        </x-filament::link>
-                                    @endcan
+                                    <x-filament::link
+                                        tag="button"
+                                        icon="heroicon-m-plus"
+                                        :wire:click="'mountAction(\'addEntry\', { stage:\'' . $stageKey . '\' })'"
+                                    >
+                                        {{ __('Add') }}
+                                    </x-filament::link>
                                 </div>
 
                                 <div

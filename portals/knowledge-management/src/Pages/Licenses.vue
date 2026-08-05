@@ -32,26 +32,54 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseButton from '@common/BaseButton.vue';
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
-    import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/16/solid';
     import { Card } from 'primevue';
-    import { computed, ref } from 'vue';
+    import { onMounted, ref } from 'vue';
+    import BaseButton from '../../../../resources/js/components/BaseButton.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import EmptyState from '../Components/EmptyState.vue';
+    import Page from '../Components/Page.vue';
+    import PageCard from '../Components/PageCard.vue';
+    import { consumer } from '../Services/Consumer';
     import formatDateTime from '../Services/FormatDateTime.js';
-    import { useLicensesData } from './loaders.js';
 
-    const { data: licensesData } = useLicensesData();
-
-    const productLicenses = computed(() => licensesData.value ?? { activeLicense: [], expiredLicense: [] });
-
+    const productLicenses = ref({});
+    const { get } = consumer();
+    const loading = ref(true);
     const showLicenseKeys = ref({});
+
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+    });
+
+    async function getProductLicenses() {
+        const response = await get(`${props.apiUrl}/product-licenses`);
+
+        if (response.error) {
+            throw new Error(response.error);
+        }
+
+        return response.data;
+    }
 
     function toggleLicenseKey(id) {
         showLicenseKeys.value[id] = !showLicenseKeys.value[id];
     }
+
+    onMounted(async () => {
+        await getProductLicenses()
+            .then((response) => {
+                productLicenses.value = response;
+                loading.value = false;
+            })
+            .catch((error) => {
+                console.error('Error fetching product licenses:', error);
+                loading.value = false;
+            });
+    });
 </script>
 
 <template>
@@ -64,7 +92,41 @@
         </template>
 
         <PageCard>
-            <div class="flex flex-col gap-y-8">
+            <div v-if="loading" class="flex flex-col gap-y-8">
+                <div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'active-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="h-6 bg-gray-300 rounded w-24 mb-3"></div>
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        <div
+                            v-for="n in 4"
+                            :key="'expired-skel-' + n"
+                            class="p-7 bg-white text-sm shadow-md rounded-lg border border-gray-200 animate-pulse"
+                        >
+                            <div class="h-4 bg-gray-300 rounded w-1/2 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/4 mb-2"></div>
+                            <div class="h-4 bg-gray-300 rounded w-1/3"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div v-else class="flex flex-col gap-y-8">
                 <div v-if="productLicenses.activeLicense?.length > 0">
                     <h3 class="text-xl font-semibold text-gray-800 mb-3">Active</h3>
                     <div class="grid gap-4 lg:grid-cols-2">
@@ -171,7 +233,7 @@
             </div>
         </PageCard>
 
-        <EmptyState v-if="!productLicenses.activeLicense?.length && !productLicenses.expiredLicense?.length">
+        <EmptyState v-if="!loading && !productLicenses.activeLicense.length && !productLicenses.expiredLicense.length">
             <template #heading>There are no licenses to display.</template>
             <template #actions>
                 <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>

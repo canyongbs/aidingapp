@@ -37,18 +37,21 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ManageAssignmentAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 
 class AssignedToRelationManager extends RelationManager
 {
@@ -79,10 +82,9 @@ class AssignedToRelationManager extends RelationManager
                 Action::make('assign-to-me')
                     ->visible(function () {
                         $user = auth()->user();
-                        $type = $this->getOwnerRecord()->priority?->type;
+                        $type = $this->getOwnerRecord()->priority->type;
 
-                        return $type !== null
-                            && $user->can('update', $this->getOwnerRecord())
+                        return $user->can('update', $this->getOwnerRecord())
                             && is_null($this->getOwnerRecord()->assignedTo)
                             && (
                                 $type->managerUsers->contains('id', $user?->getKey()) ||
@@ -105,7 +107,46 @@ class AssignedToRelationManager extends RelationManager
 
                         $this->dispatch('assignment-history-refresh');
                     }),
-                ManageAssignmentAction::make($this->getOwnerRecord()),
+                Action::make('assign-service-request')
+                    ->visible(fn () => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
+                    ->color('gray')
+                    ->action(function (array $data) {
+                        $assignmentData = [
+                            'user_id' => $data['userId'],
+                            'assigned_by_id' => auth()->user()->getKey() ?? null,
+                            'assigned_by_type' => auth()->user()?->getMorphClass(),
+                            'assigned_at' => now(),
+                            'status' => ServiceRequestAssignmentStatus::Active,
+                        ];
+
+                        $this->getOwnerRecord()->assignments()->create($assignmentData);
+
+                        $this->dispatch('assignment-history-refresh');
+                    })
+                    ->schema([
+                        Select::make('userId')
+                            ->label(fn () => $this->getOwnerRecord()->assignedTo ? 'Reassign' : 'Assign')
+                            ->searchable()
+                            ->getSearchResultsUsing(fn (string $search): array => User::query()
+                                ->where(new Expression('lower(name)'), 'like', '%' . str($search)->lower() . '%')
+                                ->where(function (Builder $query) {
+                                    $typeId = $this->getOwnerRecord()?->priority->type_id ?? null;
+                                    $query->whereHas('department.manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                        $query->where('service_request_type_id', $typeId);
+                                    });
+
+                                    $query->orWhereHas('manageableServiceRequestTypes', function (Builder $query) use ($typeId) {
+                                        $query->where('service_request_type_id', $typeId);
+                                    });
+                                })
+                                ->where('id', '!=', $this->getOwnerRecord()->assignedTo?->user_id)
+                                ->pluck('name', 'id')
+                                ->all())
+                            ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name)
+                            ->placeholder('Search for and select a User')
+                            ->required(),
+                    ]),
             ])
             ->recordActions([
                 ViewAction::make()

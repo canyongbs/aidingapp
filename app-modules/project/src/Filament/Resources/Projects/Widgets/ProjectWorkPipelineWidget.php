@@ -37,9 +37,8 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
-use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
@@ -49,6 +48,7 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -65,8 +65,6 @@ use Livewire\Attributes\Locked;
 
 class ProjectWorkPipelineWidget extends TableWidget
 {
-    use HasPipelineSwitcherAction;
-
     #[Locked]
     public Project $record;
 
@@ -185,15 +183,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ],
             )
             ->headerActions([
-                Action::make('kanban')
-                    ->label('Kanban')
-                    ->icon('heroicon-m-view-columns')
-                    ->url(fn (): string => PipelineResource::getUrl('manage-entries', [
-                        'record' => $pipeline?->getKey(),
-                        'project' => $this->record->getKey(),
-                        'viewType' => 'kanban',
-                    ]))
-                    ->visible(fn (): bool => (bool) $pipeline),
                 CreateAction::make('createEntry')
                     ->label('New Pipeline Entry')
                     ->icon('heroicon-m-plus')
@@ -206,6 +195,38 @@ class ProjectWorkPipelineWidget extends TableWidget
             ]);
     }
 
+    public function selectPipelineAction(): Action
+    {
+        return Action::make('selectPipeline')
+            ->label('Select Pipeline')
+            ->modalHeading('Select Pipeline')
+            ->modalSubmitActionLabel('Select')
+            ->fillForm(fn (): array => ['pipeline_id' => $this->selectedPipelineId])
+            ->schema([
+                TableSelect::make('pipeline_id')
+                    ->hiddenLabel()
+                    ->tableConfiguration(ProjectPipelinesTable::class)
+                    ->tableArguments(['projectId' => $this->record->getKey()])
+                    ->required(),
+            ])
+            ->action(function (array $data): void {
+                $pipelineId = $data['pipeline_id'];
+
+                if (blank($pipelineId) || ! $this->record->pipelines()->whereKey($pipelineId)->exists()) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Invalid pipeline selection')
+                        ->body('The selected pipeline does not belong to this project.')
+                        ->send();
+
+                    return;
+                }
+
+                $this->selectedPipelineId = (string) $pipelineId;
+                $this->resetTable();
+            });
+    }
+
     public function createPipelineAction(): Action
     {
         return Action::make('createPipeline')
@@ -216,22 +237,6 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->schema($this->pipelineFormSchema())
             ->action(fn (array $data) => $this->persistPipeline($data))
             ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record));
-    }
-
-    protected function getPipelineSwitcherProjectId(): ?string
-    {
-        return (string) $this->record->getKey();
-    }
-
-    protected function getPipelineSwitcherCurrentPipelineId(): ?string
-    {
-        return $this->selectedPipelineId;
-    }
-
-    protected function onPipelineSwitcherSelected(string $pipelineId): void
-    {
-        $this->selectedPipelineId = $pipelineId;
-        $this->resetTable();
     }
 
     protected function getTableHeadingView(?Pipeline $pipeline): View

@@ -35,7 +35,7 @@
     import { createMessage } from '@formkit/core';
     import axios from 'axios';
     import { computed, nextTick, ref } from 'vue';
-    import { apiGetUrl } from '../../Services/api.js';
+    import { consumer } from '../../../../../portals/knowledge-management/src/Services/Consumer.js';
 
     import vueFilePond from 'vue-filepond';
 
@@ -70,11 +70,14 @@
                 return;
             }
             const index = fileIndexCounter.value++;
+            const { get } = consumer();
             try {
-                const data = await apiGetUrl(props.context.uploadUrl, {
+                const data = await get(props.context.uploadUrl, {
                     filename: file.name,
                 })
-                    .then(async ({ url, path }) => {
+                    .then(async (response) => {
+                        const { url, path } = response.data;
+
                         return axios
                             .put(url, file, {
                                 headers: {

@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseBadge from '@common/BaseBadge.vue';
-    import Pagination from '@common/portal/Pagination.vue';
+    import BaseBadge from '../../../../../resources/js/components/BaseBadge.vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
+    import Pagination from '../Pagination.vue';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
     import BaseTableCell from '../ui/BaseTableCell.vue';
@@ -53,10 +53,6 @@
         loading: {
             type: Boolean,
             required: true,
-        },
-        loadingPage: {
-            type: Number,
-            default: null,
         },
         activeFilter: {
             type: String,
@@ -174,10 +170,9 @@
                 v-if="lastPage > 1"
                 :current-page="currentPage"
                 :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
+                :from-article="fromItem"
+                :to-article="toItem"
+                :total-articles="totalItems"
                 @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
                 @fetchNextPage="emit('fetchPage', currentPage + 1)"
                 @fetchPage="emit('fetchPage', $event)"

@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
@@ -53,17 +52,13 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
-use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Locked;
 use Livewire\Attributes\Url;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
-    use HasPipelineSwitcherAction;
-
     protected static string $resource = PipelineResource::class;
 
     protected static ?string $relatedResource = PipelineEntryResource::class;
@@ -79,8 +74,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static ?string $title = 'Manage Pipeline Entries';
 
-    protected static ?string $breadcrumb = 'Pipeline Entries';
-
     protected string $view = 'project::filament.pages.manage-pipeline-entries';
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
@@ -88,36 +81,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
     public function mount(int | string $record): void
     {
         parent::mount($record);
-
-        $pipeline = $this->getOwnerRecord();
-        assert($pipeline instanceof Pipeline);
-
-        if (filled($this->project) && (string) $pipeline->project?->getKey() !== $this->project) {
-            abort(404);
-        }
-
-        if (filled($this->project)) {
-            $this->viewType = 'kanban';
-
-            return;
-        }
-
-        $requestedViewType = request()->query('viewType');
-
-        $this->setViewType(filled($requestedViewType) ? $requestedViewType : (session('pipeline-view-type') ?? 'table'));
-    }
-
-    public function getSubheading(): string | Htmlable | null
-    {
-        if (blank($this->project)) {
-            return null;
-        }
-
-        return new HtmlString(
-            view('project::filament.pages.back-to-project', [
-                'url' => ProjectResource::getUrl('view', ['record' => $this->project]),
-            ])->render(),
-        );
+        $this->viewType = session('pipeline-view-type') ?? 'table';
     }
 
     /**
@@ -135,9 +99,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
             ...($project ? [
                 ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
+                ProjectResource::getUrl('manage-pipelines', ['record' => $project]) => 'Pipelines',
             ] : []),
-            Str::limit($this->getRecordTitle(), 16),
+            PipelineResource::getUrl('view', ['record' => $this->getRecord()]) => Str::limit($this->getRecordTitle(), 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
@@ -204,24 +168,5 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ]),
             ])
             ->defaultSort('created_at', 'desc');
-    }
-
-    protected function getPipelineSwitcherProjectId(): ?string
-    {
-        return $this->project;
-    }
-
-    protected function getPipelineSwitcherCurrentPipelineId(): ?string
-    {
-        return (string) $this->getOwnerRecord()->getKey();
-    }
-
-    protected function onPipelineSwitcherSelected(string $pipelineId): void
-    {
-        $this->redirect(static::getUrl([
-            'record' => $pipelineId,
-            'project' => $this->project,
-            'viewType' => $this->viewType,
-        ]));
     }
 }

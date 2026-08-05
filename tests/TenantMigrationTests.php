@@ -35,27 +35,9 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Models\EmailTemplate;
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
-
-use function Tests\richContentText;
-use function Tests\richContentWith;
-
-if (! function_exists('plantLiteralMergeTagContent')) {
-    function plantLiteralMergeTagContent(Model $model, string $attribute, string $text): void
-    {
-        $model->setAttribute($attribute, richContentText($text));
-        $model->saveQuietly();
-    }
-}
 
 describe('2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique', function () {
     $migrationPath = 'app-modules/contact/database/migrations/2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique.php';
@@ -116,113 +98,6 @@ describe('2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique'
                     ->and($trashed->refresh()->email)->toBe('Dupe@Example.com');
             }
         );
-    });
-});
-
-describe('2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_rich_content', function () {
-    $migrationName = '2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_rich_content';
-    $migrationPath = "app-modules/engagement/database/migrations/{$migrationName}.php";
-
-    it('converts literal merge tags across the engagement tables', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $engagement = Engagement::factory()->create();
-            $batch = EngagementBatch::factory()->create();
-            $emailTemplate = EmailTemplate::factory()->create();
-
-            plantLiteralMergeTagContent($engagement, 'body', 'Hello {{ contact full name }}!');
-            plantLiteralMergeTagContent($batch, 'body', 'Hello {{ contact full name }}!');
-            plantLiteralMergeTagContent($emailTemplate, 'content', 'Reach you at {{ contact email }}?');
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $expectedGreeting = richContentWith([
-                ['type' => 'text', 'text' => 'Hello '],
-                ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
-                ['type' => 'text', 'text' => '!'],
-            ]);
-
-            expect($engagement->refresh()->body)->toEqual($expectedGreeting)
-                ->and($batch->refresh()->body)->toEqual($expectedGreeting)
-                ->and($emailTemplate->refresh()->content)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Reach you at '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'contact email']],
-                    ['type' => 'text', 'text' => '?'],
-                ]));
-        });
-    });
-
-    it('leaves content without a recognised merge tag untouched', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $engagement = Engagement::factory()->create();
-
-            plantLiteralMergeTagContent($engagement, 'body', 'Hello {{ not a merge tag }}!');
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($engagement->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
-        });
-    });
-});
-
-describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_request_email_templates', function () {
-    $migrationName = '2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_request_email_templates';
-    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
-
-    it('converts literal merge tags in the subject and body of every template table', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $typeTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
-            $automationTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create();
-            $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create();
-
-            plantLiteralMergeTagContent($typeTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($typeTemplate, 'body', "Hello {{ recipient's name }}!");
-            plantLiteralMergeTagContent($automationTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($automationTemplate, 'body', 'Assigned to {{ assigned manager }}');
-            plantLiteralMergeTagContent($customTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($customTemplate, 'body', "Hi {{ contact's name }}!");
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $expectedSubject = richContentWith([['type' => 'mergeTag', 'attrs' => ['id' => 'title']]]);
-
-            expect($typeTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($typeTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Hello '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']],
-                    ['type' => 'text', 'text' => '!'],
-                ]))
-                ->and($automationTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($automationTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Assigned to '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned staff name']],
-                ]))
-                ->and($customTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($customTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Hi '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'contact name']],
-                    ['type' => 'text', 'text' => '!'],
-                ]));
-        });
-    });
-
-    it('leaves content without a recognised merge tag untouched', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $typeTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
-
-            plantLiteralMergeTagContent($typeTemplate, 'body', 'Hello {{ not a merge tag }}!');
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($typeTemplate->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
-        });
     });
 });
 

@@ -32,12 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseBadge from '@common/BaseBadge.vue';
-    import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
-    import Page from '@common/portal/Page.vue';
-    import Pagination from '@common/portal/Pagination.vue';
-    import { ref, watch } from 'vue';
+    import { defineProps, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import BaseBadge from '../../../../resources/js/components/BaseBadge.vue';
+    import AppLoading from '../Components/AppLoading.vue';
+    import Breadcrumbs from '../Components/Breadcrumbs.vue';
+    import Page from '../Components/Page.vue';
+    import Pagination from '../Components/Pagination.vue';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import BaseTable from '../Components/ui/BaseTable.vue';
@@ -46,20 +47,29 @@
     import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
     import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
     import BaseTableRow from '../Components/ui/BaseTableRow.vue';
-    import { apiGet, apiPost, getApiBaseUrl } from '../Services/api.js';
+    import { consumer } from '../Services/Consumer.js';
     import formatDateTime from '../Services/FormatDateTime.js';
-    import { useServiceRequestData } from './loaders.js';
 
     const route = useRoute();
 
-    // The current service request (page 1 of its updates) arrives via the route data
-    // loader; paginating the updates fetches on demand.
-    const { data: initialData } = useServiceRequestData();
-
-    const uploadUrl = getApiBaseUrl() + '/service-request/request-upload-url';
+    const props = defineProps({
+        apiUrl: {
+            type: String,
+            required: true,
+        },
+        serviceRequest: {
+            type: Object,
+            required: true,
+        },
+        serviceRequestUpdates: {
+            type: Array,
+            required: true,
+        },
+    });
 
     const serviceRequest = ref(null);
     const serviceRequestUpdates = ref([]);
+    const loadingResults = ref(false);
     const authorizationError = ref(null);
     const currentPage = ref(1);
     const nextPageUrl = ref(null);
@@ -71,7 +81,6 @@
     const isSubmitting = ref(false);
     const acceptedMimeTypes = ref([]);
     const updateFormKey = ref(0);
-    const loadingPage = ref(null);
 
     const setPagination = (pagination) => {
         currentPage.value = pagination.current_page;
@@ -83,34 +92,38 @@
         toRecord.value = pagination.to;
     };
 
-    function applyResponse(response) {
-        if (!response) {
-            return;
+    watch(
+        route.params.serviceRequestId,
+        function (newRouteValue) {
+            getData();
+        },
+        {
+            immediate: true,
+        },
+    );
+
+    function getData(page = 1, fromPagination = false) {
+        if (!fromPagination) {
+            loadingResults.value = true;
         }
 
-        serviceRequest.value = response.serviceRequestDetails;
-        serviceRequestUpdates.value = response.serviceRequestUpdates.data || [];
-        acceptedMimeTypes.value = response.acceptedMimeTypes || [];
-        setPagination(response.serviceRequestUpdates);
-    }
+        const { get } = consumer();
 
-    watch(initialData, applyResponse, { immediate: true });
-
-    async function getData(page = 1) {
-        loadingPage.value = page;
-
-        try {
-            applyResponse(await apiGet('/service-request/' + route.params.serviceRequestId, { page }));
-        } catch (error) {
-            console.error('Error loading service request updates:', error);
-        } finally {
-            loadingPage.value = null;
-        }
+        get(props.apiUrl + '/service-request/' + route.params.serviceRequestId, { page: page }).then((response) => {
+            serviceRequest.value = response.data.serviceRequestDetails;
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+            acceptedMimeTypes.value = response.data.acceptedMimeTypes || [];
+            if (!fromPagination) {
+                loadingResults.value = false;
+            }
+            setPagination(response.data.serviceRequestUpdates);
+        });
     }
 
     async function submitUpdate(formValues, node) {
         try {
             isSubmitting.value = true;
+            const { post } = consumer();
 
             let data = {
                 description: formValues.description,
@@ -121,10 +134,14 @@
                 data.files = formValues.files;
             }
 
-            const response = await apiPost('/service-request-update/store', data);
+            const response = await post(props.apiUrl + '/service-request-update/store', data, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
 
-            serviceRequestUpdates.value = response.serviceRequestUpdates.data || [];
-            setPagination(response.serviceRequestUpdates);
+            serviceRequestUpdates.value = response.data.serviceRequestUpdates.data || [];
+            setPagination(response.data.serviceRequestUpdates);
 
             updateFormKey.value++;
         } catch (error) {
@@ -142,17 +159,17 @@
 
     const fetchNextPage = () => {
         currentPage.value = currentPage.value !== lastPage.value ? currentPage.value + 1 : lastPage.value;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 
     const fetchPreviousPage = () => {
         currentPage.value = currentPage.value !== 1 ? currentPage.value - 1 : 1;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 
     const fetchPage = (page) => {
         currentPage.value = page;
-        getData(currentPage.value);
+        getData(currentPage.value, true);
     };
 
     const breadcrumbs = [
@@ -165,7 +182,11 @@
 </script>
 
 <template>
-    <Page v-if="serviceRequest">
+    <div v-if="loadingResults">
+        <AppLoading />
+    </div>
+
+    <Page v-else>
         <template #heading>Service Request Details</template>
         <template #description> View the details and status of your request </template>
 
@@ -250,7 +271,7 @@
                     :accept="acceptedMimeTypes"
                     :classes="{ outer: 'mb-4' }"
                     :size="10"
-                    :upload-url="uploadUrl"
+                    :upload-url="props.apiUrl + '/service-request/request-upload-url'"
                 />
                 <FormKit type="submit" label="Submit Update" :disabled="isSubmitting" :classes="{ input: 'mt-2' }" />
             </FormKit>
@@ -301,7 +322,6 @@
                     :fromItem="fromRecord"
                     :toItem="toRecord"
                     :totalItems="totalRecords"
-                    :loadingPage="loadingPage"
                     @fetchNextPage="fetchNextPage"
                     @fetchPreviousPage="fetchPreviousPage"
                     @fetchPage="fetchPage"

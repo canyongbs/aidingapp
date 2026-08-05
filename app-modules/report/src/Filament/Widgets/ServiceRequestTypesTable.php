@@ -80,11 +80,10 @@ class ServiceRequestTypesTable extends BaseWidget
     {
         $startDate = $this->getStartDate();
         $endDate = $this->getEndDate();
-        $types = $this->getServiceRequestTypes();
 
         return $table
             ->query(
-                function () use ($startDate, $endDate, $types) {
+                function () use ($startDate, $endDate) {
                     $query = ServiceRequestType::withCount([
                         'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
                             $query->when(
@@ -121,11 +120,6 @@ class ServiceRequestTypesTable extends BaseWidget
                     } else {
                         $query->withAvg('serviceRequests', 'time_to_resolution');
                     }
-
-                    $query->when(
-                        $types,
-                        fn (Builder $query): Builder => $query->whereIn('service_request_types.id', $types)
-                    );
 
                     return $query->orderBy('service_requests_count', 'desc');
                 }

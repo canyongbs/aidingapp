@@ -37,21 +37,13 @@
 namespace AidingApp\Engagement\Observers;
 
 use AidingApp\Engagement\Models\EmailTemplate;
-use App\Observers\Concerns\ConvertsLiteralMergeTags;
 
 class EmailTemplateObserver
 {
-    use ConvertsLiteralMergeTags;
-
     public function creating(EmailTemplate $emailTemplate): void
     {
         if (is_null($emailTemplate->user_id) && ! is_null(auth()->user())) {
             $emailTemplate->user_id = auth()->user()->id;
         }
-    }
-
-    public function saving(EmailTemplate $emailTemplate): void
-    {
-        $this->convertLiteralMergeTags($emailTemplate, ['content']);
     }
 }

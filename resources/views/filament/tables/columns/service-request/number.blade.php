@@ -37,14 +37,14 @@
     $record = $getRecord();
 @endphp
 
-<div class="fi-ta-text grid w-max gap-y-1">
+<div class="fi-ta-text grid w-full gap-y-1">
     <div class="flex items-center gap-x-2">
         <span class="text-sm font-medium text-gray-950 dark:text-white">
             {{ $record->service_request_number }}
         </span>
 
         @if ($record->category)
-            <x-filament::badge :color="$record->category->getColor()" class="flex-none">
+            <x-filament::badge :color="$record->category->getColor()">
                 {{ $record->category->getLabel() }}
             </x-filament::badge>
         @endif
