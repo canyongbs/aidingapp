@@ -103,7 +103,6 @@ class KnowledgeBaseArticlesTable extends BaseWidget
                         $categories,
                         fn (Builder $query) => $query->whereIn('category_id', $categories)
                     )
-                    ->orderBy('updated_at', 'desc')
             )
             ->columns([
                 TextColumn::make('title')

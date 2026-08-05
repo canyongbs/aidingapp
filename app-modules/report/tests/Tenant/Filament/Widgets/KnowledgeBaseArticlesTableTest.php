@@ -213,6 +213,81 @@ it('filters records by created_at using the table-level created after filter', f
         ->assertCanNotSeeTableRecords(collect([$oldArticle]));
 });
 
+it('defaults to sorting by updated_at in descending order', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $recentlyUpdatedArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'updated_at' => now(),
+    ])->create();
+
+    $olderUpdatedArticle = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-default-sort-views',
+        'pageFilters' => [],
+    ])
+        ->assertCanSeeTableRecords([$recentlyUpdatedArticle, $olderUpdatedArticle], inOrder: true);
+});
+
+it('allows sorting records by portal_view_count descending, overriding the default updated_at sort', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $highViewsOlderUpdate = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 100,
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    $lowViewsRecentUpdate = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 1,
+        'updated_at' => now(),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-default-sort-tiebreaker',
+        'pageFilters' => [],
+    ])
+        ->sortTable('portal_view_count', 'desc')
+        ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentUpdate], inOrder: true);
+});
+
+it('allows sorting records by updated_at ascending, overriding the default updated_at sort', function () {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $highViewsOlderUpdate = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 100,
+        'updated_at' => now()->subDays(10),
+    ])->create();
+
+    $lowViewsRecentlyUpdated = KnowledgeBaseItem::factory()->state([
+        'status_id' => $status->id,
+        'category_id' => $category->id,
+        'portal_view_count' => 1,
+        'updated_at' => now(),
+    ])->create();
+
+    livewire(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-sort-updated-at-asc',
+        'pageFilters' => [],
+    ])
+        ->sortTable('updated_at', 'asc')
+        ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentlyUpdated], inOrder: true);
+});
+
 it('filters records by updated_at using the table-level updated after filter', function () {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
