@@ -37,14 +37,11 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\Pipeline;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
-use Illuminate\Support\Str;
 
 class ViewPipeline extends ViewRecord
 {
@@ -70,33 +67,5 @@ class ViewPipeline extends ViewRecord
                     ->columns(2),
             ]),
         ]);
-    }
-
-    /**
-     * @return array<string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $pipeline = $this->getRecord();
-
-        assert($pipeline instanceof Pipeline);
-
-        $project = $pipeline->project;
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
-            Str::limit($this->getRecordTitle(), 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
     }
 }

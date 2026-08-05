@@ -36,6 +36,7 @@
 
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
@@ -51,7 +52,9 @@ it('can render with proper permission.', function () {
 
     actingAs($user);
 
-    livewire(CreatePipeline::class)
+    $project = Project::factory()->create();
+
+    livewire(CreatePipeline::class, ['parentRecord' => $project])
         ->assertForbidden();
 
     $user->givePermissionTo('project.view-any');
@@ -60,7 +63,7 @@ it('can render with proper permission.', function () {
     $user->givePermissionTo('pipeline.create');
     $user->refresh();
 
-    livewire(CreatePipeline::class)
+    livewire(CreatePipeline::class, ['parentRecord' => $project])
         ->assertSuccessful();
 });
 
@@ -68,9 +71,11 @@ it('can validate create pipeline inputs', function ($data, $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
+    $project = Project::factory()->create();
+
     $request = CreatePipelineRequestFactory::new($data)->create();
 
-    livewire(CreatePipeline::class)
+    livewire(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -99,9 +104,11 @@ it('can create pipelines', function () {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
+    $project = Project::factory()->create();
+
     $pipelineData = CreatePipelineRequestFactory::new()->create();
 
-    livewire(CreatePipeline::class)
+    livewire(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($pipelineData)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -109,6 +116,7 @@ it('can create pipelines', function () {
     $createdPipeline = Pipeline::first();
     assertCount(1, Pipeline::all());
     expect($createdPipeline->stages)->toHaveCount(3);
+    expect($createdPipeline->project_id)->toBe($project->getKey());
 
     $undoRepeaterFake();
 });
@@ -119,13 +127,15 @@ it('defaults new pipeline stages to planning', function () {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
+    $project = Project::factory()->create();
+
     $pipelineData = [
         'name' => 'Test',
         'description' => 'This is a test pipeline',
         'stages' => [['name' => 'Stage One']],
     ];
 
-    livewire(CreatePipeline::class)
+    livewire(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($pipelineData)
         ->call('create')
         ->assertHasNoFormErrors();

@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\Select;
@@ -93,7 +94,9 @@ class EditPipelineEntry extends Page
             abort(404);
         }
 
-        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+        $projectRouteKey = request()->route('project');
+
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
 

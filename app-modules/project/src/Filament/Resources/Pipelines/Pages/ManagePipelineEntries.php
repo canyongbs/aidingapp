@@ -56,9 +56,6 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 class ManagePipelineEntries extends ManageRelatedRecords
 {
@@ -70,11 +67,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static string $relationship = 'entries';
 
-    public ?string $viewType = null;
-
-    #[Locked, Url]
-    public ?string $project = null;
-
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-adjustments-vertical';
 
     protected static ?string $title = 'Manage Pipeline Entries';
@@ -85,67 +77,15 @@ class ManagePipelineEntries extends ManageRelatedRecords
 
     protected static ?string $navigationLabel = 'Pipeline Entries';
 
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        $pipeline = $this->getOwnerRecord();
-        assert($pipeline instanceof Pipeline);
-
-        if (filled($this->project) && (string) $pipeline->project?->getKey() !== $this->project) {
-            abort(404);
-        }
-
-        if (filled($this->project)) {
-            $this->viewType = 'kanban';
-
-            return;
-        }
-
-        $requestedViewType = request()->query('viewType');
-
-        $this->setViewType(filled($requestedViewType) ? $requestedViewType : (session('pipeline-view-type') ?? 'table'));
-    }
+    public ?string $viewType = null;
 
     public function getSubheading(): string | Htmlable | null
     {
-        if (blank($this->project)) {
-            return null;
-        }
-
         return new HtmlString(
             view('project::filament.pages.back-to-project', [
-                'url' => ProjectResource::getUrl('view', ['record' => $this->project]),
+                'url' => ProjectResource::getUrl('view', ['record' => $this->getParentRecord()]),
             ])->render(),
         );
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    public function getBreadcrumbs(): array
-    {
-        $pipeline = $this->getOwnerRecord();
-
-        assert($pipeline instanceof Pipeline);
-
-        $project = $pipeline->project;
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
-            Str::limit($this->getRecordTitle(), 16),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
     }
 
     public function setViewType(string $viewType): void
@@ -205,10 +145,11 @@ class ManagePipelineEntries extends ManageRelatedRecords
             ])
             ->defaultSort('created_at', 'desc');
     }
-
     protected function getPipelineSwitcherProjectId(): ?string
     {
-        return $this->project;
+        $project = $this->getParentRecord();
+
+        return $project ? (string) $project->getKey() : null;
     }
 
     protected function getPipelineSwitcherCurrentPipelineId(): ?string
@@ -220,8 +161,7 @@ class ManagePipelineEntries extends ManageRelatedRecords
     {
         $this->redirect(static::getUrl([
             'record' => $pipelineId,
-            'project' => $this->project,
-            'viewType' => $this->viewType,
+            'project' => $this->getParentRecord(),
         ]));
     }
 }

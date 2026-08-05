@@ -36,24 +36,10 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
-use AidingApp\Project\Enums\PipelineStageClassification;
-use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\PipelinesRelationManager;
 use AidingApp\Project\Models\Pipeline;
-use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Repeater\TableColumn;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
-use Filament\Schemas\Schema;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ManagePipelines extends ManageRelatedRecords
 {
@@ -73,67 +59,11 @@ class ManagePipelines extends ManageRelatedRecords
         return $user->can('viewAny', [Pipeline::class, $arguments['record']]);
     }
 
-    public function form(Schema $schema): Schema
+    /**
+     * @return array<string>
+     */
+    public function getRelationManagers(): array
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->required()
-                    ->maxLength(65535),
-                Repeater::make('stages')
-                    ->relationship('stages')
-                    ->table([
-                        TableColumn::make('Stage Name'),
-                        TableColumn::make('Classification'),
-                    ])
-                    ->schema([
-                        TextInput::make('name')
-                            ->label('Stage')
-                            ->distinct()
-                            ->required(),
-                        Select::make('classification')
-                            ->label('Classification')
-                            ->options(PipelineStageClassification::class)
-                            ->enum(PipelineStageClassification::class)
-                            ->required()
-                            ->native()
-                            ->default(PipelineStageClassification::Planning->value),
-                    ])
-                    ->orderColumn('order')
-                    ->reorderable()
-                    ->columnSpanFull()
-                    ->label('Pipeline Stages')
-                    ->minItems(1)
-                    ->maxItems(5),
-            ]);
-    }
-
-    public function table(Table $table): Table
-    {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('createdBy.name')->label('Created By'),
-            ])
-            ->headerActions([
-                CreateAction::make()
-                    ->url(PipelineResource::getUrl('create', ['project' => $this->getRecord()->getKey()]))
-                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getRecord())),
-            ])
-            ->filters([
-                Filter::make('createdBy')
-                    ->label('My Pipelines')
-                    ->default()
-                    ->query(fn (Builder $query) => $query->where('created_by_id', auth()->id())),
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('view', ['record' => $record])),
-                EditAction::make()
-                    ->url(fn (Pipeline $record): string => PipelineResource::getUrl('edit', ['record' => $record])),
-            ]);
+        return [PipelinesRelationManager::class];
     }
 }

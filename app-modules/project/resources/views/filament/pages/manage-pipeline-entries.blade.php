@@ -37,94 +37,26 @@
         'fi-resource-' . str_replace('/', '-', $this->getResource()::getSlug()),
     ])
 >
-    @unless ($project)
-        <div class="flex w-full justify-center">
-            <div class="grid max-w-xs grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1 dark:bg-gray-800" role="group">
-                <button
-                    type="button"
-                    @class([
-                        'px-5 py-1.5 text-xs font-medium rounded-lg',
-                        'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'table',
-                        'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'table',
-                    ])
-                    wire:click="setViewType('table')"
-                >
-                    <x-filament::icon class="h-6 w-6" icon="heroicon-m-table-cells" />
-                </button>
-                <button
-                    type="button"
-                    @class([
-                        'px-5 py-1.5 text-xs font-medium rounded-lg',
-                        'text-white bg-gray-900 dark:bg-gray-300 dark:text-gray-900' => $viewType === 'kanban',
-                        'text-gray-900 hover:bg-gray-200 dark:text-white dark:hover:bg-gray-700' => $viewType !== 'kanban',
-                    ])
-                    wire:click="setViewType('kanban')"
-                >
-                    <x-filament::icon class="h-6 w-6" icon="heroicon-m-view-columns" />
-                </button>
-            </div>
-        </div>
-    @endunless
+    <div class="flex w-full justify-center">
+        <x-filament::link
+            tag="button"
+            wire:click="mountAction('selectPipeline')"
+            icon="heroicon-c-chevron-down"
+            icon-position="after"
+            color="gray"
+            size="sm"
+        >
+            {{ $this->getOwnerRecord()->name }}
+        </x-filament::link>
+    </div>
 
-    @if ($project)
-        <div class="flex w-full justify-center">
-            <x-filament::link
-                tag="button"
-                wire:click="mountAction('selectPipeline')"
-                icon="heroicon-c-chevron-down"
-                icon-position="after"
-                color="gray"
-                size="sm"
-            >
-                {{ $this->getOwnerRecord()->name }}
-            </x-filament::link>
-        </div>
-    @endif
-
-    @if ($viewType === 'table')
-        @if ($this->table->getColumns())
-            <div class="flex flex-col gap-y-6">
-                @if (count($tabs = $this->getCachedTabs()))
-                    @php
-                        $activeTab = strval($this->activeTab);
-                        $renderHookScopes = $this->getRenderHookScopes();
-                    @endphp
-
-                    <x-filament::tabs>
-                        @foreach ($tabs as $tabKey => $tab)
-                            @php
-                                $tabKey = strval($tabKey);
-                            @endphp
-
-                            <x-filament::tabs.item
-                                :active="$activeTab === $tabKey"
-                                :badge="$tab->getBadge()"
-                                :badge-color="$tab->getBadgeColor()"
-                                :badge-icon="$tab->getBadgeIcon()"
-                                :badge-icon-position="$tab->getBadgeIconPosition()"
-                                :icon="$tab->getIcon()"
-                                :icon-position="$tab->getIconPosition()"
-                                :wire:click="'$set(\'activeTab\', ' . (filled($tabKey) ? ('\'' . $tabKey . '\'') : 'null') . ')'"
-                                :attributes="$tab->getExtraAttributeBag()"
-                            >
-                                {{ $tab->getLabel() ?? $this->generateTabLabel($tabKey) }}
-                            </x-filament::tabs.item>
-                        @endforeach
-                    </x-filament::tabs>
-                @endif
-
-                {{ $this->table }}
-            </div>
-        @endif
-    @elseif ($viewType === 'kanban')
-        @livewire(
-            'project::livewire.pipeline-entry-kanban',
-            [
-                'pipeline' => $this->getOwnerRecord(),
-                'project' => $project,
-            ]
-        )
-    @endif
+    @livewire(
+        'project::livewire.pipeline-entry-kanban',
+        [
+            'pipeline' => $this->getOwnerRecord(),
+            'project' => $this->getParentRecord()?->getKey(),
+        ]
+    )
 
     <x-filament-actions::modals />
 

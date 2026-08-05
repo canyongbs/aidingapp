@@ -34,19 +34,14 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
-use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -64,6 +59,7 @@ it('can render with proper permission', function () {
 
     get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertForbidden();
 
@@ -74,153 +70,12 @@ it('can render with proper permission', function () {
 
     get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
 });
 
-it('can list pipeline entries', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->create();
-
-    $entries = PipelineEntry::factory()
-        ->count(5)
-        ->create([
-            'pipeline_stage_id' => $pipeline->stages->first()->id,
-        ]);
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->assertCanSeeTableRecords($entries);
-});
-
-it('can filter pipeline entries by stage', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->create();
-
-    $stage1 = $pipeline->stages->first();
-    $stage2 = $pipeline->stages->skip(1)->first();
-
-    $entriesStage1 = PipelineEntry::factory()
-        ->count(3)
-        ->create(['pipeline_stage_id' => $stage1->id]);
-
-    $entriesStage2 = PipelineEntry::factory()
-        ->count(2)
-        ->create(['pipeline_stage_id' => $stage2->id]);
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->filterTable('stage', $stage1->id)
-        ->assertCanSeeTableRecords($entriesStage1)
-        ->assertCanNotSeeTableRecords($entriesStage2);
-});
-
-it('can create pipeline entries', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getKey(),
-    ])
-        ->callTableAction('create', data: [
-            'name' => 'New Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(
-        PipelineEntry::class,
-        ['pipeline_stage_id' => $stage->id]
-    );
-});
-
-it('validates stage_id is required when creating pipeline entries', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getKey(),
-    ])
-        ->callTableAction('create', data: [
-            'stage_id' => null,
-        ])
-        ->assertHasTableActionErrors(['pipeline_stage_id' => 'required']);
-});
-
-it('can delete pipeline entries', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->create();
-
-    $entry = PipelineEntry::factory()
-        ->create([
-            'pipeline_stage_id' => $pipeline->stages->first()->id,
-        ]);
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getKey(),
-    ])
-        ->callTableAction('delete', record: $entry->getKey())
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseMissing(
-        PipelineEntry::class,
-        ['id' => $entry->id]
-    );
-});
-
-it('can switch view types', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(2), 'stages')
-        ->create();
-
-    $component = livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ]);
-
-    expect($component->viewType)->toBe('table');
-
-    $component->call('setViewType', 'kanban');
-
-    expect($component->viewType)->toBe('kanban');
-    expect(session('pipeline-view-type'))->toBe('kanban');
-});
-
-it('defaults to the kanban view when the viewType query parameter is kanban', function () {
+it('renders the kanban board', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -231,13 +86,13 @@ it('defaults to the kanban view when the viewType query parameter is kanban', fu
 
     get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
-        'viewType' => 'kanban',
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
         ->assertSee('Drag pipeline entry here');
 });
 
-it('returns 404 if the project query parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -255,7 +110,7 @@ it('returns 404 if the project query parameter does not match the pipeline\'s pr
         ->assertNotFound();
 });
 
-it('shows a back to project link only when accessed with a project context', function () {
+it('shows a back to project link', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -266,16 +121,10 @@ it('shows a back to project link only when accessed with a project context', fun
 
     get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
-        'project' => $project->getKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
         ->assertSee('Back to Project');
-
-    get(ManagePipelineEntries::getUrl([
-        'record' => $pipeline->getRouteKey(),
-    ]))
-        ->assertSuccessful()
-        ->assertDontSee('Back to Project');
 });
 
 it('shows the selected pipeline name on the pipeline switcher trigger', function () {
@@ -289,7 +138,7 @@ it('shows the selected pipeline name on the pipeline switcher trigger', function
 
     get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
-        'project' => $project->getKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
         ->assertSee('Onboarding Pipeline');
@@ -310,55 +159,14 @@ it('can switch to a different pipeline within the same project via the select pi
 
     livewire(ManagePipelineEntries::class, [
         'record' => $pipelineOne->getRouteKey(),
-        'project' => $project->getKey(),
+        'parentRecord' => $project,
     ])
         ->assertActionVisible('selectPipeline')
         ->callAction('selectPipeline', data: ['pipeline_id' => $pipelineTwo->getKey()])
         ->assertRedirect(ManagePipelineEntries::getUrl([
             'record' => $pipelineTwo->getRouteKey(),
-            'project' => $project->getKey(),
-            'viewType' => 'kanban',
+            'project' => $project->getRouteKey(),
         ]));
-});
-
-it('always renders the kanban view without a table/kanban toggle when accessed within a project context', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-        'project' => $project->getKey(),
-    ])
-        ->assertSet('viewType', 'kanban')
-        ->assertDontSeeHtml("wire:click=\"setViewType('table')\"")
-        ->assertDontSeeHtml("wire:click=\"setViewType('kanban')\"");
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->assertSet('viewType', 'table')
-        ->assertSeeHtml("wire:click=\"setViewType('table')\"")
-        ->assertSeeHtml("wire:click=\"setViewType('kanban')\"");
-});
-
-it('hides the select pipeline action when there is no project context', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])
-        ->assertActionHidden('selectPipeline');
 });
 
 it('rejects switching to a pipeline that does not belong to the project', function () {
@@ -377,13 +185,13 @@ it('rejects switching to a pipeline that does not belong to the project', functi
 
     livewire(ManagePipelineEntries::class, [
         'record' => $pipeline->getRouteKey(),
-        'project' => $project->getKey(),
+        'parentRecord' => $project,
     ])
         ->callAction('selectPipeline', data: ['pipeline_id' => $foreignPipeline->getKey()])
         ->assertNotified('Invalid pipeline selection');
 });
 
-it('hides the pipeline resource sub navigation when accessed within a project context', function () {
+it('hides the pipeline resource sub navigation', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -392,199 +200,10 @@ it('hides the pipeline resource sub navigation when accessed within a project co
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $withProject = livewire(ManagePipelineEntries::class, [
+    $component = livewire(ManagePipelineEntries::class, [
         'record' => $pipeline->getRouteKey(),
-        'project' => $project->getKey(),
+        'parentRecord' => $project,
     ])->instance();
 
-    expect(PipelineResource::getRecordSubNavigation($withProject))->toBe([]);
-
-    $withoutProject = livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-    ])->instance();
-
-    expect(PipelineResource::getRecordSubNavigation($withoutProject))->not->toBeEmpty();
-});
-
-it('can create pipeline entry with description and due date', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-    $due = now()->addDays(7)->toDateTimeString();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Entry With Details',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'description' => 'A detailed description.',
-            'due' => $due,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Entry With Details',
-        'description' => 'A detailed description.',
-    ]);
-});
-
-it('can create pipeline entry with an assigned user', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-    $user = User::factory()->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Assigned Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => $user->id,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Assigned Entry',
-        'assigned_to_id' => $user->id,
-    ]);
-});
-
-it('can create pipeline entry with an assigned contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-    $contact = Contact::factory()->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Contact Assigned Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => (new Contact())->getMorphClass(),
-            'assigned_to_id' => $contact->id,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Contact Assigned Entry',
-        'assigned_to_type' => (new Contact())->getMorphClass(),
-        'assigned_to_id' => $contact->id,
-    ]);
-});
-
-it('can create pipeline entry with no assigned user', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $stage = $pipeline->stages->first();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Unassigned Entry',
-            'pipeline_stage_id' => $stage->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => null,
-            'assigned_to_id' => null,
-        ])
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(PipelineEntry::class, [
-        'name' => 'Unassigned Entry',
-        'assigned_to_id' => null,
-    ]);
-});
-
-it('validates assigned_to_id must be a valid contact id when contact type is selected', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Bad Contact Entry',
-            'pipeline_stage_id' => $pipeline->stages->first()->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => (new Contact())->getMorphClass(),
-            'assigned_to_id' => (string) str()->uuid(),
-        ])
-        ->assertHasTableActionErrors(['assigned_to_id']);
-});
-
-it('validates assigned_to_id must be a valid user id when user type is selected', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->callTableAction('create', data: [
-            'name' => 'Bad User Entry',
-            'pipeline_stage_id' => $pipeline->stages->first()->id,
-            'organizable_type' => (new Contact())->getMorphClass(),
-            'organizable_id' => Contact::factory()->create()->id,
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => (string) str()->uuid(),
-        ])
-        ->assertHasTableActionErrors(['assigned_to_id']);
-});
-
-it('can render create pipeline entry with proper permission', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    get(ManagePipelineEntries::getUrl([
-        'record' => $pipeline->getRouteKey(),
-    ]))
-        ->assertForbidden();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    livewire(ManagePipelineEntries::class, ['record' => $pipeline->getKey()])
-        ->assertActionVisible(TestAction::make('create')->table());
+    expect(PipelineResource::getRecordSubNavigation($component))->toBe([]);
 });

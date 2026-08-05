@@ -49,15 +49,10 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Js;
-use Livewire\Attributes\Locked;
-use Livewire\Attributes\Url;
 
 class CreatePipeline extends CreateRecord
 {
     protected static string $resource = PipelineResource::class;
-
-    #[Locked, Url]
-    public ?string $project = null;
 
     public function form(Schema $schema): Schema
     {
@@ -103,47 +98,27 @@ class CreatePipeline extends CreateRecord
             ]);
     }
 
-    public function getBreadcrumbs(): array
-    {
-        $project = Project::find($this->project);
-
-        $breadcrumbs = [
-            ProjectResource::getUrl() => ProjectResource::getBreadcrumb(),
-            ...($project ? [
-                ProjectResource::getUrl('view', ['record' => $project]) => $project->name ?? '',
-                'Pipelines',
-            ] : []),
-            ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
-        ];
-
-        if (filled($cluster = static::getCluster())) {
-            return $cluster::unshiftClusterBreadcrumbs($breadcrumbs);
-        }
-
-        return $breadcrumbs;
-    }
-
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $project = Project::find($this->project);
+        $project = $this->getParentRecord();
 
-        if ($project && (! auth()->user()->can('update', $project))) {
-            $project = null;
-        }
+        assert($project instanceof Project);
 
         $data['user_id'] = auth()->id();
-        $data['project_id'] = $project?->getKey();
+        $data['project_id'] = $project->getKey();
 
         return $data;
     }
 
     protected function getCancelFormAction(): Action
     {
-        $project = Project::find($this->project);
+        $project = $this->getParentRecord();
+
+        assert($project instanceof Project);
 
         return Action::make('cancel')
             ->label(__('filament-panels::resources/pages/create-record.form.actions.cancel.label'))
-            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? ($project ? ProjectResource::getUrl('manage-pipelines', ['record' => $project]) : null)) . ')')
+            ->alpineClickHandler('document.referrer ? window.history.back() : (window.location.href = ' . Js::from($this->previousUrl ?? ProjectResource::getUrl('pipelines', ['record' => $project])) . ')')
             ->color('gray');
     }
 }

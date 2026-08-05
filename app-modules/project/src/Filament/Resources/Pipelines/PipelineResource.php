@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\EditPipeline;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipeline;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use BackedEnum;
 use Filament\Resources\Pages\Page;
@@ -56,9 +57,11 @@ class PipelineResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
+    protected static ?string $parentResource = ProjectResource::class;
+
     public static function getRecordSubNavigation(Page $page): array
     {
-        if ($page instanceof ManagePipelineEntries && filled($page->project)) {
+        if ($page instanceof ManagePipelineEntries) {
             return [];
         }
 

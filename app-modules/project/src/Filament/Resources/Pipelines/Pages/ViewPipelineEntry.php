@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use BackedEnum;
@@ -87,15 +88,13 @@ class ViewPipelineEntry extends Page
             abort(404);
         }
 
-        if (filled($this->project) && (string) $this->record->project?->getKey() !== $this->project) {
+        $projectRouteKey = request()->route('project');
+
+        if (filled($projectRouteKey) && (string) $this->record->project?->getRouteKey() !== (string) $projectRouteKey) {
             abort(404);
         }
 
         $this->authorize('view', $this->record);
-
-        if (request()->has('from')) {
-            session(['pipeline_entry_source' => request('from')]);
-        }
     }
 
     public function getPipelineEntry(): PipelineEntry

@@ -58,6 +58,7 @@ it('can render with proper permission', function () {
 
     get(PipelineResource::getUrl('view', [
         'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertForbidden();
 
@@ -70,6 +71,7 @@ it('can render with proper permission', function () {
 
     get(PipelineResource::getUrl('view', [
         'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
 });
@@ -84,6 +86,7 @@ it('can view a pipeline', function () {
 
     livewire(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
+        'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
@@ -101,6 +104,7 @@ it('displays correct pipeline details', function () {
 
     livewire(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
+        'parentRecord' => $project,
     ])
         ->assertSuccessful()
         ->assertSee('Test Pipeline Name')
@@ -132,6 +136,7 @@ it('displays pipeline with multiple stages', function () {
 
     livewire(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
+        'parentRecord' => $project,
     ])
         ->assertSuccessful()
         ->assertSee('Customer Journey')
@@ -152,6 +157,7 @@ it('can access pipeline from project context', function () {
 
     livewire(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
+        'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
