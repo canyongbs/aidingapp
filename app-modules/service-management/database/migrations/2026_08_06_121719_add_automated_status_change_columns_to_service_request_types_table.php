@@ -45,10 +45,6 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_request_types', function (Blueprint $table) {
-                if (! Schema::hasColumn('service_request_types', 'is_automated_status_change_enabled')) {
-                    $table->boolean('is_automated_status_change_enabled')->default(false);
-                }
-
                 if (! Schema::hasColumn('service_request_types', 'automated_status_id')) {
                     $table->foreignUuid('automated_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
                 }
@@ -66,10 +62,6 @@ return new class () extends Migration {
             Schema::table('service_request_types', function (Blueprint $table) {
                 if (Schema::hasColumn('service_request_types', 'automated_status_id')) {
                     $table->dropConstrainedForeignId('automated_status_id');
-                }
-
-                if (Schema::hasColumn('service_request_types', 'is_automated_status_change_enabled')) {
-                    $table->dropColumn('is_automated_status_change_enabled');
                 }
             });
         });

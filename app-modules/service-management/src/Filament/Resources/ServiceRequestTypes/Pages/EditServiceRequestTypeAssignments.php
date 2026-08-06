@@ -170,4 +170,32 @@ class EditServiceRequestTypeAssignments extends EditRecord
                     ]),
             ]);
     }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['is_automated_status_change_enabled'] = filled($data['automated_status_id'] ?? null);
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (! ($data['is_automated_status_change_enabled'] ?? false)) {
+            $data['automated_status_id'] = null;
+        }
+
+        unset($data['is_automated_status_change_enabled']);
+
+        return $data;
+    }
 }

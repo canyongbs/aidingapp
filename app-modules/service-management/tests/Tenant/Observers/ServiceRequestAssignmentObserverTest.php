@@ -678,7 +678,6 @@ describe('automated status change on assignment', function () {
         ]);
 
         $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => true,
             'automated_status_id' => $target->getKey(),
         ]);
         $type->managerUsers()->attach($manager);
@@ -696,11 +695,9 @@ describe('automated status change on assignment', function () {
         expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
     });
 
-    it('does not change the status when the toggle is off', function () {
+    it('does not change the status when automated_status_id is null', function () {
         $manager = User::factory()->create();
-        $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => false,
-        ]);
+        $type = ServiceRequestType::factory()->create();
         $type->managerUsers()->attach($manager);
 
         $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -724,7 +721,6 @@ describe('automated status change on assignment', function () {
         ]);
 
         $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => true,
             'automated_status_id' => $target->getKey(),
         ]);
         $type->managerUsers()->attach($manager);
@@ -753,7 +749,6 @@ describe('automated status change on assignment', function () {
         ]);
 
         $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => true,
             'automated_status_id' => $target->getKey(),
         ]);
         $type->managerUsers()->attach($manager);
@@ -781,7 +776,6 @@ describe('automated status change on assignment', function () {
         ]);
 
         $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => true,
             'automated_status_id' => $target->getKey(),
         ]);
         $type->managerUsers()->attach($manager);
@@ -808,7 +802,6 @@ describe('automated status change on assignment', function () {
         ]);
 
         $type = ServiceRequestType::factory()->create([
-            'is_automated_status_change_enabled' => true,
             'automated_status_id' => $target->getKey(),
         ]);
         $type->managerUsers()->attach($manager);

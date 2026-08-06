@@ -38,15 +38,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 
-it('persists the automated status change columns and loads the relation', function () {
+it('persists the automated status change fk and loads the relation', function () {
     $status = ServiceRequestStatus::factory()->open()->create();
 
     $type = ServiceRequestType::factory()->create([
-        'is_automated_status_change_enabled' => true,
         'automated_status_id' => $status->getKey(),
     ]);
 
-    expect($type->fresh()->is_automated_status_change_enabled)->toBeTrue()
+    expect($type->fresh()->automated_status_id)->toBe($status->getKey())
         ->and($type->automatedStatus->is($status))->toBeTrue();
 });
 

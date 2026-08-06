@@ -100,7 +100,6 @@ class ServiceRequestType extends BaseModel implements Auditable
         'max_simultaneous_chats',
         'email_automatic_creation_contact_create_condition',
         'is_visibility_restricted',
-        'is_automated_status_change_enabled',
         'automated_status_id',
     ];
 
@@ -349,7 +348,6 @@ class ServiceRequestType extends BaseModel implements Auditable
             'max_simultaneous_chats' => 'integer',
             'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
             'is_visibility_restricted' => 'boolean',
-            'is_automated_status_change_enabled' => 'boolean',
         ];
     }
 

@@ -338,7 +338,6 @@ test('it persists the automated status change configuration', function () {
         ->assertHasNoFormErrors();
 
     expect($serviceRequestType->fresh())
-        ->is_automated_status_change_enabled->toBeTrue()
         ->automated_status_id->toBe($status->getKey());
 });
 
@@ -352,4 +351,40 @@ test('the automated status change toggle is hidden when the feature flag is inac
     livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm(['assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value])
         ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isHidden());
+});
+
+test('the automated status change toggle is on when loading a type with an automated_status_id set', function () {
+    asSuperAdmin();
+
+    $status = ServiceRequestStatus::factory()->open()->create();
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
+        'automated_status_id' => $status->getKey(),
+    ]);
+
+    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->assertFormSet([
+            'is_automated_status_change_enabled' => true,
+            'automated_status_id' => $status->getKey(),
+        ]);
+});
+
+test('saving with the automated status change toggle off nulls the automated_status_id', function () {
+    asSuperAdmin();
+
+    $status = ServiceRequestStatus::factory()->open()->create();
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
+        'automated_status_id' => $status->getKey(),
+    ]);
+
+    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->fillForm([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
+            'is_automated_status_change_enabled' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->fresh()->automated_status_id)->toBeNull();
 });

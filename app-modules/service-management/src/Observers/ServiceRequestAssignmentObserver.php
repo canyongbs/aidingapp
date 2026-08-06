@@ -176,7 +176,7 @@ class ServiceRequestAssignmentObserver
         $serviceRequest = $serviceRequestAssignment->serviceRequest;
         $type = $serviceRequest->priority?->type;
 
-        if (! $type?->is_automated_status_change_enabled || is_null($type->automated_status_id)) {
+        if (is_null($type?->automated_status_id)) {
             return;
         }
 
