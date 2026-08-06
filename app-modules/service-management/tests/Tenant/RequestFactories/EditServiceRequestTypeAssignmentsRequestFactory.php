@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -78,15 +77,6 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
 
         return $this->state([
             'assignment_type_individual_id' => $userFactory,
-        ]);
-    }
-
-    public function withAutomatedStatusChange(?ServiceRequestStatus $status = null): static
-    {
-        return $this->state([
-            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual->value,
-            'is_automated_status_change_enabled' => true,
-            'automated_status_id' => $status?->getKey() ?? ServiceRequestStatus::factory()->open(),
         ]);
     }
 }

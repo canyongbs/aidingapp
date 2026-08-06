@@ -798,4 +798,32 @@ describe('automated status change on assignment', function () {
 
         expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
     });
+
+    it('does not send a duplicate notification when the request is already at the target status', function () {
+        Notification::fake();
+
+        $manager = User::factory()->create();
+        $target = ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ]);
+
+        $type = ServiceRequestType::factory()->create([
+            'is_automated_status_change_enabled' => true,
+            'automated_status_id' => $target->getKey(),
+        ]);
+        $type->managerUsers()->attach($manager);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($target, 'status')->create();
+
+        $serviceRequest->assignments()->create([
+            'user_id' => $manager->getKey(),
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
+        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class);
+    });
 });

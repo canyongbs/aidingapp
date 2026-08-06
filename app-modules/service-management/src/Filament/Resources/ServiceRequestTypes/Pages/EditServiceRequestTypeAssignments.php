@@ -144,7 +144,6 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                 }
                             }),
                         ServiceRequestStatusSelect::make('automated_status_id')
-                            ->default($defaultStatusId)
                             ->required()
                             ->columnSpanFull()
                             ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
