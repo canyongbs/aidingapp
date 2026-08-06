@@ -203,7 +203,7 @@ class ServiceRequestType extends BaseModel implements Auditable
      */
     public function automatedStatus(): BelongsTo
     {
-        return $this->belongsTo(ServiceRequestStatus::class, 'automated_status_id');
+        return $this->belongsTo(ServiceRequestStatus::class);
     }
 
     /**
