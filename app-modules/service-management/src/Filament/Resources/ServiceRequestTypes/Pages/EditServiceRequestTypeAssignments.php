@@ -148,6 +148,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->required()
                             ->columnSpanFull()
                             ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
+                                && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None
                                 && (bool) $get('is_automated_status_change_enabled')),
                         Toggle::make('is_live_chat_enabled')
                             ->label('Live Chat')

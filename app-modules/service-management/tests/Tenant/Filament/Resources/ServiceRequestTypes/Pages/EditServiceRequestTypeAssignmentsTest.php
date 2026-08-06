@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequest
 use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 
 use function Pest\Laravel\actingAs;
@@ -285,6 +286,40 @@ test('the status picker is required when the automated status change toggle is o
         ])
         ->call('save')
         ->assertHasFormErrors(['automated_status_id' => 'required']);
+});
+
+test('the status picker pre-fills with the default open status when the toggle is switched on', function () {
+    asSuperAdmin();
+
+    // The tenant seeds a system-protected "New" Open status at sort 0 that cannot be modified or
+    // deleted, so give this status a lower sort to make it deterministically the resolved default.
+    $lowestSort = ServiceRequestStatus::query()->min('sort') ?? 0;
+
+    $openStatus = ServiceRequestStatus::factory()->open()->create(['sort' => $lowestSort - 1]);
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->fillForm([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
+            'is_automated_status_change_enabled' => true,
+        ])
+        ->assertFormSet(['automated_status_id' => $openStatus->getKey()]);
+});
+
+test('the status picker is hidden when assignment type is switched back to None even though the toggle was previously enabled', function () {
+    asSuperAdmin();
+
+    $status = ServiceRequestStatus::factory()->open()->create();
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        ->fillForm([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
+            'is_automated_status_change_enabled' => true,
+            'automated_status_id' => $status->getKey(),
+        ])
+        ->set('data.assignment_type', ServiceRequestTypeAssignmentTypes::None->value)
+        ->assertFormFieldExists('automated_status_id', fn (Select $field): bool => $field->isHidden());
 });
 
 test('it persists the automated status change configuration', function () {
