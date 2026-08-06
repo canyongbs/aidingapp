@@ -42,7 +42,7 @@
     </x-slot:header>
 
     {{-- Body --}}
-    Your {{ strtolower($serviceMonitoringTarget->report_frequency->value) }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
+    Your {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
 
     ## Service Monitor
     {{ $serviceMonitoringTarget->name }}
@@ -52,7 +52,7 @@
     {{ $reportPeriodStart }} through {{ $reportPeriodEnd }}
 
     ## Status Summary
-    Current Status: {{ $serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed' }}
+    Current Status: {{ is_null($serviceMonitoringTarget->latestHistory->succeeded) ? 'N/A' : $serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed' }}
     Uptime: {{ $uptimePercentage }}
     Successful Checks: {{ $successfulChecks }}
     Failed Checks: {{ $failedChecks }}
@@ -62,7 +62,7 @@
     ## Incidents
     {{ $incidentSummary }}
 
-    Last Checked: {{ $serviceMonitoringTarget->latestHistory->created_at->format('M j, Y g:i a (T)') }}
+    Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->format('M j, Y g:i a (T)') }}
 
     {{-- Footer --}}
     <x-slot:footer>

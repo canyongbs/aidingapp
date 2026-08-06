@@ -81,7 +81,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         $incidentSummary = $this->getIncidentSummary();
 
         return MailMessage::make()
-            ->subject($this->serviceMonitoringTarget->report_frequency->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
+            ->subject(($this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly)->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
             ->markdown('service-management::mail.service-monitoring-report', [
                 'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
                 'reportPeriodStart' => $reportPeriodStart,
@@ -101,7 +101,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     public function toDatabase(User $notifiable): array
     {
         return Notification::make()
-            ->title('Your ' . Str::lower($this->serviceMonitoringTarget->report_frequency->value) . ' service monitor report for ' . $this->serviceMonitoringTarget->name . 'is ready.')
+            ->title('Your ' . Str::lower($this->serviceMonitoringTarget->report_frequency->value ?? ServiceMonitoringReportFrequency::Monthly->value) . ' service monitor report for ' . $this->serviceMonitoringTarget->name . ' is ready.')
             ->body(
                 'Uptime: ' . $this->serviceMonitoringTarget->getUptimePercentage($this->getUptimeDays()) . "\n" .
                 'Successful checks: ' . $this->getSuccessfulChecks() . "\n" .

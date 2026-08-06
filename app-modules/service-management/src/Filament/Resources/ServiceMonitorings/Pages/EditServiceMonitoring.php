@@ -132,10 +132,10 @@ class EditServiceMonitoring extends EditRecord
                                 'is_reported_via_database' => 'Application',
                             ])
                             ->afterStateHydrated(fn (Set $set, ServiceMonitoringTarget $record) => $set(
-                                'report_channel',
+                                'report_channels',
                                 [
-                                    ...$record->is_reported_via_email ? ['is_reported_via_email'] : [],
-                                    ...$record->is_reported_via_database ? ['is_reported_via_database'] : [],
+                                    ...($record->is_reported_via_email ? ['is_reported_via_email'] : []),
+                                    ...($record->is_reported_via_database ? ['is_reported_via_database'] : []),
                                 ]
                             ))
                             ->live()
