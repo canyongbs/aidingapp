@@ -100,6 +100,8 @@ class ServiceRequestType extends BaseModel implements Auditable
         'max_simultaneous_chats',
         'email_automatic_creation_contact_create_condition',
         'is_visibility_restricted',
+        'is_automated_status_change_enabled',
+        'automated_status_id',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -194,6 +196,14 @@ class ServiceRequestType extends BaseModel implements Auditable
             foreignKey: 'assignment_type_individual_id',
             relation: 'serviceRequestTypeIndividualAssignment',
         );
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
+    public function automatedStatus(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestStatus::class, 'automated_status_id');
     }
 
     /**
@@ -339,6 +349,7 @@ class ServiceRequestType extends BaseModel implements Auditable
             'max_simultaneous_chats' => 'integer',
             'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
             'is_visibility_restricted' => 'boolean',
+            'is_automated_status_change_enabled' => 'boolean',
         ];
     }
 
