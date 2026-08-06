@@ -223,10 +223,9 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
     {
         $form = $this->getServiceRequestType()->form;
 
-        $this->form->fill([
+        $formData = [
             'description' => $form?->description,
             'is_wizard' => (bool) $form?->is_wizard,
-            'is_first_step_combined' => (bool) $form?->is_first_step_combined,
             'content' => $form?->content,
             'steps' => $form
                 ? $form->steps()
@@ -238,7 +237,13 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                     ])
                     ->all()
                 : [],
-        ]);
+        ];
+
+        if (CombineStepFormFeature::active()) {
+            $formData['is_first_step_combined'] = (bool) $form?->is_first_step_combined;
+        }
+
+        $this->form->fill($formData);
     }
 
     /**
