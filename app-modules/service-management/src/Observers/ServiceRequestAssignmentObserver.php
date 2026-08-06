@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssign
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 
 class ServiceRequestAssignmentObserver
 {
@@ -153,10 +154,37 @@ class ServiceRequestAssignmentObserver
                 new ServiceRequestAssigned($serviceRequestAssignment->serviceRequest, $assignedManagerEmailTemplate, DatabaseChannel::class)
             );
         }
+
+        $this->applyAutomatedStatusChange($serviceRequestAssignment);
     }
 
     public function deleted(ServiceRequestAssignment $serviceRequestAssignment): void
     {
         TimelineableRecordDeleted::dispatch($serviceRequestAssignment->serviceRequest, $serviceRequestAssignment);
+    }
+
+    private function applyAutomatedStatusChange(ServiceRequestAssignment $serviceRequestAssignment): void
+    {
+        if (! AutomatedStatusChangeOnAssignmentFeature::active()) {
+            return;
+        }
+
+        if (! is_null($serviceRequestAssignment->assigned_by_id)) {
+            return;
+        }
+
+        $serviceRequest = $serviceRequestAssignment->serviceRequest;
+        $type = $serviceRequest->priority?->type;
+
+        if (! ($type?->is_automated_status_change_enabled) || is_null($type->automated_status_id)) {
+            return;
+        }
+
+        if ($serviceRequest->status_id === $type->automated_status_id) {
+            return;
+        }
+
+        $serviceRequest->status_id = $type->automated_status_id;
+        $serviceRequest->save();
     }
 }
