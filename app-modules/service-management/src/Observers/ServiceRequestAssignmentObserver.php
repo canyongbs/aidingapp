@@ -184,7 +184,7 @@ class ServiceRequestAssignmentObserver
             return;
         }
 
-        $serviceRequest->status_id = $type->automated_status_id;
+        $serviceRequest->status()->associate($type->automated_status_id);
         $serviceRequest->save();
     }
 }
