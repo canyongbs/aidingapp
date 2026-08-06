@@ -378,6 +378,8 @@ test('saving with the automated status change toggle off nulls the automated_sta
         'automated_status_id' => $status->getKey(),
     ]);
 
+    expect($serviceRequestType->automated_status_id)->toBe($status->getKey());
+
     livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
