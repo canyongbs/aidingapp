@@ -42,6 +42,7 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use App\Features\ProjectArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
@@ -79,10 +80,9 @@ class EditProject extends EditRecord
 
     protected function getHeaderActions(): array
     {
-        return [
-            ViewAction::make(),
-            ArchiveAction::make()
-                ->visible(fn (): bool => ProjectArchivingFeature::active()),
-        ];
+      return [
+        ViewAction::make(),
+        ProjectArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
+      ];
     }
 }

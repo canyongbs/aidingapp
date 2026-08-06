@@ -203,14 +203,14 @@ class ListProjects extends ListRecords
                     ->visible(fn (): bool => ProjectArchivingFeature::active())
                     ->hidden(fn (Project $record): bool => $record->isArchived())
                     ->requiresConfirmation()
-                    ->action(fn (Project $record): bool => $record->archive())
+                    ->action(fn (Project $record) => $record->archive())
                     ->authorize(fn (Project $record): bool => ProjectResource::can('archive', $record)),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     ArchiveBulkAction::make()
                         ->visible(fn (): bool => ProjectArchivingFeature::active())
-                        ->authorizeIndividualRecords('delete')
+                        ->authorizeIndividualRecords('archive')
                         ->deselectRecordsAfterCompletion(),
                 ]),
             ]);
