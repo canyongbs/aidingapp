@@ -255,9 +255,8 @@ it('clears related milestones, assets, and service requests when type is set to 
     $entry->serviceRequests()->sync([$serviceRequest->id]);
 
     livewire(EditPipelineEntry::class, [
-        'record' => $pipeline,
-        'pipelineEntry' => $entry,
-        'parentRecord' => $project,
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
     ])
         ->assertSet('data.milestones_type', 'select')
         ->assertSet('data.assets_type', 'select')

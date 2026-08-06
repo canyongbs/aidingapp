@@ -53,12 +53,12 @@ class ProjectPipelinesStageTable
             })
             ->columns([
                 TextColumn::make('name')
-                    ->label('Pipeline')
+                    ->label('Stage')
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('classification'),
             ])
             ->paginated([5])
-            ->defaultSort('created_at');
+            ->defaultSort('order');
     }
 }

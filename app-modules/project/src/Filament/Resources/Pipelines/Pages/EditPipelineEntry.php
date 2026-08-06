@@ -146,7 +146,7 @@ class EditPipelineEntry extends Page
         $pipeline = $this->getPipeline();
 
         return $schema
-            ->components(PipelineEntryForm::components($this->record))
+            ->components(PipelineEntryForm::components($pipeline))
             ->statePath('data')
             ->model($this->getPipelineEntry());
     }

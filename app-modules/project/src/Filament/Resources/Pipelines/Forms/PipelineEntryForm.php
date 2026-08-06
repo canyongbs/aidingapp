@@ -104,7 +104,8 @@ class PipelineEntryForm
                     if ($state === 'none') {
                         $set('assigned_to_id', null);
                     }
-                }),
+                })
+                ->dehydrateStateUsing(fn (?string $state): ?string => $state === 'none' ? null : $state),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
                 ->tableConfiguration(fn (Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
@@ -125,7 +126,7 @@ class PipelineEntryForm
                     return $record instanceof Contact ? $record->full_name : $record?->name;
                 })
                 ->visible(fn (Get $get): bool => filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none')
-                ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => filled($get('assigned_to_type')) ? $state : null)
+                ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => (filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none') ? $state : null)
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
             Toggle::make('is_visible_to_guests')
