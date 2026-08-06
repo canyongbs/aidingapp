@@ -121,6 +121,7 @@ class EditServiceMonitoring extends EditRecord
                             ->label('Frequency')
                             ->options(ServiceMonitoringReportFrequency::class)
                             ->enum(ServiceMonitoringReportFrequency::class)
+                            ->required(fn (Get $get) => $get('is_reporting_active'))
                             ->visible(fn (Get $get) => $get('is_reporting_active')),
                         Hidden::make('is_reported_via_email'),
                         Hidden::make('is_reported_via_database'),
@@ -130,11 +131,19 @@ class EditServiceMonitoring extends EditRecord
                                 'is_reported_via_email' => 'Email',
                                 'is_reported_via_database' => 'Application',
                             ])
+                            ->afterStateHydrated(fn (Set $set, ServiceMonitoringTarget $record) => $set(
+                                'report_channel',
+                                [
+                                    ...$record->is_reported_via_email ? ['is_reported_via_email'] : [],
+                                    ...$record->is_reported_via_database ? ['is_reported_via_database'] : [],
+                                ]
+                            ))
                             ->live()
                             ->afterStateUpdated(function (Set $set, array $state = []): void {
                                 $set('is_reported_via_email', in_array('is_reported_via_email', $state, true));
                                 $set('is_reported_via_database', in_array('is_reported_via_database', $state, true));
                             })
+                            ->dehydrated(false)
                             ->visible(fn (Get $get) => $get('is_reporting_active')),
                         Section::make('Recipients')
                             ->schema([

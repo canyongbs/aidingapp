@@ -117,6 +117,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->label('Frequency')
                             ->options(ServiceMonitoringReportFrequency::class)
                             ->enum(ServiceMonitoringReportFrequency::class)
+                            ->required(fn (Get $get) => $get('is_reporting_active'))
                             ->visible(fn (Get $get) => $get('is_reporting_active')),
                         Hidden::make('is_reported_via_email')
                             ->default(false),
@@ -133,6 +134,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 $set('is_reported_via_email', in_array('is_reported_via_email', $state, true));
                                 $set('is_reported_via_database', in_array('is_reported_via_database', $state, true));
                             })
+                            ->dehydrated(false)
                             ->visible(fn (Get $get) => $get('is_reporting_active')),
                         Section::make('Recipients')
                             ->schema([
