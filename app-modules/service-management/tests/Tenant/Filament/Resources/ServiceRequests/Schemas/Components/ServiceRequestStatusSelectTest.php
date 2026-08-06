@@ -36,22 +36,33 @@
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Forms\Components\Select;
 
-it('builds a status_id select defaulting to the current service request status', function () {
+it('builds a status_id select with no default by default', function () {
+    $select = ServiceRequestStatusSelect::make();
+
+    expect($select)->toBeInstanceOf(Select::class)
+        ->and($select->getName())->toBe('status_id')
+        ->and($select->getDefaultState())->toBeNull();
+});
+
+it('builds a select for a custom field name', function () {
+    ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $select = ServiceRequestStatusSelect::make('automated_status_id');
+
+    expect($select->getName())->toBe('automated_status_id');
+});
+
+it('applies a chained default when provided', function () {
     $status = ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
     ]);
 
-    $serviceRequest = ServiceRequest::factory()->create([
-        'status_id' => $status->getKey(),
-    ]);
+    $select = ServiceRequestStatusSelect::make()->default($status->getKey());
 
-    $select = ServiceRequestStatusSelect::make($serviceRequest);
-
-    expect($select)->toBeInstanceOf(Select::class)
-        ->and($select->getName())->toBe('status_id')
-        ->and($select->getDefaultState())->toBe($status->getKey());
+    expect($select->getDefaultState())->toBe($status->getKey());
 });

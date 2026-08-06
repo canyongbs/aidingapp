@@ -75,7 +75,8 @@ class ManageAssignmentAction
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
-                ServiceRequestStatusSelect::make($serviceRequest)
+                ServiceRequestStatusSelect::make()
+                    ->default($serviceRequest->status_id)
                     ->label('Update Status')
                     ->required()
                     ->helperText('You may simultaneously update the status along with this change.'),
