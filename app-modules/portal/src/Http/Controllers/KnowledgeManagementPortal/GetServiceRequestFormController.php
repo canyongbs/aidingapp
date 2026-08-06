@@ -53,7 +53,7 @@ class GetServiceRequestFormController extends Controller
         abort_unless($type->isVisibleToContactType(auth('contact')->user()?->type_id), 404);
 
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
-        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
+        $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStep: true);
 
         return response()->json([
             'schema' => app(GenerateFormKitSchema::class)($form),

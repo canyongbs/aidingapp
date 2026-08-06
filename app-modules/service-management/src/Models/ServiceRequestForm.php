@@ -54,6 +54,7 @@ class ServiceRequestForm extends Submissible
         'description',
         'is_authenticated',
         'is_wizard',
+        'is_first_step_combined',
         'content',
     ];
 
@@ -61,6 +62,7 @@ class ServiceRequestForm extends Submissible
         'content' => 'array',
         'is_authenticated' => 'boolean',
         'is_wizard' => 'boolean',
+        'is_first_step_combined' => 'boolean',
     ];
 
     /**

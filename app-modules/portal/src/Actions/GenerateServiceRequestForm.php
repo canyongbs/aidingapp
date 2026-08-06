@@ -50,7 +50,7 @@ use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
 {
-    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection): ServiceRequestForm
+    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection, bool $shouldCombineFirstStep = false): ServiceRequestForm
     {
         $form = $type->form ?? new ServiceRequestForm();
 
@@ -84,10 +84,20 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
+        if ($shouldCombineFirstStep && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
+            $firstStep = $form->steps->shift();
+
+            /** @var array<int, array<string, mixed>> $firstStepContentData */
+            $firstStepContentData = data_get($firstStep, 'content.content', []);
+            $content = $content->concat($firstStepContentData);
+        }
+
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
-        if (app(AiClarificationSettings::class)->is_enabled
-            && $type->is_ai_clarification_enabled) {
+        if (
+            app(AiClarificationSettings::class)->is_enabled
+            && $type->is_ai_clarification_enabled
+        ) {
             $maxOrder = $form->steps->max('order') ?? 0;
             $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions'; /** @phpstan-ignore identical.alwaysTrue */
             $form->steps->push($this->formatStep($stepLabel, $maxOrder + 1, collect([])));

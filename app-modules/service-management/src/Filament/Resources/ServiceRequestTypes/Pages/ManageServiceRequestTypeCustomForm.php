@@ -93,6 +93,8 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                         Toggle::make('is_wizard')
                             ->label('Multi-step service request form')
                             ->live(),
+                        Toggle::make('is_first_step_combined')
+                            ->label('Combine step 1 on portal'),
                     ]),
                 Section::make('Form Design')
                     ->schema([
@@ -142,6 +144,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
         $form->fill([
             'description' => $state['description'] ?? null,
             'is_wizard' => $isWizard,
+            'is_first_step_combined' => (bool) ($state['is_first_step_combined'] ?? false),
         ])->save();
 
         $form->fields()->delete();
@@ -216,6 +219,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
         $this->form->fill([
             'description' => $form?->description,
             'is_wizard' => (bool) $form?->is_wizard,
+            'is_first_step_combined' => (bool) $form?->is_first_step_combined,
             'content' => $form?->content,
             'steps' => $form
                 ? $form->steps()
