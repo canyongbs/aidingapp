@@ -51,6 +51,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 
@@ -109,7 +110,16 @@ class EditServiceMonitoring extends EditRecord
                             ->label('Restrict Visibility')
                             ->live()
                             ->helperText('When enabled, only the creator and the users, departments, and contacts selected below can view this service monitor.')
-                            ->default(false),
+                            ->default(false)
+                            ->afterStateUpdated(function (bool $state, Set $set): void {
+                                if ($state) {
+                                    return;
+                                }
+
+                                $set('confidentialUsers', []);
+                                $set('confidentialDepartments', []);
+                                $set('confidentialContacts', []);
+                            }),
                         Select::make('confidentialUsers')
                             ->relationship('confidentialUsers', 'name')
                             ->label('Users')
@@ -157,6 +167,21 @@ class EditServiceMonitoring extends EditRecord
         }
 
         return $breadcrumbs;
+    }
+
+    protected function afterSave(): void
+    {
+        /** @var ServiceMonitoringTarget $record */
+        $record = $this->getRecord();
+
+        if ($record->is_confidential) {
+            return;
+        }
+
+        // Filament skips saving hidden relationship fields, so clear stale grants explicitly
+        $record->confidentialUsers()->sync([]);
+        $record->confidentialDepartments()->sync([]);
+        $record->confidentialContacts()->sync([]);
     }
 
     protected function getHeaderActions(): array

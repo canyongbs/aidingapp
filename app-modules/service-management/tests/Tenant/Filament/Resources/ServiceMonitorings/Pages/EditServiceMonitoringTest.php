@@ -287,3 +287,29 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
             return ! empty($field->getSearchResults($adminUser->name));
         });
 });
+
+test('turning off confidentiality clears previously granted users, departments, and contacts', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => true]);
+    $grantedUser = User::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'is_confidential' => true,
+            'confidentialUsers' => [$grantedUser->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'is_confidential' => false,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(0);
+});

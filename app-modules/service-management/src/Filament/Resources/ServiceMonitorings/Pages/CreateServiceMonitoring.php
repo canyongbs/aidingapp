@@ -47,6 +47,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CreateServiceMonitoring extends CreateRecord
@@ -104,7 +105,16 @@ class CreateServiceMonitoring extends CreateRecord
                             ->label('Restrict Visibility')
                             ->live()
                             ->helperText('When enabled, only the creator and the users, departments, and contacts selected below can view this service monitor.')
-                            ->default(false),
+                            ->default(false)
+                            ->afterStateUpdated(function (bool $state, Set $set): void {
+                                if ($state) {
+                                    return;
+                                }
+
+                                $set('confidentialUsers', []);
+                                $set('confidentialDepartments', []);
+                                $set('confidentialContacts', []);
+                            }),
                         Select::make('confidentialUsers')
                             ->relationship('confidentialUsers', 'name')
                             ->label('Users')
