@@ -227,3 +227,26 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
             return ! empty($field->getSearchResults($adminUser->name));
         });
 });
+
+test('creating a confidential service monitor persists the granted users, departments, and contacts', function () {
+    asSuperAdmin();
+
+    $grantedUser = User::factory()->create();
+    $grantedDepartment = Department::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'is_confidential' => true,
+            'confidentialUsers' => [$grantedUser->getKey()],
+            'confidentialDepartments' => [$grantedDepartment->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::latest('created_at')->first();
+
+    expect($serviceMonitoringTarget->is_confidential)->toBeTrue();
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
+    expect($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1);
+});

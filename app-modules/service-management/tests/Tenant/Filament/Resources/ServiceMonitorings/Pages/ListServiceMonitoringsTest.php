@@ -124,3 +124,25 @@ test('a confidential service monitoring is still listed for an admin', function 
         ->assertCanSeeTableRecords([$serviceMonitoringTarget])
         ->assertSuccessful();
 });
+
+test('a confidential service monitoring is hidden from the list for a non-granted, non-admin user', function () {
+    $creator = User::factory()->create();
+    $publicTarget = ServiceMonitoringTarget::factory()->for($creator, 'createdBy')->create(['is_confidential' => false]);
+    $confidentialTarget = ServiceMonitoringTarget::factory()->for($creator, 'createdBy')->create(['is_confidential' => true]);
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.*.view');
+    actingAs($user);
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$publicTarget])
+        ->assertCanNotSeeTableRecords([$confidentialTarget])
+        ->assertSuccessful();
+
+    $confidentialTarget->confidentialUsers()->attach($user->getKey());
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$publicTarget, $confidentialTarget])
+        ->assertSuccessful();
+});
