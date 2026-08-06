@@ -169,14 +169,14 @@ class ServiceRequestAssignmentObserver
             return;
         }
 
-        if (! is_null($serviceRequestAssignment->assigned_by_id)) {
+        if (filled($serviceRequestAssignment->assigned_by_id)) {
             return;
         }
 
         $serviceRequest = $serviceRequestAssignment->serviceRequest;
         $type = $serviceRequest->priority?->type;
 
-        if (is_null($type?->automated_status_id)) {
+        if (blank($type?->automated_status_id)) {
             return;
         }
 

@@ -136,7 +136,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->columnSpanFull()
                             ->live()
                             ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
-                                && $get('assignment_type') !== null
+                                && filled($get('assignment_type'))
                                 && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None)
                             ->afterStateUpdated(function (bool $state, Get $get, Set $set) use ($defaultStatusId): void {
                                 if ($state && blank($get('automated_status_id'))) {
