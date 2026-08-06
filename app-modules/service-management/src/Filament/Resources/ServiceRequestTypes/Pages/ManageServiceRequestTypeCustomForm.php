@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
+use App\Features\CombineStepFormFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\RichEditor;
@@ -94,6 +95,7 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
                             ->label('Multi-step service request form')
                             ->live(),
                         Toggle::make('is_first_step_combined')
+                            ->visible(fn () => CombineStepFormFeature::active())
                             ->label('Combine step 1 on portal'),
                     ]),
                 Section::make('Form Design')
@@ -141,11 +143,16 @@ class ManageServiceRequestTypeCustomForm extends EditRecord
             $form->type()->associate($type);
         }
 
-        $form->fill([
+        $formData = [
             'description' => $state['description'] ?? null,
             'is_wizard' => $isWizard,
-            'is_first_step_combined' => (bool) ($state['is_first_step_combined'] ?? false),
-        ])->save();
+        ];
+
+        if (CombineStepFormFeature::active()) {
+            $formData['is_first_step_combined'] = (bool) ($state['is_first_step_combined'] ?? false);
+        }
+
+        $form->fill($formData)->save();
 
         $form->fields()->delete();
         $form->steps()->delete();

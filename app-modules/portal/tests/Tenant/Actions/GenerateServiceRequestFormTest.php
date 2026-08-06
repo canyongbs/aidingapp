@@ -39,6 +39,11 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\CombineStepFormFeature;
+
+beforeEach(function (): void {
+    CombineStepFormFeature::activate();
+});
 
 function serviceRequestFormStepContent(string $label): array
 {
@@ -64,7 +69,7 @@ it('keeps the default fields and custom content as separate steps by default', f
 
     $form = ServiceRequestForm::factory()
         ->for($type, 'type')
-        ->create(['is_first_step_combined' => true]);
+        ->create(['is_first_step_combined' => false]);
 
     $form->steps()->create([
         'label' => 'Details',
