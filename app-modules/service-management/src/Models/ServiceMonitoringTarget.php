@@ -178,18 +178,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
             ->withTimestamps();
     }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'is_notified_via_database' => 'boolean',
-            'is_notified_via_email' => 'boolean',
-            'is_confidential' => 'boolean',
-        ];
-    }
-
     public function getUptimePercentage(int $days): string
     {
         $serviceChecks = $this->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
@@ -203,5 +191,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'is_notified_via_database' => 'boolean',
+            'is_notified_via_email' => 'boolean',
+            'is_confidential' => 'boolean',
+        ];
     }
 }
