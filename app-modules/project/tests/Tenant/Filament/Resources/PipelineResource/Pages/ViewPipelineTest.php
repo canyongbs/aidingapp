@@ -103,8 +103,9 @@ it('cannot view a pipeline whose project is archived', function () {
 
     get(PipelineResource::getUrl('view', [
         'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
     ]))
-        ->assertForbidden();
+        ->assertNotFound();
 });
 
 it('displays correct pipeline details', function () {
