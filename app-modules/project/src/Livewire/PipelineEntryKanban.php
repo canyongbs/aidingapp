@@ -44,7 +44,6 @@ use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
-use Filament\Forms\Components\TextInput;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -80,7 +79,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          * @var Collection<int, PipelineEntry> $entries
          */
         $entries = $this->pipeline->entries()
-            ->with('organizable')
             ->oldest()
             ->get();
 
@@ -121,7 +119,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
             return response()->json([
                 'success' => false,
-                'message' => 'Pipeline entry could not be moved. Something went wrong, if this continues please contact support.',
+                'message' => 'Pipeline task could not be moved. Something went wrong, if this continues please contact support.',
             ], ResponseAlias::HTTP_BAD_REQUEST);
         }
 
@@ -135,24 +133,17 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
     {
         return Action::make('addEntry')
             ->slideOver()
-            ->label('Add pipeline entry')
+            ->label('Add pipeline task')
             ->model(PipelineEntry::class)
             ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
-            ->schema([
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->required()
-                    ->string()
-                    ->columnSpanFull(),
-                ...PipelineEntryForm::components($this->pipeline),
-            ])
+            ->schema(PipelineEntryForm::components($this->pipeline, isStageVisible: false))
             ->action(function (array $data, array $arguments, Action $action) {
                 $stage = $this->pipeline->stages()->whereKey($arguments['stage'] ?? null)->first();
 
                 if (! $stage) {
                     Notification::make()
                         ->danger()
-                        ->title('Pipeline entry could not be added')
+                        ->title('Pipeline task could not be added')
                         ->body('The selected stage does not belong to this pipeline.')
                         ->send();
 
@@ -163,8 +154,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 $dataArray = [
                     'name' => $data['name'],
-                    'organizable_type' => $data['organizable_type'],
-                    'organizable_id' => $data['organizable_id'],
                     'pipeline_stage_id' => $stage->getKey(),
                 ];
 
@@ -187,7 +176,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 Notification::make()
                     ->success()
-                    ->title('Entry Added!')
+                    ->title('Pipeline Task Added!')
                     ->send();
             });
     }

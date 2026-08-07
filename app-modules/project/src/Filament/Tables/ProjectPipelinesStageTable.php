@@ -34,34 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace AidingApp\Project\Filament\Tables;
 
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-/**
- * @extends Factory<PipelineEntry>
- */
-class PipelineEntryFactory extends Factory
+class ProjectPipelinesStageTable
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public static function configure(Table $table): Table
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'description' => $this->faker->sentence(3),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => User::factory(),
-            'created_by' => User::factory(),
-            'is_visible_to_guests' => true,
-        ];
+        return $table
+            ->query(function () use ($table): Builder {
+                $pipelineId = $table->getArguments()['pipelineId'] ?? null;
+
+                return PipelineStage::query()->where('pipeline_id', $pipelineId);
+            })
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Stage')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('classification'),
+            ])
+            ->paginated([5])
+            ->defaultSort('order');
     }
 }

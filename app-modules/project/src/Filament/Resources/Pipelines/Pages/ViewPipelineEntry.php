@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
@@ -63,7 +62,7 @@ class ViewPipelineEntry extends Page
 
     protected static string $resource = PipelineEntryResource::class;
 
-    protected static ?string $title = 'Pipeline Entry Details';
+    protected static ?string $title = 'Pipeline Task Details';
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-eye';
 
@@ -106,7 +105,7 @@ class ViewPipelineEntry extends Page
 
     public function getTitle(): string | Htmlable
     {
-        return 'Pipeline Entry Details';
+        return 'Pipeline Task Details';
     }
 
     public function getBackUrl(): string
@@ -143,27 +142,14 @@ class ViewPipelineEntry extends Page
                     ->columns(2)
                     ->schema([
                         TextEntry::make('name')
-                            ->label('Name')
+                            ->label('Task Name')
                             ->extraAttributes(['class' => 'break-words']),
-                        TextEntry::make('organizable.full_name')
-                            ->label('Organization Name')
-                            ->url(function (PipelineEntry $record) {
-                                return match ($record->organizable->getMorphClass()) {
-                                    app(Contact::class)->getMorphClass() => ContactResource::getUrl('view', ['record' => $record->organizable_id]),
-                                    default => null,
-                                };
-                            })
-                            ->openUrlInNewTab(),
-                        TextEntry::make('organizable_type')
-                            ->label('Organization Type')
-                            ->formatStateUsing(fn (string $state): string => ucfirst($state))
-                            ->badge(),
+                        TextEntry::make('description')
+                            ->label('Task Description')
+                            ->extraAttributes(['class' => 'break-words']),
                         TextEntry::make('pipelineStage.name')
                             ->label('Stage')
                             ->badge(),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->extraAttributes(['class' => 'break-words']),
                         TextEntry::make('due')
                             ->label('Due Date')
                             ->dateTime(),

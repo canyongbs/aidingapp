@@ -89,7 +89,7 @@ it('renders the kanban board', function () {
         'project' => $project->getRouteKey(),
     ]))
         ->assertSuccessful()
-        ->assertSee('Drag pipeline entry here');
+        ->assertSee('Drag pipeline task here');
 });
 
 it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {

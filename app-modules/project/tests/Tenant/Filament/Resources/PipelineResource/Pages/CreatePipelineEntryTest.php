@@ -59,12 +59,8 @@ use function Tests\asSuperAdmin;
  */
 function baseKanbanEntryData(string $name = 'Test Entry'): array
 {
-    $contact = Contact::factory()->create();
-
     return [
         'name' => $name,
-        'organizable_type' => $contact->getMorphClass(),
-        'organizable_id' => $contact->id,
     ];
 }
 

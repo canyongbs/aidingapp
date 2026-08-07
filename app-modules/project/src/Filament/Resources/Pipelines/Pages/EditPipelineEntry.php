@@ -44,13 +44,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Filament\Actions\Action;
 use Filament\Facades\Filament;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
 use Filament\Pages\Concerns\InteractsWithFormActions;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -65,7 +62,7 @@ class EditPipelineEntry extends Page
 
     protected static string $resource = PipelineEntryResource::class;
 
-    protected static ?string $title = 'Edit Pipeline Entry';
+    protected static ?string $title = 'Edit Pipeline Task';
 
     protected string $view = 'project::filament.pages.edit-pipeline-entry';
 
@@ -115,7 +112,7 @@ class EditPipelineEntry extends Page
 
     public function getTitle(): string | Htmlable
     {
-        return 'Edit Pipeline Entry';
+        return 'Edit Pipeline Task';
     }
 
     public function getBackUrl(): string
@@ -149,20 +146,7 @@ class EditPipelineEntry extends Page
         $pipeline = $this->getPipeline();
 
         return $schema
-            ->components([
-                Grid::make()->schema([
-                    Select::make('pipeline_stage_id')
-                        ->label('Stage')
-                        ->relationship('pipelineStage', 'name')
-                        ->required()
-                        ->options(fn () => $pipeline->stages->pluck('name', 'id')),
-                    TextInput::make('name')
-                        ->maxLength(255)
-                        ->label('Name')
-                        ->string(),
-                ]),
-                ...PipelineEntryForm::components($pipeline),
-            ])
+            ->components(PipelineEntryForm::components($pipeline))
             ->statePath('data')
             ->model($this->getPipelineEntry());
     }
@@ -189,7 +173,7 @@ class EditPipelineEntry extends Page
 
         Notification::make()
             ->success()
-            ->title('Pipeline entry updated successfully')
+            ->title('Pipeline task updated successfully')
             ->send();
 
         $this->redirect($this->getBackUrl());

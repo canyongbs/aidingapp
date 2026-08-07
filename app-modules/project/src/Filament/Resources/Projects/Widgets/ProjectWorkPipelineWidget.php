@@ -120,7 +120,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
             ->columns([
                 TextColumn::make('name')
-                    ->label('Name')
+                    ->label('Task Name')
                     ->searchable(['pipeline_entries.name'])
                     ->sortable(),
                 ViewColumn::make('milestones')
@@ -152,21 +152,29 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->recordActions([
                 EditAction::make()
                     ->slideOver()
+                    ->modalHeading('Edit Pipeline Task')
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
+                    ->after(function (PipelineEntry $record, array $data): void {
+                        $record->milestones()->sync($data['milestones'] ?? []);
+                        $record->assets()->sync($data['assets'] ?? []);
+                        $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
+
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
             ])
-            ->emptyStateHeading($pipeline ? 'No pipeline entries' : 'No pipeline selected')
+            ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
                 $pipeline
-                    ? 'Create an entry to start tracking work in this pipeline.'
+                    ? 'Create a task to start tracking work in this pipeline.'
                     : 'Create a pipeline to start tracking project work.'
             )
             ->emptyStateActions(
                 $pipeline
                     ? [
                         CreateAction::make('createEntryFromEmptyState')
-                            ->label('Add Pipeline Entry')
+                            ->label('Add Pipeline Task')
+                            ->modalHeading('Create Pipeline Task')
                             ->icon('heroicon-m-plus')
                             ->slideOver()
                             ->model(PipelineEntry::class)
@@ -194,7 +202,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ]))
                     ->visible(fn (): bool => (bool) $pipeline),
                 CreateAction::make('createEntry')
-                    ->label('New Pipeline Entry')
+                    ->label('New Pipeline Task')
+                    ->modalHeading('Create Pipeline Task')
                     ->icon('heroicon-m-plus')
                     ->slideOver()
                     ->visible(fn (): bool => (bool) $pipeline?->entries()->exists())
@@ -245,18 +254,7 @@ class ProjectWorkPipelineWidget extends TableWidget
      */
     protected function entryFormSchema(?Pipeline $pipeline): array
     {
-        return [
-            TextInput::make('name')
-                ->required()
-                ->maxLength(255),
-            Select::make('pipeline_stage_id')
-                ->label('Stage')
-                ->options(fn (): array => $pipeline
-                    ? $pipeline->stages()->orderBy('order')->pluck('name', 'id')->all()
-                    : [])
-                ->required(),
-            ...PipelineEntryForm::components($pipeline),
-        ];
+        return PipelineEntryForm::components($pipeline);
     }
 
     /**

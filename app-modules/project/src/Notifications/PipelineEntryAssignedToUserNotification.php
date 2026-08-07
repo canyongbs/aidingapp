@@ -66,8 +66,8 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
     {
         return MailMessage::make()
             ->settings($this->resolveNotificationSetting($notifiable))
-            ->subject('You have been assigned a new Pipeline Entry')
-            ->line('You have been assigned the pipeline entry: ')
+            ->subject('You have been assigned a new Pipeline Task')
+            ->line('You have been assigned the pipeline task: ')
             ->line("\"{$this->pipelineEntry->name}\"");
     }
 
@@ -85,8 +85,8 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
         $title = str($this->pipelineEntry->name)->limit();
 
         $message = filled($url)
-            ? "You have been assigned a new Pipeline Entry: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
-            : "You have been assigned a new Pipeline Entry: {$title}";
+          ? "You have been assigned a new Pipeline Task: <a href='{$url}' target='_blank' class='underline'>{$title}</a>"
+          : "You have been assigned a new Pipeline Task: {$title}";
 
         return FilamentNotification::make()
             ->success()

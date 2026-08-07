@@ -34,7 +34,7 @@
 <x-filament-panels::page>
     <div>
         <x-filament::link :href="$this->getBackUrl()" icon="heroicon-m-arrow-left">
-            Back to Pipeline Entries
+            Back to Pipeline Tasks
         </x-filament::link>
     </div>
 
