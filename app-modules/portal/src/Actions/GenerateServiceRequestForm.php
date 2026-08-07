@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\CombineStepFormFeature;
+use App\Features\DefaultPriorityFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -70,7 +71,7 @@ class GenerateServiceRequestForm
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
 
-            ...($type->default_priority_id
+            ...(DefaultPriorityFeature::active() && $type->default_priority_id
                 ? []
                 : [
                     $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
@@ -100,13 +101,10 @@ class GenerateServiceRequestForm
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
-        if (
-            app(AiClarificationSettings::class)->is_enabled
-            && $type->is_ai_clarification_enabled
-        ) {
+        if (app(AiClarificationSettings::class)->is_enabled
+            && $type->is_ai_clarification_enabled) {
             $maxOrder = $form->steps->max('order') ?? 0;
-            $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions';
-            /** @phpstan-ignore identical.alwaysTrue */
+            $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions';/** @phpstan-ignore identical.alwaysTrue */
             $form->steps->push($this->formatStep($stepLabel, $maxOrder + 1, collect([])));
         }
 

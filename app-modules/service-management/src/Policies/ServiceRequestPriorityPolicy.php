@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use App\Enums\Feature;
+use App\Features\DefaultPriorityFeature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -94,7 +95,7 @@ class ServiceRequestPriorityPolicy
             return Response::deny('You cannot delete this service request priority because it has associated service requests.');
         }
 
-        if ($serviceRequestPriority->isSetToDefaultForType()) {
+        if (DefaultPriorityFeature::active() && $serviceRequestPriority->isSetToDefaultForType()) {
             return Response::deny('You cannot delete this service request priority because it is set as the default for its type.');
         }
 
@@ -134,7 +135,7 @@ class ServiceRequestPriorityPolicy
             return Response::deny('You cannot force delete this service request priority because it has associated service requests.');
         }
 
-        if ($serviceRequestPriority->isSetToDefaultForType()) {
+        if (DefaultPriorityFeature::active() && $serviceRequestPriority->isSetToDefaultForType()) {
             return Response::deny('You cannot force delete this service request priority because it is set as the default for its type.');
         }
 

@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\DefaultPriorityFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -82,6 +83,10 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
     public function mount(int|string $record): void
     {
         parent::mount($record);
+
+        if (! DefaultPriorityFeature::active()) {
+            return;
+        }
 
         $type = $this->getServiceRequestType();
 
@@ -192,12 +197,16 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
                             ->rule(Rule::exists('service_request_priorities', 'id')->where('type_id', $this->getServiceRequestType()->getKey()))
                             ->required(fn (Get $get): bool => ! $get('customer_defined_priorities'))
                             ->hidden(fn (Get $get): bool => $get('customer_defined_priorities')),
-                    ]),
+                    ])
+                    ->visible(DefaultPriorityFeature::active()),
             ]);
     }
 
     public function savePriorityConfiguration(): void
     {
+        if (! DefaultPriorityFeature::active()) {
+            return;
+        }
         $data = $this->getConfigurationForm()->getState();
 
         DB::transaction(function () use ($data): void {
