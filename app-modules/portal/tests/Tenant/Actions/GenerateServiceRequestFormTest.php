@@ -102,7 +102,7 @@ it('does not combine the first step when the caller does not opt in, even if the
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
-    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStep: false);
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: false);
 
     expect($result->steps)->toHaveCount(2)
         ->and($result->steps->first()->label)->toBe('Main')
@@ -125,7 +125,7 @@ it('does not combine the first step when the form has not opted in, even if the 
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
-    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStep: true);
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
     expect($result->steps)->toHaveCount(2)
         ->and($result->steps->first()->label)->toBe('Main')
@@ -145,7 +145,7 @@ it('combines the single custom step into the Main step when both the caller and 
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
-    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStep: true);
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
     expect($result->steps)->toHaveCount(1)
         ->and($result->steps->first()->label)->toBe('Main');
@@ -177,7 +177,7 @@ it('combines only the first step of a multi-step custom form into Main, keeping 
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
 
-    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStep: true);
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
     expect($result->steps)->toHaveCount(2)
         ->and($result->steps->first()->label)->toBe('Main')

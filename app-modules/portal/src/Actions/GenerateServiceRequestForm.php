@@ -51,7 +51,7 @@ use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
 {
-    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection, bool $shouldCombineFirstStep = false): ServiceRequestForm
+    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection, bool $shouldCombineFirstStepIfEnabled = false): ServiceRequestForm
     {
         $form = $type->form ?? new ServiceRequestForm();
 
@@ -85,7 +85,7 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
-        if (CombineStepFormFeature::active() && $shouldCombineFirstStep && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
+        if (CombineStepFormFeature::active() && $shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
             $firstStep = $form->steps->shift();
 
             /** @var array<int, array<string, mixed>> $firstStepContentData */
