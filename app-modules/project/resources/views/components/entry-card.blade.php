@@ -41,10 +41,6 @@
 
     $assignedTo = $entry->assignedTo;
 
-    if (blank($assignedTo) && filled($assignedModelClass) && filled($entry->assigned_to_id) && class_exists($assignedModelClass)) {
-        $assignedTo = $assignedModelClass::query()->find($entry->assigned_to_id);
-    }
-
     $assignedType = match (true) {
         $assignedModelClass === User::class => 'User',
         $assignedModelClass === Contact::class => 'Contact',

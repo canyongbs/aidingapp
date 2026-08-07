@@ -102,17 +102,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->pluck('name', 'id');
     }
 
-    /**
-     * @return Collection<(int|string), mixed>
-     */
-    public function getStageCounts(): Collection
-    {
-        return $this->pipeline->entries()
-            ->selectRaw('pipeline_stage_id, COUNT(*) as count')
-            ->groupBy('pipeline_stage_id')
-            ->pluck('count', 'pipeline_stage_id');
-    }
-
     public function movedEntry(string $pipeline, string $entryId, string $fromStage = '', string $toStage = ''): JsonResponse
     {
         $this->authorize('update', $this->pipeline);
@@ -196,10 +185,12 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function render(): View
     {
+        $pipelineEntries = $this->getPipelineEntries();
+
         return view('project::livewire.pipeline-entry-kanban', [
-            'pipelineEntries' => $this->getPipelineEntries(),
+            'pipelineEntries' => $pipelineEntries,
             'stages' => $this->getStages(),
-            'stageCounts' => $this->getStageCounts(),
+            'stageCounts' => $pipelineEntries->map->count(),
         ]);
     }
 
