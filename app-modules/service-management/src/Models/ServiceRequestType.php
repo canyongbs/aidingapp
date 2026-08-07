@@ -101,6 +101,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'email_automatic_creation_contact_create_condition',
         'is_visibility_restricted',
         'automated_status_id',
+        'default_priority_id',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -328,6 +329,14 @@ class ServiceRequestType extends BaseModel implements Auditable
         }
 
         return $map;
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestPriority, $this>
+     */
+    public function defaultPriority(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestPriority::class, 'default_priority_id');
     }
 
     protected function casts(): array

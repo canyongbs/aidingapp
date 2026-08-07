@@ -89,6 +89,13 @@ class ServiceRequestPriority extends BaseModel implements Auditable
         return $this->belongsTo(Sla::class);
     }
 
+    public function isSetToDefaultForType(): bool
+    {
+        return $this->type()
+            ->where('default_priority_id', $this->getKey())
+            ->exists();
+    }
+
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');

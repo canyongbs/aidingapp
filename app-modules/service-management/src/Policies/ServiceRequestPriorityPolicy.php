@@ -94,6 +94,10 @@ class ServiceRequestPriorityPolicy
             return Response::deny('You cannot delete this service request priority because it has associated service requests.');
         }
 
+        if ($serviceRequestPriority->isSetToDefaultForType()) {
+            return Response::deny('You cannot delete this service request priority because it is set as the default for its type.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['service_request_priority.*.delete'],
             denyResponse: 'You do not have permissions to delete this service request priority.'
@@ -128,6 +132,10 @@ class ServiceRequestPriorityPolicy
     {
         if ($serviceRequestPriority->serviceRequests()->exists()) {
             return Response::deny('You cannot force delete this service request priority because it has associated service requests.');
+        }
+
+        if ($serviceRequestPriority->isSetToDefaultForType()) {
+            return Response::deny('You cannot force delete this service request priority because it is set as the default for its type.');
         }
 
         return $authenticatable->canOrElse(

@@ -69,13 +69,18 @@ class GenerateServiceRequestForm
         $content = collect([
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
-            $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
-                'options' => $type
-                    ->priorities()
-                    ->orderByDesc('order')
-                    ->pluck('name', 'id'),
-                'placeholder' => 'Select a priority',
-            ]),
+
+            ...($type->default_priority_id
+                ? []
+                : [
+                    $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
+                        'options' => $type->priorities()
+                            ->orderByDesc('order')
+                            ->pluck('name', 'id'),
+                        'placeholder' => 'Select a priority',
+                    ]),
+                ]),
+
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
                 'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
                 'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),
@@ -95,10 +100,13 @@ class GenerateServiceRequestForm
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
-        if (app(AiClarificationSettings::class)->is_enabled
-            && $type->is_ai_clarification_enabled) {
+        if (
+            app(AiClarificationSettings::class)->is_enabled
+            && $type->is_ai_clarification_enabled
+        ) {
             $maxOrder = $form->steps->max('order') ?? 0;
-            $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions'; /** @phpstan-ignore identical.alwaysTrue */
+            $stepLabel = AiClarificationSettings::NUMBER_OF_QUESTIONS === 1 ? 'Question' : 'Questions';
+            /** @phpstan-ignore identical.alwaysTrue */
             $form->steps->push($this->formatStep($stepLabel, $maxOrder + 1, collect([])));
         }
 

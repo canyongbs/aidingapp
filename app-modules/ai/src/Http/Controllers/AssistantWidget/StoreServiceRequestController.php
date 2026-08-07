@@ -80,7 +80,10 @@ class StoreServiceRequestController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'priority_id' => ['required', 'uuid'],
+            'priority_id' => [
+                $type->defaultPriority()->exists() ? 'nullable' : 'required',
+                'uuid',
+            ],
             'attachments' => ['nullable', 'array'],
             'attachments.*.path' => [
                 'required_with:attachments',
@@ -125,7 +128,8 @@ class StoreServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $priority = $type->priorities()->findOrFail($data['priority_id']);
+            $priority = $type->defaultPriority()->first()
+                ?? $type->priorities()->findOrFail($data['priority_id']);
 
             $serviceRequestStatus = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)

@@ -88,7 +88,8 @@ class StoreServiceRequestController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $priority = $type->priorities()->findOrFail($data->pull('Main.priority'));
+        $priority = $type->defaultPriority()->first()
+            ?? $type->priorities()->findOrFail($data->pull('Main.priority'));
 
         assert($priority instanceof ServiceRequestPriority);
 
