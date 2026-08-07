@@ -195,7 +195,7 @@ class ListProjects extends ListRecords
             ->recordActions([
                 Action::make('archive')
                     ->label('Archive')
-                    ->defaultColor('warning')
+                    ->color('warning')
                     ->icon('heroicon-m-archive-box')
                     ->modalIcon('heroicon-o-archive-box')
                     ->modalSubmitActionLabel('Archive')

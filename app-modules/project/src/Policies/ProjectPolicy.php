@@ -40,6 +40,7 @@ use AidingApp\Project\Models\Project;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
@@ -181,13 +182,14 @@ class ProjectPolicy
 
     public function archive(Authenticatable $authenticatable, Project $project): Response
     {
-        if (! auth()->user()->isSuperAdmin()) {
-            $department = auth()->user()->department;
+        /** @var User $authenticatable */
+        if (! $authenticatable->isSuperAdmin()) {
+            $department = $authenticatable->department;
 
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
-            $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
+            $userExists = $project->managerUsers()->where('users.id', $authenticatable->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy->is($authenticatable)) {
                 return Response::deny("You don't have permission to archive this project because you're not manager, or creator of this project.");
             }
         }
