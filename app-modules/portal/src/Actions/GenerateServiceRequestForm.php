@@ -46,11 +46,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\CombineStepFormFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
 {
-    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection): ServiceRequestForm
+    public function execute(ServiceRequestType $type, UploadsMediaCollection $uploadsMediaCollection, bool $shouldCombineFirstStepIfEnabled = false): ServiceRequestForm
     {
         $form = $type->form ?? new ServiceRequestForm();
 
@@ -83,6 +84,14 @@ class GenerateServiceRequestForm
                 'uploadUrl' => route('api.portal.service-request.request-upload-url'),
             ]),
         ]);
+
+        if (CombineStepFormFeature::active() && $shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
+            $firstStep = $form->steps->shift();
+
+            /** @var array<int, array<string, mixed>> $firstStepContentData */
+            $firstStepContentData = data_get($firstStep, 'content.content', []);
+            $content = $content->concat($firstStepContentData);
+        }
 
         $form->steps->prepend($this->formatStep('Main', -1, $content));
 
