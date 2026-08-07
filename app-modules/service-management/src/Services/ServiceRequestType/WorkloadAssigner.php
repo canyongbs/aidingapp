@@ -77,7 +77,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                 ->where(function (QueryBuilder $query) {
                     $query->selectRaw('count(*)')
                         ->from('service_requests')
-                        ->Join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
+                        ->join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
                         ->whereColumn('users.id', 'service_request_assignments.user_id')
                         ->whereExists(function (QueryBuilder $query) {
                             $query->selectRaw('*')
