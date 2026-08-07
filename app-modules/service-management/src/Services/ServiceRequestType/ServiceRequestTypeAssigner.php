@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 
 abstract class ServiceRequestTypeAssigner
 {
@@ -56,15 +57,17 @@ abstract class ServiceRequestTypeAssigner
 
     private function assign(ServiceRequest $serviceRequest, User $user): void
     {
-        $serviceRequest->assignments()->create([
-            'user_id' => $user->getKey(),
-            'assigned_by_id' => null,
-            'assigned_by_type' => null,
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
+        DB::transaction(function () use ($serviceRequest, $user): void {
+            $serviceRequest->assignments()->create([
+                'user_id' => $user->getKey(),
+                'assigned_by_id' => null,
+                'assigned_by_type' => null,
+                'assigned_at' => now(),
+                'status' => ServiceRequestAssignmentStatus::Active,
+            ]);
 
-        $this->applyAutomatedStatusChange($serviceRequest);
+            $this->applyAutomatedStatusChange($serviceRequest);
+        });
     }
 
     private function applyAutomatedStatusChange(ServiceRequest $serviceRequest): void
