@@ -127,6 +127,7 @@ class EditServiceMonitoring extends EditRecord
                         Hidden::make('is_reported_via_database'),
                         CheckboxList::make('report_channels')
                             ->label('Channels')
+                            ->dehydrated(false)
                             ->options([
                                 'is_reported_via_email' => 'Email',
                                 'is_reported_via_database' => 'Application',

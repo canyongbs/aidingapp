@@ -74,12 +74,6 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     public function toMail(User $notifiable): MailMessage
     {
         [$reportPeriodStart, $reportPeriodEnd] = $this->getReportPeriod();
-        $uptimePercentage = $this->serviceMonitoringTarget->getUptimePercentage($this->getUptimeDays());
-        $successfulChecks = $this->getSuccessfulChecks();
-        $failedChecks = $this->getFailedChecks();
-        $averageResponseTime = $this->getAverageResponseTime();
-        $totalDowntime = $this->getTotalDowntime();
-        $incidentSummary = $this->getIncidentSummary();
 
         return MailMessage::make()
             ->subject(($this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly)->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
@@ -87,12 +81,12 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
                 'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
                 'reportPeriodStart' => $reportPeriodStart,
                 'reportPeriodEnd' => $reportPeriodEnd,
-                'uptimePercentage' => $uptimePercentage,
-                'successfulChecks' => $successfulChecks,
-                'failedChecks' => $failedChecks,
-                'averageResponseTime' => $averageResponseTime,
-                'totalDowntime' => $totalDowntime,
-                'incidentSummary' => $incidentSummary,
+                'uptimePercentage' => $this->serviceMonitoringTarget->getUptimePercentage($this->getUptimeDays()),
+                'successfulChecks' => $this->getSuccessfulChecks(),
+                'failedChecks' => $this->getFailedChecks(),
+                'averageResponseTime' => $this->getAverageResponseTime(),
+                'totalDowntime' => $this->getTotalDowntime(),
+                'incidentSummary' => $this->getIncidentSummary(),
             ]);
     }
 

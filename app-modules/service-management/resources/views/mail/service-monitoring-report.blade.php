@@ -41,28 +41,28 @@
         ></x-mail::header>
     </x-slot:header>
 
-    {{-- Body --}}
-    Your {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
+{{-- Body --}}
+Your {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
 
-    ## Service Monitor
-    {{ $serviceMonitoringTarget->name }}
-    {{ $serviceMonitoringTarget->domain }}
+## Service Monitor
+{{ $serviceMonitoringTarget->name }}
+{{ $serviceMonitoringTarget->domain }}
 
-    ## Reporting Period
-    {{ $reportPeriodStart }} through {{ $reportPeriodEnd }}
+## Reporting Period
+{{ $reportPeriodStart }} through {{ $reportPeriodEnd }}
 
-    ## Status Summary
-    Current Status: {{ is_null($serviceMonitoringTarget->latestHistory->succeeded) ? 'N/A' : $serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed' }}
-    Uptime: {{ $uptimePercentage }}
-    Successful Checks: {{ $successfulChecks }}
-    Failed Checks: {{ $failedChecks }}
-    Average Response Time: {{ $averageResponseTime }}
-    Total Downtime: {{ $totalDowntime }}
+## Status Summary
+Current Status: {{ is_null($serviceMonitoringTarget->latestHistory?->succeeded) ? 'N/A' : ($serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed') }}
+Uptime: {{ $uptimePercentage }}
+Successful Checks: {{ $successfulChecks }}
+Failed Checks: {{ $failedChecks }}
+Average Response Time: {{ $averageResponseTime }}
+Total Downtime: {{ $totalDowntime }}
 
-    ## Incidents
-    {{ $incidentSummary }}
+## Incidents
+{{ $incidentSummary }}
 
-    Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->format('M j, Y g:i a (T)') }}
+Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->format('M j, Y g:i a (T)') }}
 
     {{-- Footer --}}
     <x-slot:footer>
