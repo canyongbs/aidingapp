@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Notifications;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
@@ -60,7 +61,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     /**
      * @return array<int, string>
      */
-    public function via(User $notifiable): array
+    public function via(User|Contact $notifiable): array
     {
         return match ($this->channel) {
             DatabaseChannel::class => ['database'],

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
@@ -69,5 +70,65 @@ describe('ServiceMonitoringJob scheduling', function () {
         artisan('schedule:run');
 
         Queue::assertNotPushed(ServiceMonitoringJob::class);
+    });
+});
+
+describe('ServiceMonitoringReportJob scheduling', function () {
+    beforeEach(function () {
+        $tenant = Tenant::query()->first();
+
+        $tenant->execute(function () {
+            $settings = app(LicenseSettings::class);
+            $settings->data->addons->serviceMonitoring = true;
+            $settings->save();
+        });
+    });
+
+    it('dispatches ServiceMonitoringReportJob daily when serviceMonitoring addon is enabled', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay());
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'daily');
+    });
+
+    it('dispatches ServiceMonitoringReportJob weekly on Mondays when serviceMonitoring addon is enabled', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay()->next(1)); // Travel to next Monday
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'weekly');
+    });
+
+    it('dispatches ServiceMonitoringReportJob monthly on the first of month when serviceMonitoring addon is enabled', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfMonth());
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'monthly');
+    });
+
+    it('does not dispatch ServiceMonitoringReportJob when serviceMonitoring addon is disabled', function () {
+        Queue::fake();
+
+        $tenant = Tenant::query()->first();
+
+        $tenant->execute(function () {
+            $settings = app(LicenseSettings::class);
+            $settings->data->addons->serviceMonitoring = false;
+            $settings->save();
+        });
+
+        travelTo(now()->startOfDay());
+
+        artisan('schedule:run');
+
+        Queue::assertNotPushed(ServiceMonitoringReportJob::class);
     });
 });
