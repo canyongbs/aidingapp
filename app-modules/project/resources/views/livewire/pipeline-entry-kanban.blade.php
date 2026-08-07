@@ -39,38 +39,47 @@
                     <div class="mb-6 flex items-start justify-start space-x-4 px-4" x-data="kanban($wire)">
                         @foreach ($stages as $stageKey => $stage)
                             <div class="min-w-kanban">
-                                <div class="flex items-center justify-between gap-3">
-                                    <div class="py-4 text-base font-semibold text-gray-900 dark:text-gray-300">
-                                        {{ $stage }}
+                                <div class="rounded-lg bg-gray-100 px-4 py-2 dark:bg-gray-800">
+                                    <div class="flex items-center justify-between gap-3">
+                                        <div
+                                            class="flex items-center gap-2 text-base font-semibold text-gray-900 dark:text-gray-300"
+                                        >
+                                            <span>{{ $stage }}</span>
+                                            <span
+                                                class="flex h-6 w-6 items-center justify-center rounded-full bg-gray-300 text-xs text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                                            >
+                                                {{ $stageCounts[$stageKey] ?? 0 }}
+                                            </span>
+                                        </div>
+
+                                        @can('update', $pipeline)
+                                            <x-filament::link
+                                                tag="button"
+                                                icon="heroicon-m-plus"
+                                                :wire:click="'mountAction(\'addEntry\', { stage:\'' . $stageKey . '\' })'"
+                                            >
+                                                {{ __('Add') }}
+                                            </x-filament::link>
+                                        @endcan
                                     </div>
 
-                                    @can('update', $pipeline)
-                                        <x-filament::link
-                                            tag="button"
-                                            icon="heroicon-m-plus"
-                                            :wire:click="'mountAction(\'addEntry\', { stage:\'' . $stageKey . '\' })'"
-                                        >
-                                            {{ __('Add') }}
-                                        </x-filament::link>
-                                    @endcan
-                                </div>
-
-                                <div
-                                    id="kanban-list-{{ $stageKey }}"
-                                    data-stage="{{ $stageKey }}"
-                                    @class(['relative flex flex-col gap-4 min-w-kanban mb-4 h-full', 'pb-20' => ! count($pipelineEntries[$stageKey] ?? [])])
-                                >
-                                    @foreach ($pipelineEntries[$stageKey] ?? [] as $entry)
-                                        <x-project::entry-card
-                                            :pipeline="$pipeline"
-                                            :entry="$entry"
-                                        ></x-project::entry-card>
-                                    @endforeach
-
                                     <div
-                                        class="absolute flex h-20 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 py-2 font-semibold text-gray-500 hover:border-gray-300 dark:border-gray-800"
+                                        id="kanban-list-{{ $stageKey }}"
+                                        data-stage="{{ $stageKey }}"
+                                            @class(['relative flex flex-col gap-4 mb-4 h-full pt-4', 'pb-20' => ! count($pipelineEntries[$stageKey] ?? [])])
                                     >
-                                        <div>Drag pipeline task here</div>
+                                        @foreach ($pipelineEntries[$stageKey] ?? [] as $entry)
+                                            <x-project::entry-card
+                                                :pipeline="$pipeline"
+                                                :entry="$entry"
+                                            ></x-project::entry-card>
+                                        @endforeach
+
+                                        <div
+                                            class="absolute flex h-20 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-200 py-2 font-semibold text-gray-500 hover:border-gray-300 dark:border-gray-800"
+                                        >
+                                            <div>Drag pipeline task here</div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

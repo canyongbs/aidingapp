@@ -40,6 +40,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Carbon\Carbon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -60,6 +61,69 @@ it('renders entry cards with their name on the kanban board', function () {
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee($entry->name);
+});
+
+it('renders stage name with card count in the stage header', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(2), 'stages')
+        ->create();
+
+    [$firstStage, $secondStage] = $pipeline->stages;
+
+    PipelineEntry::factory()->count(2)->create([
+        'pipeline_stage_id' => $firstStage->getKey(),
+    ]);
+
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $secondStage->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee($firstStage->name)
+        ->assertSee($secondStage->name)
+        ->assertSee('2')
+        ->assertSee('1');
+});
+
+it('renders modern card metadata with assignment and due tooltip', function () {
+    asSuperAdmin();
+
+    Carbon::setTestNow('2026-08-07 12:00:00');
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $assignee = User::factory()->create([
+        'name' => 'Joe Licata',
+    ]);
+
+    $due = now()->addDay()->addHours(3);
+
+    PipelineEntry::factory()->create([
+        'name' => 'Modern Card Task',
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'assigned_to_type' => $assignee->getMorphClass(),
+        'assigned_to_id' => $assignee->getKey(),
+        'due' => $due,
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee('Modern Card Task')
+        ->assertSee('Milestones:')
+        ->assertSee('Assets:')
+        ->assertSee('Service Requests:')
+        ->assertSee('Assigned:')
+        ->assertSee('Joe Licata (User)')
+        ->assertSee('Due:')
+        ->assertSee('1 Day 3 Hours')
+        ->assertSee($due->format('M j, Y g:i A'));
+
+    Carbon::setTestNow();
 });
 
 it('renders stages in order sequence on the kanban board', function () {
