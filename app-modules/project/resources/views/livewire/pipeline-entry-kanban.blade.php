@@ -66,7 +66,7 @@
                                     <div
                                         id="kanban-list-{{ $stageKey }}"
                                         data-stage="{{ $stageKey }}"
-                                            @class(['relative flex flex-col gap-4 mb-4 h-full pt-4', 'pb-20' => ! count($pipelineEntries[$stageKey] ?? [])])
+                                        @class(['relative flex flex-col gap-4 mb-4 h-full pt-4', 'pb-20' => ! count($pipelineEntries[$stageKey] ?? [])])
                                     >
                                         @foreach ($pipelineEntries[$stageKey] ?? [] as $entry)
                                             <x-project::entry-card

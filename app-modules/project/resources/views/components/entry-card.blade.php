@@ -83,17 +83,30 @@
     <hr class="my-3 border-gray-200 dark:border-gray-700" />
 
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-        <div><span class="font-bold">Milestones:</span> {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}</div>
-        <div><span class="font-bold">Assets:</span> {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}</div>
         <div>
-            <span class="font-bold">Service Requests:</span> {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : 'None' }}
+            <span class="font-bold">Milestones:</span>
+            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
+        </div>
+        <div>
+            <span class="font-bold">Assets:</span>
+            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}
+        </div>
+        <div>
+            <span class="font-bold">Service Requests:</span>
+            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : 'None' }}
         </div>
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />
 
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-        <div><span class="font-bold">Assigned:</span> {{ $assignedLabel }}</div>
-        <div title="{{ $dueTooltip ?? '' }}"><span class="font-bold">Due:</span> {{ $dueLabel ? $dueLabel : 'None' }}</div>
+        <div>
+            <span class="font-bold">Assigned:</span>
+            {{ $assignedLabel }}
+        </div>
+        <div title="{{ $dueTooltip ?? '' }}">
+            <span class="font-bold">Due:</span>
+            {{ $dueLabel ? $dueLabel : 'None' }}
+        </div>
     </div>
 </div>
