@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use App\Features\AutomatedStatusChangeOnAssignmentFeature;
@@ -53,24 +52,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
 use function Tests\asSuperAdmin;
-
-if (! function_exists('enablePreference')) {
-    function enablePreference(
-        ServiceRequestType $type,
-        ServiceRequestEmailTemplateType $templateType,
-        ServiceRequestTypeEmailTemplateRole $role,
-        ServiceRequestNotificationChannel $channel,
-        bool $isEnabled = true,
-    ): void {
-        ServiceRequestTypeEmailPreference::create([
-            'service_request_type_id' => $type->getKey(),
-            'service_request_email_template_type' => $templateType,
-            'service_request_email_template_role' => $role,
-            'notification_channel' => $channel,
-            'is_enabled' => $isEnabled,
-        ]);
-    }
-}
+use function Tests\enablePreference;
 
 if (! function_exists('individualAutoAssignType')) {
     /**

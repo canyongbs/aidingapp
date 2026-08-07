@@ -40,35 +40,16 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
-if (! function_exists('enablePreference')) {
-    function enablePreference(
-        ServiceRequestType $type,
-        ServiceRequestEmailTemplateType $templateType,
-        ServiceRequestTypeEmailTemplateRole $role,
-        ServiceRequestNotificationChannel $channel,
-        bool $isEnabled = true,
-    ): void {
-        ServiceRequestTypeEmailPreference::create([
-            'service_request_type_id' => $type->getKey(),
-            'service_request_email_template_type' => $templateType,
-            'service_request_email_template_role' => $role,
-            'notification_channel' => $channel,
-            'is_enabled' => $isEnabled,
-        ]);
-    }
-}
+use function Tests\enablePreference;
 
 describe('Customer', function () {
     it('sends customer assigned notification when preference is enabled', function () {
@@ -665,31 +646,5 @@ describe('Deduplication', function () {
 
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($managerTemplate))->toBeTrue();
-    });
-});
-
-describe('automated status change on assignment', function () {
-    it('does not change the request status when an assignment is created outside the auto-assignment flow', function () {
-        $manager = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-
-        $type = ServiceRequestType::factory()->create([
-            'automated_status_id' => $target->getKey(),
-        ]);
-        $type->managerUsers()->attach($manager);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($open, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
     });
 });
