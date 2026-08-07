@@ -31,8 +31,13 @@
     
     </COPYRIGHT>
 --}}
+@use('App\Models\User')
+@use('AidingApp\Contact\Models\Contact')
+@use('Illuminate\Database\Eloquent\Relations\Relation')
+@use('Illuminate\Support\Str')
+@use('Carbon\CarbonInterface')
 @php
-    $assignedModelClass = filled($entry->assigned_to_type) ? \Illuminate\Database\Eloquent\Relations\Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
+    $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
     $assignedTo = $entry->assignedTo;
 
@@ -41,20 +46,20 @@
     }
 
     $assignedType = match (true) {
-        $assignedModelClass === \App\Models\User::class => 'User',
-        $assignedModelClass === \AidingApp\Contact\Models\Contact::class => 'Contact',
+        $assignedModelClass === User::class => 'User',
+        $assignedModelClass === Contact::class => 'Contact',
         default => null,
     };
 
     $assignedName = match (true) {
         blank($assignedTo) => 'None',
-        $assignedTo instanceof \AidingApp\Contact\Models\Contact => $assignedTo->full_name ?? 'None',
+        $assignedTo instanceof Contact => $assignedTo->full_name ?? 'None',
         default => $assignedTo->name ?? 'None',
     };
 
     $assignedLabel = filled($assignedType) && $assignedName !== 'None' ? sprintf('%s (%s)', $assignedName, $assignedType) : $assignedName;
 
-    $dueLabel = $entry->due ? \Illuminate\Support\Str::title($entry->due->diffForHumans(now(), \Carbon\CarbonInterface::DIFF_ABSOLUTE, false, 6)) : null;
+    $dueLabel = $entry->due ? Str::title($entry->due->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 6)) : null;
     $dueTooltip = $entry->due?->format('M j, Y g:i A');
 @endphp
 
