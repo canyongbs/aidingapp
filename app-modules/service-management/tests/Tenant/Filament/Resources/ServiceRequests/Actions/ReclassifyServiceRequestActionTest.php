@@ -619,7 +619,7 @@ test('reclassify with default assignment invokes the correct assigner class', fu
     ])->create();
 
     if ($assignerClass) {
-        $spy = Mockery::spy($assignerClass);
+        $spy = Mockery::spy($assignerClass)->shouldAllowMockingProtectedMethods();
         app()->instance($assignerClass, $spy);
     }
 
@@ -636,7 +636,7 @@ test('reclassify with default assignment invokes the correct assigner class', fu
         ->assertHasNoFormErrors();
 
     if ($assignerClass) {
-        $spy->shouldHaveReceived('execute')->once();
+        $spy->shouldHaveReceived('resolveAssignee')->once();
     } else {
         expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
     }
@@ -721,8 +721,8 @@ test('reclassify rolls back changes on failure and shows error notification', fu
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
-    $mock = Mockery::mock(IndividualAssigner::class);
-    $mock->shouldReceive('execute')->andThrow(new RuntimeException('Assigner failed'));
+    $mock = Mockery::mock(IndividualAssigner::class)->shouldAllowMockingProtectedMethods();
+    $mock->shouldReceive('resolveAssignee')->andThrow(new RuntimeException('Assigner failed'));
     app()->instance(IndividualAssigner::class, $mock);
 
     asSuperAdmin();

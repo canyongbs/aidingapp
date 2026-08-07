@@ -36,9 +36,54 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
+use App\Models\User;
 
-interface ServiceRequestTypeAssigner
+abstract class ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void;
+    final public function execute(ServiceRequest $serviceRequest): void
+    {
+        $user = $this->resolveAssignee($serviceRequest);
+
+        if ($user !== null) {
+            $this->assign($serviceRequest, $user);
+        }
+    }
+
+    abstract protected function resolveAssignee(ServiceRequest $serviceRequest): ?User;
+
+    private function assign(ServiceRequest $serviceRequest, User $user): void
+    {
+        $serviceRequest->assignments()->create([
+            'user_id' => $user->getKey(),
+            'assigned_by_id' => null,
+            'assigned_by_type' => null,
+            'assigned_at' => now(),
+            'status' => ServiceRequestAssignmentStatus::Active,
+        ]);
+
+        $this->applyAutomatedStatusChange($serviceRequest);
+    }
+
+    private function applyAutomatedStatusChange(ServiceRequest $serviceRequest): void
+    {
+        if (! AutomatedStatusChangeOnAssignmentFeature::active()) {
+            return;
+        }
+
+        $type = $serviceRequest->priority?->type;
+
+        if (blank($type?->automated_status_id)) {
+            return;
+        }
+
+        if ($serviceRequest->status_id === $type->automated_status_id) {
+            return;
+        }
+
+        $serviceRequest->status()->associate($type->automated_status_id);
+        $serviceRequest->save();
+    }
 }

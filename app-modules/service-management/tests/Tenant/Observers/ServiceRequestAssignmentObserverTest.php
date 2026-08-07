@@ -49,8 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
-use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
-use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
@@ -671,105 +669,7 @@ describe('Deduplication', function () {
 });
 
 describe('automated status change on assignment', function () {
-    it('sets the request status when a system assignment is created and the toggle is on', function () {
-        $manager = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-
-        $type = ServiceRequestType::factory()->create([
-            'automated_status_id' => $target->getKey(),
-        ]);
-        $type->managerUsers()->attach($manager);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($open, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
-    });
-
-    it('does not change the status when automated_status_id is null', function () {
-        $manager = User::factory()->create();
-        $type = ServiceRequestType::factory()->create();
-        $type->managerUsers()->attach($manager);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($open, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
-    });
-
-    it('does not change the status for a manual (assigned_by) assignment', function () {
-        $manager = User::factory()->create();
-        $actor = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-
-        $type = ServiceRequestType::factory()->create([
-            'automated_status_id' => $target->getKey(),
-        ]);
-        $type->managerUsers()->attach($manager);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($open, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_by_id' => $actor->getKey(),
-            'assigned_by_type' => $actor->getMorphClass(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
-    });
-
-    it('sends status change notifications for the automated change (send as normal)', function () {
-        Notification::fake();
-
-        $manager = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-
-        $type = ServiceRequestType::factory()->create([
-            'automated_status_id' => $target->getKey(),
-        ]);
-        $type->managerUsers()->attach($manager);
-        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($open, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class);
-    });
-
-    it('leaves the status unchanged when the feature flag is inactive', function () {
-        AutomatedStatusChangeOnAssignmentFeature::deactivate();
-
+    it('does not change the request status when an assignment is created outside the auto-assignment flow', function () {
         $manager = User::factory()->create();
         $target = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
@@ -791,32 +691,5 @@ describe('automated status change on assignment', function () {
         ]);
 
         expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
-    });
-
-    it('does not send a duplicate notification when the request is already at the target status', function () {
-        Notification::fake();
-
-        $manager = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-
-        $type = ServiceRequestType::factory()->create([
-            'automated_status_id' => $target->getKey(),
-        ]);
-        $type->managerUsers()->attach($manager);
-        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
-
-        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-        $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($target, 'status')->create();
-
-        $serviceRequest->assignments()->create([
-            'user_id' => $manager->getKey(),
-            'assigned_at' => now(),
-            'status' => ServiceRequestAssignmentStatus::Active,
-        ]);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
-        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class);
     });
 });
