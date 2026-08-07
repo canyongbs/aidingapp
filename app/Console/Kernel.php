@@ -145,7 +145,7 @@ class Kernel extends ConsoleKernel
                         });
                     })
                         ->daily();
-                    
+
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
@@ -154,7 +154,7 @@ class Kernel extends ConsoleKernel
                         });
                     })
                         ->daily();
-                    
+
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
@@ -163,7 +163,7 @@ class Kernel extends ConsoleKernel
                         });
                     })
                         ->mondays();
-                    
+
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {
                             if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
