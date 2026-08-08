@@ -55,3 +55,35 @@ it('defaults the widget to the oldest non-archived pipeline', function () {
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertSet('selectedPipelineId', $newer->getKey());
 });
+
+it('archives the checked pipeline and cascades to its tasks', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    $other = Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->call('archivePipelineFromSwitcher', $other->getKey());
+
+    expect($other->refresh()->isArchived())->toBeTrue()
+        ->and($active->refresh()->isArchived())->toBeFalse();
+});
+
+it('re-selects the oldest remaining pipeline after archiving the active one', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    $next = Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->assertSet('selectedPipelineId', $active->getKey())
+        ->call('archivePipelineFromSwitcher', $active->getKey())
+        ->assertSet('selectedPipelineId', $next->getKey());
+});
+
+it('clears the selection when the last pipeline is archived', function () {
+    $project = Project::factory()->create();
+    $only = Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->call('archivePipelineFromSwitcher', $only->getKey())
+        ->assertSet('selectedPipelineId', null);
+});
