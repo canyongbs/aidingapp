@@ -157,4 +157,9 @@ class ManagePipelineEntries extends ManageRelatedRecords
             'project' => $this->getParentRecord(),
         ]));
     }
+
+    protected function onPipelineSwitcherCleared(): void
+    {
+        $this->redirect(ProjectResource::getUrl('view', ['record' => $this->getParentRecord()]));
+    }
 }

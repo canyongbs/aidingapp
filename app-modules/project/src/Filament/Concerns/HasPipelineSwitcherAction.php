@@ -87,4 +87,6 @@ trait HasPipelineSwitcherAction
     abstract protected function getPipelineSwitcherCurrentPipelineId(): ?string;
 
     abstract protected function onPipelineSwitcherSelected(string $pipelineId): void;
+
+    abstract protected function onPipelineSwitcherCleared(): void;
 }

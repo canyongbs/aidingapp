@@ -43,6 +43,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
+use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -80,6 +81,10 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         $this->selectedPipelineId = $this->record
             ->pipelines()
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
             ->oldest()
             ->value('id');
     }
@@ -92,6 +97,10 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $this->record
             ->pipelines()
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
             ->whereKey($this->selectedPipelineId)
             ->first();
     }
@@ -232,6 +241,12 @@ class ProjectWorkPipelineWidget extends TableWidget
     protected function onPipelineSwitcherSelected(string $pipelineId): void
     {
         $this->selectedPipelineId = $pipelineId;
+        $this->resetTable();
+    }
+
+    protected function onPipelineSwitcherCleared(): void
+    {
+        $this->selectedPipelineId = null;
         $this->resetTable();
     }
 
