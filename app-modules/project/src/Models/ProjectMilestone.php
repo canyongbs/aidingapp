@@ -116,6 +116,12 @@ class ProjectMilestone extends Model implements Auditable
 
     public function reevaluateArchivedState(): void
     {
+        $linkedTasksCount = $this->pipelineEntries()->count();
+
+        if ($linkedTasksCount === 0) {
+            return;
+        }
+
         $hasActiveTask = $this->pipelineEntries()->withoutArchived()->exists();
 
         if (! $hasActiveTask && ! $this->isArchived()) {
