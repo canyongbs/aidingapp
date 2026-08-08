@@ -72,6 +72,22 @@ it('archives the checked pipeline and cascades to its tasks', function () {
         ->and($active->refresh()->isArchived())->toBeFalse();
 });
 
+it('archives the checked pipeline through the switcher footer archive action', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    $other = Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->mountAction('selectPipeline')
+        ->setActionData(['pipeline_id' => $active->getKey()])
+        ->mountAction('archivePipeline')
+        ->callMountedAction()
+        ->assertSet('selectedPipelineId', $other->getKey());
+
+    expect($active->refresh()->isArchived())->toBeTrue()
+        ->and($other->refresh()->isArchived())->toBeFalse();
+});
+
 it('re-selects the oldest remaining pipeline after archiving the active one', function () {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
