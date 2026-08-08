@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,45 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
-
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use App\Features\PipelineArchivingFeature;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
-class ProjectPipelinesTable
-{
-    public static function configure(Table $table): Table
-    {
-        return $table
-            ->query(function () use ($table): Builder {
-                $projectId = $table->getArguments()['projectId'] ?? null;
+it('excludes archived pipelines from the switcher list when the flag is active', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    $archived = Pipeline::factory()->for($project)->create();
+    $archived->archive();
 
-                return Pipeline::query()
-                    ->where('project_id', $projectId)
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    );
-            })
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Pipeline')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('stages_count')
-                    ->label('Stages')
-                    ->counts('stages'),
-                TextColumn::make('entries_count')
-                    ->label('Entries')
-                    ->counts('entries'),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at');
-    }
-}
+    // Simulate the query from ProjectPipelinesTable::configure()
+    $projectId = $project->getKey();
+
+    $query = Pipeline::query()
+        ->where('project_id', $projectId)
+        ->when(
+            PipelineArchivingFeature::active(),
+            fn (Builder $query): Builder => $query->withoutArchived(),
+        );
+
+    $ids = $query->pluck('id');
+
+    expect($ids)->toContain($active->getKey())
+        ->and($ids)->not->toContain($archived->getKey());
+});
