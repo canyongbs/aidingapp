@@ -65,3 +65,20 @@ it('leaves a milestone with no linked tasks untouched', function () {
 
     expect($milestone->refresh()->isArchived())->toBeFalse();
 });
+
+it('keeps a milestone active while it still has a task in another active pipeline', function () {
+    $milestone = ProjectMilestone::factory()->create();
+
+    $entryA = PipelineEntry::factory()->create();
+    $entryB = PipelineEntry::factory()->create();
+    $entryA->milestones()->attach($milestone);
+    $entryB->milestones()->attach($milestone);
+
+    $entryA->archive();
+
+    expect($milestone->refresh()->isArchived())->toBeFalse();
+
+    $entryB->archive();
+
+    expect($milestone->refresh()->isArchived())->toBeTrue();
+});
