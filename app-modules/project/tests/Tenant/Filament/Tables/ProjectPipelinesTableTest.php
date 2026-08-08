@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -34,10 +34,19 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineArchivingFeature;
-use Illuminate\Database\Eloquent\Builder;
+use App\Models\User;
+use Filament\Tables\Table;
+
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
+
+beforeEach(function () {
+    asSuperAdmin(User::factory()->create());
+});
 
 it('excludes archived pipelines from the switcher list when the flag is active', function () {
     $project = Project::factory()->create();
@@ -45,17 +54,13 @@ it('excludes archived pipelines from the switcher list when the flag is active',
     $archived = Pipeline::factory()->for($project)->create();
     $archived->archive();
 
-    // Simulate the query from ProjectPipelinesTable::configure()
-    $projectId = $project->getKey();
+    $component = livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();
 
-    $query = Pipeline::query()
-        ->where('project_id', $projectId)
-        ->when(
-            PipelineArchivingFeature::active(),
-            fn (Builder $query): Builder => $query->withoutArchived(),
-        );
+    $table = ProjectPipelinesTable::configure(
+        Table::make($component)->arguments(['projectId' => $project->getKey()]),
+    );
 
-    $ids = $query->pluck('id');
+    $ids = $table->getQuery()->pluck('id');
 
     expect($ids)->toContain($active->getKey())
         ->and($ids)->not->toContain($archived->getKey());
