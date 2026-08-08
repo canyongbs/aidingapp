@@ -34,7 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\ProjectMilestone;
 
 it('archives a milestone once it has no remaining non-archived linked task', function () {
@@ -79,6 +81,41 @@ it('keeps a milestone active while it still has a task in another active pipelin
     expect($milestone->refresh()->isArchived())->toBeFalse();
 
     $entryB->archive();
+
+    expect($milestone->refresh()->isArchived())->toBeTrue();
+});
+
+it('archives all of a pipeline\'s tasks when the pipeline is archived, and restores them on unarchive', function () {
+    $pipeline = Pipeline::factory()->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    // Entries are created without an assignee: assignment is orthogonal to archiving,
+    // and refreshing an assigned entry trips an unrelated pre-existing quirk in the
+    // assignedTo() morphTo (relation name "assigned_to" has no matching method).
+    $entries = PipelineEntry::factory()
+        ->count(3)
+        ->for($stage, 'pipelineStage')
+        ->create([
+            'assigned_to_id' => null,
+            'assigned_to_type' => null,
+        ]);
+
+    $pipeline->archive();
+
+    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+
+    $pipeline->unarchive();
+
+    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeFalse());
+});
+
+it('archives a milestone linked only to tasks in the archived pipeline', function () {
+    $pipeline = Pipeline::factory()->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
+    $milestone = ProjectMilestone::factory()->create();
+    $entry->milestones()->attach($milestone);
+
+    $pipeline->archive();
 
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });

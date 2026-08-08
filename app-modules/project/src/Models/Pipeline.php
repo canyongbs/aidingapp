@@ -39,6 +39,7 @@ namespace AidingApp\Project\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineFactory;
 use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +57,7 @@ class Pipeline extends BaseModel implements Auditable
     use HasFactory;
 
     use AuditableTrait;
+    use CanBeArchived;
     use HasUuids;
     use HasUserSaveTracking;
 
@@ -94,5 +96,16 @@ class Pipeline extends BaseModel implements Auditable
             'id',
             'id'
         );
+    }
+
+    protected static function booted(): void
+    {
+        static::archived(function (Pipeline $pipeline): void {
+            $pipeline->entries()->withoutArchived()->get()->each->archive();
+        });
+
+        static::unarchived(function (Pipeline $pipeline): void {
+            $pipeline->entries()->onlyArchived()->get()->each->unarchive();
+        });
     }
 }
