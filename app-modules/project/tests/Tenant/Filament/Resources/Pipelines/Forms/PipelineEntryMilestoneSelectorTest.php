@@ -34,38 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
-
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
+use AidingApp\Project\Filament\Tables\PipelineEntryMilestonesTable;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\PipelineArchivingFeature;
-use Filament\Tables\Columns\TextColumn;
+use App\Models\User;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
-class PipelineEntryMilestonesTable
-{
-    public static function configure(Table $table): Table
-    {
-        return $table
-            ->query(function () use ($table): Builder {
-                $projectId = $table->getArguments()['projectId'] ?? null;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-                return ProjectMilestone::query()
-                    ->where('project_id', $projectId)
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    );
-            })
-            ->columns([
-                TextColumn::make('title')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('target_date')
-                    ->date()
-                    ->placeholder('N/A'),
-            ])
-            ->paginated([5])
-            ->defaultSort('created_at');
-    }
-}
+beforeEach(function () {
+    asSuperAdmin(User::factory()->create());
+});
+
+it('excludes archived milestones from the related-milestones picker when the flag is active', function () {
+    $project = Project::factory()->create();
+    $active = ProjectMilestone::factory()->for($project)->create();
+    $archived = ProjectMilestone::factory()->for($project)->create();
+    $archived->archive();
+
+    $component = livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();
+
+    $table = PipelineEntryMilestonesTable::configure(
+        Table::make($component)->arguments(['projectId' => $project->getKey()]),
+    );
+
+    $ids = $table->getQuery()->pluck('id');
+
+    expect($ids)->toContain($active->getKey())
+        ->and($ids)->not->toContain($archived->getKey());
+});
