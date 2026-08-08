@@ -35,10 +35,14 @@
 */
 
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use App\Features\PipelineArchivingFeature;
 use App\Models\User;
+use Filament\Tables\Table;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -86,4 +90,79 @@ it('clears the selection when the last pipeline is archived', function () {
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->call('archivePipelineFromSwitcher', $only->getKey())
         ->assertSet('selectedPipelineId', null);
+});
+
+describe('feature flag inactive', function () {
+    it('keeps archived pipelines in the switcher list when the flag is inactive', function () {
+        PipelineArchivingFeature::deactivate();
+
+        $project = Project::factory()->create();
+        $active = Pipeline::factory()->for($project)->create();
+        $archived = Pipeline::factory()->for($project)->create();
+        $archived->archive();
+
+        $table = ProjectPipelinesTable::configure(
+            Table::make(livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance())
+                ->arguments(['projectId' => $project->getKey()]),
+        );
+
+        $ids = $table->getQuery()->pluck('id');
+
+        expect($ids)->toContain($active->getKey())
+            ->and($ids)->toContain($archived->getKey());
+    });
+
+    it('hides the footer archive control when the flag is inactive', function () {
+        PipelineArchivingFeature::deactivate();
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->mountAction('selectPipeline')
+            ->assertActionHidden('archivePipeline');
+    });
+
+    it('does not archive when archivePipelineFromSwitcher is called directly while the flag is inactive', function () {
+        PipelineArchivingFeature::deactivate();
+
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->call('archivePipelineFromSwitcher', $pipeline->getKey());
+
+        expect($pipeline->refresh()->isArchived())->toBeFalse();
+    });
+});
+
+describe('archive authorization', function () {
+    it('does not archive when the acting user lacks the pipeline delete ability', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('pipeline.view-any');
+        $user->refresh();
+        actingAs($user);
+
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->call('archivePipelineFromSwitcher', $pipeline->getKey());
+
+        expect($pipeline->refresh()->isArchived())->toBeFalse();
+    });
+
+    it('hides the footer archive control from a user lacking the pipeline delete ability', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('pipeline.view-any');
+        $user->refresh();
+        actingAs($user);
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->mountAction('selectPipeline')
+            ->assertActionHidden('archivePipeline');
+    });
 });
