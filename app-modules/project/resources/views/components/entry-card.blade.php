@@ -31,32 +31,32 @@
     
     </COPYRIGHT>
 --}}
-@use('App\Models\User')
-@use('AidingApp\Contact\Models\Contact')
-@use('Illuminate\Database\Eloquent\Relations\Relation')
-@use('Illuminate\Support\Str')
-@use('Carbon\CarbonInterface')
+@use("App\Models\User")
+@use("AidingApp\Contact\Models\Contact")
+@use("Illuminate\Database\Eloquent\Relations\Relation")
+@use("Illuminate\Support\Str")
+@use("Carbon\CarbonInterface")
 @php
     $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
     $assignedTo = $entry->assignedTo;
 
     $assignedType = match (true) {
-        $assignedModelClass === User::class => 'User',
-        $assignedModelClass === Contact::class => 'Contact',
+        $assignedModelClass === User::class => "User",
+        $assignedModelClass === Contact::class => "Contact",
         default => null,
     };
 
     $assignedName = match (true) {
-        blank($assignedTo) => 'None',
-        $assignedTo instanceof Contact => $assignedTo->full_name ?? 'None',
-        default => $assignedTo->name ?? 'None',
+        blank($assignedTo) => "None",
+        $assignedTo instanceof Contact => $assignedTo->full_name ?? "None",
+        default => $assignedTo->name ?? "None",
     };
 
-    $assignedLabel = filled($assignedType) && $assignedName !== 'None' ? sprintf('%s (%s)', $assignedName, $assignedType) : $assignedName;
+    $assignedLabel = filled($assignedType) && $assignedName !== "None" ? sprintf("%s (%s)", $assignedName, $assignedType) : $assignedName;
 
     $dueLabel = $entry->due ? Str::title($entry->due->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 6)) : null;
-    $dueTooltip = $entry->due?->format('M j, Y g:i A');
+    $dueTooltip = $entry->due?->format("M j, Y g:i A");
 @endphp
 
 <div role="button" tabindex="0"
@@ -83,15 +83,15 @@
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
         <div>
             <span class="font-bold">Milestones:</span>
-            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
+            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : "None" }}
         </div>
         <div>
             <span class="font-bold">Assets:</span>
-            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}
+            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : "None" }}
         </div>
         <div>
             <span class="font-bold">Service Requests:</span>
-            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : 'None' }}
+            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : "None" }}
         </div>
     </div>
 
@@ -102,9 +102,9 @@
             <span class="font-bold">Assigned:</span>
             {{ $assignedLabel }}
         </div>
-        <div title="{{ $dueTooltip ?? '' }}">
+        <div title="{{ $dueTooltip ?? "" }}">
             <span class="font-bold">Due:</span>
-            {{ $dueLabel ? $dueLabel : 'None' }}
+            {{ $dueLabel ? $dueLabel : "None" }}
         </div>
     </div>
 </div>
