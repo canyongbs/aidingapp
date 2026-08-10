@@ -190,7 +190,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (! ($data['is_automated_status_change_enabled'] ?? false)) {
+        if (AutomatedStatusChangeOnAssignmentFeature::active() && ! ($data['is_automated_status_change_enabled'] ?? false)) {
             $data['automated_status_id'] = null;
         }
 
