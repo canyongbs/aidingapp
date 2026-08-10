@@ -119,3 +119,44 @@ it('archives a milestone linked only to tasks in the archived pipeline', functio
 
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
+
+it('archives a stage\'s non-archived tasks when the stage is archived, and restores them on unarchive', function () {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $entries = PipelineEntry::factory()
+        ->count(3)
+        ->for($stage, 'pipelineStage')
+        ->create([
+            'assigned_to_id' => null,
+            'assigned_to_type' => null,
+        ]);
+
+    $stage->archive();
+
+    expect($stage->refresh()->isArchived())->toBeTrue();
+    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+
+    $stage->unarchive();
+
+    expect($stage->refresh()->isArchived())->toBeFalse();
+    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeFalse());
+});
+
+it('leaves an already-archived task untouched when its stage is unarchived', function () {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $active = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $manuallyArchived = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+
+    $stage->archive();
+    $manuallyArchived->refresh();
+
+    $stage->unarchive();
+
+    expect($active->refresh()->isArchived())->toBeFalse()
+        ->and($manuallyArchived->refresh()->isArchived())->toBeFalse();
+});

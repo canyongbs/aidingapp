@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor's trademarks is subject
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -48,6 +48,10 @@ return new class () extends Migration {
                 $table->timestamp('archived_at')->nullable();
             });
 
+            Schema::table('pipeline_stages', function (Blueprint $table): void {
+                $table->timestamp('archived_at')->nullable();
+            });
+
             Schema::table('pipeline_entries', function (Blueprint $table): void {
                 $table->timestamp('archived_at')->nullable();
             });
@@ -68,6 +72,10 @@ return new class () extends Migration {
             });
 
             Schema::table('pipeline_entries', function (Blueprint $table): void {
+                $table->dropColumn('archived_at');
+            });
+
+            Schema::table('pipeline_stages', function (Blueprint $table): void {
                 $table->dropColumn('archived_at');
             });
 

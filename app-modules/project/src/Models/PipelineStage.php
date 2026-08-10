@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineStageFactory;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use App\Models\BaseModel;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -56,6 +57,7 @@ class PipelineStage extends BaseModel implements Auditable
     use HasFactory;
 
     use AuditableTrait;
+    use CanBeArchived;
     use HasUuids;
     use HasUserSaveTracking;
 
@@ -84,5 +86,16 @@ class PipelineStage extends BaseModel implements Auditable
     public function pipelineEntries(): HasMany
     {
         return $this->hasMany(PipelineEntry::class);
+    }
+
+    protected static function booted(): void
+    {
+        static::archived(function (PipelineStage $stage): void {
+            $stage->pipelineEntries()->withoutArchived()->get()->each->archive();
+        });
+
+        static::unarchived(function (PipelineStage $stage): void {
+            $stage->pipelineEntries()->onlyArchived()->get()->each->unarchive();
+        });
     }
 }
