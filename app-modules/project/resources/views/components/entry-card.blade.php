@@ -59,8 +59,10 @@
     $dueTooltip = $entry->due?->format("M j, Y g:i A");
 @endphp
 
-<div role="button" tabindex="0"
-    @can('update', $pipeline)
+<div
+    role="button"
+    tabindex="0"
+    @can("update", $pipeline)
         wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
         wire:keydown.enter="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
     @else
