@@ -59,6 +59,15 @@ class PipelineResource extends Resource
 
     protected static ?string $parentResource = ProjectResource::class;
 
+    // Every page here is reached through a Project (see $parentResource below), whose own
+    // access check already runs alongside this one. Real authorization is delegated to the
+    // Project via PipelinePolicy, but Filament's automatic viewAny gate has no record to pass,
+    // so it must be bypassed here rather than by the bare pipeline.view-any permission.
+    public static function canAccess(): bool
+    {
+        return true;
+    }
+
     public static function getRecordSubNavigation(Page $page): array
     {
         if ($page instanceof ManagePipelineEntries) {

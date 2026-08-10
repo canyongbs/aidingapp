@@ -62,7 +62,7 @@ class PipelinesRelationManager extends RelationManager
             ->headerActions([
                 CreateAction::make()
                     ->url(fn (): string => PipelineResource::getUrl('create', ['project' => $this->getOwnerRecord()]))
-                    ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->getOwnerRecord())),
+                    ->authorize(fn (): bool => auth()->user()->can('create', [Pipeline::class, $this->getOwnerRecord()])),
             ])
             ->filters([
                 Filter::make('createdBy')

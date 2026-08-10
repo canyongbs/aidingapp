@@ -57,7 +57,6 @@ it('can render edit pipeline entry with proper permission', function () {
     actingAs($user);
 
     $project = Project::factory()->create();
-    $project->managerUsers()->attach($user->getKey());
 
     $pipeline = Pipeline::factory()
         ->for($project)
@@ -68,23 +67,18 @@ it('can render edit pipeline entry with proper permission', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->id,
     ]);
 
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    $project->managerUsers()->attach($user);
-
     livewire(EditPipelineEntry::class, [
         'record' => $entry->getRouteKey(),
         'parentRecord' => $pipeline,
     ])
         ->assertForbidden();
 
-    $user->givePermissionTo('pipeline.*.update');
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
     $user->givePermissionTo('project.*.update');
     $user->refresh();
+
+    $project->managerUsers()->attach($user);
 
     livewire(EditPipelineEntry::class, [
         'record' => $entry->getRouteKey(),

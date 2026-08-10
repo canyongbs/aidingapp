@@ -34,43 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+use AidingApp\Project\Models\Project;
+use App\Models\User;
 
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use function Pest\Laravel\actingAs;
 
-class GuestContactsRelationManager extends RelationManager
-{
-    protected static string $relationship = 'guestContacts';
+it('does not throw when checking a permission whose project creator has been deleted', function (string $ability) {
+    $creator = User::factory()->create();
 
-    protected static ?string $title = 'Contacts';
+    $project = Project::factory()->for($creator, 'createdBy')->create();
 
-    // Owner-record update access is enforced globally in FilamentServiceProvider, not a Contact::viewAny permission
-    protected static bool $shouldSkipAuthorization = true;
+    $creator->delete();
 
-    public function table(Table $table): Table
-    {
-        return $table
-            ->recordTitleAttribute('full_name')
-            ->columns([
-                TextColumn::make('full_name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('guestProjects');
-    }
-}
+    $user = User::factory()->create();
+
+    $user->givePermissionTo("project.*.{$ability}");
+
+    actingAs($user);
+
+    expect($project->refresh()->createdBy)->toBeNull()
+        ->and($user->can($ability, $project))->toBeFalse();
+})->with([
+    'update',
+    'delete',
+    'restore',
+]);
+
+it('does not throw when checking the force-delete permission and the project creator has been deleted', function () {
+    $creator = User::factory()->create();
+
+    $project = Project::factory()->for($creator, 'createdBy')->create();
+
+    $creator->delete();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.force-delete');
+
+    actingAs($user);
+
+    expect($project->refresh()->createdBy)->toBeNull()
+        ->and($user->can('forceDelete', $project))->toBeFalse();
+});

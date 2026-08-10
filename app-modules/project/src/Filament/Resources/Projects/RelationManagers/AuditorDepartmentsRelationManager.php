@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
-use AidingApp\Project\Models\Project;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
@@ -50,6 +49,9 @@ class AuditorDepartmentsRelationManager extends RelationManager
 
     protected static ?string $title = 'Departments';
 
+    // Owner-record update access is enforced globally in FilamentServiceProvider, not a Department::viewAny permission
+    protected static bool $shouldSkipAuthorization = true;
+
     public function table(Table $table): Table
     {
         return $table
@@ -59,17 +61,14 @@ class AuditorDepartmentsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize('update', Project::class)
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->authorize('update', Project::class)
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->authorize('update', Project::class)
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('auditedProjects');

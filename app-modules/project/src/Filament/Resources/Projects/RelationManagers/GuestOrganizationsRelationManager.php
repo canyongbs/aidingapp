@@ -49,6 +49,9 @@ class GuestOrganizationsRelationManager extends RelationManager
 
     protected static ?string $title = 'Organizations';
 
+    // Owner-record update access is enforced globally in FilamentServiceProvider, not an Organization::viewAny permission
+    protected static bool $shouldSkipAuthorization = true;
+
     public function table(Table $table): Table
     {
         return $table
@@ -58,17 +61,14 @@ class GuestOrganizationsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('guestProjects');
