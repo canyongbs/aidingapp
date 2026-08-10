@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -74,12 +73,16 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         $recipientUsers = $this->serviceMonitoringTarget->reportUsers()->get();
-        $recipientContacts = $this->serviceMonitoringTarget->reportContacts()->get();
 
-        $this->serviceMonitoringTarget->reportDepartments()->each(function (Department $department) use (&$recipientUsers) {
-            $users = $department->users()->get();
-            $recipientUsers = $recipientUsers->merge($users)->unique('id');
-        });
+      $departmentUsers = $this->serviceMonitoringTarget
+        ->reportDepartments()
+        ->with('users')
+        ->get()
+        ->pluck('users')
+        ->flatten(1);
+
+        $recipientUsers = $recipientUsers->merge($departmentUsers)->unique('id');
+        $reportRecipients = $recipientUsers->concat($this->serviceMonitoringTarget->reportContacts()->get());
 
         $channel = match (true) {
             $this->serviceMonitoringTarget->is_reported_via_email && $this->serviceMonitoringTarget->is_reported_via_database => 'both',
@@ -92,7 +95,6 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        Notification::send($recipientUsers, new ServiceMonitoringReportNotification($this->serviceMonitoringTarget, $channel));
-        Notification::send($recipientContacts, new ServiceMonitoringReportNotification($this->serviceMonitoringTarget, $channel));
+        Notification::send($reportRecipients, new ServiceMonitoringReportNotification($this->serviceMonitoringTarget, $channel));
     }
 }

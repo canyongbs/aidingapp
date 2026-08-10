@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringReportFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -71,11 +72,12 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+        if (! app(LicenseSettings::class)->data?->addons?->serviceMonitoring || ! ServiceMonitoringReportFeature::active()) {
             return;
         }
 
         ServiceMonitoringTarget::where('report_frequency', $this->frequency)
+            ->where('is_reporting_active', true)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
                     dispatch(new ServiceMonitoringReportNotifyJob($serviceMonitoringTarget));

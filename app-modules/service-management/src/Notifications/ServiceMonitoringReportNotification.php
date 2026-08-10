@@ -49,12 +49,23 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class ServiceMonitoringReportNotification extends BaseNotification implements ShouldQueue
 {
     use Queueable;
+
+    /**
+     * @var array<CarbonInterface>
+     **/
+    private ?array $reportPeriod = null;
+
+    /**
+     * @var array<int|string>
+     **/
+    private ?array $statistics = null;
 
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public string $channel) {}
 
@@ -71,21 +82,22 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         };
     }
 
-    public function toMail(User $notifiable): MailMessage
+    public function toMail(User|Contact $notifiable): MailMessage
     {
         [$reportPeriodStart, $reportPeriodEnd] = $this->getReportPeriod();
+        $stats = $this->getStatistics();
 
         return MailMessage::make()
             ->subject(($this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly)->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
             ->markdown('service-management::mail.service-monitoring-report', [
                 'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
-                'reportPeriodStart' => $reportPeriodStart,
-                'reportPeriodEnd' => $reportPeriodEnd,
-                'uptimePercentage' => $this->serviceMonitoringTarget->getUptimePercentage($this->getUptimeDays()),
-                'successfulChecks' => $this->getSuccessfulChecks(),
-                'failedChecks' => $this->getFailedChecks(),
-                'averageResponseTime' => $this->getAverageResponseTime(),
-                'totalDowntime' => $this->getTotalDowntime(),
+                'reportPeriodStart' => $reportPeriodStart->format('M j, Y g:i a (T)'),
+                'reportPeriodEnd' => $reportPeriodEnd->format('M j, Y g:i a (T)'),
+                'uptimePercentage' => $stats['uptime_percentage'],
+                'successfulChecks' => $stats['successful_checks'],
+                'failedChecks' => $stats['failed_checks'],
+                'averageResponseTime' => $stats['average_response_time'],
+                'totalDowntime' => $stats['downtime_percentage'],
                 'incidentSummary' => $this->getIncidentSummary(),
             ]);
     }
@@ -93,30 +105,36 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     /**
      * @return array<string, mixed>
      */
-    public function toDatabase(User $notifiable): array
+    public function toDatabase(User|Contact $notifiable): array
     {
+        $stats = $this->getStatistics();
+
         return Notification::make()
             ->title('Your ' . Str::lower($this->serviceMonitoringTarget->report_frequency->value ?? ServiceMonitoringReportFrequency::Monthly->value) . ' service monitor report for ' . $this->serviceMonitoringTarget->name . ' is ready.')
             ->body(
-                'Uptime: ' . $this->serviceMonitoringTarget->getUptimePercentage($this->getUptimeDays()) . "\n" .
-                'Successful checks: ' . $this->getSuccessfulChecks() . "\n" .
-                'Failed checks: ' . $this->getFailedChecks() . "\n" .
+                'Uptime: ' . $stats['uptime_percentage'] . "\n" .
+                'Successful checks: ' . $stats['successful_checks'] . "\n" .
+                'Failed checks: ' . $stats['failed_checks'] . "\n" .
                 'Incident summary: ' . $this->getIncidentSummary()
             )
             ->getDatabaseMessage();
     }
 
     /**
-     * @return array<string>
+     * @return array<CarbonInterface>
      */
     private function getReportPeriod(): array
     {
+        if ($this->reportPeriod !== null) {
+            return $this->reportPeriod;
+        }
+
         $timezone = Tenant::current()?->getTimezone() ?? config('app.timezone');
         $now = now()->setTimezone($timezone);
 
         $reportFrequency = $this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly;
 
-        [$start, $end] = match ($reportFrequency) {
+        $this->reportPeriod = match ($reportFrequency) {
             ServiceMonitoringReportFrequency::Daily => [
                 $now->copy()->subDay()->startOfDay(),
                 $now->copy()->subDay()->endOfDay(),
@@ -131,88 +149,75 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
             ],
         };
 
-        return [
-            $start->format('M j, Y g:i a (T)'),
-            $end->format('M j, Y g:i a (T)'),
+        return $this->reportPeriod;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function getStatistics(): array
+    {
+        if ($this->statistics !== null) {
+            return $this->statistics;
+        }
+
+        [$reportPeriodStart, $reportPeriodEnd] = $this->getReportPeriod();
+
+        $result = DB::table('historical_service_monitorings')
+            ->where('service_monitoring_target_id', $this->serviceMonitoringTarget->id)
+            ->whereBetween('created_at', [$reportPeriodStart, $reportPeriodEnd])
+            ->selectRaw('
+                COUNT(*) as total_checks,
+                SUM(CASE WHEN succeeded = true THEN 1 ELSE 0 END) as successful_checks,
+                SUM(CASE WHEN succeeded = false THEN 1 ELSE 0 END) as failed_checks,
+                AVG(response_time) as average_response_time
+            ')
+            ->first();
+
+        $totalChecks = (int) ($result->total_checks ?? 0);
+        $failedChecks = (int) ($result->failed_checks ?? 0);
+        $successfulChecks = (int) ($result->successful_checks ?? 0);
+
+        // Calculate downtime percentage
+        if ($totalChecks === 0) {
+            $downtimePercentage = 'N/A';
+        } else {
+            $downtimePercentage = round((($failedChecks / $totalChecks) * 100), 2) . '%';
+        }
+
+        // Calculate uptime percentage
+        if ($totalChecks === 0) {
+            $uptimePercentage = 'N/A';
+        } else {
+            $uptimePercentage = round((($successfulChecks / $totalChecks) * 100), 2) . '%';
+        }
+
+        // Format average response time
+        if ($result->average_response_time === null) {
+            $averageResponseTime = 'N/A';
+        } else {
+            $averageResponseTime = number_format((float) $result->average_response_time, 2) . ' s';
+        }
+
+        $this->statistics = [
+            'successful_checks' => $successfulChecks,
+            'failed_checks' => $failedChecks,
+            'average_response_time' => $averageResponseTime,
+            'downtime_percentage' => $downtimePercentage,
+            'uptime_percentage' => $uptimePercentage,
         ];
-    }
 
-    private function getUptimeDays(): int
-    {
-        $timezone = Tenant::current()?->getTimezone() ?? config('app.timezone');
-        $now = now()->setTimezone($timezone);
-        $reportFrequency = $this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly;
-
-        return match ($reportFrequency) {
-            ServiceMonitoringReportFrequency::Daily => 1,
-            ServiceMonitoringReportFrequency::Weekly => 7,
-            ServiceMonitoringReportFrequency::Monthly => $now->copy()->subMonthNoOverflow()->daysInMonth,
-        };
-    }
-
-    private function getSuccessfulChecks(): int
-    {
-        return $this->serviceMonitoringTarget
-            ->histories()
-            ->where('created_at', '>=', now()->subDays($this->getUptimeDays()))
-            ->where('succeeded', true)
-            ->count();
-    }
-
-    private function getFailedChecks(): int
-    {
-        return $this->serviceMonitoringTarget
-            ->histories()
-            ->where('created_at', '>=', now()->subDays($this->getUptimeDays()))
-            ->where('succeeded', false)
-            ->count();
-    }
-
-    private function getAverageResponseTime(): string
-    {
-        $averageResponseTime = $this->serviceMonitoringTarget
-            ->histories()
-            ->where('created_at', '>=', now()->subDays($this->getUptimeDays()))
-            ->avg('response_time');
-
-        if ($averageResponseTime === null) {
-            return 'N/A';
-        }
-
-        return number_format((float) $averageResponseTime, 2) . ' s';
-    }
-
-    private function getTotalDowntime(): string
-    {
-        $serviceChecks = $this->serviceMonitoringTarget
-            ->histories()
-            ->where('created_at', '>=', now()->subDays($this->getUptimeDays()))
-            ->orderBy('created_at')
-            ->get();
-
-        if ($serviceChecks->isEmpty() || now()->subDays($this->getUptimeDays())->diffInDays($serviceChecks->first()->created_at) > 1) {
-            return 'N/A';
-        }
-
-        $downtimeChecks = $serviceChecks->where('succeeded', false);
-
-        $percentage = ($downtimeChecks->count() / $serviceChecks->count()) * 100;
-
-        return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+        return $this->statistics;
     }
 
     private function getIncidentSummary(): string
     {
-        $serviceChecks = $this->serviceMonitoringTarget
-            ->histories()
-            ->where('created_at', '>=', now()->subDays($this->getUptimeDays()))
-            ->where('succeeded', false)
-            ->get();
+        $incidentCount = $this->getStatistics()['failed_checks'];
 
-        if ($serviceChecks->isEmpty()) {
+        if ($incidentCount === 0) {
             return 'No incidents were detected during this reporting period.';
         }
 
-        return $serviceChecks->count() . str('incident')->plural($serviceChecks->count()) . ' were detected during this reporting period.';
+        return $incidentCount . str('incident')->plural($incidentCount) . ($incidentCount === 1 ? ' was' : ' were') . ' detected during this reporting period.';
     }
 }
