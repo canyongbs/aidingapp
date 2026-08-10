@@ -34,14 +34,17 @@
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
     import { ArrowRightIcon } from '@heroicons/vue/16/solid';
+    import { computed } from 'vue';
 
-    defineProps({
+    const props = defineProps({
         selectedType: { type: Object, required: true },
         modelValue: { type: String, required: true },
         isLoading: { type: Boolean, default: false },
     });
 
     defineEmits(['update:modelValue', 'continue']);
+
+    const hasDefaultPriority = computed(() => Boolean(props.selectedType?.default_priority_id));
 </script>
 
 <template>
@@ -51,7 +54,7 @@
             <span class="text-xs text-gray-700 font-medium truncate">{{ selectedType.name }}</span>
         </div>
         <div class="flex items-center gap-2">
-            <div class="flex-1 relative">
+            <div v-if="!hasDefaultPriority" class="flex-1 relative">
                 <select
                     :value="modelValue"
                     @change="$emit('update:modelValue', $event.target.value)"
@@ -78,7 +81,7 @@
 
             <BaseButton
                 @click="$emit('continue')"
-                :disabled="!modelValue"
+                :disabled="!hasDefaultPriority && !modelValue"
                 :loading="isLoading"
                 :icon="ArrowRightIcon"
                 icon-position="after"

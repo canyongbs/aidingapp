@@ -74,7 +74,12 @@ export function useServiceRequestWizard() {
         questionStepRefs.value = Array(numberOfClarifyingQuestions.value).fill(null);
         generatedQuestions.value = Array(numberOfClarifyingQuestions.value).fill(null);
 
-        submitState.value = useServiceRequestSubmit(data.rawData.store_url_base, data.type.id, data.priority);
+        submitState.value = useServiceRequestSubmit(
+            data.rawData.store_url_base,
+            data.type.id,
+            data.priority,
+            Boolean(data.type.default_priority_id),
+        );
 
         step.value = 'details';
     }

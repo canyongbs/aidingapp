@@ -86,7 +86,7 @@
 
         emit('continue', {
             type: selectedType.value,
-            priority: selectedPriority.value,
+            priority: selectedPriority.value || selectedType.value?.default_priority_id || '',
             rawData: rawData.value,
             formSteps,
         });
