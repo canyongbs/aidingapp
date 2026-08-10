@@ -33,7 +33,7 @@ created: 2026-08-04
 
 - Delete the tests that cover the inactive (pre-migration) branch, since that branch no longer exists. Each also needs its `use App\Features\ProjectArchivingFeature;` import removed.
     - `app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/ListProjectsTest.php` — `it('does not show the archive actions when `ProjectArchivingFeature` is inactive')`.
-    - `app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/EditProjectTest.php` — `it('offers the `DeleteAction` instead of the `ArchiveAction` when `ProjectArchivingFeature` is inactive')`.
+    - `app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/EditProjectTest.php` — `it('offers the `DeleteAction`instead of the`ArchiveAction`when`ProjectArchivingFeature` is inactive')`.
     - `app-modules/project/tests/Tenant/Policies/PipelinePolicyTest.php` — `it('still allows viewing a pipeline whose project is archived when `ProjectArchivingFeature` is inactive')`.
 
 - Delete this file (`.cleanup-tasks/2026_08_04_project_archiving_feature.md`) once all the above cleanup is complete.
