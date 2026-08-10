@@ -60,6 +60,11 @@
 @endphp
 
 <div
+    @can('update', $pipeline)
+        wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+    @else
+        wire:click="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+    @endcan
     class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
@@ -69,11 +74,6 @@
         <div class="text-base font-semibold text-gray-900 dark:text-white">
             {{ $entry->name }}
         </div>
-        <x-filament::icon-button
-            class="fi-primary-color"
-            wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
-            icon="heroicon-m-arrow-top-right-on-square"
-        />
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />

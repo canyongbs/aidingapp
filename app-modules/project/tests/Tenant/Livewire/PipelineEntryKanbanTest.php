@@ -34,15 +34,20 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Livewire\PipelineEntryKanban;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Carbon\Carbon;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -288,4 +293,137 @@ it('rejects moving a pipeline entry that does not belong to the pipeline', funct
         ->call('movedEntry', $pipeline->getKey(), $otherEntry->getKey(), $originalStageId, $toStage->getKey());
 
     expect($otherEntry->fresh()->pipeline_stage_id)->toBe($originalStageId);
+});
+
+it('can view a pipeline entry through the slide over modal', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $contact = Contact::factory()->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'name' => 'View Modal Task',
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'assigned_to_type' => $contact->getMorphClass(),
+        'assigned_to_id' => $contact->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('viewPipelineEntry')
+        ->assertSee('View Modal Task')
+        ->assertSee($contact->full_name)
+        ->assertSee($pipeline->stages->first()->name);
+});
+
+it('hides the view action without pipeline view permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertActionHidden('viewPipelineEntry');
+});
+
+it('can edit a pipeline entry through the slide over modal', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'description' => 'Original description.',
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('editPipelineEntry')
+        ->setActionData([
+            'description' => 'Updated description.',
+        ])
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
+
+    assertDatabaseHas(PipelineEntry::class, [
+        'id' => $entry->getKey(),
+        'description' => 'Updated description.',
+    ]);
+});
+
+it('persists related milestones, assets, and service requests when edited through the modal', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $asset = Asset::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->setActionData([
+            'milestones' => [$milestone->getKey()],
+            'assets' => [$asset->getKey()],
+            'serviceRequests' => [$serviceRequest->getKey()],
+        ])
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
+
+    $entry->refresh();
+
+    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->getKey()])
+        ->and($entry->assets->pluck('id')->all())->toBe([$asset->getKey()])
+        ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
+});
+
+it('hides the edit action without pipeline update permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('pipeline.*.view');
+    $user->refresh();
+
+    expect($user->can('update', $pipeline))->toBeFalse();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertActionVisible('viewPipelineEntry')
+        ->assertActionHidden('editPipelineEntry');
 });

@@ -36,14 +36,17 @@
 
 namespace AidingApp\Project\Livewire;
 
+use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
+use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
-use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
 use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
@@ -61,8 +64,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
     public Pipeline $pipeline;
 
     public ?string $project = null;
-
-    public ?PipelineEntry $currentPipelineEntry = null;
 
     public function mount(Pipeline $pipeline, ?string $project = null): void
     {
@@ -194,12 +195,24 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
         ]);
     }
 
-    public function viewPipelineEntry(PipelineEntry $pipelineEntry): void
+    public function viewPipelineEntryAction(): ViewAction
     {
-        $this->redirect(PipelineEntryResource::getUrl('view', [
-            'record' => $pipelineEntry,
-            'pipeline' => $this->pipeline,
-            'project' => $this->pipeline->project,
-        ]));
+        return ViewPipelineEntryAction::make('viewPipelineEntry')
+            ->authorize(fn (): bool => auth()->user()->can('view', $this->pipeline))
+            ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
+    }
+
+    public function editPipelineEntryAction(): EditAction
+    {
+        return EditPipelineEntryAction::make($this->pipeline, 'editPipelineEntry')
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
+            ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
+    }
+
+    protected function resolvePipelineEntry(mixed $entryId): PipelineEntry
+    {
+        return $this->pipeline->entries()
+            ->whereKey($entryId)
+            ->firstOrFail();
     }
 }

@@ -37,7 +37,7 @@
 namespace AidingApp\Project\Notifications;
 
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
+use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Models\NotificationSetting;
 use App\Models\User;
@@ -76,9 +76,8 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
      */
     public function toDatabase(object $notifiable): array
     {
-        $url = PipelineEntryResource::getUrl('view', [
-            'record' => $this->pipelineEntry,
-            'pipeline' => $this->pipelineEntry->pipelineStage->pipeline_id,
+        $url = PipelineResource::getUrl('entries', [
+            'record' => $this->pipelineEntry->pipelineStage->pipeline_id,
             'project' => $this->pipelineEntry->pipelineStage->pipeline->project_id,
         ]);
 
