@@ -1,0 +1,214 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
+use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
+use AidingApp\Project\Models\Project;
+use App\Models\User;
+use Filament\Actions\DetachBulkAction;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
+
+it('can list guest organizations', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organizations = Organization::factory()->count(3)->create();
+
+    $project->guestOrganizations()->attach($organizations->pluck('id'));
+
+    livewire(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->assertCanSeeTableRecords($organizations);
+});
+
+it('can attach a guest organization to a project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+
+    livewire(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callTableAction('attach', data: [
+            'recordId' => $organization->getKey(),
+        ])
+        ->assertHasNoTableActionErrors();
+
+    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
+});
+
+it('can detach a guest organization from a project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organization = Organization::factory()->create();
+
+    $project->guestOrganizations()->attach($organization->getKey());
+
+    livewire(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callTableAction('detach', record: $organization)
+        ->assertHasNoTableActionErrors();
+
+    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeFalse();
+});
+
+it('can bulk detach guest organizations from a project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $organizations = Organization::factory()->count(2)->create();
+
+    $project->guestOrganizations()->attach($organizations->pluck('id'));
+
+    livewire(GuestOrganizationsRelationManager::class, [
+        'ownerRecord' => $project,
+        'pageClass' => ManageGuests::class,
+    ])
+        ->callTableBulkAction(DetachBulkAction::class, $organizations)
+        ->assertHasNoTableBulkActionErrors();
+
+    expect($project->guestOrganizations()->count())->toBe(0);
+});
+
+describe('authorization', function () {
+    it('allows a super admin to attach a guest organization', function () {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+
+        livewire(GuestOrganizationsRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ManageGuests::class,
+        ])
+            ->assertTableActionVisible('attach');
+    });
+
+    it('allows the project creator with the update permission to attach a guest organization', function () {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('project.view-any');
+        $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('project.*.update');
+
+        actingAs($user);
+
+        $project = Project::factory()->for($user, 'createdBy')->create();
+
+        $organization = Organization::factory()->create();
+
+        livewire(GuestOrganizationsRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ManageGuests::class,
+        ])
+            ->assertTableActionVisible('attach')
+            ->callTableAction('attach', data: [
+                'recordId' => $organization->getKey(),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
+    });
+
+    it('allows an assigned project manager with the update permission to attach a guest organization', function () {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('project.view-any');
+        $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('project.*.update');
+
+        $project = Project::factory()->for(User::factory(), 'createdBy')->create();
+
+        $project->managerUsers()->attach($user->getKey());
+
+        actingAs($user);
+
+        livewire(GuestOrganizationsRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ManageGuests::class,
+        ])
+            ->assertTableActionVisible('attach');
+    });
+
+    it('hides the attach action when the user has no update permission', function () {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('project.view-any');
+        $user->givePermissionTo('project.*.view');
+
+        actingAs($user);
+
+        $project = Project::factory()->for($user, 'createdBy')->create();
+
+        livewire(GuestOrganizationsRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ManageGuests::class,
+        ])
+            ->assertTableActionHidden('attach');
+    });
+
+    it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('project.view-any');
+        $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('project.*.update');
+
+        $project = Project::factory()->for(User::factory(), 'createdBy')->create();
+
+        actingAs($user);
+
+        livewire(GuestOrganizationsRelationManager::class, [
+            'ownerRecord' => $project,
+            'pageClass' => ManageGuests::class,
+        ])
+            ->assertTableActionHidden('attach');
+    });
+});

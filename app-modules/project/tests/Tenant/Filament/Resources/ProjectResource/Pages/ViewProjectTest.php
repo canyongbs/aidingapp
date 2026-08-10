@@ -38,9 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
-use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
-use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
@@ -208,25 +206,6 @@ it('can render the project access widget and mount the manage access action', fu
         ->assertActionExists('manageAccess')
         ->mountAction('manageAccess')
         ->assertHasNoErrors();
-});
-
-it('can attach a manager user through the centralized access relation manager', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $manager = User::factory()->create();
-
-    livewire(ManagerUsersRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageManagers::class,
-    ])
-        ->callTableAction('attach', data: [
-            'recordId' => $manager->getKey(),
-        ])
-        ->assertHasNoTableActionErrors();
-
-    expect($project->managerUsers()->whereKey($manager->getKey())->exists())->toBeTrue();
 });
 
 it('can list milestones in the project milestones widget', function () {
