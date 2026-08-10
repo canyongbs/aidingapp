@@ -74,12 +74,12 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
     {
         $recipientUsers = $this->serviceMonitoringTarget->reportUsers()->get();
 
-      $departmentUsers = $this->serviceMonitoringTarget
-        ->reportDepartments()
-        ->with('users')
-        ->get()
-        ->pluck('users')
-        ->flatten(1);
+        $departmentUsers = $this->serviceMonitoringTarget
+            ->reportDepartments()
+            ->with('users')
+            ->get()
+            ->pluck('users')
+            ->flatten(1);
 
         $recipientUsers = $recipientUsers->merge($departmentUsers)->unique('id');
         $reportRecipients = $recipientUsers->concat($this->serviceMonitoringTarget->reportContacts()->get());
