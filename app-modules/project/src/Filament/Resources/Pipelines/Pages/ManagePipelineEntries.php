@@ -112,8 +112,10 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->preload(),
             ])
             ->recordActions([
-                ViewPipelineEntryAction::make(),
-                EditPipelineEntryAction::make($pipeline),
+                ViewPipelineEntryAction::make()
+                    ->authorize(fn (): bool => auth()->user()->can('view', $pipeline)),
+                EditPipelineEntryAction::make($pipeline)
+                    ->authorize(fn (): bool => auth()->user()->can('update', $pipeline)),
                 DeleteAction::make(),
             ])
             ->headerActions([
