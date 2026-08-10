@@ -34,34 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use App\Features\ProjectArchivingFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<PipelineEntry>
- */
-class PipelineEntryFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'description' => $this->faker->sentence(3),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => User::factory(),
-            'created_by' => User::factory(),
-            'is_visible_to_guests' => true,
-        ];
+        DB::transaction(function () {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->timestamp('archived_at')->nullable();
+            });
+
+            ProjectArchivingFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ProjectArchivingFeature::deactivate();
+
+            Schema::table('projects', function (Blueprint $table) {
+                $table->dropColumn('archived_at');
+            });
+        });
+    }
+};

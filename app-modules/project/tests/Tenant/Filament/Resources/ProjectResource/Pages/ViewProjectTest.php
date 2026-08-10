@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
@@ -51,6 +51,7 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
 
@@ -93,6 +94,18 @@ it('can render with proper permission', function () {
         'record' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
+});
+
+it('cannot render an archived project', function () {
+    loginAsUserWithProjectViewPermissions();
+
+    $project = Project::factory()->create();
+    $project->archive();
+
+    get(ViewProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertNotFound();
 });
 
 it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project', function () {
@@ -390,16 +403,12 @@ it('can create a pipeline entry through the widget header create action', functi
 
     PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
 
-    $contact = Contact::factory()->create();
-
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callTableAction('createEntry', data: [
             'name' => 'Kickoff Task',
             'pipeline_stage_id' => $stage->getKey(),
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ])
         ->assertHasNoTableActionErrors();
 
@@ -409,6 +418,47 @@ it('can create a pipeline entry through the widget header create action', functi
             ->where('pipeline_stage_id', $stage->getKey())
             ->exists()
     )->toBeTrue();
+});
+
+it('clears related milestones, assets, and service requests on the widget edit action when type is set to none', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->first();
+
+    $entry = PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $asset = Asset::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $entry->milestones()->sync([$milestone->id]);
+    $entry->assets()->sync([$asset->id]);
+    $entry->serviceRequests()->sync([$serviceRequest->id]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callTableAction('edit', $entry, data: [
+            'name' => $entry->name,
+            'pipeline_stage_id' => $stage->getKey(),
+            'milestones_type' => 'none',
+            'assets_type' => 'none',
+            'service_requests_type' => 'none',
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $entry->refresh();
+
+    expect($entry->milestones->pluck('id')->all())->toBe([]);
+    expect($entry->assets->pluck('id')->all())->toBe([]);
+    expect($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
 it('hides the header create entry action while the pipeline has no entries', function () {
@@ -425,7 +475,7 @@ it('hides the header create entry action while the pipeline has no entries', fun
         'record' => $project,
     ])
         ->assertTableActionHidden('createEntry')
-        ->assertSee('Add Pipeline Entry');
+        ->assertSee('Add Pipeline Task');
 });
 
 it('shows the empty state when the project has no pipelines', function () {

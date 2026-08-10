@@ -37,9 +37,12 @@
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 it('delegates viewAny to the project when a project is passed', function () {
     $user = User::factory()->create();
@@ -137,4 +140,53 @@ it('falls back to the pipeline.*.update permission when the pipeline has no proj
     $user->refresh();
 
     expect($user->can('update', $pipeline))->toBeTrue();
+});
+
+it('does not let a super admin view or update a pipeline whose project is archived', function () {
+    $user = User::factory()->create();
+
+    asSuperAdmin($user);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    expect($user->can('view', $pipeline))->toBeTrue()
+        ->and($user->can('update', $pipeline))->toBeTrue();
+
+    $project->archive();
+
+    expect($user->can('view', $pipeline->refresh()))->toBeFalse()
+        ->and($user->can('update', $pipeline))->toBeFalse();
+});
+
+it('still allows viewing a pipeline whose project is archived when `ProjectArchivingFeature` is inactive', function () {
+    ProjectArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+
+    asSuperAdmin($user);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    $project->archive();
+
+    expect($user->can('view', $pipeline->refresh()))->toBeTrue()
+        ->and($user->can('update', $pipeline))->toBeTrue();
+});
+
+it('denies access to a pipeline of an archived project without disclosing that it is archived', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('pipeline.view-any', 'pipeline.*.view');
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    $project->archive();
+
+    expect(Gate::inspect('view', $pipeline->refresh())->message())
+        ->toBe('You do not have permission to view this pipeline\'s project.');
 });

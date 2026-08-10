@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Livewire\PipelineEntryKanban;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
@@ -46,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-it('renders entry cards with their name and organizable name on the kanban board', function () {
+it('renders entry cards with their name on the kanban board', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -54,18 +53,13 @@ it('renders entry cards with their name and organizable name on the kanban board
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $contact = Contact::factory()->create();
-
     $entry = PipelineEntry::factory()->create([
         'name' => 'Kickoff Task',
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-        'organizable_type' => $contact->getMorphClass(),
-        'organizable_id' => $contact->getKey(),
     ]);
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertSee($entry->name)
-        ->assertSee($contact->full_name);
+        ->assertSee($entry->name);
 });
 
 it('renders stages in order sequence on the kanban board', function () {
@@ -93,13 +87,9 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
 
     [$firstStage, $secondStage] = $pipeline->stages;
 
-    $contact = Contact::factory()->create();
-
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Second Column Entry',
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ], arguments: ['stage' => $secondStage->getKey()])
         ->assertHasNoActionErrors();
 
@@ -143,15 +133,11 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
 
     $otherStage = PipelineStage::factory()->create();
 
-    $contact = Contact::factory()->create();
-
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Invalid Stage Entry',
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
         ], arguments: ['stage' => $otherStage->getKey()])
-        ->assertNotified('Pipeline entry could not be added');
+        ->assertNotified('Pipeline task could not be added');
 
     expect(PipelineEntry::query()->where('name', 'Invalid Stage Entry')->exists())->toBeFalse();
 });

@@ -227,6 +227,47 @@ it('persists related milestones, assets, and service requests on save', function
     expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });
 
+it('clears related milestones, assets, and service requests when type is set to none', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->id,
+    ]);
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
+    $asset = Asset::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $entry->milestones()->sync([$milestone->id]);
+    $entry->assets()->sync([$asset->id]);
+    $entry->serviceRequests()->sync([$serviceRequest->id]);
+
+    livewire(EditPipelineEntry::class, [
+        'record' => $entry->getRouteKey(),
+        'parentRecord' => $pipeline,
+    ])
+        ->assertSet('data.milestones_type', 'select')
+        ->assertSet('data.assets_type', 'select')
+        ->assertSet('data.service_requests_type', 'select')
+        ->set('data.milestones_type', 'none')
+        ->set('data.assets_type', 'none')
+        ->set('data.service_requests_type', 'none')
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $entry->refresh();
+
+    expect($entry->milestones->pluck('id')->all())->toBe([]);
+    expect($entry->assets->pluck('id')->all())->toBe([]);
+    expect($entry->serviceRequests->pluck('id')->all())->toBe([]);
+});
+
 it('can save pipeline entry with an assigned user', function () {
     asSuperAdmin();
 
@@ -376,7 +417,7 @@ it('sets assigned_to_type to user when entry has an assigned user', function () 
         ->assertSet('data.assigned_to_type', 'user');
 });
 
-it('sets assigned_to_type to null when entry has no assigned user', function () {
+it('sets assigned_to_type to none when entry has no assigned user', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -395,5 +436,5 @@ it('sets assigned_to_type to null when entry has no assigned user', function () 
         'record' => $entry->getRouteKey(),
         'parentRecord' => $pipeline,
     ])
-        ->assertSet('data.assigned_to_type', null);
+        ->assertSet('data.assigned_to_type', 'none');
 });

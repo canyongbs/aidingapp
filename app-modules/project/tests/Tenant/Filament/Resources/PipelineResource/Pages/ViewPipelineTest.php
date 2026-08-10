@@ -91,6 +91,23 @@ it('can view a pipeline', function () {
         ->assertSuccessful();
 });
 
+it('does not resolve a pipeline whose parent project is archived', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->create();
+
+    $project->archive();
+
+    get(PipelineResource::getUrl('view', [
+        'record' => $pipeline->getRouteKey(),
+        'project' => $project->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
 it('displays correct pipeline details', function () {
     asSuperAdmin();
 

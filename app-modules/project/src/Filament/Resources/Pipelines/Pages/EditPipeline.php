@@ -100,7 +100,7 @@ class EditPipeline extends EditRecord
                                     if ($hasEntries) {
                                         Notification::make()
                                             ->title('Error!')
-                                            ->body('This stage cannot be deleted because it contains pipeline entries!')
+                                            ->body('This stage cannot be deleted because it contains pipeline tasks!')
                                             ->danger()
                                             ->send();
 

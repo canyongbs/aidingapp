@@ -150,8 +150,8 @@ it('displays correct pipeline entry details', function () {
         ->create([
             'pipeline_stage_id' => $pipeline->stages->first()->id,
             'name' => 'Test Entry Name',
-            'organizable_id' => $contact->id,
-            'organizable_type' => $contact->getMorphClass(),
+            'assigned_to_id' => $contact->id,
+            'assigned_to_type' => $contact->getMorphClass(),
         ]);
 
     livewire(ViewPipelineEntry::class, [

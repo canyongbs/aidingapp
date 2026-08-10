@@ -36,8 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
@@ -66,12 +65,8 @@ test('portal returns has_projects as true when contact has pipeline entries', fu
 
     $contact = Contact::factory()->create();
 
-    PipelineEntry::factory()
-        ->for(PipelineStage::factory(), 'pipelineStage')
-        ->create([
-            'organizable_type' => $contact->getMorphClass(),
-            'organizable_id' => $contact->getKey(),
-        ]);
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
 
     actingAs($contact, 'contact');
 

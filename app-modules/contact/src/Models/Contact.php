@@ -51,7 +51,6 @@ use AidingApp\LicenseManagement\Models\ProductLicense;
 use AidingApp\Notification\Models\Concerns\NotifiableViaSms;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -269,18 +268,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function productLicenses(): HasMany
     {
         return $this->hasMany(ProductLicense::class, 'assigned_to');
-    }
-
-    /**
-     * @return MorphToMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): MorphToMany
-    {
-        return $this->morphToMany(
-            related: PipelineEntry::class,
-            name: 'organizable',
-            table: 'pipeline_entries',
-        )->withTimestamps();
     }
 
     public static function getLabel(): string

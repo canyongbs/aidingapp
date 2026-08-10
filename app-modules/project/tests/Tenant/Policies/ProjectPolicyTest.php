@@ -38,6 +38,7 @@ use AidingApp\Project\Models\Project;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 it('does not throw when checking a permission whose project creator has been deleted', function (string $ability) {
     $creator = User::factory()->create();
@@ -75,4 +76,83 @@ it('does not throw when checking the force-delete permission and the project cre
 
     expect($project->refresh()->createdBy)->toBeNull()
         ->and($user->can('forceDelete', $project))->toBeFalse();
+});
+
+it('allows a super admin to archive any project', function () {
+    $user = User::factory()->create();
+
+    asSuperAdmin($user);
+
+    $project = Project::factory()->create();
+
+    expect($user->can('archive', $project))->toBeTrue();
+});
+
+it('allows a project manager with the delete permission to archive the project', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.delete');
+
+    actingAs($user);
+
+    $project = Project::factory()
+        ->for(User::factory(), 'createdBy')
+        ->hasAttached($user, relationship: 'managerUsers')
+        ->create();
+
+    expect($user->can('archive', $project))->toBeTrue();
+});
+
+it('allows the project creator with the delete permission to archive the project', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.delete');
+
+    actingAs($user);
+
+    $project = Project::factory()->for($user, 'createdBy')->create();
+
+    expect($user->can('archive', $project))->toBeTrue();
+});
+
+it('does not let a manager archive the project without the delete permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()
+        ->for(User::factory(), 'createdBy')
+        ->hasAttached($user, relationship: 'managerUsers')
+        ->create();
+
+    expect($user->can('archive', $project))->toBeFalse();
+});
+
+it('does not fail when the project has no creator', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.delete');
+
+    $project = Project::factory()->create();
+
+    actingAs($user);
+
+    expect($project->createdBy)->toBeNull()
+        ->and($user->can('archive', $project))->toBeFalse();
+});
+
+it('does not let a user with the delete permission archive a project they do not manage or create', function () {
+    $creator = User::factory()->create();
+
+    actingAs($creator);
+
+    $project = Project::factory()->create();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.delete');
+
+    actingAs($user);
+
+    expect($user->can('archive', $project))->toBeFalse();
 });

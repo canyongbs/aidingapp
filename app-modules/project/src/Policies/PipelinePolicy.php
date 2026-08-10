@@ -38,6 +38,7 @@ namespace AidingApp\Project\Policies;
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -60,9 +61,15 @@ class PipelinePolicy
     public function view(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
         if ($pipeline->project) {
-            return $authenticatable->can('view', $pipeline->project)
-                ? Response::allow()
-                : Response::deny('You do not have permission to view this pipeline\'s project.');
+            if (! $authenticatable->can('view', $pipeline->project)) {
+                return Response::deny('You do not have permission to view this pipeline\'s project.');
+            }
+
+            if (ProjectArchivingFeature::active() && $pipeline->project->isArchived()) {
+                return Response::deny('You do not have permission to view this pipeline because its project is archived.');
+            }
+
+            return Response::allow();
         }
 
         return $authenticatable->canOrElse(
@@ -88,9 +95,15 @@ class PipelinePolicy
     public function update(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
         if ($pipeline->project) {
-            return $authenticatable->can('update', $pipeline->project)
-                ? Response::allow()
-                : Response::deny('You do not have permission to update this pipeline\'s project.');
+            if (! $authenticatable->can('update', $pipeline->project)) {
+                return Response::deny('You do not have permission to update this pipeline\'s project.');
+            }
+
+            if (ProjectArchivingFeature::active() && $pipeline->project->isArchived()) {
+                return Response::deny('You do not have permission to update this pipeline because its project is archived.');
+            }
+
+            return Response::allow();
         }
 
         return $authenticatable->canOrElse(

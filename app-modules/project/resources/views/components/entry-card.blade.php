@@ -32,7 +32,7 @@
     </COPYRIGHT>
 --}}
 <div
-    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-7 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
@@ -42,10 +42,6 @@
             <small class="capitalize">
                 {{ $entry->name }}
             </small>
-            <br />
-            <x-filament::badge color="success">
-                {{ $entry->organizable?->full_name }}
-            </x-filament::badge>
             <br />
         </div>
         <x-filament::icon-button
