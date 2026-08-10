@@ -44,6 +44,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
@@ -95,6 +96,7 @@ class PipelinesRelationManager extends RelationManager
                         'project' => $this->getOwnerRecord(),
                     ])),
                 ArchiveAction::make()
+                    ->icon(Heroicon::ArchiveBox)
                     ->visible(fn (): bool => PipelineArchivingFeature::active())
                     ->authorize(fn (Pipeline $record): bool => auth()->user()?->can('delete', $record) ?? false)
                     ->modalHeading('Archive Pipeline')

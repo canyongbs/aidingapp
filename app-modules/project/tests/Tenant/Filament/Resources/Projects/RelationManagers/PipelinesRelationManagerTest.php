@@ -41,6 +41,7 @@ use AidingApp\Project\Models\Project;
 use App\Features\PipelineArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Support\Icons\Heroicon;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -94,6 +95,7 @@ it('archives a pipeline through the row action', function () {
         'ownerRecord' => $project,
         'pageClass' => ManagePipelines::class,
     ])
+        ->assertActionHasIcon(TestAction::make('archive')->table($pipeline), Heroicon::ArchiveBox)
         ->callAction(TestAction::make('archive')->table($pipeline))
         ->assertHasNoActionErrors();
 
