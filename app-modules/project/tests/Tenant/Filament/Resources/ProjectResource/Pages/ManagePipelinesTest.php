@@ -35,16 +35,11 @@
 */
 
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
-use AidingApp\Project\Filament\Resources\Projects\RelationManagers\PipelinesRelationManager;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
 
 it('can render with proper permission.', function () {
     $user = User::factory()->create();
@@ -60,30 +55,10 @@ it('can render with proper permission.', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
     $user->refresh();
 
     get(ManagePipelines::getUrl([
         'record' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
-});
-
-it('can list pipelines', function () {
-    $superAdmin = User::factory()->create();
-    asSuperAdmin($superAdmin);
-
-    $project = Project::factory()->create();
-
-    $pipelines = Pipeline::factory()
-        ->has(PipelineStage::factory()->count(3), 'stages')
-        ->for($project)
-        ->count(2)
-        ->create();
-
-    livewire(PipelinesRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManagePipelines::class,
-    ])
-        ->assertCanSeeTableRecords($pipelines);
 });

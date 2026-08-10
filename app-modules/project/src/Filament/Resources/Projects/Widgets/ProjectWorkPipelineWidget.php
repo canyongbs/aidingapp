@@ -181,7 +181,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->slideOver()
                             ->schema($this->pipelineFormSchema())
                             ->action(fn (array $data) => $this->persistPipeline($data))
-                            ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record)),
+                            ->authorize(fn (): bool => auth()->user()->can('create', [Pipeline::class, $this->record])),
                     ],
             )
             ->headerActions([
@@ -214,7 +214,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->slideOver()
             ->schema($this->pipelineFormSchema())
             ->action(fn (array $data) => $this->persistPipeline($data))
-            ->authorize(fn (): bool => auth()->user()->can('create', Pipeline::class) && auth()->user()->can('update', $this->record));
+            ->authorize(fn (): bool => auth()->user()->can('create', [Pipeline::class, $this->record]));
     }
 
     protected function getPipelineSwitcherProjectId(): ?string
