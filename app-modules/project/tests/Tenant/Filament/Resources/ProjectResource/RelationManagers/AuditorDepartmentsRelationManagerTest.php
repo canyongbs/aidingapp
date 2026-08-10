@@ -39,7 +39,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageAuditors;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorDepartmentsRelationManager;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -72,10 +75,10 @@ it('can attach an auditor department to a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableAction('attach', data: [
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
             'recordId' => $department->getKey(),
         ])
-        ->assertHasNoTableActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($project->auditorDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
 });
@@ -93,8 +96,8 @@ it('can detach an auditor department from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableAction('detach', record: $department)
-        ->assertHasNoTableActionErrors();
+        ->callAction(TestAction::make(DetachAction::class)->table($department))
+        ->assertHasNoFormErrors();
 
     expect($project->auditorDepartments()->whereKey($department->getKey())->exists())->toBeFalse();
 });
@@ -112,8 +115,9 @@ it('can bulk detach auditor departments from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableBulkAction(DetachBulkAction::class, $departments)
-        ->assertHasNoTableBulkActionErrors();
+        ->selectTableRecords($departments->pluck('id')->all())
+        ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+        ->assertHasNoFormErrors();
 
     expect($project->auditorDepartments()->count())->toBe(0);
 });
@@ -128,7 +132,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('allows the project creator with the update permission to attach an auditor department', function () {
@@ -148,11 +152,11 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach')
-            ->callTableAction('attach', data: [
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
                 'recordId' => $department->getKey(),
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoFormErrors();
 
         expect($project->auditorDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
     });
@@ -178,7 +182,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user\'s department is only an auditor department, not a manager department', function () {
@@ -202,7 +206,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has no update permission', function () {
@@ -219,7 +223,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
@@ -237,6 +241,6 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 });

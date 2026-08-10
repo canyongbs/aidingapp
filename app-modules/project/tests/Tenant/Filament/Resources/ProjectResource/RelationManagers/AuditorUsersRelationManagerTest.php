@@ -38,7 +38,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageAuditors;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\AuditorUsersRelationManager;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -71,10 +74,10 @@ it('can attach an auditor user to a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableAction('attach', data: [
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
             'recordId' => $auditor->getKey(),
         ])
-        ->assertHasNoTableActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
 });
@@ -92,8 +95,8 @@ it('can detach an auditor user from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableAction('detach', record: $auditor)
-        ->assertHasNoTableActionErrors();
+        ->callAction(TestAction::make(DetachAction::class)->table($auditor))
+        ->assertHasNoFormErrors();
 
     expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeFalse();
 });
@@ -111,8 +114,9 @@ it('can bulk detach auditor users from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
-        ->callTableBulkAction(DetachBulkAction::class, $auditors)
-        ->assertHasNoTableBulkActionErrors();
+        ->selectTableRecords($auditors->pluck('id')->all())
+        ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+        ->assertHasNoFormErrors();
 
     expect($project->auditorUsers()->count())->toBe(0);
 });
@@ -127,7 +131,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('allows the project creator with the update permission to attach an auditor user', function () {
@@ -147,11 +151,11 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach')
-            ->callTableAction('attach', data: [
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
                 'recordId' => $auditor->getKey(),
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoFormErrors();
 
         expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
@@ -173,7 +177,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user is only an auditor, not a manager or creator', function () {
@@ -193,7 +197,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has no update permission', function () {
@@ -210,7 +214,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
@@ -228,6 +232,6 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 });

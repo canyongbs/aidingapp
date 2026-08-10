@@ -39,7 +39,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestContactsRelationManager;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -72,10 +75,10 @@ it('can attach a guest contact to a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
-        ->callTableAction('attach', data: [
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
             'recordId' => $contact->getKey(),
         ])
-        ->assertHasNoTableActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
 });
@@ -93,8 +96,8 @@ it('can detach a guest contact from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
-        ->callTableAction('detach', record: $contact)
-        ->assertHasNoTableActionErrors();
+        ->callAction(TestAction::make(DetachAction::class)->table($contact))
+        ->assertHasNoFormErrors();
 
     expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeFalse();
 });
@@ -112,8 +115,9 @@ it('can bulk detach guest contacts from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
-        ->callTableBulkAction(DetachBulkAction::class, $contacts)
-        ->assertHasNoTableBulkActionErrors();
+        ->selectTableRecords($contacts->pluck('id')->all())
+        ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+        ->assertHasNoFormErrors();
 
     expect($project->guestContacts()->count())->toBe(0);
 });
@@ -128,7 +132,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('allows the project creator with the update permission to attach a guest contact', function () {
@@ -148,11 +152,11 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertTableActionVisible('attach')
-            ->callTableAction('attach', data: [
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
                 'recordId' => $contact->getKey(),
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoFormErrors();
 
         expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
@@ -174,7 +178,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has no update permission', function () {
@@ -191,7 +195,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
@@ -209,6 +213,6 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 });

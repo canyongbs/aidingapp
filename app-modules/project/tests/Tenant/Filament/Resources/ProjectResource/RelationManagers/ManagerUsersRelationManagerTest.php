@@ -38,7 +38,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\ManagerUsersRelationManager;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -71,10 +74,10 @@ it('can attach a manager user to a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
-        ->callTableAction('attach', data: [
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
             'recordId' => $manager->getKey(),
         ])
-        ->assertHasNoTableActionErrors();
+        ->assertHasNoFormErrors();
 
     expect($project->managerUsers()->whereKey($manager->getKey())->exists())->toBeTrue();
 });
@@ -92,8 +95,8 @@ it('can detach a manager user from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
-        ->callTableAction('detach', record: $manager)
-        ->assertHasNoTableActionErrors();
+        ->callAction(TestAction::make(DetachAction::class)->table($manager))
+        ->assertHasNoFormErrors();
 
     expect($project->managerUsers()->whereKey($manager->getKey())->exists())->toBeFalse();
 });
@@ -111,8 +114,9 @@ it('can bulk detach manager users from a project', function () {
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
-        ->callTableBulkAction(DetachBulkAction::class, $managers)
-        ->assertHasNoTableBulkActionErrors();
+        ->selectTableRecords($managers->pluck('id')->all())
+        ->callAction(TestAction::make(DetachBulkAction::class)->table()->bulk())
+        ->assertHasNoFormErrors();
 
     expect($project->managerUsers()->count())->toBe(0);
 });
@@ -127,7 +131,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('allows the project creator with the update permission to attach a manager user', function () {
@@ -147,11 +151,11 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertTableActionVisible('attach')
-            ->callTableAction('attach', data: [
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
                 'recordId' => $manager->getKey(),
             ])
-            ->assertHasNoTableActionErrors();
+            ->assertHasNoFormErrors();
 
         expect($project->managerUsers()->whereKey($manager->getKey())->exists())->toBeTrue();
     });
@@ -173,7 +177,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertTableActionVisible('attach');
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has no update permission', function () {
@@ -190,7 +194,7 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
     it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
@@ -208,6 +212,6 @@ describe('authorization', function () {
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertTableActionHidden('attach');
+            ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 });

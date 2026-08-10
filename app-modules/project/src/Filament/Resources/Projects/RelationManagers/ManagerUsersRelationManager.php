@@ -61,17 +61,14 @@ class ManagerUsersRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('managedProjects');
