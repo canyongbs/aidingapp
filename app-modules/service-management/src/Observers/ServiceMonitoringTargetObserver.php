@@ -42,6 +42,17 @@ class ServiceMonitoringTargetObserver
 {
     public function creating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
+        $this->assignCreatedByIfBlank($serviceMonitoringTarget);
+    }
+
+    public function updating(ServiceMonitoringTarget $serviceMonitoringTarget): void
+    {
+        $this->assignCreatedByIfBlank($serviceMonitoringTarget);
+    }
+
+    // Backfills the creator for pre-existing records that predate the confidentiality feature
+    private function assignCreatedByIfBlank(ServiceMonitoringTarget $serviceMonitoringTarget): void
+    {
         if (blank($serviceMonitoringTarget->getAttribute('created_by_id')) && auth()->check()) {
             $serviceMonitoringTarget->createdBy()->associate(auth()->user());
         }

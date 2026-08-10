@@ -46,6 +46,7 @@ use Filament\Actions\DeleteAction;
 use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -312,4 +313,24 @@ test('turning off confidentiality clears previously granted users, departments, 
         ->assertHasNoFormErrors();
 
     expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(0);
+});
+
+test('marking a legacy service monitor confidential backfills the editor as its creator', function () {
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    expect($serviceMonitoringTarget->getAttribute('created_by_id'))->toBeNull();
+
+    $editor = User::factory()->create();
+    $editor->givePermissionTo('service_monitoring.view-any');
+    $editor->givePermissionTo('service_monitoring.*.view');
+    $editor->givePermissionTo('service_monitoring.*.update');
+    actingAs($editor);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm(['is_confidential' => true])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
+        ->assertSuccessful();
 });
