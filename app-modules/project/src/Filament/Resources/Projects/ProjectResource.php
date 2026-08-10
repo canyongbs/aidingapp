@@ -48,8 +48,10 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
 use App\Enums\NavigationGroup;
+use App\Features\ProjectArchivingFeature;
 use Filament\Resources\Resource;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -79,6 +81,18 @@ class ProjectResource extends Resource
     public static function getGloballySearchableAttributes(): array
     {
         return ['name'];
+    }
+
+    /**
+     * @return Builder<Project>
+     */
+    public static function getEloquentQuery(): Builder
+    {
+        /** @var Builder<Project> $query */
+        $query = parent::getEloquentQuery();
+
+        return $query
+            ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived());
     }
 
     public static function getGlobalSearchResultDetails(Model $record): array

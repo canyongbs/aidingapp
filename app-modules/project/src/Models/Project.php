@@ -47,6 +47,7 @@ use AidingApp\Project\Observers\ProjectObserver;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Enums\Color;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Collection;
@@ -70,6 +71,7 @@ class Project extends BaseModel implements Auditable
     /** @use HasFactory<ProjectFactory> */
     use HasFactory;
 
+    use CanBeArchived;
     use HasUuids;
     use SoftDeletes;
     use AuditableTrait;

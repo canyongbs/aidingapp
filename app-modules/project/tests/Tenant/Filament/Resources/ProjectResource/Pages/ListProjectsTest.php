@@ -43,12 +43,14 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -115,6 +117,19 @@ it('can list records', function () {
     livewire(ListProjects::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
+        ->assertSuccessful();
+});
+
+it('does not list archived projects', function () {
+    asSuperAdmin();
+
+    $activeProject = Project::factory()->create();
+    $archivedProject = Project::factory()->create();
+    $archivedProject->archive();
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$activeProject])
+        ->assertCanNotSeeTableRecords([$archivedProject])
         ->assertSuccessful();
 });
 
@@ -197,22 +212,90 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the project.delete permission', function () {
-    Project::factory(15)->create();
-
+it('only shows archive actions to a user with the project.delete permission', function () {
     $user = User::factory()
         ->create()
         ->givePermissionTo('project.view-any', 'project.*.view');
 
     actingAs($user);
 
+    $project = Project::factory()->for($user, 'createdBy')->create();
+
     livewire(ListProjects::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+        ->assertActionHidden(TestAction::make('archive')->table($project))
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('project.*.delete');
 
     livewire(ListProjects::class)
+        ->assertActionVisible(TestAction::make('archive')->table($project))
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
+});
+
+it('does not show the archive actions when `ProjectArchivingFeature` is inactive', function () {
+    ProjectArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ListProjects::class)
+        ->assertActionHidden(TestAction::make('archive')->table($project))
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('can archive a project from the list row action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    expect($project->isArchived())->toBeFalse();
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->callAction(TestAction::make('archive')->table($project))
+        ->assertNotified();
+
+    expect($project->refresh()->isArchived())->toBeTrue()
+        ->and($project->trashed())->toBeFalse();
+
+    assertDatabaseHas('projects', [
+        'id' => $project->getKey(),
+        'deleted_at' => null,
+    ]);
+});
+
+it('can archive multiple projects from the list bulk action', function () {
+    asSuperAdmin();
+
+    $projects = Project::factory()->count(3)->create();
+
+    $projects->each(fn (Project $project) => expect($project->isArchived())->toBeFalse());
+
+    livewire(ListProjects::class)
+        ->assertSuccessful()
+        ->selectTableRecords($projects->modelKeys())
+        ->callAction(TestAction::make('archive')->table()->bulk());
+
+    $projects->each(fn (Project $project) => expect($project->refresh()->isArchived())->toBeTrue()
+        ->and($project->trashed())->toBeFalse());
+});
+
+it('does not show the archive row action to an auditor who is neither a manager nor the creator', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+
+    actingAs($user);
+
+    $project = Project::factory()
+        ->for(User::factory(), 'createdBy')
+        ->hasAttached($user, relationship: 'auditorUsers')
+        ->create();
+
+    livewire(ListProjects::class)
+        ->assertCanSeeTableRecords([$project])
+        ->assertActionHidden(TestAction::make('archive')->table($project));
 });
 
 it('displays project name, manager(s), department, start date, target date, and progress columns', function () {

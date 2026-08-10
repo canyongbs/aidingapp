@@ -98,6 +98,18 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
+it('cannot render an archived project', function () {
+    loginAsUserWithProjectViewPermissions();
+
+    $project = Project::factory()->create();
+    $project->archive();
+
+    get(ViewProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
 it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project', function () {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();

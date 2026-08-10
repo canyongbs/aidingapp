@@ -34,55 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
-
-use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\Project;
 use App\Features\ProjectArchivingFeature;
-use CanyonGBS\Common\Filament\Actions\ArchiveAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-class EditProject extends EditRecord
-{
-    use HasProjectDashboardNavigation;
-
-    protected static string $resource = ProjectResource::class;
-
-    protected static ?string $navigationLabel = 'Edit';
-
-    public function getTitle(): string | Htmlable
+return new class () extends Migration {
+    public function up(): void
     {
-        $record = $this->getRecord();
+        DB::transaction(function () {
+            Schema::table('projects', function (Blueprint $table) {
+                $table->timestamp('archived_at')->nullable();
+            });
 
-        assert($record instanceof Project);
-
-        return __('filament-panels::resources/pages/edit-record.title', [
-            'label' => $record->name,
-        ]);
+            ProjectArchivingFeature::activate();
+        });
     }
 
-    public function form(Schema $schema): Schema
+    public function down(): void
     {
-        return $schema
-            ->components(ProjectForm::components(isEdit: true));
-    }
+        DB::transaction(function () {
+            ProjectArchivingFeature::deactivate();
 
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
+            Schema::table('projects', function (Blueprint $table) {
+                $table->dropColumn('archived_at');
+            });
+        });
     }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            ProjectArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
-        ];
-    }
-}
+};
