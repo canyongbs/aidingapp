@@ -49,6 +49,9 @@ class GuestContactsRelationManager extends RelationManager
 
     protected static ?string $title = 'Contacts';
 
+    // Access is governed by the authorize() checks against the Project below, not a Contact::viewAny permission
+    protected static bool $shouldSkipAuthorization = true;
+
     public function table(Table $table): Table
     {
         return $table
@@ -58,17 +61,17 @@ class GuestContactsRelationManager extends RelationManager
             ])
             ->headerActions([
                 AttachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->recordActions([
                 DetachAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->toolbarActions([
                 DetachBulkAction::make()
-                    ->visible(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->getOwnerRecord()))
                     ->after(fn () => $this->dispatch('projectAccessUpdated')),
             ])
             ->inverseRelationship('guestProjects');
