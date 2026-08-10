@@ -41,10 +41,11 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Features\ProjectArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
-use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -108,7 +109,6 @@ class ListProjects extends ListRecords
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
                 /** @var Builder<Project> $query */
                 $query
-                    ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived())
                     ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
                     ->tap(new WithProgressCounts());
 
@@ -191,27 +191,23 @@ class ListProjects extends ListRecords
                     ->preload()
                     ->label('Department'),
             ])
-            ->recordUrl(fn (Project $record): string => ProjectResource::getUrl('view', ['record' => $record]))
+            ->recordUrl(fn (Project $record): ?string => ProjectResource::can('view', $record)
+                ? ProjectResource::getUrl('view', ['record' => $record])
+                : null)
             ->recordActions([
-                Action::make('archive')
-                    ->label('Archive')
-                    ->color('warning')
+                ArchiveAction::make()
                     ->icon('heroicon-m-archive-box')
-                    ->modalIcon('heroicon-o-archive-box')
-                    ->modalSubmitActionLabel('Archive')
-                    ->successNotificationTitle('Archived')
                     ->visible(fn (): bool => ProjectArchivingFeature::active())
-                    ->hidden(fn (Project $record): bool => $record->isArchived())
-                    ->requiresConfirmation()
-                    ->action(fn (Project $record) => $record->archive())
-                    ->authorize(fn (Project $record): bool => ProjectResource::can('archive', $record)),
+                    ->authorize('archive')
+                    ->successRedirectUrl(null),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    ArchiveBulkAction::make()
-                        ->visible(fn (): bool => ProjectArchivingFeature::active())
-                        ->authorizeIndividualRecords('archive')
-                        ->deselectRecordsAfterCompletion(),
+                    ProjectArchivingFeature::active()
+                        ? ArchiveBulkAction::make()
+                            ->authorizeIndividualRecords('delete')
+                        : DeleteBulkAction::make()
+                            ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }

@@ -91,7 +91,7 @@ it('can view a pipeline', function () {
         ->assertSuccessful();
 });
 
-it('cannot view a pipeline whose project is archived', function () {
+it('does not resolve a pipeline whose parent project is archived', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();

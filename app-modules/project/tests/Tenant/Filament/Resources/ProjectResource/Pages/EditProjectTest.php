@@ -38,7 +38,9 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
+use App\Features\ProjectArchivingFeature;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
@@ -335,4 +337,47 @@ it('hydrates target_completion_date_type to set when record has target_completio
     ])
         ->assertFormFieldExists('target_completion_date_type')
         ->assertFormFieldExists('target_completion_date');
+});
+
+it('cannot render an archived project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $project->archive();
+
+    get(EditProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertNotFound();
+});
+
+it('can archive a project from the header action', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    expect($project->isArchived())->toBeFalse();
+
+    livewire(EditProject::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('archive'))
+        ->assertNotified();
+
+    expect($project->refresh()->isArchived())->toBeTrue()
+        ->and($project->trashed())->toBeFalse();
+});
+
+it('offers the `DeleteAction` instead of the `ArchiveAction` when `ProjectArchivingFeature` is inactive', function () {
+    ProjectArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(EditProject::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->assertActionDoesNotExist(TestAction::make('archive'))
+        ->assertActionVisible(TestAction::make('delete'));
 });

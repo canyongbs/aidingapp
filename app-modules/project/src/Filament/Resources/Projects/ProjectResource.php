@@ -95,18 +95,6 @@ class ProjectResource extends Resource
             ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived());
     }
 
-    /**
-     * @return Builder<Project>
-     */
-    public static function getGlobalSearchEloquentQuery(): Builder
-    {
-        /** @var Builder<Project> $query */
-        $query = parent::getGlobalSearchEloquentQuery();
-
-        return $query
-            ->when(ProjectArchivingFeature::active(), fn (Builder $query): Builder => $query->withoutArchived());
-    }
-
     public static function getGlobalSearchResultDetails(Model $record): array
     {
         assert($record instanceof Project);

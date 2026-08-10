@@ -53,12 +53,12 @@ class PipelinePolicy
 
     public function view(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
-        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
-            return Response::deny('You do not have permission to view this pipeline because its project is archived.');
-        }
-
         if ($pipeline->project && (! $authenticatable->can('view', $pipeline->project))) {
             return Response::deny('You do not have permission to view this pipeline\'s project.');
+        }
+
+        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
+            return Response::deny('You do not have permission to view this pipeline because its project is archived.');
         }
 
         return $authenticatable->canOrElse(
@@ -77,12 +77,12 @@ class PipelinePolicy
 
     public function update(Authenticatable $authenticatable, Pipeline $pipeline): Response
     {
-        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
-            return Response::deny('You do not have permission to update this pipeline because its project is archived.');
-        }
-
         if ($pipeline->project && (! $authenticatable->can('update', $pipeline->project))) {
             return Response::deny('You do not have permission to update this pipeline\'s project.');
+        }
+
+        if (ProjectArchivingFeature::active() && $pipeline->project?->isArchived()) {
+            return Response::deny('You do not have permission to update this pipeline because its project is archived.');
         }
 
         return $authenticatable->canOrElse(

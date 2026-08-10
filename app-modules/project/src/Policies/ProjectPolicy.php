@@ -189,7 +189,7 @@ class ProjectPolicy
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', $authenticatable->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is($authenticatable)) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is($authenticatable)) {
                 return Response::deny("You don't have permission to archive this project because you're not manager, or creator of this project.");
             }
         }

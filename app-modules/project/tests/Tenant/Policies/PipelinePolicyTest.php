@@ -34,87 +34,60 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
 use App\Models\User;
+use Illuminate\Support\Facades\Gate;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('allows a super admin to archive any project', function () {
+it('does not let a super admin view or update a pipeline whose project is archived', function () {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
 
     $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
 
-    expect($user->can('archive', $project))->toBeTrue();
+    expect($user->can('view', $pipeline))->toBeTrue()
+        ->and($user->can('update', $pipeline))->toBeTrue();
+
+    $project->archive();
+
+    expect($user->can('view', $pipeline->refresh()))->toBeFalse()
+        ->and($user->can('update', $pipeline))->toBeFalse();
 });
 
-it('allows a project manager with the delete permission to archive the project', function () {
+it('still allows viewing a pipeline whose project is archived when `ProjectArchivingFeature` is inactive', function () {
+    ProjectArchivingFeature::deactivate();
+
     $user = User::factory()->create();
 
-    $user->givePermissionTo('project.*.delete');
-
-    actingAs($user);
-
-    $project = Project::factory()
-        ->for(User::factory(), 'createdBy')
-        ->hasAttached($user, relationship: 'managerUsers')
-        ->create();
-
-    expect($user->can('archive', $project))->toBeTrue();
-});
-
-it('allows the project creator with the delete permission to archive the project', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.*.delete');
-
-    actingAs($user);
-
-    $project = Project::factory()->for($user, 'createdBy')->create();
-
-    expect($user->can('archive', $project))->toBeTrue();
-});
-
-it('does not let a manager archive the project without the delete permission', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()
-        ->for(User::factory(), 'createdBy')
-        ->hasAttached($user, relationship: 'managerUsers')
-        ->create();
-
-    expect($user->can('archive', $project))->toBeFalse();
-});
-
-it('does not fail when the project has no creator', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.*.delete');
+    asSuperAdmin($user);
 
     $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
 
-    actingAs($user);
+    $project->archive();
 
-    expect($project->createdBy)->toBeNull()
-        ->and($user->can('archive', $project))->toBeFalse();
+    expect($user->can('view', $pipeline->refresh()))->toBeTrue()
+        ->and($user->can('update', $pipeline))->toBeTrue();
 });
 
-it('does not let a user with the delete permission archive a project they do not manage or create', function () {
-    $creator = User::factory()->create();
-
-    actingAs($creator);
-
-    $project = Project::factory()->create();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.*.delete');
+it('denies access to a pipeline of an archived project without disclosing that it is archived', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('pipeline.view-any', 'pipeline.*.view');
 
     actingAs($user);
 
-    expect($user->can('archive', $project))->toBeFalse();
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    $project->archive();
+
+    expect(Gate::inspect('view', $pipeline->refresh())->message())
+        ->toBe('You do not have permission to view this pipeline\'s project.');
 });
