@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\Http\Requests\StoreServiceRequestUpdateRequest;
+use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Http\Controllers\Controller;
@@ -64,6 +65,9 @@ class StoreServiceRequestUpdateController extends Controller
             }
 
             $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+
+            // Reopen the service request if it was closed when this update was submitted.
+            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
 
             $serviceRequestUpdates = $serviceRequest
                 ->serviceRequestUpdates()

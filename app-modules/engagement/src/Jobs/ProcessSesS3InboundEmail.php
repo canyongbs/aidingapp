@@ -47,6 +47,7 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -363,13 +364,16 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 return;
             }
 
-            // Create SR Update — do NOT change status (even if closed)
+            // Create SR Update
             $serviceRequestUpdate = $serviceRequest->serviceRequestUpdates()->create([
                 'update' => $parser->getMessageBody('text') ?: $parser->getMessageBody('html'),
                 'internal' => false,
                 'created_by_id' => $serviceRequest->respondent->getKey(),
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
+
+            // Reopen the service request if it was closed when this reply arrived.
+            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
 
             foreach ($parser->getAttachments() as $attachment) {
                 try {
