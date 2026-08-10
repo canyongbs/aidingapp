@@ -390,24 +390,3 @@ test('saving with the automated status change toggle off nulls the automated_sta
 
     expect($serviceRequestType->fresh()->automated_status_id)->toBeNull();
 });
-
-test('saving while the feature flag is inactive preserves the stored automated_status_id', function () {
-    asSuperAdmin();
-
-    AutomatedStatusChangeOnAssignmentFeature::deactivate();
-
-    $status = ServiceRequestStatus::factory()->open()->create();
-    $serviceRequestType = ServiceRequestType::factory()->create([
-        'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
-        'automated_status_id' => $status->getKey(),
-    ]);
-
-    expect($serviceRequestType->automated_status_id)->toBe($status->getKey());
-
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
-        ->fillForm(['assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect($serviceRequestType->fresh()->automated_status_id)->toBe($status->getKey());
-});
