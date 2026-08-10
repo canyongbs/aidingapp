@@ -34,17 +34,21 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Filament\Resources\Pipelines\Pages\CreatePipeline;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\PipelinesRelationManager;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 it('can list pipelines', function () {
@@ -68,6 +72,8 @@ it('can list pipelines', function () {
 
 describe('authorization', function () {
     it('allows a super admin to create a pipeline', function () {
+        $undoRepeaterFake = Repeater::fake();
+
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -77,9 +83,23 @@ describe('authorization', function () {
             'pageClass' => ManagePipelines::class,
         ])
             ->assertActionVisible(TestAction::make(CreateAction::class)->table());
+
+        $pipelineData = CreatePipelineRequestFactory::new()->create();
+
+        livewire(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm($pipelineData)
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        assertCount(1, Pipeline::all());
+        expect(Pipeline::first()->project_id)->toBe($project->getKey());
+
+        $undoRepeaterFake();
     });
 
     it('allows the project creator with the update permission to create a pipeline', function () {
+        $undoRepeaterFake = Repeater::fake();
+
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -95,9 +115,23 @@ describe('authorization', function () {
             'pageClass' => ManagePipelines::class,
         ])
             ->assertActionVisible(TestAction::make(CreateAction::class)->table());
+
+        $pipelineData = CreatePipelineRequestFactory::new()->create();
+
+        livewire(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm($pipelineData)
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        assertCount(1, Pipeline::all());
+        expect(Pipeline::first()->project_id)->toBe($project->getKey());
+
+        $undoRepeaterFake();
     });
 
     it('allows an assigned project manager with the update permission to create a pipeline', function () {
+        $undoRepeaterFake = Repeater::fake();
+
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -115,6 +149,18 @@ describe('authorization', function () {
             'pageClass' => ManagePipelines::class,
         ])
             ->assertActionVisible(TestAction::make(CreateAction::class)->table());
+
+        $pipelineData = CreatePipelineRequestFactory::new()->create();
+
+        livewire(CreatePipeline::class, ['parentRecord' => $project])
+            ->fillForm($pipelineData)
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        assertCount(1, Pipeline::all());
+        expect(Pipeline::first()->project_id)->toBe($project->getKey());
+
+        $undoRepeaterFake();
     });
 
     it('hides the create action when the user has no update permission', function () {

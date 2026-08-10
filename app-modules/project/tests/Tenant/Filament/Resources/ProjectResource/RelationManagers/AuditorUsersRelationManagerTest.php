@@ -127,11 +127,19 @@ describe('authorization', function () {
 
         $project = Project::factory()->create();
 
+        $auditor = User::factory()->create();
+
         livewire(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $auditor->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
 
     it('allows the project creator with the update permission to attach an auditor user', function () {
@@ -173,11 +181,19 @@ describe('authorization', function () {
 
         actingAs($user);
 
+        $auditor = User::factory()->create();
+
         livewire(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $auditor->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->auditorUsers()->whereKey($auditor->getKey())->exists())->toBeTrue();
     });
 
     it('hides the attach action when the user is only an auditor, not a manager or creator', function () {

@@ -128,11 +128,19 @@ describe('authorization', function () {
 
         $project = Project::factory()->create();
 
+        $department = Department::factory()->create();
+
         livewire(ManagerDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $department->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->managerDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
     });
 
     it('allows the project creator with the update permission to attach a manager department', function () {
@@ -178,11 +186,19 @@ describe('authorization', function () {
 
         actingAs($user);
 
+        $newDepartment = Department::factory()->create();
+
         livewire(ManagerDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $newDepartment->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->managerDepartments()->whereKey($newDepartment->getKey())->exists())->toBeTrue();
     });
 
     it('hides the attach action when the user has no update permission', function () {

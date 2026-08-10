@@ -128,11 +128,19 @@ describe('authorization', function () {
 
         $project = Project::factory()->create();
 
+        $contact = Contact::factory()->create();
+
         livewire(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $contact->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
 
     it('allows the project creator with the update permission to attach a guest contact', function () {
@@ -174,11 +182,19 @@ describe('authorization', function () {
 
         actingAs($user);
 
+        $contact = Contact::factory()->create();
+
         livewire(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $contact->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
     });
 
     it('hides the attach action when the user has no update permission', function () {

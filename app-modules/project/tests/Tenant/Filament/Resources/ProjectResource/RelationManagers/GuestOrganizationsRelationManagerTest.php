@@ -128,11 +128,19 @@ describe('authorization', function () {
 
         $project = Project::factory()->create();
 
+        $organization = Organization::factory()->create();
+
         livewire(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $organization->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
     });
 
     it('allows the project creator with the update permission to attach a guest organization', function () {
@@ -174,11 +182,19 @@ describe('authorization', function () {
 
         actingAs($user);
 
+        $organization = Organization::factory()->create();
+
         livewire(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
-            ->assertActionVisible(TestAction::make(AttachAction::class)->table());
+            ->assertActionVisible(TestAction::make(AttachAction::class)->table())
+            ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+                'recordId' => $organization->getKey(),
+            ])
+            ->assertHasNoFormErrors();
+
+        expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
     });
 
     it('hides the attach action when the user has no update permission', function () {
