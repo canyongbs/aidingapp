@@ -104,7 +104,7 @@ class CreateServiceMonitoring extends CreateRecord
                         Toggle::make('is_confidential')
                             ->label('Restrict Visibility')
                             ->live()
-                            ->helperText('When enabled, only the creator and the users, departments, and contacts selected below can view this service monitor.')
+                            ->helperText('When enabled, only admins, the creator, and the users, departments, and contacts selected below can view this service monitor.')
                             ->default(false)
                             ->columnSpanFull()
                             ->afterStateUpdated(function (bool $state, Set $set): void {

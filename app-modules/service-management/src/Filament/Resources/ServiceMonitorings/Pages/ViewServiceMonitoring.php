@@ -101,19 +101,19 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialUsers()->count()),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialUsers()->exists()),
                                 TextEntry::make('confidentialDepartments.name')
                                     ->label('Departments')
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialDepartments()->count()),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialDepartments()->exists()),
                                 TextEntry::make('confidentialContacts.full_name')
                                     ->label('Contacts')
                                     ->listWithLineBreaks()
                                     ->limitList(3)
                                     ->expandableLimitedList()
-                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialContacts()->count()),
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialContacts()->exists()),
                             ])
                             ->visible(fn (ServiceMonitoringTarget $record): bool => $record->is_confidential)
                             ->columns(),
