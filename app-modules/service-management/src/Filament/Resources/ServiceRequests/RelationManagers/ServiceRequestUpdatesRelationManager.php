@@ -91,7 +91,8 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->label('Internal')
                     ->rule(['boolean'])
                     ->columnSpan('full'),
-                ServiceRequestStatusSelect::make($serviceRequest),
+                ServiceRequestStatusSelect::make()
+                    ->default($serviceRequest->status_id),
                 Section::make('Uploads')
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('uploads')

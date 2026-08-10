@@ -34,25 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Collection;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestStatusSelect
+class AutomatedStatusChangeOnAssignmentFeature extends AbstractFeatureFlag
 {
-    public static function make(string $name = 'status_id'): Select
+    public function resolve(mixed $scope): mixed
     {
-        return Select::make($name)
-            ->label('Status')
-            ->allowHtml()
-            ->options(fn () => ServiceRequestStatus::orderBy('sort')
-                ->get(['id', 'name', 'classification', 'color'])
-                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getLabel())
-                ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                    $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                ])))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+        return false;
     }
 }

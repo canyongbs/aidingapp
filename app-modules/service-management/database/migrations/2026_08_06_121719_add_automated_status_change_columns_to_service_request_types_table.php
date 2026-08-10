@@ -34,25 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\Select;
-use Illuminate\Database\Eloquent\Collection;
-
-class ServiceRequestStatusSelect
-{
-    public static function make(string $name = 'status_id'): Select
+return new class () extends Migration {
+    public function up(): void
     {
-        return Select::make($name)
-            ->label('Status')
-            ->allowHtml()
-            ->options(fn () => ServiceRequestStatus::orderBy('sort')
-                ->get(['id', 'name', 'classification', 'color'])
-                ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getLabel())
-                ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [
-                    $status->getKey() => view('service-management::components.service-request-status-select-option-label', ['status' => $status])->render(),
-                ])))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->foreignUuid('automated_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
+            });
+
+            AutomatedStatusChangeOnAssignmentFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AutomatedStatusChangeOnAssignmentFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('automated_status_id');
+            });
+        });
+    }
+};

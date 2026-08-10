@@ -36,93 +36,88 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
 
-class WorkloadAssigner implements ServiceRequestTypeAssigner
+class WorkloadAssigner extends ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
     {
         $serviceRequestType = $serviceRequest->priority?->type;
 
-        if (! is_null($serviceRequestType)) {
-            $lastAssignee = $serviceRequestType->lastAssignedUser;
-            $user = null;
-
-            if ($lastAssignee) {
-                $lowestServiceRequest = User::query()
-                    ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                        $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    })
-                    ->withCount([
-                        'serviceRequests as service_request_count' => function (Builder $query) {
-                            $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
-                        },
-                    ])
-                    ->orderBy('service_request_count', 'asc')
-                    ->first()?->getAttributeValue('service_request_count') ?? 0;
-
-                $user = User::query()
-                    ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                        $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    })
-                    ->where(function (QueryBuilder $query) {
-                        $query->selectRaw('count(*)')
-                            ->from('service_requests')
-                            ->Join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
-                            ->whereColumn('users.id', 'service_request_assignments.user_id')
-                            ->whereExists(function (QueryBuilder $query) {
-                                $query->selectRaw('*')
-                                    ->from('service_request_statuses')
-                                    ->whereColumn('service_requests.status_id', 'service_request_statuses.id')
-                                    ->where('classification', '!=', SystemServiceRequestClassification::Closed)
-                                    ->whereNull('service_request_statuses.deleted_at');
-                            })
-                            ->whereNull('service_requests.deleted_at')
-                            ->whereNull('service_request_assignments.deleted_at');
-                    }, '<=', $lowestServiceRequest)
-                    ->where('name', '>=', $lastAssignee->name)
-                    ->where(fn (Builder $query) => $query
-                        ->where('name', '!=', $lastAssignee->name)
-                        ->orWhere('users.id', '>', $lastAssignee->id))
-                    ->orderBy('name')->orderBy('id')->first();
-            }
-
-            if ($user === null) {
-                $user = User::query()
-                    ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                        $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    })
-                    ->withCount([
-                        'serviceRequests as service_request_count' => function (Builder $query) {
-                            $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
-                        },
-                    ])
-                    ->orderBy('service_request_count', 'asc')
-                    ->orderBy('name')->orderBy('id')->first();
-            }
-
-            if ($user !== null) {
-                $serviceRequestType->last_assigned_id = $user->getKey();
-                $serviceRequestType->save();
-
-                $data = [
-                    'user_id' => $user->getKey(),
-                    'assigned_by_id' => null,
-                    'assigned_by_type' => null,
-                    'assigned_at' => now(),
-                    'status' => ServiceRequestAssignmentStatus::Active,
-                ];
-
-                $serviceRequest->assignments()->create($data);
-            }
+        if (is_null($serviceRequestType)) {
+            return null;
         }
+
+        $lastAssignee = $serviceRequestType->lastAssignedUser;
+        $user = null;
+
+        if ($lastAssignee) {
+            $lowestServiceRequest = User::query()
+                ->where(function (Builder $query) use ($serviceRequestType) {
+                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                })
+                ->withCount([
+                    'serviceRequests as service_request_count' => function (Builder $query) {
+                        $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
+                    },
+                ])
+                ->orderBy('service_request_count', 'asc')
+                ->first()?->getAttributeValue('service_request_count') ?? 0;
+
+            $user = User::query()
+                ->where(function (Builder $query) use ($serviceRequestType) {
+                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                })
+                ->where(function (QueryBuilder $query) {
+                    $query->selectRaw('count(*)')
+                        ->from('service_requests')
+                        ->join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
+                        ->whereColumn('users.id', 'service_request_assignments.user_id')
+                        ->whereExists(function (QueryBuilder $query) {
+                            $query->selectRaw('*')
+                                ->from('service_request_statuses')
+                                ->whereColumn('service_requests.status_id', 'service_request_statuses.id')
+                                ->where('classification', '!=', SystemServiceRequestClassification::Closed)
+                                ->whereNull('service_request_statuses.deleted_at');
+                        })
+                        ->whereNull('service_requests.deleted_at')
+                        ->whereNull('service_request_assignments.deleted_at');
+                }, '<=', $lowestServiceRequest)
+                ->where('name', '>=', $lastAssignee->name)
+                ->where(fn (Builder $query) => $query
+                    ->where('name', '!=', $lastAssignee->name)
+                    ->orWhere('users.id', '>', $lastAssignee->id))
+                ->orderBy('name')->orderBy('id')->first();
+        }
+
+        if ($user === null) {
+            $user = User::query()
+                ->where(function (Builder $query) use ($serviceRequestType) {
+                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                })
+                ->withCount([
+                    'serviceRequests as service_request_count' => function (Builder $query) {
+                        $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
+                    },
+                ])
+                ->orderBy('service_request_count', 'asc')
+                ->orderBy('name')->orderBy('id')->first();
+        }
+
+        if ($user === null) {
+            return null;
+        }
+
+        $serviceRequestType->last_assigned_id = $user->getKey();
+        $serviceRequestType->save();
+
+        return $user;
     }
 }

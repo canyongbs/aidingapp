@@ -37,6 +37,11 @@
 namespace Tests;
 
 use AidingApp\Authorization\Models\Role;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Actions\Paths\ModulePath;
 use App\Models\User;
 use Illuminate\Foundation\Testing\TestCase;
@@ -90,4 +95,20 @@ function richContentWith(array $nodes): array
 function richContentText(string $text): array
 {
     return richContentWith([['type' => 'text', 'text' => $text]]);
+}
+
+function enablePreference(
+    ServiceRequestType $type,
+    ServiceRequestEmailTemplateType $templateType,
+    ServiceRequestTypeEmailTemplateRole $role,
+    ServiceRequestNotificationChannel $channel,
+    bool $isEnabled = true,
+): void {
+    ServiceRequestTypeEmailPreference::create([
+        'service_request_type_id' => $type->getKey(),
+        'service_request_email_template_type' => $templateType,
+        'service_request_email_template_role' => $role,
+        'notification_channel' => $channel,
+        'is_enabled' => $isEnabled,
+    ]);
 }
