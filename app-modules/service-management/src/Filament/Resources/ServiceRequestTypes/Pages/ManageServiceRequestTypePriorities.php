@@ -164,41 +164,37 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
             ->model($this->getOwnerRecord())
             ->statePath('configurationData')
             ->components([
-                Section::make('Priorities Configuration')
+                Section::make('Customer Defined Priorities')
+                    ->description('Allow customers to define the priority of their requests in the portal and in the Support Assistant experiences.')
+                    ->compact()
                     ->schema([
-                        Section::make('Customer Defined Priorities')
-                            ->description('Allow customers to define the priority of their requests in the portal and in the Support Assistant experiences.')
-                            ->compact()
-                            ->schema([
-                                Toggle::make('customer_defined_priorities')
-                                    ->label('Enable')
-                                    ->live()
-                                    ->afterStateUpdated(
-                                        fn (bool $state, Set $set) => $state
-                                            ? $set('default_priority_id', null)
-                                            : null
-                                    ),
-                            ]),
+                        Toggle::make('customer_defined_priorities')
+                            ->label('Enable')
+                            ->live()
+                            ->afterStateUpdated(
+                                fn (bool $state, Set $set) => $state
+                                    ? $set('default_priority_id', null)
+                                    : null
+                            ),
+                    ]),
 
-                        Select::make('default_priority_id')
-                            ->label('Default Priority')
-                            ->helperText(
-                                'Define a default priority for all new service requests.'
-                            )
-                            ->options(
-                                fn (): array => $this->getServiceRequestType()
-                                    ->priorities()
-                                    ->orderBy('order')
-                                    ->pluck('name', 'id')
-                                    ->all()
-                            )
-                            ->searchable()
-                            ->preload()
-                            ->rule(Rule::exists('service_request_priorities', 'id')->where('type_id', $this->getServiceRequestType()->getKey()))
-                            ->required(fn (Get $get): bool => ! $get('customer_defined_priorities'))
-                            ->hidden(fn (Get $get): bool => $get('customer_defined_priorities')),
-                    ])
-                    ->visible(DefaultPriorityFeature::active()),
+                Select::make('default_priority_id')
+                    ->label('Default Priority')
+                    ->helperText(
+                        'Define a default priority for all new service requests.'
+                    )
+                    ->options(
+                        fn (): array => $this->getServiceRequestType()
+                            ->priorities()
+                            ->orderBy('order')
+                            ->pluck('name', 'id')
+                            ->all()
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->rule(Rule::exists('service_request_priorities', 'id')->where('type_id', $this->getServiceRequestType()->getKey()))
+                    ->required(fn (Get $get): bool => ! $get('customer_defined_priorities'))
+                    ->hidden(fn (Get $get): bool => $get('customer_defined_priorities')),
             ]);
     }
 

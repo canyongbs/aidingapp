@@ -37,8 +37,10 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\DefaultPriorityFeature;
 use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
@@ -69,6 +71,43 @@ function widgetRequestAsContact(Contact $contact, string $url): TestResponse
 
     return getJson($url, ['Origin' => config('app.url')]);
 }
+
+it('returns a configured default priority for a service request type', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()
+        ->for($type, 'type')
+        ->create();
+
+    $type->update(['default_priority_id' => $priority->getKey()]);
+
+    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+    $response->assertOk();
+
+    expect(collect($response->json('types'))->firstWhere('id', $type->getKey())['default_priority_id'])
+        ->toBe($priority->getKey());
+});
+
+it('does not expose a default priority before the feature is activated', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()
+        ->for($type, 'type')
+        ->create();
+
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    DefaultPriorityFeature::deactivate();
+
+    try {
+        $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+
+        $response->assertOk();
+
+        expect(collect($response->json('types'))->firstWhere('id', $type->getKey())['default_priority_id'])
+            ->toBeNull();
+    } finally {
+        DefaultPriorityFeature::activate();
+    }
+});
 
 it('does not return categories that have no service request types', function () {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
