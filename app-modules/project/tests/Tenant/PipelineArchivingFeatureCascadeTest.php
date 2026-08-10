@@ -34,10 +34,16 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Models\User;
+
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 it('archives a milestone once it has no remaining non-archived linked task', function () {
     $milestone = ProjectMilestone::factory()->create();
@@ -172,4 +178,32 @@ it('leaves an already-archived task untouched when its stage is unarchived', fun
 
     expect($active->refresh()->isArchived())->toBeFalse()
         ->and($manuallyArchived->refresh()->isArchived())->toBeFalse();
+});
+
+it('rolls back the whole cascade when a child archive fails through the switcher', function () {
+    asSuperAdmin(User::factory()->create());
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+
+    // Force a failure partway through the cascade (after the pipeline and stage
+    // rows have already been written, before the entry is archived).
+    PipelineEntry::archiving(function (): void {
+        throw new RuntimeException('boom');
+    });
+
+    try {
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->call('archivePipelineFromSwitcher', $pipeline->getKey());
+    } catch (Throwable) {
+        // Expected: the forced failure propagates out of the transaction.
+    }
+
+    expect($pipeline->refresh()->isArchived())->toBeFalse()
+        ->and($stage->refresh()->isArchived())->toBeFalse();
 });

@@ -42,6 +42,7 @@ use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Facades\DB;
 
 trait HasPipelineSwitcherAction
 {
@@ -124,7 +125,9 @@ trait HasPipelineSwitcherAction
 
         $wasActive = (string) $pipeline->getKey() === (string) $this->getPipelineSwitcherCurrentPipelineId();
 
-        $pipeline->archive();
+        DB::transaction(function () use ($pipeline): void {
+            $pipeline->archive();
+        });
 
         Notification::make()
             ->success()
