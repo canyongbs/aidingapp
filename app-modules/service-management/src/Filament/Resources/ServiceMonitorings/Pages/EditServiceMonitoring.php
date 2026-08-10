@@ -111,6 +111,7 @@ class EditServiceMonitoring extends EditRecord
                             ->live()
                             ->helperText('When enabled, only the creator and the users, departments, and contacts selected below can view this service monitor.')
                             ->default(false)
+                            ->columnSpanFull()
                             ->afterStateUpdated(function (bool $state, Set $set): void {
                                 if ($state) {
                                     return;
@@ -142,7 +143,7 @@ class EditServiceMonitoring extends EditRecord
                             ->searchable()
                             ->visible(fn (Get $get): bool => (bool) $get('is_confidential')),
                     ])
-                    ->columns(2),
+                    ->columns(3),
             ]);
     }
 
