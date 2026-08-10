@@ -38,6 +38,8 @@ namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
+use App\Features\PipelineArchivingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -46,7 +48,11 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
+// TODO: This relation manager (and its ManagePipelines page) is currently only
+// reachable by direct URL. Evaluate whether it is still needed now that the
+// pipeline switcher owns pipeline management; remove if redundant.
 class PipelinesRelationManager extends RelationManager
 {
     protected static string $relationship = 'pipelines';
@@ -55,6 +61,13 @@ class PipelinesRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('name')
+            ->modifyQueryUsing(function (Builder $query): Builder {
+                /** @var Builder<Pipeline> $query */
+                return $query->when(
+                    PipelineArchivingFeature::active(),
+                    fn (Builder $query): Builder => $query->withoutArchived(),
+                );
+            })
             ->columns([
                 TextColumn::make('name'),
                 TextColumn::make('createdBy.name')->label('Created By'),
@@ -81,6 +94,14 @@ class PipelinesRelationManager extends RelationManager
                         'record' => $record,
                         'project' => $this->getOwnerRecord(),
                     ])),
+                ArchiveAction::make()
+                    ->visible(fn (): bool => PipelineArchivingFeature::active())
+                    ->authorize(fn (Pipeline $record): bool => auth()->user()?->can('delete', $record) ?? false)
+                    ->modalHeading('Archive Pipeline')
+                    ->modalDescription('Are you sure you want to archive this pipeline? All related milestones and tasks will also be archived.')
+                    ->modalSubmitActionLabel('Archive')
+                    ->using(fn (Pipeline $record): bool => DB::transaction(fn (): bool => $record->archive()))
+                    ->successRedirectUrl(null),
             ]);
     }
 }
