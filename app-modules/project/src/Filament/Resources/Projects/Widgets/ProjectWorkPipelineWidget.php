@@ -76,13 +76,6 @@ class ProjectWorkPipelineWidget extends TableWidget
 
     protected string $view = 'project::filament.resources.projects.widgets.project-work-pipeline-widget';
 
-    public static function canView(): bool
-    {
-        $user = auth()->user();
-
-        return $user->can('viewAny', Pipeline::class);
-    }
-
     public function mount(): void
     {
         $this->selectedPipelineId = $this->record

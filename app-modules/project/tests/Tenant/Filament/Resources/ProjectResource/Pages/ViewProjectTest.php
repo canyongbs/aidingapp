@@ -604,16 +604,3 @@ it('gates the project stats widget behind project view permissions', function ()
 
     expect(ProjectStatsWidget::canView())->toBeTrue();
 });
-
-it('gates the project work pipeline widget behind the pipeline view-any permission', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    expect(ProjectWorkPipelineWidget::canView())->toBeFalse();
-
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    expect(ProjectWorkPipelineWidget::canView())->toBeTrue();
-});

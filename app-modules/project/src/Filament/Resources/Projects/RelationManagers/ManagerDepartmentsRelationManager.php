@@ -49,7 +49,7 @@ class ManagerDepartmentsRelationManager extends RelationManager
 
     protected static ?string $title = 'Departments';
 
-    // Access is governed by the authorize() checks against the Project below, not a Department::viewAny permission
+    // Owner-record update access is enforced globally in FilamentServiceProvider, not a Department::viewAny permission
     protected static bool $shouldSkipAuthorization = true;
 
     public function table(Table $table): Table

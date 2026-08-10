@@ -49,7 +49,7 @@ class GuestOrganizationsRelationManager extends RelationManager
 
     protected static ?string $title = 'Organizations';
 
-    // Access is governed by the authorize() checks against the Project below, not an Organization::viewAny permission
+    // Owner-record update access is enforced globally in FilamentServiceProvider, not an Organization::viewAny permission
     protected static bool $shouldSkipAuthorization = true;
 
     public function table(Table $table): Table
