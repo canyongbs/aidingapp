@@ -120,6 +120,19 @@ it('archives a milestone linked only to tasks in the archived pipeline', functio
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
+it('archives a pipeline\'s stages when the pipeline is archived, and restores them on unarchive', function () {
+    $pipeline = Pipeline::factory()->create();
+    $stages = PipelineStage::factory()->count(2)->for($pipeline)->create();
+
+    $pipeline->archive();
+
+    $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeTrue());
+
+    $pipeline->unarchive();
+
+    $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeFalse());
+});
+
 it('archives a stage\'s non-archived tasks when the stage is archived, and restores them on unarchive', function () {
     $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
     $entries = PipelineEntry::factory()
