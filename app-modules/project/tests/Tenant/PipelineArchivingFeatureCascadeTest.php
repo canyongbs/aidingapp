@@ -149,35 +149,26 @@ it('archives a stage\'s non-archived tasks when the stage is archived, and resto
             'assigned_to_type' => null,
         ]);
 
+    // One task is archived independently, before the stage cascade runs. The archive
+    // cascade uses withoutArchived() (so it is left as-is), and the unarchive cascade
+    // uses onlyArchived() (so it is restored alongside the cascade-archived tasks).
+    $preArchived = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $preArchived->archive();
+
     $stage->archive();
 
     expect($stage->refresh()->isArchived())->toBeTrue();
     $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+    expect($preArchived->refresh()->isArchived())->toBeTrue();
 
     $stage->unarchive();
 
     expect($stage->refresh()->isArchived())->toBeFalse();
     $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeFalse());
-});
-
-it('leaves an already-archived task untouched when its stage is unarchived', function () {
-    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
-    $active = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
-        'assigned_to_id' => null,
-        'assigned_to_type' => null,
-    ]);
-    $manuallyArchived = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
-        'assigned_to_id' => null,
-        'assigned_to_type' => null,
-    ]);
-
-    $stage->archive();
-    $manuallyArchived->refresh();
-
-    $stage->unarchive();
-
-    expect($active->refresh()->isArchived())->toBeFalse()
-        ->and($manuallyArchived->refresh()->isArchived())->toBeFalse();
+    expect($preArchived->refresh()->isArchived())->toBeFalse();
 });
 
 it('rolls back the whole cascade when a child archive fails through the switcher', function () {
