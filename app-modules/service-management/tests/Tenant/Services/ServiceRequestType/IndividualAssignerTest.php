@@ -54,34 +54,30 @@ use Illuminate\Support\Facades\Notification;
 use function Tests\asSuperAdmin;
 use function Tests\enablePreference;
 
-if (! function_exists('individualAutoAssignType')) {
-    /**
-     * Builds a Service Request Type configured to auto-assign to $manager via the Individual assigner,
-     * optionally with an automated status change target.
-     */
-    function individualAutoAssignType(User $manager, ?ServiceRequestStatus $automatedStatus = null): ServiceRequestType
-    {
-        return ServiceRequestType::factory()
-            ->hasAttached($manager, relationship: 'managerUsers')
-            ->state([
-                'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
-                'assignment_type_individual_id' => $manager->getKey(),
-                'automated_status_id' => $automatedStatus?->getKey(),
-            ])
-            ->create();
-    }
+/**
+ * Builds a Service Request Type configured to auto-assign to $manager via the Individual assigner,
+ * optionally with an automated status change target.
+ */
+function individualAutoAssignType(User $manager, ?ServiceRequestStatus $automatedStatus = null): ServiceRequestType
+{
+    return ServiceRequestType::factory()
+        ->hasAttached($manager, relationship: 'managerUsers')
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $manager->getKey(),
+            'automated_status_id' => $automatedStatus?->getKey(),
+        ])
+        ->create();
 }
 
-if (! function_exists('serviceRequestForType')) {
-    function serviceRequestForType(ServiceRequestType $type, ServiceRequestStatus $status): ServiceRequest
-    {
-        return ServiceRequest::factory()->state([
-            'status_id' => $status->getKey(),
-            'priority_id' => ServiceRequestPriority::factory()->create([
-                'type_id' => $type->getKey(),
-            ])->getKey(),
-        ])->create();
-    }
+function serviceRequestForType(ServiceRequestType $type, ServiceRequestStatus $status): ServiceRequest
+{
+    return ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $type->getKey(),
+        ])->getKey(),
+    ])->create();
 }
 
 test('individual assigner assigns to configured user via department manager', function () {
