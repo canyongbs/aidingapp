@@ -71,7 +71,7 @@ class GenerateServiceRequestForm
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
 
-            ...(DefaultPriorityFeature::active() && $type->default_priority_id
+            ...(DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
                 ? []
                 : [
                     $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
