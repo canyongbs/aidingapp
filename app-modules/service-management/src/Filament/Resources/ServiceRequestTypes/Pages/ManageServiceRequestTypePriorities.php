@@ -77,7 +77,7 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
 
     protected string $view = 'service-management::filament.resources.service-request-type-resource.pages.manage-service-request-type-priorities';
 
-    /** @var array<string, mixed>|null */
+    /** @var array<string, mixed> */
     public ?array $configurationData = [];
 
     public function mount(int|string $record): void
