@@ -47,7 +47,9 @@ class ServiceMonitoringTargetObserver
 
     public function updating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        $this->assignCreatedByIfBlank($serviceMonitoringTarget);
+        if ($serviceMonitoringTarget->isDirty('is_confidential') && $serviceMonitoringTarget->is_confidential) {
+            $this->assignCreatedByIfBlank($serviceMonitoringTarget);
+        }
     }
 
     // Backfills the creator for pre-existing records that predate the confidentiality feature
