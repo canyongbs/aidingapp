@@ -36,14 +36,27 @@
 
 namespace AidingApp\Report\Filament\Exports;
 
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
+use Illuminate\Database\Eloquent\Builder;
 
 class ServiceMonitoringTargetExporter extends Exporter
 {
     protected static ?string $model = ServiceMonitoringTarget::class;
+
+    /**
+     * @param  Builder<ServiceMonitoringTarget>  $query
+     *
+     * @return Builder<ServiceMonitoringTarget>
+     */
+    public static function modifyQuery(Builder $query): Builder
+    {
+        // The export re-runs this query in a queued job with no authenticated user, so the confidentiality scope must be bypassed
+        return $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class);
+    }
 
     public static function getColumns(): array
     {

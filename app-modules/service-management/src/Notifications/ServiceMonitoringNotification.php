@@ -41,6 +41,7 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -71,7 +72,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
 
     public function toMail(User $notifiable): MailMessage
     {
-        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+        $this->loadServiceMonitoringTarget();
 
         return MailMessage::make()
             ->subject('Aiding App Service Monitoring Alert for ' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name)
@@ -89,12 +90,20 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function toDatabase(object $notifiable): array
     {
-        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+        $this->loadServiceMonitoringTarget();
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
 
         return Notification::make()
             ->danger()
             ->title((string) str("The last service monitoring check for [<ins>{$target->name}</ins>](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ') has failed.')->markdown())
             ->getDatabaseMessage();
+    }
+
+    // Notifications are queued and run without an authenticated user, so the confidentiality scope must be bypassed to load the target
+    private function loadServiceMonitoringTarget(): void
+    {
+        $this->historicalServiceMonitoring->loadMissing([
+            'serviceMonitoringTarget' => fn ($query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
+        ]);
     }
 }
