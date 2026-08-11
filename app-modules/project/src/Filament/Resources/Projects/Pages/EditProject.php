@@ -40,6 +40,8 @@ use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
 use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
+use App\Features\ProjectArchivingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
@@ -80,7 +82,7 @@ class EditProject extends EditRecord
     {
         return [
             ViewAction::make(),
-            DeleteAction::make(),
+            ProjectArchivingFeature::active() ? ArchiveAction::make() : DeleteAction::make(),
         ];
     }
 }

@@ -35,7 +35,6 @@
 @use("AidingApp\Contact\Models\Contact")
 @use("Illuminate\Database\Eloquent\Relations\Relation")
 @use("Illuminate\Support\Str")
-@use("Carbon\CarbonInterface")
 @php
     $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
@@ -55,7 +54,26 @@
 
     $assignedLabel = filled($assignedType) && $assignedName !== "None" ? sprintf("%s (%s)", $assignedName, $assignedType) : $assignedName;
 
-    $dueLabel = $entry->due ? Str::title($entry->due->diffForHumans(now(), CarbonInterface::DIFF_ABSOLUTE, false, 6)) : null;
+    $dueLabel = null;
+
+    if ($entry->due) {
+        $dueInterval = now()->diff($entry->due);
+        $dueDays = (int) $dueInterval->days;
+        $dueHours = (int) $dueInterval->h;
+
+        $dueParts = [];
+
+        if ($dueDays > 0) {
+            $dueParts[] = sprintf('%d %s', $dueDays, Str::plural('Day', $dueDays));
+        }
+
+        if ($dueHours > 0) {
+            $dueParts[] = sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+        }
+
+        $dueLabel = filled($dueParts) ? implode(' ', $dueParts) : sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+    }
+
     $dueTooltip = $entry->due?->format("M j, Y g:i A");
 @endphp
 

@@ -36,25 +36,13 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
 
-class IndividualAssigner implements ServiceRequestTypeAssigner
+class IndividualAssigner extends ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
     {
-        $manager = $serviceRequest->priority->type->assignmentTypeIndividual;
-
-        if ($manager) {
-            $data = [
-                'user_id' => $manager->getKey(),
-                'assigned_by_id' => null,
-                'assigned_by_type' => null,
-                'assigned_at' => now(),
-                'status' => ServiceRequestAssignmentStatus::Active,
-            ];
-
-            $serviceRequest->assignments()->create($data);
-        }
+        return $serviceRequest->priority->type->assignmentTypeIndividual;
     }
 }

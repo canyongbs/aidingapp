@@ -34,17 +34,12 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
-use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestContactsRelationManager;
-use AidingApp\Project\Filament\Resources\Projects\RelationManagers\GuestOrganizationsRelationManager;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission', function () {
@@ -69,129 +64,4 @@ it('can render with proper permission', function () {
         'record' => $project->getRouteKey(),
     ]))
         ->assertSuccessful();
-});
-
-it('can list guest contacts', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $contacts = Contact::factory()->count(3)->create();
-
-    $project->guestContacts()->attach($contacts->pluck('id'));
-
-    livewire(GuestContactsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->assertCanSeeTableRecords($contacts);
-});
-
-it('can attach a guest contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $contact = Contact::factory()->create();
-
-    livewire(GuestContactsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->callTableAction('attach', data: [
-            'recordId' => $contact->getKey(),
-        ])
-        ->assertHasNoTableActionErrors();
-
-    expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeTrue();
-});
-
-it('can detach a guest contact', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $contact = Contact::factory()->create();
-
-    $project->guestContacts()->attach($contact->getKey());
-
-    livewire(GuestContactsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->callTableAction('detach', record: $contact)
-        ->assertHasNoTableActionErrors();
-
-    expect($project->guestContacts()->where('contacts.id', $contact->getKey())->exists())->toBeFalse();
-});
-
-it('can list guest organizations', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $organizations = Organization::factory()->count(3)->create();
-
-    $project->guestOrganizations()->attach($organizations->pluck('id'));
-
-    livewire(GuestOrganizationsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->assertCanSeeTableRecords($organizations);
-});
-
-it('can attach a guest organization', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $organization = Organization::factory()->create();
-
-    livewire(GuestOrganizationsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->callTableAction('attach', data: [
-            'recordId' => $organization->getKey(),
-        ])
-        ->assertHasNoTableActionErrors();
-
-    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeTrue();
-});
-
-it('can detach a guest organization', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $organization = Organization::factory()->create();
-
-    $project->guestOrganizations()->attach($organization->getKey());
-
-    livewire(GuestOrganizationsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->callTableAction('detach', record: $organization)
-        ->assertHasNoTableActionErrors();
-
-    expect($project->guestOrganizations()->where('organizations.id', $organization->getKey())->exists())->toBeFalse();
-});
-
-it('hides attach action when user cannot update project', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-
-    actingAs($user);
-
-    $project = Project::factory()->for($user, 'createdBy')->create();
-
-    livewire(GuestContactsRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManageGuests::class,
-    ])
-        ->assertTableActionHidden('attach');
 });

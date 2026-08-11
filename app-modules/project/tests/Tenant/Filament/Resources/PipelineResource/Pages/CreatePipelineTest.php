@@ -59,8 +59,7 @@ it('can render with proper permission.', function () {
 
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.create');
+    $user->givePermissionTo('project.*.update');
     $user->refresh();
 
     livewire(CreatePipeline::class, ['parentRecord' => $project])

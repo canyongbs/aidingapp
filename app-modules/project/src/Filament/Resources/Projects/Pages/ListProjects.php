@@ -39,12 +39,13 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
+use App\Features\ProjectArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
+use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -106,6 +107,7 @@ class ListProjects extends ListRecords
                     ->view('project::filament.tables.columns.project.progress'),
             ])
             ->modifyQueryUsing(function (Builder $query, ListRecords $livewire): Builder {
+                /** @var Builder<Project> $query */
                 $query
                     ->with(['managerUsers.media', 'managerDepartments.users.media', 'department'])
                     ->tap(new WithProgressCounts());
@@ -189,14 +191,23 @@ class ListProjects extends ListRecords
                     ->preload()
                     ->label('Department'),
             ])
+            ->recordUrl(fn (Project $record): ?string => ProjectResource::can('view', $record)
+                ? ProjectResource::getUrl('view', ['record' => $record])
+                : null)
             ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
+                ArchiveAction::make()
+                    ->icon('heroicon-m-archive-box')
+                    ->visible(fn (): bool => ProjectArchivingFeature::active())
+                    ->authorize('archive')
+                    ->successRedirectUrl(null),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                    ProjectArchivingFeature::active()
+                        ? ArchiveBulkAction::make()
+                            ->authorizeIndividualRecords('delete')
+                        : DeleteBulkAction::make()
+                            ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }
