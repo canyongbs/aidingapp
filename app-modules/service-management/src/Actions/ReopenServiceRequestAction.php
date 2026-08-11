@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
 
 class ReopenServiceRequestAction
 {
@@ -53,6 +52,8 @@ class ReopenServiceRequestAction
         $openStatus = ServiceRequestStatus::query()
             ->where('classification', SystemServiceRequestClassification::Open)
             ->orderBy('sort')
+            ->orderBy('created_at')
+            ->orderBy('id')
             ->first();
 
         if (! $openStatus) {
@@ -62,7 +63,6 @@ class ReopenServiceRequestAction
         }
 
         $serviceRequest->status()->associate($openStatus);
-        $serviceRequest->status_updated_at = CarbonImmutable::now();
         $serviceRequest->save();
     }
 }

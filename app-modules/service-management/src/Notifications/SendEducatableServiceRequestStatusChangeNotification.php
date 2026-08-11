@@ -63,7 +63,9 @@ class SendEducatableServiceRequestStatusChangeNotification extends Notification 
     public function __construct(
         protected ServiceRequest $serviceRequest,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    ) {}
+    ) {
+        $this->afterCommit = true;
+    }
 
     /**
      * @return array<int, string>

@@ -42,15 +42,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Illuminate\Support\Facades\Exceptions;
 
 it('reopens a closed service request to the first open status ordered by sort', function () {
+    // A system-protected 'New' status (Open, sort 0) is seeded for every tenant, so use a lower sort to be unambiguously first.
+    $expectedOpenStatus = ServiceRequestStatus::factory()->open()->create(['sort' => -1]);
+
     ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
         'sort' => 999,
     ]);
-
-    $expectedFirstOpenStatus = ServiceRequestStatus::query()
-        ->where('classification', SystemServiceRequestClassification::Open)
-        ->orderBy('sort')
-        ->firstOrFail();
 
     $closedStatus = ServiceRequestStatus::factory()->closed()->create();
 
@@ -60,7 +58,7 @@ it('reopens a closed service request to the first open status ordered by sort', 
 
     $reopened = $serviceRequest->fresh();
 
-    expect($reopened->status_id)->toBe($expectedFirstOpenStatus->getKey())
+    expect($reopened->status_id)->toBe($expectedOpenStatus->getKey())
         ->and($reopened->status->classification)->toBe(SystemServiceRequestClassification::Open);
 });
 

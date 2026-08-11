@@ -364,7 +364,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 return;
             }
 
-            // Create SR Update
             $serviceRequestUpdate = $serviceRequest->serviceRequestUpdates()->create([
                 'update' => $parser->getMessageBody('text') ?: $parser->getMessageBody('html'),
                 'internal' => false,
@@ -372,7 +371,6 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
 
-            // Reopen the service request if it was closed when this reply arrived.
             app(ReopenServiceRequestAction::class)->execute($serviceRequest);
 
             foreach ($parser->getAttachments() as $attachment) {
