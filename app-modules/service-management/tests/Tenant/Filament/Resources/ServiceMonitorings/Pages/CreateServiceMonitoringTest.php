@@ -233,10 +233,11 @@ test('creating a confidential service monitor persists the granted users, depart
 
     $grantedUser = User::factory()->create();
     $grantedDepartment = Department::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
 
     livewire(CreateServiceMonitoring::class)
         ->fillForm([
-            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            ...$request,
             'is_confidential' => true,
             'confidentialUsers' => [$grantedUser->getKey()],
             'confidentialDepartments' => [$grantedDepartment->getKey()],
@@ -244,9 +245,13 @@ test('creating a confidential service monitor persists the granted users, depart
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $serviceMonitoringTarget = ServiceMonitoringTarget::latest('created_at')->first();
+    assertDatabaseHas(ServiceMonitoringTarget::class, [
+        'name' => $request['name'],
+        'is_confidential' => true,
+    ]);
 
-    expect($serviceMonitoringTarget->is_confidential)->toBeTrue();
+    $serviceMonitoringTarget = ServiceMonitoringTarget::where('name', $request['name'])->firstOrFail();
+
     expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
     expect($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1);
 });

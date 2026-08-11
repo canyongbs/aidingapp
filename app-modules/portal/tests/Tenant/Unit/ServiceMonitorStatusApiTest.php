@@ -87,9 +87,8 @@ test('excludes confidential service monitoring targets unless the contact is gra
 
     ServiceMonitoringTarget::factory()->create(['name' => 'Public Monitor']);
 
-    $confidentialTarget = ServiceMonitoringTarget::factory()->create([
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create([
         'name' => 'Confidential Monitor',
-        'is_confidential' => true,
     ]);
 
     $url = URL::route(name: 'api.portal.status', absolute: false);

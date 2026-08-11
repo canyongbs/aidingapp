@@ -149,8 +149,9 @@ test('a confidential service monitoring is only visible to its creator, granted 
     $user->givePermissionTo('service_monitoring.*.view');
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->confidential()
         ->for($creator, 'createdBy')
-        ->create(['is_confidential' => true]);
+        ->create();
 
     actingAs($user);
 

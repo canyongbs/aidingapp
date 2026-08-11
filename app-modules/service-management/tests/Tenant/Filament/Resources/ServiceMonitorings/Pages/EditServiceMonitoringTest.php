@@ -292,7 +292,7 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
 test('turning off confidentiality clears previously granted users, departments, and contacts', function () {
     asSuperAdmin();
 
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => true]);
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
     $grantedUser = User::factory()->create();
 
     livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
