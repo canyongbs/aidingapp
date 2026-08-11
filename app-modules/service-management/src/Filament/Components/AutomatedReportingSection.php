@@ -48,7 +48,7 @@ use Filament\Schemas\Components\Utilities\Get;
 
 class AutomatedReportingSection
 {
-  public static function make(): Section
+    public static function make(): Section
     {
         return Section::make('Automated Reporting')
             ->schema([
