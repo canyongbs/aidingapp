@@ -209,7 +209,7 @@ it('hides the pipeline resource sub navigation', function () {
     expect(PipelineResource::getRecordSubNavigation($component))->toBe([]);
 });
 
-it('hides the table view and edit actions without pipeline view and update permissions', function () {
+it('shows the table view action but hides the edit action without update permission on the pipeline\'s project', function () {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -227,38 +227,6 @@ it('hides the table view and edit actions without pipeline view and update permi
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
     $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    expect($user->can('view', $pipeline))->toBeFalse()
-        ->and($user->can('update', $pipeline))->toBeFalse();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-        'parentRecord' => $project,
-    ])
-        ->assertTableActionHidden('view', $entry)
-        ->assertTableActionHidden('edit', $entry);
-});
-
-it('shows the table view action but hides the edit action with only pipeline view permission', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $entry = PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-    ]);
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->givePermissionTo('pipeline.*.view');
     $user->refresh();
 
     expect($user->can('view', $pipeline))->toBeTrue()
@@ -270,4 +238,38 @@ it('shows the table view action but hides the edit action with only pipeline vie
     ])
         ->assertTableActionVisible('view', $entry)
         ->assertTableActionHidden('edit', $entry);
+});
+
+it('shows the table view and edit actions with update permission on the pipeline\'s project', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($user);
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->refresh();
+
+    expect($user->can('view', $pipeline))->toBeTrue()
+        ->and($user->can('update', $pipeline))->toBeTrue();
+
+    livewire(ManagePipelineEntries::class, [
+        'record' => $pipeline->getRouteKey(),
+        'parentRecord' => $project,
+    ])
+        ->assertTableActionVisible('view', $entry)
+        ->assertTableActionVisible('edit', $entry);
 });
