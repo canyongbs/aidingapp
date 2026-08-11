@@ -51,6 +51,11 @@ class StoreServiceRequestUpdateController extends Controller
     public function __invoke(StoreServiceRequestUpdateRequest $request): JsonResponse
     {
         return DB::transaction(function () use ($request) {
+            $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
+
+            // Reopen the service request if it was closed when this update was submitted.
+            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
+
             $serviceRequestUpdate = new ServiceRequestUpdate();
             $serviceRequestUpdate->service_request_id = $request->serviceRequestId;
             $serviceRequestUpdate->update = $request->description;
@@ -63,11 +68,6 @@ class StoreServiceRequestUpdateController extends Controller
             if (! empty($request->input('files'))) {
                 $this->processFileUploads($request->input('files'), $serviceRequestUpdate);
             }
-
-            $serviceRequest = ServiceRequest::findOrFail($request->serviceRequestId);
-
-            // Reopen the service request if it was closed when this update was submitted.
-            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
 
             $serviceRequestUpdates = $serviceRequest
                 ->serviceRequestUpdates()

@@ -364,14 +364,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 return;
             }
 
+            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
+
             $serviceRequestUpdate = $serviceRequest->serviceRequestUpdates()->create([
                 'update' => $parser->getMessageBody('text') ?: $parser->getMessageBody('html'),
                 'internal' => false,
                 'created_by_id' => $serviceRequest->respondent->getKey(),
                 'created_by_type' => $serviceRequest->respondent->getMorphClass(),
             ]);
-
-            app(ReopenServiceRequestAction::class)->execute($serviceRequest);
 
             foreach ($parser->getAttachments() as $attachment) {
                 try {
