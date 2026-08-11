@@ -111,7 +111,8 @@ class ProjectMilestone extends Model implements Auditable
                 'project_milestone_id',
                 'pipeline_entry_id',
             )
-            ->using(PipelineEntryMilestone::class);
+            ->using(PipelineEntryMilestone::class)
+            ->withTimestamps();
     }
 
     public function reevaluateArchivedState(): void
