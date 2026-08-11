@@ -38,6 +38,7 @@ namespace AidingApp\Report\Filament\Exports;
 
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -54,8 +55,18 @@ class ServiceMonitoringTargetExporter extends Exporter
      */
     public static function modifyQuery(Builder $query): Builder
     {
-        // The export re-runs this query in a queued job with no authenticated user, so the confidentiality scope must be bypassed
-        return $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class);
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return $query;
+        }
+
+        // Exports run in a queued job without an authenticated user, so the exporting user's own
+        // visibility is baked into the query here, and the live scope is removed so it is not
+        // reapplied later with no authenticated user once the job resumes from serialization
+        $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class);
+
+        (new ServiceMonitoringTargetVisibilityScope())->apply($query, $query->getModel());
+
+        return $query;
     }
 
     public static function getColumns(): array

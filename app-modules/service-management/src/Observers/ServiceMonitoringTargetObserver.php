@@ -37,16 +37,25 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 
 class ServiceMonitoringTargetObserver
 {
     public function creating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return;
+        }
+
         $this->assignCreatedByIfBlank($serviceMonitoringTarget);
     }
 
     public function updating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return;
+        }
+
         if ($serviceMonitoringTarget->isDirty('is_confidential') && $serviceMonitoringTarget->is_confidential) {
             $this->assignCreatedByIfBlank($serviceMonitoringTarget);
         }

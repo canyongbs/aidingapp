@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Page
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Select;
@@ -98,7 +99,8 @@ class CreateServiceMonitoring extends CreateRecord
                             ->default(false),
                     ])
                     ->columns(2),
-                ConfidentialitySection::make(),
+                // The confidentiality columns may not exist yet for tenants whose migration has not run
+                ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make()] : []),
             ]);
     }
 }

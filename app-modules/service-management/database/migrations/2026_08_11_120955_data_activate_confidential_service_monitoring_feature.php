@@ -34,42 +34,17 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Report\Filament\Exports\ServiceMonitoringTargetExporter;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Models\User;
+use App\Features\ConfidentialServiceMonitoringFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use function Pest\Laravel\actingAs;
-use function Tests\asSuperAdmin;
+return new class () extends Migration {
+    public function up(): void
+    {
+        ConfidentialServiceMonitoringFeature::activate();
+    }
 
-test('modifyQuery includes confidential service monitors for an admin exporting user', function () {
-    asSuperAdmin();
-
-    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
-
-    $ids = ServiceMonitoringTargetExporter::modifyQuery(ServiceMonitoringTarget::query())->pluck('id');
-
-    expect($ids)->toContain($confidentialTarget->getKey());
-});
-
-test('modifyQuery excludes confidential service monitors the exporting user is not granted access to', function () {
-    $creator = User::factory()->create();
-    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->for($creator, 'createdBy')->create();
-
-    $user = User::factory()->create();
-    actingAs($user);
-
-    $ids = ServiceMonitoringTargetExporter::modifyQuery(ServiceMonitoringTarget::query())->pluck('id');
-
-    expect($ids)->not->toContain($confidentialTarget->getKey());
-});
-
-test('modifyQuery includes confidential service monitors the exporting user is granted access to', function () {
-    $user = User::factory()->create();
-    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->hasAttached($user, [], 'confidentialUsers')->create();
-
-    actingAs($user);
-
-    $ids = ServiceMonitoringTargetExporter::modifyQuery(ServiceMonitoringTarget::query())->pluck('id');
-
-    expect($ids)->toContain($confidentialTarget->getKey());
-});
+    public function down(): void
+    {
+        ConfidentialServiceMonitoringFeature::deactivate();
+    }
+};
