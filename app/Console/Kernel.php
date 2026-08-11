@@ -162,6 +162,7 @@ class Kernel extends ConsoleKernel
                             }
                         });
                     })
+                        ->weekly()
                         ->mondays();
 
                     $schedule->call(function () use ($tenant) {
