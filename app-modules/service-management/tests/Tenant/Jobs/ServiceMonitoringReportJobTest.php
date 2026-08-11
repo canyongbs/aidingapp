@@ -35,10 +35,10 @@
 */
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use App\Features\ServiceMonitoringReportFeature;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportNotifyJob;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringReportFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
