@@ -49,7 +49,6 @@ use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification as BaseNotification;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
@@ -84,7 +83,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
 
     public function toMail(User|Contact $notifiable): MailMessage
     {
-        [$reportPeriodStart, $reportPeriodEnd] = $this->getReportPeriod();
+        [$reportPeriodStart, $reportPeriodEnd, $timezone] = $this->getReportPeriod();
         $stats = $this->getStatistics();
 
         return MailMessage::make()
@@ -93,6 +92,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
                 'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
                 'reportPeriodStart' => $reportPeriodStart->format('M j, Y g:i a (T)'),
                 'reportPeriodEnd' => $reportPeriodEnd->format('M j, Y g:i a (T)'),
+                'timezone' => $timezone,
                 'uptimePercentage' => $stats['uptime_percentage'],
                 'successfulChecks' => $stats['successful_checks'],
                 'failedChecks' => $stats['failed_checks'],
@@ -130,24 +130,25 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         }
 
         $timezone = Tenant::current()?->getTimezone() ?? config('app.timezone');
-        $now = now()->setTimezone($timezone);
 
         $reportFrequency = $this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly;
 
         $this->reportPeriod = match ($reportFrequency) {
             ServiceMonitoringReportFrequency::Daily => [
-                $now->copy()->subDay()->startOfDay(),
-                $now->copy()->subDay()->endOfDay(),
+                now()->copy()->subDay()->startOfDay()->setTimezone($timezone),
+                now()->copy()->subDay()->endOfDay()->setTimezone($timezone),
             ],
             ServiceMonitoringReportFrequency::Weekly => [
-                $now->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
-                $now->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
+                now()->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay()->setTimezone($timezone),
+                now()->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay()->setTimezone($timezone),
             ],
             ServiceMonitoringReportFrequency::Monthly => [
-                $now->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-                $now->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
+                now()->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay()->setTimezone($timezone),
+                now()->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay()->setTimezone($timezone),
             ],
         };
+
+        $this->reportPeriod[] = $timezone;
 
         return $this->reportPeriod;
     }
@@ -161,17 +162,18 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
             return $this->statistics;
         }
 
-        [$reportPeriodStart, $reportPeriodEnd] = $this->getReportPeriod();
+        [$reportPeriodStart, $reportPeriodEnd, $timezone] = $this->getReportPeriod();
 
-        $result = DB::table('historical_service_monitorings')
-            ->where('service_monitoring_target_id', $this->serviceMonitoringTarget->id)
-            ->whereBetween('created_at', [$reportPeriodStart, $reportPeriodEnd])
+        $result = $this->serviceMonitoringTarget
+            ->histories()
+            ->whereBetween('created_at', [$reportPeriodStart->copy()->utc(), $reportPeriodEnd->copy()->utc()])
             ->selectRaw('
                 COUNT(*) as total_checks,
                 SUM(CASE WHEN succeeded = true THEN 1 ELSE 0 END) as successful_checks,
                 SUM(CASE WHEN succeeded = false THEN 1 ELSE 0 END) as failed_checks,
                 AVG(response_time) as average_response_time
             ')
+            ->toBase()
             ->first();
 
         $totalChecks = (int) ($result->total_checks ?? 0);
@@ -218,6 +220,6 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
             return 'No incidents were detected during this reporting period.';
         }
 
-        return $incidentCount . str('incident')->plural($incidentCount) . ($incidentCount === 1 ? ' was' : ' were') . ' detected during this reporting period.';
+        return $incidentCount . str('incident')->plural($incidentCount) . ' ' . ($incidentCount === 1 ? ' was' : ' were') . ' detected during this reporting period.';
     }
 }

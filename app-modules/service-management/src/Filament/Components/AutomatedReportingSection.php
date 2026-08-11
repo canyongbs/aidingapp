@@ -48,13 +48,13 @@ use Filament\Schemas\Components\Utilities\Get;
 
 class AutomatedReportingSection
 {
-    public static function make(bool $isCreatePage = false): Section
+  public static function make(): Section
     {
         return Section::make('Automated Reporting')
             ->schema([
                 Toggle::make('is_reporting_active')
                     ->label('Activate Reporting')
-                    ->default($isCreatePage ? false : null)
+                    ->default(false)
                     ->live()
                     ->columnSpanFull(),
                 Radio::make('report_frequency')
@@ -64,10 +64,10 @@ class AutomatedReportingSection
                     ->required(fn (Get $get) => $get('is_reporting_active'))
                     ->visible(fn (Get $get) => $get('is_reporting_active')),
                 Hidden::make('is_reported_via_email')
-                    ->default($isCreatePage ? false : null),
+                    ->default(false),
                 Hidden::make('is_reported_via_database')
-                    ->default($isCreatePage ? false : null),
-                ReportChannelCheckboxList::make($isCreatePage),
+                    ->default(false),
+                ReportChannelCheckboxList::make(),
                 Section::make('Recipients')
                     ->schema([
                         UserSelect::make('report_users')

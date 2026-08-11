@@ -100,7 +100,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->default(false),
                     ])
                     ->columns(2),
-                AutomatedReportingSection::make(true),
+                AutomatedReportingSection::make(),
                 // The confidentiality columns may not exist yet for tenants whose migration has not run
                 ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make(
                     notifiedUsersField: 'user',

@@ -62,7 +62,9 @@ Total Downtime: {{ $totalDowntime }}
 ## Incidents
 {{ $incidentSummary }}
 
-Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->format('M j, Y g:i a (T)') }}
+Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->timezone($timezone)->format('M j, Y g:i a (T)') }}
+
+You are receiving this email because you are subscribed to {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} reports for this service monitor.
 
     {{-- Footer --}}
     <x-slot:footer>

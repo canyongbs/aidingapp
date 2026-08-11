@@ -43,7 +43,7 @@ use Filament\Schemas\Components\Utilities\Set;
 
 class ReportChannelCheckboxList
 {
-    public static function make(bool $isCreatePage = false): CheckboxList
+    public static function make(): CheckboxList
     {
         $checkboxList = CheckboxList::make('report_channels')
             ->label('Channels')
@@ -60,15 +60,19 @@ class ReportChannelCheckboxList
             ->dehydrated(false)
             ->visible(fn (Get $get) => $get('is_reporting_active'));
 
-        if (! $isCreatePage) {
-            $checkboxList->afterStateHydrated(fn (Set $set, ServiceMonitoringTarget $record) => $set(
+        $checkboxList->afterStateHydrated(function (Set $set, ?ServiceMonitoringTarget $record = null): void {
+            if (! filled($record)) {
+                return;
+            }
+
+            $set(
                 'report_channels',
                 [
                     ...($record->is_reported_via_email ? ['is_reported_via_email'] : []),
                     ...($record->is_reported_via_database ? ['is_reported_via_database'] : []),
                 ]
-            ));
-        }
+            );
+        });
 
         return $checkboxList;
     }
