@@ -64,14 +64,14 @@
         $dueParts = [];
 
         if ($dueDays > 0) {
-            $dueParts[] = sprintf('%d %s', $dueDays, Str::plural('Day', $dueDays));
+            $dueParts[] = sprintf("%d %s", $dueDays, Str::plural("Day", $dueDays));
         }
 
         if ($dueHours > 0) {
-            $dueParts[] = sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+            $dueParts[] = sprintf("%d %s", $dueHours, Str::plural("Hour", $dueHours));
         }
 
-        $dueLabel = filled($dueParts) ? implode(' ', $dueParts) : sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+        $dueLabel = filled($dueParts) ? implode(" ", $dueParts) : sprintf("%d %s", $dueHours, Str::plural("Hour", $dueHours));
     }
 
     $dueTooltip = $entry->due?->format("M j, Y g:i A");
