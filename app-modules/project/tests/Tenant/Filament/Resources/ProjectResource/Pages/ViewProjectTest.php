@@ -357,6 +357,33 @@ it('rejects selecting a pipeline that belongs to another project', function () {
         ->assertSet('selectedPipelineId', $pipeline->getKey());
 });
 
+it('rejects selecting an archived pipeline when the archiving feature is active', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $archivedPipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $archivedPipeline->archive();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction('selectPipeline', data: [
+            'pipeline_id' => $archivedPipeline->getKey(),
+        ])
+        ->assertNotified('Invalid pipeline selection')
+        ->assertSet('selectedPipelineId', $pipeline->getKey());
+});
+
 it('can create a pipeline through the create pipeline action', function () {
     $undoRepeaterFake = Repeater::fake();
 

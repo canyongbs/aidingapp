@@ -42,6 +42,7 @@ use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 trait HasPipelineSwitcherAction
@@ -69,6 +70,10 @@ trait HasPipelineSwitcherAction
                     blank($pipelineId) ||
                     ! Pipeline::query()
                         ->where('project_id', $this->getPipelineSwitcherProjectId())
+                        ->when(
+                            PipelineArchivingFeature::active(),
+                            fn (Builder $query): Builder => $query->withoutArchived(),
+                        )
                         ->whereKey($pipelineId)
                         ->exists()
                 ) {
