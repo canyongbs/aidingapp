@@ -40,6 +40,7 @@ use AidingApp\Project\Models\Project;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
+use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
 class ProjectPolicy
@@ -87,7 +88,7 @@ class ProjectPolicy
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
                 return Response::deny("You don't have permission to update this project because you're not manager, or creator of this project.");
             }
         }
@@ -106,7 +107,7 @@ class ProjectPolicy
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
                 return Response::deny("You don't have permission to delete this project because you're not manager, or creator of this project.");
             }
         }
@@ -133,7 +134,7 @@ class ProjectPolicy
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
                 return Response::deny("You don't have permission to restore this project because you're not manager, or creator of this project.");
             }
         }
@@ -160,7 +161,7 @@ class ProjectPolicy
             $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
             $userExists = $project->managerUsers()->where('users.id', auth()->user()->getKey())->exists();
 
-            if (! $departmentExists && ! $userExists && ! $project->createdBy->is(auth()->user())) {
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is(auth()->user())) {
                 return Response::deny("You don't have permission to permanently delete this project because you're not manager, or creator of this project.");
             }
         }
@@ -176,6 +177,26 @@ class ProjectPolicy
         return $authenticatable->canOrElse(
             abilities: 'project.*.force-delete',
             denyResponse: 'You do not have permission to permanently delete any project.'
+        );
+    }
+
+    public function archive(Authenticatable $authenticatable, Project $project): Response
+    {
+        /** @var User $authenticatable */
+        if (! $authenticatable->isSuperAdmin()) {
+            $department = $authenticatable->department;
+
+            $departmentExists = $project->managerDepartments()->where('departments.id', $department?->getKey())->exists();
+            $userExists = $project->managerUsers()->where('users.id', $authenticatable->getKey())->exists();
+
+            if (! $departmentExists && ! $userExists && ! $project->createdBy?->is($authenticatable)) {
+                return Response::deny("You don't have permission to archive this project because you're not manager, or creator of this project.");
+            }
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: 'project.*.delete',
+            denyResponse: 'You do not have permission to archive this project.'
         );
     }
 

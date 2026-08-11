@@ -100,6 +100,7 @@ class ServiceRequestType extends BaseModel implements Auditable
         'max_simultaneous_chats',
         'email_automatic_creation_contact_create_condition',
         'is_visibility_restricted',
+        'automated_status_id',
     ];
 
     public function serviceRequests(): HasManyThrough
@@ -194,6 +195,14 @@ class ServiceRequestType extends BaseModel implements Auditable
             foreignKey: 'assignment_type_individual_id',
             relation: 'serviceRequestTypeIndividualAssignment',
         );
+    }
+
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
+    public function automatedStatus(): BelongsTo
+    {
+        return $this->belongsTo(ServiceRequestStatus::class);
     }
 
     /**
