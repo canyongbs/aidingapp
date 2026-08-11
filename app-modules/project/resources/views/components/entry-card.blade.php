@@ -31,23 +31,96 @@
     
     </COPYRIGHT>
 --}}
+@use('App\Models\User')
+@use('AidingApp\Contact\Models\Contact')
+@use('Illuminate\Database\Eloquent\Relations\Relation')
+@use('Illuminate\Support\Str')
+@php
+    $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
+
+    $assignedTo = $entry->assignedTo;
+
+    $assignedType = match (true) {
+        $assignedModelClass === User::class => 'User',
+        $assignedModelClass === Contact::class => 'Contact',
+        default => null,
+    };
+
+    $assignedName = match (true) {
+        blank($assignedTo) => 'None',
+        $assignedTo instanceof Contact => $assignedTo->full_name ?? 'None',
+        default => $assignedTo->name ?? 'None',
+    };
+
+    $assignedLabel = filled($assignedType) && $assignedName !== 'None' ? sprintf('%s (%s)', $assignedName, $assignedType) : $assignedName;
+
+    $dueLabel = null;
+
+    if ($entry->due) {
+        $dueInterval = now()->diff($entry->due);
+        $dueDays = (int) $dueInterval->days;
+        $dueHours = (int) $dueInterval->h;
+
+        $dueParts = [];
+
+        if ($dueDays > 0) {
+            $dueParts[] = sprintf('%d %s', $dueDays, Str::plural('Day', $dueDays));
+        }
+
+        if ($dueHours > 0) {
+            $dueParts[] = sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+        }
+
+        $dueLabel = filled($dueParts) ? implode(' ', $dueParts) : sprintf('%d %s', $dueHours, Str::plural('Hour', $dueHours));
+    }
+
+    $dueTooltip = $entry->due?->format('M j, Y g:i A');
+@endphp
+
 <div
-    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-7 shadow dark:bg-gray-800"
+    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
 >
-    <div class="flex items-center justify-between">
+    <div class="flex items-start justify-between gap-2">
         <div class="text-base font-semibold text-gray-900 dark:text-white">
-            <small class="capitalize">
-                {{ $entry->name }}
-            </small>
-            <br />
+            {{ $entry->name }}
         </div>
         <x-filament::icon-button
             class="fi-primary-color"
             wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
             icon="heroicon-m-arrow-top-right-on-square"
         />
+    </div>
+
+    <hr class="my-3 border-gray-200 dark:border-gray-700" />
+
+    <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+        <div>
+            <span class="font-bold">Milestones:</span>
+            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
+        </div>
+        <div>
+            <span class="font-bold">Assets:</span>
+            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}
+        </div>
+        <div>
+            <span class="font-bold">Service Requests:</span>
+            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : 'None' }}
+        </div>
+    </div>
+
+    <hr class="my-3 border-gray-200 dark:border-gray-700" />
+
+    <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+        <div>
+            <span class="font-bold">Assigned:</span>
+            {{ $assignedLabel }}
+        </div>
+        <div title="{{ $dueTooltip ?? '' }}">
+            <span class="font-bold">Due:</span>
+            {{ $dueLabel ? $dueLabel : 'None' }}
+        </div>
     </div>
 </div>

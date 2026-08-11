@@ -79,6 +79,8 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          * @var Collection<int, PipelineEntry> $entries
          */
         $entries = $this->pipeline->entries()
+            ->with(['assignedTo', 'pipelineStage'])
+            ->withCount(['milestones', 'assets', 'serviceRequests'])
             ->oldest()
             ->get();
 
@@ -183,9 +185,12 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
     public function render(): View
     {
+        $pipelineEntries = $this->getPipelineEntries();
+
         return view('project::livewire.pipeline-entry-kanban', [
-            'pipelineEntries' => $this->getPipelineEntries(),
+            'pipelineEntries' => $pipelineEntries,
             'stages' => $this->getStages(),
+            'stageCounts' => $pipelineEntries->map->count(),
         ]);
     }
 

@@ -99,7 +99,7 @@ class PipelineEntry extends Model implements Auditable
      */
     public function assignedTo(): MorphTo
     {
-        return $this->morphTo('assigned_to', 'assigned_to_type', 'assigned_to_id');
+        return $this->morphTo('assignedTo', 'assigned_to_type', 'assigned_to_id');
     }
 
     /**
