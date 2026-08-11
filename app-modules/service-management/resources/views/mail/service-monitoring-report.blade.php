@@ -45,18 +45,18 @@
 Your {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
 
 ## Service Monitor
-{{ $serviceMonitoringTarget->name }}
+{{ $serviceMonitoringTarget->name }}<br>
 {{ $serviceMonitoringTarget->domain }}
 
 ## Reporting Period
 {{ $reportPeriodStart }} through {{ $reportPeriodEnd }}
 
 ## Status Summary
-Current Status: {{ is_null($serviceMonitoringTarget->latestHistory?->succeeded) ? 'N/A' : ($serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed') }}
-Uptime: {{ $uptimePercentage }}
-Successful Checks: {{ $successfulChecks }}
-Failed Checks: {{ $failedChecks }}
-Average Response Time: {{ $averageResponseTime }}
+Current Status: {{ is_null($serviceMonitoringTarget->latestHistory?->succeeded) ? 'N/A' : ($serviceMonitoringTarget->latestHistory->succeeded ? 'Successful' : 'Failed') }}<br>
+Uptime: {{ $uptimePercentage }}<br>
+Successful Checks: {{ $successfulChecks }}<br>
+Failed Checks: {{ $failedChecks }}<br>
+Average Response Time: {{ $averageResponseTime }}<br>
 Total Downtime: {{ $totalDowntime }}
 
 ## Incidents
