@@ -88,6 +88,31 @@ it('archives the checked pipeline through the switcher footer archive action', f
         ->and($other->refresh()->isArchived())->toBeFalse();
 });
 
+it('keeps the switcher modal open after archiving when other pipelines remain', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->mountAction('selectPipeline')
+        ->setActionData(['pipeline_id' => $active->getKey()])
+        ->mountAction('archivePipeline')
+        ->callMountedAction()
+        ->assertActionMounted('selectPipeline');
+});
+
+it('closes the switcher modal after archiving the last remaining pipeline', function () {
+    $project = Project::factory()->create();
+    $only = Pipeline::factory()->for($project)->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->mountAction('selectPipeline')
+        ->setActionData(['pipeline_id' => $only->getKey()])
+        ->mountAction('archivePipeline')
+        ->callMountedAction()
+        ->assertActionNotMounted();
+});
+
 it('re-selects the oldest remaining pipeline after archiving the active one', function () {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();

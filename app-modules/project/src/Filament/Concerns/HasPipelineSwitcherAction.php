@@ -164,6 +164,7 @@ trait HasPipelineSwitcherAction
             ->modalHeading('Archive Pipeline')
             ->modalDescription('Are you sure you want to archive this pipeline? All related milestones and tasks will also be archived.')
             ->modalSubmitActionLabel('Archive')
+            ->cancelParentActions(fn (): bool => ! $this->switcherHasSelectablePipelines())
             ->action(function (): void {
                 $pipelineId = data_get($this->mountedActions, '0.data.pipeline_id');
 
@@ -181,6 +182,14 @@ trait HasPipelineSwitcherAction
             ->first();
 
         return $pipeline !== null && (bool) auth()->user()?->can('delete', $pipeline);
+    }
+
+    protected function switcherHasSelectablePipelines(): bool
+    {
+        return Pipeline::query()
+            ->where('project_id', $this->getPipelineSwitcherProjectId())
+            ->withoutArchived()
+            ->exists();
     }
 
     abstract protected function getPipelineSwitcherProjectId(): ?string;
