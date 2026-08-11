@@ -46,6 +46,7 @@ use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryMilestoneFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
@@ -154,9 +155,11 @@ class PipelineEntryForm
                 ->dehydrated(false)
                 ->afterStateUpdated(function (?string $state, Set $set) {
                     if ($state === 'none') {
-                        $set('milestones', []);
+                        $defaultMilestone = PipelineEntryMilestoneFeature::active() ? null : [];
+                        $set('milestones', $defaultMilestone);
                     }
                 }),
+            //TODO: PipelineEntryMilestoneFeature clean up: Please remove extra milestoles ModalTableSelect from line 163 to 179.
             ModalTableSelect::make('milestones')
                 ->label('Related Milestones')
                 ->relationship(
@@ -172,6 +175,23 @@ class PipelineEntryForm
                 ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->multiple()
                 ->dehydrated()
+                ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
+                ->dehydratedWhenHidden(),
+            ModalTableSelect::make('milestone')
+                ->label('Related Milestone')
+                ->relationship(
+                    name: 'milestone',
+                    titleAttribute: 'title',
+                    modifyQueryUsing: $pipeline
+                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        : null,
+                )
+                ->tableConfiguration(PipelineEntryMilestonesTable::class)
+                ->tableArguments(['projectId' => $pipeline?->project_id])
+                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
+                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
+                ->dehydrated()
+                ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
                 ->dehydratedWhenHidden(),
 
             ToggleButtons::make('assets_type')

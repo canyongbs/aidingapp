@@ -42,6 +42,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Features\PipelineArchivingFeature;
+use App\Features\PipelineEntryMilestoneFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -179,7 +180,9 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 $entry->saveOrFail();
 
-                $entry->milestones()->sync($data['milestones'] ?? []);
+                if (! PipelineEntryMilestoneFeature::active()) {
+                    $entry->milestones()->sync($data['milestones'] ?? []);
+                }
                 $entry->assets()->sync($data['assets'] ?? []);
                 $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
 

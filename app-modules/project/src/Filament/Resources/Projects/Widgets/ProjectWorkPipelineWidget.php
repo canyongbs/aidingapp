@@ -46,8 +46,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use App\Features\PipelineArchivingFeature;
+use App\Features\PipelineEntryMilestoneFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
+use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
@@ -122,7 +124,12 @@ class ProjectWorkPipelineWidget extends TableWidget
                         PipelineArchivingFeature::active(),
                         fn (Builder $query): Builder => $query->withoutArchived(),
                     )
-                    ->with(['milestones', 'assets', 'serviceRequests', 'pipelineStage.pipeline.project']);
+                    ->with([
+                        'assets',
+                        'serviceRequests',
+                        'pipelineStage.pipeline.project',
+                        ...(PipelineEntryMilestoneFeature::active() ? ['milestone'] : ['milestones']),
+                    ]);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
             ->columns([
@@ -134,9 +141,15 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record): void {
                         $this->openPipelineEntry($record);
                     }),
+                // TODO:: PipelineEntryMilestoneFeature clean up: Please remove the entire ViewColumn below, along with its corresponding Blade file.
                 ViewColumn::make('milestones')
                     ->label('Milestones')
+                    ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
                     ->view('project::filament.tables.columns.pipeline-entry.milestones'),
+                TextColumn::make('pipelineStage.name')
+                    ->label('Stage')
+                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
+                    ->placeholder('N/A'),
                 ViewColumn::make('assets')
                     ->label('Assets')
                     ->view('project::filament.tables.columns.pipeline-entry.assets'),
@@ -156,10 +169,38 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->placeholder('N/A'),
             ])
             ->defaultGroup(
-                Group::make('pipelineStage.name')
-                    ->label('Stage')
-                    ->collapsible(),
+                function () {
+                    if (! PipelineEntryMilestoneFeature::active()) {
+                        return Group::make('pipelineStage.name')
+                            ->label('Stage')
+                            ->collapsible();
+                    }
+
+                    return Group::make('milestone.title')
+                        ->label('Milestone')
+                        ->getTitleFromRecordUsing(
+                            fn ($record) => $record->milestone?->title ?? 'Unaffiliated'
+                        )
+                        ->collapsible();
+                }
             )
+            ->recordActions([
+                EditAction::make()
+                    ->slideOver()
+                    ->modalHeading('Edit Pipeline Task')
+                    ->schema($this->entryFormSchema($pipeline))
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+                    ->after(function (PipelineEntry $record, array $data): void {
+                        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+                        if (! PipelineEntryMilestoneFeature::active()) {
+                            $record->milestones()->sync($data['milestones'] ?? []);
+                        }
+                        $record->assets()->sync($data['assets'] ?? []);
+                        $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
+
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
+            ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
                 $pipeline

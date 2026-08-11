@@ -123,6 +123,7 @@ class PipelineEntry extends Model implements Auditable
     }
 
     /**
+     *
      * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
      */
     public function milestones(): BelongsToMany
@@ -158,5 +159,13 @@ class PipelineEntry extends Model implements Auditable
     protected static function booted(): void
     {
         static::archived(fn (PipelineEntry $entry) => $entry->reevaluateLinkedMilestones());
+    }
+    
+    /**
+     * @return BelongsTo<ProjectMilestone, $this>
+     */
+    public function milestone(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id');
     }
 }
