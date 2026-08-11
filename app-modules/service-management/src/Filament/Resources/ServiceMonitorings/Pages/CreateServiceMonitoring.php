@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
@@ -46,8 +47,6 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CreateServiceMonitoring extends CreateRecord
@@ -99,46 +98,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->default(false),
                     ])
                     ->columns(2),
-                Section::make('Confidentiality')
-                    ->schema([
-                        Toggle::make('is_confidential')
-                            ->label('Restrict Visibility')
-                            ->live()
-                            ->helperText('When enabled, only admins, the creator, and the users, departments, and contacts selected below can view this service monitor.')
-                            ->default(false)
-                            ->columnSpanFull()
-                            ->afterStateUpdated(function (bool $state, Set $set): void {
-                                if ($state) {
-                                    return;
-                                }
-
-                                $set('confidentialUsers', []);
-                                $set('confidentialDepartments', []);
-                                $set('confidentialContacts', []);
-                            }),
-                        Select::make('confidentialUsers')
-                            ->relationship('confidentialUsers', 'name')
-                            ->label('Users')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->visible(fn (Get $get): bool => (bool) $get('is_confidential')),
-                        Select::make('confidentialDepartments')
-                            ->relationship('confidentialDepartments', 'name')
-                            ->label('Departments')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->visible(fn (Get $get): bool => (bool) $get('is_confidential')),
-                        Select::make('confidentialContacts')
-                            ->relationship('confidentialContacts', 'full_name')
-                            ->label('Contacts')
-                            ->multiple()
-                            ->preload()
-                            ->searchable()
-                            ->visible(fn (Get $get): bool => (bool) $get('is_confidential')),
-                    ])
-                    ->columns(3),
+                ConfidentialitySection::make(),
             ]);
     }
 }
