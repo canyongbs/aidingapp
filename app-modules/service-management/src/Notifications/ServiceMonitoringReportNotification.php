@@ -130,21 +130,22 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         }
 
         $timezone = Tenant::current()?->getTimezone() ?? config('app.timezone');
+        $now = now()->setTimezone($timezone);
 
         $reportFrequency = $this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly;
 
         $this->reportPeriod = match ($reportFrequency) {
             ServiceMonitoringReportFrequency::Daily => [
-                now()->copy()->subDay()->startOfDay()->setTimezone($timezone),
-                now()->copy()->subDay()->endOfDay()->setTimezone($timezone),
+                $now->copy()->subDay()->startOfDay(),
+                $now->copy()->subDay()->endOfDay(),
             ],
             ServiceMonitoringReportFrequency::Weekly => [
-                now()->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay()->setTimezone($timezone),
-                now()->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay()->setTimezone($timezone),
+                $now->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
+                $now->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
             ],
             ServiceMonitoringReportFrequency::Monthly => [
-                now()->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay()->setTimezone($timezone),
-                now()->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay()->setTimezone($timezone),
+                $now->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
+                $now->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
             ],
         };
 
