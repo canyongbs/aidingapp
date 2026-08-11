@@ -79,10 +79,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'is_confidential',
     ];
 
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
-    ];
-
     /**
      * @return HasMany<HistoricalServiceMonitoring, $this>
      */
@@ -199,6 +195,7 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     protected function casts(): array
     {
         return [
+            'frequency' => ServiceMonitoringFrequency::class,
             'is_notified_via_database' => 'boolean',
             'is_notified_via_email' => 'boolean',
             'is_confidential' => 'boolean',
