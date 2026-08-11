@@ -183,3 +183,20 @@ test('a confidential service monitoring is visible to everyone while the feature
         ->assertCanSeeTableRecords([$confidentialTarget])
         ->assertSuccessful();
 });
+
+// TODO: Cleanup Task (confidential-service-monitoring): delete this test once the flag is removed
+test('the name column hides the lock icon and tooltip while the feature flag is inactive', function () {
+    asSuperAdmin();
+
+    ConfidentialServiceMonitoringFeature::deactivate();
+
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    $column = livewire(ListServiceMonitorings::class)
+        ->instance()
+        ->getTable()
+        ->getColumn('name');
+
+    expect($column->record($confidentialTarget)->getIcon($confidentialTarget->name))->toBeNull();
+    expect($column->getTooltip($confidentialTarget->name))->toBeNull();
+});

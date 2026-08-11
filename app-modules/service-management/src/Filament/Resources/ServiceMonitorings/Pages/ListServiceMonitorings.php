@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Page
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -61,10 +62,10 @@ class ListServiceMonitorings extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable()
-                    ->icon(fn (ServiceMonitoringTarget $record): ?Heroicon => $record->is_confidential ? Heroicon::LockClosed : null)
+                    ->icon(fn (ServiceMonitoringTarget $record): ?Heroicon => (ConfidentialServiceMonitoringFeature::active() && $record->is_confidential) ? Heroicon::LockClosed : null)
                     ->iconColor('gray')
                     ->iconPosition(IconPosition::After)
-                    ->tooltip(fn (ServiceMonitoringTarget $record): ?string => $record->is_confidential ? 'This service monitor is confidential and only visible to admins, its creator, and permitted users, departments, and contacts.' : null),
+                    ->tooltip(fn (ServiceMonitoringTarget $record): ?string => (ConfidentialServiceMonitoringFeature::active() && $record->is_confidential) ? 'This service monitor is confidential and only visible to admins, its creator, and permitted users, departments, and contacts.' : null),
                 TextColumn::make('domain')
                     ->label('URL')
                     ->searchable()
