@@ -50,6 +50,7 @@ trait HasPipelineSwitcherAction
     {
         $action = Action::make('selectPipeline')
             ->label('Select Pipeline')
+            ->slideOver()
             ->modalHeading('Select Pipeline')
             ->modalSubmitActionLabel('Select')
             ->visible(fn (): bool => filled($this->getPipelineSwitcherProjectId()))
