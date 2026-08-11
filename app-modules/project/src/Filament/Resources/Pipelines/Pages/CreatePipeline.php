@@ -39,6 +39,7 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Repeater;
@@ -96,6 +97,11 @@ class CreatePipeline extends CreateRecord
                     ->minItems(1)
                     ->maxItems(5),
             ]);
+    }
+
+    protected function authorizeAccess(): void
+    {
+        abort_unless(auth()->user()->can('create', [Pipeline::class, $this->getParentRecord()]), 403);
     }
 
     protected function mutateFormDataBeforeCreate(array $data): array

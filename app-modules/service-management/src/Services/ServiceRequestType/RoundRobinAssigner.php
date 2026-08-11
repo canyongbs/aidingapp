@@ -36,57 +36,52 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
-class RoundRobinAssigner implements ServiceRequestTypeAssigner
+class RoundRobinAssigner extends ServiceRequestTypeAssigner
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
     {
         $serviceRequestType = $serviceRequest->priority?->type;
 
-        if (! is_null($serviceRequestType)) {
-            $lastAssignee = $serviceRequestType->lastAssignedUser;
-            $user = null;
-
-            if ($lastAssignee) {
-                $user = User::query()
-                    ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                        $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    })
-                    ->where('name', '>=', $lastAssignee->name)
-                    ->where(fn (Builder $query) => $query
-                        ->where('name', '!=', $lastAssignee->name)
-                        ->orWhere('users.id', '>', $lastAssignee->id))
-                    ->orderBy('name')->orderBy('id')->first();
-            }
-
-            if ($user === null) {
-                $user = User::query()
-                    ->where(function (Builder $query) use ($serviceRequestType) {
-                        $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                        $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    })
-                    ->orderBy('name')->orderBy('id')->first();
-            }
-
-            if ($user !== null) {
-                $serviceRequestType->last_assigned_id = $user->getKey();
-                $serviceRequestType->save();
-
-                $data = [
-                    'user_id' => $user->getKey(),
-                    'assigned_by_id' => null,
-                    'assigned_by_type' => null,
-                    'assigned_at' => now(),
-                    'status' => ServiceRequestAssignmentStatus::Active,
-                ];
-
-                $serviceRequest->assignments()->create($data);
-            }
+        if (is_null($serviceRequestType)) {
+            return null;
         }
+
+        $lastAssignee = $serviceRequestType->lastAssignedUser;
+        $user = null;
+
+        if ($lastAssignee) {
+            $user = User::query()
+                ->where(function (Builder $query) use ($serviceRequestType) {
+                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                })
+                ->where('name', '>=', $lastAssignee->name)
+                ->where(fn (Builder $query) => $query
+                    ->where('name', '!=', $lastAssignee->name)
+                    ->orWhere('users.id', '>', $lastAssignee->id))
+                ->orderBy('name')->orderBy('id')->first();
+        }
+
+        if ($user === null) {
+            $user = User::query()
+                ->where(function (Builder $query) use ($serviceRequestType) {
+                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
+                })
+                ->orderBy('name')->orderBy('id')->first();
+        }
+
+        if ($user === null) {
+            return null;
+        }
+
+        $serviceRequestType->last_assigned_id = $user->getKey();
+        $serviceRequestType->save();
+
+        return $user;
     }
 }

@@ -34,43 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+namespace App\Features;
 
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use App\Support\AbstractFeatureFlag;
 
-class GuestContactsRelationManager extends RelationManager
+class CombineStepFormFeature extends AbstractFeatureFlag
 {
-    protected static string $relationship = 'guestContacts';
-
-    protected static ?string $title = 'Contacts';
-
-    // Owner-record update access is enforced globally in FilamentServiceProvider, not a Contact::viewAny permission
-    protected static bool $shouldSkipAuthorization = true;
-
-    public function table(Table $table): Table
+    public function resolve(mixed $scope): mixed
     {
-        return $table
-            ->recordTitleAttribute('full_name')
-            ->columns([
-                TextColumn::make('full_name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('guestProjects');
+        return false;
     }
 }

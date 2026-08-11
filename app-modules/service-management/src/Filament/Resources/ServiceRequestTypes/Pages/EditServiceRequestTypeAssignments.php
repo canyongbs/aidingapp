@@ -37,10 +37,14 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Enums\Feature;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use App\Filament\Forms\Components\UserSelect;
@@ -50,6 +54,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
@@ -73,6 +78,11 @@ class EditServiceRequestTypeAssignments extends EditRecord
 
     public function form(Schema $schema): Schema
     {
+        $defaultStatusId = ServiceRequestStatus::query()
+            ->where('classification', SystemServiceRequestClassification::Open)
+            ->orderBy('sort')
+            ->value('id');
+
         return $schema
             ->components([
                 Section::make()
@@ -121,6 +131,24 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->required()
                             ->rules(fn (ServiceRequestType $record) => [new ServiceRequestTypeAssignmentsIndividualUserMustBeAManager($record)])
                             ->visible(fn (Get $get) => $get('assignment_type') === ServiceRequestTypeAssignmentTypes::Individual),
+                        Toggle::make('is_automated_status_change_enabled')
+                            ->label('Automated Status Change')
+                            ->columnSpanFull()
+                            ->live()
+                            ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
+                                && filled($get('assignment_type'))
+                                && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None)
+                            ->afterStateUpdated(function (bool $state, Get $get, Set $set) use ($defaultStatusId): void {
+                                if ($state && blank($get('automated_status_id'))) {
+                                    $set('automated_status_id', $defaultStatusId);
+                                }
+                            }),
+                        ServiceRequestStatusSelect::make('automated_status_id')
+                            ->required()
+                            ->columnSpanFull()
+                            ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
+                                && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None
+                                && (bool) $get('is_automated_status_change_enabled')),
                         Toggle::make('is_live_chat_enabled')
                             ->label('Live Chat')
                             ->columnSpanFull()
@@ -141,5 +169,33 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->visible(fn (Get $get): bool => $get('is_live_chat_enabled') && Gate::check(Feature::RealtimeChat->getGateName())),
                     ]),
             ]);
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['is_automated_status_change_enabled'] = filled($data['automated_status_id'] ?? null);
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        if (AutomatedStatusChangeOnAssignmentFeature::active() && ! ($data['is_automated_status_change_enabled'] ?? false)) {
+            $data['automated_status_id'] = null;
+        }
+
+        unset($data['is_automated_status_change_enabled']);
+
+        return $data;
     }
 }

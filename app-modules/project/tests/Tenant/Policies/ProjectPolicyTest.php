@@ -40,6 +40,44 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
+it('does not throw when checking a permission whose project creator has been deleted', function (string $ability) {
+    $creator = User::factory()->create();
+
+    $project = Project::factory()->for($creator, 'createdBy')->create();
+
+    $creator->delete();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo("project.*.{$ability}");
+
+    actingAs($user);
+
+    expect($project->refresh()->createdBy)->toBeNull()
+        ->and($user->can($ability, $project))->toBeFalse();
+})->with([
+    'update',
+    'delete',
+    'restore',
+]);
+
+it('does not throw when checking the force-delete permission and the project creator has been deleted', function () {
+    $creator = User::factory()->create();
+
+    $project = Project::factory()->for($creator, 'createdBy')->create();
+
+    $creator->delete();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('project.*.force-delete');
+
+    actingAs($user);
+
+    expect($project->refresh()->createdBy)->toBeNull()
+        ->and($user->can('forceDelete', $project))->toBeFalse();
+});
+
 it('allows a super admin to archive any project', function () {
     $user = User::factory()->create();
 

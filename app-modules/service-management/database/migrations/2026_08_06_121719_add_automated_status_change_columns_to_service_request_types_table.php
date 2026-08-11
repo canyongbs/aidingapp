@@ -34,43 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-use Filament\Actions\AttachAction;
-use Filament\Actions\DetachAction;
-use Filament\Actions\DetachBulkAction;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-
-class GuestContactsRelationManager extends RelationManager
-{
-    protected static string $relationship = 'guestContacts';
-
-    protected static ?string $title = 'Contacts';
-
-    // Owner-record update access is enforced globally in FilamentServiceProvider, not a Contact::viewAny permission
-    protected static bool $shouldSkipAuthorization = true;
-
-    public function table(Table $table): Table
+return new class () extends Migration {
+    public function up(): void
     {
-        return $table
-            ->recordTitleAttribute('full_name')
-            ->columns([
-                TextColumn::make('full_name'),
-            ])
-            ->headerActions([
-                AttachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->recordActions([
-                DetachAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->toolbarActions([
-                DetachBulkAction::make()
-                    ->after(fn () => $this->dispatch('projectAccessUpdated')),
-            ])
-            ->inverseRelationship('guestProjects');
+        DB::transaction(function () {
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->foreignUuid('automated_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
+            });
+
+            AutomatedStatusChangeOnAssignmentFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AutomatedStatusChangeOnAssignmentFeature::deactivate();
+
+            Schema::table('service_request_types', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('automated_status_id');
+            });
+        });
+    }
+};

@@ -43,30 +43,13 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
-if (! function_exists('enablePreference')) {
-    function enablePreference(
-        ServiceRequestType $type,
-        ServiceRequestEmailTemplateType $templateType,
-        ServiceRequestTypeEmailTemplateRole $role,
-        ServiceRequestNotificationChannel $channel,
-        bool $isEnabled = true,
-    ): void {
-        ServiceRequestTypeEmailPreference::create([
-            'service_request_type_id' => $type->getKey(),
-            'service_request_email_template_type' => $templateType,
-            'service_request_email_template_role' => $role,
-            'notification_channel' => $channel,
-            'is_enabled' => $isEnabled,
-        ]);
-    }
-}
+use function Tests\enablePreference;
 
 describe('Customer', function () {
     it('sends customer assigned notification when preference is enabled', function () {

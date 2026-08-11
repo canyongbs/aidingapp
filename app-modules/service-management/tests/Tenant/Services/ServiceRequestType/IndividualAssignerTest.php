@@ -36,16 +36,49 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
+use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
+use Illuminate\Support\Facades\Notification;
 
 use function Tests\asSuperAdmin;
+use function Tests\enablePreference;
+
+/**
+ * Builds a Service Request Type configured to auto-assign to $manager via the Individual assigner,
+ * optionally with an automated status change target.
+ */
+function individualAutoAssignType(User $manager, ?ServiceRequestStatus $automatedStatus = null): ServiceRequestType
+{
+    return ServiceRequestType::factory()
+        ->hasAttached($manager, relationship: 'managerUsers')
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $manager->getKey(),
+            'automated_status_id' => $automatedStatus?->getKey(),
+        ])
+        ->create();
+}
+
+function serviceRequestForType(ServiceRequestType $type, ServiceRequestStatus $status): ServiceRequest
+{
+    return ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $type->getKey(),
+        ])->getKey(),
+    ])->create();
+}
 
 test('individual assigner assigns to configured user via department manager', function () {
     asSuperAdmin();
@@ -134,4 +167,91 @@ test('individual assigner does not assign when no individual is configured', fun
     app(IndividualAssigner::class)->execute($serviceRequest);
 
     expect($serviceRequest->assignments()->count())->toBe(0);
+});
+
+describe('automated status change on assignment', function () {
+    it('sets the request status when auto-assigning and the toggle is on', function () {
+        asSuperAdmin();
+
+        $manager = User::factory()->create();
+        $target = ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ]);
+        $type = individualAutoAssignType($manager, $target);
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $serviceRequest = serviceRequestForType($type, $open);
+
+        app(IndividualAssigner::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
+    });
+
+    it('does not change the status when no automated status is configured', function () {
+        asSuperAdmin();
+
+        $manager = User::factory()->create();
+        $type = individualAutoAssignType($manager);
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $serviceRequest = serviceRequestForType($type, $open);
+
+        app(IndividualAssigner::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
+    });
+
+    it('leaves the status unchanged when the feature flag is inactive', function () {
+        asSuperAdmin();
+
+        AutomatedStatusChangeOnAssignmentFeature::deactivate();
+
+        $manager = User::factory()->create();
+        $target = ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ]);
+        $type = individualAutoAssignType($manager, $target);
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $serviceRequest = serviceRequestForType($type, $open);
+
+        app(IndividualAssigner::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
+    });
+
+    it('sends status change notifications for the automated change (send as normal)', function () {
+        Notification::fake();
+
+        asSuperAdmin();
+
+        $manager = User::factory()->create();
+        $target = ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ]);
+        $type = individualAutoAssignType($manager, $target);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $serviceRequest = serviceRequestForType($type, $open);
+
+        app(IndividualAssigner::class)->execute($serviceRequest);
+
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class);
+    });
+
+    it('does not send a duplicate notification when the request is already at the target status', function () {
+        Notification::fake();
+
+        asSuperAdmin();
+
+        $manager = User::factory()->create();
+        $target = ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ]);
+        $type = individualAutoAssignType($manager, $target);
+        enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
+        $serviceRequest = serviceRequestForType($type, $target);
+
+        app(IndividualAssigner::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
+        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class);
+    });
 });

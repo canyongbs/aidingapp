@@ -285,6 +285,40 @@ it('saves the description', function () {
     expect($type->form->description)->toBe('How to request access.');
 });
 
+it('saves the is_first_step_combined toggle', function () {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    livewire(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->set('data.is_wizard', false)
+        ->set('data.content', customFormContent())
+        ->set('data.is_first_step_combined', true)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $type->unsetRelation('form');
+
+    expect($type->form->is_first_step_combined)->toBeTrue();
+});
+
+it('hydrates the is_first_step_combined toggle from an existing form', function () {
+    asSuperAdmin();
+
+    $type = ServiceRequestType::factory()->create();
+
+    ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_first_step_combined' => true]);
+
+    livewire(ManageServiceRequestTypeCustomForm::class, [
+        'record' => $type->getKey(),
+    ])
+        ->assertSet('data.is_first_step_combined', true);
+});
+
 it('stores steps and clears top-level content for a multi-step form', function () {
     asSuperAdmin();
 
