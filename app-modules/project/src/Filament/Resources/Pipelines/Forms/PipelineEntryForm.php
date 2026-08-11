@@ -182,6 +182,23 @@ class PipelineEntryForm
                 ->visible(fn (Get $get): bool => ! PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->multiple()
                 ->dehydrated()
+                ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
+                ->dehydratedWhenHidden(),
+            ModalTableSelect::make('milestone')
+                ->label('Related Milestone')
+                ->relationship(
+                    name: 'milestone',
+                    titleAttribute: 'title',
+                    modifyQueryUsing: $pipeline
+                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        : null,
+                )
+                ->tableConfiguration(PipelineEntryMilestonesTable::class)
+                ->tableArguments(['projectId' => $pipeline?->project_id])
+                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
+                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
+                ->dehydrated()
+                ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
                 ->dehydratedWhenHidden(),
             ModalTableSelect::make('project_milestone_id')
                 ->label('Related Milestone')

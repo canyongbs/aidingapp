@@ -175,4 +175,12 @@ class PipelineEntry extends Model implements Auditable
     {
         static::archived(fn (PipelineEntry $entry) => $entry->reevaluateLinkedMilestones());
     }
+    
+    /**
+     * @return BelongsTo<ProjectMilestone, $this>
+     */
+    public function milestone(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id');
+    }
 }
