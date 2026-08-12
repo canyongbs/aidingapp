@@ -225,6 +225,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(function (PipelineEntry $record, array $data): void {
+                        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
                         if (! PipelineEntryMilestoneFeature::active()) {
                             $record->milestones()->sync($data['milestones'] ?? []);
                         }
