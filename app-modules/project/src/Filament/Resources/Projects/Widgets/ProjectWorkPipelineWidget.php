@@ -48,6 +48,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Features\PipelineArchivingFeature;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Features\PipelineEntryMilestoneFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -224,13 +225,46 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(function (PipelineEntry $record, array $data): void {
-                        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
                         if (! PipelineEntryMilestoneFeature::active()) {
                             $record->milestones()->sync($data['milestones'] ?? []);
                         }
                         $record->assets()->sync($data['assets'] ?? []);
                         $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
+                Action::make('editMilestone')
+                    ->label('Edit Milestone')
+                    ->icon('heroicon-m-pencil-square')
+                    ->slideOver()
+                    ->fillForm(fn (PipelineEntry $record): array => $record->milestone?->attributesToArray() ?? [])
+                    ->schema(CreateProjectMilestoneAction::formSchema())
+                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
+                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('update', $record->milestone))
+                    ->action(function (PipelineEntry $record, array $data): void {
+                        $record->milestone?->update($data);
+
+                        $this->dispatch('projectMilestonesUpdated');
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
+                Action::make('deleteMilestone')
+                    ->label('Delete Milestone')
+                    ->icon('heroicon-m-trash')
+                    ->color('danger')
+                    ->requiresConfirmation()
+                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
+                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('delete', $record->milestone))
+                    ->action(function (PipelineEntry $record): void {
+                        $milestone = $record->milestone;
+
+                        if (! $milestone instanceof ProjectMilestone) {
+                            return;
+                        }
+
+                        $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
+                        $milestone->delete();
+
+                        $this->dispatch('projectMilestonesUpdated');
                         $this->dispatch('projectPipelineUpdated');
                     }),
             ])

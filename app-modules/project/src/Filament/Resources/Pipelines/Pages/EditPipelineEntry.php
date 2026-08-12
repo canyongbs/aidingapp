@@ -167,10 +167,9 @@ class EditPipelineEntry extends Page
             unset($data['milestones']);
         }
 
-        $milestones = $data['milestones'] ?? [];
         $assets = $data['assets'] ?? [];
         $serviceRequests = $data['serviceRequests'] ?? [];
-        unset($data['milestones'], $data['assets'], $data['serviceRequests']);
+        unset($data['assets'], $data['serviceRequests']);
 
         $pipelineEntry->update($data);
 
@@ -196,7 +195,11 @@ class EditPipelineEntry extends Page
 
         $data = $pipelineEntry->attributesToArray();
 
-        $data['milestones'] = $pipelineEntry->milestones->pluck('id')->toArray();
+        if (PipelineEntryMilestoneFeature::active()) {
+            $data['project_milestone_id'] = $pipelineEntry->project_milestone_id;
+        } else {
+            $data['milestones'] = $pipelineEntry->milestones->pluck('id')->toArray();
+        }
         $data['assets'] = $pipelineEntry->assets->pluck('id')->toArray();
         $data['serviceRequests'] = $pipelineEntry->serviceRequests->pluck('id')->toArray();
 
