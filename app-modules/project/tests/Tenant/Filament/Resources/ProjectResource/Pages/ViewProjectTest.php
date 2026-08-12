@@ -234,7 +234,7 @@ it('can list milestones in the project milestones widget', function () {
         ->assertCanSeeTableRecords($milestones);
 });
 
-it('hides archived milestones in the project milestones widget when the archiving feature is active', function () {
+it('hides archived milestones in the project milestones widget', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -373,7 +373,7 @@ it('rejects selecting a pipeline that belongs to another project', function () {
         ->assertSet('selectedPipelineId', $pipeline->getKey());
 });
 
-it('rejects selecting an archived pipeline when the archiving feature is active', function () {
+it('rejects selecting an archived pipeline', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();

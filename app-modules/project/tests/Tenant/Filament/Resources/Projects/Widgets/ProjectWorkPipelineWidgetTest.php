@@ -135,7 +135,7 @@ it('clears the selection when the last pipeline is archived', function () {
         ->assertSet('selectedPipelineId', null);
 });
 
-it('excludes archived tasks from the pipeline board when the flag is active', function () {
+it('excludes archived tasks from the pipeline board', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();

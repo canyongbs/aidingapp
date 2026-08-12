@@ -48,7 +48,7 @@ beforeEach(function () {
     asSuperAdmin(User::factory()->create());
 });
 
-it('excludes archived milestones from the related-milestones picker when the flag is active', function () {
+it('excludes archived milestones from the related-milestones picker', function () {
     $project = Project::factory()->create();
     $active = ProjectMilestone::factory()->for($project)->create();
     $archived = ProjectMilestone::factory()->for($project)->create();

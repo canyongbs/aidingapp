@@ -118,7 +118,7 @@ it('can list milestones', function () {
         ->assertCanSeeTableRecords($project->milestones);
 });
 
-it('hides archived milestones when the archiving feature is active', function () {
+it('hides archived milestones', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();

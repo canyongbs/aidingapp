@@ -50,14 +50,7 @@ beforeEach(function () {
     asSuperAdmin(User::factory()->create());
 });
 
-// The archiving flag is activated globally by the archiving migration (RefreshDatabase
-// runs it), matching how ProjectWorkPipelineWidgetTest treats the active default and
-// only ever calls deactivate() for the inactive cases. We still activate explicitly in
-// the active-path tests for clarity.
-
-it('hides archived pipelines when the archiving flag is active', function () {
-    PipelineArchivingFeature::activate();
-
+it('hides archived pipelines', function () {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
     $archived = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
@@ -86,8 +79,6 @@ it('shows archived pipelines when the archiving flag is inactive', function () {
 });
 
 it('archives a pipeline through the row action', function () {
-    PipelineArchivingFeature::activate();
-
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
 

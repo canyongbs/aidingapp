@@ -126,7 +126,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
     Carbon::setTestNow();
 });
 
-it('hides archived tasks from the kanban board when the archiving feature is active', function () {
+it('hides archived tasks from the kanban board', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()

@@ -48,7 +48,7 @@ beforeEach(function () {
     asSuperAdmin(User::factory()->create());
 });
 
-it('excludes archived pipelines from the switcher list when the flag is active', function () {
+it('excludes archived pipelines from the switcher list', function () {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     $archived = Pipeline::factory()->for($project)->create();
