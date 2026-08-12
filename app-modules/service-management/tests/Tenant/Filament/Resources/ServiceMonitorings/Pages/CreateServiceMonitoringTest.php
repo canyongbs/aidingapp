@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
@@ -233,6 +234,7 @@ test('creating a confidential service monitor persists the granted users, depart
 
     $grantedUser = User::factory()->create();
     $grantedDepartment = Department::factory()->create();
+    $grantedContact = Contact::factory()->create();
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
 
     livewire(CreateServiceMonitoring::class)
@@ -241,6 +243,7 @@ test('creating a confidential service monitor persists the granted users, depart
             'is_confidential' => true,
             'confidentialUsers' => [$grantedUser->getKey()],
             'confidentialDepartments' => [$grantedDepartment->getKey()],
+            'confidentialContacts' => [$grantedContact->getKey()],
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -254,4 +257,18 @@ test('creating a confidential service monitor persists the granted users, depart
 
     expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
     expect($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1);
+    expect($serviceMonitoringTarget->confidentialContacts()->count())->toBe(1);
+});
+
+test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertFormFieldHidden('confidentialUsers')
+        ->assertFormFieldHidden('confidentialDepartments')
+        ->assertFormFieldHidden('confidentialContacts')
+        ->fillForm(['is_confidential' => true])
+        ->assertFormFieldVisible('confidentialUsers')
+        ->assertFormFieldVisible('confidentialDepartments')
+        ->assertFormFieldVisible('confidentialContacts');
 });
