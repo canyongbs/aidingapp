@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\SlaWaitingExclusionFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -106,16 +107,26 @@ class ServiceRequestObserver
         if ($serviceRequest->isDirty('status_id')) {
             $serviceRequest->status_updated_at = CarbonImmutable::now();
 
-            if (
-                $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
-                is_null($serviceRequest->time_to_resolution)
-            ) {
-                $createdTime = $serviceRequest->created_at;
-                $currentTime = Carbon::now();
+            if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
+                if (SlaWaitingExclusionFeature::active()) {
+                    $end = $serviceRequest->status_updated_at;
 
-                // Calculate the difference in seconds
-                $secondsDifference = $createdTime ? (int) round($createdTime->diffInSeconds($currentTime)) : null;
-                $serviceRequest->time_to_resolution = $secondsDifference;
+                    $seconds = (int) round($serviceRequest->created_at->diffInSeconds($end));
+
+                    $seconds -= $serviceRequest->getExcludedSecondsBetween($serviceRequest->created_at, $end, [
+                        SystemServiceRequestClassification::Waiting,
+                        SystemServiceRequestClassification::Closed,
+                    ]);
+
+                    $serviceRequest->time_to_resolution = max(0, $seconds);
+                } elseif (is_null($serviceRequest->time_to_resolution)) {
+                    $createdTime = $serviceRequest->created_at;
+                    $currentTime = Carbon::now();
+
+                    // Calculate the difference in seconds
+                    $secondsDifference = $createdTime ? (int) round($createdTime->diffInSeconds($currentTime)) : null;
+                    $serviceRequest->time_to_resolution = $secondsDifference;
+                }
             }
         }
     }
