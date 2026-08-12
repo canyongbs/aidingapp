@@ -36,7 +36,9 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -169,4 +171,44 @@ it('stores a new service request update', function () {
     expect($media)->not->toBeNull();
     expect($media->createdBy?->is($contact))->toBeTrue();
     Storage::assertExists($media->getPathRelativeToRoot());
+});
+
+it('reopens a closed service request when a portal update is submitted', function () {
+    Queue::fake();
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
+    $portalSettings->save();
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    Storage::fake('s3');
+    asSuperAdmin();
+
+    $expectedOpenStatus = ServiceRequestStatus::query()
+        ->where('classification', SystemServiceRequestClassification::Open)
+        ->orderBy('sort')
+        ->orderBy('created_at')
+        ->orderBy('id')
+        ->firstOrFail();
+
+    $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+    $contact = Contact::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for($closedStatus, 'status')
+        ->create(['respondent_id' => $contact->getKey()]);
+
+    $contact->createToken('knowledge-management-portal-access-token');
+
+    actingAs($contact, 'contact');
+
+    postJson(route('api.portal.service-request-update.storeServiceRequestUpdate', ['serviceRequest' => $serviceRequest->getKey()]), [
+        'description' => 'Reopening this request.',
+        'serviceRequestId' => $serviceRequest->getKey(),
+    ])->assertStatus(201);
+
+    expect($serviceRequest->fresh()->status_id)->toBe($expectedOpenStatus->getKey());
 });
