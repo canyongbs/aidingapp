@@ -189,6 +189,8 @@ it('reopens a closed service request when a portal update is submitted', functio
     $expectedOpenStatus = ServiceRequestStatus::query()
         ->where('classification', SystemServiceRequestClassification::Open)
         ->orderBy('sort')
+        ->orderBy('created_at')
+        ->orderBy('id')
         ->firstOrFail();
 
     $closedStatus = ServiceRequestStatus::factory()->closed()->create();

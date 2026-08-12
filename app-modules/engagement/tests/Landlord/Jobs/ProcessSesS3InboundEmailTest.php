@@ -2362,6 +2362,8 @@ describe('Service request reply threading', function () {
             $expectedOpenStatus = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)
                 ->orderBy('sort')
+                ->orderBy('created_at')
+                ->orderBy('id')
                 ->firstOrFail();
 
             $closedStatus = ServiceRequestStatus::factory()->closed()->create();

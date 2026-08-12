@@ -123,7 +123,8 @@
 
             await apiPost('/service-request-update/store', data);
 
-            await getData(currentPage.value);
+            // A new update sorts to the top, so return to page 1 to make it visible.
+            await getData(1);
 
             updateFormKey.value++;
         } catch (error) {
