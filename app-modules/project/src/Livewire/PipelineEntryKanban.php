@@ -176,6 +176,10 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
                 ];
 
+                if (PipelineEntryMilestoneFeature::active()) {
+                    $data['project_milestone_id'] = $data['project_milestone_id'] ?? null;
+                }
+
                 $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();

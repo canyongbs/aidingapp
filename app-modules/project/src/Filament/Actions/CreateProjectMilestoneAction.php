@@ -74,7 +74,7 @@ class CreateProjectMilestoneAction
     /**
      * @return array<int, Component>
      */
-    protected static function formSchema(): array
+    public static function formSchema(): array
     {
         return [
             TextInput::make('title')

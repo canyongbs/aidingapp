@@ -75,6 +75,7 @@ class PipelineEntry extends Model implements Auditable
     protected $fillable = [
         'name',
         'pipeline_stage_id',
+        'project_milestone_id',
         'description',
         'due',
         'assigned_to_id',
@@ -123,6 +124,7 @@ class PipelineEntry extends Model implements Auditable
     }
 
     /**
+     *  TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire milestones() method below also check references to it in the codebase and remove them as well.
      *
      * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
      */

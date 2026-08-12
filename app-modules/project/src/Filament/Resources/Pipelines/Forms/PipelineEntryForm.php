@@ -144,7 +144,9 @@ class PipelineEntryForm
                 ->inline()
                 ->live()
                 ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
-                    $state = $record?->milestones()->exists();
+                    $state = PipelineEntryMilestoneFeature::active()
+                        ? $record?->milestone()->exists()
+                        : $record?->milestones()->exists();
 
                     if (filled($state)) {
                         $set('milestones_type', 'select');
@@ -155,8 +157,13 @@ class PipelineEntryForm
                 ->dehydrated(false)
                 ->afterStateUpdated(function (?string $state, Set $set) {
                     if ($state === 'none') {
-                        $defaultMilestone = PipelineEntryMilestoneFeature::active() ? null : [];
-                        $set('milestones', $defaultMilestone);
+                        if (PipelineEntryMilestoneFeature::active()) {
+                            $set('project_milestone_id', null);
+
+                            return;
+                        }
+
+                        $set('milestones', []);
                     }
                 }),
             //TODO: PipelineEntryMilestoneFeature clean up: Please remove extra milestoles ModalTableSelect from line 163 to 179.
@@ -172,12 +179,11 @@ class PipelineEntryForm
                 ->tableConfiguration(PipelineEntryMilestonesTable::class)
                 ->tableArguments(['projectId' => $pipeline?->project_id])
                 ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
-                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
+                ->visible(fn (Get $get): bool => ! PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->multiple()
                 ->dehydrated()
-                ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
                 ->dehydratedWhenHidden(),
-            ModalTableSelect::make('milestone')
+            ModalTableSelect::make('project_milestone_id')
                 ->label('Related Milestone')
                 ->relationship(
                     name: 'milestone',
@@ -189,9 +195,8 @@ class PipelineEntryForm
                 ->tableConfiguration(PipelineEntryMilestonesTable::class)
                 ->tableArguments(['projectId' => $pipeline?->project_id])
                 ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
-                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
+                ->visible(fn (Get $get): bool => PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->dehydrated()
-                ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
                 ->dehydratedWhenHidden(),
 
             ToggleButtons::make('assets_type')
