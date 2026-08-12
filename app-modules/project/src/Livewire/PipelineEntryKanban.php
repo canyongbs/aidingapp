@@ -165,10 +165,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 $dataArray = [
                     'name' => $data['name'],
                     'pipeline_stage_id' => $stage->getKey(),
-                ];
-
-                $dataArray = [
-                    ...$dataArray,
                     'description' => $data['description'] ?? null,
                     'due' => $data['due'] ?? null,
                     'assigned_to_type' => $data['assigned_to_type'] ?? null,
@@ -177,7 +173,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 ];
 
                 if (PipelineEntryMilestoneFeature::active()) {
-                    $data['project_milestone_id'] = $data['project_milestone_id'] ?? null;
+                    $dataArray['project_milestone_id'] = $data['project_milestone_id'] ?? null;
                 }
 
                 $entry = new PipelineEntry($dataArray);
