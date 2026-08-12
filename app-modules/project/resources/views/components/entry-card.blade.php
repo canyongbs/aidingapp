@@ -103,15 +103,15 @@
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
         <div>
             <span class="font-bold">Milestones:</span>
-            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
+            {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : "None" }}
         </div>
         <div>
             <span class="font-bold">Assets:</span>
-            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}
+            {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : "None" }}
         </div>
         <div>
             <span class="font-bold">Service Requests:</span>
-            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : 'None' }}
+            {{ ($entry->service_requests_count ?? 0) > 0 ? $entry->service_requests_count : "None" }}
         </div>
     </div>
 
@@ -122,9 +122,9 @@
             <span class="font-bold">Assigned:</span>
             {{ $assignedLabel }}
         </div>
-        <div title="{{ $dueTooltip ?? '' }}">
+        <div title="{{ $dueTooltip ?? "" }}">
             <span class="font-bold">Due:</span>
-            {{ $dueLabel ? $dueLabel : 'None' }}
+            {{ $dueLabel ? $dueLabel : "None" }}
         </div>
     </div>
 </div>
