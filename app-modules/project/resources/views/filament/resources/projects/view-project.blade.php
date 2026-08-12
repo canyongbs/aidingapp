@@ -56,10 +56,6 @@
         @livewire(ProjectAccessWidget::class, ['record' => $record])
     @endif
 
-    @if (auth()->user()?->can('viewAny', [ProjectMilestone::class, $record]))
-        @livewire(ProjectMilestonesWidget::class, ['record' => $record])
-    @endif
-
     @if (auth()->user()?->can('viewAny', [Pipeline::class, $record]))
         @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
     @endif

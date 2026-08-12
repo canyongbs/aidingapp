@@ -36,18 +36,17 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Features\PipelineArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
-use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -105,21 +104,7 @@ class ProjectMilestonesWidget extends TableWidget
                     ->placeholder('N/A'),
             ])
             ->headerActions([
-                Action::make('createMilestone')
-                    ->label('New Milestone')
-                    ->slideOver()
-                    ->schema($this->formSchema())
-                    ->authorize('create', $this->record)
-                    ->action(function (array $data): void {
-                        $this->record->milestones()->create($data);
-
-                        $this->dispatch('projectMilestonesUpdated');
-
-                        Notification::make()
-                            ->success()
-                            ->title('Milestone created')
-                            ->send();
-                    }),
+                CreateProjectMilestoneAction::make($this->record, 'createMilestone'),
             ])
             ->recordActions([
                 EditAction::make()

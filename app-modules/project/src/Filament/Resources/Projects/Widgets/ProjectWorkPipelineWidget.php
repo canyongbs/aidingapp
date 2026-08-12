@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
@@ -168,6 +169,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->label('Created By')
                     ->placeholder('N/A'),
             ])
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(50)
             ->defaultGroup(
                 function () {
                     if (! PipelineEntryMilestoneFeature::active()) {
@@ -249,6 +252,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(fn () => $this->dispatch('projectPipelineUpdated')),
+                CreateProjectMilestoneAction::make($this->record, 'createMilestone')
+                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active()),
             ]);
     }
 
