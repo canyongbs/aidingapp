@@ -13,4 +13,4 @@ created: 2026-08-11
 
 ## Additional Cleanup
 
-- Search for `TODO: Cleanup Task (pipeline-entry-milestone-feature)` and follow the instructions at each site.
+- Search for `TODO: PipelineEntryMilestoneFeature clean up:` and follow the instructions at each site.
