@@ -47,8 +47,10 @@ use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
@@ -2347,6 +2349,80 @@ describe('Service request reply threading', function () {
             'created_by_id' => $contact->getKey(),
             'created_by_type' => $contact->getMorphClass(),
         ]);
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('reopens a closed service request when a reply arrives', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$contact, $serviceRequest, $expectedOpenStatus] = $tenant->execute(function () {
+            $expectedOpenStatus = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->orderBy('sort')
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->firstOrFail();
+
+            $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequest = ServiceRequest::factory()->create([
+                'respondent_id' => $contact->getKey(),
+                'status_id' => $closedStatus->getKey(),
+            ]);
+
+            $serviceRequest->outboundEmailMessageIds()->create([
+                'message_id' => "{$serviceRequest->service_request_number}.1.1740000000000",
+            ]);
+
+            return [$contact, $serviceRequest, $expectedOpenStatus];
+        });
+
+        $messageId = "{$serviceRequest->service_request_number}.1.1740000000000@mail.aiding.app";
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
+
+        $content = str_replace(
+            'SR-TEST123456.1.1740000000000@mail.aiding.app',
+            $messageId,
+            $content,
+        );
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        assertDatabaseCount(ServiceRequestUpdate::class, 1);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($expectedOpenStatus->getKey());
 
         $filesystem->assertMissing('s3_email');
     });

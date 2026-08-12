@@ -60,7 +60,9 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
         public ServiceRequest $serviceRequest,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
         public string $channel,
-    ) {}
+    ) {
+        $this->afterCommit = true;
+    }
 
     /**
      * @return array<int, string>
