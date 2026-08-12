@@ -90,8 +90,11 @@ class PipelineEntry extends Model implements Auditable
 
     public function reevaluateLinkedMilestones(): void
     {
-        $this->milestones()->get()->each(
-            fn (ProjectMilestone $milestone) => $milestone->reevaluateArchivedState(),
+        $this->milestones()->eachById(
+            function (ProjectMilestone $milestone): void {
+                $milestone->reevaluateArchivedState();
+            },
+            column: 'project_milestones.id',
         );
     }
 
@@ -155,6 +158,5 @@ class PipelineEntry extends Model implements Auditable
     protected static function booted(): void
     {
         static::archived(fn (PipelineEntry $entry) => $entry->reevaluateLinkedMilestones());
-        static::unarchived(fn (PipelineEntry $entry) => $entry->reevaluateLinkedMilestones());
     }
 }

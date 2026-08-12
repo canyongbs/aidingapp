@@ -101,11 +101,9 @@ class Pipeline extends BaseModel implements Auditable
     protected static function booted(): void
     {
         static::archived(function (Pipeline $pipeline): void {
-            $pipeline->stages()->withoutArchived()->get()->each->archive();
-        });
-
-        static::unarchived(function (Pipeline $pipeline): void {
-            $pipeline->stages()->onlyArchived()->get()->each->unarchive();
+            $pipeline->stages()->withoutArchived()->eachById(function (PipelineStage $stage): void {
+                $stage->archive();
+            });
         });
     }
 }

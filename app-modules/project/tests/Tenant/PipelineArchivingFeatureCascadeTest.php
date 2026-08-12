@@ -55,17 +55,6 @@ it('archives a milestone once it has no remaining non-archived linked task', fun
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('unarchives a milestone when a linked task becomes active again', function () {
-    $milestone = ProjectMilestone::factory()->create();
-    $entry = PipelineEntry::factory()->create();
-    $entry->milestones()->attach($milestone);
-    $entry->archive();
-
-    $entry->unarchive();
-
-    expect($milestone->refresh()->isArchived())->toBeFalse();
-});
-
 it('leaves a milestone with no linked tasks untouched', function () {
     $milestone = ProjectMilestone::factory()->create();
 
@@ -91,7 +80,7 @@ it('keeps a milestone active while it still has a task in another active pipelin
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('archives all of a pipeline\'s tasks when the pipeline is archived, and restores them on unarchive', function () {
+it('archives all of a pipeline\'s tasks when the pipeline is archived', function () {
     $pipeline = Pipeline::factory()->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
     // Entries are created without an assignee: assignment is orthogonal to archiving,
@@ -108,10 +97,6 @@ it('archives all of a pipeline\'s tasks when the pipeline is archived, and resto
     $pipeline->archive();
 
     $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
-
-    $pipeline->unarchive();
-
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeFalse());
 });
 
 it('archives a milestone linked only to tasks in the archived pipeline', function () {
@@ -126,20 +111,16 @@ it('archives a milestone linked only to tasks in the archived pipeline', functio
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('archives a pipeline\'s stages when the pipeline is archived, and restores them on unarchive', function () {
+it('archives a pipeline\'s stages when the pipeline is archived', function () {
     $pipeline = Pipeline::factory()->create();
     $stages = PipelineStage::factory()->count(2)->for($pipeline)->create();
 
     $pipeline->archive();
 
     $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeTrue());
-
-    $pipeline->unarchive();
-
-    $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeFalse());
 });
 
-it('archives a stage\'s non-archived tasks when the stage is archived, and restores them on unarchive', function () {
+it('archives a stage\'s non-archived tasks when the stage is archived', function () {
     $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
     $entries = PipelineEntry::factory()
         ->count(3)
@@ -150,8 +131,7 @@ it('archives a stage\'s non-archived tasks when the stage is archived, and resto
         ]);
 
     // One task is archived independently, before the stage cascade runs. The archive
-    // cascade uses withoutArchived() (so it is left as-is), and the unarchive cascade
-    // uses onlyArchived() (so it is restored alongside the cascade-archived tasks).
+    // cascade uses withoutArchived(), so the pre-archived task is left untouched.
     $preArchived = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'assigned_to_id' => null,
         'assigned_to_type' => null,
@@ -163,12 +143,6 @@ it('archives a stage\'s non-archived tasks when the stage is archived, and resto
     expect($stage->refresh()->isArchived())->toBeTrue();
     $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
     expect($preArchived->refresh()->isArchived())->toBeTrue();
-
-    $stage->unarchive();
-
-    expect($stage->refresh()->isArchived())->toBeFalse();
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeFalse());
-    expect($preArchived->refresh()->isArchived())->toBeFalse();
 });
 
 it('rolls back the whole cascade when a child archive fails through the switcher', function () {
