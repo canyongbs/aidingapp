@@ -57,7 +57,6 @@ class ReportChannelCheckboxList
                 $set('is_reported_via_email', in_array('is_reported_via_email', $state, true));
                 $set('is_reported_via_database', in_array('is_reported_via_database', $state, true));
             })
-            ->dehydrated(false)
             ->visible(fn (Get $get) => $get('is_reporting_active'));
 
         $checkboxList->afterStateHydrated(function (Set $set, ?ServiceMonitoringTarget $record = null): void {

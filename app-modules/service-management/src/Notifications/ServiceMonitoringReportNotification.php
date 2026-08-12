@@ -221,6 +221,6 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
             return 'No incidents were detected during this reporting period.';
         }
 
-        return $incidentCount . str('incident')->plural($incidentCount) . ' ' . ($incidentCount === 1 ? ' was' : ' were') . ' detected during this reporting period.';
+        return $incidentCount . ' ' . str('incident')->plural($incidentCount) . ($incidentCount === 1 ? ' was' : ' were') . ' detected during this reporting period.';
     }
 }
