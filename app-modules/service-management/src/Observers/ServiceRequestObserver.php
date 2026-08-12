@@ -40,6 +40,7 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestStatusPeriod;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
@@ -76,6 +77,8 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        app(RecordServiceRequestStatusPeriod::class)->execute($serviceRequest, $serviceRequest->created_at);
+
         if (! $serviceRequest->isDraft()) {
             $this->writeCreatedHistory($serviceRequest);
         }
@@ -119,6 +122,13 @@ class ServiceRequestObserver
 
     public function saved(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->wasRecentlyCreated && $serviceRequest->wasChanged('status_id')) {
+            app(RecordServiceRequestStatusPeriod::class)->execute(
+                $serviceRequest,
+                $serviceRequest->status_updated_at,
+            );
+        }
+
         if (! $serviceRequest->isDraft() && ! $serviceRequest->wasRecentlyCreated) {
             $actor = $this->resolveActor();
 
