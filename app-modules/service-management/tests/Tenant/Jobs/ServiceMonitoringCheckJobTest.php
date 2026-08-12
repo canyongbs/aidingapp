@@ -233,6 +233,26 @@ it('builds the database notification for a confidential service monitor without 
     );
 });
 
+it('still resolves the confidential target after the notification is serialized for the queue', function () {
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->confidential()
+        ->hasAttached($user, [], 'confidentialUsers')
+        ->create();
+
+    $history = $serviceMonitorTarget->histories()->create([
+        'response' => 500,
+        'response_time' => 0.1,
+        'succeeded' => false,
+    ]);
+
+    $notification = unserialize(serialize(new ServiceMonitoringNotification($history, MailChannel::class)));
+
+    expect($notification->via($user))->toBe(['mail'])
+        ->and($notification->toMail($user)->subject)->toBe("Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}");
+});
+
 it('does not send a notification for a confidential service monitor to a subscriber who is not granted confidential access', function () {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();

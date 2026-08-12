@@ -50,6 +50,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notification as BaseNotification;
 use InvalidArgumentException;
 
@@ -112,8 +113,12 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
     // Notifications are queued and run without an authenticated user, so the confidentiality scope must be bypassed to load the target
     private function loadServiceMonitoringTarget(): void
     {
-        $this->historicalServiceMonitoring->loadMissing([
-            'serviceMonitoringTarget' => fn ($query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
+        if (filled($this->historicalServiceMonitoring->serviceMonitoringTarget)) {
+            return;
+        }
+
+        $this->historicalServiceMonitoring->load([
+            'serviceMonitoringTarget' => fn (BelongsTo $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
         ]);
     }
 
