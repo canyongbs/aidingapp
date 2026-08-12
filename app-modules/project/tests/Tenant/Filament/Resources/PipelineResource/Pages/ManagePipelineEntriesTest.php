@@ -37,7 +37,6 @@
 use AidingApp\Project\Filament\Resources\Pipelines\Pages\ManagePipelineEntries;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
@@ -207,69 +206,4 @@ it('hides the pipeline resource sub navigation', function () {
     ])->instance();
 
     expect(PipelineResource::getRecordSubNavigation($component))->toBe([]);
-});
-
-it('shows the table view action but hides the edit action without update permission on the pipeline\'s project', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $entry = PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-    ]);
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    expect($user->can('view', $pipeline))->toBeTrue()
-        ->and($user->can('update', $pipeline))->toBeFalse();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-        'parentRecord' => $project,
-    ])
-        ->assertTableActionVisible('view', $entry)
-        ->assertTableActionHidden('edit', $entry);
-});
-
-it('shows the table view and edit actions with update permission on the pipeline\'s project', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-    $project->managerUsers()->attach($user);
-
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $entry = PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-    ]);
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    expect($user->can('view', $pipeline))->toBeTrue()
-        ->and($user->can('update', $pipeline))->toBeTrue();
-
-    livewire(ManagePipelineEntries::class, [
-        'record' => $pipeline->getRouteKey(),
-        'parentRecord' => $project,
-    ])
-        ->assertTableActionVisible('view', $entry)
-        ->assertTableActionVisible('edit', $entry);
 });

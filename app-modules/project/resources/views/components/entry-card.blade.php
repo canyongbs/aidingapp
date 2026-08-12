@@ -78,15 +78,7 @@
 @endphp
 
 <div
-    role="button"
-    tabindex="0"
-    @can("update", $pipeline)
-        wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-        wire:keydown.enter="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-    @else
-        wire:click="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-        wire:keydown.enter="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-    @endcan
+    role="listitem"
     class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
@@ -96,6 +88,22 @@
         <div class="text-base font-semibold text-gray-900 dark:text-white">
             {{ $entry->name }}
         </div>
+
+        @can("update", $pipeline)
+            <x-filament::icon-button
+                class="fi-primary-color"
+                wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+                icon="heroicon-m-arrow-top-right-on-square"
+                label="Open pipeline task"
+            />
+        @else
+            <x-filament::icon-button
+                class="fi-primary-color"
+                wire:click="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+                icon="heroicon-m-arrow-top-right-on-square"
+                label="Open pipeline task"
+            />
+        @endcan
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />

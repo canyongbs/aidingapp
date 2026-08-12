@@ -37,8 +37,6 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Pages;
 
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
-use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
-use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
@@ -46,7 +44,6 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
 use BackedEnum;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -110,13 +107,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->relationship('pipelineStage', 'name')
                     ->multiple()
                     ->preload(),
-            ])
-            ->recordActions([
-                ViewPipelineEntryAction::make()
-                    ->authorize(fn (): bool => auth()->user()->can('view', $pipeline)),
-                EditPipelineEntryAction::make($pipeline)
-                    ->authorize(fn (): bool => auth()->user()->can('update', $pipeline)),
-                DeleteAction::make(),
             ])
             ->headerActions([
                 CreateAction::make()
