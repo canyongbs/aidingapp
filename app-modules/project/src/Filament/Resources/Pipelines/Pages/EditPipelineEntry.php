@@ -195,11 +195,11 @@ class EditPipelineEntry extends Page
 
         $data = $pipelineEntry->attributesToArray();
 
-        if (PipelineEntryMilestoneFeature::active()) {
-            $data['project_milestone_id'] = $pipelineEntry->project_milestone_id;
-        } else {
+        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+        if (! PipelineEntryMilestoneFeature::active()) {
             $data['milestones'] = $pipelineEntry->milestones->pluck('id')->toArray();
         }
+
         $data['assets'] = $pipelineEntry->assets->pluck('id')->toArray();
         $data['serviceRequests'] = $pipelineEntry->serviceRequests->pluck('id')->toArray();
 
