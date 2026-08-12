@@ -268,6 +268,26 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     }
 
     /**
+     * @return HasMany<ServiceRequestStatusPeriod, $this>
+     */
+    public function statusPeriods(): HasMany
+    {
+        return $this->hasMany(ServiceRequestStatusPeriod::class);
+    }
+
+    /**
+     * @return HasOne<ServiceRequestStatusPeriod, $this>
+     */
+    public function currentStatusPeriod(): HasOne
+    {
+        return $this->hasOne(ServiceRequestStatusPeriod::class)
+            ->ofMany([
+                'started_at' => 'max',
+                'created_at' => 'max',
+            ]);
+    }
+
+    /**
      * @return HasMany<ServiceRequestConversation, $this>
      */
     public function conversations(): HasMany
