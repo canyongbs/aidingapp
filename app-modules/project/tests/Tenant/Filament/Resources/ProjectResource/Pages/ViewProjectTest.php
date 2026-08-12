@@ -234,6 +234,22 @@ it('can list milestones in the project milestones widget', function () {
         ->assertCanSeeTableRecords($milestones);
 });
 
+it('hides archived milestones in the project milestones widget when the archiving feature is active', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $active = ProjectMilestone::factory()->for($project)->create();
+    $archived = ProjectMilestone::factory()->for($project)->create();
+    $archived->archive();
+
+    livewire(ProjectMilestonesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$archived]);
+});
+
 it('can create a milestone through the project milestones widget create action', function () {
     asSuperAdmin();
 

@@ -117,6 +117,10 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 return PipelineEntry::query()
                     ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+                    ->when(
+                        PipelineArchivingFeature::active(),
+                        fn (Builder $query): Builder => $query->withoutArchived(),
+                    )
                     ->with(['milestones', 'assets', 'serviceRequests', 'pipelineStage.pipeline.project']);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))

@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\PipelineArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -50,6 +51,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ManageMilestones extends ManageRelatedRecords
 {
@@ -92,6 +94,13 @@ class ManageMilestones extends ManageRelatedRecords
     {
         return $table
             ->recordTitleAttribute('title')
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->when(
+                PipelineArchivingFeature::active(),
+                function (Builder $query): Builder {
+                    /** @var Builder<ProjectMilestone> $query */
+                    return $query->withoutArchived();
+                },
+            ))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title'),

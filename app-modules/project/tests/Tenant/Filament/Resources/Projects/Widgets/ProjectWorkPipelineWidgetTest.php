@@ -37,6 +37,8 @@
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Features\PipelineArchivingFeature;
 use App\Models\User;
@@ -131,6 +133,26 @@ it('clears the selection when the last pipeline is archived', function () {
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->call('archivePipelineFromSwitcher', $only->getKey())
         ->assertSet('selectedPipelineId', null);
+});
+
+it('excludes archived tasks from the pipeline board when the flag is active', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+
+    $active = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $archived = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $archived->archive();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$archived]);
 });
 
 describe('feature flag inactive', function () {

@@ -118,6 +118,22 @@ it('can list milestones', function () {
         ->assertCanSeeTableRecords($project->milestones);
 });
 
+it('hides archived milestones when the archiving feature is active', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $active = ProjectMilestone::factory()->for($project)->create();
+    $archived = ProjectMilestone::factory()->for($project)->create();
+    $archived->archive();
+
+    livewire(ManageMilestones::class, [
+        'record' => $project->getRouteKey(),
+    ])
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$archived]);
+});
+
 it('can validate create milestone inputs', function ($data, $errors) {
     asSuperAdmin();
 
