@@ -116,7 +116,7 @@ return new class () extends Migration {
     }
 
     /**
-     * @param Collection<int, \stdClass> $histories
+     * @param Collection<int, stdClass> $histories
      *
      * @return array<int, array{status_id: string, started_at: mixed}>
      */
@@ -156,7 +156,7 @@ return new class () extends Migration {
     }
 
     /**
-     * @param Collection<int, \stdClass> $histories
+     * @param Collection<int, stdClass> $histories
      */
     private function resolveInitialStatusId(Collection $histories, ?string $currentStatusId): ?string
     {
