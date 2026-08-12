@@ -121,10 +121,9 @@
                 data.files = formValues.files;
             }
 
-            const response = await apiPost('/service-request-update/store', data);
+            await apiPost('/service-request-update/store', data);
 
-            serviceRequestUpdates.value = response.serviceRequestUpdates.data || [];
-            setPagination(response.serviceRequestUpdates);
+            await getData(currentPage.value);
 
             updateFormKey.value++;
         } catch (error) {
