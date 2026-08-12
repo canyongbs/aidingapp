@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
@@ -226,4 +227,65 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
         });
+});
+
+test('creating a confidential service monitor persists the granted users, departments, and contacts', function () {
+    asSuperAdmin();
+
+    $grantedUser = User::factory()->create();
+    $grantedDepartment = Department::factory()->create();
+    $grantedContact = Contact::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'is_confidential' => true,
+            'confidentialUsers' => [$grantedUser->getKey()],
+            'confidentialDepartments' => [$grantedDepartment->getKey()],
+            'confidentialContacts' => [$grantedContact->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(ServiceMonitoringTarget::class, [
+        'name' => $request['name'],
+        'is_confidential' => true,
+    ]);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()->where('name', $request['name'])->firstOrFail();
+
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
+    expect($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1);
+    expect($serviceMonitoringTarget->confidentialContacts()->count())->toBe(1);
+});
+
+test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertSchemaComponentHidden('confidentialUsers')
+        ->assertSchemaComponentHidden('confidentialDepartments')
+        ->assertSchemaComponentHidden('confidentialContacts')
+        ->fillForm(['is_confidential' => true])
+        ->assertSchemaComponentVisible('confidentialUsers')
+        ->assertSchemaComponentVisible('confidentialDepartments')
+        ->assertSchemaComponentVisible('confidentialContacts');
+});
+
+test('a confidential service monitor cannot be created while a notification recipient has no confidential access', function () {
+    asSuperAdmin();
+
+    $notifiedUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'user' => [$notifiedUser->getKey()],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });

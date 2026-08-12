@@ -34,39 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
+class ConfidentialServiceMonitoringFeature extends AbstractFeatureFlag
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
-    }
-
-    public function confidential(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        return false;
     }
 }

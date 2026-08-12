@@ -34,39 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ConfidentialServiceMonitoringFeature;
 
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
+class ServiceMonitoringTargetObserver
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function creating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return;
+        }
+
+        $this->assignCreatedByIfBlank($serviceMonitoringTarget);
     }
 
-    public function confidential(): static
+    public function updating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return;
+        }
+
+        if ($serviceMonitoringTarget->isDirty('is_confidential') && $serviceMonitoringTarget->is_confidential) {
+            $this->assignCreatedByIfBlank($serviceMonitoringTarget);
+        }
+    }
+
+    // Backfills the creator for pre-existing records that predate the confidentiality feature
+    private function assignCreatedByIfBlank(ServiceMonitoringTarget $serviceMonitoringTarget): void
+    {
+        if (blank($serviceMonitoringTarget->getAttribute('created_by_id')) && auth()->check()) {
+            $serviceMonitoringTarget->createdBy()->associate(auth()->user());
+        }
     }
 }

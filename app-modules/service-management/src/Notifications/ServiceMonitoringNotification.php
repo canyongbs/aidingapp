@@ -41,10 +41,16 @@ use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notification as BaseNotification;
 use InvalidArgumentException;
 
@@ -59,6 +65,12 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function via(object $notifiable): array
     {
+        $this->loadServiceMonitoringTarget();
+
+        if (! $this->notifiableCanViewTarget($notifiable)) {
+            return [];
+        }
+
         return match ($this->channel) {
             DatabaseChannel::class => ['database'],
             MailChannel::class => ['mail'],
@@ -71,7 +83,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
 
     public function toMail(User $notifiable): MailMessage
     {
-        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+        $this->loadServiceMonitoringTarget();
 
         return MailMessage::make()
             ->subject('Aiding App Service Monitoring Alert for ' . $this->historicalServiceMonitoring->serviceMonitoringTarget->name)
@@ -89,12 +101,43 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function toDatabase(object $notifiable): array
     {
-        $this->historicalServiceMonitoring->loadMissing('serviceMonitoringTarget');
+        $this->loadServiceMonitoringTarget();
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
 
         return Notification::make()
             ->danger()
             ->title((string) str("The last service monitoring check for [<ins>{$target->name}</ins>](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ') has failed.')->markdown())
             ->getDatabaseMessage();
+    }
+
+    // Notifications are queued and run without an authenticated user, so the confidentiality scope must be bypassed to load the target
+    private function loadServiceMonitoringTarget(): void
+    {
+        if (filled($this->historicalServiceMonitoring->serviceMonitoringTarget)) {
+            return;
+        }
+
+        $this->historicalServiceMonitoring->load([
+            'serviceMonitoringTarget' => fn (BelongsTo $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
+        ]);
+    }
+
+    // The scope is bypassed above, so confidential targets must be re-checked against this specific notifiable
+    private function notifiableCanViewTarget(object $notifiable): bool
+    {
+        $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
+
+        if (! ConfidentialServiceMonitoringFeature::active() || ! $target?->is_confidential) {
+            return true;
+        }
+
+        return ServiceMonitoringTarget::query()
+            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->whereKey($target->getKey())
+            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
+                $query,
+                $notifiable instanceof Authenticatable ? $notifiable : null,
+            ))
+            ->exists();
     }
 }

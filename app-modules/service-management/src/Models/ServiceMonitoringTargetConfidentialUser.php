@@ -34,39 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @extends Factory<ServiceMonitoringTarget>
+ * @mixin IdeHelperServiceMonitoringTargetConfidentialUser
  */
-class ServiceMonitoringTargetFactory extends Factory
+class ServiceMonitoringTargetConfidentialUser extends Pivot
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    use HasUuids;
+
+    public function getTable(): string
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        return 'service_monitoring_target_confidential_user';
     }
 
-    public function confidential(): static
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function user(): BelongsTo
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     */
+    public function serviceMonitoringTarget(): BelongsTo
+    {
+        return $this->belongsTo(ServiceMonitoringTarget::class);
     }
 }

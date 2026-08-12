@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -83,7 +84,9 @@ class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        ServiceMonitoringTarget::where('frequency', $this->interval)
+        // Bypass confidentiality visibility: this runs with no authenticated user and must check every monitor
+        ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->where('frequency', $this->interval)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
                     dispatch(new ServiceMonitoringCheckJob($serviceMonitoringTarget));

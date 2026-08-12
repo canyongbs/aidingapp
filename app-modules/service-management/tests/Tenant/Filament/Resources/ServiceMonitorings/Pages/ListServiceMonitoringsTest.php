@@ -36,10 +36,12 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Support\Icons\Heroicon;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
@@ -113,4 +115,88 @@ it('only shows the bulk delete action to a user with the service_monitoring.dele
 
     livewire(ListServiceMonitorings::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+test('a confidential service monitoring is still listed for an admin', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$serviceMonitoringTarget])
+        ->assertSuccessful();
+});
+
+test('a confidential service monitoring is hidden from the list for a non-granted, non-admin user', function () {
+    $creator = User::factory()->create();
+    $publicTarget = ServiceMonitoringTarget::factory()->for($creator, 'createdBy')->create(['is_confidential' => false]);
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->for($creator, 'createdBy')->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.*.view');
+    actingAs($user);
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$publicTarget])
+        ->assertCanNotSeeTableRecords([$confidentialTarget])
+        ->assertSuccessful();
+
+    $confidentialTarget->confidentialUsers()->attach($user->getKey());
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$publicTarget, $confidentialTarget])
+        ->assertSuccessful();
+});
+
+test('the name column shows a lock icon and tooltip only for confidential service monitors', function () {
+    asSuperAdmin();
+
+    $publicTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    $column = livewire(ListServiceMonitorings::class)
+        ->instance()
+        ->getTable()
+        ->getColumn('name');
+
+    expect($column->record($confidentialTarget)->getIcon($confidentialTarget->name))->toBe(Heroicon::LockClosed);
+    expect($column->getTooltip($confidentialTarget->name))->toBe('This service monitor is confidential and only visible to admins, its creator, and permitted users, departments, and contacts.');
+
+    expect($column->record($publicTarget)->getIcon($publicTarget->name))->toBeNull();
+    expect($column->getTooltip($publicTarget->name))->toBeNull();
+});
+
+// TODO: Cleanup Task (confidential-service-monitoring): delete this test once the flag is removed
+test('a confidential service monitoring is visible to everyone while the feature flag is inactive', function () {
+    ConfidentialServiceMonitoringFeature::deactivate();
+
+    $creator = User::factory()->create();
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->for($creator, 'createdBy')->create();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.*.view');
+    actingAs($user);
+
+    livewire(ListServiceMonitorings::class)
+        ->assertCanSeeTableRecords([$confidentialTarget])
+        ->assertSuccessful();
+});
+
+// TODO: Cleanup Task (confidential-service-monitoring): delete this test once the flag is removed
+test('the name column hides the lock icon and tooltip while the feature flag is inactive', function () {
+    asSuperAdmin();
+
+    ConfidentialServiceMonitoringFeature::deactivate();
+
+    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    $column = livewire(ListServiceMonitorings::class)
+        ->instance()
+        ->getTable()
+        ->getColumn('name');
+
+    expect($column->record($confidentialTarget)->getIcon($confidentialTarget->name))->toBeNull();
+    expect($column->getTooltip($confidentialTarget->name))->toBeNull();
 });

@@ -34,39 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use App\Features\ConfidentialServiceMonitoringFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        ConfidentialServiceMonitoringFeature::activate();
     }
 
-    public function confidential(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        ConfidentialServiceMonitoringFeature::deactivate();
     }
-}
+};

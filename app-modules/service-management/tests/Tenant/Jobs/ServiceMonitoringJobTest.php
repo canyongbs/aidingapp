@@ -84,3 +84,15 @@ it('does not dispatch when serviceMonitoring addon is disabled', function ($freq
             fn () => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
+
+it('dispatches confidential service monitors even though the job runs without an authenticated user', function () {
+    Queue::fake();
+
+    ServiceMonitoringTarget::factory()->confidential()->create([
+        'frequency' => ServiceMonitoringFrequency::FiveMinutes,
+    ]);
+
+    (new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes))->handle();
+
+    Queue::assertPushed(ServiceMonitoringCheckJob::class, 1);
+});
