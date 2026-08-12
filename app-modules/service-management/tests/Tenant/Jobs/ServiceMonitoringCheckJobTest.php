@@ -186,7 +186,28 @@ it('sends notifications based on configured channels', function (
         ],
     ]);
 
-it('sends a notification for a confidential service monitor with no authenticated user', function () {
+it('sends a notification for a confidential service monitor to a recipient granted confidential access', function () {
+    Http::fake(fn () => Http::response('Test', 500));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->confidential()
+        ->hasAttached($user)
+        ->hasAttached($user, [], 'confidentialUsers')
+        ->create(['is_notified_via_email' => true]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo(
+        $user,
+        ServiceMonitoringNotification::class,
+        fn (ServiceMonitoringNotification $notification) => $notification->toMail($user)->subject === "Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}"
+    );
+});
+
+it('does not send a notification for a confidential service monitor to a subscriber who is not granted confidential access', function () {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
 
@@ -199,9 +220,5 @@ it('sends a notification for a confidential service monitor with no authenticate
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Notification::assertSentTo(
-        $user,
-        ServiceMonitoringNotification::class,
-        fn (ServiceMonitoringNotification $notification) => $notification->toMail($user)->subject === "Aiding App Service Monitoring Alert for {$serviceMonitorTarget->name}"
-    );
+    Notification::assertNotSentTo($user, ServiceMonitoringNotification::class);
 });

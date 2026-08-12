@@ -60,6 +60,12 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
      */
     public function via(object $notifiable): array
     {
+        $this->loadServiceMonitoringTarget();
+
+        if (! $this->notifiableCanViewTarget($notifiable)) {
+            return [];
+        }
+
         return match ($this->channel) {
             DatabaseChannel::class => ['database'],
             MailChannel::class => ['mail'],
@@ -105,5 +111,35 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
         $this->historicalServiceMonitoring->loadMissing([
             'serviceMonitoringTarget' => fn ($query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
         ]);
+    }
+
+    // The scope is bypassed above, so confidential targets must be re-checked against this specific notifiable
+    private function notifiableCanViewTarget(object $notifiable): bool
+    {
+        $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
+
+        if (! $target?->is_confidential) {
+            return true;
+        }
+
+        if (! $notifiable instanceof User) {
+            return false;
+        }
+
+        if ($notifiable->isAdmin()) {
+            return true;
+        }
+
+        if ($target->createdBy?->is($notifiable)) {
+            return true;
+        }
+
+        if ($target->confidentialUsers()->whereKey($notifiable->getKey())->exists()) {
+            return true;
+        }
+
+        return $target->confidentialDepartments()
+            ->whereHas('users', fn ($query) => $query->whereKey($notifiable->getKey()))
+            ->exists();
     }
 }
