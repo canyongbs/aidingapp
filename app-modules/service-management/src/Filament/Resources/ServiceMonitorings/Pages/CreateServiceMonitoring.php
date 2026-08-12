@@ -100,7 +100,10 @@ class CreateServiceMonitoring extends CreateRecord
                     ])
                     ->columns(2),
                 // The confidentiality columns may not exist yet for tenants whose migration has not run
-                ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make()] : []),
+                ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make(
+                    notifiedUsersField: 'user',
+                    notifiedDepartmentsField: 'department',
+                )] : []),
             ]);
     }
 }

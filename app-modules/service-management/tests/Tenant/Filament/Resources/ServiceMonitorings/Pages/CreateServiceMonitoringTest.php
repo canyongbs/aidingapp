@@ -253,7 +253,7 @@ test('creating a confidential service monitor persists the granted users, depart
         'is_confidential' => true,
     ]);
 
-    $serviceMonitoringTarget = ServiceMonitoringTarget::where('name', $request['name'])->firstOrFail();
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()->where('name', $request['name'])->firstOrFail();
 
     expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
     expect($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1);
@@ -264,11 +264,28 @@ test('the confidential users, departments, and contacts fields are only visible 
     asSuperAdmin();
 
     livewire(CreateServiceMonitoring::class)
-        ->assertFormFieldHidden('confidentialUsers')
-        ->assertFormFieldHidden('confidentialDepartments')
-        ->assertFormFieldHidden('confidentialContacts')
+        ->assertSchemaComponentHidden('confidentialUsers')
+        ->assertSchemaComponentHidden('confidentialDepartments')
+        ->assertSchemaComponentHidden('confidentialContacts')
         ->fillForm(['is_confidential' => true])
-        ->assertFormFieldVisible('confidentialUsers')
-        ->assertFormFieldVisible('confidentialDepartments')
-        ->assertFormFieldVisible('confidentialContacts');
+        ->assertSchemaComponentVisible('confidentialUsers')
+        ->assertSchemaComponentVisible('confidentialDepartments')
+        ->assertSchemaComponentVisible('confidentialContacts');
+});
+
+test('a confidential service monitor cannot be created while a notification recipient has no confidential access', function () {
+    asSuperAdmin();
+
+    $notifiedUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'user' => [$notifiedUser->getKey()],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });

@@ -42,10 +42,14 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification as BaseNotification;
 use InvalidArgumentException;
 
@@ -118,28 +122,17 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
     {
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
 
-        if (! $target?->is_confidential) {
+        if (! ConfidentialServiceMonitoringFeature::active() || ! $target?->is_confidential) {
             return true;
         }
 
-        if (! $notifiable instanceof User) {
-            return false;
-        }
-
-        if ($notifiable->isAdmin()) {
-            return true;
-        }
-
-        if ($target->createdBy?->is($notifiable)) {
-            return true;
-        }
-
-        if ($target->confidentialUsers()->whereKey($notifiable->getKey())->exists()) {
-            return true;
-        }
-
-        return $target->confidentialDepartments()
-            ->whereHas('users', fn ($query) => $query->whereKey($notifiable->getKey()))
+        return ServiceMonitoringTarget::query()
+            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->whereKey($target->getKey())
+            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
+                $query,
+                $notifiable instanceof Authenticatable ? $notifiable : null,
+            ))
             ->exists();
     }
 }

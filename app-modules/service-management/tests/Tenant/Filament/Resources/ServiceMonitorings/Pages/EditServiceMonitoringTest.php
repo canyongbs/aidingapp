@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -294,16 +296,22 @@ test('turning off confidentiality clears previously granted users, departments, 
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
     $grantedUser = User::factory()->create();
+    $grantedDepartment = Department::factory()->create();
+    $grantedContact = Contact::factory()->create();
 
     livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'is_confidential' => true,
             'confidentialUsers' => [$grantedUser->getKey()],
+            'confidentialDepartments' => [$grantedDepartment->getKey()],
+            'confidentialContacts' => [$grantedContact->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1);
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(1)
+        ->and($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1)
+        ->and($serviceMonitoringTarget->confidentialContacts()->count())->toBe(1);
 
     livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
@@ -312,7 +320,82 @@ test('turning off confidentiality clears previously granted users, departments, 
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(0);
+    expect($serviceMonitoringTarget->confidentialUsers()->count())->toBe(0)
+        ->and($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(0)
+        ->and($serviceMonitoringTarget->confidentialContacts()->count())->toBe(0);
+});
+
+test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled on the edit page', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSchemaComponentHidden('confidentialUsers')
+        ->assertSchemaComponentHidden('confidentialDepartments')
+        ->assertSchemaComponentHidden('confidentialContacts')
+        ->fillForm(['is_confidential' => true])
+        ->assertSchemaComponentVisible('confidentialUsers')
+        ->assertSchemaComponentVisible('confidentialDepartments')
+        ->assertSchemaComponentVisible('confidentialContacts');
+});
+
+test('a service monitor cannot be made confidential while a notification recipient has no confidential access', function () {
+    asSuperAdmin();
+
+    $notifiedUser = User::factory()->create();
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'user' => [$notifiedUser->getKey()],
+            'is_confidential' => true,
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeFalse();
+});
+
+test('the creator on the notification list satisfies the confidential access rule without an explicit grant', function () {
+    asSuperAdmin();
+
+    $creator = User::factory()->create();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->for($creator, 'createdBy')
+        ->create(['is_confidential' => false]);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'user' => [$creator->getKey()],
+            'is_confidential' => true,
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeTrue();
+});
+
+test('a notification recipient covered by a granted department satisfies the confidential access rule', function () {
+    asSuperAdmin();
+
+    $grantedDepartment = Department::factory()->create();
+    $notifiedUser = User::factory()->create();
+    $notifiedUser->department()->associate($grantedDepartment)->save();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'user' => [$notifiedUser->getKey()],
+            'is_confidential' => true,
+            'confidentialDepartments' => [$grantedDepartment->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeTrue();
 });
 
 test('marking a legacy service monitor confidential backfills the editor as its creator', function () {

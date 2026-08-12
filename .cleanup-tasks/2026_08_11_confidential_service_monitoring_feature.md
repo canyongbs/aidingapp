@@ -36,4 +36,5 @@ full deploy cycle.
     - `app-modules/service-management/src/Filament/Resources/ServiceMonitorings/Pages/EditServiceMonitoring.php` (conditional `ConfidentialitySection::make()` and `afterSave()` early return)
     - `app-modules/service-management/src/Filament/Resources/ServiceMonitorings/Pages/ViewServiceMonitoring.php` (Confidentiality infolist section `visible()`)
     - `app-modules/service-management/src/Filament/Resources/ServiceMonitorings/Pages/ListServiceMonitorings.php` (name column `icon()`/`tooltip()`)
+    - `app-modules/service-management/src/Notifications/ServiceMonitoringNotification.php` (`notifiableCanViewTarget()` early return)
 - Delete the activation migration `app-modules/service-management/database/migrations/2026_08_11_120955_data_activate_confidential_service_monitoring_feature.php` along with the flag class.

@@ -36,16 +36,21 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Rules\ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\Arr;
 
 class ConfidentialitySection
 {
-    public static function make(): Section
+    // The notified fields live on the pages rather than in this section, so their names are
+    // required here: the rule below has to compare them against the confidential access lists
+    public static function make(string $notifiedUsersField, string $notifiedDepartmentsField): Section
     {
         return Section::make('Confidentiality')
             ->schema([
@@ -55,6 +60,15 @@ class ConfidentialitySection
                     ->helperText('When enabled, only admins, the creator, and the users, departments, and contacts selected below can view this service monitor.')
                     ->default(false)
                     ->columnSpanFull()
+                    ->rules(fn (Get $get, ?ServiceMonitoringTarget $record): array => [
+                        new ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess(
+                            notifiedUserIds: Arr::wrap($get($notifiedUsersField)),
+                            notifiedDepartmentIds: Arr::wrap($get($notifiedDepartmentsField)),
+                            confidentialUserIds: Arr::wrap($get('confidentialUsers')),
+                            confidentialDepartmentIds: Arr::wrap($get('confidentialDepartments')),
+                            creatorId: $record?->getAttribute('created_by_id') ?? auth()->id(),
+                        ),
+                    ])
                     ->afterStateUpdated(function (bool $state, Set $set): void {
                         if ($state) {
                             return;

@@ -1,0 +1,135 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+namespace AidingApp\ServiceManagement\Rules;
+
+use AidingApp\Department\Models\Department;
+use App\Models\Scopes\WithoutAnyAdmin;
+use App\Models\User;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Translation\PotentiallyTranslatedString;
+
+/**
+ * A confidential service monitor only notifies recipients who are allowed to see it, so a
+ * recipient without confidential access would silently never be alerted. This rejects that
+ * combination at the form instead of letting the outage alert disappear at delivery time.
+ */
+class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess implements ValidationRule
+{
+    /**
+     * @param list<string> $notifiedUserIds
+     * @param list<string> $notifiedDepartmentIds
+     * @param list<string> $confidentialUserIds
+     * @param list<string> $confidentialDepartmentIds
+     */
+    public function __construct(
+        protected array $notifiedUserIds,
+        protected array $notifiedDepartmentIds,
+        protected array $confidentialUserIds,
+        protected array $confidentialDepartmentIds,
+        protected ?string $creatorId,
+    ) {}
+
+    /**
+     * @param Closure(string): PotentiallyTranslatedString $fail
+     */
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        if (! $value) {
+            return;
+        }
+
+        $unreachable = $this->unreachableDepartmentNames()
+            ->concat($this->unreachableUserNames());
+
+        if ($unreachable->isEmpty()) {
+            return;
+        }
+
+        $fail(
+            'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
+            . $unreachable->join(', ', ' and ')
+            . '. Grant them confidential access below, or remove them from the notification settings.'
+        );
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    protected function unreachableDepartmentNames(): Collection
+    {
+        return Department::query()
+            ->whereKey($this->notifiedDepartmentIds)
+            ->when(
+                filled($this->confidentialDepartmentIds),
+                fn (Builder $query) => $query->whereKeyNot($this->confidentialDepartmentIds),
+            )
+            ->orderBy('name')
+            ->pluck('name');
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    protected function unreachableUserNames(): Collection
+    {
+        return User::query()
+            ->whereKey($this->notifiedUserIds)
+            // Admins can already see every confidential monitor
+            ->tap(new WithoutAnyAdmin())
+            ->when(
+                filled($this->confidentialUserIds),
+                fn (Builder $query) => $query->whereKeyNot($this->confidentialUserIds),
+            )
+            ->when(
+                filled($this->confidentialDepartmentIds),
+                // A user with no department is never covered by a granted department, and
+                // `whereNotIn` alone would drop them from the results because NULL NOT IN (…) is NULL
+                fn (Builder $query) => $query->where(fn (Builder $query) => $query
+                    ->whereNull('department_id')
+                    ->orWhereNotIn('department_id', $this->confidentialDepartmentIds)),
+            )
+            ->when(
+                filled($this->creatorId),
+                fn (Builder $query) => $query->whereKeyNot($this->creatorId),
+            )
+            ->orderBy('name')
+            ->pluck('name');
+    }
+}

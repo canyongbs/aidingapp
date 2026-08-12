@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
@@ -41,6 +42,7 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Support\Facades\Http;
@@ -207,6 +209,30 @@ it('sends a notification for a confidential service monitor to a recipient grant
     );
 });
 
+it('builds the database notification for a confidential service monitor without an authenticated user', function () {
+    Http::fake(fn () => Http::response('Test', 500));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->confidential()
+        ->hasAttached($user)
+        ->hasAttached($user, [], 'confidentialUsers')
+        ->create(['is_notified_via_database' => true, 'is_notified_via_email' => false]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo(
+        $user,
+        ServiceMonitoringNotification::class,
+        fn (ServiceMonitoringNotification $notification) => str_contains(
+            $notification->toDatabase($user)['title'],
+            e($serviceMonitorTarget->name),
+        )
+    );
+});
+
 it('does not send a notification for a confidential service monitor to a subscriber who is not granted confidential access', function () {
     Http::fake(fn () => Http::response('Test', 500));
     Notification::fake();
@@ -221,4 +247,30 @@ it('does not send a notification for a confidential service monitor to a subscri
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Notification::assertNotSentTo($user, ServiceMonitoringNotification::class);
+});
+
+it('does not send a notification for a confidential service monitor to a subscriber whose department is not granted confidential access', function () {
+    Http::fake(fn () => Http::response('Test', 500));
+    Notification::fake();
+
+    $grantedDepartment = Department::factory()->create();
+    $otherDepartment = Department::factory()->create();
+
+    $grantedUser = User::factory()->create();
+    $grantedUser->department()->associate($grantedDepartment)->save();
+
+    $ungrantedUser = User::factory()->create();
+    $ungrantedUser->department()->associate($otherDepartment)->save();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->confidential()
+        ->hasAttached($grantedDepartment, [], 'departments')
+        ->hasAttached($otherDepartment, [], 'departments')
+        ->hasAttached($grantedDepartment, [], 'confidentialDepartments')
+        ->create(['is_notified_via_email' => true]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo($grantedUser, ServiceMonitoringNotification::class);
+    Notification::assertNotSentTo($ungrantedUser, ServiceMonitoringNotification::class);
 });

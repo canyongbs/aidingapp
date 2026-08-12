@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models\Scopes;
 use AidingApp\Contact\Models\Contact;
 use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -55,8 +56,14 @@ class ServiceMonitoringTargetVisibilityScope implements Scope
             return;
         }
 
-        $authenticatable = auth()->user();
+        $this->constrainFor($builder, auth()->user());
+    }
 
+    /**
+     * @param Builder<covariant Model> $builder
+     */
+    public function constrainFor(Builder $builder, ?Authenticatable $authenticatable): void
+    {
         if ($authenticatable instanceof User) {
             if ($authenticatable->isAdmin()) {
                 return;
