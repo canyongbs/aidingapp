@@ -232,6 +232,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $record->assets()->sync($data['assets'] ?? []);
                         $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
+                        $this->milestoneProgressDescriptions = [];
                         $this->dispatch('projectPipelineUpdated');
                     }),
                 Action::make('editMilestone')
@@ -245,6 +246,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record, array $data): void {
                         $record->milestone?->update($data);
 
+                        $this->milestoneProgressDescriptions = [];
                         $this->dispatch('projectMilestonesUpdated');
                         $this->dispatch('projectPipelineUpdated');
                     }),
@@ -265,6 +267,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
                         $milestone->delete();
 
+                        $this->milestoneProgressDescriptions = [];
                         $this->dispatch('projectMilestonesUpdated');
                         $this->dispatch('projectPipelineUpdated');
                     }),
