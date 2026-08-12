@@ -85,7 +85,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     ];
 
     protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
         'is_reporting_active' => 'boolean',
         'report_frequency' => ServiceMonitoringReportFrequency::class,
         'is_reported_via_database' => 'boolean',
