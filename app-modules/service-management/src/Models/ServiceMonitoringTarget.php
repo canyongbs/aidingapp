@@ -37,21 +37,30 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
+use AidingApp\ServiceManagement\Observers\ServiceMonitoringTargetObserver;
 use App\Models\BaseModel;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperServiceMonitoringTarget
  */
+#[ObservedBy([ServiceMonitoringTargetObserver::class])]
+#[ScopedBy(ServiceMonitoringTargetVisibilityScope::class)]
 class ServiceMonitoringTarget extends BaseModel implements Auditable
 {
     /** @use HasFactory<ServiceMonitoringTargetFactory> */
@@ -67,10 +76,7 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'frequency',
         'is_notified_via_database',
         'is_notified_via_email',
-    ];
-
-    protected $casts = [
-        'frequency' => ServiceMonitoringFrequency::class,
+        'is_confidential',
     ];
 
     /**
@@ -116,14 +122,56 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     }
 
     /**
-     * @return array<string, string>
+     * @return MorphTo<Model, $this>
      */
-    public function casts(): array
+    public function createdBy(): MorphTo
     {
-        return [
-            'is_notified_via_database' => 'boolean',
-            'is_notified_via_email' => 'boolean',
-        ];
+        return $this->morphTo();
+    }
+
+    /**
+     * @return BelongsToMany<User, $this, covariant ServiceMonitoringTargetConfidentialUser>
+     */
+    public function confidentialUsers(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            User::class,
+            'service_monitoring_target_confidential_user',
+            'service_monitoring_target_id',
+            'user_id',
+        )
+            ->using(ServiceMonitoringTargetConfidentialUser::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Department, $this, covariant ServiceMonitoringTargetConfidentialDepartment>
+     */
+    public function confidentialDepartments(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Department::class,
+            'service_monitoring_target_confidential_department',
+            'service_monitoring_target_id',
+            'department_id',
+        )
+            ->using(ServiceMonitoringTargetConfidentialDepartment::class)
+            ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Contact, $this, covariant ServiceMonitoringTargetConfidentialContact>
+     */
+    public function confidentialContacts(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Contact::class,
+            'service_monitoring_target_confidential_contact',
+            'service_monitoring_target_id',
+            'contact_id',
+        )
+            ->using(ServiceMonitoringTargetConfidentialContact::class)
+            ->withTimestamps();
     }
 
     public function getUptimePercentage(int $days): string
@@ -139,5 +187,18 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'frequency' => ServiceMonitoringFrequency::class,
+            'is_notified_via_database' => 'boolean',
+            'is_notified_via_email' => 'boolean',
+            'is_confidential' => 'boolean',
+        ];
     }
 }

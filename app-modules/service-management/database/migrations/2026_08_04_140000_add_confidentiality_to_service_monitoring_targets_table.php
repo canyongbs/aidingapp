@@ -34,39 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->boolean('is_confidential')->default(false);
+            $table->nullableUuidMorphs('created_by');
+        });
     }
 
-    public function confidential(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->dropColumn(['is_confidential', 'created_by_type', 'created_by_id']);
+        });
     }
-}
+};

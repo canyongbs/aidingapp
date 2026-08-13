@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -90,6 +91,32 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->boolean(),
                             ])
                             ->visible(fn (ServiceMonitoringTarget $record): bool => $record->departments()->count() || $record->users()->count())
+                            ->columns(),
+                        Section::make('Confidentiality')
+                            ->schema([
+                                IconEntry::make('is_confidential')
+                                    ->label('Restricted Visibility')
+                                    ->boolean(),
+                                TextEntry::make('confidentialUsers.name')
+                                    ->label('Users')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialUsers()->exists()),
+                                TextEntry::make('confidentialDepartments.name')
+                                    ->label('Departments')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialDepartments()->exists()),
+                                TextEntry::make('confidentialContacts.full_name')
+                                    ->label('Contacts')
+                                    ->listWithLineBreaks()
+                                    ->limitList(3)
+                                    ->expandableLimitedList()
+                                    ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialContacts()->exists()),
+                            ])
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => ConfidentialServiceMonitoringFeature::active() && $record->is_confidential)
                             ->columns(),
                     ])
                     ->columns(),

@@ -34,39 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        Schema::create('service_monitoring_target_confidential_contact', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('service_monitoring_target_id')->constrained('service_monitoring_targets', indexName: 'smt_confidential_contact_target_id_foreign')->cascadeOnDelete();
+            $table->foreignUuid('contact_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+
+            $table->unique(['service_monitoring_target_id', 'contact_id'], 'smt_confidential_contact_unique');
+        });
     }
 
-    public function confidential(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        Schema::dropIfExists('service_monitoring_target_confidential_contact');
     }
-}
+};

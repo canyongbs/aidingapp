@@ -38,8 +38,10 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Page
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
@@ -102,6 +104,11 @@ class EditServiceMonitoring extends EditRecord
                             ->default(false),
                     ])
                     ->columns(2),
+                // The confidentiality columns may not exist yet for tenants whose migration has not run
+                ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make(
+                    notifiedUsersField: 'user',
+                    notifiedDepartmentsField: 'department',
+                )] : []),
             ]);
     }
 
@@ -126,6 +133,25 @@ class EditServiceMonitoring extends EditRecord
         }
 
         return $breadcrumbs;
+    }
+
+    protected function afterSave(): void
+    {
+        if (! ConfidentialServiceMonitoringFeature::active()) {
+            return;
+        }
+
+        /** @var ServiceMonitoringTarget $record */
+        $record = $this->getRecord();
+
+        if (! $record->wasChanged('is_confidential') || $record->is_confidential) {
+            return;
+        }
+
+        // Filament skips saving hidden relationship fields, so clear stale grants explicitly
+        $record->confidentialUsers()->sync([]);
+        $record->confidentialDepartments()->sync([]);
+        $record->confidentialContacts()->sync([]);
     }
 
     protected function getHeaderActions(): array
