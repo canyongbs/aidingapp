@@ -209,6 +209,25 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
     }
 
+    public function removePipelineEntryAction(): Action
+    {
+        return Action::make('removePipelineEntry')
+            ->label('Remove')
+            ->icon('heroicon-m-trash')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->modalHeading('Remove Pipeline Task')
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->pipeline))
+            ->action(function (array $arguments): void {
+                $this->resolvePipelineEntry($arguments['entry'] ?? null)->delete();
+
+                Notification::make()
+                    ->success()
+                    ->title('Pipeline task removed successfully')
+                    ->send();
+            });
+    }
+
     protected function resolvePipelineEntry(mixed $entryId): PipelineEntry
     {
         return $this->pipeline->entries()

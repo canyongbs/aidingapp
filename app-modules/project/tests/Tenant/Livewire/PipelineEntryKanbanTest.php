@@ -49,6 +49,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertModelMissing;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
@@ -510,6 +511,75 @@ it('clears related milestones, assets, and service requests when the type is set
     expect($entry->milestones->pluck('id')->all())->toBe([])
         ->and($entry->assets->pluck('id')->all())->toBe([])
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([]);
+});
+
+it('can remove a pipeline entry through the dropdown', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('removePipelineEntry', arguments: ['entry' => $entry->getKey()])
+        ->assertHasNoActionErrors()
+        ->assertNotified('Pipeline task removed successfully');
+
+    assertModelMissing($entry);
+});
+
+it('fails to remove a pipeline entry that belongs to a different pipeline', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $otherPipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $otherPipeline->stages->first()->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('removePipelineEntry', arguments: ['entry' => $entry->getKey()]);
+})->throws(ModelNotFoundException::class);
+
+it('hides the remove action without pipeline update permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('pipeline.*.view');
+    $user->refresh();
+
+    expect($user->can('update', $pipeline))->toBeFalse();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertActionHidden('removePipelineEntry');
 });
 
 it('hides the edit action without pipeline update permission', function () {
