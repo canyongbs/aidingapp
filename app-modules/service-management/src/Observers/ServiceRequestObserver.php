@@ -108,7 +108,7 @@ class ServiceRequestObserver
             $serviceRequest->status_updated_at = CarbonImmutable::now();
 
             if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
-                if (SlaWaitingExclusionFeature::active()) {
+                if (SlaWaitingExclusionFeature::active() && ! is_null($serviceRequest->created_at)) {
                     $end = $serviceRequest->status_updated_at;
 
                     $seconds = (int) round($serviceRequest->created_at->diffInSeconds($end));
