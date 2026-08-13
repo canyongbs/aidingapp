@@ -235,42 +235,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->milestoneProgressDescriptions = [];
                         $this->dispatch('projectPipelineUpdated');
                     }),
-                Action::make('editMilestone')
-                    ->label('Edit Milestone')
-                    ->icon('heroicon-m-pencil-square')
-                    ->slideOver()
-                    ->fillForm(fn (PipelineEntry $record): array => $record->milestone?->attributesToArray() ?? [])
-                    ->schema(CreateProjectMilestoneAction::formSchema())
-                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
-                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('update', $record->milestone))
-                    ->action(function (PipelineEntry $record, array $data): void {
-                        $record->milestone?->update($data);
-
-                        $this->milestoneProgressDescriptions = [];
-                        $this->dispatch('projectMilestonesUpdated');
-                        $this->dispatch('projectPipelineUpdated');
-                    }),
-                Action::make('deleteMilestone')
-                    ->label('Delete Milestone')
-                    ->icon('heroicon-m-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
-                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('delete', $record->milestone))
-                    ->action(function (PipelineEntry $record): void {
-                        $milestone = $record->milestone;
-
-                        if (! $milestone instanceof ProjectMilestone) {
-                            return;
-                        }
-
-                        $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
-                        $milestone->delete();
-
-                        $this->milestoneProgressDescriptions = [];
-                        $this->dispatch('projectMilestonesUpdated');
-                        $this->dispatch('projectPipelineUpdated');
-                    }),
             ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
