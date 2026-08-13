@@ -31,10 +31,7 @@
     
     </COPYRIGHT>
 --}}
-<span
-    class="project-milestone-group-actions block w-full"
-    x-on:click.stop
->
+<span class="project-milestone-group-actions block w-full" x-on:click.stop>
     <span class="inline-block">{{ $progress }}</span>
 
     @if ($milestone)
