@@ -31,15 +31,14 @@
     
     </COPYRIGHT>
 --}}
-<div
-    class="flex w-full items-center justify-between gap-3"
-    x-init="$el.closest('.fi-ta-group-header').firstElementChild.classList.add('grow')"
+<span
+    class="project-milestone-group-actions block w-full"
     x-on:click.stop
 >
-    <span>{{ $progress }}</span>
+    <span class="inline-block">{{ $progress }}</span>
 
     @if ($milestone)
-        <div class="flex items-center gap-3">
+        <span class="float-right inline-flex items-center gap-3">
             @can('update', $milestone)
                 <x-filament::link
                     tag="button"
@@ -60,6 +59,6 @@
                     Delete
                 </x-filament::link>
             @endcan
-        </div>
+        </span>
     @endif
-</div>
+</span>
