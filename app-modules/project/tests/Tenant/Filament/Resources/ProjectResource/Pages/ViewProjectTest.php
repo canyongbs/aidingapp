@@ -512,8 +512,8 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->callTableAction('deleteMilestone', $entry)
-        ->assertHasNoTableActionErrors();
+        ->callAction('deleteMilestone', arguments: ['milestone' => $milestone->getKey()])
+        ->assertHasNoActionErrors();
 
     expect($milestone->fresh()->trashed())->toBeTrue()
         ->and($entry->fresh()->project_milestone_id)->toBeNull();

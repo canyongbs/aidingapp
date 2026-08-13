@@ -186,11 +186,15 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                     return Group::make('milestone.title')
                         ->label('Milestone')
+                        ->titlePrefixedWithLabel(false)
                         ->getTitleFromRecordUsing(
-                            fn (PipelineEntry $record): string => $record->milestone->title ?? 'Unaffiliated'
+                            fn (PipelineEntry $record): string => $record->milestone?->title ?? 'No Associated Milestone'
                         )
                         ->getDescriptionFromRecordUsing(
-                            fn (PipelineEntry $record): string => $this->milestoneProgressDescription($record, $pipeline)
+                            fn (PipelineEntry $record): View => view('project::filament.tables.groups.milestone', [
+                                'milestone' => $record->milestone,
+                                'progress' => $this->milestoneProgressDescription($record, $pipeline),
+                            ])
                         )
                         ->collapsible();
                 }
@@ -210,42 +214,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
                         $this->milestoneProgressDescriptions = [];
-                        $this->dispatch('projectPipelineUpdated');
-                    }),
-                Action::make('editMilestone')
-                    ->label('Edit Milestone')
-                    ->icon('heroicon-m-pencil-square')
-                    ->slideOver()
-                    ->fillForm(fn (PipelineEntry $record): array => $record->milestone?->attributesToArray() ?? [])
-                    ->schema(CreateProjectMilestoneAction::formSchema())
-                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
-                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('update', $record->milestone))
-                    ->action(function (PipelineEntry $record, array $data): void {
-                        $record->milestone?->update($data);
-
-                        $this->milestoneProgressDescriptions = [];
-                        $this->dispatch('projectMilestonesUpdated');
-                        $this->dispatch('projectPipelineUpdated');
-                    }),
-                Action::make('deleteMilestone')
-                    ->label('Delete Milestone')
-                    ->icon('heroicon-m-trash')
-                    ->color('danger')
-                    ->requiresConfirmation()
-                    ->visible(fn (PipelineEntry $record): bool => PipelineEntryMilestoneFeature::active() && filled($record->project_milestone_id))
-                    ->authorize(fn (PipelineEntry $record): bool => auth()->user()->can('delete', $record->milestone))
-                    ->action(function (PipelineEntry $record): void {
-                        $milestone = $record->milestone;
-
-                        if (! $milestone instanceof ProjectMilestone) {
-                            return;
-                        }
-
-                        $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
-                        $milestone->delete();
-
-                        $this->milestoneProgressDescriptions = [];
-                        $this->dispatch('projectMilestonesUpdated');
                         $this->dispatch('projectPipelineUpdated');
                     }),
             ])
@@ -348,9 +316,72 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->authorize(fn (): bool => auth()->user()->can('create', [Pipeline::class, $this->record]));
     }
 
+    public function editMilestoneAction(): Action
+    {
+        return Action::make('editMilestone')
+            ->label('Edit')
+            ->icon('heroicon-m-pencil-square')
+            ->slideOver()
+            ->fillForm(function (Action $action): array {
+                $milestone = $this->getActionMilestone($action);
+
+                return $milestone?->attributesToArray() ?? [];
+            })
+            ->schema(CreateProjectMilestoneAction::formSchema())
+            ->authorize(fn (Action $action): bool => auth()->user()->can('update', $this->getActionMilestone($action)))
+            ->action(function (Action $action, array $data): void {
+                $milestone = $this->getActionMilestone($action);
+
+                if (! $milestone instanceof ProjectMilestone) {
+                    return;
+                }
+
+                $milestone->update($data);
+
+                $this->milestoneProgressDescriptions = [];
+                $this->dispatch('projectMilestonesUpdated');
+                $this->dispatch('projectPipelineUpdated');
+            });
+    }
+
+    public function deleteMilestoneAction(): Action
+    {
+        return Action::make('deleteMilestone')
+            ->label('Delete')
+            ->icon('heroicon-m-trash')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->authorize(fn (Action $action): bool => auth()->user()->can('delete', $this->getActionMilestone($action)))
+            ->action(function (Action $action): void {
+                $milestone = $this->getActionMilestone($action);
+
+                if (! $milestone instanceof ProjectMilestone) {
+                    return;
+                }
+
+                $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
+                $milestone->delete();
+
+                $this->milestoneProgressDescriptions = [];
+                $this->dispatch('projectMilestonesUpdated');
+                $this->dispatch('projectPipelineUpdated');
+            });
+    }
+
     protected function getPipelineSwitcherProjectId(): ?string
     {
         return (string) $this->record->getKey();
+    }
+
+    protected function getActionMilestone(Action $action): ?ProjectMilestone
+    {
+        $milestoneId = $action->getArguments()['milestone'] ?? null;
+
+        if (blank($milestoneId)) {
+            return null;
+        }
+
+        return $this->record->milestones()->whereKey($milestoneId)->first();
     }
 
     protected function getPipelineSwitcherCurrentPipelineId(): ?string
