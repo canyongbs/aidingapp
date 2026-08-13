@@ -70,7 +70,7 @@ class EditContract extends EditRecord
                     ->relationship(
                         name: 'contractType',
                         titleAttribute: 'name',
-                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'ASC')
+                        modifyQueryUsing: fn (Builder $query) => $query->orderBy('order', 'asc')
                     )
                     ->preload()
                     ->default(

@@ -55,7 +55,7 @@ class ServiceMonitorStatusController extends Controller
         $paginated = ServiceMonitoringTarget::query()
             ->with(['latestHistory:id,response_time,succeeded,response,historical_service_monitorings.service_monitoring_target_id'])
             ->select('id', 'name', 'domain')
-            ->orderBy('created_at', 'ASC')
+            ->orderBy('created_at', 'asc')
             ->paginate($perPage);
 
         $paginated->through(function (ServiceMonitoringTarget $target) {

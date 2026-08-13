@@ -34,19 +34,11 @@
 </COPYRIGHT>
 */
 
-namespace App\Http\Middleware;
+namespace AidingApp\Ai\Support\StreamingChunks;
 
-use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken as Middleware;
-
-class VerifyCsrfToken extends Middleware
+readonly class Thinking
 {
-    /**
-     * The URIs that should be excluded from CSRF verification.
-     *
-     * @var array<int, string>
-     */
-    protected $except = [
-        // TODO: Review if these exclusions are still necessary
-        '/api/forms/*',
-    ];
+    public function __construct(
+        public string $content,
+    ) {}
 }
