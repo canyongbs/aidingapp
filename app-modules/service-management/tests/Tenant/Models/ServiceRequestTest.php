@@ -249,4 +249,29 @@ describe('SLA waiting exclusion', function () {
         // The raw 180s exceeds the 150s SLA, but excluding the 50s waiting span brings it to 130s.
         expect($serviceRequest->fresh()->getResolutionSlaComplianceStatus())->toBe(SlaComplianceStatus::Compliant);
     });
+
+    it('excludes time spent closed before a reopen from the resolution seconds when the feature is active', function () {
+        Notification::fake();
+
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $inProgress = ServiceRequestStatus::factory()->inProgress()->create();
+        $closed = ServiceRequestStatus::factory()->closed()->create();
+
+        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+        $this->travelTo($start);
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
+
+        $this->travelTo($start->addSeconds(100));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        $this->travelTo($start->addSeconds(200));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
+
+        $this->travelTo($start->addSeconds(300));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        // The 300s window excludes the 100s the request spent closed before it was reopened.
+        expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(200);
+    });
 });
