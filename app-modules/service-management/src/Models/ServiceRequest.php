@@ -418,10 +418,12 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
      */
     public function getExcludedSecondsBetween(CarbonInterface $start, CarbonInterface $end, array $classifications): int
     {
-        $periods = $this->statusPeriods()
-            ->orderBy('started_at')
-            ->orderBy('created_at')
-            ->get();
+        $periods = $this->statusPeriods
+            ->sortBy([
+                ['started_at', 'asc'],
+                ['created_at', 'asc'],
+            ])
+            ->values();
 
         if ($periods->isEmpty()) {
             return 0;
