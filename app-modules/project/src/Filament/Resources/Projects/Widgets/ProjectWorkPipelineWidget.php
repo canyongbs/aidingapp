@@ -188,7 +188,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)
                         ->getTitleFromRecordUsing(
-                            fn (PipelineEntry $record): string => $record->milestone?->title ?? 'No Associated Milestone'
+                            fn (PipelineEntry $record): string => $record->milestone->title ?? 'No Associated Milestone'
                         )
                         ->getDescriptionFromRecordUsing(
                             fn (PipelineEntry $record): View => view('project::filament.tables.groups.milestone', [
