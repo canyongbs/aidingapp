@@ -128,6 +128,13 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->without('frequency'),
             ['frequency' => 'required'],
         ],
+        'report frequency required when reporting is active' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'is_reporting_active' => true,
+                'report_frequency' => null,
+            ]),
+            ['report_frequency' => 'required'],
+        ],
     ]
 );
 

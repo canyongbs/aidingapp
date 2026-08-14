@@ -34,44 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetReportContactFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @extends Factory<ServiceMonitoringTarget>
+ * @mixin IdeHelperServiceMonitoringTargetReportContact
  */
-class ServiceMonitoringTargetFactory extends Factory
+class ServiceMonitoringTargetReportContact extends Pivot
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    use HasUuids;
+
+    /** @use HasFactory<ServiceMonitoringTargetReportContactFactory> */
+    use HasFactory;
+
+    public function getTable(): string
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        return 'service_monitoring_target_report_contact';
     }
 
-    public function confidential(): static
+    /**
+     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     */
+    public function serviceMonitoringTarget(): BelongsTo
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        return $this->belongsTo(ServiceMonitoringTarget::class);
+    }
+
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
     }
 }

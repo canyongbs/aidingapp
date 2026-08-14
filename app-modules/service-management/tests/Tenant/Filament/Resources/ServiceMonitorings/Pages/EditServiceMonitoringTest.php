@@ -148,8 +148,48 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ServiceMonitoringTargetRequestFactory::new()->state(['frequency' => null]),
             ['frequency' => 'required'],
         ],
+        'report frequency required when reporting is active' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'is_reporting_active' => true,
+                'report_frequency' => null,
+            ]),
+            ['report_frequency' => 'required'],
+        ],
     ]
 );
+
+test('EditServiceMonitoring hydrates report channels from persisted flags', function (array $attributes, array $expectedChannels) {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'is_reporting_active' => true,
+        ...$attributes,
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaStateSet([
+            'report_channels' => $expectedChannels,
+        ]);
+})->with([
+    'email only' => [
+        ['is_reported_via_email' => true, 'is_reported_via_database' => false],
+        ['is_reported_via_email'],
+    ],
+    'application only' => [
+        ['is_reported_via_email' => false, 'is_reported_via_database' => true],
+        ['is_reported_via_database'],
+    ],
+    'both channels' => [
+        ['is_reported_via_email' => true, 'is_reported_via_database' => true],
+        ['is_reported_via_email', 'is_reported_via_database'],
+    ],
+    'no channels' => [
+        ['is_reported_via_email' => false, 'is_reported_via_database' => false],
+        [],
+    ],
+]);
 
 test('delete action visible with proper access control', function () {
     $settings = app(LicenseSettings::class);

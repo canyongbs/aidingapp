@@ -48,10 +48,12 @@ use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
 use AidingApp\ServiceManagement\Jobs\EndServiceRequestConversations;
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
+use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
@@ -143,6 +145,34 @@ class Kernel extends ConsoleKernel
                         });
                     })
                         ->daily();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily));
+                            }
+                        });
+                    })
+                        ->daily();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Weekly));
+                            }
+                        });
+                    })
+                        ->weekly()
+                        ->mondays();
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
+                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Monthly));
+                            }
+                        });
+                    })
+                        ->monthly();
 
                     $schedule->call(function () use ($tenant) {
                         $tenant->execute(function () {

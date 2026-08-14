@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Filament\Components\AutomatedReportingSection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use App\Features\ConfidentialServiceMonitoringFeature;
@@ -99,6 +100,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->default(false),
                     ])
                     ->columns(2),
+                AutomatedReportingSection::make(),
                 // The confidentiality columns may not exist yet for tenants whose migration has not run
                 ...(ConfidentialServiceMonitoringFeature::active() ? [ConfidentialitySection::make(
                     notifiedUsersField: 'user',

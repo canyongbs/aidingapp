@@ -34,44 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        Schema::create('service_monitoring_target_report_department', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('department_id')->constrained()->cascadeOnDelete();
+
+            $table->timestamps();
+        });
     }
 
-    public function confidential(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        Schema::dropIfExists('service_monitoring_target_report_department');
     }
-}
+};

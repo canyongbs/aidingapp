@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
@@ -109,10 +108,14 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
 
-            $this->serviceMonitoringTarget->departments()->each(function (Department $department) use (&$recipients) {
-                $users = $department->users()->get();
-                $recipients = $recipients->merge($users)->unique('id');
-            });
+            $departmentUsers = $this->serviceMonitoringTarget
+                ->departments()
+                ->with('users')
+                ->get()
+                ->pluck('users')
+                ->flatten(1);
+
+            $recipients = $recipients->merge($departmentUsers)->unique('id');
 
             $channel = match (true) {
                 $this->serviceMonitoringTarget->is_notified_via_email && $this->serviceMonitoringTarget->is_notified_via_database => 'both',

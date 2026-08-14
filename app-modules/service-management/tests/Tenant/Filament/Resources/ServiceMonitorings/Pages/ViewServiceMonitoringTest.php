@@ -34,7 +34,9 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -84,10 +86,22 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
 });
 
 test('The correct details are displayed on the ViewServiceMonitoring page', function () {
+    $reportDepartment = Department::factory()->create();
+    $reportUser = User::factory()->create();
+    $reportContact = Contact::factory()->create();
+
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
         ->hasAttached(Department::factory())
         ->hasAttached(User::factory())
-        ->create();
+        ->hasAttached($reportDepartment, [], 'reportDepartments')
+        ->hasAttached($reportUser, [], 'reportUsers')
+        ->hasAttached($reportContact, [], 'reportContacts')
+        ->create([
+            'is_reporting_active' => true,
+            'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'is_reported_via_email' => true,
+            'is_reported_via_database' => true,
+        ]);
 
     asSuperAdmin()
         ->get(
@@ -111,7 +125,44 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 'Users',
                 ...$serviceMonitoringTarget->users()->pluck('name')->all(),
             ]
-        );
+        )
+        ->assertSee('Automated Reporting')
+        ->assertSee('Frequency')
+        ->assertSee($serviceMonitoringTarget->report_frequency->getLabel())
+        ->assertSee('Email')
+        ->assertSee('Application')
+        ->assertSee($reportUser->name)
+        ->assertSee($reportDepartment->name)
+        ->assertSee($reportContact->full_name);
+});
+
+test('The Automated Reporting section is hidden when reporting is not active', function () {
+    $reportDepartment = Department::factory()->create();
+    $reportUser = User::factory()->create();
+    $reportContact = Contact::factory()->create();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($reportDepartment, [], 'reportDepartments')
+        ->hasAttached($reportUser, [], 'reportUsers')
+        ->hasAttached($reportContact, [], 'reportContacts')
+        ->create([
+            'is_reporting_active' => false,
+            'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'is_reported_via_email' => true,
+            'is_reported_via_database' => true,
+        ]);
+
+    asSuperAdmin()
+        ->get(
+            ServiceMonitoringResource::getUrl('view', [
+                'record' => $serviceMonitoringTarget,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertDontSee('Automated Reporting')
+        ->assertDontSee($reportUser->name)
+        ->assertDontSee($reportDepartment->name)
+        ->assertDontSee($reportContact->full_name);
 });
 
 test('Reset Monitoring button resets monitoring', function () {

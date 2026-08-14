@@ -34,44 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Features\ServiceMonitoringReportFeature;
+use App\Settings\LicenseSettings;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
+class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public function __construct(public ServiceMonitoringReportFrequency $frequency) {}
+
+    public function uniqueId(): string
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        return $this->frequency->value;
     }
 
-    public function confidential(): static
+    /**
+     * Return the period for which this job should be unique for, half an hour, in seconds
+     */
+    public function uniqueFor(): int
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        return 30 * 60;
+    }
+
+    public function handle(): void
+    {
+        if (! app(LicenseSettings::class)->data?->addons?->serviceMonitoring || ! ServiceMonitoringReportFeature::active()) {
+            return;
+        }
+
+        ServiceMonitoringTarget::where('report_frequency', $this->frequency)
+            ->where('is_reporting_active', true)
+            ->chunkById(100, function (Collection $serviceMonitoringTargets) {
+                foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
+                    dispatch(new ServiceMonitoringReportNotifyJob($serviceMonitoringTarget));
+                }
+            });
     }
 }

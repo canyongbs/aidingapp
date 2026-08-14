@@ -34,44 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use App\Features\ServiceMonitoringReportFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
+        DB::transaction(function () {
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->boolean('is_reporting_active')->default(false);
+                $table->string('report_frequency')->nullable();
+                $table->boolean('is_reported_via_database')->default(false);
+                $table->boolean('is_reported_via_email')->default(false);
+            });
+
+            ServiceMonitoringReportFeature::activate();
+        });
     }
 
-    public function confidential(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        DB::transaction(function () {
+            ServiceMonitoringReportFeature::deactivate();
+
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->dropColumn(['is_reporting_active', 'report_frequency', 'is_reported_via_database', 'is_reported_via_email']);
+            });
+        });
     }
-}
+};

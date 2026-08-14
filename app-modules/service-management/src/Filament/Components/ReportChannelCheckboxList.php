@@ -34,44 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+namespace AidingApp\ServiceManagement\Filament\Components;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
-/**
- * @extends Factory<ServiceMonitoringTarget>
- */
-class ServiceMonitoringTargetFactory extends Factory
+class ReportChannelCheckboxList
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public static function make(): CheckboxList
     {
-        return [
-            'name' => $this->faker->words(10, true),
-            'description' => $this->faker->paragraph(),
-            'domain' => $this->faker->url(),
-            'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
-            'is_notified_via_database' => $this->faker->boolean(),
-            'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
-            'is_confidential' => false,
-        ];
-    }
+        $checkboxList = CheckboxList::make('report_channels')
+            ->label('Channels')
+            ->dehydrated(false)
+            ->options([
+                'is_reported_via_email' => 'Email',
+                'is_reported_via_database' => 'Application',
+            ])
+            ->live()
+            ->afterStateUpdated(function (Set $set, array $state = []): void {
+                $set('is_reported_via_email', in_array('is_reported_via_email', $state, true));
+                $set('is_reported_via_database', in_array('is_reported_via_database', $state, true));
+            })
+            ->visible(fn (Get $get) => $get('is_reporting_active'));
 
-    public function confidential(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'is_confidential' => true,
-        ]);
+        $checkboxList->afterStateHydrated(function (Set $set, ?ServiceMonitoringTarget $record = null): void {
+            if (! filled($record)) {
+                return;
+            }
+
+            $set(
+                'report_channels',
+                [
+                    ...($record->is_reported_via_email ? ['is_reported_via_email'] : []),
+                    ...($record->is_reported_via_database ? ['is_reported_via_database'] : []),
+                ]
+            );
+        });
+
+        return $checkboxList;
     }
 }
