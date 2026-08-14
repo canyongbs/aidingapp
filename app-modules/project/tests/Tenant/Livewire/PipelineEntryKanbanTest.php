@@ -133,6 +133,31 @@ it('renders modern card metadata with assignment and due tooltip', function () {
     Carbon::setTestNow();
 });
 
+it('hides archived tasks from the kanban board', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stageId = $pipeline->stages->first()->getKey();
+
+    $active = PipelineEntry::factory()->create([
+        'name' => 'Active Task',
+        'pipeline_stage_id' => $stageId,
+    ]);
+    $archived = PipelineEntry::factory()->create([
+        'name' => 'Archived Task',
+        'pipeline_stage_id' => $stageId,
+    ]);
+    $archived->archive();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee($active->name)
+        ->assertDontSee($archived->name);
+});
+
 it('renders stages in order sequence on the kanban board', function () {
     asSuperAdmin();
 

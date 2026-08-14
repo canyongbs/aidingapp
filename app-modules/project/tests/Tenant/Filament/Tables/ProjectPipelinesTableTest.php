@@ -34,45 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
-
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
+use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineArchivingFeature;
-use Filament\Tables\Columns\TextColumn;
+use AidingApp\Project\Models\Project;
+use App\Models\User;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
-class ProjectPipelinesTable
-{
-    public static function configure(Table $table): Table
-    {
-        return $table
-            ->query(function () use ($table): Builder {
-                $projectId = $table->getArguments()['projectId'] ?? null;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-                return Pipeline::query()
-                    ->where('project_id', $projectId)
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    );
-            })
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Pipeline')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('stages_count')
-                    ->label('Stages')
-                    ->counts('stages'),
-                TextColumn::make('entries_count')
-                    ->label('Entries')
-                    ->counts('entries'),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at');
-    }
-}
+beforeEach(function () {
+    asSuperAdmin(User::factory()->create());
+});
+
+it('excludes archived pipelines from the switcher list', function () {
+    $project = Project::factory()->create();
+    $active = Pipeline::factory()->for($project)->create();
+    $archived = Pipeline::factory()->for($project)->create();
+    $archived->archive();
+
+    $component = livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();
+
+    $table = ProjectPipelinesTable::configure(
+        Table::make($component)->arguments(['projectId' => $project->getKey()]),
+    );
+
+    $ids = $table->getQuery()->pluck('id');
+
+    expect($ids)->toContain($active->getKey())
+        ->and($ids)->not->toContain($archived->getKey());
+});

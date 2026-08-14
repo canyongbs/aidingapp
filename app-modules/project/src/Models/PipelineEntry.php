@@ -42,6 +42,7 @@ use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use AidingApp\Project\Observers\PipelineEntryObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -67,6 +68,7 @@ class PipelineEntry extends Model implements Auditable
 
     use HasUuids;
     use AuditableTrait;
+    use CanBeArchived;
 
     protected $table = 'pipeline_entries';
 
@@ -85,6 +87,16 @@ class PipelineEntry extends Model implements Auditable
         'due' => 'datetime',
         'is_visible_to_guests' => 'boolean',
     ];
+
+    public function reevaluateLinkedMilestones(): void
+    {
+        $this->milestones()->eachById(
+            function (ProjectMilestone $milestone): void {
+                $milestone->reevaluateArchivedState();
+            },
+            column: 'project_milestones.id',
+        );
+    }
 
     /**
      * @return BelongsTo<PipelineStage, $this>
@@ -141,5 +153,10 @@ class PipelineEntry extends Model implements Auditable
             ->belongsToMany(ServiceRequest::class, 'pipeline_entry_service_requests', 'pipeline_entry_id', 'service_request_id')
             ->using(PipelineEntryServiceRequest::class)
             ->withTimestamps();
+    }
+
+    protected static function booted(): void
+    {
+        static::archived(fn (PipelineEntry $entry) => $entry->reevaluateLinkedMilestones());
     }
 }

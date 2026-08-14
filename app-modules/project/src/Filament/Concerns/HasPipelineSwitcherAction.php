@@ -38,16 +38,20 @@ namespace AidingApp\Project\Filament\Concerns;
 
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
+use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\DB;
 
 trait HasPipelineSwitcherAction
 {
     public function selectPipelineAction(): Action
     {
-        return Action::make('selectPipeline')
+        $action = Action::make('selectPipeline')
             ->label('Select Pipeline')
+            ->slideOver()
             ->modalHeading('Select Pipeline')
             ->modalSubmitActionLabel('Select')
             ->visible(fn (): bool => filled($this->getPipelineSwitcherProjectId()))
@@ -66,6 +70,10 @@ trait HasPipelineSwitcherAction
                     blank($pipelineId) ||
                     ! Pipeline::query()
                         ->where('project_id', $this->getPipelineSwitcherProjectId())
+                        ->when(
+                            PipelineArchivingFeature::active(),
+                            fn (Builder $query): Builder => $query->withoutArchived(),
+                        )
                         ->whereKey($pipelineId)
                         ->exists()
                 ) {
@@ -80,6 +88,113 @@ trait HasPipelineSwitcherAction
 
                 $this->onPipelineSwitcherSelected($pipelineId);
             });
+
+        return $action->modalFooterActions(fn (): array => [
+            $action->getModalSubmitAction(),
+            $action->getModalCancelAction(),
+            $this->archivePipelineAction(),
+        ]);
+    }
+
+    public function archivePipelineFromSwitcher(string $pipelineId): void
+    {
+        if (! PipelineArchivingFeature::active()) {
+            return;
+        }
+
+        $projectId = $this->getPipelineSwitcherProjectId();
+
+        $pipeline = Pipeline::query()
+            ->where('project_id', $projectId)
+            ->whereKey($pipelineId)
+            ->first();
+
+        if (! $pipeline) {
+            Notification::make()
+                ->danger()
+                ->title('Invalid pipeline selection')
+                ->body('The selected pipeline does not belong to this project.')
+                ->send();
+
+            return;
+        }
+
+        if (auth()->user()?->cannot('delete', $pipeline)) {
+            Notification::make()
+                ->danger()
+                ->title('Unauthorized')
+                ->body('You do not have permission to archive this pipeline.')
+                ->send();
+
+            return;
+        }
+
+        $wasActive = (string) $pipeline->getKey() === (string) $this->getPipelineSwitcherCurrentPipelineId();
+
+        DB::transaction(function () use ($pipeline): void {
+            $pipeline->archive();
+        });
+
+        Notification::make()
+            ->success()
+            ->title('Pipeline archived')
+            ->send();
+
+        if (! $wasActive) {
+            return;
+        }
+
+        $next = Pipeline::query()
+            ->where('project_id', $projectId)
+            ->withoutArchived()
+            ->oldest()
+            ->value('id');
+
+        if (filled($next)) {
+            $this->onPipelineSwitcherSelected((string) $next);
+
+            return;
+        }
+
+        $this->onPipelineSwitcherCleared();
+    }
+
+    protected function archivePipelineAction(): Action
+    {
+        return Action::make('archivePipeline')
+            ->label('Archive')
+            ->color('danger')
+            ->visible(fn (): bool => PipelineArchivingFeature::active() && $this->canArchivePipelinesFromSwitcher())
+            ->requiresConfirmation()
+            ->modalHeading('Archive Pipeline')
+            ->modalDescription('Are you sure you want to archive this pipeline? All related milestones and tasks will also be archived.')
+            ->modalSubmitActionLabel('Archive')
+            ->cancelParentActions(fn (): bool => ! $this->switcherHasSelectablePipelines())
+            ->action(function (): void {
+                $pipelineId = data_get($this->mountedActions, '0.data.pipeline_id');
+
+                if (filled($pipelineId)) {
+                    $this->archivePipelineFromSwitcher((string) $pipelineId);
+                }
+            });
+    }
+
+    protected function canArchivePipelinesFromSwitcher(): bool
+    {
+        $pipeline = Pipeline::query()
+            ->where('project_id', $this->getPipelineSwitcherProjectId())
+            ->withoutArchived()
+            ->first();
+
+        return $pipeline !== null && (bool) auth()->user()?->can('delete', $pipeline);
+    }
+
+    protected function switcherHasSelectablePipelines(): bool
+    {
+        return Pipeline::query()
+            ->where('project_id', $this->getPipelineSwitcherProjectId())
+            ->withoutArchived()
+            ->exists();
     }
 
     abstract protected function getPipelineSwitcherProjectId(): ?string;
@@ -87,4 +202,6 @@ trait HasPipelineSwitcherAction
     abstract protected function getPipelineSwitcherCurrentPipelineId(): ?string;
 
     abstract protected function onPipelineSwitcherSelected(string $pipelineId): void;
+
+    abstract protected function onPipelineSwitcherCleared(): void;
 }

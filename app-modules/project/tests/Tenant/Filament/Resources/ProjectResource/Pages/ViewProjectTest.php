@@ -234,6 +234,22 @@ it('can list milestones in the project milestones widget', function () {
         ->assertCanSeeTableRecords($milestones);
 });
 
+it('hides archived milestones in the project milestones widget', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $active = ProjectMilestone::factory()->for($project)->create();
+    $archived = ProjectMilestone::factory()->for($project)->create();
+    $archived->archive();
+
+    livewire(ProjectMilestonesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertCanSeeTableRecords([$active])
+        ->assertCanNotSeeTableRecords([$archived]);
+});
+
 it('can create a milestone through the project milestones widget create action', function () {
     asSuperAdmin();
 
@@ -352,6 +368,33 @@ it('rejects selecting a pipeline that belongs to another project', function () {
     ])
         ->callAction('selectPipeline', data: [
             'pipeline_id' => $foreignPipeline->getKey(),
+        ])
+        ->assertNotified('Invalid pipeline selection')
+        ->assertSet('selectedPipelineId', $pipeline->getKey());
+});
+
+it('rejects selecting an archived pipeline', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $archivedPipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $archivedPipeline->archive();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction('selectPipeline', data: [
+            'pipeline_id' => $archivedPipeline->getKey(),
         ])
         ->assertNotified('Invalid pipeline selection')
         ->assertSet('selectedPipelineId', $pipeline->getKey());

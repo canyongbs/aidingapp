@@ -44,6 +44,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
+use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -80,6 +81,10 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         $this->selectedPipelineId = $this->record
             ->pipelines()
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
             ->oldest()
             ->value('id');
     }
@@ -92,6 +97,10 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $this->record
             ->pipelines()
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
             ->whereKey($this->selectedPipelineId)
             ->first();
     }
@@ -108,6 +117,10 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 return PipelineEntry::query()
                     ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+                    ->when(
+                        PipelineArchivingFeature::active(),
+                        fn (Builder $query): Builder => $query->withoutArchived(),
+                    )
                     ->with(['milestones', 'assets', 'serviceRequests', 'pipelineStage.pipeline.project']);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
@@ -227,6 +240,12 @@ class ProjectWorkPipelineWidget extends TableWidget
     protected function onPipelineSwitcherSelected(string $pipelineId): void
     {
         $this->selectedPipelineId = $pipelineId;
+        $this->resetTable();
+    }
+
+    protected function onPipelineSwitcherCleared(): void
+    {
+        $this->selectedPipelineId = null;
         $this->resetTable();
     }
 

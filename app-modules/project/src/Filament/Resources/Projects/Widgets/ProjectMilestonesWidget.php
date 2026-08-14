@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Features\PipelineArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -73,7 +74,11 @@ class ProjectMilestonesWidget extends TableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(fn (): Builder => $this->record->milestones()->getQuery())
+            ->query(fn (): Builder => $this->record->milestones()->getQuery()
+                ->when(
+                    PipelineArchivingFeature::active(),
+                    fn (Builder $query): Builder => $query->withoutArchived(),
+                ))
             ->recordTitleAttribute('title')
             ->heading('Project Milestones')
             ->paginated([5, 10, 25])

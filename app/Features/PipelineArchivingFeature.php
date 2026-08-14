@@ -34,45 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
+namespace App\Features;
 
-use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineArchivingFeature;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\AbstractFeatureFlag;
 
-class ProjectPipelinesTable
+class PipelineArchivingFeature extends AbstractFeatureFlag
 {
-    public static function configure(Table $table): Table
+    public function resolve(mixed $scope): mixed
     {
-        return $table
-            ->query(function () use ($table): Builder {
-                $projectId = $table->getArguments()['projectId'] ?? null;
-
-                return Pipeline::query()
-                    ->where('project_id', $projectId)
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    );
-            })
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Pipeline')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('stages_count')
-                    ->label('Stages')
-                    ->counts('stages'),
-                TextColumn::make('entries_count')
-                    ->label('Entries')
-                    ->counts('entries'),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at');
+        return false;
     }
 }
