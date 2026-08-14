@@ -59,7 +59,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class PipelineEntryForm
@@ -149,8 +148,6 @@ class PipelineEntryForm
                         ? $record?->milestone()->exists()
                         : $record?->milestones()->exists();
 
-                    Log::info('PipelineEntryForm::components: afterStateHydrated: $state=' . var_export($state, true));
-
                     if ($state) {
                         $set('milestones_type', 'select');
                     } else {
@@ -169,7 +166,7 @@ class PipelineEntryForm
                         $set('milestones', []);
                     }
                 }),
-            //TODO: PipelineEntryMilestoneFeature clean up: remove the legacy `milestones` ModalTableSelect once the feature flag is fully rolled out.
+            // TODO: Cleanup Task (pipeline-entry-milestone): remove the legacy `milestones` ModalTableSelect once the feature flag is fully rolled out.
             ModalTableSelect::make('milestones')
                 ->label('Related Milestones')
                 ->relationship(

@@ -42,7 +42,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('pipeline_entries', function (Blueprint $table) {
-            $table->foreignUuid('project_milestone_id')->nullable()->references('id')->on('project_milestones')->nullOnDelete();
+            $table->foreignUuid('project_milestone_id')->nullable()->constrained('project_milestones')->nullOnDelete();
         });
     }
 

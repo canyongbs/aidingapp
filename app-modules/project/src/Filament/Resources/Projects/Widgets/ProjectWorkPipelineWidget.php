@@ -148,7 +148,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record): void {
                         $this->openPipelineEntry($record);
                     }),
-                // TODO:: PipelineEntryMilestoneFeature clean up: Please remove the entire ViewColumn below, along with its corresponding Blade file.
+                    
+                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
                 ViewColumn::make('milestones')
                     ->label('Milestones')
                     ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
@@ -189,6 +190,21 @@ class ProjectWorkPipelineWidget extends TableWidget
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)
+                        ->orderQueryUsing(function (Builder $query, string $direction): Builder {
+                            $model = $query->getModel();
+
+                            return $query
+                                ->orderByRaw("{$model->qualifyColumn('project_milestone_id')} IS NULL")
+                                ->orderBy(
+                                    ProjectMilestone::query()
+                                        ->select('title')
+                                        ->whereColumn(
+                                            (new ProjectMilestone())->qualifyColumn('id'),
+                                            $model->qualifyColumn('project_milestone_id'),
+                                        ),
+                                    $direction,
+                                );
+                        })
                         ->getTitleFromRecordUsing(
                             fn (PipelineEntry $record): string => $record->milestone->title ?? 'No Associated Milestone'
                         )
@@ -208,7 +224,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(function (PipelineEntry $record, array $data): void {
-                        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+                        // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
                         if (! PipelineEntryMilestoneFeature::active()) {
                             $record->milestones()->sync($data['milestones'] ?? []);
                         }

@@ -180,7 +180,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
 
                 $entry->saveOrFail();
 
-                //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
                 if (! PipelineEntryMilestoneFeature::active()) {
                     $entry->milestones()->sync($data['milestones'] ?? []);
                 }

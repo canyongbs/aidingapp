@@ -124,7 +124,7 @@ class PipelineEntry extends Model implements Auditable
     }
 
     /**
-     *  TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire milestones() method below also check references to it in the codebase and remove them as well.
+     * TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire milestones() method below also check references to it in the codebase and remove them as well.
      *
      * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
      */

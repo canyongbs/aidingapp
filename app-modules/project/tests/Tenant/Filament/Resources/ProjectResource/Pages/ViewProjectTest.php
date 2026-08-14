@@ -495,6 +495,30 @@ it('displays milestone progress from completed pipeline tasks', function () {
         ->assertSee('Progress: 50%');
 });
 
+it('groups unassigned pipeline tasks after milestone groups', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Named Milestone']);
+
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSeeInOrder([$milestone->title, 'No Associated Milestone']);
+});
+
 it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
     asSuperAdmin();
 
