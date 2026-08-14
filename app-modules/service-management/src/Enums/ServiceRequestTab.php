@@ -34,49 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestFormSubmissionRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use BackedEnum;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Database\Eloquent\Model;
+use Filament\Support\Contracts\HasLabel;
 
-class ManageServiceRequestFormSubmission extends ManageRelatedRecords
+enum ServiceRequestTab: string implements HasLabel
 {
-    protected static string $resource = ServiceRequestResource::class;
+    case Request = 'request';
 
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'serviceRequestFormSubmission';
+    case Files = 'files';
 
-    protected static ?string $navigationLabel = 'Service Request Form Submission';
+    case Assignments = 'assignments';
 
-    protected static ?string $breadcrumb = 'Form Submission';
+    case Updates = 'updates';
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-document-check';
+    case Feedback = 'feedback';
 
-    public static function canAccess(array $arguments = []): bool
+    case Chats = 'chats';
+
+    case Timeline = 'timeline';
+
+    public function getLabel(): string
     {
-        return (bool) count(static::managers($arguments['record'] ?? null));
+        return match ($this) {
+            self::Request => 'Request',
+            self::Files => 'Files',
+            self::Assignments => 'Assignments',
+            self::Updates => 'Updates',
+            self::Feedback => 'Feedback',
+            self::Chats => 'Chats',
+            self::Timeline => 'Timeline',
+        };
     }
 
-    /**
-     * @return array<string>
-     */
-    public function getRelationManagers(): array
+    public static function default(): self
     {
-        return static::managers($this->getRecord());
-    }
-
-    /**
-     * @return array<string>
-     */
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            ServiceRequestFormSubmissionRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
+        return self::Request;
     }
 }

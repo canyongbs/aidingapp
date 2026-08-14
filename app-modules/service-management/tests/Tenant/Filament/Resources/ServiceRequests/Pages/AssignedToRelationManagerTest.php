@@ -38,7 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -87,7 +87,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('assign-to-me');
 });
@@ -121,7 +121,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('assign-to-me');
 });
@@ -164,7 +164,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -201,7 +201,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -237,7 +237,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -272,7 +272,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -312,7 +312,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('manageAssignment');
 });
@@ -346,7 +346,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('manageAssignment');
 });
@@ -378,7 +378,7 @@ test('Manage Assignment action is not visible when the logged-in user cannot upd
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('manageAssignment');
 });
@@ -418,7 +418,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -452,7 +452,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('assign-to-me');
 });
@@ -492,7 +492,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('manageAssignment');
 });
@@ -526,7 +526,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('manageAssignment');
 });
@@ -558,7 +558,7 @@ test('Manage Assignment action is not visible when the logged-in user is not a m
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionHidden('manageAssignment');
 });
@@ -591,7 +591,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when unass
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('manageAssignment')
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
@@ -630,7 +630,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('manageAssignment')
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
@@ -658,7 +658,7 @@ test('Manage Assignment action is hidden and the page renders when the Service R
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->assertSuccessful()
         ->assertTableActionHidden('manageAssignment');
@@ -697,7 +697,7 @@ test('submitting Manage Assignment assigns the selected manager and deactivates 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
         ->setTableActionData([
@@ -742,7 +742,7 @@ test('submitting Manage Assignment with a different status updates the service r
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
         ->setTableActionData([
@@ -794,7 +794,7 @@ test('submitting Manage Assignment while moving the Service Request to a Closed 
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
         ->setTableActionData([
@@ -839,7 +839,7 @@ test('submitting Manage Assignment with a non-manager user does not create an as
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
         ->setTableActionData([
@@ -879,7 +879,7 @@ test('submitting Manage Assignment without a status fails validation and does no
 
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
-        'pageClass' => ManageAssignments::class,
+        'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
         ->setTableActionData([

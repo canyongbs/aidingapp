@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\InAppCommunication\Models\Message;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
@@ -134,7 +135,7 @@ class ViewLiveChatTranscript extends Page
         return [
             ...$this->getResourceBreadcrumbs(),
             ServiceRequestResource::getUrl('view', ['record' => $record]) => $this->getRecordTitle(),
-            ServiceRequestResource::getUrl('manage-live-chats', ['record' => $record]) => 'Live Chats',
+            ServiceRequestResource::getUrl('view', ['record' => $record, 'tab' => ServiceRequestTab::Chats->value]) => 'Live Chats',
             $this->getBreadcrumb(),
         ];
     }

@@ -31,16 +31,13 @@
     
     </COPYRIGHT>
 --}}
-@use('AidingApp\Timeline\Livewire\TimelineList')
+<div>
+    <x-timeline::timeline
+        :timelineRecords="$timelineRecords"
+        :hasMorePages="$hasMorePages"
+        :emptyStateMessage="$emptyStateMessage"
+        :noMoreRecordsMessage="$noMoreRecordsMessage"
+    />
 
-<x-filament-panels::page>
-    @livewire(
-        TimelineList::class,
-        [
-            'record' => $recordModel,
-            'modelsToTimeline' => $modelsToTimeline,
-            'emptyStateMessage' => $emptyStateMessage,
-            'noMoreRecordsMessage' => $noMoreRecordsMessage,
-        ]
-    )
-</x-filament-panels::page>
+    <x-filament-actions::modals />
+</div>

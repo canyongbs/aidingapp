@@ -36,6 +36,7 @@
 
 namespace AidingApp\Timeline;
 
+use AidingApp\Timeline\Livewire\TimelineList;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
 
@@ -51,7 +52,10 @@ class TimelinePlugin implements Plugin
         $panel->discoverResources(
             in: __DIR__ . '/Filament/Resources',
             for: 'AidingApp\\Timeline\\Filament\\Resources'
-        );
+        )
+            ->livewireComponents([
+                TimelineList::class,
+            ]);
     }
 
     public function boot(Panel $panel): void {}
