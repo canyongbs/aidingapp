@@ -232,7 +232,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $record->assets()->sync($data['assets'] ?? []);
                         $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
-                        $this->milestoneProgressDescriptions = [];
+                        $this->resetMilestoneProgressDescriptions();
                         $this->dispatch('projectPipelineUpdated');
                     }),
             ])
