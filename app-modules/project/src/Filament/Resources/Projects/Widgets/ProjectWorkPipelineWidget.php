@@ -448,11 +448,16 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->get();
 
         foreach ($counts as $count) {
-            $cacheKey = "{$pipeline->getKey()}:{$count->project_milestone_id}";
+            $attributes = $count->getAttributes();
 
-            $this->milestoneProgressDescriptions[$cacheKey] = $count->total === 0
+            $cacheKey = "{$pipeline->getKey()}:{$attributes['project_milestone_id']}";
+
+            $total = (int) $attributes['total'];
+            $completed = (int) $attributes['completed'];
+
+            $this->milestoneProgressDescriptions[$cacheKey] = $total === 0
                 ? 'Progress: 0%'
-                : 'Progress: ' . (int) round(($count->completed / $count->total) * 100) . '%';
+                : 'Progress: ' . (int) round(($completed / $total) * 100) . '%';
         }
 
         $this->milestoneProgressDescriptionsLoadedForPipelineId = $pipeline->getKey();
