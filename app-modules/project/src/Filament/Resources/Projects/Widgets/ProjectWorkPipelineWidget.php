@@ -81,6 +81,8 @@ class ProjectWorkPipelineWidget extends TableWidget
     /** @var array<string, string> */
     protected array $milestoneProgressDescriptions = [];
 
+    protected ?string $milestoneProgressDescriptionsLoadedForPipelineId = null;
+
     protected int | string | array $columnSpan = 'full';
 
     protected string $view = 'project::filament.resources.projects.widgets.project-work-pipeline-widget';
@@ -213,7 +215,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $record->assets()->sync($data['assets'] ?? []);
                         $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
-                        $this->milestoneProgressDescriptions = [];
+                        $this->resetMilestoneProgressDescriptions();
                         $this->dispatch('projectPipelineUpdated');
                     }),
             ])
@@ -235,7 +237,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->schema($this->entryFormSchema($pipeline))
                             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                             ->after(function (): void {
-                                $this->milestoneProgressDescriptions = [];
+                                $this->resetMilestoneProgressDescriptions();
                                 $this->dispatch('projectPipelineUpdated');
                             }),
                     ]
@@ -268,7 +270,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(function (): void {
-                        $this->milestoneProgressDescriptions = [];
+                        $this->resetMilestoneProgressDescriptions();
                         $this->dispatch('projectPipelineUpdated');
                     }),
                 CreateProjectMilestoneAction::make($this->record, 'createMilestone')
@@ -338,7 +340,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 $milestone->update($data);
 
-                $this->milestoneProgressDescriptions = [];
+                $this->resetMilestoneProgressDescriptions();
                 $this->dispatch('projectMilestonesUpdated');
                 $this->dispatch('projectPipelineUpdated');
             });
@@ -362,7 +364,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                 $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
                 $milestone->delete();
 
-                $this->milestoneProgressDescriptions = [];
+                $this->resetMilestoneProgressDescriptions();
                 $this->dispatch('projectMilestonesUpdated');
                 $this->dispatch('projectPipelineUpdated');
             });
@@ -414,25 +416,46 @@ class ProjectWorkPipelineWidget extends TableWidget
             return '';
         }
 
-        $cacheKey = "{$pipeline->getKey()}:{$record->project_milestone_id}";
+        $this->loadMilestoneProgressDescriptions($pipeline);
 
-        if (array_key_exists($cacheKey, $this->milestoneProgressDescriptions)) {
-            return $this->milestoneProgressDescriptions[$cacheKey];
+        return $this->milestoneProgressDescriptions["{$pipeline->getKey()}:{$record->project_milestone_id}"] ?? 'Progress: 0%';
+    }
+
+    protected function resetMilestoneProgressDescriptions(): void
+    {
+        $this->milestoneProgressDescriptions = [];
+        $this->milestoneProgressDescriptionsLoadedForPipelineId = null;
+    }
+
+    /**
+     * Precomputes the progress description for every milestone in the given pipeline
+     * with a single aggregate query, rather than issuing 2 queries per unique milestone.
+     */
+    protected function loadMilestoneProgressDescriptions(Pipeline $pipeline): void
+    {
+        if ($this->milestoneProgressDescriptionsLoadedForPipelineId === $pipeline->getKey()) {
+            return;
         }
 
-        $entries = PipelineEntry::query()
-            ->where('project_milestone_id', $record->project_milestone_id)
-            ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()));
+        $counts = PipelineEntry::query()
+            ->whereNotNull('project_milestone_id')
+            ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+            ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
+            ->selectRaw('pipeline_entries.project_milestone_id')
+            ->selectRaw('count(*) as total')
+            ->selectRaw('count(*) filter (where pipeline_stages.classification = ?) as completed', [PipelineStageClassification::Complete->value])
+            ->groupBy('pipeline_entries.project_milestone_id')
+            ->get();
 
-        $total = $entries->count();
+        foreach ($counts as $count) {
+            $cacheKey = "{$pipeline->getKey()}:{$count->project_milestone_id}";
 
-        $this->milestoneProgressDescriptions[$cacheKey] = $total === 0
-            ? 'Progress: 0%'
-            : 'Progress: ' . (int) round(((clone $entries)
-                ->whereHas('pipelineStage', fn (Builder $query) => $query->where('classification', PipelineStageClassification::Complete))
-                ->count() / $total) * 100) . '%';
+            $this->milestoneProgressDescriptions[$cacheKey] = $count->total === 0
+                ? 'Progress: 0%'
+                : 'Progress: ' . (int) round(($count->completed / $count->total) * 100) . '%';
+        }
 
-        return $this->milestoneProgressDescriptions[$cacheKey];
+        $this->milestoneProgressDescriptionsLoadedForPipelineId = $pipeline->getKey();
     }
 
     /**
