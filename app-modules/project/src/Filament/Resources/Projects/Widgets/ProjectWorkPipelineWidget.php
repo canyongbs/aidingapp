@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
+use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
@@ -45,7 +46,6 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
-use Filament\Actions\EditAction;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
 use Filament\Forms\Components\Select;
@@ -143,18 +143,13 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->collapsible(),
             )
             ->recordActions([
-                EditAction::make()
-                    ->slideOver()
-                    ->modalHeading('Edit Pipeline Task')
-                    ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                    ->after(function (PipelineEntry $record, array $data): void {
-                        $record->milestones()->sync($data['milestones'] ?? []);
-                        $record->assets()->sync($data['assets'] ?? []);
-                        $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
-
+                EditPipelineEntryAction::make(
+                    $pipeline,
+                    after: function (): void {
                         $this->dispatch('projectPipelineUpdated');
-                    }),
+                    },
+                )
+                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record)),
             ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(

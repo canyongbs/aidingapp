@@ -42,11 +42,8 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries\PipelineEntryResource;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -110,16 +107,6 @@ class ManagePipelineEntries extends ManageRelatedRecords
                     ->relationship('pipelineStage', 'name')
                     ->multiple()
                     ->preload(),
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->label('View')
-                    ->url(fn (PipelineEntry $record): string => PipelineEntryResource::getUrl('view', [
-                        'record' => $record,
-                        'pipeline' => $pipeline,
-                        'project' => $pipeline->project,
-                    ])),
-                DeleteAction::make(),
             ])
             ->headerActions([
                 CreateAction::make()

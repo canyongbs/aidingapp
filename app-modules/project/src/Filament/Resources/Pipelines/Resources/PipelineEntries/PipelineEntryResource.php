@@ -36,13 +36,10 @@
 
 namespace AidingApp\Project\Filament\Resources\Pipelines\Resources\PipelineEntries;
 
-use AidingApp\Project\Filament\Resources\Pipelines\Pages\EditPipelineEntry;
-use AidingApp\Project\Filament\Resources\Pipelines\Pages\ViewPipelineEntry;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use BackedEnum;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\ParentResourceRegistration;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
@@ -60,20 +57,9 @@ class PipelineEntryResource extends Resource
 
     protected static bool $shouldRegisterNavigation = false;
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewPipelineEntry::class,
-            EditPipelineEntry::class,
-        ]);
-    }
-
     public static function getPages(): array
     {
-        return [
-            'view' => ViewPipelineEntry::route('/{record}/view'),
-            'edit' => EditPipelineEntry::route('/{record}/edit'),
-        ];
+        return [];
     }
 
     public static function getParentResourceRegistration(): ?ParentResourceRegistration

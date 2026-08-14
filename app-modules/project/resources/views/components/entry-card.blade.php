@@ -78,6 +78,7 @@
 @endphp
 
 <div
+    role="listitem"
     class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
@@ -87,11 +88,43 @@
         <div class="text-base font-semibold text-gray-900 dark:text-white">
             {{ $entry->name }}
         </div>
-        <x-filament::icon-button
-            class="fi-primary-color"
-            wire:click="viewPipelineEntry('{{ $entry->getKey() }}')"
-            icon="heroicon-m-arrow-top-right-on-square"
-        />
+
+        <x-filament::dropdown placement="bottom-end">
+            <x-slot name="trigger">
+                <x-filament::icon-button
+                    class="shrink-0"
+                    icon="heroicon-m-ellipsis-horizontal"
+                    label="Actions"
+                    size="xs"
+                />
+            </x-slot>
+
+            <x-filament::dropdown.list>
+                <x-filament::dropdown.list.item
+                    icon="heroicon-m-eye"
+                    wire:click="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+                >
+                    View
+                </x-filament::dropdown.list.item>
+
+                @can('update', $pipeline)
+                    <x-filament::dropdown.list.item
+                        icon="heroicon-m-pencil"
+                        wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+                    >
+                        Edit
+                    </x-filament::dropdown.list.item>
+
+                    <x-filament::dropdown.list.item
+                        icon="heroicon-m-trash"
+                        color="danger"
+                        wire:click="mountAction('removePipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+                    >
+                        Remove
+                    </x-filament::dropdown.list.item>
+                @endcan
+            </x-filament::dropdown.list>
+        </x-filament::dropdown>
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />
