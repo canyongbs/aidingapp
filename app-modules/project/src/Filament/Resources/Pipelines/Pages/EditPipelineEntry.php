@@ -161,7 +161,7 @@ class EditPipelineEntry extends Page
 
         $data = $this->form->getState();
 
-        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+        // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
         if (! PipelineEntryMilestoneFeature::active()) {
             $milestones = $data['milestones'] ?? [];
             unset($data['milestones']);
@@ -173,7 +173,7 @@ class EditPipelineEntry extends Page
 
         $pipelineEntry->update($data);
 
-        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+        // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
         if (! PipelineEntryMilestoneFeature::active()) {
             $pipelineEntry->milestones()->sync($milestones);
         }
@@ -195,7 +195,7 @@ class EditPipelineEntry extends Page
 
         $data = $pipelineEntry->attributesToArray();
 
-        //TODO: PipelineEntryMilestoneFeature clean up: Please remove the entire if block below.
+        // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
         if (! PipelineEntryMilestoneFeature::active()) {
             $data['milestones'] = $pipelineEntry->milestones->pluck('id')->toArray();
         }
