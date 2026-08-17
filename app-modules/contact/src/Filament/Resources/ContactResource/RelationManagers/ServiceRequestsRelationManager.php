@@ -40,7 +40,7 @@ use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -178,7 +178,7 @@ class ServiceRequestsRelationManager extends RelationManager
 
     public function infolist(Schema $schema): Schema
     {
-        return (resolve(ViewServiceRequest::class))->infolist($schema);
+        return ServiceRequestInfolist::configure($schema);
     }
 
     public function table(Table $table): Table
@@ -243,7 +243,8 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->using(fn (array $data): Model => $this->handleRecordCreation($data)),
             ])
             ->recordActions([
-                ViewAction::make(),
+                ViewAction::make()
+                    ->slideOver(),
                 EditAction::make()
                     ->slideOver()
                     ->mutateRecordDataUsing(function (array $data, ?ServiceRequest $record) {
