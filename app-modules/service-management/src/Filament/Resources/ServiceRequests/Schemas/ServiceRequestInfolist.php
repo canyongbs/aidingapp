@@ -220,6 +220,7 @@ class ServiceRequestInfolist
                         ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
                     TextEntry::make('time_to_resolution')
                         ->label('Time to Resolution')
+                        ->placeholder('-')
                         ->formatStateUsing(function (int $state) {
                             $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
                             $days = $interval->d;
