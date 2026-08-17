@@ -64,6 +64,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -82,7 +83,8 @@ class StoreServiceRequestController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'priority_id' => [
-                DefaultPriorityFeature::active() && $type->defaultPriority()->exists() ? 'nullable' : 'required',
+                Rule::requiredIf(fn (): bool => ! (DefaultPriorityFeature::active() && $type->defaultPriority()->exists())),
+                Rule::prohibitedIf(fn (): bool => DefaultPriorityFeature::active() && $type->defaultPriority()->exists()),
                 'uuid',
             ],
             'attachments' => ['nullable', 'array'],

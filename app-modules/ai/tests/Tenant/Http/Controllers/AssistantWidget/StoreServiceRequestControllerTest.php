@@ -87,6 +87,25 @@ it('assigns the configured default priority when no priority is submitted', func
     ]);
 });
 
+it('prohibits a submitted priority when a default priority is configured', function () {
+    $type = ServiceRequestType::factory()->create();
+    $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $submittedPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $defaultPriority->getKey()]);
+    $contact = Contact::factory()->create();
+
+    $response = postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant priority test',
+        'description' => 'Configured priority should be enforced.',
+        'priority_id' => $submittedPriority->getKey(),
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('priority_id');
+
+    expect(ServiceRequest::query()->count())->toBe(0);
+});
+
 it('requires a priority when the default priority feature is inactive', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
