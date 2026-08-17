@@ -35,6 +35,7 @@
 */
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 
@@ -72,7 +73,7 @@ it('shows the empty state message when there is nothing to timeline', function (
         ->assertSee('Nothing has happened yet.');
 });
 
-it('paginates the timeline and exposes loading more on the component', function () {
+it('loads one page of records at a time and flags that more remain', function () {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -92,6 +93,78 @@ it('paginates the timeline and exposes loading more on the component', function 
 
     $component->call('loadTimelineRecords')
         ->assertSuccessful();
+});
+
+it('refuses to open a record from another entity timeline', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+    $otherServiceRequest = ServiceRequest::factory()->create();
+
+    $otherUpdate = ServiceRequestUpdate::factory()
+        ->for($otherServiceRequest, 'serviceRequest')
+        ->create();
+
+    livewire(TimelineList::class, [
+        'record' => $serviceRequest,
+        'modelsToTimeline' => [ServiceRequestUpdate::class],
+    ])
+        ->call('viewRecord', $otherUpdate->getKey(), $otherUpdate->getMorphClass())
+        ->assertStatus(404);
+});
+
+it('refuses to open a record of a type this timeline does not display', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $update = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
+
+    livewire(TimelineList::class, [
+        'record' => $serviceRequest,
+        'modelsToTimeline' => [ServiceRequestAssignment::class],
+    ])
+        ->call('viewRecord', $update->getKey(), $update->getMorphClass())
+        ->assertStatus(404);
+});
+
+it('returns a 404 when the view action is mounted without a record', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
+
+    livewire(TimelineList::class, [
+        'record' => $serviceRequest,
+        'modelsToTimeline' => [ServiceRequestUpdate::class],
+    ])
+        ->call('mountAction', 'view')
+        ->assertStatus(404);
+});
+
+it('keeps the opened record selected when more timeline records are loaded', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $update = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
+
+    livewire(TimelineList::class, [
+        'record' => $serviceRequest,
+        'modelsToTimeline' => [ServiceRequestUpdate::class],
+    ])
+        ->call('viewRecord', $update->getKey(), $update->getMorphClass())
+        ->assertSuccessful()
+        ->call('loadTimelineRecords')
+        ->assertSuccessful()
+        ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
 it('opens the slide over for a timeline record', function () {

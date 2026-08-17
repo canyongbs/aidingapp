@@ -39,6 +39,7 @@ namespace AidingApp\Timeline\Livewire;
 use AidingApp\Timeline\Actions\SyncTimelineData;
 use AidingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Models\Timeline;
 use App\Actions\GetRecordFromMorphAndKey;
 use Filament\Actions\Concerns\InteractsWithActions;
 use Filament\Actions\Contracts\HasActions;
@@ -97,6 +98,8 @@ class TimelineList extends Component implements HasActions, HasSchemas
 
     public function viewRecord(string $key, string $morphReference): void
     {
+        abort_unless($this->isOnThisTimeline($key, $morphReference), 404);
+
         $this->currentRecordToView = resolve(GetRecordFromMorphAndKey::class)->via($morphReference, $key);
 
         $this->mountAction('view');
@@ -104,7 +107,10 @@ class TimelineList extends Component implements HasActions, HasSchemas
 
     public function viewAction(): ViewAction
     {
-        assert($this->currentRecordToView instanceof ProvidesATimeline);
+        abort_unless(
+            isset($this->currentRecordToView) && $this->currentRecordToView instanceof ProvidesATimeline,
+            404,
+        );
 
         return $this->currentRecordToView
             ->timeline()
@@ -114,5 +120,21 @@ class TimelineList extends Component implements HasActions, HasSchemas
     public function render(): View
     {
         return view('timeline::livewire.timeline-list');
+    }
+
+    private function isOnThisTimeline(string $key, string $morphReference): bool
+    {
+        $displayedMorphClasses = collect($this->modelsToTimeline)
+            ->map(fn (Model | string $model): string => resolve($model)->getMorphClass());
+
+        if (! $displayedMorphClasses->contains($morphReference)) {
+            return false;
+        }
+
+        return Timeline::query()
+            ->forEntity($this->recordModel)
+            ->where('timelineable_type', $morphReference)
+            ->where('timelineable_id', $key)
+            ->exists();
     }
 }

@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceR
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Enums\Feature;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Filament\Infolists\Components\TextEntry;
@@ -52,6 +53,7 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\HtmlString;
 
 class ServiceRequestInfolist
@@ -263,7 +265,8 @@ class ServiceRequestInfolist
     public static function feedbackSummarySection(): Section
     {
         return Section::make('Feedback')
-            ->visible(fn (ServiceRequest $record): bool => $record->feedback()->exists())
+            ->visible(fn (ServiceRequest $record): bool => Gate::check(Feature::FeedbackManagement->getGateName())
+                && $record->feedback()->exists())
             ->schema([
                 TextEntry::make('feedback.csat_answer')
                     ->label('CSAT')

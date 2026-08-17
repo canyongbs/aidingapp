@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -472,4 +473,54 @@ test('Non-super admin can only see service requests from directly managed or dir
     ])
         ->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest])
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
+});
+
+describe('feedback visibility', function () {
+    it('shows the feedback summary when the `FeedbackManagement` feature is enabled', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($contact, 'respondent')
+            ->create();
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create(['csat_answer' => 4, 'nps_answer' => 8]);
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->mountTableAction('view', $serviceRequest)
+            ->assertSchemaComponentVisible('feedback.csat_answer', 'mountedActionSchema0');
+    });
+
+    it('hides the feedback summary when the `FeedbackManagement` feature is disabled', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($contact, 'respondent')
+            ->create();
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create(['csat_answer' => 4, 'nps_answer' => 8]);
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->feedbackManagement = false;
+        $settings->save();
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->mountTableAction('view', $serviceRequest)
+            ->assertSchemaComponentHidden('feedback.csat_answer', 'mountedActionSchema0');
+    });
 });
