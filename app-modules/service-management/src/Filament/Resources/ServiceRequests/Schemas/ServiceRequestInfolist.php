@@ -175,12 +175,12 @@ class ServiceRequestInfolist
 
                                 return $author?->{$author::displayNameKey()};
                             })
-                            ->url(fn (ServiceRequest $record): ?string => static::authorUrl($record))
+                            ->url(fn (ServiceRequest $record): ?string => self::authorUrl($record))
                             ->placeholder('-'),
                         TextEntry::make('serviceRequestFormSubmission.author.email')
                             ->label('Email')
                             ->color('primary')
-                            ->url(fn (ServiceRequest $record): ?string => static::authorUrl($record))
+                            ->url(fn (ServiceRequest $record): ?string => self::authorUrl($record))
                             ->placeholder('-'),
                         TextEntry::make('serviceRequestFormSubmission.author_type')
                             ->label('Submitted By Type')
