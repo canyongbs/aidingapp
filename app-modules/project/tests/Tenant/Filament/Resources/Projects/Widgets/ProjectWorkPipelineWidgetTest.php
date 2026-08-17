@@ -155,6 +155,16 @@ it('excludes archived tasks from the pipeline board', function () {
         ->assertCanNotSeeTableRecords([$archived]);
 });
 
+it('does not display a row-level edit action for pipeline tasks', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->assertTableActionDoesNotExist('edit', record: $entry);
+});
+
 describe('feature flag inactive', function () {
     it('keeps archived pipelines in the switcher list when the flag is inactive', function () {
         PipelineArchivingFeature::deactivate();
@@ -227,5 +237,51 @@ describe('archive authorization', function () {
         livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->mountAction('selectPipeline')
             ->assertActionHidden('archivePipeline');
+    });
+});
+
+describe('task access authorization', function () {
+    it('opens pipeline task details for a project auditor', function () {
+        $auditor = User::factory()->create();
+        $auditor->givePermissionTo('project.*.view');
+        $auditor->refresh();
+
+        $project = Project::factory()->create();
+        $project->auditorUsers()->attach($auditor);
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $stage = PipelineStage::factory()->for($pipeline)->create();
+        $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['name' => 'View-only task']);
+
+        actingAs($auditor);
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callTableColumnAction('name', $entry)
+            ->assertActionMounted('viewPipelineEntry')
+            ->assertSchemaStateSet(['name' => 'View-only task'])
+            ->unmountAction()
+            ->assertActionHidden('editPipelineEntry');
+    });
+
+    it('opens an editable pipeline task form for a project manager', function () {
+        $manager = User::factory()->create();
+        $manager->givePermissionTo(['project.*.view', 'project.*.update']);
+        $manager->refresh();
+
+        $project = Project::factory()->create();
+        $project->managerUsers()->attach($manager);
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $stage = PipelineStage::factory()->for($pipeline)->create();
+        $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['description' => 'Original description.']);
+
+        actingAs($manager);
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->callTableColumnAction('name', $entry)
+            ->assertActionMounted('editPipelineEntry')
+            ->setActionData(['description' => 'Updated description.'])
+            ->callMountedAction()
+            ->assertHasNoActionErrors();
+
+        expect($entry->refresh()->description)->toBe('Updated description.');
     });
 });

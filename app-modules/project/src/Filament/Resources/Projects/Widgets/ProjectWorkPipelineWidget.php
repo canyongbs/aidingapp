@@ -39,6 +39,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
+use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
@@ -128,7 +129,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                 TextColumn::make('name')
                     ->label('Task Name')
                     ->searchable(['pipeline_entries.name'])
-                    ->sortable(),
+                    ->sortable()
+                    ->extraAttributes(['class' => 'underline'])
+                    ->action(function (PipelineEntry $record): void {
+                        $this->openPipelineEntry($record);
+                    }),
                 ViewColumn::make('milestones')
                     ->label('Milestones')
                     ->view('project::filament.tables.columns.pipeline-entry.milestones'),
@@ -155,15 +160,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->label('Stage')
                     ->collapsible(),
             )
-            ->recordActions([
-                EditPipelineEntryAction::make(
-                    $pipeline,
-                    after: function (): void {
-                        $this->dispatch('projectPipelineUpdated');
-                    },
-                )
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record)),
-            ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
                 $pipeline
@@ -215,6 +211,34 @@ class ProjectWorkPipelineWidget extends TableWidget
             ]);
     }
 
+    public function openPipelineEntry(PipelineEntry $record): void
+    {
+        $entry = $this->resolvePipelineEntry($record->getKey());
+
+        $this->mountAction(
+            auth()->user()->can('update', $this->record) ? 'editPipelineEntry' : 'viewPipelineEntry',
+            ['entry' => $entry->getKey()],
+        );
+    }
+
+    public function viewPipelineEntryAction(): Action
+    {
+        return ViewPipelineEntryAction::make('viewPipelineEntry')
+            ->authorize(fn (): bool => auth()->user()->can('view', $this->record))
+            ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
+    }
+
+    public function editPipelineEntryAction(): Action
+    {
+        return EditPipelineEntryAction::make(
+            $this->getSelectedPipeline(),
+            'editPipelineEntry',
+            after: fn () => $this->dispatch('projectPipelineUpdated'),
+        )
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+            ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
+    }
+
     public function createPipelineAction(): Action
     {
         return Action::make('createPipeline')
@@ -262,6 +286,24 @@ class ProjectWorkPipelineWidget extends TableWidget
     protected function entryFormSchema(?Pipeline $pipeline): array
     {
         return PipelineEntryForm::components($pipeline);
+    }
+
+    protected function resolvePipelineEntry(?string $entryId): PipelineEntry
+    {
+        $pipeline = $this->getSelectedPipeline();
+
+        if ($pipeline === null) {
+            abort(404);
+        }
+
+        return $pipeline
+            ->entries()
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
+            ->whereKey($entryId)
+            ->firstOrFail();
     }
 
     /**
