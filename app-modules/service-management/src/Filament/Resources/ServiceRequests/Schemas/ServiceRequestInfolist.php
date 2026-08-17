@@ -61,8 +61,11 @@ class ServiceRequestInfolist
         return $schema
             ->schema([
                 static::headerSection(),
-                ...static::detailSections(),
+                static::titleSection(),
+                static::descriptionSection(),
                 static::filesSection(),
+                static::formDetailsSection()->collapsed(),
+                static::slaSection(),
                 static::feedbackSummarySection(),
             ]);
     }
@@ -79,7 +82,7 @@ class ServiceRequestInfolist
             ))
             ->schema([
                 TextEntry::make('division.name')
-                    ->visible(fn (): bool => Division::count() > 1)
+                    ->visible(fn (ServiceRequest $record): bool => Division::count() > 1 && filled($record->division))
                     ->label('Division'),
                 Grid::make(3)
                     ->schema([
@@ -127,104 +130,128 @@ class ServiceRequestInfolist
      */
     public static function detailSections(): array
     {
+        return [
+            static::titleSection(),
+            static::descriptionSection(),
+            static::formDetailsSection(),
+            static::slaSection(),
+        ];
+    }
+
+    public static function titleSection(): Section
+    {
+        return Section::make('Title')
+            ->schema([
+                TextEntry::make('title')
+                    ->hiddenLabel(),
+            ]);
+    }
+
+    public static function descriptionSection(): Section
+    {
+        return Section::make('Description')
+            ->schema([
+                TextEntry::make('close_details')
+                    ->hiddenLabel()
+                    ->markdown(),
+            ]);
+    }
+
+    public static function formDetailsSection(): Section
+    {
+        return Section::make('Form Details')
+            ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
+            ->schema([
+                Grid::make(4)
+                    ->schema([
+                        TextEntry::make('serviceRequestFormSubmission.submitted_at')
+                            ->label('Submitted')
+                            ->dateTime(),
+                        TextEntry::make('submission_author_name')
+                            ->label('Submitted By')
+                            ->color('primary')
+                            ->state(function (ServiceRequest $record): ?string {
+                                $author = $record->serviceRequestFormSubmission?->author;
+
+                                return $author?->{$author::displayNameKey()};
+                            })
+                            ->url(fn (ServiceRequest $record): ?string => static::authorUrl($record))
+                            ->placeholder('-'),
+                        TextEntry::make('serviceRequestFormSubmission.author.email')
+                            ->label('Email')
+                            ->color('primary')
+                            ->url(fn (ServiceRequest $record): ?string => static::authorUrl($record))
+                            ->placeholder('-'),
+                        TextEntry::make('serviceRequestFormSubmission.author_type')
+                            ->label('Submitted By Type')
+                            ->badge()
+                            ->color('success')
+                            ->formatStateUsing(fn (?string $state): ?string => filled($state) ? ucfirst($state) : null)
+                            ->placeholder('-'),
+                    ]),
+                ViewEntry::make('serviceRequestFormSubmission')
+                    ->view('filament.infolists.components.submission-entry'),
+            ]);
+    }
+
+    public static function slaSection(): Section
+    {
         $formatSecondsAsInterval = fn (?int $state): ?string => $state ? CarbonInterval::seconds($state)->cascade()->forHumans(short: true) : null;
 
-        return [
-            Section::make('Title')
-                ->schema([
-                    TextEntry::make('title')
-                        ->hiddenLabel(),
-                ]),
-            Section::make('Description')
-                ->schema([
-                    TextEntry::make('close_details')
-                        ->hiddenLabel()
-                        ->markdown(),
-                ]),
-            Section::make('Form Details')
-                ->visible(fn (ServiceRequest $record): bool => ! is_null($record->serviceRequestFormSubmission))
-                ->schema([
-                    Grid::make(3)
-                        ->schema([
-                            TextEntry::make('serviceRequestFormSubmission.submitted_at')
-                                ->label('Submitted')
-                                ->dateTime(),
-                            TextEntry::make('serviceRequestFormSubmission.author.email')
-                                ->label('Submitted By')
-                                ->color('primary')
-                                ->url(function (ServiceRequest $record): ?string {
-                                    $author = $record->serviceRequestFormSubmission?->author;
+        return Section::make('SLA Management')
+            ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
+            ->schema([
+                Group::make([
+                    TextEntry::make('sla_response_seconds')
+                        ->label('Response agreement')
+                        ->state(fn (ServiceRequest $record): ?int => $record->getSlaResponseSeconds())
+                        ->formatStateUsing($formatSecondsAsInterval)
+                        ->placeholder('-'),
+                    TextEntry::make('response_age')
+                        ->label('Response age')
+                        ->state(fn (ServiceRequest $record): int => $record->getLatestResponseSeconds())
+                        ->formatStateUsing($formatSecondsAsInterval)
+                        ->placeholder('-'),
+                    TextEntry::make('response_sla_compliance')
+                        ->label('Response compliance')
+                        ->badge()
+                        ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
+                    TextEntry::make('time_to_resolution')
+                        ->label('Time to Resolution')
+                        ->formatStateUsing(function (int $state) {
+                            $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
+                            $days = $interval->d;
+                            $hours = $interval->h;
+                            $minutes = $interval->i;
 
-                                    return $author
-                                        ? resolve($author::filamentResource())->getUrl('view', ['record' => $author])
-                                        : null;
-                                })
-                                ->placeholder('-'),
-                            TextEntry::make('serviceRequestFormSubmission.author_type')
-                                ->label('Submitted By Type')
-                                ->badge()
-                                ->color('success')
-                                ->formatStateUsing(fn (?string $state): ?string => filled($state) ? ucfirst($state) : null)
-                                ->placeholder('-'),
-                        ]),
-                    ViewEntry::make('serviceRequestFormSubmission')
-                        ->view('filament.infolists.components.submission-entry'),
+                            return "{$days}d {$hours}h {$minutes}m";
+                        }),
                 ]),
-            Section::make('SLA Management')
-                ->visible(fn (ServiceRequest $record): bool => $record->priority?->sla !== null)
-                ->schema([
-                    Group::make([
-                        TextEntry::make('sla_response_seconds')
-                            ->label('Response agreement')
-                            ->state(fn (ServiceRequest $record): ?int => $record->getSlaResponseSeconds())
-                            ->formatStateUsing($formatSecondsAsInterval)
-                            ->placeholder('-'),
-                        TextEntry::make('response_age')
-                            ->label('Response age')
-                            ->state(fn (ServiceRequest $record): int => $record->getLatestResponseSeconds())
-                            ->formatStateUsing($formatSecondsAsInterval)
-                            ->placeholder('-'),
-                        TextEntry::make('response_sla_compliance')
-                            ->label('Response compliance')
-                            ->badge()
-                            ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResponseSlaComplianceStatus()),
-                        TextEntry::make('time_to_resolution')
-                            ->label('Time to Resolution')
-                            ->formatStateUsing(function (int $state) {
-                                $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds($state));
-                                $days = $interval->d;
-                                $hours = $interval->h;
-                                $minutes = $interval->i;
-
-                                return "{$days}d {$hours}h {$minutes}m";
-                            }),
-                    ]),
-                    Group::make([
-                        TextEntry::make('sla_resolution_seconds')
-                            ->label('Resolution agreement')
-                            ->state(fn (ServiceRequest $record): ?int => $record->getSlaResolutionSeconds())
-                            ->formatStateUsing($formatSecondsAsInterval)
-                            ->placeholder('-'),
-                        TextEntry::make('resolution_seconds')
-                            ->label('Resolution age')
-                            ->state(fn (ServiceRequest $record): int => $record->getResolutionSeconds())
-                            ->formatStateUsing($formatSecondsAsInterval)
-                            ->placeholder('-'),
-                        TextEntry::make('resolution_sla_compliance')
-                            ->label('Resolution compliance')
-                            ->badge()
-                            ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus()),
-                    ]),
-                ])
-                ->columns(),
-        ];
+                Group::make([
+                    TextEntry::make('sla_resolution_seconds')
+                        ->label('Resolution agreement')
+                        ->state(fn (ServiceRequest $record): ?int => $record->getSlaResolutionSeconds())
+                        ->formatStateUsing($formatSecondsAsInterval)
+                        ->placeholder('-'),
+                    TextEntry::make('resolution_seconds')
+                        ->label('Resolution age')
+                        ->state(fn (ServiceRequest $record): int => $record->getResolutionSeconds())
+                        ->formatStateUsing($formatSecondsAsInterval)
+                        ->placeholder('-'),
+                    TextEntry::make('resolution_sla_compliance')
+                        ->label('Resolution compliance')
+                        ->badge()
+                        ->state(fn (ServiceRequest $record): ?SlaComplianceStatus => $record->getResolutionSlaComplianceStatus()),
+                ]),
+            ])
+            ->columns();
     }
 
     public static function filesSection(): Section
     {
         $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)->__invoke();
 
-        return Section::make('Files')
+        return Section::make('Uploaded Files')
             ->schema(fn (ServiceRequest $record): array => [
                 Livewire::make(ServiceRequestMediaTable::class, [
                     'record' => $record,
@@ -246,5 +273,14 @@ class ServiceRequestInfolist
                     ->badge(),
             ])
             ->columns();
+    }
+
+    private static function authorUrl(ServiceRequest $record): ?string
+    {
+        $author = $record->serviceRequestFormSubmission?->author;
+
+        return $author
+            ? resolve($author::filamentResource())->getUrl('view', ['record' => $author])
+            : null;
     }
 }

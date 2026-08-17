@@ -524,9 +524,56 @@ describe('tabs', function () {
 
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
+            ->assertSchemaComponentStateSet('request.submission_author_name', $author->full_name)
             ->assertSchemaComponentStateSet('request.serviceRequestFormSubmission.author.email', $author->email)
             ->assertSeeHtml(ContactResource::getUrl('view', ['record' => $author]))
             ->assertSee('Contact');
+    });
+
+    it('resolves the submitter name for a user author, not just a contact', function () {
+        asSuperAdmin();
+
+        $author = User::factory()->create(['name' => 'Dana Whitfield']);
+
+        $form = ServiceRequestForm::factory()->create([
+            'content' => richContentText('What do you need help with?'),
+        ]);
+
+        $submission = ServiceRequestFormSubmission::create([
+            'service_request_form_id' => $form->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $submission->author()->associate($author)->save();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($submission, 'serviceRequestFormSubmission')
+            ->create();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentStateSet('request.submission_author_name', 'Dana Whitfield');
+    });
+
+    it('falls back to a placeholder when the submission has no author', function () {
+        asSuperAdmin();
+
+        $form = ServiceRequestForm::factory()->create([
+            'content' => richContentText('What do you need help with?'),
+        ]);
+
+        $submission = ServiceRequestFormSubmission::create([
+            'service_request_form_id' => $form->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($submission, 'serviceRequestFormSubmission')
+            ->create();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentStateSet('request.submission_author_name', null);
     });
 
     it('hides the form details when there is no submission', function () {
@@ -537,6 +584,53 @@ describe('tabs', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('request.serviceRequestFormSubmission');
+    });
+});
+
+describe('division', function () {
+    it('shows the division when the tenant has more than one', function () {
+        asSuperAdmin();
+
+        Division::factory()->count(2)->create();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        expect($serviceRequest->division)->not->toBeNull();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentVisible('division.name')
+            ->assertSchemaComponentStateSet('division.name', $serviceRequest->division->name);
+    });
+
+    it('hides the division when the tenant only has one', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        Division::query()->whereKeyNot($serviceRequest->division_id)->delete();
+
+        expect(Division::count())->toBe(1);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentHidden('division.name');
+    });
+
+    it('hides the division when the service request has none', function () {
+        asSuperAdmin();
+
+        Division::factory()->count(2)->create();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest->division()->disassociate()->saveQuietly();
+
+        expect(Division::count())->toBeGreaterThan(1)
+            ->and($serviceRequest->fresh()->division)->toBeNull();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentHidden('division.name');
     });
 });
 

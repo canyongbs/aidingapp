@@ -146,9 +146,6 @@ class ViewServiceRequest extends ViewRecord
         ];
     }
 
-
-
-
     /**
      * @return array<Section>
      */

@@ -133,8 +133,10 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                         default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
                     }),
                 TextColumn::make('created_at')
+                    ->dateTime()
                     ->sortable(),
                 TextColumn::make('updated_at')
+                    ->dateTime()
                     ->sortable(),
             ])
             ->defaultSort(fn (Builder $query) => $query->orderBy('created_at', 'desc')->orderBy('id', 'desc'))
