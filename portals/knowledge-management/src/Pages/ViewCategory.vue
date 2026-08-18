@@ -50,10 +50,20 @@
     import { useRoute, useRouter } from 'vue-router';
     import { searchFilterTabs, useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
     import { apiGet } from '../Services/api.js';
+    import { useConfigStore } from '../Stores/config.js';
     import { useCategoryData, useTagsData } from './loaders.js';
 
     const route = useRoute();
     const router = useRouter();
+    const configStore = useConfigStore();
+
+    const tabLabels = Object.fromEntries(searchFilterTabs.map((tab) => [tab.value, tab.label]));
+
+    // Category browsing tabs, ordered per the organization's configured
+    // `category_tab_order` setting (defaults to All Articles, Featured, Most Viewed).
+    const categoryTabs = computed(() =>
+        configStore.categoryTabOrder.map((value) => ({ label: tabLabels[value] ?? value, value })),
+    );
 
     const { data: categoryResponse } = useCategoryData();
     const { data: tags } = useTagsData();
@@ -118,7 +128,7 @@
 
     // Tab filter for browsing a category's own articles. Page 1 of every filter tab
     // arrives together via the route data loader; any other page is fetched client-side.
-    const activeFilter = computed(() => route.query.filter || 'all-articles');
+    const activeFilter = computed(() => route.query.filter || categoryTabs.value[0]?.value || 'all-articles');
     const currentPage = computed(() => parseInt(route.query.page) || 1);
 
     const pageQuery = useQuery({
@@ -202,7 +212,7 @@
             query: {
                 ...route.query,
                 page,
-                filter: filter === 'all-articles' ? undefined : filter,
+                filter: filter === categoryTabs.value[0]?.value ? undefined : filter,
             },
         });
     }
@@ -295,7 +305,7 @@
                         ></SubCategories>
                         <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
-                                :tabs="searchFilterTabs"
+                                :tabs="categoryTabs"
                                 :modelValue="activeFilter"
                                 @update:modelValue="changeFilter"
                                 :contained="true"
