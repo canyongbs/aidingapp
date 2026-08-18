@@ -57,6 +57,7 @@ class PipelineEntryFactory extends Factory
             'name' => $this->faker->word(),
             'pipeline_stage_id' => PipelineStage::factory(),
             'description' => $this->faker->sentence(3),
+            'start_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
             'due' => $this->faker->dateTimeBetween('now', '+1 year'),
             'assigned_to_type' => (new User())->getMorphClass(),
             'assigned_to_id' => User::factory(),

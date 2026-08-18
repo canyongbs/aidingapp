@@ -43,6 +43,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryMilestoneFeature;
+use App\Features\PipelineEntryStartDateFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -170,6 +171,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     'name' => $data['name'],
                     'pipeline_stage_id' => $stage->getKey(),
                     'description' => $data['description'] ?? null,
+                    ...(PipelineEntryStartDateFeature::active() ? ['start_date' => $data['start_date'] ?? null] : []),
                     'due' => $data['due'] ?? null,
                     'assigned_to_type' => $data['assigned_to_type'] ?? null,
                     'assigned_to_id' => $data['assigned_to_id'] ?? null,

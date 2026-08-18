@@ -47,6 +47,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\PipelineEntryMilestoneFeature;
+use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
@@ -55,6 +56,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
@@ -84,29 +86,31 @@ class PipelineEntryForm
                 ->tableArguments(['pipelineId' => $pipeline?->getKey()])
                 ->visible($isStageVisible)
                 ->required(),
-            DateTimePicker::make('due')
-                ->label('Due Date'),
-            ToggleButtons::make('assigned_to_type')
-                ->label('Assigned To Type')
-                ->options([
-                    'none' => 'None',
-                    Relation::getMorphAlias(User::class) => 'User',
-                    Relation::getMorphAlias(Contact::class) => 'Contact',
-                ])
-                ->default('none')
-                ->inline()
-                ->live()
-                ->afterStateHydrated(function (?string $state, Set $set) {
-                    if ($state === null) {
-                        $set('assigned_to_type', 'none');
-                    }
-                })
-                ->afterStateUpdated(function (?string $state, Set $set) {
-                    if ($state === 'none') {
-                        $set('assigned_to_id', null);
-                    }
-                })
-                ->dehydrateStateUsing(fn (?string $state): ?string => $state === 'none' ? null : $state),
+            ...(PipelineEntryStartDateFeature::active()
+                ? [
+                    Grid::make(2)
+                        ->schema([
+                            DateTimePicker::make('start_date')
+                                ->label('Start Date'),
+                            DateTimePicker::make('due')
+                                ->label('Due Date'),
+                        ]),
+                    Grid::make(2)
+                        ->schema([
+                            Toggle::make('is_visible_to_guests')
+                                ->label('Visible to Guest')
+                                ->default(true),
+                            self::assignedToType(),
+                        ]),
+                ]
+                : [
+                    DateTimePicker::make('due')
+                        ->label('Due Date'),
+                    self::assignedToType(),
+                    Toggle::make('is_visible_to_guests')
+                        ->label('Visible to Guest')
+                        ->default(true),
+                ]),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
                 ->tableConfiguration(fn (Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
@@ -130,9 +134,6 @@ class PipelineEntryForm
                 ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => (filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none') ? $state : null)
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
-            Toggle::make('is_visible_to_guests')
-                ->label('Visible to Guest')
-                ->default(true),
 
             ToggleButtons::make('milestones_type')
                 ->label('Milestones Type')
@@ -274,5 +275,30 @@ class PipelineEntryForm
             : '';
 
         return "({$serviceRequest->service_request_number}){$title}";
+    }
+
+    private static function assignedToType(): ToggleButtons
+    {
+        return ToggleButtons::make('assigned_to_type')
+            ->label('Assigned To Type')
+            ->options([
+                'none' => 'None',
+                Relation::getMorphAlias(User::class) => 'User',
+                Relation::getMorphAlias(Contact::class) => 'Contact',
+            ])
+            ->default('none')
+            ->inline()
+            ->live()
+            ->afterStateHydrated(function (?string $state, Set $set): void {
+                if ($state === null) {
+                    $set('assigned_to_type', 'none');
+                }
+            })
+            ->afterStateUpdated(function (?string $state, Set $set): void {
+                if ($state === 'none') {
+                    $set('assigned_to_id', null);
+                }
+            })
+            ->dehydrateStateUsing(fn (?string $state): ?string => $state === 'none' ? null : $state);
     }
 }

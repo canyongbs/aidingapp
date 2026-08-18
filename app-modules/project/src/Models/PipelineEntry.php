@@ -78,6 +78,7 @@ class PipelineEntry extends Model implements Auditable
         'pipeline_stage_id',
         'project_milestone_id',
         'description',
+        'start_date',
         'due',
         'assigned_to_id',
         'assigned_to_type',
@@ -86,6 +87,7 @@ class PipelineEntry extends Model implements Auditable
     ];
 
     protected $casts = [
+        'start_date' => 'datetime',
         'due' => 'datetime',
         'is_visible_to_guests' => 'boolean',
     ];
