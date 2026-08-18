@@ -64,26 +64,34 @@ class EditServiceMonitoring extends EditRecord
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->required()
-                    ->string()
-                    ->maxLength(255),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->string()
-                    ->maxLength(65535),
-                TextInput::make('domain')
-                    ->label('URL')
-                    ->required()
-                    ->maxLength(255)
-                    ->rules([new ValidUrl()]),
-                Select::make('frequency')
-                    ->label('Frequency')
-                    ->searchable()
-                    ->options(ServiceMonitoringFrequency::class)
-                    ->enum(ServiceMonitoringFrequency::class)
-                    ->required(),
+                Section::make('Monitor Details')
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Name')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->label('Description')
+                            ->string()
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                        TextInput::make('domain')
+                            ->label('URL')
+                            ->required()
+                            ->maxLength(255)
+                            ->rules([new ValidUrl()])
+                            ->columnSpan(1),
+                        Select::make('frequency')
+                            ->label('Frequency')
+                            ->searchable()
+                            ->options(ServiceMonitoringFrequency::class)
+                            ->enum(ServiceMonitoringFrequency::class)
+                            ->required()
+                            ->columnSpan(1),
+                    ])
+                    ->columns(2),
                 Section::make('Notification Settings')
                     ->schema([
                         Select::make('department')
