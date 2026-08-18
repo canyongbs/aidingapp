@@ -32,10 +32,21 @@
     </COPYRIGHT>
 --}}
 @php
+    use AidingApp\Theme\Settings\ThemeSettings;
     use App\Filament\Widgets\Notifications;
     use App\Settings\DisplaySettings;
 
     $timezone = app(DisplaySettings::class)->getTimezone();
+
+    $themeSettings = app(ThemeSettings::class);
+
+    $themeChangelogUrl = filled($themeSettings->changelog_url)
+        ? $themeSettings->changelog_url
+        : ThemeSettings::DEFAULT_CHANGELOG_URL;
+
+    $productResourceHubUrl = filled($themeSettings->product_resource_hub_url)
+        ? $themeSettings->product_resource_hub_url
+        : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL;
 @endphp
 
 <x-filament-panels::page class="@container">
@@ -55,8 +66,8 @@
             </div>
         </div>
 
-        <x-version-card theme-changelog-url="https://github.com/canyongbs/aidingapp/releases" />
-        <x-resource-portal-card product-resource-hub-url="https://canyongbs.aiding.app/portal" />
+        <x-version-card :theme-changelog-url="$themeChangelogUrl" />
+        <x-resource-portal-card :product-resource-hub-url="$productResourceHubUrl" />
     </div>
 
     @livewire(Notifications::class)

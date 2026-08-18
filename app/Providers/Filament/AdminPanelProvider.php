@@ -161,6 +161,28 @@ class AdminPanelProvider extends PanelProvider
                             && $user->managedContact()->exists();
                     }),
                 MenuItem::make()
+                    ->label('Recent Updates')
+                    ->url(fn (): string => app(ThemeSettings::class)->recent_updates_url ?? '')
+                    ->icon(Heroicon::Megaphone)
+                    ->openUrlInNewTab()
+                    ->visible(function (): bool {
+                        $themeSettings = app(ThemeSettings::class);
+
+                        return $themeSettings->is_recent_updates_url_enabled
+                            && filled($themeSettings->recent_updates_url);
+                    }),
+                MenuItem::make()
+                    ->label('Get Support')
+                    ->url(fn (): string => app(ThemeSettings::class)->support_url ?? '')
+                    ->icon(Heroicon::Lifebuoy)
+                    ->openUrlInNewTab()
+                    ->visible(function (): bool {
+                        $themeSettings = app(ThemeSettings::class);
+
+                        return $themeSettings->is_support_url_enabled
+                            && filled($themeSettings->support_url);
+                    }),
+                MenuItem::make()
                     ->label('Profile Settings')
                     ->url(fn () => ProfileSettings::getUrl())
                     ->icon('heroicon-s-cog-6-tooth'),

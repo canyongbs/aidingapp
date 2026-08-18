@@ -40,6 +40,7 @@ use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
 use App\Models\User;
 use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Pages\SettingsPage;
 use Filament\Schemas\Components\Section;
@@ -116,6 +117,54 @@ class ManageBrandConfigurationSettings extends SettingsPage
                         Toggle::make('is_logo_active')
                             ->label('Active')
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
+                    ]),
+                Section::make('Profile Menu Links')
+                    ->aside()
+                    ->schema([
+                        Section::make('Support')
+                            ->schema([
+                                Toggle::make('is_support_url_enabled')
+                                    ->label('Enable Support URL')
+                                    ->live()
+                                    ->columnSpanFull(),
+                                TextInput::make('support_url')
+                                    ->label('Support URL')
+                                    ->url()
+                                    ->maxLength(255)
+                                    ->placeholder(ThemeSettings::DEFAULT_SUPPORT_URL)
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_support_url_enabled'))
+                                    ->columnSpanFull(),
+                            ]),
+                        Section::make('Recent Updates')
+                            ->schema([
+                                Toggle::make('is_recent_updates_url_enabled')
+                                    ->label('Enable Recent Updates URL')
+                                    ->live()
+                                    ->columnSpanFull(),
+                                TextInput::make('recent_updates_url')
+                                    ->label('Recent Updates URL')
+                                    ->url()
+                                    ->maxLength(255)
+                                    ->placeholder(ThemeSettings::DEFAULT_RECENT_UPDATES_URL)
+                                    ->visible(fn (Get $get): bool => (bool) $get('is_recent_updates_url_enabled'))
+                                    ->columnSpanFull(),
+                            ]),
+                    ]),
+                Section::make('Login and Home Targets')
+                    ->aside()
+                    ->schema([
+                        TextInput::make('changelog_url')
+                            ->label('Changelog URL')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder(ThemeSettings::DEFAULT_CHANGELOG_URL)
+                            ->columnSpanFull(),
+                        TextInput::make('product_resource_hub_url')
+                            ->label('Product Resource Hub URL')
+                            ->url()
+                            ->maxLength(255)
+                            ->placeholder(ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL)
+                            ->columnSpanFull(),
                     ]),
             ]);
     }

@@ -34,44 +34,42 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Theme\Settings;
+use AidingApp\Theme\Settings\ThemeSettings;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
-use App\Settings\SettingsWithMedia;
-
-class ThemeSettings extends SettingsWithMedia
-{
-    public const DEFAULT_SUPPORT_URL = 'https://canyongbs.aiding.app/portal';
-
-    public const DEFAULT_RECENT_UPDATES_URL = 'https://canyongbs.com/aiding-app/changelog/';
-
-    public const DEFAULT_CHANGELOG_URL = 'https://canyongbs.com/aiding-app/changelog/';
-
-    public const DEFAULT_PRODUCT_RESOURCE_HUB_URL = 'https://canyongbs.aiding.app/portal';
-
-    public bool $is_logo_active = false;
-
-    public bool $is_favicon_active = false;
-
-    public bool $is_support_url_enabled = true;
-
-    public ?string $support_url = null;
-
-    public bool $is_recent_updates_url_enabled = true;
-
-    public ?string $recent_updates_url = null;
-
-    public ?string $changelog_url = null;
-
-    public ?string $product_resource_hub_url = null;
-
-    public static function group(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'theme';
+        DB::transaction(function () {
+            $this->migrator->update('theme.is_support_url_enabled', fn (): bool => true);
+
+            $this->migrator->update(
+                'theme.support_url',
+                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_SUPPORT_URL,
+            );
+
+            $this->migrator->update('theme.is_recent_updates_url_enabled', fn (): bool => true);
+
+            $this->migrator->update(
+                'theme.recent_updates_url',
+                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_RECENT_UPDATES_URL,
+            );
+
+            $this->migrator->update(
+                'theme.changelog_url',
+                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_CHANGELOG_URL,
+            );
+
+            $this->migrator->update(
+                'theme.product_resource_hub_url',
+                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL,
+            );
+        });
     }
 
-    public static function getSettingsPropertyModelClass(): string
+    public function down(): void
     {
-        return ThemeSettingsProperty::class;
+        // This is a one-time data seed for existing tenants and is not reversible.
     }
-}
+};
