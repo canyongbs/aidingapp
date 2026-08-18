@@ -53,7 +53,7 @@ class ManageKnowledgeBasePortalSettings extends SettingsPage
 {
     protected static ?string $navigationLabel = 'Portal';
 
-    protected static ?int $navigationSort = 5;
+    protected static ?int $navigationSort = 50;
 
     protected static string $settings = KnowledgeBasePortalSettings::class;
 
@@ -81,7 +81,7 @@ class ManageKnowledgeBasePortalSettings extends SettingsPage
                     ->schema([
                         Select::make('category_tab_order')
                             ->label('Category Tabs')
-                            ->helperText('Choose the order in which the All Articles, Featured, and Most Viewed tabs are displayed on the knowledge base category pages.')
+                            ->aboveContent('When customers browse a category or subcategory in the self-service portal, tabs organize the available articles. Use the options below to choose the order in which these tabs appear. The first tab in the selected order will be displayed by default when the page loads.')
                             ->options(KnowledgeBaseCategoryTabOrder::class)
                             ->enum(KnowledgeBaseCategoryTabOrder::class)
                             ->required(),
