@@ -49,10 +49,15 @@ class KnowledgeBasePlugin implements Plugin
 
     public function register(Panel $panel): void
     {
-        $panel->discoverResources(
-            in: __DIR__ . '/Filament/Resources',
-            for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-        )
+        $panel
+            ->discoverResources(
+                in: __DIR__ . '/Filament/Resources',
+                for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
+            )
+            ->discoverPages(
+                in: __DIR__ . '/Filament/Pages',
+                for: 'AidingApp\\KnowledgeBase\\Filament\\Pages'
+            )
             ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
     }
 
