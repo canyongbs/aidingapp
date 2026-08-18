@@ -161,6 +161,18 @@ class AdminPanelProvider extends PanelProvider
                             && $user->managedContact()->exists();
                     }),
                 MenuItem::make()
+                    ->label('Profile Settings')
+                    ->url(fn () => ProfileSettings::getUrl())
+                    ->icon('heroicon-s-cog-6-tooth'),
+                Action::make('about')
+                    ->label('About')
+                    ->modalHeading('Aiding App® by Canyon GBS')
+                    ->modalDescription('Version ' . config('sentry.release'))
+                    ->modalContent(fn () => view('components.about-modal'))
+                    ->modalFooterActions([])
+                    ->modalWidth(Width::Small)
+                    ->icon('heroicon-s-information-circle'),
+                MenuItem::make()
                     ->label('Recent Updates')
                     ->url(fn (): string => app(ThemeSettings::class)->recent_updates_url ?? '')
                     ->icon(Heroicon::Megaphone)
@@ -182,18 +194,6 @@ class AdminPanelProvider extends PanelProvider
                         return $themeSettings->is_support_url_enabled
                             && filled($themeSettings->support_url);
                     }),
-                MenuItem::make()
-                    ->label('Profile Settings')
-                    ->url(fn () => ProfileSettings::getUrl())
-                    ->icon('heroicon-s-cog-6-tooth'),
-                Action::make('about')
-                    ->label('About')
-                    ->modalHeading('Aiding App® by Canyon GBS')
-                    ->modalDescription('Version ' . config('sentry.release'))
-                    ->modalContent(fn () => view('components.about-modal'))
-                    ->modalFooterActions([])
-                    ->modalWidth(Width::Small)
-                    ->icon('heroicon-s-information-circle'),
             ])
             ->renderHook(
                 PanelsRenderHook::TOPBAR_AFTER,
