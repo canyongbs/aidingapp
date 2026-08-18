@@ -155,7 +155,7 @@ it('excludes archived tasks from the pipeline board', function () {
         ->assertCanNotSeeTableRecords([$archived]);
 });
 
-it('does not display a row-level edit action for pipeline tasks', function () {
+it('does not provide a row-level edit action because task editing is accessed through the name column', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
