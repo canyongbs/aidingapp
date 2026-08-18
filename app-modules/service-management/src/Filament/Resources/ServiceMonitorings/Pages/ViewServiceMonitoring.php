@@ -61,14 +61,22 @@ class ViewServiceMonitoring extends ViewRecord
             ->schema([
                 Section::make()
                     ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                        TextEntry::make('domain')
-                            ->label('URL'),
-                        TextEntry::make('frequency')
-                            ->label('Frequency'),
+                        Section::make('Monitor Details')
+                            ->schema([
+                                TextEntry::make('name')
+                                    ->label('Name')
+                                    ->columnSpan(1),
+                                TextEntry::make('description')
+                                    ->label('Description')
+                                    ->columnSpan(1),
+                                TextEntry::make('domain')
+                                    ->label('URL')
+                                    ->columnSpan(1),
+                                TextEntry::make('frequency')
+                                    ->label('Frequency')
+                                    ->columnSpan(1),
+                            ])
+                            ->columns(2),
                         Section::make('Notification Settings')
                             ->schema([
                                 TextEntry::make('departments.name')
