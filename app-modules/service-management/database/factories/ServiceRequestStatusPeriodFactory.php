@@ -54,12 +54,15 @@ class ServiceRequestStatusPeriodFactory extends Factory
      */
     public function definition(): array
     {
-        $status = ServiceRequestStatus::factory();
+        $classification = $this->faker->randomElement(SystemServiceRequestClassification::cases());
+        $status = ServiceRequestStatus::factory()->state([
+            'classification' => $classification,
+        ]);
 
         return [
             'service_request_id' => ServiceRequest::factory(),
             'service_request_status_id' => $status,
-            'classification' => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
+            'classification' => $classification,
             'started_at' => now(),
         ];
     }
