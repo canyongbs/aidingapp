@@ -42,7 +42,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
-use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStatsWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Pipeline;
@@ -221,29 +220,40 @@ it('can render the project access widget and mount the manage access action', fu
         ->assertHasNoErrors();
 });
 
-it('can create a milestone through the project work pipeline widget create action', function () {
+it('can list pipeline entries in the project work pipeline widget', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
 
-    $milestones = ProjectMilestone::factory()->count(3)->for($project)->create();
+    $entries = PipelineEntry::factory()
+        ->count(3)
+        ->create(['pipeline_stage_id' => $pipeline->stages->sole()->getKey()]);
 
-    livewire(ProjectMilestonesWidget::class, [
+    livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertCanSeeTableRecords($milestones);
+        ->assertCanSeeTableRecords($entries);
 });
 
-it('hides archived milestones in the project milestones widget', function () {
+it('hides archived pipeline entries in the project work pipeline widget', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $stage = $pipeline->stages->sole();
 
-    $active = ProjectMilestone::factory()->for($project)->create();
-    $archived = ProjectMilestone::factory()->for($project)->create();
+    $active = PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
+    $archived = PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
     $archived->archive();
 
-    livewire(ProjectMilestonesWidget::class, [
+    livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertCanSeeTableRecords([$active])
@@ -532,6 +542,7 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
     ]);
+    $milestone->pipelineEntries()->attach($entry);
 
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
