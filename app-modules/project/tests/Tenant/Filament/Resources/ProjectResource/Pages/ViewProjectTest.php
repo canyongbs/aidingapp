@@ -95,6 +95,22 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
+it('renders the project dashboard widgets in access, milestone, pipeline, and file tabs', function () {
+    loginAsUserWithProjectViewPermissions();
+
+    $project = Project::factory()->create();
+
+    get(ViewProject::getUrl([
+        'record' => $project->getRouteKey(),
+    ]))
+        ->assertSuccessful()
+        ->assertSee('x-data="{ tab: \'access\' }"', false)
+        ->assertSee('Access')
+        ->assertSee('Milestones')
+        ->assertSee('Pipelines')
+        ->assertSee('Files');
+});
+
 it('cannot render an archived project', function () {
     loginAsUserWithProjectViewPermissions();
 

@@ -39,9 +39,15 @@
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
     use AidingApp\Project\Models\Pipeline;
     use AidingApp\Project\Models\ProjectFile;
-    use AidingApp\Project\Models\ProjectMilestone;
 
     $record = $this->getRecord();
+    $canViewAccess = ProjectAccessWidget::canView();
+    $canViewPipelines = auth()
+        ->user()
+        ?->can('viewAny', [Pipeline::class, $record]);
+    $canViewFiles = auth()
+        ->user()
+        ?->can('viewAny', [ProjectFile::class, $record]);
 @endphp
 
 <x-filament-panels::page>
@@ -51,15 +57,62 @@
         @livewire(ProjectStatsWidget::class, ['record' => $record])
     @endif
 
-    @if (ProjectAccessWidget::canView())
-        @livewire(ProjectAccessWidget::class, ['record' => $record])
-    @endif
+    @if ($canViewAccess || $canViewPipelines || $canViewFiles)
+        <div x-data="{ tab: 'access' }" class="space-y-6">
+            <div class="flex justify-center">
+                <x-filament::tabs>
+                    @if ($canViewAccess)
+                        <x-filament::tabs.item
+                            tag="button"
+                            x-on:click="tab = 'access'"
+                            :alpine-active="'tab === \'access\''"
+                            icon="heroicon-m-key"
+                        >
+                            Access
+                        </x-filament::tabs.item>
+                    @endif
 
-    @if (auth()->user()?->can('viewAny', [Pipeline::class, $record]))
-        @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
-    @endif
+                    @if ($canViewPipelines)
+                        <x-filament::tabs.item
+                            tag="button"
+                            x-on:click="tab = 'pipelines'"
+                            :alpine-active="'tab === \'pipelines\''"
+                            icon="heroicon-m-view-columns"
+                        >
+                            Pipelines
+                        </x-filament::tabs.item>
+                    @endif
 
-    @if (auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
-        @livewire(ProjectFilesWidget::class, ['record' => $record])
+                    @if ($canViewFiles)
+                        <x-filament::tabs.item
+                            tag="button"
+                            x-on:click="tab = 'files'"
+                            :alpine-active="'tab === \'files\''"
+                            icon="heroicon-m-paper-clip"
+                        >
+                            Files
+                        </x-filament::tabs.item>
+                    @endif
+                </x-filament::tabs>
+            </div>
+
+            @if ($canViewAccess)
+                <div x-show="tab === 'access'" x-cloak>
+                    @livewire(ProjectAccessWidget::class, ['record' => $record], key('project-access-' . $record->getKey()))
+                </div>
+            @endif
+
+            @if ($canViewPipelines)
+                <div x-show="tab === 'pipelines'" x-cloak>
+                    @livewire(ProjectWorkPipelineWidget::class, ['record' => $record], key('project-pipelines-' . $record->getKey()))
+                </div>
+            @endif
+
+            @if ($canViewFiles)
+                <div x-show="tab === 'files'" x-cloak>
+                    @livewire(ProjectFilesWidget::class, ['record' => $record], key('project-files-' . $record->getKey()))
+                </div>
+            @endif
+        </div>
     @endif
 </x-filament-panels::page>
