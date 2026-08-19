@@ -43,6 +43,7 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -220,6 +221,46 @@ it('persists a start date for a pipeline entry created from a stage column', fun
     $entry = PipelineEntry::query()->where('name', 'Started Task')->sole();
 
     expect($entry->start_date?->toDateTimeString())->toBe($startDate->toDateTimeString());
+});
+
+it('does not render the start date field when the pipeline entry start date flag is inactive', function () {
+    PipelineEntryStartDateFeature::deactivate();
+
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('addEntry', arguments: ['stage' => $pipeline->stages->sole()->getKey()])
+        ->assertFormFieldDoesNotExist('start_date', 'mountedActionSchema0');
+});
+
+it('does not persist a start date for a pipeline entry created from a stage column when the flag is inactive', function () {
+    PipelineEntryStartDateFeature::deactivate();
+
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->sole();
+    $startDate = Carbon::parse('2026-08-09 09:30:00');
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('addEntry', data: [
+            'name' => 'Started Task Without Flag',
+            'start_date' => $startDate->toDateTimeString(),
+        ], arguments: ['stage' => $stage->getKey()])
+        ->assertHasNoActionErrors();
+
+    $entry = PipelineEntry::query()->where('name', 'Started Task Without Flag')->sole();
+
+    expect($entry->start_date)->toBeNull();
 });
 
 it('hides the add entry action without pipeline update permission', function () {
