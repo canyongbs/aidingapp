@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\P
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
@@ -73,7 +74,7 @@ class ViewServiceRequestUpdate extends ViewRecord
         return [
             ServiceRequestResource::getUrl() => ServiceRequestResource::getBreadcrumb(),
             ServiceRequestResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->service_request_number,
-            ServiceRequestResource::getUrl('manage-service-request-updates', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
+            ServiceRequestResource::getUrl('view', ['record' => $parentRecord, 'tab' => ServiceRequestTab::Updates->value]) => static::getResource()::getBreadcrumb(),
         ];
     }
 

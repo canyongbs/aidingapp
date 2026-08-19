@@ -38,24 +38,15 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\Feedback;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageAssignments;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageLiveChats;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestFormSubmission;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ManageServiceRequestUpdate;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ServiceRequestTimeline;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewLiveChatTranscript;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Enums\Feature;
 use App\Enums\NavigationGroup;
 use App\Models\User;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
 class ServiceRequestResource extends Resource
@@ -126,64 +117,14 @@ class ServiceRequestResource extends Resource
         return static::getUrl('view', ['record' => $record]);
     }
 
-    public static function shouldShowFormSubmission(Page $page): bool
-    {
-        if (! is_null($page->record) && ! is_null($page->record->serviceRequestFormSubmission)) {
-            return true;
-        }
-
-        return false;
-    }
-
-    public static function shouldShowFeedback(Page $page): bool
-    {
-        return Gate::check(Feature::FeedbackManagement->getGateName());
-    }
-
-    public static function shouldShowLiveChats(Page $page): bool
-    {
-        return Gate::check(Feature::RealtimeChat->getGateName());
-    }
-
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        $navigationItems = [
-            ViewServiceRequest::class,
-            EditServiceRequest::class,
-            ManageAssignments::class,
-            ManageServiceRequestUpdate::class,
-            ServiceRequestTimeline::class,
-        ];
-
-        if (static::shouldShowFormSubmission($page)) {
-            array_splice($navigationItems, 1, 0, ManageServiceRequestFormSubmission::class);
-        }
-
-        if (static::shouldShowFeedback($page)) {
-            array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, Feedback::class);
-        }
-
-        if (static::shouldShowLiveChats($page)) {
-            array_splice($navigationItems, array_search(ServiceRequestTimeline::class, $navigationItems), 0, ManageLiveChats::class);
-        }
-
-        return $page->generateNavigationItems($navigationItems);
-    }
-
     public static function getPages(): array
     {
         return [
             'index' => ListServiceRequests::route('/'),
-            'manage-assignments' => ManageAssignments::route('/{record}/users'),
-            'manage-service-request-updates' => ManageServiceRequestUpdate::route('/{record}/updates'),
-            'manage-service-request-form-submission' => ManageServiceRequestFormSubmission::route('/{record}/form-submission'),
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
             'edit' => EditServiceRequest::route('/{record}/edit'),
-            'manage-feedback' => Feedback::route('/{record}/manage-feedback'),
-            'manage-live-chats' => ManageLiveChats::route('/{record}/live-chats'),
             'view-live-chat-transcript' => ViewLiveChatTranscript::route('/{record}/live-chats/{conversation}'),
-            'timeline' => ServiceRequestTimeline::route('/{record}/timeline'),
         ];
     }
 }

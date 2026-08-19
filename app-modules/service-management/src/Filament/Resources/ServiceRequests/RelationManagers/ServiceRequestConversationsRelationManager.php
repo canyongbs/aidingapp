@@ -34,40 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Enums\Feature;
-use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Gate;
 
-class ManageLiveChats extends ManageRelatedRecords
+class ServiceRequestConversationsRelationManager extends RelationManager
 {
-    protected static string $resource = ServiceRequestResource::class;
-
     protected static string $relationship = 'conversations';
-
-    protected static ?string $navigationLabel = 'Live Chats';
-
-    protected static ?string $breadcrumb = 'Live Chats';
 
     protected static ?string $title = 'Live Chats';
 
-    public static function canAccess(array $arguments = []): bool
+    public static function canViewForRecord(Model $ownerRecord, string $pageClass): bool
     {
-        return Gate::check(Feature::RealtimeChat->getGateName());
-    }
-
-    public static function getNavigationItemActiveRoutePattern(): string | array
-    {
-        return [
-            static::getRouteName(),
-            static::getResource()::getRouteBaseName() . '.view-live-chat-transcript',
-        ];
+        return Gate::check(Feature::RealtimeChat->getGateName())
+            && Gate::check('view', $ownerRecord);
     }
 
     public function table(Table $table): Table
@@ -91,15 +79,8 @@ class ManageLiveChats extends ManageRelatedRecords
             ])
             ->defaultSort('finished_at', 'desc')
             ->recordUrl(fn (ServiceRequestConversation $record): string => ServiceRequestResource::getUrl('view-live-chat-transcript', [
-                'record' => $this->getRecord(),
+                'record' => $this->getOwnerRecord(),
                 'conversation' => $record,
             ]));
-    }
-
-    protected function authorizeAccess(): void
-    {
-        parent::authorizeAccess();
-
-        Gate::authorize('view', $this->getRecord());
     }
 }

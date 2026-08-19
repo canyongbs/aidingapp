@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -68,7 +69,7 @@ class EditServiceRequestUpdate extends EditRecord
         return [
             ServiceRequestResource::getUrl() => ServiceRequestResource::getBreadcrumb(),
             ServiceRequestResource::getUrl('view', ['record' => $parentRecord]) => $parentRecord->service_request_number,
-            ServiceRequestResource::getUrl('manage-service-request-updates', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
+            ServiceRequestResource::getUrl('view', ['record' => $parentRecord, 'tab' => ServiceRequestTab::Updates->value]) => static::getResource()::getBreadcrumb(),
         ];
     }
 

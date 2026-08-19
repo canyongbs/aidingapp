@@ -68,8 +68,6 @@ class EditServiceRequest extends EditRecord
 {
     protected static string $resource = ServiceRequestResource::class;
 
-    protected static ?string $navigationLabel = 'Edit';
-
     public function form(Schema $schema): Schema
     {
         $disabledStatuses = ServiceRequestStatus::onlyTrashed()->pluck('id');

@@ -36,12 +36,7 @@
 
 namespace AidingApp\Timeline\Filament\Pages;
 
-use AidingApp\Timeline\Actions\SyncTimelineData;
-use AidingApp\Timeline\Filament\Pages\Concerns\LoadsTimelineRecords;
-use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
-use App\Actions\GetRecordFromMorphAndKey;
 use BackedEnum;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\Concerns\InteractsWithRecord;
 use Filament\Resources\Pages\Page;
 use Illuminate\Database\Eloquent\Model;
@@ -49,7 +44,6 @@ use Illuminate\Database\Eloquent\Model;
 abstract class TimelinePage extends Page
 {
     use InteractsWithRecord;
-    use LoadsTimelineRecords;
 
     protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-queue-list';
 
@@ -64,35 +58,11 @@ abstract class TimelinePage extends Page
      */
     public array $modelsToTimeline = [];
 
-    public Model $currentRecordToView;
-
     public Model $recordModel;
 
     public function mount(int|string $record): void
     {
         $this->recordModel = $this->record = $this->resolveRecord($record);
-
-        $this->timelineRecords = collect();
-
-        resolve(SyncTimelineData::class)->now($this->recordModel, $this->modelsToTimeline);
-
-        $this->loadTimelineRecords();
-    }
-
-    public function viewRecord(string $key, string $morphReference): void
-    {
-        $this->currentRecordToView = resolve(GetRecordFromMorphAndKey::class)->via($morphReference, $key);
-
-        $this->mountAction('view');
-    }
-
-    public function viewAction(): ViewAction
-    {
-        assert($this->currentRecordToView instanceof ProvidesATimeline);
-
-        return $this->currentRecordToView
-            ->timeline()
-            ->modalViewAction()->slideOver();
     }
 
     public static function canAccess(array $parameters = []): bool
