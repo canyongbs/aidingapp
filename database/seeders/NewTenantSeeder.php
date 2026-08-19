@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestNotificationAutomationSettingsSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestTypeSeeder;
+use AidingApp\Theme\Database\Seeders\ThemeSettingsSeeder;
 use App\Models\Authenticatable;
 use Illuminate\Database\Seeder;
 
@@ -90,6 +91,9 @@ class NewTenantSeeder extends Seeder
 
             // Service Request Notification Automation
             ServiceRequestNotificationAutomationSettingsSeeder::class,
+
+            // Theme
+            ThemeSettingsSeeder::class,
         ]);
     }
 }

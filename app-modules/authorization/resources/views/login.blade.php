@@ -31,6 +31,20 @@
     
     </COPYRIGHT>
 --}}
+@php
+    use AidingApp\Theme\Settings\ThemeSettings;
+
+    $themeSettings = app(ThemeSettings::class);
+
+    $themeChangelogUrl = filled($themeSettings->changelog_url)
+        ? $themeSettings->changelog_url
+        : ThemeSettings::DEFAULT_CHANGELOG_URL;
+
+    $productResourceHubUrl = filled($themeSettings->product_resource_hub_url)
+        ? $themeSettings->product_resource_hub_url
+        : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL;
+@endphp
+
 <div class="flex w-full flex-col items-center justify-center gap-8 lg:flex-row">
     <div class="w-full lg:w-1/2 lg:pr-8">
         @if (filament()->hasRegistration())
@@ -57,7 +71,7 @@
     </div>
 
     <div class="flex w-full flex-col gap-6 lg:w-1/2">
-        <x-version-card theme-changelog-url="https://github.com/canyongbs/aidingapp/releases" />
-        <x-resource-portal-card product-resource-hub-url="https://canyongbs.aiding.app/portal" />
+        <x-version-card :theme-changelog-url="$themeChangelogUrl" />
+        <x-resource-portal-card :product-resource-hub-url="$productResourceHubUrl" />
     </div>
 </div>

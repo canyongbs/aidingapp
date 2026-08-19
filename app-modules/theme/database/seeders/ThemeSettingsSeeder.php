@@ -34,44 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Theme\Settings;
+namespace AidingApp\Theme\Database\Seeders;
 
-use AidingApp\Theme\Settings\SettingsProperties\ThemeSettingsProperty;
-use App\Settings\SettingsWithMedia;
+use AidingApp\Theme\Settings\ThemeSettings;
+use Illuminate\Database\Seeder;
 
-class ThemeSettings extends SettingsWithMedia
+class ThemeSettingsSeeder extends Seeder
 {
-    public const DEFAULT_SUPPORT_URL = 'https://canyongbs.aiding.app/portal';
-
-    public const DEFAULT_RECENT_UPDATES_URL = 'https://canyongbs.com/aiding-app/changelog/';
-
-    public const DEFAULT_CHANGELOG_URL = 'https://canyongbs.com/aiding-app/changelog/';
-
-    public const DEFAULT_PRODUCT_RESOURCE_HUB_URL = 'https://canyongbs.aiding.app/portal';
-
-    public bool $is_logo_active = false;
-
-    public bool $is_favicon_active = false;
-
-    public bool $is_support_url_enabled = true;
-
-    public ?string $support_url = null;
-
-    public bool $is_recent_updates_url_enabled = true;
-
-    public ?string $recent_updates_url = null;
-
-    public ?string $changelog_url = null;
-
-    public ?string $product_resource_hub_url = null;
-
-    public static function group(): string
+    public function run(): void
     {
-        return 'theme';
-    }
+        $settings = app(ThemeSettings::class);
 
-    public static function getSettingsPropertyModelClass(): string
-    {
-        return ThemeSettingsProperty::class;
+        $settings->is_support_url_enabled = true;
+        $settings->support_url = ThemeSettings::DEFAULT_SUPPORT_URL;
+        $settings->is_recent_updates_url_enabled = true;
+        $settings->recent_updates_url = ThemeSettings::DEFAULT_RECENT_UPDATES_URL;
+        $settings->changelog_url = ThemeSettings::DEFAULT_CHANGELOG_URL;
+        $settings->product_resource_hub_url = ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL;
+
+        $settings->save();
     }
 }
