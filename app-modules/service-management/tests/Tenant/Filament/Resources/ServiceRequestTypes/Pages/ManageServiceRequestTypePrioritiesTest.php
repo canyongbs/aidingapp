@@ -60,6 +60,58 @@ test('A successful action on the ManageServiceRequestTypePriorities page', funct
         ->assertSuccessful();
 });
 
+it('enables customer defined priorities when no default priority is configured', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertSchemaStateSet([
+            'customer_defined_priorities' => true,
+            'default_priority_id' => null,
+        ], 'configurationForm')
+        ->assertSchemaComponentHidden('default_priority_id', 'configurationForm');
+});
+
+it('configures a default priority when customer defined priorities are disabled', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'customer_defined_priorities' => false,
+            'default_priority_id' => $priority->getKey(),
+        ], 'configurationForm')
+        ->call('savePriorityConfiguration')
+        ->assertHasNoFormErrors([], 'configurationForm');
+
+    expect($serviceRequestType->refresh()->default_priority_id)->toBe($priority->getKey());
+});
+
+it('requires a default priority when customer defined priorities are disabled', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'customer_defined_priorities' => false,
+            'default_priority_id' => null,
+        ], 'configurationForm')
+        ->call('savePriorityConfiguration')
+        ->assertHasFormErrors(['default_priority_id' => 'required'], 'configurationForm');
+});
+
 it('can create a service request priority', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -118,6 +170,25 @@ it('can delete a service request priority', function () {
         ->assertHasNoTableActionErrors();
 
     assertSoftDeleted(ServiceRequestPriority::class, ['id' => $priority->getKey()]);
+});
+
+it('cannot delete a service request priority configured as its type default', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $priority = ServiceRequestPriority::factory()
+        ->for($serviceRequestType, 'type')
+        ->create();
+
+    $serviceRequestType->update(['default_priority_id' => $priority->getKey()]);
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->assertTableActionHidden('delete', $priority);
+
+    expect($priority->refresh()->trashed())->toBeFalse();
 });
 
 it('validates required fields when creating a service request priority', function (array $data, array $errors) {

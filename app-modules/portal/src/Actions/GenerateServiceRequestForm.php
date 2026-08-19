@@ -47,6 +47,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\CombineStepFormFeature;
+use App\Features\DefaultPriorityFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -69,13 +70,18 @@ class GenerateServiceRequestForm
         $content = collect([
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
-            $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
-                'options' => $type
-                    ->priorities()
-                    ->orderByDesc('order')
-                    ->pluck('name', 'id'),
-                'placeholder' => 'Select a priority',
-            ]),
+
+            ...(DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
+                ? []
+                : [
+                    $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
+                        'options' => $type->priorities()
+                            ->orderByDesc('order')
+                            ->pluck('name', 'id'),
+                        'placeholder' => 'Select a priority',
+                    ]),
+                ]),
+
             $this->formatBlock('Upload File', UploadFormFieldBlock::type(), false, [
                 'multiple' => $uploadsMediaCollection->getMaxNumberOfFiles() > 1,
                 'limit' => $uploadsMediaCollection->getMaxNumberOfFiles(),

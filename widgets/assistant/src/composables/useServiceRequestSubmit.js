@@ -39,8 +39,11 @@ import { clearToken, getAuthHeaders } from '../utils/token.js';
  * @param {string} storeUrlBase  - URL template with `__TYPE__` placeholder
  * @param {string} typeId        - Selected service request type ID
  * @param {string} priorityId    - Selected priority ID (may be empty string)
+ * @param {boolean} hasDefaultPriority - Whether the type has a default priority configured, in which
+ *                                       case the server always assigns the priority and `priority_id`
+ *                                       must not be sent from the client.
  */
-export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
+export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId, hasDefaultPriority = false) {
     const title = ref('');
     const description = ref('');
     const attachments = ref([]);
@@ -64,12 +67,15 @@ export function useServiceRequestSubmit(storeUrlBase, typeId, priorityId) {
         const payload = {
             title: title.value,
             description: description.value,
-            priority_id: priorityId,
             attachments: (attachments.value ?? []).map((a) => ({
                 path: a.path,
                 original_file_name: a.originalFileName,
             })),
         };
+
+        if (!hasDefaultPriority) {
+            payload.priority_id = priorityId;
+        }
 
         if (customFields && Object.keys(customFields).length > 0) {
             payload.custom_fields = customFields;

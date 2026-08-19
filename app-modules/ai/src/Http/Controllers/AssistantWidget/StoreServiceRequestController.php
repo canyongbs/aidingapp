@@ -53,6 +53,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use App\Features\DefaultPriorityFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -63,6 +64,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -80,7 +82,11 @@ class StoreServiceRequestController extends Controller
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
-            'priority_id' => ['required', 'uuid'],
+            'priority_id' => [
+                Rule::requiredIf(fn (): bool => ! (DefaultPriorityFeature::active() && $type->defaultPriority()->exists())),
+                Rule::prohibitedIf(fn (): bool => DefaultPriorityFeature::active() && $type->defaultPriority()->exists()),
+                'uuid',
+            ],
             'attachments' => ['nullable', 'array'],
             'attachments.*.path' => [
                 'required_with:attachments',
@@ -125,7 +131,9 @@ class StoreServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $priority = $type->priorities()->findOrFail($data['priority_id']);
+            $priority = DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
+                ? $type->defaultPriority()->first()
+                : $type->priorities()->findOrFail($data['priority_id']);
 
             $serviceRequestStatus = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)

@@ -37,8 +37,10 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\DefaultPriorityFeature;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -47,6 +49,51 @@ beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
+});
+
+it('omits the priority field when the type has a configured default priority', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()
+        ->for($type, 'type')
+        ->create();
+
+    $type->update(['default_priority_id' => $priority->getKey()]);
+
+    $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
+
+    $response->assertOk();
+
+    expect(json_encode($response->json('schema')))->not->toContain('priority');
+});
+
+it('includes the priority field when the type has no configured default priority', function () {
+    $type = ServiceRequestType::factory()->create();
+
+    $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
+
+    $response->assertOk();
+
+    expect(json_encode($response->json('schema')))->toContain('priority');
+});
+
+it('includes the priority field before the default priority feature is activated', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()
+        ->for($type, 'type')
+        ->create();
+
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    DefaultPriorityFeature::deactivate();
+
+    try {
+        $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
+
+        $response->assertOk();
+
+        expect(json_encode($response->json('schema')))->toContain('priority');
+    } finally {
+        DefaultPriorityFeature::activate();
+    }
 });
 
 it('blocks guests from loading the form of a visibility restricted type', function () {

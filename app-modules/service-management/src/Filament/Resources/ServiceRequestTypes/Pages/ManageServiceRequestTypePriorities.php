@@ -39,21 +39,35 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\DefaultPriorityFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Concerns\InteractsWithForms;
+use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ManageRelatedRecords;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use LogicException;
+use Throwable;
 
 class ManageServiceRequestTypePriorities extends ManageRelatedRecords
 {
+    use InteractsWithForms;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     // TODO: Obsolete when there is no table, remove from Filament
@@ -62,6 +76,27 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
     protected static ?string $navigationLabel = 'Priorities';
 
     protected static ?string $breadcrumb = 'Priorities';
+
+    protected string $view = 'service-management::filament.resources.service-request-type-resource.pages.manage-service-request-type-priorities';
+
+    /** @var array<string, mixed> */
+    public ?array $configurationData = [];
+
+    public function mount(int|string $record): void
+    {
+        parent::mount($record);
+
+        if (! DefaultPriorityFeature::active()) {
+            return;
+        }
+
+        $type = $this->getServiceRequestType();
+
+        $this->getConfigurationForm()->fill([
+            'customer_defined_priorities' => ! $type->defaultPriority()->exists(),
+            'default_priority_id' => $type->defaultPriority()->value('id'),
+        ]);
+    }
 
     public function form(Schema $schema): Schema
     {
@@ -123,5 +158,104 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
                 EditAction::make(),
                 DeleteAction::make(),
             ]);
+    }
+
+    public function configurationForm(Schema $schema): Schema
+    {
+        return $schema
+            ->model($this->getOwnerRecord())
+            ->statePath('configurationData')
+            ->components([
+                Section::make('Customer Defined Priorities')
+                    ->description('Allow customers to define the priority of their requests in the portal and in the Support Assistant experiences.')
+                    ->compact()
+                    ->schema([
+                        Toggle::make('customer_defined_priorities')
+                            ->label('Enable')
+                            ->live()
+                            ->afterStateUpdated(
+                                fn (bool $state, Set $set) => $state
+                                    ? $set('default_priority_id', null)
+                                    : null
+                            ),
+                    ]),
+
+                Select::make('default_priority_id')
+                    ->label('Default Priority')
+                    ->helperText(
+                        'Define a default priority for all new service requests.'
+                    )
+                    ->options(
+                        fn (): array => $this->getServiceRequestType()
+                            ->priorities()
+                            ->orderBy('order')
+                            ->pluck('name', 'id')
+                            ->all()
+                    )
+                    ->searchable()
+                    ->preload()
+                    ->rule(Rule::exists('service_request_priorities', 'id')->where('type_id', $this->getServiceRequestType()->getKey()))
+                    ->required(fn (Get $get): bool => ! $get('customer_defined_priorities'))
+                    ->hidden(fn (Get $get): bool => $get('customer_defined_priorities')),
+            ]);
+    }
+
+    public function savePriorityConfiguration(): void
+    {
+        if (! DefaultPriorityFeature::active()) {
+            return;
+        }
+
+        $data = $this->getConfigurationForm()->getState();
+
+        try {
+            DB::beginTransaction();
+
+            $type = $this->getServiceRequestType();
+
+            $type->update([
+                'default_priority_id' => $data['customer_defined_priorities']
+                    ? null
+                    : $data['default_priority_id'],
+            ]);
+
+            DB::commit();
+
+            Notification::make()
+                ->title('Configuration saved')
+                ->success()
+                ->send();
+        } catch (Throwable $exception) {
+            DB::rollBack();
+
+            report($exception);
+
+            Notification::make()
+                ->title('Failed to save configuration')
+                ->danger()
+                ->send();
+        }
+    }
+
+    protected function getConfigurationForm(): Schema
+    {
+        $form = $this->getSchema('configurationForm');
+
+        if (! $form instanceof Schema) {
+            throw new LogicException(static::class . ' expected the [configurationForm] schema to be registered.');
+        }
+
+        return $form;
+    }
+
+    protected function getServiceRequestType(): ServiceRequestType
+    {
+        $type = $this->getOwnerRecord();
+
+        if (! $type instanceof ServiceRequestType) {
+            throw new LogicException(static::class . ' must be mounted with a ' . ServiceRequestType::class . ' owner record.');
+        }
+
+        return $type;
     }
 }
