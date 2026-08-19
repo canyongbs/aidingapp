@@ -80,6 +80,28 @@ it('prohibits a submitted priority when a default priority is configured', funct
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
+it('requires a submitted priority when the type has no configured default priority', function () {
+    $type = ServiceRequestType::factory()->create();
+    ServiceRequestPriority::factory()->for($type, 'type')->create();
+
+    $contact = Contact::factory()->create();
+
+    $response = actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store', ['type' => $type]),
+        [
+            'Main' => [
+                'title' => 'Portal priority test',
+                'description' => 'A priority is required when no default is configured.',
+            ],
+        ],
+    );
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('Main.priority');
+
+    expect(ServiceRequest::query()->count())->toBe(0);
+});
+
 it('requires a submitted priority before the default priority feature is activated', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();

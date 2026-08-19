@@ -66,6 +66,16 @@ it('omits the priority field when the type has a configured default priority', f
     expect(json_encode($response->json('schema')))->not->toContain('priority');
 });
 
+it('includes the priority field when the type has no configured default priority', function () {
+    $type = ServiceRequestType::factory()->create();
+
+    $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
+
+    $response->assertOk();
+
+    expect(json_encode($response->json('schema')))->toContain('priority');
+});
+
 it('includes the priority field before the default priority feature is activated', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()

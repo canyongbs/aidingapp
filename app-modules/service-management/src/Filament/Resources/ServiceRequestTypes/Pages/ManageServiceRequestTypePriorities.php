@@ -61,6 +61,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use LogicException;
+use Throwable;
 
 class ManageServiceRequestTypePriorities extends ManageRelatedRecords
 {
@@ -203,9 +205,12 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
         if (! DefaultPriorityFeature::active()) {
             return;
         }
+
         $data = $this->getConfigurationForm()->getState();
 
-        DB::transaction(function () use ($data): void {
+        try {
+            DB::beginTransaction();
+
             $type = $this->getServiceRequestType();
 
             $type->update([
@@ -213,19 +218,32 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
                     ? null
                     : $data['default_priority_id'],
             ]);
-        });
 
-        Notification::make()
-            ->title('Configuration saved')
-            ->success()
-            ->send();
+            DB::commit();
+
+            Notification::make()
+                ->title('Configuration saved')
+                ->success()
+                ->send();
+        } catch (Throwable $exception) {
+            DB::rollBack();
+
+            report($exception);
+
+            Notification::make()
+                ->title('Failed to save configuration')
+                ->danger()
+                ->send();
+        }
     }
 
     protected function getConfigurationForm(): Schema
     {
         $form = $this->getSchema('configurationForm');
 
-        assert($form instanceof Schema);
+        if (! $form instanceof Schema) {
+            throw new LogicException(static::class . ' expected the [configurationForm] schema to be registered.');
+        }
 
         return $form;
     }
@@ -234,7 +252,9 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
     {
         $type = $this->getOwnerRecord();
 
-        assert($type instanceof ServiceRequestType);
+        if (! $type instanceof ServiceRequestType) {
+            throw new LogicException(static::class . ' must be mounted with a ' . ServiceRequestType::class . ' owner record.');
+        }
 
         return $type;
     }
