@@ -48,22 +48,12 @@
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import { searchFilterTabs, useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
     import { apiGet } from '../Services/api.js';
-    import { useConfigStore } from '../Stores/config.js';
     import { useCategoryData, useTagsData } from './loaders.js';
 
     const route = useRoute();
     const router = useRouter();
-    const configStore = useConfigStore();
-
-    const tabLabels = Object.fromEntries(searchFilterTabs.map((tab) => [tab.value, tab.label]));
-
-    // Category browsing tabs, ordered per the organization's configured
-    // `category_tab_order` setting (defaults to All Articles, Featured, Most Viewed).
-    const categoryTabs = computed(() =>
-        configStore.categoryTabOrder.map((value) => ({ label: tabLabels[value] ?? value, value })),
-    );
 
     const { data: categoryResponse } = useCategoryData();
     const { data: tags } = useTagsData();
@@ -104,6 +94,7 @@
         loadingResults: loadingSearchResults,
         globalSearchInput,
         isSearchActive,
+        orderedFilterTabs: categoryTabs,
         toggleTag,
         changeSearchFilter,
         searchResultArticles,
@@ -279,7 +270,7 @@
                         :articles="searchResultArticles"
                         :categories="searchResultCategories"
                         :loadingResults="loadingSearchResults"
-                        :filter-tabs="searchFilterTabs"
+                        :filter-tabs="categoryTabs"
                         @change-filter="changeSearchFilter"
                         :selected-filter="searchFilter"
                         :currentPage="searchCurrentPage"

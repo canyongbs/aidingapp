@@ -44,6 +44,8 @@ export const searchFilterTabs = [
     { label: 'Most Viewed', value: 'most-viewed' },
 ];
 
+const searchFilterTabLabels = Object.fromEntries(searchFilterTabs.map((tab) => [tab.value, tab.label]));
+
 /**
  * Shared knowledge management search behaviour, used by both the homepage and the
  * category page: keeps `searchQuery`, `selectedTags`, `filter` and `page` in sync
@@ -60,6 +62,13 @@ export function useKnowledgeManagementSearch() {
     const route = useRoute();
     const router = useRouter();
     const config = useConfigStore();
+
+    // Filter tabs ordered per the organization's configured `category_tab_order`
+    // setting (defaults to All Articles, Featured, Most Viewed), shared by every
+    // search-results view so tab order stays consistent with category browsing.
+    const orderedFilterTabs = computed(() =>
+        config.categoryTabOrder.map((value) => ({ label: searchFilterTabLabels[value] ?? value, value })),
+    );
 
     const searchQuery = ref('');
     const activeSearchQuery = ref('');
@@ -170,7 +179,7 @@ export function useKnowledgeManagementSearch() {
                 page: currentPage.value > 1 ? currentPage.value : undefined,
                 search: activeSearchQuery.value || undefined,
                 tags: activeTags.value.join(',') || undefined,
-                filter: filter.value && filter.value !== 'all-articles' ? filter.value : undefined,
+                filter: filter.value && filter.value !== orderedFilterTabs.value[0]?.value ? filter.value : undefined,
             },
         });
 
@@ -246,7 +255,7 @@ export function useKnowledgeManagementSearch() {
         const initialSearch = route.query.search || '';
         const initialTags = route.query.tags ? route.query.tags.split(',') : [];
 
-        filter.value = route.query.filter || 'all-articles';
+        filter.value = route.query.filter || orderedFilterTabs.value[0]?.value || 'all-articles';
         currentPage.value = parseInt(route.query.page) || 1;
 
         if (initialSearch || initialTags.length > 0) {
@@ -266,6 +275,7 @@ export function useKnowledgeManagementSearch() {
         loadingResults,
         globalSearchInput,
         isSearchActive,
+        orderedFilterTabs,
         searchResultArticles,
         searchResultCategories,
         currentPage,

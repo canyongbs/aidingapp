@@ -38,7 +38,7 @@
     import Page from '@common/portal/Page.vue';
     import SearchResults from '@common/portal/SearchResults.vue';
     import { computed } from 'vue';
-    import { searchFilterTabs, useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
     import { useCategoriesData, useTagsData } from './loaders.js';
 
     const { data: categories } = useCategoriesData();
@@ -59,6 +59,7 @@
         loadingResults,
         globalSearchInput,
         isSearchActive,
+        orderedFilterTabs,
         toggleTag,
         changeSearchFilter,
         searchResultArticles,
@@ -100,7 +101,7 @@
             :articles="searchResultArticles"
             :categories="searchResultCategories"
             :loadingResults="loadingResults"
-            :filter-tabs="searchFilterTabs"
+            :filter-tabs="orderedFilterTabs"
             @change-filter="changeSearchFilter"
             :selected-filter="filter"
             :currentPage="currentPage"
