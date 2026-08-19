@@ -488,14 +488,16 @@ it('clears related milestones, assets, and service requests on the widget edit a
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->callTableAction('edit', $entry, data: [
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->setActionData([
             'name' => $entry->name,
             'pipeline_stage_id' => $stage->getKey(),
             'milestones_type' => 'none',
             'assets_type' => 'none',
             'service_requests_type' => 'none',
         ])
-        ->assertHasNoTableActionErrors();
+        ->callMountedAction()
+        ->assertHasNoActionErrors();
 
     $entry->refresh();
 
