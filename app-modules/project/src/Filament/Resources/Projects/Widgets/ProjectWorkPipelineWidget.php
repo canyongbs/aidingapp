@@ -46,8 +46,8 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineArchivingFeature;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryMilestoneFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -148,7 +148,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record): void {
                         $this->openPipelineEntry($record);
                     }),
-                    
+
                 // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
                 ViewColumn::make('milestones')
                     ->label('Milestones')
