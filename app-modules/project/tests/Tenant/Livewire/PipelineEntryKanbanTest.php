@@ -416,7 +416,7 @@ it('persists related milestones, assets, and service requests when edited throug
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->setActionData([
-            'milestones' => [$milestone->getKey()],
+            'project_milestone_id' => $milestone->getKey(),
             'assets' => [$asset->getKey()],
             'serviceRequests' => [$serviceRequest->getKey()],
         ])
@@ -425,7 +425,7 @@ it('persists related milestones, assets, and service requests when edited throug
 
     $entry->refresh();
 
-    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->getKey()])
+    expect($entry->milestone?->getKey())->toBe($milestone->getKey())
         ->and($entry->assets->pluck('id')->all())->toBe([$asset->getKey()])
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
 });
@@ -463,15 +463,15 @@ it('preserves related milestones, assets, and service requests when edited witho
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $entry->milestones()->sync([$milestone->getKey()]);
     $entry->assets()->sync([$asset->getKey()]);
     $entry->serviceRequests()->sync([$serviceRequest->getKey()]);
 
@@ -488,7 +488,7 @@ it('preserves related milestones, assets, and service requests when edited witho
 
     $entry->refresh();
 
-    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->getKey()])
+    expect($entry->milestone?->getKey())->toBe($milestone->getKey())
         ->and($entry->assets->pluck('id')->all())->toBe([$asset->getKey()])
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
 });
@@ -503,15 +503,15 @@ it('clears related milestones, assets, and service requests when the type is set
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $entry->milestones()->sync([$milestone->getKey()]);
     $entry->assets()->sync([$asset->getKey()]);
     $entry->serviceRequests()->sync([$serviceRequest->getKey()]);
 
@@ -533,7 +533,7 @@ it('clears related milestones, assets, and service requests when the type is set
 
     $entry->refresh();
 
-    expect($entry->milestones->pluck('id')->all())->toBe([])
+    expect($entry->milestone)->toBeNull()
         ->and($entry->assets->pluck('id')->all())->toBe([])
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
