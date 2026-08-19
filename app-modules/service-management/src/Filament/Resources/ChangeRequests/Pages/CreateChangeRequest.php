@@ -55,7 +55,6 @@ class CreateChangeRequest extends CreateRecord
         return $schema
             ->components([
                 Section::make('Change Request Details')
-                    ->aside()
                     ->schema([
                         TextInput::make('title')
                             ->required()
@@ -86,7 +85,6 @@ class CreateChangeRequest extends CreateRecord
                     ])
                     ->columns(),
                 Section::make('Risk Management')
-                    ->aside()
                     ->schema([
                         TextInput::make('impact')
                             ->reactive()
