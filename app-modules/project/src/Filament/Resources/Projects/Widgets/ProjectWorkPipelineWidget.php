@@ -216,24 +216,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                         ->collapsible();
                 }
             )
-            ->recordActions([
-                EditAction::make()
-                    ->slideOver()
-                    ->modalHeading('Edit Pipeline Task')
-                    ->schema($this->entryFormSchema($pipeline))
-                    ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                    ->after(function (PipelineEntry $record, array $data): void {
-                        // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
-                        if (! PipelineEntryMilestoneFeature::active()) {
-                            $record->milestones()->sync($data['milestones'] ?? []);
-                        }
-                        $record->assets()->sync($data['assets'] ?? []);
-                        $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
-
-                        $this->resetMilestoneProgressDescriptions();
-                        $this->dispatch('projectPipelineUpdated');
-                    }),
-            ])
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
                 $pipeline
