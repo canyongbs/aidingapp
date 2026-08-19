@@ -62,7 +62,6 @@ class EditChangeRequest extends EditRecord
         return $schema
             ->components([
                 Section::make('Change Request Details')
-                    ->aside()
                     ->description(function (ChangeRequest $record) {
                         return $record->isNotNew()
                             ? "This change request {$record->status->classification->getDescription()} and can no longer be edited."
@@ -117,7 +116,6 @@ class EditChangeRequest extends EditRecord
                     ])
                     ->columns(2),
                 Section::make('Risk Management')
-                    ->aside()
                     ->schema([
                         TextInput::make('impact')
                             ->reactive()
