@@ -542,6 +542,7 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
     ]);
+    $milestone->pipelineEntries()->attach($entry);
 
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
