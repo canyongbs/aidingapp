@@ -59,6 +59,8 @@ export const useConfigStore = defineStore('config', () => {
     const primaryColor = ref('');
     const rounding = ref(roundingScales.md);
 
+    const categoryTabOrder = ref(['all-articles', 'featured', 'most-viewed']);
+
     const authenticationRequestUrl = ref(null);
 
     const assistantWidgetLoaderUrl = ref(null);
@@ -79,6 +81,8 @@ export const useConfigStore = defineStore('config', () => {
         primaryColor.value = data.primary_color ?? '';
         rounding.value = roundingScales[data.rounding ?? 'md'] ?? roundingScales.md;
 
+        categoryTabOrder.value = data.category_tab_order ?? ['all-articles', 'featured', 'most-viewed'];
+
         authenticationRequestUrl.value = data.authentication_url ?? null;
 
         assistantWidgetLoaderUrl.value = data.assistant_widget_loader_url ?? null;
@@ -98,6 +102,7 @@ export const useConfigStore = defineStore('config', () => {
         favicon,
         primaryColor,
         rounding,
+        categoryTabOrder,
         authenticationRequestUrl,
         assistantWidgetLoaderUrl,
         assistantWidgetConfigUrl,

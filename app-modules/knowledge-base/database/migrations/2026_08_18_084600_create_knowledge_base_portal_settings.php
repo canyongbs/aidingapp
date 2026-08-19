@@ -34,32 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+use App\Features\KnowledgeBaseCategoryTabOrderFeature;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
-
-class KnowledgeBasePlugin implements Plugin
-{
-    public function getId(): string
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return 'knowledge-base';
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('knowledge_base_portal.category_tab_order', 'all_articles_featured_most_viewed');
+            } catch (SettingAlreadyExists) {
+            }
+
+            KnowledgeBaseCategoryTabOrderFeature::activate();
+        });
     }
 
-    public function register(Panel $panel): void
+    public function down(): void
     {
-        $panel
-            ->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-            )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\KnowledgeBase\\Filament\\Pages'
-            )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
-    }
+        DB::transaction(function () {
+            KnowledgeBaseCategoryTabOrderFeature::deactivate();
 
-    public function boot(Panel $panel): void {}
-}
+            $this->migrator->deleteIfExists('knowledge_base_portal.category_tab_order');
+        });
+    }
+};

@@ -34,32 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase;
+namespace AidingApp\KnowledgeBase\Settings;
 
-use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
-use Filament\Contracts\Plugin;
-use Filament\Panel;
+use AidingApp\KnowledgeBase\Enums\KnowledgeBaseCategoryTabOrder;
+use Spatie\LaravelSettings\Settings;
 
-class KnowledgeBasePlugin implements Plugin
+class KnowledgeBasePortalSettings extends Settings
 {
-    public function getId(): string
-    {
-        return 'knowledge-base';
-    }
+    public KnowledgeBaseCategoryTabOrder $category_tab_order = KnowledgeBaseCategoryTabOrder::AllArticlesFeaturedMostViewed;
 
-    public function register(Panel $panel): void
+    public static function group(): string
     {
-        $panel
-            ->discoverResources(
-                in: __DIR__ . '/Filament/Resources',
-                for: 'AidingApp\\KnowledgeBase\\Filament\\Resources'
-            )
-            ->discoverPages(
-                in: __DIR__ . '/Filament/Pages',
-                for: 'AidingApp\\KnowledgeBase\\Filament\\Pages'
-            )
-            ->livewireComponents([KnowledgeBaseItemConcernsTable::class]);
+        return 'knowledge_base_portal';
     }
-
-    public function boot(Panel $panel): void {}
 }

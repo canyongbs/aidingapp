@@ -48,7 +48,7 @@
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
-    import { searchFilterTabs, useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
     import { apiGet } from '../Services/api.js';
     import { useCategoryData, useTagsData } from './loaders.js';
 
@@ -94,6 +94,7 @@
         loadingResults: loadingSearchResults,
         globalSearchInput,
         isSearchActive,
+        orderedFilterTabs: categoryTabs,
         toggleTag,
         changeSearchFilter,
         searchResultArticles,
@@ -118,7 +119,7 @@
 
     // Tab filter for browsing a category's own articles. Page 1 of every filter tab
     // arrives together via the route data loader; any other page is fetched client-side.
-    const activeFilter = computed(() => route.query.filter || 'all-articles');
+    const activeFilter = computed(() => route.query.filter || categoryTabs.value[0]?.value || 'all-articles');
     const currentPage = computed(() => parseInt(route.query.page) || 1);
 
     const pageQuery = useQuery({
@@ -202,7 +203,7 @@
             query: {
                 ...route.query,
                 page,
-                filter: filter === 'all-articles' ? undefined : filter,
+                filter: filter === categoryTabs.value[0]?.value ? undefined : filter,
             },
         });
     }
@@ -269,7 +270,7 @@
                         :articles="searchResultArticles"
                         :categories="searchResultCategories"
                         :loadingResults="loadingSearchResults"
-                        :filter-tabs="searchFilterTabs"
+                        :filter-tabs="categoryTabs"
                         @change-filter="changeSearchFilter"
                         :selected-filter="searchFilter"
                         :currentPage="searchCurrentPage"
@@ -295,7 +296,7 @@
                         ></SubCategories>
                         <div class="flex flex-col overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-gray-950/5">
                             <Tabs
-                                :tabs="searchFilterTabs"
+                                :tabs="categoryTabs"
                                 :modelValue="activeFilter"
                                 @update:modelValue="changeFilter"
                                 :contained="true"
