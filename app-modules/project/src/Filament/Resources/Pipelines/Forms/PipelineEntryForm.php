@@ -198,6 +198,7 @@ class PipelineEntryForm
                 ->visible(fn (Get $get): bool => PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
+
             ToggleButtons::make('assets_type')
                 ->label('Assets Type')
                 ->options([

@@ -147,7 +147,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record): void {
                         $this->openPipelineEntry($record);
                     }),
-                    
+
                 // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
                 ViewColumn::make('milestones')
                     ->label('Milestones')
