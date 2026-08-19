@@ -74,7 +74,6 @@ class ManageBrandConfigurationSettings extends SettingsPage
         return $schema
             ->components([
                 Section::make('Favicon')
-                    ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('favicon')
                             ->disk('s3')
@@ -92,7 +91,6 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->hidden(fn (Get $get): bool => blank($get('favicon'))),
                     ]),
                 Section::make('Logo')
-                    ->aside()
                     ->schema([
                         SpatieMediaLibraryFileUpload::make('logo')
                             ->disk('s3-public')
@@ -119,7 +117,6 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ->hidden(fn (Get $get): bool => blank($get('logo'))),
                     ]),
                 Section::make('Profile Menu Links')
-                    ->aside()
                     ->schema([
                         Section::make('Support')
                             ->schema([
@@ -151,7 +148,6 @@ class ManageBrandConfigurationSettings extends SettingsPage
                             ]),
                     ]),
                 Section::make('Login and Home Targets')
-                    ->aside()
                     ->schema([
                         TextInput::make('changelog_url')
                             ->label('Changelog URL')
