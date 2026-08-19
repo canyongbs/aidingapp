@@ -47,8 +47,7 @@ use function Tests\asSuperAdmin;
 
 it('archives a milestone once it has no remaining non-archived linked task', function () {
     $milestone = ProjectMilestone::factory()->create();
-    $entry = PipelineEntry::factory()->create();
-    $entry->milestones()->attach($milestone);
+    $entry = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
 
     $entry->archive();
 
@@ -66,10 +65,8 @@ it('leaves a milestone with no linked tasks untouched', function () {
 it('keeps a milestone active while it still has a task in another active pipeline', function () {
     $milestone = ProjectMilestone::factory()->create();
 
-    $entryA = PipelineEntry::factory()->create();
-    $entryB = PipelineEntry::factory()->create();
-    $entryA->milestones()->attach($milestone);
-    $entryB->milestones()->attach($milestone);
+    $entryA = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
+    $entryB = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
 
     $entryA->archive();
 
@@ -102,9 +99,8 @@ it('archives all of a pipeline\'s tasks when the pipeline is archived', function
 it('archives a milestone linked only to tasks in the archived pipeline', function () {
     $pipeline = Pipeline::factory()->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
-    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
     $milestone = ProjectMilestone::factory()->create();
-    $entry->milestones()->attach($milestone);
+    PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['project_milestone_id' => $milestone->getKey()]);
 
     $pipeline->archive();
 

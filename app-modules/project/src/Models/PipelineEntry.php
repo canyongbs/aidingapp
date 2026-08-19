@@ -91,12 +91,9 @@ class PipelineEntry extends Model implements Auditable
 
     public function reevaluateLinkedMilestones(): void
     {
-        $this->milestones()->eachById(
-            function (ProjectMilestone $milestone): void {
-                $milestone->reevaluateArchivedState();
-            },
-            column: 'project_milestones.id',
-        );
+        if ($this->milestone) {
+            $this->milestone->reevaluateArchivedState();
+        }
     }
 
     /**
