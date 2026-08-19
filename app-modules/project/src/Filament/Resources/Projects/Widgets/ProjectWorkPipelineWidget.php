@@ -297,10 +297,10 @@ class ProjectWorkPipelineWidget extends TableWidget
         return EditPipelineEntryAction::make(
             $this->getSelectedPipeline(),
             'editPipelineEntry',
-            after: fn () => [
-                $this->resetMilestoneProgressDescriptions(),
-                $this->dispatch('projectPipelineUpdated'),
-            ],
+            after: function (): void {
+                $this->resetMilestoneProgressDescriptions();
+                $this->dispatch('projectPipelineUpdated');
+            },
         )
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
