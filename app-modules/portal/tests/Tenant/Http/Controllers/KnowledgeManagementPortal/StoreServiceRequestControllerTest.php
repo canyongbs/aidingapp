@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\DefaultPriorityFeature;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
@@ -56,7 +55,7 @@ beforeEach(function () {
     );
 });
 
-it('assigns the configured default priority instead of the submitted priority', function () {
+it('prohibits a submitted priority when a default priority is configured', function () {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $submittedPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -69,18 +68,16 @@ it('assigns the configured default priority instead of the submitted priority', 
         [
             'Main' => [
                 'title' => 'Portal priority test',
-                'description' => 'Configured priority must take precedence.',
+                'description' => 'Configured priority should be enforced.',
                 'priority' => $submittedPriority->getKey(),
             ],
         ],
     );
 
-    $response->assertOk();
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('Main.priority');
 
-    assertDatabaseHas(ServiceRequest::class, [
-        'priority_id' => $defaultPriority->getKey(),
-        'respondent_id' => $contact->getKey(),
-    ]);
+    expect(ServiceRequest::query()->count())->toBe(0);
 });
 
 it('requires a submitted priority before the default priority feature is activated', function () {

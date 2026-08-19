@@ -63,6 +63,7 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
@@ -82,7 +83,7 @@ class StoreServiceRequestController extends Controller
         $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
         try {
-            $data = $this->validateRequest($request, $form);
+            $data = $this->validateRequest($request, $form, $type);
         } catch (ValidationException $exception) {
             return response()->json([
                 'errors' => (object) $exception->errors(),
@@ -145,9 +146,9 @@ class StoreServiceRequestController extends Controller
     /**
      * @return Collection<string, mixed>
      */
-    protected function validateRequest(Request $request, ServiceRequestForm $form): Collection
+    protected function validateRequest(Request $request, ServiceRequestForm $form, ServiceRequestType $type): Collection
     {
-        $validator = Validator::make($request->all(), [
+        $rules = [
             ...app(GenerateSubmissibleValidation::class)($form),
             'Questions' => ['nullable', 'array'],
             'Questions.*' => ['required', 'string'],
@@ -165,7 +166,14 @@ class StoreServiceRequestController extends Controller
                 'regex:/^tmp\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\.[a-zA-Z0-9]+$/i',
             ],
             'Main.upload-file.*.originalFileName' => ['required_with:Main.upload-file', 'string', 'max:255'],
-        ]);
+        ];
+
+        $rules['Main.priority'] ??= [];
+        $rules['Main.priority'][] = Rule::prohibitedIf(
+            fn (): bool => DefaultPriorityFeature::active() && $type->defaultPriority()->exists(),
+        );
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             throw new ValidationException($validator);

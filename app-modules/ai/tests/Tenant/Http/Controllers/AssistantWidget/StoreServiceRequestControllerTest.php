@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\DefaultPriorityFeature;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -106,22 +105,36 @@ it('prohibits a submitted priority when a default priority is configured', funct
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('requires a priority when the default priority feature is inactive', function () {
+it('requires a priority when no default priority is configured', function () {
+    $type = ServiceRequestType::factory()->create();
+    $contact = Contact::factory()->create();
+
+    $response = postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant priority test',
+        'description' => 'A priority is required.',
+    ]);
+
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('priority_id');
+
+    expect(ServiceRequest::query()->count())->toBe(0);
+});
+
+it('assigns the submitted priority when no default priority is configured', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-    $type->update(['default_priority_id' => $priority->getKey()]);
     $contact = Contact::factory()->create();
-    DefaultPriorityFeature::deactivate();
 
-    try {
-        $response = postAssistantServiceRequest($contact, $type, [
-            'title' => 'Assistant priority test',
-            'description' => 'A priority is required.',
-        ]);
+    $response = postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant priority test',
+        'description' => 'Submitted priority should be assigned.',
+        'priority_id' => $priority->getKey(),
+    ]);
 
-        $response->assertUnprocessable()
-            ->assertJsonValidationErrors('priority_id');
-    } finally {
-        DefaultPriorityFeature::activate();
-    }
+    $response->assertOk();
+
+    assertDatabaseHas(ServiceRequest::class, [
+        'priority_id' => $priority->getKey(),
+        'respondent_id' => $contact->getKey(),
+    ]);
 });
