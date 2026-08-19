@@ -43,6 +43,7 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -109,6 +110,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
         'name' => 'Joe Licata',
     ]);
 
+    $startDate = now()->subDay()->addHours(3);
     $due = now()->addDay()->addHours(3);
 
     PipelineEntry::factory()->create([
@@ -116,6 +118,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'assigned_to_type' => $assignee->getMorphClass(),
         'assigned_to_id' => $assignee->getKey(),
+        'start_date' => $startDate,
         'due' => $due,
     ]);
 
@@ -126,6 +129,8 @@ it('renders modern card metadata with assignment and due tooltip', function () {
         ->assertSee('Service Requests:')
         ->assertSee('Assigned:')
         ->assertSee('Joe Licata (User)')
+        ->assertSee('Start Date:')
+        ->assertSee($startDate->format('M j, Y g:i A'))
         ->assertSee('Due:')
         ->assertSee('1 Day 3 Hours')
         ->assertSee($due->format('M j, Y g:i A'));
@@ -193,6 +198,69 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
 
     expect($entry->pipeline_stage_id)->toBe($secondStage->getKey())
         ->and($entry->pipeline_stage_id)->not->toBe($firstStage->getKey());
+});
+
+it('persists a start date for a pipeline entry created from a stage column', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->sole();
+    $startDate = Carbon::parse('2026-08-09 09:30:00');
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('addEntry', data: [
+            'name' => 'Started Task',
+            'start_date' => $startDate->toDateTimeString(),
+        ], arguments: ['stage' => $stage->getKey()])
+        ->assertHasNoActionErrors();
+
+    $entry = PipelineEntry::query()->where('name', 'Started Task')->sole();
+
+    expect($entry->start_date?->toDateTimeString())->toBe($startDate->toDateTimeString());
+});
+
+it('does not render the start date field when the pipeline entry start date flag is inactive', function () {
+    PipelineEntryStartDateFeature::deactivate();
+
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('addEntry', arguments: ['stage' => $pipeline->stages->sole()->getKey()])
+        ->assertFormFieldDoesNotExist('start_date', 'mountedActionSchema0');
+});
+
+it('does not persist a start date for a pipeline entry created from a stage column when the flag is inactive', function () {
+    PipelineEntryStartDateFeature::deactivate();
+
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = $pipeline->stages->sole();
+    $startDate = Carbon::parse('2026-08-09 09:30:00');
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->callAction('addEntry', data: [
+            'name' => 'Started Task Without Flag',
+            'start_date' => $startDate->toDateTimeString(),
+        ], arguments: ['stage' => $stage->getKey()])
+        ->assertHasNoActionErrors();
+
+    $entry = PipelineEntry::query()->where('name', 'Started Task Without Flag')->sole();
+
+    expect($entry->start_date)->toBeNull();
 });
 
 it('hides the add entry action without pipeline update permission', function () {
@@ -331,12 +399,14 @@ it('can view a pipeline entry through the slide over modal', function () {
         ->create();
 
     $contact = Contact::factory()->create();
+    $startDate = Carbon::parse('2026-08-09 09:30:00');
 
     $entry = PipelineEntry::factory()->create([
         'name' => 'View Modal Task',
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'assigned_to_type' => $contact->getMorphClass(),
         'assigned_to_id' => $contact->getKey(),
+        'start_date' => $startDate,
     ]);
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
@@ -346,6 +416,7 @@ it('can view a pipeline entry through the slide over modal', function () {
             'name' => 'View Modal Task',
             'assignedTo' => $contact->full_name,
             'pipelineStage.name' => $pipeline->stages->first()->name,
+            'start_date' => $startDate,
         ]);
 });
 
@@ -385,6 +456,7 @@ it('can edit a pipeline entry through the slide over modal', function () {
         ->assertActionMounted('editPipelineEntry')
         ->setActionData([
             'description' => 'Updated description.',
+            'start_date' => '2026-08-09 09:30:00',
         ])
         ->callMountedAction()
         ->assertHasNoActionErrors();
@@ -392,6 +464,7 @@ it('can edit a pipeline entry through the slide over modal', function () {
     assertDatabaseHas(PipelineEntry::class, [
         'id' => $entry->getKey(),
         'description' => 'Updated description.',
+        'start_date' => '2026-08-09 09:30:00',
     ]);
 });
 

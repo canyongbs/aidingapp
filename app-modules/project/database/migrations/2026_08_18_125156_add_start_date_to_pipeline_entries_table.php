@@ -34,35 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use App\Features\PipelineEntryStartDateFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<PipelineEntry>
- */
-class PipelineEntryFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => $this->faker->word(),
-            'pipeline_stage_id' => PipelineStage::factory(),
-            'description' => $this->faker->sentence(3),
-            'start_date' => $this->faker->dateTimeBetween('-1 year', 'now'),
-            'due' => $this->faker->dateTimeBetween('now', '+1 year'),
-            'assigned_to_type' => (new User())->getMorphClass(),
-            'assigned_to_id' => User::factory(),
-            'created_by' => User::factory(),
-            'is_visible_to_guests' => true,
-        ];
+        DB::transaction(function (): void {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
+                $table->timestamp('start_date')->nullable();
+            });
+
+            PipelineEntryStartDateFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function (): void {
+            Schema::table('pipeline_entries', function (Blueprint $table): void {
+                $table->dropColumn('start_date');
+            });
+
+            PipelineEntryStartDateFeature::deactivate();
+        });
+    }
+};

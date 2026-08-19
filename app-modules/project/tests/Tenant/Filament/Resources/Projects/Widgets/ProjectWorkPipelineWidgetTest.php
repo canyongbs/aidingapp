@@ -41,6 +41,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Features\PipelineArchivingFeature;
+use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Filament\Tables\Table;
 
@@ -206,6 +207,16 @@ describe('feature flag inactive', function () {
             ->call('archivePipelineFromSwitcher', $pipeline->getKey());
 
         expect($pipeline->refresh()->isArchived())->toBeFalse();
+    });
+
+    it('hides the Start Date column when the pipeline entry start date flag is inactive', function () {
+        PipelineEntryStartDateFeature::deactivate();
+
+        $project = Project::factory()->create();
+        Pipeline::factory()->for($project)->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->assertTableColumnDoesNotExist('start_date');
     });
 });
 

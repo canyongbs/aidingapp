@@ -32,6 +32,7 @@
     </COPYRIGHT>
 --}}
 @use('App\Models\User')
+@use('App\Features\PipelineEntryStartDateFeature')
 @use('AidingApp\Contact\Models\Contact')
 @use('Illuminate\Database\Eloquent\Relations\Relation')
 @use('Illuminate\Support\Str')
@@ -159,6 +160,13 @@
             <span class="font-bold">Assigned:</span>
             {{ $assignedLabel }}
         </div>
+        @if (PipelineEntryStartDateFeature::active())
+            <div>
+                <span class="font-bold">Start Date:</span>
+                {{ $entry->start_date?->format('M j, Y g:i A') ?? 'None' }}
+            </div>
+        @endif
+
         <div title="{{ $dueTooltip ?? '' }}">
             <span class="font-bold">Due:</span>
             {{ $dueLabel ? $dueLabel : 'None' }}

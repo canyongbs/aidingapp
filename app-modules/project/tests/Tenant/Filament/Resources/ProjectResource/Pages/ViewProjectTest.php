@@ -335,6 +335,25 @@ it('only shows pipeline entries that belong to the selected pipeline', function 
         ->assertCanNotSeeTableRecords($entriesA);
 });
 
+it('displays a pipeline entry start date in the project work pipeline widget', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
+        'start_date' => '2026-08-09 09:30:00',
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableColumnStateSet('start_date', $entry->start_date, $entry);
+});
+
 it('can switch the selected pipeline through the select pipeline action', function () {
     asSuperAdmin();
 
