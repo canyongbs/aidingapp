@@ -423,6 +423,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             ->orderBy('created_at')
             ->get()
             ->values();
+
         if ($periods->isEmpty()) {
             return 0;
         }
