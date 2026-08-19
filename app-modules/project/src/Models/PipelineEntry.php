@@ -41,6 +41,7 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use AidingApp\Project\Observers\PipelineEntryObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryMilestoneFeature;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -75,6 +76,7 @@ class PipelineEntry extends Model implements Auditable
     protected $fillable = [
         'name',
         'pipeline_stage_id',
+        'project_milestone_id',
         'description',
         'due',
         'assigned_to_id',
@@ -90,10 +92,14 @@ class PipelineEntry extends Model implements Auditable
 
     public function reevaluateLinkedMilestones(): void
     {
+        if (PipelineEntryMilestoneFeature::active()) {
+            $this->milestone?->reevaluateArchivedState();
+
+            return;
+        }
+
         $this->milestones()->eachById(
-            function (ProjectMilestone $milestone): void {
-                $milestone->reevaluateArchivedState();
-            },
+            fn (ProjectMilestone $milestone) => $milestone->reevaluateArchivedState(),
             column: 'project_milestones.id',
         );
     }
@@ -123,6 +129,8 @@ class PipelineEntry extends Model implements Auditable
     }
 
     /**
+     * TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire milestones() method below also check references to it in the codebase and remove them as well.
+     *
      * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
      */
     public function milestones(): BelongsToMany
@@ -153,6 +161,14 @@ class PipelineEntry extends Model implements Auditable
             ->belongsToMany(ServiceRequest::class, 'pipeline_entry_service_requests', 'pipeline_entry_id', 'service_request_id')
             ->using(PipelineEntryServiceRequest::class)
             ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsTo<ProjectMilestone, $this>
+     */
+    public function milestone(): BelongsTo
+    {
+        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id');
     }
 
     protected static function booted(): void

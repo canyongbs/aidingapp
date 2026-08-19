@@ -94,6 +94,10 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
     @apply p-0;
 }
 
+.fi-ta-group-header:has(.project-milestone-group-actions) > div {
+    @apply grow;
+}
+
 .dark_button_border {
     @apply dark:border! dark:border-white! dark:hover:border-white!;
 }

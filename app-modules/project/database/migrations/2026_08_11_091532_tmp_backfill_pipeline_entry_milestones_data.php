@@ -34,43 +34,34 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Pipelines\Actions;
-
-use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
 use App\Features\PipelineEntryMilestoneFeature;
-use Closure;
-use Filament\Actions\EditAction;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-class EditPipelineEntryAction
-{
-    /**
-     * Builds the shared "edit pipeline task" slide-over action so every surface
-     * (kanban board, pipeline task table, project widget) reuses the same form and
-     * relationship-syncing logic.
-     *
-     * @param  (Closure(): void)|null  $after
-     *     Optional callback run after the related records have been synced, e.g. to
-     *     dispatch a UI refresh event on the calling component.
-     */
-    public static function make(?Pipeline $pipeline = null, ?string $name = null, ?Closure $after = null): EditAction
+return new class () extends Migration {
+    public function up(): void
     {
-        return EditAction::make($name ?? 'edit')
-            ->slideOver()
-            ->modalHeading('Edit Pipeline Task')
-            ->schema(PipelineEntryForm::components($pipeline))
-            ->after(function (PipelineEntry $record, array $data) use ($after): void {
-                if (! PipelineEntryMilestoneFeature::active()) {
-                    $record->milestones()->sync($data['milestones'] ?? []);
-                }
-                $record->assets()->sync($data['assets'] ?? []);
-                $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
+        DB::transaction(function () {
+            DB::statement(<<<'SQL'
+                UPDATE pipeline_entries
+                SET project_milestone_id = first_milestone.project_milestone_id
+                FROM (
+                    SELECT DISTINCT ON (pipeline_entry_id)
+                        pipeline_entry_id,
+                        project_milestone_id
+                    FROM pipeline_entry_milestones
+                    ORDER BY pipeline_entry_id, created_at, id
+                ) AS first_milestone
+                WHERE pipeline_entries.id = first_milestone.pipeline_entry_id
+                    AND pipeline_entries.project_milestone_id IS NULL
+                SQL);
 
-                if ($after !== null) {
-                    $after();
-                }
-            })
-            ->successNotificationTitle('Pipeline task updated successfully');
+            PipelineEntryMilestoneFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        PipelineEntryMilestoneFeature::deactivate();
+    }
+};

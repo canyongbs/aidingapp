@@ -46,7 +46,7 @@ use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -100,19 +100,11 @@ class ProjectMilestone extends Model implements Auditable
     }
 
     /**
-     * @return BelongsToMany<PipelineEntry, $this, PipelineEntryMilestone>
+     * @return HasMany<PipelineEntry, $this>
      */
-    public function pipelineEntries(): BelongsToMany
+    public function pipelineEntries(): HasMany
     {
-        return $this
-            ->belongsToMany(
-                PipelineEntry::class,
-                'pipeline_entry_milestones',
-                'project_milestone_id',
-                'pipeline_entry_id',
-            )
-            ->using(PipelineEntryMilestone::class)
-            ->withTimestamps();
+        return $this->hasMany(PipelineEntry::class, 'project_milestone_id');
     }
 
     public function reevaluateArchivedState(): void

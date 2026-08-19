@@ -230,7 +230,7 @@ it('persists related milestones, assets, and service requests via the kanban add
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             ...baseKanbanEntryData('Related Kanban Entry'),
-            'milestones' => [$milestone->id],
+            'project_milestone_id' => $milestone->id,
             'assets' => [$asset->id],
             'serviceRequests' => [$serviceRequest->id],
         ], arguments: ['stage' => $stage->id])
@@ -238,7 +238,7 @@ it('persists related milestones, assets, and service requests via the kanban add
 
     $entry = PipelineEntry::where('name', 'Related Kanban Entry')->sole();
 
-    expect($entry->milestones->pluck('id')->all())->toBe([$milestone->id]);
+    expect($entry->project_milestone_id)->toBe($milestone->id);
     expect($entry->assets->pluck('id')->all())->toBe([$asset->id]);
     expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });

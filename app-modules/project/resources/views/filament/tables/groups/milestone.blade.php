@@ -31,8 +31,31 @@
     
     </COPYRIGHT>
 --}}
-<x-filament-widgets::widget>
-    {{ $this->table }}
+<span class="project-milestone-group-actions block w-full" x-on:click.stop>
+    <span class="inline-block">{{ $progress }}</span>
 
-    <x-filament-actions::modals />
-</x-filament-widgets::widget>
+    @if ($milestone)
+        <span class="float-right inline-flex items-center gap-3">
+            @can('update', $milestone)
+                <x-filament::link
+                    tag="button"
+                    icon="heroicon-m-pencil-square"
+                    :wire:click="'mountAction(\'editMilestone\', { milestone:\'' . $milestone->getKey() . '\' })'"
+                >
+                    Edit
+                </x-filament::link>
+            @endcan
+
+            @can('delete', $milestone)
+                <x-filament::link
+                    tag="button"
+                    icon="heroicon-m-trash"
+                    color="danger"
+                    :wire:click="'mountAction(\'deleteMilestone\', { milestone:\'' . $milestone->getKey() . '\' })'"
+                >
+                    Delete
+                </x-filament::link>
+            @endcan
+        </span>
+    @endif
+</span>

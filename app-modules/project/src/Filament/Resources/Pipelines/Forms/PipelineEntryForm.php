@@ -46,6 +46,7 @@ use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryMilestoneFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
@@ -143,9 +144,11 @@ class PipelineEntryForm
                 ->inline()
                 ->live()
                 ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
-                    $state = $record?->milestones()->exists();
+                    $state = PipelineEntryMilestoneFeature::active()
+                        ? $record?->milestone()->exists()
+                        : $record?->milestones()->exists();
 
-                    if (filled($state)) {
+                    if ($state) {
                         $set('milestones_type', 'select');
                     } else {
                         $set('milestones_type', 'none');
@@ -154,9 +157,16 @@ class PipelineEntryForm
                 ->dehydrated(false)
                 ->afterStateUpdated(function (?string $state, Set $set) {
                     if ($state === 'none') {
+                        if (PipelineEntryMilestoneFeature::active()) {
+                            $set('project_milestone_id', null);
+
+                            return;
+                        }
+
                         $set('milestones', []);
                     }
                 }),
+            // TODO: Cleanup Task (pipeline-entry-milestone): remove the legacy `milestones` ModalTableSelect once the feature flag is fully rolled out.
             ModalTableSelect::make('milestones')
                 ->label('Related Milestones')
                 ->relationship(
@@ -169,8 +179,23 @@ class PipelineEntryForm
                 ->tableConfiguration(PipelineEntryMilestonesTable::class)
                 ->tableArguments(['projectId' => $pipeline?->project_id])
                 ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
-                ->visible(fn (Get $get): bool => filled($get('milestones_type')) && $get('milestones_type') !== 'none')
+                ->visible(fn (Get $get): bool => ! PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->multiple()
+                ->dehydrated()
+                ->dehydratedWhenHidden(),
+            ModalTableSelect::make('project_milestone_id')
+                ->label('Related Milestone')
+                ->relationship(
+                    name: 'milestone',
+                    titleAttribute: 'title',
+                    modifyQueryUsing: $pipeline
+                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
+                        : null,
+                )
+                ->tableConfiguration(PipelineEntryMilestonesTable::class)
+                ->tableArguments(['projectId' => $pipeline?->project_id])
+                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
+                ->visible(fn (Get $get): bool => PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
 

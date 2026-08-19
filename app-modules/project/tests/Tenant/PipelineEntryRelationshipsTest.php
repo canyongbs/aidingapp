@@ -89,7 +89,7 @@ it('can assign a pipeline entry to a contact', function () {
     expect($entry->assigned_to_type)->toBe('contact');
 });
 
-it('can have related milestones', function () {
+it('can belong to a milestone', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -99,19 +99,15 @@ it('can have related milestones', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestones = ProjectMilestone::factory()->count(3)->create([
-        'project_id' => $project->id,
-    ]);
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->id]);
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
+        'project_milestone_id' => $milestone->id,
     ]);
 
-    $entry->milestones()->sync($milestones->pluck('id'));
-
-    expect($entry->milestones)->toHaveCount(3);
-    expect($entry->milestones->pluck('id')->sort()->values()->toArray())
-        ->toBe($milestones->pluck('id')->sort()->values()->toArray());
+    expect($entry->milestone->is($milestone))->toBeTrue()
+        ->and($milestone->pipelineEntries->pluck('id')->all())->toContain($entry->id);
 });
 
 it('can have related assets', function () {
@@ -187,7 +183,7 @@ it('can set is_visible_to_guests to false', function () {
     expect($entry->is_visible_to_guests)->toBeFalse();
 });
 
-it('can sync and detach milestones', function () {
+it('can change and clear its milestone', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -197,22 +193,20 @@ it('can sync and detach milestones', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $milestones = ProjectMilestone::factory()->count(3)->create([
-        'project_id' => $project->id,
-    ]);
+    $milestones = ProjectMilestone::factory()->count(2)->create(['project_id' => $project->id]);
 
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->first()->id,
     ]);
 
-    $entry->milestones()->sync($milestones->pluck('id'));
-    expect($entry->fresh()->milestones)->toHaveCount(3);
+    $entry->update(['project_milestone_id' => $milestones->first()->id]);
+    expect($entry->fresh()->milestone->is($milestones->first()))->toBeTrue();
 
-    $entry->milestones()->sync($milestones->take(1)->pluck('id'));
-    expect($entry->fresh()->milestones)->toHaveCount(1);
+    $entry->update(['project_milestone_id' => $milestones->last()->id]);
+    expect($entry->fresh()->milestone->is($milestones->last()))->toBeTrue();
 
-    $entry->milestones()->detach();
-    expect($entry->fresh()->milestones)->toHaveCount(0);
+    $entry->update(['project_milestone_id' => null]);
+    expect($entry->fresh()->milestone)->toBeNull();
 });
 
 it('does not send notification when assigned to a contact', function () {

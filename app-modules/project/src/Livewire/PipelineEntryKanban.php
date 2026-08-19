@@ -42,6 +42,7 @@ use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Features\PipelineArchivingFeature;
+use App\Features\PipelineEntryMilestoneFeature;
 use Exception;
 use Filament\Actions\Action;
 use Filament\Actions\Concerns\InteractsWithActions;
@@ -87,7 +88,11 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 fn (Builder $query): Builder => $query->withoutArchived(),
             )
             ->with(['assignedTo', 'pipelineStage'])
-            ->withCount(['milestones', 'assets', 'serviceRequests'])
+            ->withCount([
+                'assets',
+                'serviceRequests',
+                ...(! PipelineEntryMilestoneFeature::active() ? ['milestones'] : []),
+            ])
             ->oldest()
             ->get();
 
@@ -164,10 +169,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 $dataArray = [
                     'name' => $data['name'],
                     'pipeline_stage_id' => $stage->getKey(),
-                ];
-
-                $dataArray = [
-                    ...$dataArray,
                     'description' => $data['description'] ?? null,
                     'due' => $data['due'] ?? null,
                     'assigned_to_type' => $data['assigned_to_type'] ?? null,
@@ -175,11 +176,18 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
                 ];
 
+                if (PipelineEntryMilestoneFeature::active()) {
+                    $dataArray['project_milestone_id'] = $data['project_milestone_id'] ?? null;
+                }
+
                 $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
 
-                $entry->milestones()->sync($data['milestones'] ?? []);
+                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
+                if (! PipelineEntryMilestoneFeature::active()) {
+                    $entry->milestones()->sync($data['milestones'] ?? []);
+                }
                 $entry->assets()->sync($data['assets'] ?? []);
                 $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
 

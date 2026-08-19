@@ -36,7 +36,6 @@
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStatsWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
-    use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectMilestonesWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
     use AidingApp\Project\Models\Pipeline;
     use AidingApp\Project\Models\ProjectFile;
@@ -54,10 +53,6 @@
 
     @if (ProjectAccessWidget::canView())
         @livewire(ProjectAccessWidget::class, ['record' => $record])
-    @endif
-
-    @if (auth()->user()?->can('viewAny', [ProjectMilestone::class, $record]))
-        @livewire(ProjectMilestonesWidget::class, ['record' => $record])
     @endif
 
     @if (auth()->user()?->can('viewAny', [Pipeline::class, $record]))

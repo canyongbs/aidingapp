@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\EditPipelineEntryAction;
 use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryAction;
@@ -45,7 +46,9 @@ use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Features\PipelineArchivingFeature;
+use App\Features\PipelineEntryMilestoneFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -73,6 +76,11 @@ class ProjectWorkPipelineWidget extends TableWidget
     public Project $record;
 
     public ?string $selectedPipelineId = null;
+
+    /** @var array<string, string> */
+    protected array $milestoneProgressDescriptions = [];
+
+    protected ?string $milestoneProgressDescriptionsLoadedForPipelineId = null;
 
     protected int | string | array $columnSpan = 'full';
 
@@ -122,7 +130,12 @@ class ProjectWorkPipelineWidget extends TableWidget
                         PipelineArchivingFeature::active(),
                         fn (Builder $query): Builder => $query->withoutArchived(),
                     )
-                    ->with(['milestones', 'assets', 'serviceRequests', 'pipelineStage.pipeline.project']);
+                    ->with([
+                        'assets',
+                        'serviceRequests',
+                        'pipelineStage.pipeline.project',
+                        ...(PipelineEntryMilestoneFeature::active() ? ['milestone'] : ['milestones']),
+                    ]);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
             ->columns([
@@ -134,9 +147,17 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->action(function (PipelineEntry $record): void {
                         $this->openPipelineEntry($record);
                     }),
+
+                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
                 ViewColumn::make('milestones')
                     ->label('Milestones')
+                    ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
                     ->view('project::filament.tables.columns.pipeline-entry.milestones'),
+                TextColumn::make('pipelineStage.name')
+                    ->label('Stage')
+                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
+                    ->badge()
+                    ->placeholder('N/A'),
                 ViewColumn::make('assets')
                     ->label('Assets')
                     ->view('project::filament.tables.columns.pipeline-entry.assets'),
@@ -155,10 +176,45 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->label('Created By')
                     ->placeholder('N/A'),
             ])
+            ->paginated([5, 10, 20, 50])
+            ->defaultPaginationPageOption(50)
             ->defaultGroup(
-                Group::make('pipelineStage.name')
-                    ->label('Stage')
-                    ->collapsible(),
+                function () use ($pipeline) {
+                    if (! PipelineEntryMilestoneFeature::active()) {
+                        return Group::make('pipelineStage.name')
+                            ->label('Stage')
+                            ->collapsible();
+                    }
+
+                    return Group::make('milestone.title')
+                        ->label('Milestone')
+                        ->titlePrefixedWithLabel(false)
+                        ->orderQueryUsing(function (Builder $query, string $direction): Builder {
+                            $model = $query->getModel();
+
+                            return $query
+                                ->orderByRaw("{$model->qualifyColumn('project_milestone_id')} IS NULL")
+                                ->orderBy(
+                                    ProjectMilestone::query()
+                                        ->select('title')
+                                        ->whereColumn(
+                                            (new ProjectMilestone())->qualifyColumn('id'),
+                                            $model->qualifyColumn('project_milestone_id'),
+                                        ),
+                                    $direction,
+                                );
+                        })
+                        ->getTitleFromRecordUsing(
+                            fn (PipelineEntry $record): string => $record->milestone->title ?? 'No Associated Milestone'
+                        )
+                        ->getDescriptionFromRecordUsing(
+                            fn (PipelineEntry $record): View => view('project::filament.tables.groups.milestone', [
+                                'milestone' => $record->milestone,
+                                'progress' => $this->milestoneProgressDescription($record, $pipeline),
+                            ])
+                        )
+                        ->collapsible();
+                }
             )
             ->emptyStateHeading($pipeline ? 'No pipeline tasks' : 'No pipeline selected')
             ->emptyStateDescription(
@@ -177,7 +233,10 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->model(PipelineEntry::class)
                             ->schema($this->entryFormSchema($pipeline))
                             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                            ->after(fn () => $this->dispatch('projectPipelineUpdated')),
+                            ->after(function (): void {
+                                $this->resetMilestoneProgressDescriptions();
+                                $this->dispatch('projectPipelineUpdated');
+                            }),
                     ]
                     : [
                         Action::make('createPipelineFromEmptyState')
@@ -199,7 +258,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ]))
                     ->visible(fn (): bool => (bool) $pipeline),
                 CreateAction::make('createEntry')
-                    ->label('New Pipeline Task')
+                    ->label('Task')
                     ->modalHeading('Create Pipeline Task')
                     ->icon('heroicon-m-plus')
                     ->slideOver()
@@ -207,7 +266,12 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->model(PipelineEntry::class)
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
-                    ->after(fn () => $this->dispatch('projectPipelineUpdated')),
+                    ->after(function (): void {
+                        $this->resetMilestoneProgressDescriptions();
+                        $this->dispatch('projectPipelineUpdated');
+                    }),
+                CreateProjectMilestoneAction::make($this->record, 'createMilestone')
+                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active()),
             ]);
     }
 
@@ -233,7 +297,10 @@ class ProjectWorkPipelineWidget extends TableWidget
         return EditPipelineEntryAction::make(
             $this->getSelectedPipeline(),
             'editPipelineEntry',
-            after: fn () => $this->dispatch('projectPipelineUpdated'),
+            after: function (): void {
+                $this->resetMilestoneProgressDescriptions();
+                $this->dispatch('projectPipelineUpdated');
+            },
         )
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
@@ -251,9 +318,72 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->authorize(fn (): bool => auth()->user()->can('create', [Pipeline::class, $this->record]));
     }
 
+    public function editMilestoneAction(): Action
+    {
+        return Action::make('editMilestone')
+            ->label('Edit')
+            ->icon('heroicon-m-pencil-square')
+            ->slideOver()
+            ->fillForm(function (Action $action): array {
+                $milestone = $this->getActionMilestone($action);
+
+                return $milestone?->attributesToArray() ?? [];
+            })
+            ->schema(CreateProjectMilestoneAction::formSchema())
+            ->authorize(fn (Action $action): bool => auth()->user()->can('update', $this->getActionMilestone($action)))
+            ->action(function (Action $action, array $data): void {
+                $milestone = $this->getActionMilestone($action);
+
+                if (! $milestone instanceof ProjectMilestone) {
+                    return;
+                }
+
+                $milestone->update($data);
+
+                $this->resetMilestoneProgressDescriptions();
+                $this->dispatch('projectMilestonesUpdated');
+                $this->dispatch('projectPipelineUpdated');
+            });
+    }
+
+    public function deleteMilestoneAction(): Action
+    {
+        return Action::make('deleteMilestone')
+            ->label('Delete')
+            ->icon('heroicon-m-trash')
+            ->color('danger')
+            ->requiresConfirmation()
+            ->authorize(fn (Action $action): bool => auth()->user()->can('delete', $this->getActionMilestone($action)))
+            ->action(function (Action $action): void {
+                $milestone = $this->getActionMilestone($action);
+
+                if (! $milestone instanceof ProjectMilestone) {
+                    return;
+                }
+
+                $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
+                $milestone->delete();
+
+                $this->resetMilestoneProgressDescriptions();
+                $this->dispatch('projectMilestonesUpdated');
+                $this->dispatch('projectPipelineUpdated');
+            });
+    }
+
     protected function getPipelineSwitcherProjectId(): ?string
     {
         return (string) $this->record->getKey();
+    }
+
+    protected function getActionMilestone(Action $action): ?ProjectMilestone
+    {
+        $milestoneId = $action->getArguments()['milestone'] ?? null;
+
+        if (blank($milestoneId)) {
+            return null;
+        }
+
+        return $this->record->milestones()->whereKey($milestoneId)->first();
     }
 
     protected function getPipelineSwitcherCurrentPipelineId(): ?string
@@ -278,6 +408,63 @@ class ProjectWorkPipelineWidget extends TableWidget
         return view('project::filament.resources.projects.widgets.project-work-pipeline-heading', [
             'pipeline' => $pipeline,
         ]);
+    }
+
+    protected function milestoneProgressDescription(PipelineEntry $record, ?Pipeline $pipeline): string
+    {
+        if (! $pipeline || blank($record->project_milestone_id)) {
+            return '';
+        }
+
+        $this->loadMilestoneProgressDescriptions($pipeline);
+
+        return $this->milestoneProgressDescriptions["{$pipeline->getKey()}:{$record->project_milestone_id}"] ?? 'Progress: 0%';
+    }
+
+    protected function resetMilestoneProgressDescriptions(): void
+    {
+        $this->milestoneProgressDescriptions = [];
+        $this->milestoneProgressDescriptionsLoadedForPipelineId = null;
+    }
+
+    /**
+     * Precomputes the progress description for every milestone in the given pipeline
+     * with a single aggregate query, rather than issuing 2 queries per unique milestone.
+     */
+    protected function loadMilestoneProgressDescriptions(Pipeline $pipeline): void
+    {
+        if ($this->milestoneProgressDescriptionsLoadedForPipelineId === $pipeline->getKey()) {
+            return;
+        }
+
+        $counts = PipelineEntry::query()
+            ->whereNotNull('project_milestone_id')
+            ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
+            ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
+            ->selectRaw('pipeline_entries.project_milestone_id')
+            ->selectRaw('count(*) as total')
+            ->selectRaw('count(*) filter (where pipeline_stages.classification = ?) as completed', [PipelineStageClassification::Complete->value])
+            ->groupBy('pipeline_entries.project_milestone_id')
+            ->get();
+
+        foreach ($counts as $count) {
+            $attributes = $count->getAttributes();
+
+            $cacheKey = "{$pipeline->getKey()}:{$attributes['project_milestone_id']}";
+
+            $total = (int) $attributes['total'];
+            $completed = (int) $attributes['completed'];
+
+            $this->milestoneProgressDescriptions[$cacheKey] = $total === 0
+                ? 'Progress: 0%'
+                : 'Progress: ' . (int) round(($completed / $total) * 100) . '%';
+        }
+
+        $this->milestoneProgressDescriptionsLoadedForPipelineId = $pipeline->getKey();
     }
 
     /**

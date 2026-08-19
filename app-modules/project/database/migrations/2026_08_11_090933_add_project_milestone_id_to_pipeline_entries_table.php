@@ -34,34 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
-
-/**
- * TODO: Cleanup Task (pipeline-entry-milestone): Remove this model once the milestone feature is fully implemented and the pivot table is no longer needed.
- *
- * @mixin IdeHelperPipelineEntryMilestone
- */
-class PipelineEntryMilestone extends Pivot
-{
-    use HasUuids;
-
-    /**
-     * @return BelongsTo<PipelineEntry, $this>
-     */
-    public function pipelineEntry(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(PipelineEntry::class, 'pipeline_entry_id', 'id', 'pipelineEntry');
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->foreignUuid('project_milestone_id')->nullable()->constrained('project_milestones')->nullOnDelete();
+        });
     }
 
-    /**
-     * @return BelongsTo<ProjectMilestone, $this>
-     */
-    public function projectMilestone(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id', 'id', 'projectMilestone');
+        Schema::table('pipeline_entries', function (Blueprint $table) {
+            $table->dropForeign(['project_milestone_id']);
+            $table->dropColumn('project_milestone_id');
+        });
     }
-}
+};
