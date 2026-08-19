@@ -48,6 +48,7 @@
     $canViewFiles = auth()
         ->user()
         ?->can('viewAny', [ProjectFile::class, $record]);
+    $defaultTab = $canViewAccess ? 'access' : ($canViewPipelines ? 'pipelines' : 'files');
 @endphp
 
 <x-filament-panels::page>
@@ -58,7 +59,7 @@
     @endif
 
     @if ($canViewAccess || $canViewPipelines || $canViewFiles)
-        <div x-data="{ tab: 'access' }" class="space-y-6">
+        <div x-data="{ tab: '{{ $defaultTab }}' }" class="space-y-6">
             <div class="flex justify-center">
                 <x-filament::tabs>
                     @if ($canViewAccess)

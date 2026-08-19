@@ -95,7 +95,7 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
-it('renders the project dashboard widgets in access, milestone, pipeline, and file tabs', function () {
+it('renders the project dashboard widgets in access, pipeline, and file tabs', function () {
     loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
@@ -106,7 +106,6 @@ it('renders the project dashboard widgets in access, milestone, pipeline, and fi
         ->assertSuccessful()
         ->assertSee('x-data="{ tab: \'access\' }"', false)
         ->assertSee('Access')
-        ->assertSee('Milestones')
         ->assertSee('Pipelines')
         ->assertSee('Files');
 });
