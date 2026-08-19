@@ -88,7 +88,11 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                 fn (Builder $query): Builder => $query->withoutArchived(),
             )
             ->with(['assignedTo', 'pipelineStage'])
-            ->withCount(['milestones', 'assets', 'serviceRequests'])
+            ->withCount([
+                'assets',
+                'serviceRequests',
+                ...(! PipelineEntryMilestoneFeature::active() ? ['milestones'] : []),
+            ])
             ->oldest()
             ->get();
 
