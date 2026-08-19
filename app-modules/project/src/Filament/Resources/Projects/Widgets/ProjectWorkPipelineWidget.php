@@ -297,7 +297,10 @@ class ProjectWorkPipelineWidget extends TableWidget
         return EditPipelineEntryAction::make(
             $this->getSelectedPipeline(),
             'editPipelineEntry',
-            after: fn () => $this->dispatch('projectPipelineUpdated'),
+            after: fn () => [
+                $this->resetMilestoneProgressDescriptions(),
+                $this->dispatch('projectPipelineUpdated'),
+            ],
         )
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
@@ -437,6 +440,10 @@ class ProjectWorkPipelineWidget extends TableWidget
         $counts = PipelineEntry::query()
             ->whereNotNull('project_milestone_id')
             ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
+            ->when(
+                PipelineArchivingFeature::active(),
+                fn (Builder $query): Builder => $query->withoutArchived(),
+            )
             ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
             ->selectRaw('pipeline_entries.project_milestone_id')
             ->selectRaw('count(*) as total')

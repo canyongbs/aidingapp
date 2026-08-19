@@ -41,6 +41,7 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use AidingApp\Project\Observers\PipelineEntryObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\PipelineEntryMilestoneFeature;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -91,9 +92,16 @@ class PipelineEntry extends Model implements Auditable
 
     public function reevaluateLinkedMilestones(): void
     {
-        if ($this->milestone) {
-            $this->milestone->reevaluateArchivedState();
+        if (PipelineEntryMilestoneFeature::active()) {
+            $this->milestone?->reevaluateArchivedState();
+
+            return;
         }
+
+        $this->milestones()->eachById(
+            fn (ProjectMilestone $milestone) => $milestone->reevaluateArchivedState(),
+            column: 'project_milestones.id',
+        );
     }
 
     /**

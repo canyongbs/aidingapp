@@ -41,7 +41,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * TODO: Remove this model once the milestone feature is fully implemented and the pivot table is no longer needed.
+ * TODO: Cleanup Task (pipeline-entry-milestone): Remove this model once the milestone feature is fully implemented and the pivot table is no longer needed.
  *
  * @mixin IdeHelperPipelineEntryMilestone
  */
