@@ -121,7 +121,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee('Modern Card Task')
-        ->assertSee('Milestones:')
+        ->assertSee('Milestone:')
         ->assertSee('Assets:')
         ->assertSee('Service Requests:')
         ->assertSee('Assigned:')
@@ -395,7 +395,7 @@ it('can edit a pipeline entry through the slide over modal', function () {
     ]);
 });
 
-it('persists related milestones, assets, and service requests when edited through the modal', function () {
+it('persists related milestone, assets, and service requests when edited through the modal', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -453,7 +453,7 @@ it('fails to edit a pipeline entry that belongs to a different pipeline', functi
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()]);
 })->throws(ModelNotFoundException::class);
 
-it('preserves related milestones, assets, and service requests when edited without changing them', function () {
+it('preserves related milestone, assets, and service requests when edited without changing them', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -493,7 +493,7 @@ it('preserves related milestones, assets, and service requests when edited witho
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
 });
 
-it('clears related milestones, assets, and service requests when the type is set to none', function () {
+it('clears related milestone, assets, and service requests when the type is set to none', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
