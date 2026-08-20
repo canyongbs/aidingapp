@@ -492,6 +492,33 @@ it('archives a pipeline entry through the slide-over modal', function () {
     expect($entry->refresh()->isArchived())->toBeTrue();
 });
 
+it('notifies when archiving a pipeline entry is cancelled', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    PipelineEntry::archiving(fn (): bool => false);
+
+    try {
+        livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+            ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+            ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
+            ->callMountedAction()
+            ->assertNotified('Pipeline task could not be archived');
+    } finally {
+        PipelineEntry::clearBootedModels();
+    }
+
+    expect($entry->refresh()->isArchived())->toBeFalse();
+});
+
 it('persists related milestone, assets, and service requests when edited through the modal', function () {
     asSuperAdmin();
 

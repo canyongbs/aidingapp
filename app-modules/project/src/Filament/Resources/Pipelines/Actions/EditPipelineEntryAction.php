@@ -98,7 +98,7 @@ class EditPipelineEntryAction
             ->modalDescription('Are you sure you want to archive this pipeline task?')
             ->modalSubmitActionLabel('Archive')
             ->cancelParentActions()
-            ->authorize(fn (): bool => $pipeline !== null && auth()->user()->can('update', $pipeline))
+            ->authorize(fn (): bool => $pipeline !== null && auth()->user()->can('delete', $pipeline))
             ->action(function () use ($pipeline, $entryId, $afterArchive): void {
                 if (! PipelineArchivingFeature::active() || $pipeline === null) {
                     return;
@@ -116,7 +116,14 @@ class EditPipelineEntryAction
                     return;
                 }
 
-                $entry->archive();
+                if (! $entry->archive()) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Pipeline task could not be archived')
+                        ->send();
+
+                    return;
+                }
 
                 if ($afterArchive !== null) {
                     $afterArchive();
