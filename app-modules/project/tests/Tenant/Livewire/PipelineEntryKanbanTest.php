@@ -477,6 +477,7 @@ it('archives a pipeline entry through the slide-over modal', function () {
         ->create();
 
     $entry = PipelineEntry::factory()->create([
+        'name' => 'Archive Slide Over Task',
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
