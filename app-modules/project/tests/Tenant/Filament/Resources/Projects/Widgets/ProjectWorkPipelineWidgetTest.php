@@ -166,6 +166,24 @@ it('does not provide a row-level edit action because task editing is accessed th
         ->assertTableActionDoesNotExist('edit', record: $entry);
 });
 
+it('archives a pipeline task from its slide-over modal', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
+
+    expect($entry->isArchived())->toBeFalse();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
+        ->callMountedAction()
+        ->assertActionNotMounted()
+        ->assertCanNotSeeTableRecords([$entry]);
+
+    expect($entry->refresh()->isArchived())->toBeTrue();
+});
+
 describe('feature flag inactive', function () {
     it('keeps archived pipelines in the switcher list when the flag is inactive', function () {
         PipelineArchivingFeature::deactivate();
