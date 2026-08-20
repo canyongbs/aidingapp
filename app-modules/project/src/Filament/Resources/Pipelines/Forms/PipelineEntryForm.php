@@ -80,12 +80,6 @@ class PipelineEntryForm
             Textarea::make('description')
                 ->label('Task Description')
                 ->maxLength(65535),
-            TableSelect::make('pipeline_stage_id')
-                ->label('Stage')
-                ->tableConfiguration(ProjectPipelinesStageTable::class)
-                ->tableArguments(['pipelineId' => $pipeline?->getKey()])
-                ->visible($isStageVisible)
-                ->required(),
             ...(PipelineEntryStartDateFeature::active()
                 ? [
                     Grid::make(2)
@@ -134,6 +128,12 @@ class PipelineEntryForm
                 ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => (filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none') ? $state : null)
                 ->dehydrated()
                 ->dehydratedWhenHidden(),
+            TableSelect::make('pipeline_stage_id')
+                ->label('Stage')
+                ->tableConfiguration(ProjectPipelinesStageTable::class)
+                ->tableArguments(['pipelineId' => $pipeline?->getKey()])
+                ->visible($isStageVisible)
+                ->required(),
 
             ToggleButtons::make('milestones_type')
                 ->label('Milestones Type')
