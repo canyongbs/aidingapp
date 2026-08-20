@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
@@ -44,6 +45,9 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
+/**
+ * @implements Scope<ServiceMonitoringTarget>
+ */
 class ServiceMonitoringTargetVisibilityScope implements Scope
 {
     /**

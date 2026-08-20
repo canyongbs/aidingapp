@@ -34,33 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\LicenseManagement\Models\Scopes;
+namespace App\Http\Middleware;
 
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Foundation\Http\Middleware\PreventRequestForgery as Middleware;
 
-/**
- * @implements Scope<Model>
- */
-class AuthorizeLicensesScope implements Scope
+class PreventRequestForgery extends Middleware
 {
     /**
-     * Apply the scope to a given Eloquent query builder.
+     * The URIs that should be excluded from CSRF verification.
+     *
+     * @var array<int, string>
      */
-    public function apply(Builder $builder, Model $model): void
-    {
-        $user = auth()->user();
-
-        if (! $user instanceof User) {
-            return;
-        }
-
-        if ($user->isAdmin()) {
-            return;
-        }
-
-        $builder->where('created_by_id', $user->getKey());
-    }
+    protected $except = [
+        // TODO: Review if these exclusions are still necessary
+        '/api/forms/*',
+    ];
 }

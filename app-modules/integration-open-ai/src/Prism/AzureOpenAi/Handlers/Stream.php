@@ -42,16 +42,29 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
-use Prism\Prism\Enums\ChunkType;
-use Prism\Prism\Enums\FinishReason;
+use Prism\Prism\Exceptions\PrismException;
+use Prism\Prism\Exceptions\PrismRateLimitedException;
 use Prism\Prism\Providers\OpenAI\Handlers\Stream as BaseStream;
-use Prism\Prism\Text\Chunk;
+use Prism\Prism\Streaming\EventID;
+use Prism\Prism\Streaming\Events\StepFinishEvent;
+use Prism\Prism\Streaming\Events\StepStartEvent;
+use Prism\Prism\Streaming\Events\StreamEvent;
+use Prism\Prism\Streaming\Events\StreamStartEvent;
+use Prism\Prism\Streaming\Events\TextCompleteEvent;
+use Prism\Prism\Streaming\Events\TextDeltaEvent;
+use Prism\Prism\Streaming\Events\TextStartEvent;
+use Prism\Prism\Streaming\Events\ThinkingCompleteEvent;
+use Prism\Prism\Streaming\Events\ThinkingEvent;
+use Prism\Prism\Streaming\Events\ThinkingStartEvent;
+use Prism\Prism\Streaming\Events\ToolCallDeltaEvent;
+use Prism\Prism\Streaming\Events\ToolCallEvent;
 use Prism\Prism\Text\Request;
 use Prism\Prism\ValueObjects\Messages\AssistantMessage;
 use Prism\Prism\ValueObjects\Messages\ToolResultMessage;
-use Prism\Prism\ValueObjects\Meta;
+use Prism\Prism\ValueObjects\ToolCall;
 use Prism\Prism\ValueObjects\Usage;
 use Psr\Http\Message\MessageInterface;
+use Psr\Http\Message\StreamInterface;
 use ReflectionClass;
 
 class Stream extends BaseStream
@@ -98,14 +111,12 @@ class Stream extends BaseStream
     }
 
     /**
-     * @return Generator<Chunk>
+     * @return Generator<StreamEvent>
      */
     protected function processStream(Response $response, Request $request, int $depth = 0): Generator
     {
-        $text = '';
-        $toolCalls = [];
+        $this->state->reset()->withMessageId(EventID::generate());
         $reasoningItems = [];
-
         $newResponseId = null;
 
         assert($response instanceof MessageInterface);
@@ -118,33 +129,66 @@ class Stream extends BaseStream
             }
 
             if ($data['type'] === 'error') {
-                $this->handleErrors($data, $request);
+                $code = data_get($data, 'error.code', 'unknown_error');
+                $message = data_get($data, 'error.message', 'No error message provided');
+
+                if ($code === 'rate_limit_exceeded') {
+                    throw new PrismRateLimitedException([]);
+                }
+
+                throw new PrismException(sprintf(
+                    'Sending to model %s failed. Code: %s. Message: %s',
+                    $request->model(),
+                    $code,
+                    $message
+                ));
             }
 
-            if ($data['type'] === 'response.created') {
+            if ($data['type'] === 'response.created' && $this->state->shouldEmitStreamStart()) {
                 $newResponseId = $data['response']['id'] ?? $newResponseId;
 
-                yield new Chunk(
-                    text: '',
-                    finishReason: null,
-                    meta: new Meta(
-                        id: $data['response']['id'] ?? null,
-                        model: $data['response']['model'] ?? null,
-                    ),
-                    chunkType: ChunkType::Meta,
+                yield new StreamStartEvent(
+                    id: EventID::generate(),
+                    timestamp: time(),
+                    model: $data['response']['model'] ?? 'unknown',
+                    provider: 'azure_open_ai',
                 );
 
+                $this->state->markStreamStarted();
+
                 continue;
+            }
+
+            if ($this->state->shouldEmitStepStart()) {
+                $this->state->markStepStarted();
+
+                yield new StepStartEvent(
+                    id: EventID::generate(),
+                    timestamp: time()
+                );
             }
 
             if ($this->hasReasoningSummaryDelta($data)) {
                 $reasoningDelta = $this->extractReasoningSummaryDelta($data);
 
                 if ($reasoningDelta !== '') {
-                    yield new Chunk(
-                        text: $reasoningDelta,
-                        finishReason: null,
-                        chunkType: ChunkType::Thinking
+                    if ($this->state->reasoningId() === '') {
+                        $this->state->withReasoningId(EventID::generate());
+
+                        yield new ThinkingStartEvent(
+                            id: EventID::generate(),
+                            timestamp: time(),
+                            reasoningId: $this->state->reasoningId()
+                        );
+                    }
+
+                    $this->state->appendThinking($reasoningDelta);
+
+                    yield new ThinkingEvent(
+                        id: EventID::generate(),
+                        timestamp: time(),
+                        delta: $reasoningDelta,
+                        reasoningId: $this->state->reasoningId()
                     );
                 }
 
@@ -154,102 +198,223 @@ class Stream extends BaseStream
             if ($this->hasReasoningItems($data)) {
                 $reasoningItems = $this->extractReasoningItems($data, $reasoningItems);
 
+                if ($this->state->reasoningId() !== '') {
+                    yield new ThinkingCompleteEvent(
+                        id: EventID::generate(),
+                        timestamp: time(),
+                        reasoningId: $this->state->reasoningId()
+                    );
+                    $this->state->withReasoningId('');
+                }
+
                 continue;
             }
 
             if ($this->hasToolCalls($data)) {
-                $toolCalls = $this->extractToolCalls($data, $toolCalls, $reasoningItems);
+                $toolCallDeltaEvent = $this->extractToolCalls($data, $reasoningItems);
+
+                if ($toolCallDeltaEvent instanceof ToolCallDeltaEvent) {
+                    yield $toolCallDeltaEvent;
+                }
+
+                if ($this->isToolCallComplete($data)) {
+                    $completedToolCall = $this->getCompletedToolCall($data);
+
+                    if ($completedToolCall instanceof ToolCall) {
+                        yield new ToolCallEvent(
+                            id: EventID::generate(),
+                            timestamp: time(),
+                            toolCall: $completedToolCall,
+                            messageId: $this->state->messageId()
+                        );
+                    }
+                }
 
                 continue;
             }
 
             $content = $this->extractOutputTextDelta($data);
 
-            $text .= $content;
+            if ($content !== '') {
+                if ($this->state->shouldEmitTextStart()) {
+                    yield new TextStartEvent(
+                        id: EventID::generate(),
+                        timestamp: time(),
+                        messageId: $this->state->messageId()
+                    );
+                    $this->state->markTextStarted();
+                }
 
-            $finishReason = $this->mapFinishReason($data);
+                $this->state->appendText($content);
 
-            yield new Chunk(
-                text: $content,
-                finishReason: $finishReason !== FinishReason::Unknown ? $finishReason : null
-            );
-
-            if (data_get($data, 'type') === 'response.completed') {
-                yield new Chunk(
-                    text: '',
-                    usage: new Usage(
-                        promptTokens: data_get($data, 'response.usage.input_tokens'),
-                        completionTokens: data_get($data, 'response.usage.output_tokens'),
-                        cacheReadInputTokens: data_get($data, 'response.usage.input_tokens_details.cached_tokens'),
-                        thoughtTokens: data_get($data, 'response.usage.output_tokens_details.reasoning_tokens')
-                    ),
-                    chunkType: ChunkType::Meta,
+                yield new TextDeltaEvent(
+                    id: EventID::generate(),
+                    timestamp: time(),
+                    delta: $content,
+                    messageId: $this->state->messageId()
                 );
             }
-        }
 
-        if ($toolCalls !== []) {
-            $toolCalls = $this->mapToolCalls($toolCalls);
+            if (data_get($data, 'type') === 'response.output_text.done' && $this->state->hasTextStarted()) {
+                $this->state->markTextCompleted();
 
-            yield new Chunk(
-                text: '',
-                toolCalls: $toolCalls,
-                chunkType: ChunkType::ToolCall,
-            );
+                yield new TextCompleteEvent(
+                    id: EventID::generate(),
+                    timestamp: time(),
+                    messageId: $this->state->messageId()
+                );
+            }
 
-            $toolResults = $this->callTools($request->tools(), $toolCalls);
-
-            yield new Chunk(
-                text: '',
-                toolResults: $toolResults,
-                chunkType: ChunkType::ToolResult,
-            );
-
-            // Track how many messages exist before we add new ones
-            $messageCountBefore = count($request->messages());
-
-            $request->addMessage(new ToolResultMessage($toolResults));
-
-            $depth++;
-
-            if ($depth < $request->maxSteps()) {
-                // Only send the 2 messages we just added, but WITHOUT the assistant's text content
-                // The text was already sent in the previous request, we only need the `function_call` and `function_call_output`
-                $allMessages = $request->messages();
-                $newMessages = array_slice($allMessages, $messageCountBefore);
-
-                // Strip text content from `AssistantMessage` to avoid duplicate assistant messages
-                // We only want to send the `function_call`, not the text
-                // @phpstan-ignore argument.type
-                $newMessages = array_map(function (AssistantMessage|ToolResultMessage $message) {
-                    if ($message instanceof AssistantMessage) {
-                        // Create a new `AssistantMessage` with empty text but same tool calls
-                        return new AssistantMessage('', $message->toolCalls);
-                    }
-
-                    return $message;
-                }, $newMessages);
-
-                $reflection = new ReflectionClass($request);
-
-                $messagesProperty = $reflection->getProperty('messages');
-                $messagesProperty->setAccessible(true);
-                $messagesProperty->setValue($request, $newMessages);
-
-                $providerOptionsProperty = $reflection->getProperty('providerOptions');
-                $providerOptionsProperty->setAccessible(true);
-                $providerOptionsProperty->setValue($request, [
-                    ...$request->providerOptions(),
-                    'previous_response_id' => $newResponseId,
-                ]);
-
-                $nextResponse = $this->sendRequest($request);
-
-                // Restore full message history
-                $messagesProperty->setValue($request, $allMessages);
-
-                yield from $this->processStream($nextResponse, $request, $depth);
+            if (data_get($data, 'type') === 'response.completed') {
+                $this->state->withFinishReason($this->mapFinishReason($data));
+                $this->state->addUsage(new Usage(
+                    promptTokens: data_get($data, 'response.usage.input_tokens'),
+                    completionTokens: data_get($data, 'response.usage.output_tokens'),
+                    cacheReadInputTokens: data_get($data, 'response.usage.input_tokens_details.cached_tokens'),
+                    thoughtTokens: data_get($data, 'response.usage.output_tokens_details.reasoning_tokens')
+                ));
+                $this->state->withMetadata(['response_id' => data_get($data, 'response.id')]);
             }
         }
+
+        if ($this->state->hasToolCalls()) {
+            yield from $this->handleToolCalls($request, $depth, $newResponseId);
+
+            return;
+        }
+
+        $this->state->markStepFinished();
+
+        yield new StepFinishEvent(
+            id: EventID::generate(),
+            timestamp: time()
+        );
+
+        yield $this->emitStreamEndEvent();
+    }
+
+    /**
+     * Azure's Responses API supports continuing a run via `previous_response_id`, so unlike the
+     * base OpenAI handler we avoid resending the full conversation history: only the assistant's
+     * tool calls and the tool results are sent, with the assistant's text stripped since it was
+     * already delivered in the previous request.
+     *
+     * @return Generator<StreamEvent>
+     */
+    protected function handleToolCalls(Request $request, int $depth, ?string $previousResponseId = null): Generator
+    {
+        $mappedToolCalls = $this->mapToolCalls($this->state->toolCalls());
+
+        $toolResults = $this->callTools($request->tools(), $mappedToolCalls);
+
+        $this->state->markStepFinished();
+
+        yield new StepFinishEvent(
+            id: EventID::generate(),
+            timestamp: time()
+        );
+
+        $depth++;
+
+        if ($depth >= $request->maxSteps()) {
+            yield $this->emitStreamEndEvent();
+
+            return;
+        }
+
+        // Track how many messages exist before we add the new ones.
+        $messageCountBefore = count($request->messages());
+
+        $request->addMessage(new AssistantMessage($this->state->currentText(), $mappedToolCalls));
+        $request->addMessage(new ToolResultMessage($toolResults));
+
+        // Only send the messages we just added, but WITHOUT the assistant's text content.
+        // The text was already sent in the previous request, we only need the `function_call`
+        // and `function_call_output`.
+        $allMessages = $request->messages();
+        $newMessages = array_slice($allMessages, $messageCountBefore);
+
+        // Strip text content from `AssistantMessage` to avoid duplicate assistant messages.
+        // We only want to send the `function_call`, not the text.
+        // @phpstan-ignore argument.type
+        $newMessages = array_map(function (AssistantMessage|ToolResultMessage $message) {
+            if ($message instanceof AssistantMessage) {
+                // Create a new `AssistantMessage` with empty text but same tool calls.
+                return new AssistantMessage('', $message->toolCalls);
+            }
+
+            return $message;
+        }, $newMessages);
+
+        $reflection = new ReflectionClass($request);
+
+        $messagesProperty = $reflection->getProperty('messages');
+        $messagesProperty->setValue($request, $newMessages);
+
+        $request->withProviderOptions([
+            ...$request->providerOptions(),
+            'previous_response_id' => $previousResponseId,
+        ]);
+
+        $nextResponse = $this->sendRequest($request);
+
+        // Restore full message history.
+        $messagesProperty->setValue($request, $allMessages);
+
+        yield from $this->processStream($nextResponse, $request, $depth);
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    protected function parseNextDataLine(StreamInterface $stream): ?array
+    {
+        $data = parent::parseNextDataLine($stream);
+
+        // Prism discards the provider's message when it throws for a rate limit, so we capture the retry delay here first.
+        if (is_array($data) && data_get($data, 'error.code') === 'rate_limit_exceeded') {
+            throw new PrismRateLimitedException([], $this->extractRetryAfterSeconds(data_get($data, 'error.message')));
+        }
+
+        return $data;
+    }
+
+    private function extractRetryAfterSeconds(mixed $message): ?int
+    {
+        if (! is_string($message) || blank($message)) {
+            return null;
+        }
+
+        // Azure phrasing, e.g. "Please retry after 26 seconds."
+        if (preg_match('/retry after (\d+)\s*second/i', $message, $matches)) {
+            return max(1, (int) $matches[1]);
+        }
+
+        // OpenAI phrasing, e.g. "Please try again in 1.5s" or "2m30s" or "200ms".
+        if (preg_match('/try again in\s+([0-9hms.\s]+)/i', $message, $matches)) {
+            return $this->sumDurationToSeconds($matches[1]);
+        }
+
+        return null;
+    }
+
+    private function sumDurationToSeconds(string $duration): ?int
+    {
+        if (preg_match_all('/(\d+(?:\.\d+)?)\s*(ms|h|m|s)/i', $duration, $matches, PREG_SET_ORDER) === 0) {
+            return null;
+        }
+
+        $seconds = 0.0;
+
+        foreach ($matches as $match) {
+            $seconds += match (mb_strtolower($match[2])) {
+                'ms' => ((float) $match[1]) / 1000,
+                'm' => ((float) $match[1]) * 60,
+                'h' => ((float) $match[1]) * 3600,
+                default => (float) $match[1],
+            };
+        }
+
+        return max(1, (int) ceil($seconds));
     }
 }

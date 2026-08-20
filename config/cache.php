@@ -103,4 +103,18 @@ return [
     */
 
     'prefix' => env('CACHE_PREFIX', '{aidingapp_landlord_cache}'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Serializable Classes
+    |--------------------------------------------------------------------------
+    |
+    | This option allows you to control which classes may be unserialized.
+    | When set to false, all classes may be unserialized. When set to true,
+    | all classes may be unserialized. When set to an array, only the listed
+    | classes and their subclasses may be unserialized.
+    |
+    */
+
+    'serializable_classes' => true,
 ];
