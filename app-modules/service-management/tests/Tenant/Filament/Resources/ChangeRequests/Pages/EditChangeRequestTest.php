@@ -95,3 +95,27 @@ test('EditChangeRequest recalculates end_time from start_time and duration and s
     expect($changeRequest->start_time?->toDateTimeString())->toEqual($startTime)
         ->and($changeRequest->end_time?->toDateTimeString())->toEqual($expectedEndTime);
 });
+
+  test('EditChangeRequest hydrates duration from existing start_time and end_time', function () {
+    asSuperAdmin();
+
+    $changeRequestStatus = ChangeRequestStatus::factory()->create([
+      'classification' => SystemChangeRequestClassification::New,
+    ]);
+
+    $startTime = CarbonImmutable::parse('2026-08-14 20:23:28');
+    $endTime = CarbonImmutable::parse('2026-08-14 20:48:28');
+
+    $changeRequest = ChangeRequest::factory()->create([
+      'change_request_status_id' => $changeRequestStatus->getKey(),
+      'change_request_type_id' => ChangeRequestType::factory()->create()->getKey(),
+      'start_time' => $startTime,
+      'end_time' => $endTime,
+    ]);
+
+    livewire(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
+      ->assertSuccessful()
+      ->assertFormSet([
+        'duration' => 25,
+      ]);
+  });

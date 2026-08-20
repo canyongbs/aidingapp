@@ -86,10 +86,12 @@ test('CreateChangeRequest calculates end_time from start_time and duration and s
         ->call('create')
         ->assertHasNoFormErrors();
 
-    $changeRequest = ChangeRequest::query()->latest()->first();
+    $changeRequest = ChangeRequest::query()
+        ->where('title', 'Database Migration Rollout')
+        ->where('change_request_type_id', $changeRequestType->getKey())
+        ->latest('id')
+        ->firstOrFail();
 
-    expect($changeRequest)->not->toBeNull()
-        ->and($changeRequest->end_time?->toDateTimeString())->toEqual($expectedEndTime);
 
     assertDatabaseHas(ChangeRequest::class, [
         'id' => $changeRequest?->getKey(),

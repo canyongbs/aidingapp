@@ -49,6 +49,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -116,10 +117,19 @@ class EditChangeRequest extends EditRecord
                             ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
                         TextInput::make('duration')
                             ->required()
-                            ->numeric()
+                            ->integer()
+                            ->minValue(0)
+                            ->step(1)
                             ->suffix('minutes')
                             ->columnSpan(1)
                             ->dehydrated(false)
+                            ->afterStateHydrated(function (Set $set, ?ChangeRequest $record): void {
+                                if (! $record || blank($record->start_time) || blank($record->end_time)) {
+                                    return;
+                                }
+
+                                $set('duration', (int) $record->start_time->diffInMinutes($record->end_time, true));
+                            })
                             ->live(onBlur: true)
                             ->afterStateUpdated(static::calculateEndTime(...))
                             ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),

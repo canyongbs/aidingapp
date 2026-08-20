@@ -86,7 +86,9 @@ class CreateChangeRequest extends CreateRecord
                             ->afterStateUpdated(static::calculateEndTime(...)),
                         TextInput::make('duration')
                             ->required()
-                            ->numeric()
+                            ->integer()
+                            ->minValue(0)
+                            ->step(1)
                             ->suffix('minutes')
                             ->columnSpan(1)
                             ->dehydrated(false)
