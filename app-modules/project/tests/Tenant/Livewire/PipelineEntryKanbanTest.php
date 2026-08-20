@@ -468,6 +468,30 @@ it('can edit a pipeline entry through the slide over modal', function () {
     ]);
 });
 
+it('archives a pipeline entry through the slide-over modal', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    expect($entry->isArchived())->toBeFalse();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
+        ->callMountedAction()
+        ->assertActionNotMounted()
+        ->assertDontSee($entry->name);
+
+    expect($entry->refresh()->isArchived())->toBeTrue();
+});
+
 it('persists related milestone, assets, and service requests when edited through the modal', function () {
     asSuperAdmin();
 
