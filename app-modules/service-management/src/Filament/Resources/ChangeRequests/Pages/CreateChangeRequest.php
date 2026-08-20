@@ -36,9 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages;
 
+use AidingApp\ServiceManagement\Filament\Concerns\CalculatesChangeRequestEndTime;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
-use Carbon\CarbonImmutable;
-use DateTimeInterface;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -46,12 +45,12 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CreateChangeRequest extends CreateRecord
 {
+    use CalculatesChangeRequestEndTime;
+
     protected static string $resource = ChangeRequestResource::class;
 
     public function form(Schema $schema): Schema
@@ -124,30 +123,5 @@ class CreateChangeRequest extends CreateRecord
                     ])
                     ->columns(3),
             ]);
-    }
-
-    private static function calculateEndTime(Get $get, Set $set): void
-    {
-        $startTime = $get('start_time');
-
-        if (blank($startTime)) {
-            $set('end_time', null);
-
-            return;
-        }
-
-        $duration = $get('duration');
-
-        if (blank($duration)) {
-            $set('end_time', null);
-
-            return;
-        }
-
-        $startAt = $startTime instanceof DateTimeInterface
-            ? CarbonImmutable::instance($startTime)
-            : CarbonImmutable::parse((string) $startTime);
-
-        $set('end_time', $startAt->addMinutes((int) $duration)->toDateTimeString());
     }
 }
