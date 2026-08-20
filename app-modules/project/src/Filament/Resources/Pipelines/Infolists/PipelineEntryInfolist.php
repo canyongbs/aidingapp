@@ -65,9 +65,6 @@ class PipelineEntryInfolist
                     TextEntry::make('description')
                         ->label('Task Description')
                         ->extraAttributes(['class' => 'break-words']),
-                    TextEntry::make('pipelineStage.name')
-                        ->label('Stage')
-                        ->badge(),
                     ...(PipelineEntryStartDateFeature::active()
                         ? [
                             TextEntry::make('start_date')
@@ -78,6 +75,14 @@ class PipelineEntryInfolist
                     TextEntry::make('due')
                         ->label('Due Date')
                         ->dateTime(),
+                    IconEntry::make('is_visible_to_guests')
+                        ->label('Visible to Guest')
+                        ->boolean(),
+                    TextEntry::make('assigned_to_type')
+                        ->visible(fn (PipelineEntry $record): bool => filled($record->assigned_to_type))
+                        ->label('Assigned To Type')
+                        ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                        ->badge(),
                     TextEntry::make('assignedTo')
                         ->label('Assigned To')
                         ->state(function (PipelineEntry $record): ?string {
@@ -93,14 +98,9 @@ class PipelineEntryInfolist
                                 default => null,
                             };
                         }),
-                    TextEntry::make('assigned_to_type')
-                        ->visible(fn (PipelineEntry $record): bool => filled($record->assigned_to_type))
-                        ->label('Assigned To Type')
-                        ->formatStateUsing(fn (string $state): string => ucfirst($state))
+                    TextEntry::make('pipelineStage.name')
+                        ->label('Stage')
                         ->badge(),
-                    IconEntry::make('is_visible_to_guests')
-                        ->label('Visible to Guest')
-                        ->boolean(),
                     TextEntry::make('milestones.title')
                         ->label('Related Milestones')
                         ->badge(),
