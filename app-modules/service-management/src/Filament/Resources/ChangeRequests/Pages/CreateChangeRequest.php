@@ -37,6 +37,8 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -44,6 +46,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 
 class CreateChangeRequest extends CreateRecord
@@ -78,12 +82,24 @@ class CreateChangeRequest extends CreateRecord
                             ->columnSpanFull(),
                         DateTimePicker::make('start_time')
                             ->required()
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...)),
+                        TextInput::make('duration')
+                            ->required()
+                            ->numeric()
+                            ->suffix('minutes')
+                            ->columnSpan(1)
+                            ->dehydrated(false)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...)),
                         DateTimePicker::make('end_time')
                             ->required()
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->dehydrated()
+                            ->disabled(),
                     ])
-                    ->columns(),
+                    ->columns(3),
                 Section::make('Risk Management')
                     ->schema([
                         TextInput::make('impact')
@@ -108,5 +124,30 @@ class CreateChangeRequest extends CreateRecord
                     ])
                     ->columns(3),
             ]);
+    }
+
+    private static function calculateEndTime(Get $get, Set $set): void
+    {
+        $startTime = $get('start_time');
+
+        if (blank($startTime)) {
+            $set('end_time', null);
+
+            return;
+        }
+
+        $duration = $get('duration');
+
+        if (blank($duration)) {
+            $set('end_time', null);
+
+            return;
+        }
+
+        $startAt = $startTime instanceof DateTimeInterface
+            ? CarbonImmutable::instance($startTime)
+            : CarbonImmutable::parse((string) $startTime);
+
+        $set('end_time', $startAt->addMinutes((int) $duration)->toDateTimeString());
     }
 }
