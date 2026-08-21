@@ -37,11 +37,13 @@
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ToggleButtons;
@@ -71,16 +73,18 @@ class ReclassifyServiceRequestAction extends Action
             ->modalDescription('Reclassify this request to a different service request type. The selected type determines the responsible department, assignment rules, and communication templates.')
             ->schema([
                 Section::make('Assignment')
-                    ->schema([
-                        Select::make('type_id')
+                    ->schema(fn (ServiceRequest $record): array => [
+                        SelectTree::make('type_id')
                             ->label('Type')
-                            ->options(
-                                fn (ServiceRequest $record) => ServiceRequestType::query()
+                            ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
+                                withoutArchived: true,
+                                allowedTypeIds: ServiceRequestType::query()
                                     ->withoutArchived()
                                     ->whereKeyNot($record->priority->type->getKey())
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
-                            )
+                                    ->pluck('id')
+                                    ->all(),
+                            ))
+                            ->searchable()
                             ->afterStateUpdated(function (?string $state, Set $set, ServiceRequest $record): void {
                                 if (! $state) {
                                     $set('priority_id', null);
