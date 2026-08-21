@@ -71,11 +71,11 @@
         @livewire(ProjectAccessWidget::class, ['record' => $record])
     @endif
 
-    @if ($tab === ProjectTab::Pipelines->value && auth()->user()?->can('viewAny', [Pipeline::class, $record]))
+    @if ($tab === ProjectTab::Pipelines->value &&auth()->user()?->can('viewAny', [Pipeline::class, $record]))
         @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
     @endif
 
-    @if ($tab === ProjectTab::Files->value && auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
+    @if ($tab === ProjectTab::Files->value &&auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
         @livewire(ProjectFilesWidget::class, ['record' => $record])
     @endif
 </x-filament-panels::page>
