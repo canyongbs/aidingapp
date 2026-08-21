@@ -183,7 +183,12 @@ export function useKnowledgeManagementSearch() {
             },
         });
 
-        history.replaceState(history.state, '', resolved.href);
+        const state = { ...history.state };
+        if (state.current) {
+            state.current = resolved.fullPath;
+        }
+
+        history.replaceState(state, '', resolved.href);
     }
 
     function toggleTag(tag) {
