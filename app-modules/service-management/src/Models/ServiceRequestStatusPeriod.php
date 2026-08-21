@@ -34,29 +34,59 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Actions\RecordReclassifiedServiceRequestStatusPeriods;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestStatusPeriodFactory;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Models\BaseModel;
+use DateTimeInterface;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ServiceRequestStatusObserver
+/**
+ * @mixin IdeHelperServiceRequestStatusPeriod
+ */
+class ServiceRequestStatusPeriod extends BaseModel
 {
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
+    /** @use HasFactory<ServiceRequestStatusPeriodFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'service_request_id',
+        'service_request_status_id',
+        'classification',
+        'started_at',
+    ];
+
+    /**
+     * @return BelongsTo<ServiceRequest, $this>
+     */
+    public function serviceRequest(): BelongsTo
     {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
+        return $this->belongsTo(ServiceRequest::class);
     }
 
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
+    /**
+     * @return BelongsTo<ServiceRequestStatus, $this>
+     */
+    public function status(): BelongsTo
     {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+        return $this->belongsTo(ServiceRequestStatus::class, 'service_request_status_id');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'classification' => SystemServiceRequestClassification::class,
+            'started_at' => 'immutable_datetime',
+        ];
+    }
+
+    protected function serializeDate(DateTimeInterface $date): string
+    {
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

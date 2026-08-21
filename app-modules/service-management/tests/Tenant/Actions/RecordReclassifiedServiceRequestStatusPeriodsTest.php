@@ -34,29 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
-
 use AidingApp\ServiceManagement\Actions\RecordReclassifiedServiceRequestStatusPeriods;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestStatusPeriod;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
 
-class ServiceRequestStatusObserver
-{
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
-    }
+it('appends a status period for every request currently in the reclassified status', function () {
+    Notification::fake();
 
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+    $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+    $this->travelTo($start);
+
+    $status = ServiceRequestStatus::factory()->inProgress()->create();
+
+    $serviceRequests = ServiceRequest::factory()->count(2)->create(['status_id' => $status->getKey()]);
+
+    // Simulate the reclassification: the status now resolves to a different classification.
+    $status->classification = SystemServiceRequestClassification::Waiting;
+
+    $reclassifiedAt = $start->addSeconds(100);
+
+    (new RecordReclassifiedServiceRequestStatusPeriods($status, $reclassifiedAt))
+        ->handle(app(RecordServiceRequestStatusPeriod::class));
+
+    foreach ($serviceRequests as $serviceRequest) {
+        $latestPeriod = $serviceRequest->statusPeriods()
+            ->orderByDesc('started_at')
+            ->orderByDesc('created_at')
+            ->first();
+
+        expect($latestPeriod->service_request_status_id)->toBe($status->getKey())
+            ->and($latestPeriod->classification)->toBe(SystemServiceRequestClassification::Waiting)
+            ->and($latestPeriod->started_at->toDateTimeString())->toBe($reclassifiedAt->toDateTimeString());
     }
-}
+});

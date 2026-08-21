@@ -34,29 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Actions\RecordReclassifiedServiceRequestStatusPeriods;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatusPeriod;
+use Carbon\CarbonInterface;
 
-class ServiceRequestStatusObserver
+class RecordServiceRequestStatusPeriod
 {
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
+    public function execute(ServiceRequest $serviceRequest, CarbonInterface $startedAt): void
     {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
-    }
+        $status = $serviceRequest->status;
 
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
+        if (! $status) {
+            return;
         }
+
+        /** @var ServiceRequestStatusPeriod|null $latestPeriod */
+        $latestPeriod = $serviceRequest->statusPeriods()
+            ->orderByDesc('started_at')
+            ->orderByDesc('created_at')
+            ->first();
+
+        if (
+            $latestPeriod
+            && $latestPeriod->service_request_status_id === $status->getKey()
+            && $latestPeriod->classification === $status->classification
+        ) {
+            return;
+        }
+
+        $serviceRequest->statusPeriods()->create([
+            'service_request_status_id' => $status->getKey(),
+            'classification' => $status->classification,
+            'started_at' => $startedAt,
+        ]);
     }
 }

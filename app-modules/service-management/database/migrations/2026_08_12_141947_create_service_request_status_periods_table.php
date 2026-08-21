@@ -34,29 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Actions\RecordReclassifiedServiceRequestStatusPeriods;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
-
-class ServiceRequestStatusObserver
-{
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
+        Schema::create('service_request_status_periods', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+
+            $table->foreignUuid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
+            $table->foreignUuid('service_request_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
+            $table->string('classification')->nullable();
+            $table->timestamp('started_at');
+
+            $table->timestamps();
+
+            $table->index(['service_request_id', 'started_at']);
+        });
     }
 
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
+    public function down(): void
     {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+        Schema::dropIfExists('service_request_status_periods');
     }
-}
+};
