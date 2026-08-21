@@ -72,12 +72,12 @@ enum ProjectTab: string implements HasLabel
             self::Pipelines => auth()->user()?->can(
                 'viewAny',
                 [Pipeline::class, $project],
-            ),
+            ) ?? false,
 
             self::Files => auth()->user()?->can(
                 'viewAny',
                 [ProjectFile::class, $project],
-            ),
+            ) ?? false,
         };
     }
 }

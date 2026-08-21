@@ -69,8 +69,8 @@ class ViewProject extends ViewRecord
     {
         parent::mount($record);
 
-        /** @var Project $project */
         $project = $this->getRecord();
+        assert($project instanceof Project);
 
         $availableTab = collect(ProjectTab::cases())
             ->first(fn (ProjectTab $tab): bool => $tab->canView($project));
@@ -81,7 +81,7 @@ class ViewProject extends ViewRecord
             return;
         }
 
-        $requestedTab = ProjectTab::tryFrom($this->tab);
+        $requestedTab = $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
         $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
 
         $this->tab = $effectiveTab->value;
