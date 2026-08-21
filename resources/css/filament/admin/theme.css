@@ -38,6 +38,7 @@
 @config '../../../../tailwind.config.js';
 
 .min-w-kanban {
+    width: 20rem;
     min-width: 20rem;
 }
 
