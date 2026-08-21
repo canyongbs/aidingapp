@@ -81,7 +81,7 @@
 
 <div
     role="listitem"
-    class="z-10 flex w-80 transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    class="z-10 flex w-full transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
