@@ -110,11 +110,14 @@ class CreateServiceRequest extends CreateRecord
                                     ->label('Type')
                                     ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
                                         withoutArchived: true,
-                                        allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                            $query->whereHas('managerUsers', function (Builder $query): void {
-                                                $query->where('users.id', auth()->user()->getKey());
-                                            })->orWhereHas('managerDepartments', function (Builder $query): void {
-                                                $query->where('departments.id', auth()->user()->department?->getKey());
+                                        allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
+                                             $query->where(function (Builder $query): void {
+                                                 $query->whereHas('managerUsers', function (Builder $query): void {
+                                                     $query->where('users.id', auth()->user()->getKey());
+                                                 });
+                                                 $query->orWhereHas('managerDepartments', function (Builder $query): void {
+                                                     $query->where('departments.id', auth()->user()->department?->getKey());
+                                                 });
                                             });
                                         })
                                             ->pluck('id')
