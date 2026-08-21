@@ -311,6 +311,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                 $this->resetMilestoneProgressDescriptions();
                 $this->dispatch('projectPipelineUpdated');
             },
+            afterArchive: function (): void {
+                $this->resetMilestoneProgressDescriptions();
+                $this->resetTable();
+                $this->dispatch('projectPipelineUpdated');
+            },
         )
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->record(fn (array $arguments): PipelineEntry => $this->resolvePipelineEntry($arguments['entry'] ?? null));
