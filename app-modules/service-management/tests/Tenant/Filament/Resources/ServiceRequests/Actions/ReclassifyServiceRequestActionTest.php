@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use App\Models\User;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Notifications\Notification;
 
 use function Pest\Laravel\actingAs;
@@ -291,11 +292,25 @@ test('type options exclude the current service request type', function () {
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
-        ->assertFormFieldExists('type_id', function ($field) use ($currentType, $otherType): bool {
-            $options = $field->getOptions();
+        ->assertFormFieldExists('type_id', function (SelectTree $field) use ($currentType, $otherType): bool {
+            $flattenedValues = collect($field->getTree())
+                ->pipe(function ($tree): array {
+                    $flatten = function (array $nodes) use (&$flatten): array {
+                        $values = [];
 
-            return ! isset($options[$currentType->getKey()])
-                && isset($options[$otherType->getKey()]);
+                        foreach ($nodes as $node) {
+                            $values[] = $node['value'];
+                            $values = array_merge($values, $flatten($node['children'] ?? []));
+                        }
+
+                        return $values;
+                    };
+
+                    return $flatten($tree->toArray());
+                });
+
+            return ! in_array($currentType->getKey(), $flattenedValues, true)
+                && in_array($otherType->getKey(), $flattenedValues, true);
         });
 });
 
@@ -321,11 +336,25 @@ test('type options exclude archived service request types', function () {
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
-        ->assertFormFieldExists('type_id', function ($field) use ($archivedType, $activeType): bool {
-            $options = $field->getOptions();
+        ->assertFormFieldExists('type_id', function (SelectTree $field) use ($archivedType, $activeType): bool {
+            $flattenedValues = collect($field->getTree())
+                ->pipe(function ($tree): array {
+                    $flatten = function (array $nodes) use (&$flatten): array {
+                        $values = [];
 
-            return ! isset($options[$archivedType->getKey()])
-                && isset($options[$activeType->getKey()]);
+                        foreach ($nodes as $node) {
+                            $values[] = $node['value'];
+                            $values = array_merge($values, $flatten($node['children'] ?? []));
+                        }
+
+                        return $values;
+                    };
+
+                    return $flatten($tree->toArray());
+                });
+
+            return ! in_array($archivedType->getKey(), $flattenedValues, true)
+                && in_array($activeType->getKey(), $flattenedValues, true);
         });
 });
 

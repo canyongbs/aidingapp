@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Filament\Forms\Components\Select;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -469,11 +469,25 @@ test('displays only service request types managed by the current user', function
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
 
     livewire(CreateServiceRequest::class)
-        ->assertFormFieldExists('type_id', function (Select $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
-            $options = $field->getOptions();
+        ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
+            $flattenedValues = collect($field->getTree())
+                ->pipe(function ($tree): array {
+                    $flatten = function (array $nodes) use (&$flatten): array {
+                        $values = [];
 
-            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+                        foreach ($nodes as $node) {
+                            $values[] = $node['value'];
+                            $values = array_merge($values, $flatten($node['children'] ?? []));
+                        }
+
+                        return $values;
+                    };
+
+                    return $flatten($tree->toArray());
+                });
+
+            return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
+                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 
@@ -498,11 +512,25 @@ test('displays only service request types where current user is a direct manager
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
 
     livewire(CreateServiceRequest::class)
-        ->assertFormFieldExists('type_id', function (Select $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
-            $options = $field->getOptions();
+        ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
+            $flattenedValues = collect($field->getTree())
+                ->pipe(function ($tree): array {
+                    $flatten = function (array $nodes) use (&$flatten): array {
+                        $values = [];
 
-            return in_array($serviceRequestTypesWithManagers->getKey(), array_keys($options)) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), array_keys($options));
+                        foreach ($nodes as $node) {
+                            $values[] = $node['value'];
+                            $values = array_merge($values, $flatten($node['children'] ?? []));
+                        }
+
+                        return $values;
+                    };
+
+                    return $flatten($tree->toArray());
+                });
+
+            return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
+                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 

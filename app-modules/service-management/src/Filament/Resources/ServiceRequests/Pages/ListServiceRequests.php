@@ -304,10 +304,11 @@ class ListServiceRequests extends ListRecords
 
     /**
      * @param  bool  $withoutArchived
+     * @param  array<int, string>|null  $allowedTypeIds
      *
      * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
-    public static function buildTypeTreeOptions(bool $withoutArchived = false): array
+    public static function buildTypeTreeOptions(bool $withoutArchived = false, ?array $allowedTypeIds = null): array
     {
         $categories = ServiceRequestTypeCategory::query()
             ->orderBy('sort')
@@ -359,7 +360,43 @@ class ListServiceRequests extends ListRecords
             ])
             ->all();
 
-        return array_merge($uncategorizedTypes, $tree);
+        $fullTree = array_merge($uncategorizedTypes, $tree);
+
+        if ($allowedTypeIds === null) {
+            return $fullTree;
+        }
+
+        return static::filterTypeTreeOptionsByTypeIds($fullTree, $allowedTypeIds);
+    }
+
+    /**
+     * @param  array<int, array{name: string, value: string, children: array<int, mixed>}>  $tree
+     * @param  array<int, string>  $allowedTypeIds
+     *
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
+     */
+    protected static function filterTypeTreeOptionsByTypeIds(array $tree, array $allowedTypeIds): array
+    {
+        $normalizedAllowedTypeIds = array_map(static fn (string $typeId): string => (string) $typeId, $allowedTypeIds);
+        $filteredTree = [];
+
+        foreach ($tree as $node) {
+            $children = $node['children'] ?? [];
+            $filteredChildren = static::filterTypeTreeOptionsByTypeIds($children, $normalizedAllowedTypeIds);
+
+            $isLeafNode = empty($children);
+            $isAllowedLeaf = $isLeafNode && in_array((string) ($node['value'] ?? ''), $normalizedAllowedTypeIds, true);
+
+            if (! $isAllowedLeaf && empty($filteredChildren)) {
+                continue;
+            }
+
+            $node['children'] = $filteredChildren;
+
+            $filteredTree[] = $node;
+        }
+
+        return $filteredTree;
     }
 
     protected function getHeaderActions(): array
