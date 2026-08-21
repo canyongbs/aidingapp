@@ -32,6 +32,7 @@
     </COPYRIGHT>
 --}}
 @php
+    use AidingApp\Project\Enums\ProjectTab;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectStatsWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
@@ -51,15 +52,30 @@
         @livewire(ProjectStatsWidget::class, ['record' => $record])
     @endif
 
-    @if (ProjectAccessWidget::canView())
+    <div class="flex justify-center">
+        <x-filament::tabs>
+            @foreach (ProjectTab::cases() as $projectTab)
+                @if ($projectTab->canView($record))
+                    <x-filament::tabs.item
+                        :active="$tab === $projectTab->value"
+                        wire:click="$set('tab', '{{ $projectTab->value }}')"
+                    >
+                        {{ $projectTab->getLabel() }}
+                    </x-filament::tabs.item>
+                @endif
+            @endforeach
+        </x-filament::tabs>
+    </div>
+
+    @if ($tab === ProjectTab::Access->value && ProjectAccessWidget::canView())
         @livewire(ProjectAccessWidget::class, ['record' => $record])
     @endif
 
-    @if (auth()->user()?->can('viewAny', [Pipeline::class, $record]))
+    @if ($tab === ProjectTab::Pipelines->value && auth()->user()?->can('viewAny', [Pipeline::class, $record]))
         @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
     @endif
 
-    @if (auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
+    @if ($tab === ProjectTab::Files->value && auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
         @livewire(ProjectFilesWidget::class, ['record' => $record])
     @endif
 </x-filament-panels::page>
