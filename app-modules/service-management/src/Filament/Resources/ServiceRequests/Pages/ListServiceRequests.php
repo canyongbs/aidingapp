@@ -381,11 +381,11 @@ class ListServiceRequests extends ListRecords
         $filteredTree = [];
 
         foreach ($tree as $node) {
-            $children = $node['children'] ?? [];
+            $children = $node['children'];
             $filteredChildren = static::filterTypeTreeOptionsByTypeIds($children, $normalizedAllowedTypeIds);
 
             $isLeafNode = empty($children);
-            $isAllowedLeaf = $isLeafNode && in_array((string) ($node['value'] ?? ''), $normalizedAllowedTypeIds, true);
+            $isAllowedLeaf = $isLeafNode && in_array((string) $node['value'], $normalizedAllowedTypeIds, true);
 
             if (! $isAllowedLeaf && empty($filteredChildren)) {
                 continue;
