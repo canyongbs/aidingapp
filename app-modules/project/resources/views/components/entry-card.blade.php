@@ -81,13 +81,13 @@
 
 <div
     role="listitem"
-    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    class="z-10 flex w-full transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
 >
     <div class="flex items-start justify-between gap-2">
-        <div class="text-base font-semibold text-gray-900 dark:text-white">
+        <div class="min-w-0 break-words text-base font-semibold text-gray-900 dark:text-white">
             {{ $entry->name }}
         </div>
 
