@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages;
 
+use AidingApp\ServiceManagement\Filament\Concerns\CalculatesChangeRequestEndTime;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
@@ -48,11 +49,14 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ViewField;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 
 class EditChangeRequest extends EditRecord
 {
+    use CalculatesChangeRequestEndTime;
+
     protected static string $resource = ChangeRequestResource::class;
 
     public function form(Schema $schema): Schema
@@ -108,13 +112,34 @@ class EditChangeRequest extends EditRecord
                         DateTimePicker::make('start_time')
                             ->required()
                             ->columnSpan(1)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...))
+                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                        TextInput::make('duration')
+                            ->required()
+                            ->integer()
+                            ->minValue(0)
+                            ->step(1)
+                            ->suffix('minutes')
+                            ->columnSpan(1)
+                            ->dehydrated(false)
+                            ->afterStateHydrated(function (Set $set, ?ChangeRequest $record): void {
+                                if (! $record || blank($record->start_time) || blank($record->end_time)) {
+                                    return;
+                                }
+
+                                $set('duration', (int) $record->start_time->diffInMinutes($record->end_time, true));
+                            })
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...))
                             ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
                         DateTimePicker::make('end_time')
                             ->required()
                             ->columnSpan(1)
-                            ->disabled(fn (ChangeRequest $record) => $record->isNotNew()),
+                            ->dehydrated()
+                            ->disabled(),
                     ])
-                    ->columns(2),
+                    ->columns(3),
                 Section::make('Risk Management')
                     ->schema([
                         TextInput::make('impact')

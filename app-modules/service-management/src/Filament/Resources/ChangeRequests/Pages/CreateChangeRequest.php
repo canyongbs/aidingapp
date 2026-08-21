@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\Pages;
 
+use AidingApp\ServiceManagement\Filament\Concerns\CalculatesChangeRequestEndTime;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Select;
@@ -48,6 +49,8 @@ use Filament\Schemas\Schema;
 
 class CreateChangeRequest extends CreateRecord
 {
+    use CalculatesChangeRequestEndTime;
+
     protected static string $resource = ChangeRequestResource::class;
 
     public function form(Schema $schema): Schema
@@ -78,12 +81,26 @@ class CreateChangeRequest extends CreateRecord
                             ->columnSpanFull(),
                         DateTimePicker::make('start_time')
                             ->required()
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...)),
+                        TextInput::make('duration')
+                            ->required()
+                            ->integer()
+                            ->minValue(0)
+                            ->step(1)
+                            ->suffix('minutes')
+                            ->columnSpan(1)
+                            ->dehydrated(false)
+                            ->live(onBlur: true)
+                            ->afterStateUpdated(static::calculateEndTime(...)),
                         DateTimePicker::make('end_time')
                             ->required()
-                            ->columnSpan(1),
+                            ->columnSpan(1)
+                            ->dehydrated()
+                            ->disabled(),
                     ])
-                    ->columns(),
+                    ->columns(3),
                 Section::make('Risk Management')
                     ->schema([
                         TextInput::make('impact')
