@@ -189,7 +189,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ])
             ->filters([
                 SelectFilter::make('classification')
-                    ->label('Status')
+                    ->label('Statuses')
                     ->options(PipelineStageClassification::class)
                     ->multiple()
                     ->default(
