@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
