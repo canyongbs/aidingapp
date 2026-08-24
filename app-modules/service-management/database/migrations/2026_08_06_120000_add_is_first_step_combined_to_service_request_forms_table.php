@@ -34,32 +34,22 @@
 </COPYRIGHT>
 */
 
-use App\Features\CombineStepFormFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function (): void {
-            Schema::table('service_request_forms', function (Blueprint $table) {
-                $table->boolean('is_first_step_combined')->default(false);
-            });
-
-            CombineStepFormFeature::activate();
+        Schema::table('service_request_forms', function (Blueprint $table) {
+            $table->boolean('is_first_step_combined')->default(false);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function (): void {
-            CombineStepFormFeature::deactivate();
-
-            Schema::table('service_request_forms', function (Blueprint $table) {
-                $table->dropColumn('is_first_step_combined');
-            });
+        Schema::table('service_request_forms', function (Blueprint $table) {
+            $table->dropColumn('is_first_step_combined');
         });
     }
 };
