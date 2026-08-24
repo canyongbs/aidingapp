@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
