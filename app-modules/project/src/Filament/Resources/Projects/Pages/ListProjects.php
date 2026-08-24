@@ -39,13 +39,11 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
-use App\Features\ProjectArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -197,17 +195,13 @@ class ListProjects extends ListRecords
             ->recordActions([
                 ArchiveAction::make()
                     ->icon('heroicon-m-archive-box')
-                    ->visible(fn (): bool => ProjectArchivingFeature::active())
                     ->authorize('archive')
                     ->successRedirectUrl(null),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    ProjectArchivingFeature::active()
-                        ? ArchiveBulkAction::make()
-                            ->authorizeIndividualRecords('delete')
-                        : DeleteBulkAction::make()
-                            ->authorizeIndividualRecords('delete'),
+                    ArchiveBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
     }
