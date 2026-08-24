@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Components;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use App\Features\ServiceMonitoringReportFeature;
+
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
@@ -91,7 +91,6 @@ class AutomatedReportingSection
                     ->columns(3)
                     ->visible(fn (Get $get) => $get('is_reporting_active')),
             ])
-            ->visible(fn () => ServiceMonitoringReportFeature::active())
-            ->columns(2);
+                    ->columns(2);
     }
 }
