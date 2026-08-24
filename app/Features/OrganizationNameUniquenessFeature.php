@@ -34,46 +34,14 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
-use AidingApp\Contact\Models\Organization;
-use App\Models\User;
-use Filament\Actions\Testing\TestAction;
+namespace App\Features;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+use App\Support\AbstractFeatureFlag;
 
-it('only shows the bulk delete action to a user with the organization.delete permission', function () {
-    Organization::factory(15)->create();
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
-
-    actingAs($user);
-
-    livewire(ListOrganizations::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
-
-    $user->givePermissionTo('organization.*.delete');
-
-    livewire(ListOrganizations::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
-});
-
-it('only shows the import and export actions to a user with the `organization.import` permission', function () {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
-
-    actingAs($user);
-
-    livewire(ListOrganizations::class)
-        ->assertActionHidden('import')
-        ->assertActionHidden('export');
-
-    $user->givePermissionTo('organization.import');
-
-    livewire(ListOrganizations::class)
-        ->assertActionVisible('import')
-        ->assertActionVisible('export');
-});
+class OrganizationNameUniquenessFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
+}

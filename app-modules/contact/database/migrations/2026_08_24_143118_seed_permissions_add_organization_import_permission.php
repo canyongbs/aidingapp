@@ -34,46 +34,45 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
-use AidingApp\Contact\Models\Organization;
-use App\Models\User;
-use Filament\Actions\Testing\TestAction;
+use Database\Migrations\Concerns\CanModifyPermissions;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+return new class () extends Migration {
+    use CanModifyPermissions;
 
-it('only shows the bulk delete action to a user with the organization.delete permission', function () {
-    Organization::factory(15)->create();
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'organization.import' => 'Organization',
+    ];
 
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
 
-    actingAs($user);
+    public function up(): void
+    {
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
 
-    livewire(ListOrganizations::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+                $this->createPermissions($permissions, $guard);
+            });
+    }
 
-    $user->givePermissionTo('organization.*.delete');
-
-    livewire(ListOrganizations::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
-});
-
-it('only shows the import and export actions to a user with the `organization.import` permission', function () {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
-
-    actingAs($user);
-
-    livewire(ListOrganizations::class)
-        ->assertActionHidden('import')
-        ->assertActionHidden('export');
-
-    $user->givePermissionTo('organization.import');
-
-    livewire(ListOrganizations::class)
-        ->assertActionVisible('import')
-        ->assertActionVisible('export');
-});
+    public function down(): void
+    {
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+    }
+};

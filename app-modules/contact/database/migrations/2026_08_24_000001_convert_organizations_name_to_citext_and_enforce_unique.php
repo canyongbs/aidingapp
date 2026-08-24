@@ -34,46 +34,51 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
-use AidingApp\Contact\Models\Organization;
-use App\Models\User;
-use Filament\Actions\Testing\TestAction;
+use App\Features\OrganizationNameUniquenessFeature;
+use Database\Migrations\Concerns\FixesDuplicateNames;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+return new class () extends Migration {
+    use FixesDuplicateNames;
 
-it('only shows the bulk delete action to a user with the organization.delete permission', function () {
-    Organization::factory(15)->create();
+    private string $table = 'organizations';
 
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
+    private string $column = 'name';
 
-    actingAs($user);
+    private int $chunkSize = 500;
 
-    livewire(ListOrganizations::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+    private bool $usesSoftDeletes = true;
 
-    $user->givePermissionTo('organization.*.delete');
+    public function up(): void
+    {
+        DB::transaction(function () {
+            $this->fixDuplicates();
 
-    livewire(ListOrganizations::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
-});
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
-it('only shows the import and export actions to a user with the `organization.import` permission', function () {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('organization.view-any', 'organization.*.view');
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->uniqueIndex($this->column, 'organizations_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
 
-    actingAs($user);
+            OrganizationNameUniquenessFeature::activate();
+        });
+    }
 
-    livewire(ListOrganizations::class)
-        ->assertActionHidden('import')
-        ->assertActionHidden('export');
+    public function down(): void
+    {
+        DB::transaction(function () {
+            OrganizationNameUniquenessFeature::deactivate();
 
-    $user->givePermissionTo('organization.import');
+            DB::statement('DROP INDEX IF EXISTS organizations_name_unique');
 
-    livewire(ListOrganizations::class)
-        ->assertActionVisible('import')
-        ->assertActionVisible('export');
-});
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+            $this->revertDuplicates();
+        });
+    }
+};
