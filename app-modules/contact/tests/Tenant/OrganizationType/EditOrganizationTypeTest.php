@@ -39,7 +39,9 @@ use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\EditOrga
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Tests\Tenant\OrganizationType\RequestFactories\EditOrganizationTypeRequestFactory;
+use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -96,4 +98,62 @@ test('Edit Organization Type Record', function () {
     $organizationType->refresh();
 
     expect($organizationType->name)->toEqual($request->get('name'));
+});
+
+test('the organization type name must be unique among other non-trashed types', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    OrganizationType::factory()->create(['name' => 'Vendor']);
+    $organizationType = OrganizationType::factory()->create(['name' => 'Partner']);
+
+    actingAs($user);
+
+    livewire(EditOrganizationType::class, [
+        'record' => $organizationType->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Vendor'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+test('an organization type can keep its own name when editing', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    $organizationType = OrganizationType::factory()->create(['name' => 'Vendor']);
+
+    actingAs($user);
+
+    livewire(EditOrganizationType::class, [
+        'record' => $organizationType->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Vendor'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+});
+
+test('does not apply the unique form rule when the feature is disabled', function () {
+    OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.*.update');
+
+    OrganizationType::factory()->create(['name' => 'Vendor']);
+    $organizationType = OrganizationType::factory()->create(['name' => 'Partner']);
+
+    actingAs($user);
+
+    expect(fn () => livewire(EditOrganizationType::class, [
+        'record' => $organizationType->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Vendor'])
+        ->call('save'))
+        ->toThrow(UniqueConstraintViolationException::class);
 });
