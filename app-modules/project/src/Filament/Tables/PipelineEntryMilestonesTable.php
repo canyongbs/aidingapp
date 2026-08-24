@@ -37,7 +37,6 @@
 namespace AidingApp\Project\Filament\Tables;
 
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\PipelineArchivingFeature;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -52,10 +51,7 @@ class PipelineEntryMilestonesTable
 
                 return ProjectMilestone::query()
                     ->where('project_id', $projectId)
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    );
+                  ->withoutArchived();
             })
             ->columns([
                 TextColumn::make('title')

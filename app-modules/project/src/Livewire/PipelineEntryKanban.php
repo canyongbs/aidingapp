@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryActi
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryMilestoneFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use Exception;
@@ -84,10 +83,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          * @var Collection<int, PipelineEntry> $entries
          */
         $entries = $this->pipeline->entries()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->with(['assignedTo', 'pipelineStage'])
             ->withCount([
                 'assets',
