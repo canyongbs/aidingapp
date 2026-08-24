@@ -241,10 +241,9 @@ describe('tabs', function () {
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('defaults to pipelines when the user cannot view the access tab', function () {
+    it('denies access without the `project.view-any` permission even when the user can view the project', function () {
         $user = User::factory()->create();
         $user->givePermissionTo('project.*.view');
-        $user->refresh();
 
         $project = Project::factory()->create();
         $project->managerUsers()->attach($user->getKey());
@@ -252,12 +251,12 @@ describe('tabs', function () {
         actingAs($user);
 
         expect($user->can('view', $project))->toBeTrue()
-            ->and($user->can('viewAny', [Pipeline::class, $project]))->toBeTrue();
+            ->and($user->can('viewAny', Project::class))->toBeFalse();
 
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->assertSet('tab', ProjectTab::Pipelines->value)
-            ->assertDontSeeHtml('wire:click="$set(\'tab\', \'access\')"')
-            ->assertSeeHtml('wire:click="$set(\'tab\', \'pipelines\')"');
+        get(ViewProject::getUrl([
+            'record' => $project->getRouteKey(),
+        ]))
+            ->assertForbidden();
     });
 
     it('does not make the files tab available when project management is inactive', function () {
@@ -272,38 +271,24 @@ describe('tabs', function () {
         expect(ProjectTab::Files->canView($project))->toBeFalse();
     });
 
-    it('selects the access tab', function () {
+    it('renders only the active tab widget', function (ProjectTab $tab) {
         asSuperAdmin();
 
         $project = Project::factory()->create();
 
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->set('tab', ProjectTab::Access->value)
-            ->assertSet('tab', ProjectTab::Access->value)
-            ->assertSeeHtml('wire:click="$set(\'tab\', \'access\')"');
-    });
+        $page = livewire(ViewProject::class, ['record' => $project->getRouteKey()])
+            ->set('tab', $tab->value)
+            ->assertSet('tab', $tab->value)
+            ->assertSeeHtml("data-project-tab-panel=\"{$tab->value}\"");
 
-    it('selects the pipelines tab', function () {
-        asSuperAdmin();
+        foreach (ProjectTab::cases() as $inactiveTab) {
+            if ($inactiveTab === $tab) {
+                continue;
+            }
 
-        $project = Project::factory()->create();
-
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->set('tab', ProjectTab::Pipelines->value)
-            ->assertSet('tab', ProjectTab::Pipelines->value)
-            ->assertSeeHtml('wire:click="$set(\'tab\', \'pipelines\')"');
-    });
-
-    it('selects the files tab', function () {
-        asSuperAdmin();
-
-        $project = Project::factory()->create();
-
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->set('tab', ProjectTab::Files->value)
-            ->assertSet('tab', ProjectTab::Files->value)
-            ->assertSeeHtml('wire:click="$set(\'tab\', \'files\')"');
-    });
+            $page->assertDontSeeHtml("data-project-tab-panel=\"{$inactiveTab->value}\"");
+        }
+    })->with(ProjectTab::cases());
 });
 
 it('can render the project access widget and mount the manage access action', function () {

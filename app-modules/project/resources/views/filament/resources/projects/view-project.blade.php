@@ -38,8 +38,6 @@
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
     use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
-    use AidingApp\Project\Models\Pipeline;
-    use AidingApp\Project\Models\ProjectFile;
     use AidingApp\Project\Models\ProjectMilestone;
 
     $record = $this->getRecord();
@@ -67,15 +65,21 @@
         </x-filament::tabs>
     </div>
 
-    @if ($tab === ProjectTab::Access->value && ProjectAccessWidget::canView())
-        @livewire(ProjectAccessWidget::class, ['record' => $record])
+    @if ($tab === ProjectTab::Access->value && ProjectTab::Access->canView($record))
+        <div data-project-tab-panel="{{ ProjectTab::Access->value }}">
+            @livewire(ProjectAccessWidget::class, ['record' => $record])
+        </div>
     @endif
 
-    @if ($tab === ProjectTab::Pipelines->value &&auth()->user()?->can('viewAny', [Pipeline::class, $record]))
-        @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
+    @if ($tab === ProjectTab::Pipelines->value && ProjectTab::Pipelines->canView($record))
+        <div data-project-tab-panel="{{ ProjectTab::Pipelines->value }}">
+            @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
+        </div>
     @endif
 
-    @if ($tab === ProjectTab::Files->value &&auth()->user()?->can('viewAny', [ProjectFile::class, $record]))
-        @livewire(ProjectFilesWidget::class, ['record' => $record])
+    @if ($tab === ProjectTab::Files->value && ProjectTab::Files->canView($record))
+        <div data-project-tab-panel="{{ ProjectTab::Files->value }}">
+            @livewire(ProjectFilesWidget::class, ['record' => $record])
+        </div>
     @endif
 </x-filament-panels::page>

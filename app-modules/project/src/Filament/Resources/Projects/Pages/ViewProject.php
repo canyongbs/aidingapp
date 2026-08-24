@@ -39,9 +39,7 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Enums\ProjectTab;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
-use App\Models\Authenticatable;
 use Filament\Resources\Pages\ViewRecord;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 
@@ -57,13 +55,6 @@ class ViewProject extends ViewRecord
 
     #[Url()]
     public ?string $tab = null;
-
-    public function mountCanAuthorizeResourceAccess(): void
-    {
-        $user = Auth::user();
-
-        abort_unless($user instanceof Authenticatable && $user->can('project.*.view'), 403);
-    }
 
     public function mount(int | string $record): void
     {
