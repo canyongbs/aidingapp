@@ -663,7 +663,7 @@ it('clears related milestone, assets, and service requests when the type is set 
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
-it('can remove a pipeline entry through the dropdown', function () {
+it('can remove a pipeline entry', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
