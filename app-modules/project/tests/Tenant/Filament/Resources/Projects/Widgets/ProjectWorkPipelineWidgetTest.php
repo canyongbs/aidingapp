@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
@@ -139,7 +140,7 @@ it('clears the selection when the last pipeline is archived', function () {
 it('excludes archived tasks from the pipeline board', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
-    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
 
     $active = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
         'assigned_to_id' => null,
@@ -159,17 +160,52 @@ it('excludes archived tasks from the pipeline board', function () {
 it('does not provide a row-level edit action because task editing is accessed through the name column', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
-    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
     $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
 
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertTableActionDoesNotExist('edit', record: $entry);
 });
 
+describe('status filter', function () {
+    it('defaults to showing all non-complete classifications and hiding complete tasks', function () {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+
+        $planningStage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
+        $inProgressStage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::InProgress]);
+        $completeStage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Complete]);
+
+        $planningTask = PipelineEntry::factory()->for($planningStage, 'pipelineStage')->create();
+        $inProgressTask = PipelineEntry::factory()->for($inProgressStage, 'pipelineStage')->create();
+        $completeTask = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->assertCanSeeTableRecords([$planningTask, $inProgressTask])
+            ->assertCanNotSeeTableRecords([$completeTask]);
+    });
+
+    it('can filter tasks by stage classification', function () {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+
+        $planningStage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
+        $completeStage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Complete]);
+
+        $planningTask = PipelineEntry::factory()->for($planningStage, 'pipelineStage')->create();
+        $completeTask = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
+
+        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->filterTable('classification', [PipelineStageClassification::Complete->value])
+            ->assertCanSeeTableRecords([$completeTask])
+            ->assertCanNotSeeTableRecords([$planningTask]);
+    });
+});
+
 it('archives a pipeline task from its slide-over modal', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
-    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
     $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
 
     expect($entry->isArchived())->toBeFalse();
@@ -278,7 +314,7 @@ describe('task access authorization', function () {
         $project = Project::factory()->create();
         $project->auditorUsers()->attach($auditor);
         $pipeline = Pipeline::factory()->for($project)->create();
-        $stage = PipelineStage::factory()->for($pipeline)->create();
+        $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
         $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['name' => 'View-only task']);
 
         actingAs($auditor);
@@ -299,7 +335,7 @@ describe('task access authorization', function () {
         $project = Project::factory()->create();
         $project->managerUsers()->attach($manager);
         $pipeline = Pipeline::factory()->for($project)->create();
-        $stage = PipelineStage::factory()->for($pipeline)->create();
+        $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
         $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['description' => 'Original description.']);
 
         actingAs($manager);

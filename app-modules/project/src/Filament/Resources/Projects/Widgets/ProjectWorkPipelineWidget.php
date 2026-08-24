@@ -62,6 +62,7 @@ use Filament\Schemas\Components\Component;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Grouping\Group;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
@@ -185,6 +186,27 @@ class ProjectWorkPipelineWidget extends TableWidget
                 TextColumn::make('createdBy.name')
                     ->label('Created By')
                     ->placeholder('N/A'),
+            ])
+            ->filters([
+                SelectFilter::make('classification')
+                    ->label('Status')
+                    ->options(PipelineStageClassification::class)
+                    ->multiple()
+                    ->default(
+                        collect(PipelineStageClassification::cases())
+                            ->reject(fn (PipelineStageClassification $case): bool => $case === PipelineStageClassification::Complete)
+                            ->map(fn (PipelineStageClassification $case): string => $case->value)
+                            ->all()
+                    )
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['values'] ?? null),
+                            fn (Builder $query): Builder => $query->whereHas(
+                                'pipelineStage',
+                                fn (Builder $query): Builder => $query->whereIn('classification', $data['values']),
+                            ),
+                        );
+                    }),
             ])
             ->paginated([5, 10, 20, 50])
             ->defaultPaginationPageOption(50)
