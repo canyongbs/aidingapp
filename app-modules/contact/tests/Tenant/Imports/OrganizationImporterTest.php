@@ -53,12 +53,17 @@ beforeEach(function () {
  */
 function runOrganizationImport(array $row, ?Import $import = null): void
 {
+    if ($import === null) {
+        $import = new Import();
+        $import->id = (string) Str::uuid();
+    }
+
     $columnMap = collect(array_keys($row))
         ->mapWithKeys(fn (string $key): array => [$key => $key])
         ->all();
 
     $importer = new OrganizationImporter(
-        import: $import ?? new Import(),
+        import: $import,
         columnMap: $columnMap,
         options: [],
     );
@@ -229,6 +234,18 @@ it('rejects a domain already used by another organization', function () {
     ]);
 })->throws(RowImportFailedException::class);
 
+it('rejects a domain already used by another organization case-insensitively', function () {
+    Organization::factory()->create([
+        'name' => 'Existing College',
+        'domains' => [['domain' => 'Shared.edu']],
+    ]);
+
+    runOrganizationImport([
+        'name' => 'New College',
+        'domains' => 'shared.edu',
+    ]);
+})->throws(RowImportFailedException::class);
+
 it('allows an organization to keep its own domain while adding another on update', function () {
     $organization = Organization::factory()->create([
         'name' => 'Keep College',
@@ -246,12 +263,28 @@ it('allows an organization to keep its own domain while adding another on update
     ]);
 });
 
-it('rejects a domain already claimed earlier in the same import', function () {
+it('leaves existing domains unchanged when the domains column is blank', function () {
+    $organization = Organization::factory()->create([
+        'name' => 'Keep College',
+        'domains' => [['domain' => 'keep.edu']],
+    ]);
+
+    runOrganizationImport([
+        'name' => 'Keep College',
+        'domains' => '',
+        'city' => 'New City',
+    ]);
+
+    expect($organization->refresh()->domains)->toBe([['domain' => 'keep.edu']])
+        ->and($organization->city)->toBe('New City');
+});
+
+it('rejects a domain claimed by a different organization earlier in the same import', function () {
     $import = new Import();
     $import->id = (string) Str::uuid();
 
     Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])
-        ->add('shared.edu', true, now()->addDay());
+        ->add('shared.edu', 'existing college', now()->addDay());
 
     runOrganizationImport([
         'name' => 'New College',
@@ -259,12 +292,28 @@ it('rejects a domain already claimed earlier in the same import', function () {
     ], $import);
 })->throws(RowImportFailedException::class);
 
+it('allows an organization to re-claim its own domains within the same import', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+
+    Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])
+        ->add('shared.edu', Str::lower('Retry College'), now()->addDay());
+
+    runOrganizationImport([
+        'name' => 'Retry College',
+        'domains' => 'shared.edu',
+    ], $import);
+
+    expect(Organization::query()->where('name', 'Retry College')->firstOrFail()->domains)
+        ->toBe([['domain' => 'shared.edu']]);
+});
+
 it('does not reject a domain claimed by a different import', function () {
     $otherImport = new Import();
     $otherImport->id = (string) Str::uuid();
 
     Cache::tags([OrganizationImporter::domainClaimCacheTag($otherImport->getKey())])
-        ->add('shared.edu', true, now()->addDay());
+        ->add('shared.edu', 'existing college', now()->addDay());
 
     $import = new Import();
     $import->id = (string) Str::uuid();
@@ -276,4 +325,42 @@ it('does not reject a domain claimed by a different import', function () {
 
     expect(Organization::query()->where('name', 'New College')->firstOrFail()->domains)
         ->toBe([['domain' => 'shared.edu']]);
+});
+
+it('fails the row when the industry does not exist', function () {
+    runOrganizationImport([
+        'name' => 'New College',
+        'industry' => 'Nonexistent Industry',
+    ]);
+})->throws(ValidationException::class);
+
+it('fails the row when the type does not exist', function () {
+    runOrganizationImport([
+        'name' => 'New College',
+        'type' => 'Nonexistent Type',
+    ]);
+})->throws(ValidationException::class);
+
+it('preserves the existing industry and type when the columns are blank on update', function () {
+    $industry = OrganizationIndustry::factory()->create(['name' => 'Finance']);
+    $type = OrganizationType::factory()->create(['name' => 'Vendor']);
+
+    $organization = Organization::factory()
+        ->for($industry, 'industry')
+        ->for($type, 'type')
+        ->create(['name' => 'Keep College']);
+
+    OrganizationIndustry::factory()->create(['name' => 'Default Industry', 'is_default' => true]);
+    OrganizationType::factory()->create(['name' => 'Default Type', 'is_default' => true]);
+
+    runOrganizationImport([
+        'name' => 'Keep College',
+        'industry' => '',
+        'type' => '',
+    ]);
+
+    $organization->refresh();
+
+    expect($organization->industry->is($industry))->toBeTrue()
+        ->and($organization->type->is($type))->toBeTrue();
 });

@@ -39,15 +39,16 @@ namespace AidingApp\Contact\Imports;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class OrganizationImporter extends Importer
@@ -58,84 +59,122 @@ class OrganizationImporter extends Importer
     {
         return [
             ImportColumn::make('name')
+                ->label('Name')
+                ->exampleHeader('Name')
                 ->rules(['required', 'max:255'])
                 ->requiredMapping()
                 ->example('College Community College'),
             ImportColumn::make('email')
+                ->label('Email')
+                ->exampleHeader('Email')
                 ->rules(['nullable', 'email', 'max:255'])
                 ->example('admissions@collegecc.edu'),
             ImportColumn::make('phone_number')
+                ->label('Phone Number')
+                ->exampleHeader('Phone Number')
                 ->rules(['nullable', 'string'])
                 ->example('+1 (555) 555-5555'),
             ImportColumn::make('website')
+                ->label('Website')
+                ->exampleHeader('Website')
                 ->rules(['nullable', 'url', 'max:255'])
                 ->example('https://www.collegecc.edu'),
             ImportColumn::make('industry')
-                ->relationship(
-                    resolveUsing: function (mixed $state): ?OrganizationIndustry {
-                        if (blank($state)) {
-                            return OrganizationIndustry::query()->where('is_default', true)->first();
+                ->label('Industry')
+                ->exampleHeader('Industry')
+                ->relationship(resolveUsing: 'name')
+                ->guess(['industry_name'])
+                ->fillRecordUsing(function (Organization $record, mixed $state): void {
+                    if (blank($state)) {
+                        // Only assign the default on create; on update keep the organization's existing industry.
+                        if (! $record->exists) {
+                            $record->industry()->associate(OrganizationIndustry::query()->where('is_default', true)->first());
                         }
 
-                        return OrganizationIndustry::query()
-                            ->where('name', $state)
-                            ->first()
-                            ?? OrganizationIndustry::query()->where('is_default', true)->first();
-                    },
-                )
-                ->guess(['industry_name'])
+                        return;
+                    }
+
+                    $record->industry()->associate(OrganizationIndustry::query()->where('name', $state)->first());
+                })
                 ->example(fn (): ?string => OrganizationIndustry::query()->value('name')),
             ImportColumn::make('type')
-                ->relationship(
-                    resolveUsing: function (mixed $state): ?OrganizationType {
-                        if (blank($state)) {
-                            return OrganizationType::query()->where('is_default', true)->first();
+                ->label('Type')
+                ->exampleHeader('Type')
+                ->relationship(resolveUsing: 'name')
+                ->guess(['type_name'])
+                ->fillRecordUsing(function (Organization $record, mixed $state): void {
+                    if (blank($state)) {
+                        // Only assign the default on create; on update keep the organization's existing type.
+                        if (! $record->exists) {
+                            $record->type()->associate(OrganizationType::query()->where('is_default', true)->first());
                         }
 
-                        return OrganizationType::query()
-                            ->where('name', $state)
-                            ->first()
-                            ?? OrganizationType::query()->where('is_default', true)->first();
-                    },
-                )
-                ->guess(['type_name'])
+                        return;
+                    }
+
+                    $record->type()->associate(OrganizationType::query()->where('name', $state)->first());
+                })
                 ->example(fn (): ?string => OrganizationType::query()->value('name')),
             ImportColumn::make('description')
+                ->label('Description')
+                ->exampleHeader('Description')
+                ->rules(['nullable', 'string'])
                 ->example('A public community college serving the local community.'),
             ImportColumn::make('number_of_employees')
+                ->label('Number of Employees')
+                ->exampleHeader('Number of Employees')
                 ->integer()
                 ->rules(['nullable', 'integer', 'min:0'])
                 ->example('250'),
             ImportColumn::make('address')
+                ->label('Address')
+                ->exampleHeader('Address')
+                ->rules(['nullable', 'string', 'max:255'])
                 ->example('123 College Ave.'),
             ImportColumn::make('city')
+                ->label('City')
+                ->exampleHeader('City')
+                ->rules(['nullable', 'string', 'max:255'])
                 ->example('Riverside'),
             ImportColumn::make('state')
+                ->label('State')
+                ->exampleHeader('State')
+                ->rules(['nullable', 'string', 'max:255'])
                 ->example('IL'),
             ImportColumn::make('postalcode')
                 ->label('Postal Code')
+                ->exampleHeader('Postal Code')
+                ->rules(['nullable', 'string', 'max:255'])
                 ->example('62704'),
             ImportColumn::make('country')
+                ->label('Country')
+                ->exampleHeader('Country')
+                ->rules(['nullable', 'string', 'max:255'])
                 ->example('United States'),
             ImportColumn::make('linkedin_url')
                 ->label('LinkedIn URL')
+                ->exampleHeader('LinkedIn URL')
                 ->rules(['nullable', 'url', 'max:255'])
                 ->example('https://www.linkedin.com/school/college-community-college'),
             ImportColumn::make('facebook_url')
                 ->label('Facebook URL')
+                ->exampleHeader('Facebook URL')
                 ->rules(['nullable', 'url', 'max:255'])
                 ->example('https://www.facebook.com/collegecc'),
             ImportColumn::make('twitter_url')
                 ->label('Twitter URL')
+                ->exampleHeader('Twitter URL')
                 ->rules(['nullable', 'url', 'max:255'])
                 ->example('https://twitter.com/collegecc'),
             ImportColumn::make('is_contact_generation_enabled')
                 ->label('Automatically generate contact record on login')
+                ->exampleHeader('Automatically generate contact record on login')
                 ->boolean()
                 ->rules(['boolean'])
                 ->example('false'),
             ImportColumn::make('domains')
                 ->label('Domains')
+                ->exampleHeader('Domains')
                 ->rules(['nullable', 'string', function (string $attribute, mixed $value, Closure $fail): void {
                     $domains = collect(preg_split('/[|,]/', (string) $value) ?: [])
                         ->map(fn (string $domain): string => trim($domain))
@@ -155,7 +194,7 @@ class OrganizationImporter extends Importer
                 }])
                 ->fillRecordUsing(function (Organization $record, ?string $state): void {
                     $domains = self::parseDomains($state)
-                        ->map(fn (string $domain): array => ['domain' => $domain])
+                        ->map(fn (string $domain): array => ['domain' => Str::lower($domain)])
                         ->all();
 
                     // A blank column leaves the organization's existing domains untouched.
@@ -172,6 +211,9 @@ class OrganizationImporter extends Importer
     public function resolveRecord(): ?Model
     {
         $name = $this->data['name'];
+
+        // Serialize concurrent chunk workers importing the same name so the unique index cannot abort a chunk transaction.
+        DB::selectOne('SELECT pg_advisory_xact_lock(hashtext(?))', [Str::lower(trim((string) $name))]);
 
         $organization = Organization::query()
             ->where('name', $name)
@@ -216,21 +258,29 @@ class OrganizationImporter extends Importer
         $ignoreId = $this->record->exists ? $this->record->getKey() : null;
 
         foreach ($domains as $domain) {
-            (new UniqueOrganizationDomain($ignoreId))->validate(
-                'domains',
-                $domain['domain'],
-                function (string $message) use ($domain): never {
-                    throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
-                },
-            );
+            $usedByAnotherOrganization = Organization::query()
+                ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
+                ->whereRaw("EXISTS (SELECT 1 FROM jsonb_array_elements(domains) AS element WHERE lower(element->>'domain') = ?)", [$domain['domain']])
+                ->exists();
+
+            if ($usedByAnotherOrganization) {
+                throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
+            }
         }
 
         $tag = self::domainClaimCacheTag($this->import->getKey());
 
+        // The claim value records which organization won the domain so a chunk retry can re-claim its own domains.
+        $claimant = Str::lower((string) $this->record->name);
+
         foreach ($domains as $domain) {
-            // Cache::add is an atomic set-if-absent, so the first row to claim a domain wins across concurrent workers.
-            if (! Cache::tags([$tag])->add(Str::lower($domain['domain']), true, now()->addDay())) {
-                throw new RowImportFailedException("The domain '{$domain['domain']}' was already imported on an earlier row in this file.");
+            // Cache::add is an atomic set-if-absent, so the first organization to claim a domain wins across concurrent workers.
+            if (Cache::tags([$tag])->add($domain['domain'], $claimant, now()->addDay())) {
+                continue;
+            }
+
+            if (Cache::tags([$tag])->get($domain['domain']) !== $claimant) {
+                throw new RowImportFailedException("The domain '{$domain['domain']}' was already imported for a different organization in this file.");
             }
         }
     }

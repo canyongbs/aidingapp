@@ -112,6 +112,18 @@ it('exports a blank domains value when the organization has no domains', functio
     expect(blank(exportOrganizationRow($organization)[16]))->toBeTrue();
 });
 
+it('exports a blank industry and type when the organization has none', function () {
+    $organization = Organization::factory()->create([
+        'industry_id' => null,
+        'type_id' => null,
+    ]);
+
+    $row = exportOrganizationRow($organization);
+
+    expect(blank($row[4]))->toBeTrue()
+        ->and(blank($row[5]))->toBeTrue();
+});
+
 it('exports is_contact_generation_enabled as false when disabled', function () {
     $organization = Organization::factory()->create(['is_contact_generation_enabled' => false]);
 

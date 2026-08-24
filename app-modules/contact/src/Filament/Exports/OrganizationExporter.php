@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Filament\Exports;
 
 use AidingApp\Contact\Models\Organization;
+use Filament\Actions\Exports\Enums\ExportFormat;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
 use Filament\Actions\Exports\Models\Export;
@@ -45,6 +46,17 @@ use Illuminate\Support\Collection;
 class OrganizationExporter extends Exporter
 {
     protected static ?string $model = Organization::class;
+
+    /**
+     * @return array<ExportFormat>
+     */
+    public function getFormats(): array
+    {
+        // The importer only accepts CSV, so exports must be re-importable.
+        return [
+            ExportFormat::Csv,
+        ];
+    }
 
     public static function getColumns(): array
     {
