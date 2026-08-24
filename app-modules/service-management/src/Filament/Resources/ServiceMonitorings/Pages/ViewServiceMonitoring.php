@@ -155,7 +155,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->expandableLimitedList()
                                     ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialContacts()->exists()),
                             ])
-                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->is_confidential)
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => $record->is_confidential)
                             ->columns(),
                     ])
                     ->columns(),

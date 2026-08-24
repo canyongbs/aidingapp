@@ -61,10 +61,10 @@ class ListServiceMonitorings extends ListRecords
                     ->label('Name')
                     ->searchable()
                     ->sortable()
-                  ->icon(fn (ServiceMonitoringTarget $record): ?Heroicon => $record->is_confidential ? Heroicon::LockClosed : null)
+                    ->icon(fn (ServiceMonitoringTarget $record): ?Heroicon => $record->is_confidential ? Heroicon::LockClosed : null)
                     ->iconColor('gray')
                     ->iconPosition(IconPosition::After)
-                  ->tooltip(fn (ServiceMonitoringTarget $record): ?string => $record->is_confidential ? 'This service monitor is confidential and only visible to admins, its creator, and permitted users, departments, and contacts.' : null),
+                    ->tooltip(fn (ServiceMonitoringTarget $record): ?string => $record->is_confidential ? 'This service monitor is confidential and only visible to admins, its creator, and permitted users, departments, and contacts.' : null),
                 TextColumn::make('domain')
                     ->label('URL')
                     ->searchable()
