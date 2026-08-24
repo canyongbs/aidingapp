@@ -78,12 +78,14 @@ class StoreServiceRequestController extends Controller
 
         abort_unless($type->isVisibleToContactType($contact->type_id), Response::HTTP_NOT_FOUND);
 
+        $hasDefaultPriority = $type->defaultPriority()->exists();
+
         $data = $request->validate([
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'priority_id' => [
-                Rule::requiredIf(fn (): bool => ! $type->defaultPriority()->exists()),
-                Rule::prohibitedIf(fn (): bool => $type->defaultPriority()->exists()),
+                Rule::requiredIf(fn (): bool => ! $hasDefaultPriority),
+                Rule::prohibitedIf(fn (): bool => $hasDefaultPriority),
                 'uuid',
             ],
             'attachments' => ['nullable', 'array'],
@@ -130,7 +132,7 @@ class StoreServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $priority = $type->defaultPriority()->exists()
+            $priority = $hasDefaultPriority
                 ? $type->defaultPriority()->first()
                 : $type->priorities()->findOrFail($data['priority_id']);
 
