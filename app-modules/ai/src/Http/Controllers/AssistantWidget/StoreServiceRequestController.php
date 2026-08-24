@@ -53,7 +53,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use App\Features\DefaultPriorityFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -83,8 +82,8 @@ class StoreServiceRequestController extends Controller
             'title' => ['required', 'string', 'max:255'],
             'description' => ['required', 'string'],
             'priority_id' => [
-                Rule::requiredIf(fn (): bool => ! (DefaultPriorityFeature::active() && $type->defaultPriority()->exists())),
-                Rule::prohibitedIf(fn (): bool => DefaultPriorityFeature::active() && $type->defaultPriority()->exists()),
+                Rule::requiredIf(fn (): bool => ! $type->defaultPriority()->exists()),
+                Rule::prohibitedIf(fn (): bool => $type->defaultPriority()->exists()),
                 'uuid',
             ],
             'attachments' => ['nullable', 'array'],
@@ -131,7 +130,7 @@ class StoreServiceRequestController extends Controller
         DB::beginTransaction();
 
         try {
-            $priority = DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
+            $priority = $type->defaultPriority()->exists()
                 ? $type->defaultPriority()->first()
                 : $type->priorities()->findOrFail($data['priority_id']);
 

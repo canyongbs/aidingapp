@@ -53,7 +53,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use App\Features\DefaultPriorityFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -90,7 +89,7 @@ class StoreServiceRequestController extends Controller
             ], Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        $priority = DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
+        $priority = $type->defaultPriority()->exists()
             ? $type->defaultPriority()->first()
             : $type->priorities()->findOrFail($data->pull('Main.priority'));
 
@@ -170,7 +169,7 @@ class StoreServiceRequestController extends Controller
 
         $rules['Main.priority'] ??= [];
         $rules['Main.priority'][] = Rule::prohibitedIf(
-            fn (): bool => DefaultPriorityFeature::active() && $type->defaultPriority()->exists(),
+            fn (): bool => $type->defaultPriority()->exists(),
         );
 
         $validator = Validator::make($request->all(), $rules);
