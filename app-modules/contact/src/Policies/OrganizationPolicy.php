@@ -66,6 +66,14 @@ class OrganizationPolicy
         );
     }
 
+    public function import(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'organization.import',
+            denyResponse: 'You do not have permission to import organizations.'
+        );
+    }
+
     public function update(Authenticatable $authenticatable, Organization $organization): Response
     {
         return $authenticatable->canOrElse(

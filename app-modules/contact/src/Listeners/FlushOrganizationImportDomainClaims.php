@@ -34,38 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+namespace AidingApp\Contact\Listeners;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Imports\OrganizationImporter;
 use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Cache;
 
-class ContactServiceProvider extends ServiceProvider
+class FlushOrganizationImportDomainClaims
 {
-    public function register(): void
+    public function handle(ImportCompleted $event): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+        $import = $event->getImport();
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+        if ($import->importer !== OrganizationImporter::class) {
+            return;
+        }
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+        Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])->flush();
     }
 }

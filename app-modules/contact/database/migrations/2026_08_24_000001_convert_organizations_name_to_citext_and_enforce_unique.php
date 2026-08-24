@@ -34,38 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+use App\Features\OrganizationNameUniquenessFeature;
+use Database\Migrations\Concerns\FixesDuplicateNames;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+return new class () extends Migration {
+    use FixesDuplicateNames;
 
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
+    private string $table = 'organizations';
+
+    private string $column = 'name';
+
+    private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
+
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
+        DB::transaction(function () {
+            $this->fixDuplicates();
+
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
+
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->uniqueIndex($this->column, 'organizations_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            OrganizationNameUniquenessFeature::activate();
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+        DB::transaction(function () {
+            OrganizationNameUniquenessFeature::deactivate();
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+            DB::statement('DROP INDEX IF EXISTS organizations_name_unique');
+
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+            $this->revertDuplicates();
+        });
     }
-}
+};
