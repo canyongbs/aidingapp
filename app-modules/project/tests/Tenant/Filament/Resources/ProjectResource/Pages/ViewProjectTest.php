@@ -281,13 +281,9 @@ describe('tabs', function () {
             ->assertSet('tab', $tab->value)
             ->assertSeeHtml("data-project-tab-panel=\"{$tab->value}\"");
 
-        foreach (ProjectTab::cases() as $inactiveTab) {
-            if ($inactiveTab === $tab) {
-                continue;
-            }
-
-            $page->assertDontSeeHtml("data-project-tab-panel=\"{$inactiveTab->value}\"");
-        }
+        collect(ProjectTab::cases())
+            ->reject(fn (ProjectTab $inactiveTab): bool => $inactiveTab === $tab)
+            ->each(fn (ProjectTab $inactiveTab) => $page->assertDontSeeHtml("data-project-tab-panel=\"{$inactiveTab->value}\""));
     })->with(ProjectTab::cases());
 });
 
