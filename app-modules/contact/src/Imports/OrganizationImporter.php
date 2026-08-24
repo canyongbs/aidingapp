@@ -39,12 +39,15 @@ namespace AidingApp\Contact\Imports;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use Closure;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 class OrganizationImporter extends Importer
@@ -134,11 +137,21 @@ class OrganizationImporter extends Importer
             ImportColumn::make('domains')
                 ->label('Domains')
                 ->rules(['nullable', 'string', function (string $attribute, mixed $value, Closure $fail): void {
-                    self::parseDomains($value)->each(function (string $domain) use ($fail): void {
+                    $domains = collect(preg_split('/[|,]/', (string) $value) ?: [])
+                        ->map(fn (string $domain): string => trim($domain))
+                        ->filter();
+
+                    $domains->each(function (string $domain) use ($fail): void {
                         if (! preg_match('/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', $domain)) {
                             $fail("The domain '{$domain}' is not a valid domain.");
                         }
                     });
+
+                    $domains
+                        ->map(fn (string $domain): string => Str::lower($domain))
+                        ->duplicates()
+                        ->unique()
+                        ->each(fn (string $domain) => $fail("The domain '{$domain}' is listed more than once."));
                 }])
                 ->fillRecordUsing(function (Organization $record, ?string $state): void {
                     $domains = self::parseDomains($state)
@@ -178,6 +191,48 @@ class OrganizationImporter extends Importer
         }
 
         return $body;
+    }
+
+    /**
+     * The cache tag under which this import's claimed domains are held so duplicates across rows can be rejected.
+     */
+    public static function domainClaimCacheTag(int|string|null $importKey): string
+    {
+        return "{organization-import-domain-claims-{$importKey}}";
+    }
+
+    protected function beforeSave(): void
+    {
+        assert($this->record instanceof Organization);
+
+        // Domain uniqueness only needs enforcing when this row actually sets domains.
+        if (! $this->record->isDirty('domains')) {
+            return;
+        }
+
+        /** @var array<int, array{domain: string}> $domains */
+        $domains = $this->record->domains ?? [];
+
+        $ignoreId = $this->record->exists ? $this->record->getKey() : null;
+
+        foreach ($domains as $domain) {
+            (new UniqueOrganizationDomain($ignoreId))->validate(
+                'domains',
+                $domain['domain'],
+                function (string $message) use ($domain): never {
+                    throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
+                },
+            );
+        }
+
+        $tag = self::domainClaimCacheTag($this->import->getKey());
+
+        foreach ($domains as $domain) {
+            // Cache::add is an atomic set-if-absent, so the first row to claim a domain wins across concurrent workers.
+            if (! Cache::tags([$tag])->add(Str::lower($domain['domain']), true, now()->addDay())) {
+                throw new RowImportFailedException("The domain '{$domain['domain']}' was already imported on an earlier row in this file.");
+            }
+        }
     }
 
     /**

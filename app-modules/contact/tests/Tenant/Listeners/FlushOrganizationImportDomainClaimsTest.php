@@ -34,38 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
-
-use AidingApp\Contact\ContactPlugin;
+use AidingApp\Contact\Imports\ContactImporter;
+use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
 use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+beforeEach(function () {
+    Cache::flush();
+});
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+it('flushes the domain claims when an organization import completes', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+    $import->importer = OrganizationImporter::class;
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
-    }
-}
+    $tag = OrganizationImporter::domainClaimCacheTag($import->getKey());
+
+    Cache::tags([$tag])->add('shared.edu', true, now()->addDay());
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeTrue();
+
+    (new FlushOrganizationImportDomainClaims())->handle(new ImportCompleted($import, [], []));
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeFalse();
+});
+
+it('leaves the claims untouched for a different importer', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+    $import->importer = ContactImporter::class;
+
+    $tag = OrganizationImporter::domainClaimCacheTag($import->getKey());
+
+    Cache::tags([$tag])->add('shared.edu', true, now()->addDay());
+
+    (new FlushOrganizationImportDomainClaims())->handle(new ImportCompleted($import, [], []));
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeTrue();
+});

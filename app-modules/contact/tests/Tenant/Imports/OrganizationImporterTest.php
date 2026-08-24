@@ -38,20 +38,27 @@ use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\Models\Import;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+
+beforeEach(function () {
+    Cache::flush();
+});
 
 /**
  * @param  array<string, mixed>  $row
  */
-function runOrganizationImport(array $row): void
+function runOrganizationImport(array $row, ?Import $import = null): void
 {
     $columnMap = collect(array_keys($row))
         ->mapWithKeys(fn (string $key): array => [$key => $key])
         ->all();
 
     $importer = new OrganizationImporter(
-        import: new Import(),
+        import: $import ?? new Import(),
         columnMap: $columnMap,
         options: [],
     );
@@ -182,10 +189,10 @@ it('imports domains from a pipe-separated list', function () {
     ]);
 });
 
-it('imports domains from a comma-separated list and de-duplicates case-insensitively', function () {
+it('imports domains from a comma-separated list', function () {
     runOrganizationImport([
         'name' => 'College Community College',
-        'domains' => 'collegecc.edu, college.edu , CollegeCC.edu',
+        'domains' => 'collegecc.edu, college.edu ',
     ]);
 
     $organization = Organization::query()->where('name', 'College Community College')->firstOrFail();
@@ -202,3 +209,71 @@ it('fails the row when a domain is invalid', function () {
         'domains' => 'collegecc.edu|not a domain',
     ]);
 })->throws(ValidationException::class);
+
+it('fails the row when the same domain is listed more than once in one row', function () {
+    runOrganizationImport([
+        'name' => 'College Community College',
+        'domains' => 'collegecc.edu|CollegeCC.edu',
+    ]);
+})->throws(ValidationException::class);
+
+it('rejects a domain already used by another organization', function () {
+    Organization::factory()->create([
+        'name' => 'Existing College',
+        'domains' => [['domain' => 'shared.edu']],
+    ]);
+
+    runOrganizationImport([
+        'name' => 'New College',
+        'domains' => 'shared.edu',
+    ]);
+})->throws(RowImportFailedException::class);
+
+it('allows an organization to keep its own domain while adding another on update', function () {
+    $organization = Organization::factory()->create([
+        'name' => 'Keep College',
+        'domains' => [['domain' => 'keep.edu']],
+    ]);
+
+    runOrganizationImport([
+        'name' => 'Keep College',
+        'domains' => 'keep.edu|extra.edu',
+    ]);
+
+    expect($organization->refresh()->domains)->toBe([
+        ['domain' => 'keep.edu'],
+        ['domain' => 'extra.edu'],
+    ]);
+});
+
+it('rejects a domain already claimed earlier in the same import', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+
+    Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])
+        ->add('shared.edu', true, now()->addDay());
+
+    runOrganizationImport([
+        'name' => 'New College',
+        'domains' => 'Shared.edu',
+    ], $import);
+})->throws(RowImportFailedException::class);
+
+it('does not reject a domain claimed by a different import', function () {
+    $otherImport = new Import();
+    $otherImport->id = (string) Str::uuid();
+
+    Cache::tags([OrganizationImporter::domainClaimCacheTag($otherImport->getKey())])
+        ->add('shared.edu', true, now()->addDay());
+
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+
+    runOrganizationImport([
+        'name' => 'New College',
+        'domains' => 'shared.edu',
+    ], $import);
+
+    expect(Organization::query()->where('name', 'New College')->firstOrFail()->domains)
+        ->toBe([['domain' => 'shared.edu']]);
+});
