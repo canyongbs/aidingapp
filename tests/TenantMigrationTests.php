@@ -38,19 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
-
-use function Tests\richContentText;
-use function Tests\richContentWith;
-
-if (! function_exists('plantLiteralMergeTagContent')) {
-    function plantLiteralMergeTagContent(Model $model, string $attribute, string $text): void
-    {
-        $model->setAttribute($attribute, richContentText($text));
-        $model->saveQuietly();
-    }
-}
 
 describe('2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique', function () {
     $migrationPath = 'app-modules/contact/database/migrations/2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique.php';
