@@ -87,7 +87,9 @@
 
     @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
-    <div class="fi-ta-text my-4 rounded-lg border-2 border-gray-200 p-2 text-sm font-normal text-gray-950 dark:border-gray-800 dark:text-white">
+    <div
+        class="fi-ta-text my-4 rounded-lg border-2 border-gray-200 p-2 text-sm font-normal text-gray-950 dark:border-gray-800 dark:text-white"
+    >
         @if ($isAssign)
             Assigned to
             @include('service-management::components.assignment-user', ['user' => $assignedUser])
