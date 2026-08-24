@@ -37,8 +37,8 @@
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
+use App\Models\Import;
 use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Actions\Imports\Models\Import;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
