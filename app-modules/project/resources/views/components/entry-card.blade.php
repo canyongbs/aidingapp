@@ -77,7 +77,9 @@
 
     $dueTooltip = $entry->due?->format('M j, Y g:i A');
 
-    $canUpdatePipeline = auth()->user()->can('update', $pipeline);
+    $canUpdatePipeline = auth()
+        ->user()
+        ->can('update', $pipeline);
 @endphp
 
 <div
