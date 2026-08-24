@@ -34,55 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Database\Factories;
+namespace App\Features;
 
-use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
-use AidingApp\InAppCommunication\Enums\ConversationType;
-use AidingApp\InAppCommunication\Models\Conversation;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<Conversation>
- */
-class ConversationFactory extends Factory
+class ConfidentialChannelsFeature extends AbstractFeatureFlag
 {
-    protected $model = Conversation::class;
-
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'type' => $this->faker->randomElement(ConversationType::cases()),
-            'name' => $this->faker->optional()->words(3, true),
-            'is_private' => $this->faker->boolean(80),
-            'is_confidential' => false,
-            'ephemeral_period' => null,
-            'created_by' => User::factory(),
-        ];
-    }
-
-    public function direct(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Direct,
-            'name' => null,
-        ]);
-    }
-
-    public function channel(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Channel,
-            'name' => $this->faker->words(3, true),
-        ]);
-    }
-
-    public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
-    {
-        return $this->channel()->state(fn (array $attributes) => [
-            'is_private' => true,
-            'is_confidential' => true,
-            'ephemeral_period' => $ephemeralPeriod,
-        ]);
+        return false;
     }
 }

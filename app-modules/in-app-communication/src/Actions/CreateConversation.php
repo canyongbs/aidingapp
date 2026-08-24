@@ -36,10 +36,12 @@
 
 namespace AidingApp\InAppCommunication\Actions;
 
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Events\ConversationCreated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -55,7 +57,19 @@ class CreateConversation
         array $participantIds,
         ?string $name = null,
         bool $isPrivate = true,
+        bool $isConfidential = false,
+        ?ConversationEphemeralPeriod $ephemeralPeriod = null,
     ): Conversation {
+        $isConfidential = $isConfidential
+            && $type === ConversationType::Channel
+            && ConfidentialChannelsFeature::active();
+
+        if ($isConfidential) {
+            $isPrivate = true;
+        } else {
+            $ephemeralPeriod = null;
+        }
+
         if ($type === ConversationType::Direct && count($participantIds) === 1) {
             $existing = $this->findExistingDirect($creator, $participantIds[0]);
 
@@ -64,12 +78,18 @@ class CreateConversation
             }
         }
 
-        $conversation = DB::transaction(function () use ($creator, $type, $participantIds, $name, $isPrivate) {
+        $conversation = DB::transaction(function () use ($creator, $type, $participantIds, $name, $isPrivate, $isConfidential, $ephemeralPeriod) {
             $conversation = new Conversation();
             $conversation->type = $type;
             $conversation->name = $name;
             $conversation->is_private = $isPrivate;
             $conversation->created_by = $creator->getKey();
+
+            if (ConfidentialChannelsFeature::active()) {
+                $conversation->is_confidential = $isConfidential;
+                $conversation->ephemeral_period = $ephemeralPeriod;
+            }
+
             $conversation->save();
 
             $creatorParticipant = new ConversationParticipant();

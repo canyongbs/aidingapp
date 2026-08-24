@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Models\BaseModel;
@@ -67,12 +68,23 @@ class Conversation extends BaseModel implements Auditable
         'type',
         'name',
         'is_private',
+        'is_confidential',
+        'ephemeral_period',
         'created_by',
     ];
+
+    /*
+     * TODO: Cleanup Task (confidential-channels): once ConfidentialChannelsFeature is
+     * removed, mirror the column default here with `protected $attributes = ['is_confidential' => false];`.
+     * It is omitted while the flag exists because $attributes is included in the insert
+     * for every new Conversation, which fails on a tenant whose migration has not run yet.
+     */
 
     protected $casts = [
         'type' => ConversationType::class,
         'is_private' => 'boolean',
+        'is_confidential' => 'boolean',
+        'ephemeral_period' => ConversationEphemeralPeriod::class,
     ];
 
     /**
