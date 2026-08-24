@@ -51,7 +51,7 @@ class PipelineEntryMilestonesTable
 
                 return ProjectMilestone::query()
                     ->where('project_id', $projectId)
-                  ->withoutArchived();
+                    ->withoutArchived();
             })
             ->columns([
                 TextColumn::make('title')

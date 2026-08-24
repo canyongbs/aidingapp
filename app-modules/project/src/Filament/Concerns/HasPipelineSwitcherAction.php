@@ -41,7 +41,6 @@ use AidingApp\Project\Models\Pipeline;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 trait HasPipelineSwitcherAction
