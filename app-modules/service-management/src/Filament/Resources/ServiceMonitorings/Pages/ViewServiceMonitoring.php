@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Features\ServiceMonitoringReportFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -156,7 +155,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->expandableLimitedList()
                                     ->visible(fn (ServiceMonitoringTarget $record) => $record->confidentialContacts()->exists()),
                             ])
-                            ->visible(fn (ServiceMonitoringTarget $record): bool => ConfidentialServiceMonitoringFeature::active() && $record->is_confidential)
+                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->is_confidential)
                             ->columns(),
                     ])
                     ->columns(),
