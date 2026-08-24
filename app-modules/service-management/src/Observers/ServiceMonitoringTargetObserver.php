@@ -52,7 +52,7 @@ class ServiceMonitoringTargetObserver
         }
     }
 
-    // Backfills the creator for pre-existing records that predate the confidentiality feature
+    // Assigns a default creator when missing (including legacy records and new confidential records)
     private function assignCreatedByIfBlank(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
         if (blank($serviceMonitoringTarget->getAttribute('created_by_id')) && auth()->check()) {
