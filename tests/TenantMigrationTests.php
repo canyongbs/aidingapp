@@ -42,7 +42,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 
 use function Tests\richContentText;
-use function Tests\richContentWith;
 
 if (! function_exists('plantLiteralMergeTagContent')) {
     function plantLiteralMergeTagContent(Model $model, string $attribute, string $text): void
