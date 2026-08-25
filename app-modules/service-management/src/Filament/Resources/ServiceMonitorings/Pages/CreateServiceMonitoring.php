@@ -36,18 +36,25 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Components\AutomatedReportingSection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
+use App\Features\ConfidentialServiceMonitoringFeature;
+use App\Features\MonitorTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
 
 class CreateServiceMonitoring extends CreateRecord
@@ -84,6 +91,30 @@ class CreateServiceMonitoring extends CreateRecord
                             ->enum(ServiceMonitoringFrequency::class)
                             ->required()
                             ->columnSpan(1),
+                        Radio::make('monitor_type')
+                            ->label('Monitor Type')
+                            ->options(MonitorType::class)
+                            ->enum(MonitorType::class)
+                            ->default(MonitorType::Availability)
+                            ->live()
+                            ->inline()
+                            ->visible(MonitorTypeFeature::active())
+                            ->columnSpanFull(),
+                        TextEntry::make('helperText')
+                            ->hiddenLabel()
+                            ->state('Spaces may be used within a string. Use quotes when a string contains a comma.')
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->columnSpanFull(),
+                        TextInput::make('should_contain')
+                            ->label('Should Contain')
+                            ->rule(fn (Get $get): ValidServiceMonitoringKeywordValues => new ValidServiceMonitoringKeywordValues($get('should_contain'), $get('should_not_contain')))
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more required strings separated by commas. Every string must appear in the response. Matching is case-insensitive.'),
+                        TextInput::make('should_not_contain')
+                            ->label('Should Not Contain')
+                            ->rule(fn (Get $get): ValidServiceMonitoringKeywordValues => new ValidServiceMonitoringKeywordValues($get('should_contain'), $get('should_not_contain')))
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
                     ])
                     ->columns(2),
                 Section::make('Notification Settings')
@@ -113,5 +144,17 @@ class CreateServiceMonitoring extends CreateRecord
                     notifiedDepartmentsField: 'department',
                 ),
             ]);
+    }
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        foreach (['should_contain', 'should_not_contain'] as $field) {
+            if (filled($data[$field] ?? null)) {
+                $values = array_map('trim', str_getcsv($data[$field]));
+                $data[$field] = array_values(array_unique(array_filter($values, filled(...))));
+            }
+        }
+
+        return $data;
     }
 }
