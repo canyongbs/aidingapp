@@ -523,7 +523,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(TimelineList::class)
             ->assertSee("{$customerName} (Customer) posted the following update on {$customerPostedAt}:")
             ->assertSee("{$agentName} (Agent) posted the following update on {$agentPostedAt}:")
-            ->assertSee("AI (AI) posted the following update on {$aiPostedAt}:")
+            ->assertSee("Assistant (AI) posted the following update on {$aiPostedAt}:")
             ->assertSee('This is my update.')
             ->assertSee('This is also an update.')
             ->assertSee('AI generated update.')

@@ -48,7 +48,7 @@
     };
 
     $actorName = match (true) {
-        $createdBy instanceof ServiceRequest => 'AI',
+        $createdBy instanceof ServiceRequest => 'Assistant',
         $createdBy instanceof User => $createdBy->name,
         $createdBy instanceof Contact => $createdBy->full_name,
         default => 'Unknown',
