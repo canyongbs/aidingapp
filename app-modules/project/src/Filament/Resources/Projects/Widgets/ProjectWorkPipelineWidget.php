@@ -48,7 +48,6 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Features\PipelineArchivingFeature;
-use App\Features\PipelineEntryMilestoneFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -136,7 +135,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         'assets',
                         'serviceRequests',
                         'pipelineStage.pipeline.project',
-                        ...(PipelineEntryMilestoneFeature::active() ? ['milestone'] : ['milestones']),
+                        'milestone',
                     ]);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
@@ -150,14 +149,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->openPipelineEntry($record);
                     }),
 
-                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
-                ViewColumn::make('milestones')
-                    ->label('Milestones')
-                    ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
-                    ->view('project::filament.tables.columns.pipeline-entry.milestones'),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
-                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
                     ->badge()
                     ->placeholder('N/A'),
                 ViewColumn::make('assets')
@@ -212,12 +205,6 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->defaultPaginationPageOption(50)
             ->defaultGroup(
                 function () use ($pipeline) {
-                    if (! PipelineEntryMilestoneFeature::active()) {
-                        return Group::make('pipelineStage.name')
-                            ->label('Stage')
-                            ->collapsible();
-                    }
-
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)
@@ -302,8 +289,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->resetMilestoneProgressDescriptions();
                         $this->dispatch('projectPipelineUpdated');
                     }),
-                CreateProjectMilestoneAction::make($this->record, 'createMilestone')
-                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active()),
+                CreateProjectMilestoneAction::make($this->record, 'createMilestone'),
             ]);
     }
 
