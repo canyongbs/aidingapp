@@ -37,7 +37,6 @@
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectArchivingFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
@@ -157,22 +156,6 @@ it('does not let a super admin view or update a pipeline whose project is archiv
 
     expect($user->can('view', $pipeline->refresh()))->toBeFalse()
         ->and($user->can('update', $pipeline))->toBeFalse();
-});
-
-it('still allows viewing a pipeline whose project is archived when `ProjectArchivingFeature` is inactive', function () {
-    ProjectArchivingFeature::deactivate();
-
-    $user = User::factory()->create();
-
-    asSuperAdmin($user);
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()->for($project)->create();
-
-    $project->archive();
-
-    expect($user->can('view', $pipeline->refresh()))->toBeTrue()
-        ->and($user->can('update', $pipeline))->toBeTrue();
 });
 
 it('denies access to a pipeline of an archived project without disclosing that it is archived', function () {

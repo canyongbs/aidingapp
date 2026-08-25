@@ -38,6 +38,7 @@
 @config '../../../../tailwind.config.js';
 
 .min-w-kanban {
+    width: 20rem;
     min-width: 20rem;
 }
 
@@ -94,8 +95,20 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
     @apply p-0;
 }
 
+.fi-ta-group-header:has(.project-milestone-group-actions) {
+    @apply flex-row flex-nowrap items-start;
+}
+
 .fi-ta-group-header:has(.project-milestone-group-actions) > div {
     @apply grow;
+}
+
+.fi-ta-group-header:has(.project-milestone-group-actions) > button {
+    @apply order-first shrink-0 self-start;
+}
+
+.fi-ta-group-description:has(.project-milestone-group-actions .inline-block:empty):not(:has(.float-right)) {
+    @apply hidden;
 }
 
 .dark_button_border {

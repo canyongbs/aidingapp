@@ -46,8 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\CombineStepFormFeature;
-use App\Features\DefaultPriorityFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -71,7 +69,7 @@ class GenerateServiceRequestForm
             $this->formatBlock('Title', TextInputFormFieldBlock::type()),
             $this->formatBlock('Description', TextAreaFormFieldBlock::type()),
 
-            ...(DefaultPriorityFeature::active() && $type->defaultPriority()->exists()
+            ...($type->defaultPriority()->exists()
                 ? []
                 : [
                     $this->formatBlock('Priority', SelectFormFieldBlock::type(), data: [
@@ -91,7 +89,7 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
-        if (CombineStepFormFeature::active() && $shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
+        if ($shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
             $firstStep = $form->steps->shift();
 
             /** @var array<int, array<string, mixed>> $firstStepContentData */

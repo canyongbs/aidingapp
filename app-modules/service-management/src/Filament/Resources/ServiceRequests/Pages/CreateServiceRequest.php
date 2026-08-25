@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -105,15 +106,24 @@ class CreateServiceRequest extends CreateRecord
                                     ->required()
                                     ->exists((new ServiceRequestStatus())->getTable(), 'id')
                                     ->columnSpan(fn (Get $get): int => filled($get('type_id')) ? 2 : 3),
-                                Select::make('type_id')
-                                    ->options(ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                        $query->whereHas('managerUsers', function (Builder $query): void {
-                                            $query->where('users.id', auth()->user()->getKey());
-                                        })->orWhereHas('managerDepartments', function (Builder $query): void {
-                                            $query->where('departments.id', auth()->user()->department?->getKey());
-                                        });
-                                    })
-                                        ->pluck('name', 'id'))
+                                SelectTree::make('type_id')
+                                    ->label('Type')
+                                    ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
+                                        withoutArchived: true,
+                                        allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
+                                            $query->where(function (Builder $query): void {
+                                                $query->whereHas('managerUsers', function (Builder $query): void {
+                                                    $query->where('users.id', auth()->user()->getKey());
+                                                });
+                                                $query->orWhereHas('managerDepartments', function (Builder $query): void {
+                                                    $query->where('departments.id', auth()->user()->department?->getKey());
+                                                });
+                                            });
+                                        })
+                                            ->pluck('id')
+                                            ->all(),
+                                    ))
+                                    ->searchable()
                                     ->rule(new ManagedServiceRequestType())
                                     ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire) {
                                         $set('priority_id', null);
@@ -129,7 +139,6 @@ class CreateServiceRequest extends CreateRecord
                                             }
                                         }
                                     })
-                                    ->label('Type')
                                     ->required()
                                     ->live()
                                     ->exists(ServiceRequestType::class, 'id')

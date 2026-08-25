@@ -39,9 +39,10 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Actions;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryMilestoneFeature;
 use Closure;
+use Filament\Actions\Action;
 use Filament\Actions\EditAction;
+use Filament\Notifications\Notification;
 
 class EditPipelineEntryAction
 {
@@ -53,17 +54,24 @@ class EditPipelineEntryAction
      * @param  (Closure(): void)|null  $after
      *     Optional callback run after the related records have been synced, e.g. to
      *     dispatch a UI refresh event on the calling component.
+     * @param  (Closure(): void)|null  $afterArchive
+     *     Optional no-argument callback run after the task has been archived. Use it to
+     *     refresh the calling surface or dispatch related UI updates.
      */
-    public static function make(?Pipeline $pipeline = null, ?string $name = null, ?Closure $after = null): EditAction
+    public static function make(?Pipeline $pipeline = null, ?string $name = null, ?Closure $after = null, ?Closure $afterArchive = null): EditAction
     {
         return EditAction::make($name ?? 'edit')
             ->slideOver()
             ->modalHeading('Edit Pipeline Task')
             ->schema(PipelineEntryForm::components($pipeline))
+            ->extraModalFooterActions(fn (Action $action): array => [
+                self::archivePipelineEntryAction(
+                    $pipeline,
+                    $action->getArguments()['entry'] ?? null,
+                    $afterArchive,
+                ),
+            ])
             ->after(function (PipelineEntry $record, array $data) use ($after): void {
-                if (! PipelineEntryMilestoneFeature::active()) {
-                    $record->milestones()->sync($data['milestones'] ?? []);
-                }
                 $record->assets()->sync($data['assets'] ?? []);
                 $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 
@@ -72,5 +80,54 @@ class EditPipelineEntryAction
                 }
             })
             ->successNotificationTitle('Pipeline task updated successfully');
+    }
+
+    private static function archivePipelineEntryAction(?Pipeline $pipeline, mixed $entryId, ?Closure $afterArchive): Action
+    {
+        return Action::make('archivePipelineEntry')
+            ->label('Archive')
+            ->color('danger')
+            ->visible(fn (): bool => filled($entryId))
+            ->requiresConfirmation()
+            ->modalHeading('Archive Pipeline Task')
+            ->modalDescription('Are you sure you want to archive this pipeline task?')
+            ->modalSubmitActionLabel('Archive')
+            ->cancelParentActions()
+            ->authorize(fn (): bool => $pipeline !== null && auth()->user()->can('delete', $pipeline))
+            ->action(function () use ($pipeline, $entryId, $afterArchive): void {
+                if ($pipeline === null) {
+                    return;
+                }
+
+                $entry = $pipeline->entries()->whereKey($entryId)->first();
+
+                if ($entry === null) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Pipeline task could not be found')
+                        ->body('The pipeline task may have already been archived or removed.')
+                        ->send();
+
+                    return;
+                }
+
+                if (! $entry->archive()) {
+                    Notification::make()
+                        ->danger()
+                        ->title('Pipeline task could not be archived')
+                        ->send();
+
+                    return;
+                }
+
+                if ($afterArchive !== null) {
+                    $afterArchive();
+                }
+
+                Notification::make()
+                    ->success()
+                    ->title('Pipeline task archived')
+                    ->send();
+            });
     }
 }

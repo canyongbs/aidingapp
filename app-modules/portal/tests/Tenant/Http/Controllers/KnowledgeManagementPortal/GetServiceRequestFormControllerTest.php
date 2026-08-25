@@ -40,7 +40,6 @@ use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Features\DefaultPriorityFeature;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -74,26 +73,6 @@ it('includes the priority field when the type has no configured default priority
     $response->assertOk();
 
     expect(json_encode($response->json('schema')))->toContain('priority');
-});
-
-it('includes the priority field before the default priority feature is activated', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()
-        ->for($type, 'type')
-        ->create();
-
-    $type->update(['default_priority_id' => $priority->getKey()]);
-    DefaultPriorityFeature::deactivate();
-
-    try {
-        $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
-
-        $response->assertOk();
-
-        expect(json_encode($response->json('schema')))->toContain('priority');
-    } finally {
-        DefaultPriorityFeature::activate();
-    }
 });
 
 it('blocks guests from loading the form of a visibility restricted type', function () {

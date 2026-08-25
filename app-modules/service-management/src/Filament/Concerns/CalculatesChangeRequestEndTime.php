@@ -34,14 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Filament\Concerns;
 
-use App\Support\AbstractFeatureFlag;
+use Carbon\CarbonImmutable;
+use DateTimeInterface;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
-class PipelineArchivingFeature extends AbstractFeatureFlag
+trait CalculatesChangeRequestEndTime
 {
-    public function resolve(mixed $scope): mixed
+    private static function calculateEndTime(Get $get, Set $set): void
     {
-        return false;
+        $startTime = $get('start_time');
+
+        if (blank($startTime)) {
+            $set('end_time', null);
+
+            return;
+        }
+
+        $duration = $get('duration');
+
+        if (blank($duration)) {
+            $set('end_time', null);
+
+            return;
+        }
+
+        $startAt = $startTime instanceof DateTimeInterface
+            ? CarbonImmutable::instance($startTime)
+            : CarbonImmutable::parse((string) $startTime);
+
+        $set('end_time', $startAt->addMinutes((int) $duration)->toDateTimeString());
     }
 }

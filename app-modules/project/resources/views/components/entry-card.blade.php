@@ -36,7 +36,6 @@
 @use('AidingApp\Contact\Models\Contact')
 @use('Illuminate\Database\Eloquent\Relations\Relation')
 @use('Illuminate\Support\Str')
-@use('App\Features\PipelineEntryMilestoneFeature')
 @php
     $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
@@ -81,13 +80,13 @@
 
 <div
     role="listitem"
-    class="z-10 flex max-w-md transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    class="z-10 flex w-full transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
 >
     <div class="flex items-start justify-between gap-2">
-        <div class="text-base font-semibold text-gray-900 dark:text-white">
+        <div class="min-w-0 break-words text-base font-semibold text-gray-900 dark:text-white">
             {{ $entry->name }}
         </div>
 
@@ -132,17 +131,10 @@
     <hr class="my-3 border-gray-200 dark:border-gray-700" />
 
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-        @if (PipelineEntryMilestoneFeature::active())
-            <div>
-                <span class="font-bold">Milestone:</span>
-                {{ $entry->milestone->title ?? 'None' }}
-            </div>
-        @else
-            <div>
-                <span class="font-bold">Milestones:</span>
-                {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
-            </div>
-        @endif
+        <div>
+            <span class="font-bold">Milestone:</span>
+            {{ $entry->milestone->title ?? 'None' }}
+        </div>
         <div>
             <span class="font-bold">Assets:</span>
             {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}
