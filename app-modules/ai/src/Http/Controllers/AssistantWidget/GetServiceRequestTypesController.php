@@ -42,7 +42,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\BuildContactServiceRequestTypeTree;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\DefaultPriorityFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -61,12 +60,11 @@ class GetServiceRequestTypesController extends Controller
 
         $aiClarificationGlobalEnabled = app(AiClarificationSettings::class)->is_enabled;
         $aiResolutionGlobalEnabled = app(AiResolutionSettings::class)->is_enabled;
-        $isDefaultPriorityFeatureActive = DefaultPriorityFeature::active();
 
         $tree = app(BuildContactServiceRequestTypeTree::class)->execute(
             contactTypeId: $contactTypeId,
             prepareTypesQuery: fn (Builder $query) => $query->with([
-                ...($isDefaultPriorityFeatureActive ? ['defaultPriority:id'] : []),
+                'defaultPriority:id',
                 'priorities' => fn ($priorityQuery) => $priorityQuery->orderByDesc('order'),
             ]),
             formatType: fn (ServiceRequestType $type, ?string $categoryId): array => [
@@ -79,9 +77,7 @@ class GetServiceRequestTypesController extends Controller
                 'is_ai_clarification_enabled' => $aiClarificationGlobalEnabled && $type->is_ai_clarification_enabled,
                 'is_ai_resolution_enabled' => $aiResolutionGlobalEnabled && $type->is_ai_resolution_enabled,
                 'is_live_chat_enabled' => $type->is_live_chat_enabled,
-                'default_priority_id' => $isDefaultPriorityFeatureActive
-                  ? $type->defaultPriority?->getKey()
-                  : null,
+                'default_priority_id' => $type->defaultPriority?->getKey(),
                 'priorities' => $type->priorities->map(fn ($priority) => [
                     'id' => $priority->getKey(),
                     'name' => $priority->name,
