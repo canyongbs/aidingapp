@@ -36,12 +36,18 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\Pages;
 
+use AidingApp\Contact\Filament\Exports\OrganizationExporter;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
+use AidingApp\Contact\Imports\OrganizationImporter;
+use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationNameUniquenessFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Actions\ExportAction;
+use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
@@ -89,6 +95,15 @@ class ListOrganizations extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            ImportAction::make()
+                ->importer(OrganizationImporter::class)
+                ->authorize('import', Organization::class)
+                ->visible(fn (): bool => OrganizationNameUniquenessFeature::active()),
+            ExportAction::make()
+                ->label('Export')
+                ->exporter(OrganizationExporter::class)
+                ->authorize('import', Organization::class)
+                ->visible(fn (): bool => OrganizationNameUniquenessFeature::active()),
             CreateAction::make(),
         ];
     }

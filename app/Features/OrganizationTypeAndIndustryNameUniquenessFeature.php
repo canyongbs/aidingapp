@@ -34,38 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+namespace App\Features;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use App\Support\AbstractFeatureFlag;
 
-class ContactServiceProvider extends ServiceProvider
+class OrganizationTypeAndIndustryNameUniquenessFeature extends AbstractFeatureFlag
 {
-    public function register(): void
+    public function resolve(mixed $scope): mixed
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+        return false;
     }
 }
