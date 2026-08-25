@@ -54,7 +54,7 @@ class ServiceRequestTypeObserver
 
     public function created(ServiceRequestType $serviceRequestType): void
     {
-      if (app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
+        if (app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
             app(PreloadServiceRequestTypeBaseTemplates::class)->execute($serviceRequestType);
         }
     }
