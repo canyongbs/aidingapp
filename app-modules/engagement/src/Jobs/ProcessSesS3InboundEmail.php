@@ -47,7 +47,9 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -58,7 +60,6 @@ use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
 use Aws\S3\Crypto\S3EncryptionClientV3;
 use Aws\S3\S3Client;
-use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -600,26 +601,22 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             }
 
             $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody) {
-                $serviceRequest = $contact->serviceRequests()
-                    ->make([
-                        'title' => $effectiveSubject,
-                        'close_details' => $effectiveBody,
-                    ]);
-
                 $serviceRequestStatus = ServiceRequestStatus::query()
                     ->where('classification', SystemServiceRequestClassification::Open)
                     ->where('name', 'New')
                     ->where('is_system_protected', true)
                     ->firstOrFail();
 
-                $serviceRequest->status()->associate($serviceRequestStatus);
-                $serviceRequest->status_updated_at = CarbonImmutable::now();
-
-                $serviceRequest->respondent()->associate($contact);
-
-                $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
-
-                $serviceRequest->saveOrFail();
+                $serviceRequest = app(CreateServiceRequestAction::class)->execute(
+                    ServiceRequestDataObject::fromData([
+                        'type_id' => $serviceRequestType->getKey(),
+                        'respondent_id' => $contact->getKey(),
+                        'status_id' => $serviceRequestStatus->getKey(),
+                        'priority_id' => $serviceRequestType->email_automatic_creation_priority_id,
+                        'title' => $effectiveSubject,
+                        'close_details' => $effectiveBody,
+                    ])
+                );
 
                 foreach ($parser->getAttachments() as $attachment) {
                     try {
