@@ -98,16 +98,17 @@
             {{ $entry->name }}
         </button>
 
-        @can('update', $pipeline)
+        @if ($canUpdatePipeline)
             <x-filament::icon-button
                 class="shrink-0"
                 icon="heroicon-m-trash"
                 color="danger"
                 label="Remove"
+                tooltip="Remove"
                 size="xs"
                 wire:click="mountAction('removePipelineEntry', { entry: '{{ $entry->getKey() }}' })"
             />
-        @endcan
+        @endif
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />

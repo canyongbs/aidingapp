@@ -758,8 +758,11 @@ it('mounts the edit pipeline entry action from the card title with pipeline upda
     expect($user->can('update', $pipeline))->toBeTrue();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertSee("mountAction('editPipelineEntry', { entry: '{$entry->getKey()}' })", false)
-        ->assertDontSee("mountAction('viewPipelineEntry', { entry: '{$entry->getKey()}' })", false);
+        ->assertActionVisible('editPipelineEntry')
+        ->assertSeeHtml('editPipelineEntry')
+        ->assertDontSeeHtml('viewPipelineEntry')
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('editPipelineEntry');
 });
 
 it('mounts the view pipeline entry action from the card title without pipeline update permission', function () {
@@ -785,6 +788,9 @@ it('mounts the view pipeline entry action from the card title without pipeline u
     expect($user->can('update', $pipeline))->toBeFalse();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertSee("mountAction('viewPipelineEntry', { entry: '{$entry->getKey()}' })", false)
-        ->assertDontSee("mountAction('editPipelineEntry', { entry: '{$entry->getKey()}' })", false);
+        ->assertActionHidden('editPipelineEntry')
+        ->assertSeeHtml('viewPipelineEntry')
+        ->assertDontSeeHtml('editPipelineEntry')
+        ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('viewPipelineEntry');
 });
