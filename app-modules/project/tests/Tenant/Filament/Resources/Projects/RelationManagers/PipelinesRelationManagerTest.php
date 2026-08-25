@@ -38,7 +38,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\RelationManagers\PipelinesRelationManager;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Support\Icons\Heroicon;
@@ -62,20 +61,6 @@ it('hides archived pipelines', function () {
     ])
         ->assertCanSeeTableRecords([$active])
         ->assertCanNotSeeTableRecords([$archived]);
-});
-
-it('shows archived pipelines when the archiving flag is inactive', function () {
-    PipelineArchivingFeature::deactivate();
-    $project = Project::factory()->create();
-    $active = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
-    $archived = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
-    $archived->archive();
-
-    livewire(PipelinesRelationManager::class, [
-        'ownerRecord' => $project,
-        'pageClass' => ManagePipelines::class,
-    ])
-        ->assertCanSeeTableRecords([$active, $archived]);
 });
 
 it('archives a pipeline through the row action', function () {

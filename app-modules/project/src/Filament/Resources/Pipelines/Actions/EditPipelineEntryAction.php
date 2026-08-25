@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Pipelines\Actions;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineArchivingFeature;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -88,7 +87,7 @@ class EditPipelineEntryAction
         return Action::make('archivePipelineEntry')
             ->label('Archive')
             ->color('danger')
-            ->visible(fn (): bool => PipelineArchivingFeature::active() && filled($entryId))
+            ->visible(fn (): bool => filled($entryId))
             ->requiresConfirmation()
             ->modalHeading('Archive Pipeline Task')
             ->modalDescription('Are you sure you want to archive this pipeline task?')
@@ -96,7 +95,7 @@ class EditPipelineEntryAction
             ->cancelParentActions()
             ->authorize(fn (): bool => $pipeline !== null && auth()->user()->can('delete', $pipeline))
             ->action(function () use ($pipeline, $entryId, $afterArchive): void {
-                if (! PipelineArchivingFeature::active() || $pipeline === null) {
+                if ($pipeline === null) {
                     return;
                 }
 

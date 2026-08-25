@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryActi
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use Exception;
 use Filament\Actions\Action;
@@ -53,7 +52,6 @@ use Filament\Forms\Concerns\InteractsWithForms;
 use Filament\Forms\Contracts\HasForms;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
 use Livewire\Component;
@@ -83,10 +81,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          * @var Collection<int, PipelineEntry> $entries
          */
         $entries = $this->pipeline->entries()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->with(['assignedTo', 'pipelineStage'])
             ->withCount([
                 'assets',

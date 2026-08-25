@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineArchivingFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -59,8 +58,6 @@ return new class () extends Migration {
             Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->timestamp('archived_at')->nullable();
             });
-
-            PipelineArchivingFeature::activate();
         });
     }
 
@@ -82,8 +79,6 @@ return new class () extends Migration {
             Schema::table('pipelines', function (Blueprint $table): void {
                 $table->dropColumn('archived_at');
             });
-
-            PipelineArchivingFeature::deactivate();
         });
     }
 };

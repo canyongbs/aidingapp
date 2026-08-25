@@ -47,7 +47,6 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
@@ -91,10 +90,7 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         $this->selectedPipelineId = $this->record
             ->pipelines()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->oldest()
             ->value('id');
     }
@@ -107,10 +103,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $this->record
             ->pipelines()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->whereKey($this->selectedPipelineId)
             ->first();
     }
@@ -127,10 +120,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 return PipelineEntry::query()
                     ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    )
+                    ->withoutArchived()
                     ->with([
                         'assets',
                         'serviceRequests',
@@ -463,10 +453,7 @@ class ProjectWorkPipelineWidget extends TableWidget
         $counts = PipelineEntry::query()
             ->whereNotNull('project_milestone_id')
             ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
             ->selectRaw('pipeline_entries.project_milestone_id')
             ->selectRaw('count(*) as total')
@@ -508,10 +495,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $pipeline
             ->entries()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->whereKey($entryId)
             ->firstOrFail();
     }
