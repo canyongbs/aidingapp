@@ -39,11 +39,6 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\CombineStepFormFeature;
-
-beforeEach(function (): void {
-    CombineStepFormFeature::activate();
-});
 
 function serviceRequestFormStepContent(string $label): array
 {
