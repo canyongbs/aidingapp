@@ -37,23 +37,26 @@
 namespace AidingApp\InAppCommunication\Events;
 
 use AidingApp\InAppCommunication\Models\Conversation;
+use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 
-class ConversationUpdated implements ShouldBroadcastNow
+class MessagesPruned implements ShouldBroadcastNow
 {
     use Dispatchable;
     use InteractsWithSockets;
 
     public function __construct(
         public Conversation $conversation,
+        public CarbonInterface $prunedBefore,
     ) {}
 
     public function broadcastAs(): string
     {
-        return 'conversation.updated';
+        return 'messages.pruned';
     }
 
     /**
@@ -62,11 +65,8 @@ class ConversationUpdated implements ShouldBroadcastNow
     public function broadcastWith(): array
     {
         return [
-            'id' => $this->conversation->getKey(),
-            'name' => $this->conversation->name,
-            'display_name' => $this->conversation->name ?? 'Unnamed Channel',
-            'is_private' => $this->conversation->is_private,
-            ...$this->conversation->confidentialityPayload(),
+            'conversation_id' => $this->conversation->getKey(),
+            'pruned_before' => $this->prunedBefore->toIso8601String(),
         ];
     }
 
@@ -75,6 +75,15 @@ class ConversationUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [new PrivateChannel("conversation.{$this->conversation->getKey()}")];
+        $channels = $this->conversation
+            ->conversationParticipants()
+            ->where('participant_type', app(User::class)->getMorphClass())
+            ->pluck('participant_id')
+            ->map(fn (string $id) => new PrivateChannel("user.{$id}"))
+            ->all();
+
+        $channels[] = new PrivateChannel("conversation.{$this->conversation->getKey()}");
+
+        return $channels;
     }
 }

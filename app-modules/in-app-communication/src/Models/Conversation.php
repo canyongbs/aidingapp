@@ -41,6 +41,7 @@ use AidingApp\InAppCommunication\Database\Factories\ConversationFactory;
 use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -86,6 +87,24 @@ class Conversation extends BaseModel implements Auditable
         'is_confidential' => 'boolean',
         'ephemeral_period' => ConversationEphemeralPeriod::class,
     ];
+
+    /**
+     * @return array{is_confidential: bool, ephemeral_period: ?string}
+     */
+    public function confidentialityPayload(): array
+    {
+        if (! ConfidentialChannelsFeature::active()) {
+            return [
+                'is_confidential' => false,
+                'ephemeral_period' => null,
+            ];
+        }
+
+        return [
+            'is_confidential' => (bool) $this->is_confidential,
+            'ephemeral_period' => $this->ephemeral_period?->value,
+        ];
+    }
 
     /**
      * @return HasMany<ConversationParticipant, $this>

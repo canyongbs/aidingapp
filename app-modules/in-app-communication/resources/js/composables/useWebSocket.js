@@ -46,6 +46,23 @@ export function useWebSocket() {
         return window.Echo;
     }
 
+    // Ephemeral messages are deleted server side, so drop anything older than the cutoff without a reload.
+    function handleMessagesPruned(event) {
+        const conversationId = event.conversation_id;
+        const cutoff = new Date(event.pruned_before).getTime();
+
+        store.removeMessagesBefore(conversationId, event.pruned_before);
+
+        const conversation = store.conversations.find(
+            (existingConversation) => existingConversation.id === conversationId,
+        );
+        const lastMessageAt = conversation?.last_message?.created_at;
+
+        if (lastMessageAt && new Date(lastMessageAt).getTime() < cutoff) {
+            store.updateConversation(conversationId, { last_message: null });
+        }
+    }
+
     function subscribeToUserChannel(userId, { onNewConversation, onUnknownConversation, onQueueItem } = {}) {
         const echo = getEcho();
         if (!echo || userChannelSubscribed.value) {
@@ -84,6 +101,9 @@ export function useWebSocket() {
             })
             .listen('.unread-count.updated', (event) => {
                 store.setUnreadCount(event.conversationId, event.unreadCount);
+            })
+            .listen('.messages.pruned', (event) => {
+                handleMessagesPruned(event);
             })
             .listen('.participant.removed', (event) => {
                 if (event.user_id === userId) {
@@ -155,7 +175,12 @@ export function useWebSocket() {
                     name: event.name,
                     display_name: event.display_name,
                     is_private: event.is_private,
+                    is_confidential: event.is_confidential,
+                    ephemeral_period: event.ephemeral_period,
                 });
+            })
+            .listen('.messages.pruned', (event) => {
+                handleMessagesPruned(event);
             });
 
         subscribedChannels.value.add(conversationId);

@@ -103,6 +103,7 @@ class ConversationCreated implements ShouldBroadcastNow
             'display_name' => $displayName,
             'avatar_url' => $avatarUrl,
             'is_private' => $this->conversation->is_private,
+            ...$this->conversation->confidentialityPayload(),
             'participants' => $participants->values()->all(),
             'created_at' => $this->conversation->created_at->toIso8601String(),
         ];

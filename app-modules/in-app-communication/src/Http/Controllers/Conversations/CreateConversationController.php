@@ -37,6 +37,7 @@
 namespace AidingApp\InAppCommunication\Http\Controllers\Conversations;
 
 use AidingApp\InAppCommunication\Actions\CreateConversation;
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Http\Resources\ConversationParticipantResource;
 use AidingApp\InAppCommunication\Models\Conversation;
@@ -45,6 +46,7 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class CreateConversationController extends Controller
 {
@@ -58,6 +60,8 @@ class CreateConversationController extends Controller
             'participant_ids' => ['nullable', 'array'],
             'participant_ids.*' => ['required', 'uuid', 'exists:users,id'],
             'is_private' => ['nullable', 'boolean'],
+            'is_confidential' => ['nullable', 'boolean'],
+            'ephemeral_period' => ['nullable', Rule::enum(ConversationEphemeralPeriod::class)],
         ]);
 
         if ($validated['type'] === 'direct') {
@@ -72,6 +76,10 @@ class CreateConversationController extends Controller
             participantIds: $validated['participant_ids'] ?? [],
             name: $validated['name'] ?? null,
             isPrivate: $validated['is_private'] ?? true,
+            isConfidential: $validated['is_confidential'] ?? false,
+            ephemeralPeriod: filled($validated['ephemeral_period'] ?? null)
+                ? ConversationEphemeralPeriod::from($validated['ephemeral_period'])
+                : null,
         );
 
         $conversation->load('conversationParticipants');
@@ -97,6 +105,7 @@ class CreateConversationController extends Controller
                 'display_name' => $displayName,
                 'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
+                ...$conversation->confidentialityPayload(),
                 'participants' => $participants,
                 'created_at' => $conversation->created_at->toIso8601String(),
             ],

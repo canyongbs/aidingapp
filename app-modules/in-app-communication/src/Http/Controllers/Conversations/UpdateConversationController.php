@@ -41,6 +41,7 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use InvalidArgumentException;
 
 class UpdateConversationController extends Controller
 {
@@ -53,11 +54,15 @@ class UpdateConversationController extends Controller
             'is_private' => ['sometimes', 'boolean'],
         ]);
 
-        $conversation = app(UpdateConversation::class)(
-            conversation: $conversation,
-            name: $validated['name'] ?? null,
-            isPrivate: $validated['is_private'] ?? null,
-        );
+        try {
+            $conversation = app(UpdateConversation::class)(
+                conversation: $conversation,
+                name: $validated['name'] ?? null,
+                isPrivate: $validated['is_private'] ?? null,
+            );
+        } catch (InvalidArgumentException $exception) {
+            abort(422, $exception->getMessage());
+        }
 
         return response()->json([
             'data' => [
@@ -66,6 +71,7 @@ class UpdateConversationController extends Controller
                 'name' => $conversation->name,
                 'display_name' => $conversation->name ?? 'Unnamed Channel',
                 'is_private' => $conversation->is_private,
+                ...$conversation->confidentialityPayload(),
                 'updated_at' => $conversation->updated_at->toIso8601String(),
             ],
         ]);

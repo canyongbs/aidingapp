@@ -45,7 +45,7 @@ export function useConversations() {
     const loading = computed(() => store.conversationsLoading);
     const hasMore = computed(() => store.conversationsHasMore);
 
-    async function loadConversations(loadMore = false, participantType = null) {
+    async function loadConversations(loadMore = false, participantType = null, confidential = null) {
         if (store.conversationsLoading) return store.conversations;
 
         if (!loadMore) {
@@ -58,6 +58,9 @@ export function useConversations() {
             }
             if (participantType) {
                 params.participant_type = participantType;
+            }
+            if (confidential !== null) {
+                params.confidential = confidential ? 1 : 0;
             }
 
             const { data } = await api.get('/conversations', { params });
@@ -100,7 +103,14 @@ export function useConversations() {
         }
     }
 
-    async function createConversation(type, participantIds, name = null, isPrivate = true) {
+    async function createConversation({
+        type,
+        participantIds,
+        name = null,
+        isPrivate = true,
+        isConfidential = false,
+        ephemeralPeriod = null,
+    }) {
         const payload = {
             type,
             participant_ids: participantIds,
@@ -109,6 +119,8 @@ export function useConversations() {
         if (type === 'channel') {
             payload.name = name;
             payload.is_private = isPrivate;
+            payload.is_confidential = isConfidential;
+            payload.ephemeral_period = isConfidential ? ephemeralPeriod : null;
         }
 
         const { data } = await api.post('/conversations', payload);
