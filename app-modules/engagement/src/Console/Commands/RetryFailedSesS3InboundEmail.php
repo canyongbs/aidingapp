@@ -41,13 +41,12 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Throwable;
 
 class RetryFailedSesS3InboundEmail extends Command
 {
     protected $signature = 'engagement:retry-failed-inbound-email {path : Path to the failed inbound email on the s3-inbound-email disk (e.g. failed/<id>)}';
 
-    protected $description = 'Move a failed inbound email back out of the failed folder and reprocess it';
+    protected $description = 'Move a failed inbound email back out of the failed folder and queue it for reprocessing';
 
     public function handle(): int
     {
@@ -61,23 +60,19 @@ class RetryFailedSesS3InboundEmail extends Command
             return static::FAILURE;
         }
 
-        // Reprocess from the original (non-failed) location so a re-failure moves it back to
-        // `failed/<id>` rather than nesting it under `failed/failed/<id>`.
+        // Move the file back to the disk root (its original pending location) so that a re-failure
+        // lands at `failed/<id>` rather than nesting under `failed/failed/<id>`, and so the queued
+        // job shares the same unique id the scheduled gatherer would use — letting the job's
+        // ShouldBeUnique lock dedupe the two and prevent double-processing.
         $originalPath = Str::startsWith($path, 'failed/') ? Str::after($path, 'failed/') : $path;
 
         if ($originalPath !== $path) {
             $disk->move($path, $originalPath);
         }
 
-        try {
-            ProcessSesS3InboundEmail::dispatchSync($originalPath);
-        } catch (Throwable $exception) {
-            $this->error("Reprocessing failed: {$exception->getMessage()}");
+        ProcessSesS3InboundEmail::dispatch($originalPath);
 
-            return static::FAILURE;
-        }
-
-        $this->info("Reprocessed inbound email: {$originalPath}");
+        $this->info("Queued inbound email for reprocessing: {$originalPath}");
 
         return static::SUCCESS;
     }

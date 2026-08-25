@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\artisan;
 
-it('moves a failed inbound email back out of the failed folder and reprocesses it from its original path', function () {
+it('moves a failed inbound email back out of the failed folder and queues it for reprocessing from its original path', function () {
     Bus::fake();
 
     $filesystem = Storage::fake('s3-inbound-email');
@@ -59,7 +59,7 @@ it('moves a failed inbound email back out of the failed folder and reprocesses i
     $filesystem->assertExists('s3_email');
     $filesystem->assertMissing('failed/s3_email');
 
-    Bus::assertDispatchedSync(
+    Bus::assertDispatched(
         ProcessSesS3InboundEmail::class,
         fn (ProcessSesS3InboundEmail $job): bool => invade($job)->emailFilePath === 's3_email',
     );
