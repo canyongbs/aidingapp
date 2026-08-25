@@ -41,7 +41,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\Theme\Settings\ThemeSettings;
+use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Artisan;
 
 use function Tests\richContentText;
 use function Tests\richContentWith;
