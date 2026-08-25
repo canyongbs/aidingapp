@@ -54,6 +54,7 @@ use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
@@ -655,11 +656,57 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->callAction('deleteMilestone', arguments: ['milestone' => $milestone->getKey()])
+        ->callAction([
+            TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]),
+            TestAction::make('deleteMilestone'),
+        ])
         ->assertHasNoActionErrors();
 
     expect($milestone->fresh()->trashed())->toBeTrue()
         ->and($entry->fresh()->project_milestone_id)->toBeNull();
+});
+
+it('shows milestones that have no pipeline tasks as an empty group', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSee($milestone->title)
+        ->assertSee('No tasks yet');
+});
+
+it('updates a milestone from the manage slide-over', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Old Title']);
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->callAction(
+            TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]),
+            data: ['title' => 'New Title'],
+        )
+        ->assertHasNoActionErrors();
+
+    expect($milestone->fresh()->title)->toBe('New Title');
 });
 
 it('clears related milestones, assets, and service requests on the widget edit action when type is set to none', function () {

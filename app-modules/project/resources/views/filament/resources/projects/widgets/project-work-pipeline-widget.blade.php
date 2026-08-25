@@ -32,7 +32,24 @@
     </COPYRIGHT>
 --}}
 <x-filament-widgets::widget>
-    {{ $this->table }}
+    <div class="project-work-pipeline-widget">
+        {{ $this->table }}
+    </div>
+
+    @assets
+        {{-- Allow the milestone group heading block to fill the row and keep the title and progress vertically aligned. --}}
+        <style>
+            .project-work-pipeline-widget .fi-ta-group-header > div {
+                display: flex;
+                flex: 1 1 auto;
+                align-items: center;
+            }
+
+            .project-work-pipeline-widget .fi-ta-group-header > div > .fi-ta-group-description {
+                flex: 1 1 auto;
+            }
+        </style>
+    @endassets
 
     <x-filament-actions::modals />
 </x-filament-widgets::widget>

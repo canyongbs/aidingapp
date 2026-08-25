@@ -31,6 +31,17 @@
     
     </COPYRIGHT>
 --}}
-<div class="flex w-full justify-end">
-    <x-project::progress-circle :progress="$percentage" />
-</div>
+@if ($milestone)
+    @can('update', $milestone)
+        <x-filament::link
+            tag="button"
+            wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
+        >
+            {{ $milestone->title }}
+        </x-filament::link>
+    @else
+        {{ $milestone->title }}
+    @endcan
+@else
+    No Associated Milestone
+@endif
