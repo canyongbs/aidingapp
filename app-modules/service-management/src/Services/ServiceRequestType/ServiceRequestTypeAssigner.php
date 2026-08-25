@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
@@ -72,10 +71,6 @@ abstract class ServiceRequestTypeAssigner
 
     private function applyAutomatedStatusChange(ServiceRequest $serviceRequest): void
     {
-        if (! AutomatedStatusChangeOnAssignmentFeature::active()) {
-            return;
-        }
-
         $type = $serviceRequest->priority?->type;
 
         if (blank($type?->automated_status_id)) {

@@ -40,7 +40,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use App\Features\PipelineArchivingFeature;
-use App\Features\PipelineEntryMilestoneFeature;
 use Closure;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
@@ -74,9 +73,6 @@ class EditPipelineEntryAction
                 ),
             ])
             ->after(function (PipelineEntry $record, array $data) use ($after): void {
-                if (! PipelineEntryMilestoneFeature::active()) {
-                    $record->milestones()->sync($data['milestones'] ?? []);
-                }
                 $record->assets()->sync($data['assets'] ?? []);
                 $record->serviceRequests()->sync($data['serviceRequests'] ?? []);
 

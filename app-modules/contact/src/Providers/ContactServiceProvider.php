@@ -37,13 +37,16 @@
 namespace AidingApp\Contact\Providers;
 
 use AidingApp\Contact\ContactPlugin;
+use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
 class ContactServiceProvider extends ServiceProvider
@@ -62,5 +65,7 @@ class ContactServiceProvider extends ServiceProvider
             'organization_industry' => OrganizationIndustry::class,
             'organization_type' => OrganizationType::class,
         ]);
+
+        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
     }
 }

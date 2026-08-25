@@ -34,14 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Contact\Imports\ContactImporter;
+use AidingApp\Contact\Imports\OrganizationImporter;
+use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
+use App\Models\Import;
+use Filament\Actions\Imports\Events\ImportCompleted;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 
-use App\Support\AbstractFeatureFlag;
+beforeEach(function () {
+    Cache::flush();
+});
 
-class Gpt56LunaFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+it('flushes the domain claims when an organization import completes', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+    $import->importer = OrganizationImporter::class;
+
+    $tag = OrganizationImporter::domainClaimCacheTag($import->getKey());
+
+    Cache::tags([$tag])->add('shared.edu', true, now()->addDay());
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeTrue();
+
+    (new FlushOrganizationImportDomainClaims())->handle(new ImportCompleted($import, [], []));
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeFalse();
+});
+
+it('leaves the claims untouched for a different importer', function () {
+    $import = new Import();
+    $import->id = (string) Str::uuid();
+    $import->importer = ContactImporter::class;
+
+    $tag = OrganizationImporter::domainClaimCacheTag($import->getKey());
+
+    Cache::tags([$tag])->add('shared.edu', true, now()->addDay());
+
+    (new FlushOrganizationImportDomainClaims())->handle(new ImportCompleted($import, [], []));
+
+    expect(Cache::tags([$tag])->has('shared.edu'))->toBeTrue();
+});

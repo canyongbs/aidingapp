@@ -38,7 +38,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
-use App\Features\ProjectArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
@@ -366,18 +365,4 @@ it('can archive a project from the header action', function () {
 
     expect($project->refresh()->isArchived())->toBeTrue()
         ->and($project->trashed())->toBeFalse();
-});
-
-it('offers the `DeleteAction` instead of the `ArchiveAction` when `ProjectArchivingFeature` is inactive', function () {
-    ProjectArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    livewire(EditProject::class, [
-        'record' => $project->getRouteKey(),
-    ])
-        ->assertActionDoesNotExist(TestAction::make('archive'))
-        ->assertActionVisible(TestAction::make('delete'));
 });

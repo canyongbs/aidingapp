@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Page
 
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -45,6 +46,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class EditOrganizationIndustry extends EditRecord
 {
@@ -62,7 +64,11 @@ class EditOrganizationIndustry extends EditRecord
                             ->autofocus()
                             ->maxLength(255)
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->when(
+                                OrganizationTypeAndIndustryNameUniquenessFeature::active(),
+                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                            ),
 
                         Toggle::make('is_default')
                             ->label('Default')

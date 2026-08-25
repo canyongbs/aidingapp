@@ -43,7 +43,6 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use App\Features\ProjectArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -230,18 +229,6 @@ it('only shows archive actions to a user with the project.delete permission', fu
     livewire(ListProjects::class)
         ->assertActionVisible(TestAction::make('archive')->table($project))
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());
-});
-
-it('does not show the archive actions when `ProjectArchivingFeature` is inactive', function () {
-    ProjectArchivingFeature::deactivate();
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    livewire(ListProjects::class)
-        ->assertActionHidden(TestAction::make('archive')->table($project))
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
 it('can archive a project from the list row action', function () {

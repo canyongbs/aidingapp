@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\IndividualAssigner;
-use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
@@ -191,24 +190,6 @@ describe('automated status change on assignment', function () {
 
         $manager = User::factory()->create();
         $type = individualAutoAssignType($manager);
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = serviceRequestForType($type, $open);
-
-        app(IndividualAssigner::class)->execute($serviceRequest);
-
-        expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
-    });
-
-    it('leaves the status unchanged when the feature flag is inactive', function () {
-        asSuperAdmin();
-
-        AutomatedStatusChangeOnAssignmentFeature::deactivate();
-
-        $manager = User::factory()->create();
-        $target = ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::InProgress,
-        ]);
-        $type = individualAutoAssignType($manager, $target);
         $open = ServiceRequestStatus::factory()->open()->create();
         $serviceRequest = serviceRequestForType($type, $open);
 
