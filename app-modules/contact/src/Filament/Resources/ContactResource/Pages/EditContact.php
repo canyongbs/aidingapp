@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactEmailUniquenessFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -151,19 +150,11 @@ class EditContact extends EditRecord
                     ->columnSpanFull(),
                 Section::make('Contact Information')
                     ->schema([
-                        /*
-                         * TODO: ContactEmailUniquenessFeature cleanup — once the feature flag is removed:
-                         * - Remove the ->when(ContactEmailUniquenessFeature::active(), ...) wrapper below
-                         * - Apply ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the email field
-                         */
                         TextInput::make('email')
                             ->label('Primary Email')
                             ->email()
                             ->maxLength(255)
-                            ->when(
-                                ContactEmailUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            ),
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         PhoneInput::make('mobile')
                             ->label('Mobile')
                             ->string(),
