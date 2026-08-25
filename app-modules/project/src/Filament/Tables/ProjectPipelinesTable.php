@@ -51,7 +51,7 @@ class ProjectPipelinesTable
 
                 return Pipeline::query()
                     ->where('project_id', $projectId)
-                  ->withoutArchived();
+                    ->withoutArchived();
             })
             ->columns([
                 TextColumn::make('name')
