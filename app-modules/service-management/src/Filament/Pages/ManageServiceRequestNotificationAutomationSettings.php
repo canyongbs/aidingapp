@@ -159,8 +159,8 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
 
         DB::transaction(function () use ($state): void {
             $settings = app(ServiceRequestNotificationAutomationSettings::class);
-            $settings->is_enabled = $state['is_enabled'];
-            $settings->preload_new_service_request_types = $state['preload_new_service_request_types'] ?? false;
+            $settings->is_enabled = (bool) ($state['is_enabled'] ?? false);
+            $settings->preload_new_service_request_types = (bool) ($state['preload_new_service_request_types'] ?? false);
             $settings->ai_prompt = $state['ai_prompt'] ?? [];
             $settings->save();
 
