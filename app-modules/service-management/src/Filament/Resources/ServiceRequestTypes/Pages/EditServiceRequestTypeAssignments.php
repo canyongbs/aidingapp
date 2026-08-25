@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use App\Enums\Feature;
-use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Filament\Forms\Components\Heading;
 use App\Filament\Forms\Components\Paragraph;
 use App\Filament\Forms\Components\UserSelect;
@@ -135,8 +134,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->label('Automated Status Change')
                             ->columnSpanFull()
                             ->live()
-                            ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
-                                && filled($get('assignment_type'))
+                            ->visible(fn (Get $get): bool => filled($get('assignment_type'))
                                 && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None)
                             ->afterStateUpdated(function (bool $state, Get $get, Set $set) use ($defaultStatusId): void {
                                 if ($state && blank($get('automated_status_id'))) {
@@ -146,8 +144,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                         ServiceRequestStatusSelect::make('automated_status_id')
                             ->required()
                             ->columnSpanFull()
-                            ->visible(fn (Get $get): bool => AutomatedStatusChangeOnAssignmentFeature::active()
-                                && $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None
+                            ->visible(fn (Get $get): bool => $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None
                                 && (bool) $get('is_automated_status_change_enabled')),
                         Toggle::make('is_live_chat_enabled')
                             ->label('Live Chat')
@@ -190,7 +187,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
      */
     protected function mutateFormDataBeforeSave(array $data): array
     {
-        if (AutomatedStatusChangeOnAssignmentFeature::active() && ! ($data['is_automated_status_change_enabled'] ?? false)) {
+        if (! ($data['is_automated_status_change_enabled'] ?? false)) {
             $data['automated_status_id'] = null;
         }
 

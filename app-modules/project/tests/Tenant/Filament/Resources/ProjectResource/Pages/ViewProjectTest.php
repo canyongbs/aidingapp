@@ -226,7 +226,7 @@ it('can list pipeline entries in the project work pipeline widget', function () 
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
 
     $entries = PipelineEntry::factory()
@@ -245,7 +245,7 @@ it('hides archived pipeline entries in the project work pipeline widget', functi
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
     $stage = $pipeline->stages->sole();
 
@@ -308,12 +308,12 @@ it('only shows pipeline entries that belong to the selected pipeline', function 
 
     $pipelineA = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
 
     $pipelineB = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
 
     $entriesA = PipelineEntry::factory()->count(2)->create([
@@ -341,7 +341,7 @@ it('displays a pipeline entry start date in the project work pipeline widget', f
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
     $entry = PipelineEntry::factory()->create([
         'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
@@ -530,7 +530,7 @@ it('groups unassigned pipeline tasks after milestone groups', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
     $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Named Milestone']);
 
@@ -579,7 +579,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
 
     $pipeline = Pipeline::factory()
         ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
         ->create();
 
     $stage = $pipeline->stages->first();
