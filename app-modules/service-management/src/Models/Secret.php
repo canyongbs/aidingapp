@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,44 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\ServiceManagement\Models;
+
+use AidingApp\ServiceManagement\Database\Factories\SecretFactory;
+use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+/**
+ * @mixin IdeHelperSecret
+ */
+class Secret extends BaseModel
+{
+    /** @use HasFactory<SecretFactory> */
+    use HasFactory;
+
+    protected $fillable = [
+        'value',
+        'author_type',
+        'author_id',
+        'related_type',
+        'related_id',
+    ];
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
+    {
+        return $this->morphTo('author');
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function related(): MorphTo
+    {
+        return $this->morphTo('related');
+    }
+}

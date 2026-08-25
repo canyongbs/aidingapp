@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,56 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\Form\Filament\Blocks;
+
+use AidingApp\Form\Models\SubmissibleField;
+use Illuminate\Validation\Rule;
+
+class PasswordFormFieldBlock extends FormFieldBlock
+{
+    public static function type(): string
+    {
+        return 'password';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function getFormKitSchema(SubmissibleField $field): array
+    {
+        return [
+            '$formkit' => 'password',
+            'label' => $field->label,
+            'name' => $field->id,
+            ...($field->is_required ? ['validation' => 'required'] : []),
+            'storeUrl' => route('api.portal.service-request.store-secret'),
+
+            ...self::getDescriptionSectionsSchema($field),
+        ];
+    }
+
+    /**
+     * @return array<int, mixed>
+     */
+    public static function getValidationRules(SubmissibleField $field): array
+    {
+        return [
+            'uuid',
+            Rule::exists('secrets', 'id')->whereNull('related_id'),
+        ];
+    }
+
+    /** @return array<string, mixed> */
+    public static function getSubmissionState(mixed $response): array
+    {
+        return [
+            'secretId' => $response,
+        ];
+    }
+
+    protected static function renderedView(): string
+    {
+        return 'form::blocks.submissions.password';
+    }
+}

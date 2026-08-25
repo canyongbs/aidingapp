@@ -55,9 +55,12 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\PasswordFormFieldFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
@@ -67,6 +70,12 @@ class ServiceRequestObserver
     public function creating(ServiceRequest $serviceRequest): void
     {
         $serviceRequest->service_request_number ??= app(ServiceRequestNumberGenerator::class)->generate();
+
+        if (PasswordFormFieldFeature::active()) {
+            $serviceRequest->secret_key ??= Crypt::encryptString(
+                'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
+            );
+        }
 
         /** @phpstan-ignore function.impossibleType (Because this is in an observer it is possible that category is null before the model is persisted) */
         if (is_null($serviceRequest->category)) {
@@ -90,8 +99,10 @@ class ServiceRequestObserver
             ServiceRequestTypeEmailTemplateRole::Customer
         );
 
-        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open
-            && $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email)) {
+        if (
+            $serviceRequest->status?->classification === SystemServiceRequestClassification::Open
+            && $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email)
+        ) {
             $serviceRequest->respondent->notify(
                 new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
             );

@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,24 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\ServiceManagement\Database\Factories;
+
+use AidingApp\ServiceManagement\Models\Secret;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Facades\Crypt;
+
+/**
+ * @extends Factory<Secret>
+ */
+class SecretFactory extends Factory
+{
+    protected $model = Secret::class;
+
+    public function definition(): array
+    {
+        return [
+            'value' => Crypt::encryptString($this->faker->password()),
+        ];
+    }
+}

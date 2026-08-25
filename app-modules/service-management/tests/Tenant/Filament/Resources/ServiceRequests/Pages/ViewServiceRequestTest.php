@@ -38,6 +38,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -49,7 +50,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
@@ -706,6 +709,71 @@ describe('division', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('division.name');
+    });
+});
+
+describe('secrets', function () {
+    it('returns a secret to the assigned manager', function () {
+        $assignedManager = user(permissions: [
+            'service_request.view-any',
+            'service_request.*.view',
+            'service_request.*.update',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($assignedManager);
+
+        ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($assignedManager, 'user')
+            ->create();
+
+        $secret = Secret::factory()
+            ->for($serviceRequest, 'related')
+            ->create([
+                'value' => app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)
+                    ->encryptString('service-request-password'),
+            ]);
+
+        actingAs($assignedManager);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->call('revealServiceRequestSecret', $secret->getKey())
+            ->assertReturned('service-request-password');
+    });
+
+    it('denies a secret to a manager who is not assigned to the service request', function () {
+        $assignedManager = user(permissions: [
+            'service_request.view-any',
+            'service_request.*.view',
+            'service_request.*.update',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($assignedManager);
+
+        ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($assignedManager, 'user')
+            ->create();
+
+        $otherManager = user(permissions: [
+            'service_request.view-any',
+            'service_request.*.view',
+            'service_request.*.update',
+        ]);
+        $serviceRequest->priority->type->managerUsers()->attach($otherManager);
+
+        $secret = Secret::factory()
+            ->for($serviceRequest, 'related')
+            ->create([
+                'value' => app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)
+                    ->encryptString('service-request-password'),
+            ]);
+
+        actingAs($otherManager);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->call('revealServiceRequestSecret', $secret->getKey())
+            ->assertForbidden();
     });
 });
 

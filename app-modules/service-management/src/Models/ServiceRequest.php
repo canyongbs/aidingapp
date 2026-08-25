@@ -209,6 +209,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     }
 
     /**
+     * @return MorphMany<Secret, $this>
+     */
+    public function secrets(): MorphMany
+    {
+        return $this->morphMany(Secret::class, 'related');
+    }
+
+    /**
      * @return BelongsTo<ServiceRequestStatus, $this>
      */
     public function status(): BelongsTo

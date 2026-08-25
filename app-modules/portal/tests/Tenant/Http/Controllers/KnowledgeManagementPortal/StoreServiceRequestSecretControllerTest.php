@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,45 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\Secret;
+use Illuminate\Support\Facades\Crypt;
+
+use function Pest\Laravel\actingAs;
+
+beforeEach(function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+});
+
+it('stores an encrypted secret and returns only its id', function () {
+    $contact = Contact::factory()->create();
+
+    $response = actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store-secret'),
+        ['value' => 'service-request-password'],
+    );
+
+    $response->assertSuccessful()
+        ->assertJsonStructure(['id'])
+        ->assertJsonMissing(['value' => 'service-request-password']);
+
+    $secret = Secret::query()->findOrFail($response->json('id'));
+
+    expect($secret->value)->not->toBe('service-request-password')
+        ->and(Crypt::decryptString($secret->value))->toBe('service-request-password')
+        ->and($secret->author->is($contact))->toBeTrue()
+        ->and($secret->related_id)->toBeNull();
+});
+
+it('denies unauthenticated secret storage', function () {
+    $this->postJson(
+        route('api.portal.service-request.store-secret'),
+        ['value' => 'service-request-password'],
+    )->assertUnauthorized();
+
+    expect(Secret::query()->exists())->toBeFalse();
+});

@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,36 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+
+use AidingApp\Portal\Http\Requests\StoreServiceRequestSecretRequest;
+use AidingApp\ServiceManagement\Models\Secret;
+use App\Features\PasswordFormFieldFeature;
+use App\Http\Controllers\Controller;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Crypt;
+use Symfony\Component\HttpFoundation\Response;
+
+class StoreServiceRequestSecretController extends Controller
+{
+    public function __invoke(StoreServiceRequestSecretRequest $request): JsonResponse
+    {
+        abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
+
+        $contact = auth('contact')->user();
+
+        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+
+        $secret = new Secret([
+            'value' => Crypt::encryptString($request->validated('value')),
+        ]);
+
+        $secret->author()->associate($contact);
+        $secret->save();
+
+        return response()->json([
+            'id' => $secret->getKey(),
+        ]);
+    }
+}

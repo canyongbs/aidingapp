@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,44 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\Portal\Actions;
+
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Models\Secret;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Support\Facades\Crypt;
+use Symfony\Component\HttpFoundation\Response;
+
+class AttachServiceRequestSecrets
+{
+    /** @param array<int, string> $secretIds */
+    public function execute(ServiceRequest $serviceRequest, array $secretIds, Contact $author): void
+    {
+        if ($secretIds === []) {
+            return;
+        }
+
+        $serviceRequestEncrypter = app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest);
+
+        foreach (array_unique($secretIds) as $secretId) {
+            $secret = Secret::query()
+                ->whereKey($secretId)
+                ->whereNull('related_id')
+                ->where('author_type', $author->getMorphClass())
+                ->where('author_id', $author->getKey())
+                ->first();
+
+            abort_if(is_null($secret), Response::HTTP_FORBIDDEN);
+
+            $secret->value = $serviceRequestEncrypter->encryptString(
+                Crypt::decryptString($secret->value)
+            );
+
+            $secret->related()->associate($serviceRequest);
+
+            $secret->save();
+        }
+    }
+}

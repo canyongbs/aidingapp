@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
+use App\Features\PasswordFormFieldFeature;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
 use Filament\Infolists\Components\TextEntry;
@@ -67,6 +68,7 @@ class ServiceRequestInfolist
                 static::descriptionSection(),
                 static::filesSection(),
                 static::formDetailsSection()->collapsed(),
+                static::secretsSection(),
                 static::slaSection(),
                 static::feedbackSummarySection(),
             ]);
@@ -136,6 +138,7 @@ class ServiceRequestInfolist
             static::titleSection(),
             static::descriptionSection(),
             static::formDetailsSection(),
+            static::secretsSection(),
             static::slaSection(),
         ];
     }
@@ -193,6 +196,19 @@ class ServiceRequestInfolist
                     ]),
                 ViewEntry::make('serviceRequestFormSubmission')
                     ->view('filament.infolists.components.submission-entry'),
+            ]);
+    }
+
+    public static function secretsSection(): Section
+    {
+        return Section::make('Secrets')
+            ->visible(fn (ServiceRequest $record): bool => PasswordFormFieldFeature::active()
+                && $record->secrets()->exists()
+                && Gate::allows('revealSecret', $record))
+            ->schema([
+                ViewEntry::make('secrets')
+                    ->hiddenLabel()
+                    ->view('filament.infolists.components.service-request-secrets'),
             ]);
     }
 

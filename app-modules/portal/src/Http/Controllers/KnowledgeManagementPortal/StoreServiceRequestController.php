@@ -38,6 +38,8 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\Portal\Actions\AttachServiceRequestSecrets;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
@@ -47,12 +49,14 @@ use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use App\Features\PasswordFormFieldFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -64,6 +68,7 @@ use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Validator as ValidatorInstance;
 use Symfony\Component\HttpFoundation\Response;
 use Throwable;
 
@@ -115,7 +120,7 @@ class StoreServiceRequestController extends Controller
 
             $this->dispatchFileUploads($data, $serviceRequest, $uploadsMediaCollection);
 
-            $hasAdditionalData = $this->createFormSubmission($form, $data, $serviceRequest, $priority);
+            $hasAdditionalData = $this->createFormSubmission($form, $data, $serviceRequest, $priority, $contact);
 
             if (! $hasAdditionalData) {
                 DB::commit();
@@ -172,6 +177,37 @@ class StoreServiceRequestController extends Controller
         );
 
         $validator = Validator::make($request->all(), $rules);
+
+        $contact = auth('contact')->user();
+
+        assert($contact instanceof Contact);
+
+        $validator->after(function (ValidatorInstance $validator) use ($contact, $form, $request): void {
+            foreach ($form->steps as $step) {
+                foreach ($step->fields as $field) {
+                    if ($field->type !== PasswordFormFieldBlock::type()) {
+                        continue;
+                    }
+
+                    $secretId = data_get($request->all(), "{$step->label}.{$field->getKey()}");
+
+                    if (blank($secretId)) {
+                        continue;
+                    }
+
+                    $isOwnedUnrelatedSecret = Secret::query()
+                        ->whereKey($secretId)
+                        ->whereNull('related_id')
+                        ->where('author_type', $contact->getMorphClass())
+                        ->where('author_id', $contact->getKey())
+                        ->exists();
+
+                    if (! $isOwnedUnrelatedSecret) {
+                        $validator->errors()->add("{$step->label}.{$field->getKey()}", 'The selected password is invalid.');
+                    }
+                }
+            }
+        });
 
         if ($validator->fails()) {
             throw new ValidationException($validator);
@@ -452,7 +488,8 @@ class StoreServiceRequestController extends Controller
         ServiceRequestForm $form,
         Collection $data,
         ServiceRequest $serviceRequest,
-        ServiceRequestPriority $priority
+        ServiceRequestPriority $priority,
+        Contact $contact
     ): bool {
         if (empty($priority->type->form)) {
             return false;
@@ -473,6 +510,8 @@ class StoreServiceRequestController extends Controller
 
         $submission->save();
 
+        $secretIds = [];
+
         foreach ($form->steps as $step) {
             $fields = $step->fields
                 ->pluck('type', 'id')
@@ -485,6 +524,10 @@ class StoreServiceRequestController extends Controller
                     $response,
                     $fields,
                 );
+
+                if (($fields[$fieldId] ?? null) === PasswordFormFieldBlock::type()) {
+                    $secretIds[] = $response;
+                }
             }
         }
 
@@ -497,6 +540,10 @@ class StoreServiceRequestController extends Controller
         }
 
         $serviceRequest->save();
+
+        if (PasswordFormFieldFeature::active()) {
+            app(AttachServiceRequestSecrets::class)->execute($serviceRequest, $secretIds, $contact);
+        }
 
         return true;
     }

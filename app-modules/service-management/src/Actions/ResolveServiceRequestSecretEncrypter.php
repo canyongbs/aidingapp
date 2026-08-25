@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,21 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+namespace AidingApp\ServiceManagement\Actions;
+
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
+
+class ResolveServiceRequestSecretEncrypter
+{
+    public function __invoke(ServiceRequest $serviceRequest): Encrypter
+    {
+        assert(filled($serviceRequest->secret_key));
+
+        $key = Crypt::decryptString($serviceRequest->secret_key);
+
+        return new Encrypter(base64_decode(substr($key, strlen('base64:'))), config('app.cipher'));
+    }
+}

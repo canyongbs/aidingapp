@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
@@ -46,6 +47,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
@@ -53,6 +55,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Enums\Feature;
+use App\Features\PasswordFormFieldFeature;
 use App\Filament\Concerns\FiltersManagersFromGroups;
 use App\Settings\DisplaySettings;
 use Filament\Actions\EditAction;
@@ -65,6 +68,7 @@ use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use Livewire\Attributes\Url;
+use Symfony\Component\HttpFoundation\Response;
 
 class ViewServiceRequest extends ViewRecord
 {
@@ -81,6 +85,25 @@ class ViewServiceRequest extends ViewRecord
         parent::mount($record);
 
         $this->tab = (ServiceRequestTab::tryFrom($this->tab ?? '') ?? ServiceRequestTab::default())->value;
+    }
+
+    public function revealServiceRequestSecret(string $secretId): string
+    {
+        abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
+
+        $serviceRequest = $this->getRecord();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
+        Gate::authorize('revealSecret', $serviceRequest);
+
+        $secret = Secret::query()
+            ->whereKey($secretId)
+            ->whereMorphedTo('related', $serviceRequest)
+            ->firstOrFail();
+
+        return app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)
+            ->decryptString($secret->value);
     }
 
     public function infolist(Schema $schema): Schema

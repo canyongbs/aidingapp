@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -31,23 +33,53 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
+use App\Features\PasswordFormFieldFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            if (! Schema::hasTable('secrets')) {
+                Schema::create('secrets', function (Blueprint $table) {
+                    $table->uuid('id')->primary();
+
+                    $table->text('value');
+                    $table->nullableUuidMorphs('author');
+                    $table->nullableUuidMorphs('related');
+
+                    $table->timestamps();
+                });
+            }
+
+            if (! Schema::hasColumn('service_requests', 'secret_key')) {
+                Schema::table('service_requests', function (Blueprint $table) {
+                    $table->text('secret_key')->nullable();
+                });
+            }
+
+            PasswordFormFieldFeature::activate();
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            PasswordFormFieldFeature::deactivate();
+
+            if (Schema::hasColumn('service_requests', 'secret_key')) {
+                Schema::table('service_requests', function (Blueprint $table) {
+                    $table->dropColumn('secret_key');
+                });
+            }
+
+            if (Schema::hasTable('secrets')) {
+                Schema::drop('secrets');
+            }
+        });
+    }
 };

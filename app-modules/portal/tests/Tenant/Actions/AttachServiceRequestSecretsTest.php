@@ -1,3 +1,5 @@
+<?php
+
 /*
 <COPYRIGHT>
 
@@ -18,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS® and Aiding App® are registered trademarks of
       Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
@@ -31,23 +33,28 @@
 
 </COPYRIGHT>
 */
-import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
-import { createInput } from '@formkit/vue';
-import Password from './Password.vue';
-import Signature from './Signature.vue';
-import Upload from './Upload.vue';
 
-export default {
-    otp: createInput(OneTimePassword, {
-        props: ['digits'],
-    }),
-    signature: createInput(Signature, {
-        props: [],
-    }),
-    upload: createInput(Upload, {
-        props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
-    }),
-    password: createInput(Password, {
-        props: ['storeUrl'],
-    }),
-};
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\AttachServiceRequestSecrets;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Models\Secret;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
+
+it('re-encrypts a secret with the service request key and associates it to the service request', function () {
+    $contact = Contact::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->create();
+    $secret = Secret::factory()->for($contact, 'author')->create([
+        'value' => Crypt::encryptString('service-request-password'),
+    ]);
+
+    app(AttachServiceRequestSecrets::class)->execute($serviceRequest, [$secret->getKey()], $contact);
+
+    $secret->refresh();
+
+    expect($secret->related->is($serviceRequest))->toBeTrue()
+        ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
+        ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
+        ->toBe('service-request-password');
+});
