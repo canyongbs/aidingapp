@@ -77,14 +77,12 @@ return new class () extends SettingsMigration {
             } catch (SettingAlreadyExists $exception) {
                 // do nothing
             }
-
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-
             $this->migrator->deleteIfExists('ai.open_ai_gpt_56_luna_base_uri');
             $this->migrator->deleteIfExists('ai.open_ai_gpt_56_luna_api_key');
             $this->migrator->deleteIfExists('ai.open_ai_gpt_56_luna_model');
