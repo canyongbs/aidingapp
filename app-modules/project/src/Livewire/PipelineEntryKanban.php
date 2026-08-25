@@ -41,7 +41,6 @@ use AidingApp\Project\Filament\Resources\Pipelines\Actions\ViewPipelineEntryActi
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Features\PipelineEntryMilestoneFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use Exception;
 use Filament\Actions\Action;
@@ -88,7 +87,6 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             ->withCount([
                 'assets',
                 'serviceRequests',
-                ...(! PipelineEntryMilestoneFeature::active() ? ['milestones'] : []),
             ])
             ->oldest()
             ->get();
@@ -171,21 +169,13 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
                     'due' => $data['due'] ?? null,
                     'assigned_to_type' => $data['assigned_to_type'] ?? null,
                     'assigned_to_id' => $data['assigned_to_id'] ?? null,
+                    'project_milestone_id' => $data['project_milestone_id'] ?? null,
                     'is_visible_to_guests' => $data['is_visible_to_guests'] ?? true,
                 ];
-
-                if (PipelineEntryMilestoneFeature::active()) {
-                    $dataArray['project_milestone_id'] = $data['project_milestone_id'] ?? null;
-                }
 
                 $entry = new PipelineEntry($dataArray);
 
                 $entry->saveOrFail();
-
-                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire if block below.
-                if (! PipelineEntryMilestoneFeature::active()) {
-                    $entry->milestones()->sync($data['milestones'] ?? []);
-                }
                 $entry->assets()->sync($data['assets'] ?? []);
                 $entry->serviceRequests()->sync($data['serviceRequests'] ?? []);
 

@@ -101,8 +101,8 @@ class PipelineEntryInfolist
                     TextEntry::make('pipelineStage.name')
                         ->label('Stage')
                         ->badge(),
-                    TextEntry::make('milestones.title')
-                        ->label('Related Milestones')
+                    TextEntry::make('milestone.title')
+                        ->label('Related Milestone')
                         ->badge(),
                     TextEntry::make('assets.name')
                         ->label('Related Assets')

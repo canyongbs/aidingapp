@@ -34,35 +34,25 @@
 </COPYRIGHT>
 */
 
-use App\Features\DefaultPriorityFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->foreignUuid('default_priority_id')
-                    ->nullable()
-                    ->constrained('service_request_priorities');
-            });
-
-            DefaultPriorityFeature::activate();
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->foreignUuid('default_priority_id')
+                ->nullable()
+                ->constrained('service_request_priorities');
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            DefaultPriorityFeature::deactivate();
-
-            Schema::table('service_request_types', function (Blueprint $table) {
-                $table->dropForeign(['default_priority_id']);
-                $table->dropColumn('default_priority_id');
-            });
+        Schema::table('service_request_types', function (Blueprint $table) {
+            $table->dropForeign(['default_priority_id']);
+            $table->dropColumn('default_priority_id');
         });
     }
 };

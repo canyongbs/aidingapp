@@ -36,7 +36,6 @@
 @use('AidingApp\Contact\Models\Contact')
 @use('Illuminate\Database\Eloquent\Relations\Relation')
 @use('Illuminate\Support\Str')
-@use('App\Features\PipelineEntryMilestoneFeature')
 @php
     $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
@@ -132,17 +131,10 @@
     <hr class="my-3 border-gray-200 dark:border-gray-700" />
 
     <div class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
-        @if (PipelineEntryMilestoneFeature::active())
-            <div>
-                <span class="font-bold">Milestone:</span>
-                {{ $entry->milestone->title ?? 'None' }}
-            </div>
-        @else
-            <div>
-                <span class="font-bold">Milestones:</span>
-                {{ ($entry->milestones_count ?? 0) > 0 ? $entry->milestones_count : 'None' }}
-            </div>
-        @endif
+        <div>
+            <span class="font-bold">Milestone:</span>
+            {{ $entry->milestone->title ?? 'None' }}
+        </div>
         <div>
             <span class="font-bold">Assets:</span>
             {{ ($entry->assets_count ?? 0) > 0 ? $entry->assets_count : 'None' }}

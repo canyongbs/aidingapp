@@ -34,14 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Support\AbstractFeatureFlag;
-
-class AutomatedStatusChangeOnAssignmentFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        Schema::dropIfExists('pipeline_entry_milestones');
     }
-}
+
+    public function down(): void
+    {
+        Schema::create('pipeline_entry_milestones', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('pipeline_entry_id')->constrained()->cascadeOnDelete();
+            $table->foreignUuid('project_milestone_id')->constrained()->cascadeOnDelete();
+            $table->timestamps();
+        });
+    }
+};
