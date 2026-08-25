@@ -36,7 +36,6 @@
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ListServiceMonitorings;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
@@ -165,38 +164,4 @@ test('the name column shows a lock icon and tooltip only for confidential servic
 
     expect($column->record($publicTarget)->getIcon($publicTarget->name))->toBeNull();
     expect($column->getTooltip($publicTarget->name))->toBeNull();
-});
-
-// TODO: Cleanup Task (confidential-service-monitoring): delete this test once the flag is removed
-test('a confidential service monitoring is visible to everyone while the feature flag is inactive', function () {
-    ConfidentialServiceMonitoringFeature::deactivate();
-
-    $creator = User::factory()->create();
-    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->for($creator, 'createdBy')->create();
-
-    $user = User::factory()->create();
-    $user->givePermissionTo('service_monitoring.view-any');
-    $user->givePermissionTo('service_monitoring.*.view');
-    actingAs($user);
-
-    livewire(ListServiceMonitorings::class)
-        ->assertCanSeeTableRecords([$confidentialTarget])
-        ->assertSuccessful();
-});
-
-// TODO: Cleanup Task (confidential-service-monitoring): delete this test once the flag is removed
-test('the name column hides the lock icon and tooltip while the feature flag is inactive', function () {
-    asSuperAdmin();
-
-    ConfidentialServiceMonitoringFeature::deactivate();
-
-    $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
-
-    $column = livewire(ListServiceMonitorings::class)
-        ->instance()
-        ->getTable()
-        ->getColumn('name');
-
-    expect($column->record($confidentialTarget)->getIcon($confidentialTarget->name))->toBeNull();
-    expect($column->getTooltip($confidentialTarget->name))->toBeNull();
 });

@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -127,7 +126,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
     {
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
 
-        if (! ConfidentialServiceMonitoringFeature::active() || ! $target?->is_confidential) {
+        if (! $target?->is_confidential) {
             return true;
         }
 
