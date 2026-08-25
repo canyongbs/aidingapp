@@ -600,14 +600,16 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
             }
 
-            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody) {
-                $serviceRequestStatus = ServiceRequestStatus::query()
-                    ->where('classification', SystemServiceRequestClassification::Open)
-                    ->where('name', 'New')
-                    ->where('is_system_protected', true)
-                    ->firstOrFail();
+            $serviceRequestStatus = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->where('name', 'New')
+                ->where('is_system_protected', true)
+                ->firstOrFail();
 
-                $serviceRequest = app(CreateServiceRequestAction::class)->execute(
+            $createServiceRequestAction = app(CreateServiceRequestAction::class);
+
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction) {
+                $serviceRequest = $createServiceRequestAction->execute(
                     ServiceRequestDataObject::fromData([
                         'type_id' => $serviceRequestType->getKey(),
                         'respondent_id' => $contact->getKey(),
