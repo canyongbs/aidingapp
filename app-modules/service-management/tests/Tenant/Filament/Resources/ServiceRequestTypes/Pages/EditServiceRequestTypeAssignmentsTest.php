@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeAssignmentsRequestFactory;
-use App\Features\AutomatedStatusChangeOnAssignmentFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
@@ -339,18 +338,6 @@ test('it persists the automated status change configuration', function () {
 
     expect($serviceRequestType->fresh())
         ->automated_status_id->toBe($status->getKey());
-});
-
-test('the automated status change toggle is hidden when the feature flag is inactive', function () {
-    asSuperAdmin();
-
-    AutomatedStatusChangeOnAssignmentFeature::deactivate();
-
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
-        ->fillForm(['assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value])
-        ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isHidden());
 });
 
 test('the automated status change toggle is on when loading a type with an automated_status_id set', function () {

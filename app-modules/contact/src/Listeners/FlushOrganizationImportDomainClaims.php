@@ -34,14 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Contact\Listeners;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Contact\Imports\OrganizationImporter;
+use Filament\Actions\Imports\Events\ImportCompleted;
+use Illuminate\Support\Facades\Cache;
 
-class ServiceMonitoringReportFeature extends AbstractFeatureFlag
+class FlushOrganizationImportDomainClaims
 {
-    public function resolve(mixed $scope): mixed
+    public function handle(ImportCompleted $event): void
     {
-        return false;
+        $import = $event->getImport();
+
+        if ($import->importer !== OrganizationImporter::class) {
+            return;
+        }
+
+        Cache::tags([OrganizationImporter::domainClaimCacheTag($import->getKey())])->flush();
     }
 }

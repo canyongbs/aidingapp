@@ -38,13 +38,10 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportNotifyJob;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringReportFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
 beforeEach(function () {
-    ServiceMonitoringReportFeature::activate();
-
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceMonitoring = true;
     $settings->save();

@@ -39,8 +39,10 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrgani
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
+use App\Features\OrganizationNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -222,3 +224,101 @@ test('check if the provided domain is valid', function (string $domain) {
         'test-domain-123.com',
         'subdomain.example.org',
     ]);
+
+test('the organization name must be unique among non-trashed organizations', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Acme Corporation']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'name' => 'Acme Corporation',
+    ])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    $undoRepeaterFake();
+});
+
+test('the organization name uniqueness check is case-insensitive', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Acme Corporation']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'name' => 'ACME CORPORATION',
+    ])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    $undoRepeaterFake();
+});
+
+test('the organization name of a soft-deleted organization can be reused', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Acme Corporation'])->delete();
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'name' => 'Acme Corporation',
+    ])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+test('does not apply the unique form rule when the feature is disabled', function () {
+    OrganizationNameUniquenessFeature::deactivate();
+
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+
+    Organization::factory()->create(['name' => 'Acme Corporation']);
+
+    $request = collect(CreateOrganizationRequestFactory::new()->state([
+        'name' => 'Acme Corporation',
+    ])->create());
+
+    actingAs($user);
+
+    expect(fn () => livewire(CreateOrganization::class)
+        ->fillForm($request->toArray())
+        ->call('create'))
+        ->toThrow(UniqueConstraintViolationException::class);
+
+    $undoRepeaterFake();
+});

@@ -39,8 +39,10 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\EditOrganiza
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\EditOrganizationRequestFactory;
+use App\Features\OrganizationNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -291,3 +293,75 @@ test('check if the provided domain is valid', function (string $domain) {
         'test-domain-123.com',
         'subdomain.example.org',
     ]);
+
+test('the organization name must be unique among other non-trashed organizations', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->create(['name' => 'Acme Corporation']);
+    $organization = Organization::factory()->create(['name' => 'Globex']);
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Acme Corporation'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    $undoRepeaterFake();
+});
+
+test('an organization can keep its own name when editing', function () {
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    $organization = Organization::factory()->create(['name' => 'Acme Corporation']);
+
+    actingAs($user);
+
+    livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->set('data.domains', null)
+        ->fillForm(['name' => 'Acme Corporation'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $undoRepeaterFake();
+});
+
+test('does not apply the unique form rule when the feature is disabled', function () {
+    OrganizationNameUniquenessFeature::deactivate();
+
+    $undoRepeaterFake = Repeater::fake();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+
+    Organization::factory()->create(['name' => 'Acme Corporation']);
+    $organization = Organization::factory()->create(['name' => 'Globex']);
+
+    actingAs($user);
+
+    expect(fn () => livewire(EditOrganization::class, [
+        'record' => $organization->getRouteKey(),
+    ])
+        ->set('data.domains', null)
+        ->fillForm(['name' => 'Acme Corporation'])
+        ->call('save'))
+        ->toThrow(UniqueConstraintViolationException::class);
+
+    $undoRepeaterFake();
+});

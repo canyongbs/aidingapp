@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganizations;
 use AidingApp\Contact\Models\Organization;
+use App\Features\OrganizationNameUniquenessFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
@@ -58,4 +59,36 @@ it('only shows the bulk delete action to a user with the organization.delete per
 
     livewire(ListOrganizations::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('only shows the import and export actions to a user with the `organization.import` permission', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('organization.view-any', 'organization.*.view');
+
+    actingAs($user);
+
+    livewire(ListOrganizations::class)
+        ->assertActionHidden('import')
+        ->assertActionHidden('export');
+
+    $user->givePermissionTo('organization.import');
+
+    livewire(ListOrganizations::class)
+        ->assertActionVisible('import')
+        ->assertActionVisible('export');
+});
+
+it('hides the import and export actions when the organization name uniqueness feature is inactive', function () {
+    OrganizationNameUniquenessFeature::deactivate();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('organization.view-any', 'organization.*.view', 'organization.import');
+
+    actingAs($user);
+
+    livewire(ListOrganizations::class)
+        ->assertActionHidden('import')
+        ->assertActionHidden('export');
 });

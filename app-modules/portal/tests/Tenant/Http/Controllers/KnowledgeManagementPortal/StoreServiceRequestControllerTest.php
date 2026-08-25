@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\DefaultPriorityFeature;
 
 use function Pest\Laravel\actingAs;
 
@@ -91,7 +90,7 @@ it('requires a submitted priority when the type has no configured default priori
         [
             'Main' => [
                 'title' => 'Portal priority test',
-                'description' => 'A priority is required when no default is configured.',
+                'description' => 'A priority is required.',
             ],
         ],
     );
@@ -100,24 +99,4 @@ it('requires a submitted priority when the type has no configured default priori
         ->assertJsonValidationErrors('Main.priority');
 
     expect(ServiceRequest::query()->count())->toBe(0);
-});
-
-it('requires a submitted priority before the default priority feature is activated', function () {
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
-    $type->update(['default_priority_id' => $priority->getKey()]);
-    $contact = Contact::factory()->create();
-    DefaultPriorityFeature::deactivate();
-
-    try {
-        $response = actingAs($contact, 'contact')->postJson(
-            route('api.portal.service-request.store', ['type' => $type]),
-            ['Main' => ['title' => 'Portal priority test', 'description' => 'A priority is required.']],
-        );
-
-        $response->assertUnprocessable()
-            ->assertJsonValidationErrors('Main.priority');
-    } finally {
-        DefaultPriorityFeature::activate();
-    }
 });

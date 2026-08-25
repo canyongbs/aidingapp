@@ -34,34 +34,45 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineEntryMilestoneFeature;
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
+    use CanModifyPermissions;
+
+    /**
+     * @var array<string, string>
+     */
+    private array $permissions = [
+        'organization.import' => 'Organization',
+    ];
+
+    /**
+     * @var array<string>
+     */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
     public function up(): void
     {
-        DB::transaction(function () {
-            DB::statement(<<<'SQL'
-                UPDATE pipeline_entries
-                SET project_milestone_id = first_milestone.project_milestone_id
-                FROM (
-                    SELECT DISTINCT ON (pipeline_entry_id)
-                        pipeline_entry_id,
-                        project_milestone_id
-                    FROM pipeline_entry_milestones
-                    ORDER BY pipeline_entry_id, created_at, id
-                ) AS first_milestone
-                WHERE pipeline_entries.id = first_milestone.pipeline_entry_id
-                    AND pipeline_entries.project_milestone_id IS NULL
-                SQL);
+        collect($this->guards)
+            ->each(function (string $guard) {
+                $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
+                    ->where('guard_name', $guard)
+                    ->pluck('name')
+                    ->all());
 
-            PipelineEntryMilestoneFeature::activate();
-        });
+                $this->createPermissions($permissions, $guard);
+            });
     }
 
     public function down(): void
     {
-        PipelineEntryMilestoneFeature::deactivate();
+        collect($this->guards)
+            ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
     }
 };
