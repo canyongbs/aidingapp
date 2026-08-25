@@ -33,21 +33,16 @@
 --}}
 
 @php
-    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-
     $actorName = $record->actorName();
     $createdAt = $record->created_at;
 @endphp
 
 <div>
     <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <a
-                class="ml-2 flex space-x-2 font-medium underline"
-                href="{{ ServiceRequestResource::getUrl('view', ['record' => $record->serviceRequest]) }}"
-            >
+        <h3 class="fi-ta-text mb-1 flex items-center text-base font-semibold text-gray-950 dark:text-white">
+            <span class="font-medium">
                 {{ $record->eventTitle() }}
-            </a>
+            </span>
         </h3>
 
         <div>
@@ -58,7 +53,7 @@
     @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
     <div
-        class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
+        class="fi-ta-text my-4 rounded-lg border-2 border-gray-200 p-2 text-sm font-normal text-gray-950 dark:border-gray-800 dark:text-white"
     >
         @if ($record->isCreatedEvent())
             <div>
