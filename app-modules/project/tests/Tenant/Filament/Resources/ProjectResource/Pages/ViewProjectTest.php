@@ -691,7 +691,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
         ->setActionData([
             'name' => $entry->name,
             'pipeline_stage_id' => $stage->getKey(),
-            'milestones_type' => 'none',
+            'project_milestone_id' => null,
             'assets_type' => 'none',
             'service_requests_type' => 'none',
         ])
