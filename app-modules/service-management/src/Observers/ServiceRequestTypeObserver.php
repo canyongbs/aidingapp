@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Observers;
 use AidingApp\ServiceManagement\Actions\PreloadServiceRequestTypeBaseTemplates;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
-use App\Features\ProloadServiceRequestTypeFeature;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestTypeObserver
@@ -55,7 +54,7 @@ class ServiceRequestTypeObserver
 
     public function created(ServiceRequestType $serviceRequestType): void
     {
-        if (ProloadServiceRequestTypeFeature::active() && app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
+      if (app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types) {
             app(PreloadServiceRequestTypeBaseTemplates::class)->execute($serviceRequestType);
         }
     }

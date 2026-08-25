@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmail
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Enums\Feature;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
-use App\Features\ProloadServiceRequestTypeFeature;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Support\RichContentDocument;
 use Filament\Actions\Action;
@@ -81,10 +80,6 @@ class ServiceRequestTypeTemplates extends SettingsPage
 
     public static function canAccess(): bool
     {
-        if (! ProloadServiceRequestTypeFeature::active()) {
-            return false;
-        }
-
         if (! Gate::check(Feature::ServiceManagement->getGateName())) {
             return false;
         }
