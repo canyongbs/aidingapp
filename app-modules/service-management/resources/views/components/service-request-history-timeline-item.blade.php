@@ -39,7 +39,7 @@
 
 <div>
     <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-base font-semibold text-gray-950 dark:text-white">
+        <h3 class="fi-ta-text mb-1 flex items-center text-base font-semibold text-gray-950 dark:text-white">
             <span class="font-medium">
                 {{ $record->eventTitle() }}
             </span>
