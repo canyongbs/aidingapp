@@ -259,9 +259,8 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         }
 
         return $candidates
-            ->filter()
+            ->filter(fn (string $address): bool => trim($address) !== '')
             ->map(fn (string $address): string => trim($address))
-            ->reject(fn (string $address): bool => $address === '')
             ->unique(fn (string $address): string => mb_strtolower($address))
             ->values();
     }
