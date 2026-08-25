@@ -86,13 +86,13 @@ class PipelineEntryForm
                 ->tableArguments(['pipelineId' => $pipeline?->getKey()])
                 ->visible($isStageVisible)
                 ->required(),
-                Grid::make(2)
-                    ->schema([
-                        DateTimePicker::make('start_date')
-                            ->label('Start Date'),
-                        DateTimePicker::make('due')
-                            ->label('End Date'),
-                    ]),
+                    Grid::make(2)
+                        ->schema([
+                            DateTimePicker::make('start_date')
+                                ->label('Start Date'),
+                            DateTimePicker::make('due')
+                                ->label('Due Date'),
+                        ]),
             Grid::make(2)
                 ->schema([
                     Select::make('project_milestone_id')
