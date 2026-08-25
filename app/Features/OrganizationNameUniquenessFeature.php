@@ -34,34 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace App\Features;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * TODO: Cleanup Task (pipeline-entry-milestone): Remove this model once the milestone feature is fully implemented and the pivot table is no longer needed.
- *
- * @mixin IdeHelperPipelineEntryMilestone
- */
-class PipelineEntryMilestone extends Pivot
+class OrganizationNameUniquenessFeature extends AbstractFeatureFlag
 {
-    use HasUuids;
-
-    /**
-     * @return BelongsTo<PipelineEntry, $this>
-     */
-    public function pipelineEntry(): BelongsTo
+    public function resolve(mixed $scope): mixed
     {
-        return $this->belongsTo(PipelineEntry::class, 'pipeline_entry_id', 'id', 'pipelineEntry');
-    }
-
-    /**
-     * @return BelongsTo<ProjectMilestone, $this>
-     */
-    public function projectMilestone(): BelongsTo
-    {
-        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id', 'id', 'projectMilestone');
+        return false;
     }
 }

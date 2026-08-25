@@ -36,15 +36,12 @@
 
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
-use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineArchivingFeature;
 use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
-use Filament\Tables\Table;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -220,49 +217,7 @@ it('archives a pipeline task from its slide-over modal', function () {
     expect($entry->refresh()->isArchived())->toBeTrue();
 });
 
-describe('feature flag inactive', function () {
-    it('keeps archived pipelines in the switcher list when the flag is inactive', function () {
-        PipelineArchivingFeature::deactivate();
-
-        $project = Project::factory()->create();
-        $active = Pipeline::factory()->for($project)->create();
-        $archived = Pipeline::factory()->for($project)->create();
-        $archived->archive();
-
-        $table = ProjectPipelinesTable::configure(
-            Table::make(livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance())
-                ->arguments(['projectId' => $project->getKey()]),
-        );
-
-        $ids = $table->getQuery()->pluck('id');
-
-        expect($ids)->toContain($active->getKey())
-            ->and($ids)->toContain($archived->getKey());
-    });
-
-    it('hides the footer archive control when the flag is inactive', function () {
-        PipelineArchivingFeature::deactivate();
-
-        $project = Project::factory()->create();
-        Pipeline::factory()->for($project)->create();
-
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
-            ->mountAction('selectPipeline')
-            ->assertActionHidden('archivePipeline');
-    });
-
-    it('does not archive when archivePipelineFromSwitcher is called directly while the flag is inactive', function () {
-        PipelineArchivingFeature::deactivate();
-
-        $project = Project::factory()->create();
-        $pipeline = Pipeline::factory()->for($project)->create();
-
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
-            ->call('archivePipelineFromSwitcher', $pipeline->getKey());
-
-        expect($pipeline->refresh()->isArchived())->toBeFalse();
-    });
-
+describe('feature flags', function () {
     it('hides the Start Date column when the pipeline entry start date flag is inactive', function () {
         PipelineEntryStartDateFeature::deactivate();
 

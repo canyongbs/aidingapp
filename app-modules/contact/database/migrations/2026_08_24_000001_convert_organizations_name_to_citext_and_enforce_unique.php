@@ -34,41 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Tables;
+use App\Features\OrganizationNameUniquenessFeature;
+use Database\Migrations\Concerns\FixesDuplicateNames;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Models\Pipeline;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
+return new class () extends Migration {
+    use FixesDuplicateNames;
 
-class ProjectPipelinesTable
-{
-    public static function configure(Table $table): Table
+    private string $table = 'organizations';
+
+    private string $column = 'name';
+
+    private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
+
+    public function up(): void
     {
-        return $table
-            ->query(function () use ($table): Builder {
-                $projectId = $table->getArguments()['projectId'] ?? null;
+        DB::transaction(function () {
+            $this->fixDuplicates();
 
-                return Pipeline::query()
-                    ->where('project_id', $projectId)
-                    ->withoutArchived();
-            })
-            ->columns([
-                TextColumn::make('name')
-                    ->label('Pipeline')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('stages_count')
-                    ->label('Stages')
-                    ->counts('stages'),
-                TextColumn::make('entries_count')
-                    ->label('Entries')
-                    ->counts('entries'),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->defaultSort('created_at');
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
+
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->uniqueIndex($this->column, 'organizations_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            OrganizationNameUniquenessFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            OrganizationNameUniquenessFeature::deactivate();
+
+            DB::statement('DROP INDEX IF EXISTS organizations_name_unique');
+
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+            $this->revertDuplicates();
+        });
+    }
+};
