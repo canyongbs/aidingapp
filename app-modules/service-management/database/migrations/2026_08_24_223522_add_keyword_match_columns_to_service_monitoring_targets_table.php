@@ -43,7 +43,7 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('service_monitoring_targets', function (Blueprint $table) {
-            $table->string('monitor_type')->initial(MonitorType::Availability);
+            $table->string('monitor_type')->initial(MonitorType::Availability->value);
             $table->jsonb('should_contain')->nullable();
             $table->jsonb('should_not_contain')->nullable();
         });
