@@ -36,8 +36,10 @@
 
 namespace App\Filament\Plugins;
 
+use Closure;
 use Filament\Contracts\Plugin;
 use Filament\Panel;
+use Filament\View\PanelsRenderHook;
 
 /**
  * A no-op stand-in for the emuniq browser-notifications plugin.
@@ -56,7 +58,19 @@ final class NullBrowserNotificationsPlugin implements Plugin
         return 'browser-notifications';
     }
 
-    public function register(Panel $panel): void {}
+    public function register(Panel $panel): void
+    {
+        // Panel::make() runs Panel::configureUsing() callbacks, including the
+        // vendor's, before this plugin runs, so its head meta tag and prompt
+        // banner render hooks are already queued on this panel. Render hooks
+        // can only be appended, never removed, so both are cleared here.
+        Closure::bind(function () {
+            unset(
+                $this->renderHooks[PanelsRenderHook::HEAD_END][''],
+                $this->renderHooks[PanelsRenderHook::BODY_END][''],
+            );
+        }, $panel, Panel::class)();
+    }
 
     public function boot(Panel $panel): void {}
 

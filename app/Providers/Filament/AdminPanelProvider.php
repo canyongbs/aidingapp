@@ -42,7 +42,7 @@ use App\Enums\NavigationGroup;
 use App\Filament\Clusters\ProfileSettings;
 use App\Filament\Pages\Dashboard;
 use App\Filament\Pages\ProductHealth;
-use App\Filament\Plugins\GatedBrowserNotificationsPlugin;
+use App\Filament\Plugins\HeadOnlyBrowserNotificationsPlugin;
 use App\Health\Checks\AzureCredentialsExpiringCheck;
 use App\Http\Middleware\TrackPresence;
 use App\Models\HealthCheckResultHistoryItem;
@@ -148,7 +148,7 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make()
                     ->usingPage(ProductHealth::class),
                 FilamentFullCalendarPlugin::make(),
-                GatedBrowserNotificationsPlugin::make(),
+                HeadOnlyBrowserNotificationsPlugin::make(),
             ])
             ->userMenuItems([
                 MenuItem::make()

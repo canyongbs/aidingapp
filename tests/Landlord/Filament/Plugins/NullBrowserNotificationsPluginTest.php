@@ -34,9 +34,10 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Plugins\GatedBrowserNotificationsPlugin;
+use App\Filament\Plugins\HeadOnlyBrowserNotificationsPlugin;
 use App\Filament\Plugins\NullBrowserNotificationsPlugin;
 use Filament\Facades\Filament;
+use Filament\View\PanelsRenderHook;
 
 it('suppresses the browser notifications plugin on the landlord panel', function () {
     expect(Filament::getPanel('landlord')->getPlugin('browser-notifications'))
@@ -45,5 +46,18 @@ it('suppresses the browser notifications plugin on the landlord panel', function
 
 it('keeps the browser notifications plugin active on the admin panel', function () {
     expect(Filament::getPanel('admin')->getPlugin('browser-notifications'))
-        ->toBeInstanceOf(GatedBrowserNotificationsPlugin::class);
+        ->toBeInstanceOf(HeadOnlyBrowserNotificationsPlugin::class);
+});
+
+// Panel::make() runs the vendor's Panel::configureUsing() callback before our
+// plugin ever runs, which already queues its meta tag and prompt banner onto
+// the panel. Render hooks can only be appended, never removed, so the plugins
+// above must actively clear what was queued rather than merely replacing the
+// plugin instance in Filament's plugin registry.
+it('clears the render hooks the vendor queued before the landlord panel plugin registers', function () {
+    $renderHooks = (new ReflectionProperty(Filament::getPanel('landlord'), 'renderHooks'))
+        ->getValue(Filament::getPanel('landlord'));
+
+    expect($renderHooks[PanelsRenderHook::HEAD_END][''] ?? [])->toBeEmpty()
+        ->and($renderHooks[PanelsRenderHook::BODY_END][''] ?? [])->toBeEmpty();
 });

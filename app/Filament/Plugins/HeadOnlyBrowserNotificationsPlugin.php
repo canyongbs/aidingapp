@@ -34,19 +34,38 @@
 </COPYRIGHT>
 */
 
-use App\Models\User;
+namespace App\Filament\Plugins;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
+use Closure;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
+use Filament\Panel;
+use Filament\View\PanelsRenderHook;
 
-// The inactive case is covered by ManageBrowserNotificationsTest's canAccess()
-// assertion; deactivating the flag mid-test isn't visible to this HTTP request
-// because NeedsTenant reconnects the tenant connection outside the test transaction.
-it('shows the enable notifications prompt banner when the feature is active', function () {
-    config()->set('webpush.vapid.public_key', 'test-public-key');
+/**
+ * Subscribing is handled entirely by the Notifications profile page, so this
+ * skips the vendor's own floating prompt banner and keeps only the VAPID meta
+ * tag it needs to inject.
+ */
+final class HeadOnlyBrowserNotificationsPlugin extends BrowserNotificationsPlugin
+{
+    public function register(Panel $panel): void
+    {
+        // BrowserNotificationsServiceProvider auto-registers its own plugin
+        // instance via Panel::configureUsing() before this plugin runs (Filament
+        // resolves the panel via Panel::make() first), which already queued its
+        // own head meta tag and the prompt banner onto this same panel. Render
+        // hooks can only be appended, never removed, so both are cleared here
+        // before this plugin adds its own head meta tag hook.
+        Closure::bind(function () {
+            unset(
+                $this->renderHooks[PanelsRenderHook::HEAD_END][''],
+                $this->renderHooks[PanelsRenderHook::BODY_END][''],
+            );
+        }, $panel, Panel::class)();
 
-    actingAs(User::factory()->create());
-
-    get(route('filament.admin.profile-settings.pages.profile-information'))
-        ->assertSee('x-data="browserNotifications"', false);
-});
+        $panel->renderHook(
+            PanelsRenderHook::HEAD_END,
+            fn () => $this->renderVapidMeta(),
+        );
+    }
+}

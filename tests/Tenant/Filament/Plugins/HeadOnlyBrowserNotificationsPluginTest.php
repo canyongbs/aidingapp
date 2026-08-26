@@ -34,34 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Plugins;
-
-use App\Features\DesktopNotificationsFeature;
-use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
-use Filament\Panel;
+use App\Models\User;
+use Filament\Facades\Filament;
 use Filament\View\PanelsRenderHook;
 
-/**
- * The vendor prompt banner posts to /webpush/subscribe, which requires the
- * push_subscriptions table. This overrides registration so the banner only
- * renders once DesktopNotificationsFeature is active for the current tenant,
- * checked inside the render hook closure so it runs at render time rather
- * than when the plugin itself is registered.
- */
-final class GatedBrowserNotificationsPlugin extends BrowserNotificationsPlugin
-{
-    public function register(Panel $panel): void
-    {
-        $panel->renderHook(
-            PanelsRenderHook::HEAD_END,
-            fn () => $this->renderVapidMeta(),
-        );
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-        $panel->renderHook(
-            PanelsRenderHook::BODY_END,
-            fn () => DesktopNotificationsFeature::active()
-                ? view('filament-browser-notifications::webpush-prompt', ['plugin' => $this])
-                : '',
-        );
-    }
-}
+it('never shows the vendor floating prompt banner', function () {
+    config()->set('webpush.vapid.public_key', 'test-public-key');
+
+    actingAs(User::factory()->create());
+
+    get(route('filament.admin.profile-settings.pages.profile-information'))
+        ->assertDontSee('x-data="browserNotifications"', false);
+});
+
+// Panel::make() runs the vendor's Panel::configureUsing() callback before our
+// plugin ever runs, which already queues its own head meta tag and prompt
+// banner onto the panel. Render hooks can only be appended, never removed, so
+// the plugin must clear what was queued before adding its own head meta hook
+// rather than leaving a duplicate alongside it.
+it('clears the duplicate head meta hook the vendor queued before the admin panel plugin registers', function () {
+    $panel = Filament::getPanel('admin');
+    $renderHooks = (new ReflectionProperty($panel, 'renderHooks'))->getValue($panel);
+
+    expect($renderHooks[PanelsRenderHook::HEAD_END][''] ?? [])->toHaveCount(1)
+        ->and($renderHooks[PanelsRenderHook::BODY_END][''] ?? [])->toBeEmpty();
+});
