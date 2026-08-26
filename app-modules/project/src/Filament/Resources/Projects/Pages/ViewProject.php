@@ -72,7 +72,7 @@ class ViewProject extends ViewRecord
             return;
         }
 
-        $requestedTab = $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
+        $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
         $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
 
         $this->tab = $effectiveTab->value;

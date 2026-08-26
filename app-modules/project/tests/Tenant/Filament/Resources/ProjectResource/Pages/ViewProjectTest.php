@@ -276,14 +276,24 @@ describe('tabs', function () {
 
         $project = Project::factory()->create();
 
-        $page = livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->set('tab', $tab->value)
-            ->assertSet('tab', $tab->value)
-            ->assertSeeHtml("data-project-tab-panel=\"{$tab->value}\"");
+        $page = get(ViewProject::getUrl([
+            'record' => $project->getRouteKey(),
+            'tab' => $tab->value,
+        ]))
+            ->assertSuccessful()
+            ->assertSeeLivewire(match ($tab) {
+                ProjectTab::Access => ProjectAccessWidget::class,
+                ProjectTab::Pipelines => ProjectWorkPipelineWidget::class,
+                ProjectTab::Files => ProjectFilesWidget::class,
+            });
 
         collect(ProjectTab::cases())
             ->reject(fn (ProjectTab $inactiveTab): bool => $inactiveTab === $tab)
-            ->each(fn (ProjectTab $inactiveTab) => $page->assertDontSeeHtml("data-project-tab-panel=\"{$inactiveTab->value}\""));
+            ->each(fn (ProjectTab $inactiveTab) => $page->assertDontSeeLivewire(match ($inactiveTab) {
+                ProjectTab::Access => ProjectAccessWidget::class,
+                ProjectTab::Pipelines => ProjectWorkPipelineWidget::class,
+                ProjectTab::Files => ProjectFilesWidget::class,
+            }));
     })->with(ProjectTab::cases());
 });
 

@@ -66,20 +66,14 @@
     </div>
 
     @if ($tab === ProjectTab::Access->value && ProjectTab::Access->canView($record))
-        <div data-project-tab-panel="{{ ProjectTab::Access->value }}">
-            @livewire(ProjectAccessWidget::class, ['record' => $record])
-        </div>
+        @livewire(ProjectAccessWidget::class, ['record' => $record])
     @endif
 
     @if ($tab === ProjectTab::Pipelines->value && ProjectTab::Pipelines->canView($record))
-        <div data-project-tab-panel="{{ ProjectTab::Pipelines->value }}">
-            @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
-        </div>
+        @livewire(ProjectWorkPipelineWidget::class, ['record' => $record])
     @endif
 
     @if ($tab === ProjectTab::Files->value && ProjectTab::Files->canView($record))
-        <div data-project-tab-panel="{{ ProjectTab::Files->value }}">
-            @livewire(ProjectFilesWidget::class, ['record' => $record])
-        </div>
+        @livewire(ProjectFilesWidget::class, ['record' => $record])
     @endif
 </x-filament-panels::page>
