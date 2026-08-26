@@ -34,29 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Jobs\RecordReclassifiedServiceRequestStatusPeriods;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceRequestStatusObserver
+class SlaWaitingExclusionFeature extends AbstractFeatureFlag
 {
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
+    public function resolve(mixed $scope): mixed
     {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
-    }
-
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+        return false;
     }
 }
