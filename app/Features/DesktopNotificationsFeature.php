@@ -34,32 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Pages;
+namespace App\Features;
 
-use App\Features\DesktopNotificationsFeature;
-use App\Filament\Clusters\ProfileSettings;
-use Filament\Pages\Page;
+use App\Support\AbstractFeatureFlag;
 
-class ManageBrowserNotifications extends Page
+class DesktopNotificationsFeature extends AbstractFeatureFlag
 {
-    protected string $view = 'filament.pages.manage-browser-notifications';
-
-    protected static ?string $cluster = ProfileSettings::class;
-
-    protected static ?string $navigationLabel = 'Notifications';
-
-    protected static ?string $title = 'Notifications';
-
-    protected static ?int $navigationSort = 20;
-
-    public static function getNavigationIcon(): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'heroicon-o-bell';
-    }
-
-    public static function canAccess(): bool
-    {
-        // Desktop notifications are only available once VAPID keys are configured for the environment.
-        return DesktopNotificationsFeature::active() && filled(config('webpush.vapid.public_key'));
+        return false;
     }
 }

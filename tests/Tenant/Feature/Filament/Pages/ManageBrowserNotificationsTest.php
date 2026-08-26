@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use App\Features\DesktopNotificationsFeature;
 use App\Filament\Pages\ManageBrowserNotifications;
 use App\Models\User;
 
@@ -54,4 +55,14 @@ it('renders the desktop notifications management page when configured', function
     actingAs(User::factory()->create());
 
     livewire(ManageBrowserNotifications::class)->assertOk();
+});
+
+it('is not accessible when the desktop notifications feature is inactive', function () {
+    DesktopNotificationsFeature::deactivate();
+
+    config()->set('webpush.vapid.public_key', 'test-public-key');
+
+    actingAs(User::factory()->create());
+
+    livewire(ManageBrowserNotifications::class)->assertForbidden();
 });
