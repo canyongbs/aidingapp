@@ -20,7 +20,7 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
-      Canyon GBS® and Aiding App® are registered trademarks of
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
       Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
