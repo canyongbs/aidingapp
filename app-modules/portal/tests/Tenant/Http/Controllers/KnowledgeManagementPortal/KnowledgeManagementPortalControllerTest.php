@@ -37,7 +37,6 @@
 use AidingApp\KnowledgeBase\Enums\KnowledgeBaseCategoryTabOrder;
 use AidingApp\KnowledgeBase\Settings\KnowledgeBasePortalSettings;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\KnowledgeBaseCategoryTabOrderFeature;
 
 use function Pest\Laravel\getJson;
 
@@ -55,22 +54,4 @@ it('returns the configured category tab order', function () {
     $response->assertOk();
 
     expect($response->json('category_tab_order'))->toBe(['most-viewed', 'featured', 'all-articles']);
-});
-
-it('falls back to the default category tab order when the feature is inactive', function () {
-    $portalSettings = app(PortalSettings::class);
-    $portalSettings->knowledge_management_portal_enabled = true;
-    $portalSettings->save();
-
-    $knowledgeBasePortalSettings = app(KnowledgeBasePortalSettings::class);
-    $knowledgeBasePortalSettings->category_tab_order = KnowledgeBaseCategoryTabOrder::MostViewedFeaturedAllArticles;
-    $knowledgeBasePortalSettings->save();
-
-    KnowledgeBaseCategoryTabOrderFeature::deactivate();
-
-    $response = getJson(route('api.portal.define'));
-
-    $response->assertOk();
-
-    expect($response->json('category_tab_order'))->toBe(['all-articles', 'featured', 'most-viewed']);
 });

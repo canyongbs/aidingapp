@@ -34,96 +34,35 @@
 </COPYRIGHT>
 */
 
-use App\Features\ContactEmailUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Str;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
     private string $table = 'contacts';
 
     private string $column = 'email';
 
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function () {
-            $this->fixDuplicates();
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
                 $table->uniqueIndex($this->column, 'contacts_email_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            ContactEmailUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ContactEmailUniquenessFeature::deactivate();
-
             DB::statement('DROP INDEX IF EXISTS contacts_email_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
-    }
-
-    protected function ignoresNullValues(): bool
-    {
-        return true;
-    }
-
-    protected function orderDuplicateRecords(Builder $query): Builder
-    {
-        return $query
-            ->orderByRaw('user_id IS NULL')
-            ->orderBy('created_at', 'asc')
-            ->orderBy('id', 'asc');
-    }
-
-    /**
-     * @return array{0: string, 1: string}
-     */
-    protected function existingValueMatchPatterns(string $baseValue): array
-    {
-        $lower = Str::lower($baseValue);
-
-        [$local, $domain] = array_pad(explode('@', $lower, 2), 2, '');
-
-        return [$lower, $domain === '' ? "{$local}+%" : "{$local}+%@{$domain}"];
-    }
-
-    protected function buildDeduplicatedValue(string $originalValue, int $counter): string
-    {
-        // Rewrite duplicates using plus-addressing (john@example.com -> john+2@example.com)
-        // so the address stays valid and deliverable to the same inbox.
-        [$local, $domain] = array_pad(explode('@', $originalValue, 2), 2, '');
-
-        return $domain === '' ? "{$local}+{$counter}" : "{$local}+{$counter}@{$domain}";
-    }
-
-    protected function deduplicatedValuePattern(): string
-    {
-        return '\+[0-9]+(@|$)';
-    }
-
-    protected function stripDeduplicatedSuffix(string $value): string
-    {
-        return preg_replace('/\+\d+(?=@|$)/', '', $value) ?? $value;
     }
 };

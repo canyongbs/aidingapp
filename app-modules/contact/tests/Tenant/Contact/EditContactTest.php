@@ -37,7 +37,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
-use App\Features\ContactEmailUniquenessFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -103,8 +102,6 @@ test('EditContact is gated with proper access control', function () {
 });
 
 test('EditContact keeps its own email but rejects another contact\'s email case-insensitively', function () {
-    ContactEmailUniquenessFeature::activate();
-
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.*.update');

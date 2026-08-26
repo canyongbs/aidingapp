@@ -46,7 +46,6 @@ use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
@@ -79,30 +78,19 @@ class PipelineEntryForm
             Textarea::make('description')
                 ->label('Task Description')
                 ->maxLength(65535),
-            ...(PipelineEntryStartDateFeature::active()
-                ? [
-                    Grid::make(2)
-                        ->schema([
-                            DateTimePicker::make('start_date')
-                                ->label('Start Date'),
-                            DateTimePicker::make('due')
-                                ->label('Due Date'),
-                        ]),
-                    Grid::make(2)
-                        ->schema([
-                            Toggle::make('is_visible_to_guests')
-                                ->label('Visible to Guest')
-                                ->default(true),
-                            self::assignedToType(),
-                        ]),
-                ]
-                : [
+            Grid::make(2)
+                ->schema([
+                    DateTimePicker::make('start_date')
+                        ->label('Start Date'),
                     DateTimePicker::make('due')
                         ->label('Due Date'),
-                    self::assignedToType(),
+                ]),
+            Grid::make(2)
+                ->schema([
                     Toggle::make('is_visible_to_guests')
                         ->label('Visible to Guest')
                         ->default(true),
+                    self::assignedToType(),
                 ]),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
