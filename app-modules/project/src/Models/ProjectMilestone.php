@@ -42,6 +42,7 @@ use AidingApp\Project\Observers\ProjectMilestoneObserver;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -118,5 +119,13 @@ class ProjectMilestone extends Model implements Auditable
         if (! $hasActiveTask && ! $this->isArchived()) {
             $this->archiveQuietly();
         }
+    }
+
+    /**
+     * @param Builder<ProjectMilestone> $query
+     */
+    public function used(Builder $query): void
+    {
+        $query->whereHas('pipelineEntries');
     }
 }

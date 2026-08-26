@@ -135,3 +135,77 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
             },
         );
 });
+
+it('still resolves the label and keeps the option selectable for an archived milestone still related to an entry', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = PipelineStage::factory()->create([
+        'pipeline_id' => $pipeline->getKey(),
+        'classification' => PipelineStageClassification::Planning,
+    ]);
+
+    $archivedMilestone = ProjectMilestone::factory()->create([
+        'project_id' => $project->getKey(),
+        'title' => 'Archived Milestone',
+    ]);
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $stage->getKey(),
+        'project_milestone_id' => $archivedMilestone->getKey(),
+    ]);
+
+    $archivedMilestone->archive();
+
+    expect($archivedMilestone->isArchived())->toBeTrue();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertFormFieldExists(
+            'project_milestone_id',
+            function (Select $select) use ($archivedMilestone): bool {
+                $options = $select->getOptions();
+
+                return $select->getOptionLabel() === 'Archived Milestone (1 Task) 0% Complete'
+                    && array_key_exists($archivedMilestone->getKey(), $options);
+            },
+        );
+});
+
+it('excludes an archived milestone with no related entries from the options', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stage = PipelineStage::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+
+    $unusedArchivedMilestone = ProjectMilestone::factory()->create([
+        'project_id' => $project->getKey(),
+        'title' => 'Unused Archived Milestone',
+    ]);
+    $unusedArchivedMilestone->archive();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $stage->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertFormFieldExists(
+            'project_milestone_id',
+            function (Select $select) use ($unusedArchivedMilestone): bool {
+                return ! array_key_exists($unusedArchivedMilestone->getKey(), $select->getOptions());
+            },
+        );
+});

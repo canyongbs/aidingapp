@@ -236,7 +236,7 @@ class PipelineEntryForm
     {
         return $query
             ->when($pipeline, fn (Builder $query): Builder => $query->where('project_id', $pipeline->project_id))
-            ->withoutArchived()
+            ->withoutArchivedAndUnused()
             ->addSelect([
                 'tasks_count' => self::milestonePipelineEntriesQuery(),
                 'completed_tasks_count' => self::milestonePipelineEntriesQuery()
