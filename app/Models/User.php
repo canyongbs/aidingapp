@@ -426,8 +426,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     protected function serializeDate(DateTimeInterface $date): string
     {
-        return $date->format(
-            config('project.datetime_format') ?? 'Y-m-d H:i:s'
-        );
+        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }
