@@ -174,7 +174,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->all()
                     )
                     ->query(function (Builder $query, array $data) use ($pipeline): Builder {
-                        $includePlaceholders = $pipeline !== null && PipelineEntryMilestoneFeature::active();
+                        $includePlaceholders = $pipeline !== null;
 
                         return $query->when(
                             filled($data['values'] ?? null),
@@ -396,18 +396,8 @@ class ProjectWorkPipelineWidget extends TableWidget
             'assets',
             'serviceRequests',
             'pipelineStage.pipeline.project',
-            ...(PipelineEntryMilestoneFeature::active() ? ['milestone'] : ['milestones']),
+            'milestone',
         ];
-
-        if (! PipelineEntryMilestoneFeature::active()) {
-            return PipelineEntry::query()
-                ->whereHas('pipelineStage', fn (Builder $query): Builder => $query->where('pipeline_id', $pipeline->getKey()))
-                ->when(
-                    PipelineArchivingFeature::active(),
-                    fn (Builder $query): Builder => $query->withoutArchived(),
-                )
-                ->with($eagerLoad);
-        }
 
         // Filament only renders a group header when at least one row belongs to it. To keep
         // milestones without any tasks visible, we union a synthetic placeholder row (flagged
@@ -422,16 +412,11 @@ class ProjectWorkPipelineWidget extends TableWidget
      */
     protected function buildMilestoneGroupedSubquery(Pipeline $pipeline): Builder
     {
-        $withoutArchived = PipelineArchivingFeature::active();
-
         $columns = ['id', 'name', 'pipeline_stage_id', 'project_milestone_id', 'is_visible_to_guests', 'start_date', 'due', 'created_by'];
 
         $entries = PipelineEntry::query()
             ->whereHas('pipelineStage', fn (Builder $query): Builder => $query->where('pipeline_id', $pipeline->getKey()))
-            ->when(
-                $withoutArchived,
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->select(array_map(fn (string $column): string => "pipeline_entries.{$column}", $columns))
             ->selectRaw('0 as is_placeholder');
 
@@ -447,20 +432,14 @@ class ProjectWorkPipelineWidget extends TableWidget
         $emptyMilestones = PipelineEntry::query()->getConnection()
             ->table('project_milestones')
             ->where('project_milestones.project_id', $pipeline->project_id)
-            ->when(
-                $withoutArchived,
-                fn (QueryBuilder $query): QueryBuilder => $query->whereNull('project_milestones.archived_at'),
-            )
-            ->whereNotExists(function (QueryBuilder $query) use ($pipeline, $withoutArchived): void {
+            ->whereNull('project_milestones.archived_at')
+            ->whereNotExists(function (QueryBuilder $query) use ($pipeline): void {
                 $query->select(new Expression('1'))
                     ->from('pipeline_entries')
                     ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
                     ->whereColumn('pipeline_entries.project_milestone_id', 'project_milestones.id')
                     ->where('pipeline_stages.pipeline_id', $pipeline->getKey())
-                    ->when(
-                        $withoutArchived,
-                        fn (QueryBuilder $query): QueryBuilder => $query->whereNull('pipeline_entries.archived_at'),
-                    );
+                    ->whereNull('pipeline_entries.archived_at');
             })
             ->select($placeholderSelects);
 
