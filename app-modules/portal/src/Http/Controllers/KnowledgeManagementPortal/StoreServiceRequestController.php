@@ -525,7 +525,7 @@ class StoreServiceRequestController extends Controller
                     $fields,
                 );
 
-                if (($fields[$fieldId] ?? null) === PasswordFormFieldBlock::type()) {
+                if (($fields[$fieldId] ?? null) === PasswordFormFieldBlock::type() && filled($response)) {
                     $secretIds[] = $response;
                 }
             }

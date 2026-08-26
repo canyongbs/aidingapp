@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Support\Facades\Crypt;
-use Symfony\Component\HttpFoundation\Response;
 
 class AttachServiceRequestSecrets
 {
@@ -62,7 +61,9 @@ class AttachServiceRequestSecrets
                 ->where('author_id', $author->getKey())
                 ->first();
 
-            abort_if(is_null($secret), Response::HTTP_FORBIDDEN);
+            if (is_null($secret)) {
+                continue;
+            }
 
             $secret->value = $serviceRequestEncrypter->encryptString(
                 Crypt::decryptString($secret->value)
