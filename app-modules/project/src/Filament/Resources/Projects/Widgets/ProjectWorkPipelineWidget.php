@@ -83,7 +83,7 @@ class ProjectWorkPipelineWidget extends TableWidget
     /** @var array<string, int> */
     protected array $milestoneProgressPercentages = [];
 
-    protected ?string $milestoneProgressDescriptionsLoadedForPipelineId = null;
+    protected ?string $milestoneProgressPercentagesLoadedForPipelineId = null;
 
     protected int | string | array $columnSpan = 'full';
 
@@ -244,7 +244,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                             ->schema($this->entryFormSchema($pipeline))
                             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                             ->after(function (): void {
-                                $this->resetMilestoneProgressDescriptions();
+                                $this->resetMilestoneProgressPercentages();
                                 $this->dispatch('projectPipelineUpdated');
                             }),
                     ]
@@ -277,7 +277,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
                     ->after(function (): void {
-                        $this->resetMilestoneProgressDescriptions();
+                        $this->resetMilestoneProgressPercentages();
                         $this->dispatch('projectPipelineUpdated');
                     }),
                 CreateProjectMilestoneAction::make($this->record, 'createMilestone'),
@@ -307,11 +307,11 @@ class ProjectWorkPipelineWidget extends TableWidget
             $this->getSelectedPipeline(),
             'editPipelineEntry',
             after: function (): void {
-                $this->resetMilestoneProgressDescriptions();
+                $this->resetMilestoneProgressPercentages();
                 $this->dispatch('projectPipelineUpdated');
             },
             afterArchive: function (): void {
-                $this->resetMilestoneProgressDescriptions();
+                $this->resetMilestoneProgressPercentages();
                 $this->resetTable();
                 $this->dispatch('projectPipelineUpdated');
             },
@@ -353,7 +353,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 $milestone->update($data);
 
-                $this->resetMilestoneProgressDescriptions();
+                $this->resetMilestoneProgressPercentages();
                 $this->dispatch('projectMilestonesUpdated');
                 $this->dispatch('projectPipelineUpdated');
             })
@@ -374,7 +374,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $milestone->pipelineEntries()->update(['project_milestone_id' => null]);
                         $milestone->delete();
 
-                        $this->resetMilestoneProgressDescriptions();
+                        $this->resetMilestoneProgressPercentages();
                         $this->resetTable();
                         $this->dispatch('projectMilestonesUpdated');
                         $this->dispatch('projectPipelineUpdated');
@@ -518,24 +518,24 @@ class ProjectWorkPipelineWidget extends TableWidget
             return 0;
         }
 
-        $this->loadMilestoneProgressDescriptions($pipeline);
+        $this->loadMilestoneProgressPercentages($pipeline);
 
         return $this->milestoneProgressPercentages["{$pipeline->getKey()}:{$record->project_milestone_id}"] ?? 0;
     }
 
-    protected function resetMilestoneProgressDescriptions(): void
+    protected function resetMilestoneProgressPercentages(): void
     {
         $this->milestoneProgressPercentages = [];
-        $this->milestoneProgressDescriptionsLoadedForPipelineId = null;
+        $this->milestoneProgressPercentagesLoadedForPipelineId = null;
     }
 
     /**
-     * Precomputes the progress description for every milestone in the given pipeline
+     * Precomputes the progress percentage for every milestone in the given pipeline
      * with a single aggregate query, rather than issuing 2 queries per unique milestone.
      */
-    protected function loadMilestoneProgressDescriptions(Pipeline $pipeline): void
+    protected function loadMilestoneProgressPercentages(Pipeline $pipeline): void
     {
-        if ($this->milestoneProgressDescriptionsLoadedForPipelineId === $pipeline->getKey()) {
+        if ($this->milestoneProgressPercentagesLoadedForPipelineId === $pipeline->getKey()) {
             return;
         }
 
@@ -565,7 +565,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             $this->milestoneProgressPercentages[$cacheKey] = $percentage;
         }
 
-        $this->milestoneProgressDescriptionsLoadedForPipelineId = $pipeline->getKey();
+        $this->milestoneProgressPercentagesLoadedForPipelineId = $pipeline->getKey();
     }
 
     /**

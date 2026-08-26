@@ -61,5 +61,5 @@
             class="text-primary-600 dark:text-primary-500"
         />
     </svg>
-    <span class="text-primary-600 dark:text-primary-500">Progress: {{ $progress }}%</span>
+    <span class="text-sm text-primary-600 dark:text-primary-500">Progress: {{ $progress }}%</span>
 </div>
