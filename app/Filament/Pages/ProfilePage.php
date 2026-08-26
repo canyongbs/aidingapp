@@ -61,12 +61,16 @@ class ProfilePage extends Page
 
     protected static ?string $cluster = ProfileSettings::class;
 
+    protected static ?string $navigationLabel = 'Profile';
+
+    protected static ?int $navigationSort = 10;
+
     /** @var array<string, mixed> $data */
     public ?array $data = [];
 
-    public static function shouldRegisterNavigation(): bool
+    public static function getNavigationIcon(): string
     {
-        return false;
+        return 'heroicon-o-user-circle';
     }
 
     public function mount(): void
