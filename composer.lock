@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "965d6707c7fcca7decf587f63d9477d7",
+    "content-hash": "46eb128cc554f0ae8880c57744bc6704",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -586,16 +586,16 @@
         },
         {
             "name": "brick/math",
-            "version": "0.18.0",
+            "version": "0.17.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/brick/math.git",
-                "reference": "82944324d1c1bdb2c2618e89978d4e2ad78d69ad"
+                "reference": "8189e751995f9e15729c1aa2f89fa8f166ffe818"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/brick/math/zipball/82944324d1c1bdb2c2618e89978d4e2ad78d69ad",
-                "reference": "82944324d1c1bdb2c2618e89978d4e2ad78d69ad",
+                "url": "https://api.github.com/repos/brick/math/zipball/8189e751995f9e15729c1aa2f89fa8f166ffe818",
+                "reference": "8189e751995f9e15729c1aa2f89fa8f166ffe818",
                 "shasum": ""
             },
             "require": {
@@ -633,7 +633,7 @@
             ],
             "support": {
                 "issues": "https://github.com/brick/math/issues",
-                "source": "https://github.com/brick/math/tree/0.18.0"
+                "source": "https://github.com/brick/math/tree/0.17.2"
             },
             "funding": [
                 {
@@ -641,7 +641,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2026-06-14T18:21:03+00:00"
+            "time": "2026-05-25T20:34:43+00:00"
         },
         {
             "name": "canyon-gbs/aiding-app-ai",
@@ -3624,6 +3624,70 @@
             "time": "2025-03-06T22:45:56+00:00"
         },
         {
+            "name": "emuniq/filament-browser-notifications",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Emuniq/filament-browser-notifications.git",
+                "reference": "7d3af0d406b66a91d3f42b4ecddce80b92b9a003"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Emuniq/filament-browser-notifications/zipball/7d3af0d406b66a91d3f42b4ecddce80b92b9a003",
+                "reference": "7d3af0d406b66a91d3f42b4ecddce80b92b9a003",
+                "shasum": ""
+            },
+            "require": {
+                "filament/filament": "^3.0|^4.0|^5.0",
+                "laravel-notification-channels/webpush": "^8.0|^9.0|^10.0|^11.0",
+                "php": "^8.1"
+            },
+            "require-dev": {
+                "orchestra/testbench": "^9.0|^10.0",
+                "pestphp/pest": "^2.0|^3.0",
+                "pestphp/pest-plugin-laravel": "^2.0|^3.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "Emuniq\\FilamentBrowserNotifications\\BrowserNotificationsServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Emuniq\\FilamentBrowserNotifications\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Emuniq",
+                    "homepage": "https://github.com/Emuniq"
+                }
+            ],
+            "description": "Zero-config browser push notifications for Filament. Piggybacks on database notifications — every sendToDatabase() automatically triggers a Web Push via VAPID.",
+            "keywords": [
+                "browser-notifications",
+                "filament",
+                "laravel",
+                "notifications",
+                "push-notifications",
+                "service-worker",
+                "vapid",
+                "web-push"
+            ],
+            "support": {
+                "issues": "https://github.com/Emuniq/filament-browser-notifications/issues",
+                "source": "https://github.com/Emuniq/filament-browser-notifications"
+            },
+            "time": "2026-06-21T20:44:41+00:00"
+        },
+        {
             "name": "ezyang/htmlpurifier",
             "version": "v4.19.0",
             "source": {
@@ -5636,6 +5700,72 @@
                 "source": "https://github.com/404labfr/laravel-impersonate/tree/1.7.8"
             },
             "time": "2026-03-17T15:24:14+00:00"
+        },
+        {
+            "name": "laravel-notification-channels/webpush",
+            "version": "11.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/laravel-notification-channels/webpush.git",
+                "reference": "85b577e64459a9df06a24062e2b300abbaa99fa9"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/laravel-notification-channels/webpush/zipball/85b577e64459a9df06a24062e2b300abbaa99fa9",
+                "reference": "85b577e64459a9df06a24062e2b300abbaa99fa9",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/notifications": "^12.0|^13.0",
+                "illuminate/support": "^12.0|^13.0",
+                "minishlink/web-push": "^10.0.1",
+                "php": "^8.2"
+            },
+            "require-dev": {
+                "larastan/larastan": "^3.1",
+                "laravel/pint": "^1.25",
+                "mockery/mockery": "^1.0",
+                "orchestra/testbench": "^9.2|^10.0|^11.0",
+                "phpunit/phpunit": "^11.5.3|^12.5.12|^13.1.11",
+                "rector/rector": "^2.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "NotificationChannels\\WebPush\\WebPushServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "NotificationChannels\\WebPush\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Cretu Eusebiu",
+                    "email": "me@cretueusebiu.com",
+                    "homepage": "http://cretueusebiu.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Joost de Bruijn",
+                    "email": "joost@aqualabs.nl",
+                    "role": "Maintainer"
+                }
+            ],
+            "description": "Web Push Notifications driver for Laravel.",
+            "homepage": "https://github.com/laravel-notification-channels/webpush",
+            "support": {
+                "issues": "https://github.com/laravel-notification-channels/webpush/issues",
+                "source": "https://github.com/laravel-notification-channels/webpush/tree/11.0.0"
+            },
+            "time": "2026-05-24T13:22:27+00:00"
         },
         {
             "name": "laravel/framework",
@@ -7724,6 +7854,77 @@
                 "source": "https://github.com/microsoftgraph/msgraph-sdk-php/tree/1.110.0"
             },
             "time": "2024-01-15T18:49:30+00:00"
+        },
+        {
+            "name": "minishlink/web-push",
+            "version": "v10.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-push-libs/web-push-php.git",
+                "reference": "c922021b4ed1a61e6604d8dc33a2e0378b4382e3"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-push-libs/web-push-php/zipball/c922021b4ed1a61e6604d8dc33a2e0378b4382e3",
+                "reference": "c922021b4ed1a61e6604d8dc33a2e0378b4382e3",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-mbstring": "*",
+                "ext-openssl": "*",
+                "guzzlehttp/guzzle": "^7.9.2",
+                "php": ">=8.2",
+                "psr/log": "^2.0|^3.0",
+                "spomky-labs/base64url": "^2.0.4",
+                "symfony/polyfill-php83": "^1.33",
+                "web-token/jwt-library": "^3.4.9|^4.0.6"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^v3.92.2",
+                "phpstan/phpstan": "^2.1.33",
+                "phpstan/phpstan-deprecation-rules": "^2.0",
+                "phpstan/phpstan-phpunit": "^2.0",
+                "phpstan/phpstan-strict-rules": "^2.0",
+                "phpunit/phpunit": "^11.5.46|^12.5.2",
+                "symfony/polyfill-iconv": "^1.33"
+            },
+            "suggest": {
+                "ext-bcmath": "Optional for performance.",
+                "ext-gmp": "Optional for performance."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Minishlink\\WebPush\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Louis Lagrange",
+                    "email": "lagrange.louis@gmail.com",
+                    "homepage": "https://github.com/Minishlink"
+                }
+            ],
+            "description": "Web Push library for PHP",
+            "homepage": "https://github.com/web-push-libs/web-push-php",
+            "keywords": [
+                "Push API",
+                "WebPush",
+                "notifications",
+                "push",
+                "web"
+            ],
+            "support": {
+                "issues": "https://github.com/web-push-libs/web-push-php/issues",
+                "source": "https://github.com/web-push-libs/web-push-php/tree/v10.1.0"
+            },
+            "time": "2026-05-28T09:37:37+00:00"
         },
         {
             "name": "moneyphp/money",
@@ -13336,6 +13537,180 @@
             "time": "2026-06-22T07:55:44+00:00"
         },
         {
+            "name": "spomky-labs/base64url",
+            "version": "v2.0.4",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Spomky-Labs/base64url.git",
+                "reference": "7752ce931ec285da4ed1f4c5aa27e45e097be61d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Spomky-Labs/base64url/zipball/7752ce931ec285da4ed1f4c5aa27e45e097be61d",
+                "reference": "7752ce931ec285da4ed1f4c5aa27e45e097be61d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.1"
+            },
+            "require-dev": {
+                "phpstan/extension-installer": "^1.0",
+                "phpstan/phpstan": "^0.11|^0.12",
+                "phpstan/phpstan-beberlei-assert": "^0.11|^0.12",
+                "phpstan/phpstan-deprecation-rules": "^0.11|^0.12",
+                "phpstan/phpstan-phpunit": "^0.11|^0.12",
+                "phpstan/phpstan-strict-rules": "^0.11|^0.12"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Base64Url\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky-Labs/base64url/contributors"
+                }
+            ],
+            "description": "Base 64 URL Safe Encoding/Decoding PHP Library",
+            "homepage": "https://github.com/Spomky-Labs/base64url",
+            "keywords": [
+                "base64",
+                "rfc4648",
+                "safe",
+                "url"
+            ],
+            "support": {
+                "issues": "https://github.com/Spomky-Labs/base64url/issues",
+                "source": "https://github.com/Spomky-Labs/base64url/tree/v2.0.4"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Spomky",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2020-11-03T09:10:25+00:00"
+        },
+        {
+            "name": "spomky-labs/pki-framework",
+            "version": "1.6.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Spomky-Labs/pki-framework.git",
+                "reference": "80778a25426288acd2e3a7cde2def41a3d59cddf"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/Spomky-Labs/pki-framework/zipball/80778a25426288acd2e3a7cde2def41a3d59cddf",
+                "reference": "80778a25426288acd2e3a7cde2def41a3d59cddf",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "^0.10|^0.11|^0.12|^0.13|^0.14|^0.15|^0.16|^0.17|^0.18|^0.19",
+                "ext-mbstring": "*",
+                "php": ">=8.1"
+            },
+            "require-dev": {
+                "ekino/phpstan-banned-code": "^1.0|^2.0|^3.0",
+                "ext-gmp": "*",
+                "ext-openssl": "*",
+                "infection/infection": "^0.28|^0.29|^0.31",
+                "php-parallel-lint/php-parallel-lint": "^1.3",
+                "phpstan/extension-installer": "^1.3|^2.0",
+                "phpstan/phpstan": "^1.8|^2.0",
+                "phpstan/phpstan-deprecation-rules": "^1.0|^2.0",
+                "phpstan/phpstan-phpunit": "^1.1|^2.0",
+                "phpstan/phpstan-strict-rules": "^1.3|^2.0",
+                "phpunit/phpunit": "^10.1|^11.0|^12.0",
+                "rector/rector": "^1.0|^2.0",
+                "roave/security-advisories": "dev-latest",
+                "symfony/string": "^6.4|^7.0|^8.0",
+                "symfony/var-dumper": "^6.4|^7.0|^8.0",
+                "symplify/easy-coding-standard": "^12.0 || ^13.0"
+            },
+            "suggest": {
+                "ext-bcmath": "For better performance (or GMP)",
+                "ext-gmp": "For better performance (or BCMath)",
+                "ext-openssl": "For OpenSSL based cyphering"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "SpomkyLabs\\Pki\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Joni Eskelinen",
+                    "email": "jonieske@gmail.com",
+                    "role": "Original developer"
+                },
+                {
+                    "name": "Florent Morselli",
+                    "email": "florent.morselli@spomky-labs.com",
+                    "role": "Spomky-Labs PKI Framework developer"
+                }
+            ],
+            "description": "A PHP framework for managing Public Key Infrastructures. It comprises X.509 public key certificates, attribute certificates, certification requests and certification path validation.",
+            "homepage": "https://github.com/spomky-labs/pki-framework",
+            "keywords": [
+                "DER",
+                "Private Key",
+                "ac",
+                "algorithm identifier",
+                "asn.1",
+                "asn1",
+                "attribute certificate",
+                "certificate",
+                "certification request",
+                "cryptography",
+                "csr",
+                "decrypt",
+                "ec",
+                "encrypt",
+                "pem",
+                "pkcs",
+                "public key",
+                "rsa",
+                "sign",
+                "signature",
+                "verify",
+                "x.509",
+                "x.690",
+                "x509",
+                "x690"
+            ],
+            "support": {
+                "issues": "https://github.com/Spomky-Labs/pki-framework/issues",
+                "source": "https://github.com/Spomky-Labs/pki-framework/tree/1.6.0"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Spomky",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2026-08-06T16:21:11+00:00"
+        },
+        {
             "name": "sqids/sqids",
             "version": "0.5.0",
             "source": {
@@ -15570,6 +15945,86 @@
             "time": "2026-05-26T12:45:58+00:00"
         },
         {
+            "name": "symfony/polyfill-php83",
+            "version": "v1.41.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/symfony/polyfill-php83.git",
+                "reference": "5ea99087fb99c273a9b9236ed4c31e78b16103c6"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/symfony/polyfill-php83/zipball/5ea99087fb99c273a9b9236ed4c31e78b16103c6",
+                "reference": "5ea99087fb99c273a9b9236ed4c31e78b16103c6",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=7.2"
+            },
+            "type": "library",
+            "extra": {
+                "thanks": {
+                    "url": "https://github.com/symfony/polyfill",
+                    "name": "symfony/polyfill"
+                }
+            },
+            "autoload": {
+                "files": [
+                    "bootstrap.php"
+                ],
+                "psr-4": {
+                    "Symfony\\Polyfill\\Php83\\": ""
+                },
+                "classmap": [
+                    "Resources/stubs"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Nicolas Grekas",
+                    "email": "p@tchwork.com"
+                },
+                {
+                    "name": "Symfony Community",
+                    "homepage": "https://symfony.com/contributors"
+                }
+            ],
+            "description": "Symfony polyfill backporting some PHP 8.3+ features to lower PHP versions",
+            "homepage": "https://symfony.com",
+            "keywords": [
+                "compatibility",
+                "polyfill",
+                "portable",
+                "shim"
+            ],
+            "support": {
+                "source": "https://github.com/symfony/polyfill-php83/tree/v1.41.0"
+            },
+            "funding": [
+                {
+                    "url": "https://symfony.com/sponsor",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/fabpot",
+                    "type": "github"
+                },
+                {
+                    "url": "https://github.com/nicolas-grekas",
+                    "type": "github"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/symfony/symfony",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2026-07-01T12:47:55+00:00"
+        },
+        {
             "name": "symfony/polyfill-php84",
             "version": "v1.38.1",
             "source": {
@@ -17047,6 +17502,95 @@
                 }
             ],
             "time": "2026-04-26T05:33:54+00:00"
+        },
+        {
+            "name": "web-token/jwt-library",
+            "version": "4.1.7",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/web-token/jwt-library.git",
+                "reference": "fbcbf2c276d04d8b056f5c2957815abd5dfb704d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/web-token/jwt-library/zipball/fbcbf2c276d04d8b056f5c2957815abd5dfb704d",
+                "reference": "fbcbf2c276d04d8b056f5c2957815abd5dfb704d",
+                "shasum": ""
+            },
+            "require": {
+                "brick/math": "^0.12|^0.13|^0.14|^0.15|^0.16|^0.17",
+                "php": ">=8.2",
+                "psr/clock": "^1.0",
+                "spomky-labs/pki-framework": "^1.2.1"
+            },
+            "conflict": {
+                "spomky-labs/jose": "*"
+            },
+            "suggest": {
+                "ext-bcmath": "GMP or BCMath is highly recommended to improve the library performance",
+                "ext-gmp": "GMP or BCMath is highly recommended to improve the library performance",
+                "ext-openssl": "For key management (creation, optimization, etc.) and some algorithms (AES, RSA, ECDSA, etc.)",
+                "ext-sodium": "Sodium is required for OKP key creation, EdDSA signature algorithm and ECDH-ES key encryption with OKP keys",
+                "paragonie/sodium_compat": "Sodium is required for OKP key creation, EdDSA signature algorithm and ECDH-ES key encryption with OKP keys",
+                "spomky-labs/aes-key-wrap": "For all Key Wrapping algorithms (AxxxKW, AxxxGCMKW, PBES2-HSxxx+AyyyKW...)",
+                "symfony/console": "Needed to use console commands",
+                "symfony/http-client": "To enable JKU/X5U support."
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Jose\\Component\\": ""
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Florent Morselli",
+                    "homepage": "https://github.com/Spomky"
+                },
+                {
+                    "name": "All contributors",
+                    "homepage": "https://github.com/web-token/jwt-framework/contributors"
+                }
+            ],
+            "description": "JWT library",
+            "homepage": "https://github.com/web-token",
+            "keywords": [
+                "JOSE",
+                "JWE",
+                "JWK",
+                "JWKSet",
+                "JWS",
+                "Jot",
+                "RFC7515",
+                "RFC7516",
+                "RFC7517",
+                "RFC7518",
+                "RFC7519",
+                "RFC7520",
+                "bundle",
+                "jwa",
+                "jwt",
+                "symfony"
+            ],
+            "support": {
+                "issues": "https://github.com/web-token/jwt-library/issues",
+                "source": "https://github.com/web-token/jwt-library/tree/4.1.7"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/Spomky",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/FlorentMorselli",
+                    "type": "patreon"
+                }
+            ],
+            "time": "2026-06-06T18:12:39+00:00"
         },
         {
             "name": "webmozart/assert",
