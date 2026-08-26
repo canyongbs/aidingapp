@@ -42,7 +42,6 @@ use AidingApp\KnowledgeBase\Settings\KnowledgeBasePortalSettings;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\KnowledgeBaseCategoryTabOrderFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -82,9 +81,7 @@ class KnowledgeManagementPortalController extends Controller
                 ->map(fn (string $value): string => (string) str($value)->after('rgb(')->before(')'))
                 ->all(),
             'rounding' => $settings->knowledge_management_portal_rounding,
-            'category_tab_order' => KnowledgeBaseCategoryTabOrderFeature::active()
-                ? app(KnowledgeBasePortalSettings::class)->category_tab_order->tabs()
-                : KnowledgeBaseCategoryTabOrder::AllArticlesFeaturedMostViewed->tabs(),
+            'category_tab_order' => app(KnowledgeBasePortalSettings::class)->category_tab_order->tabs(),
             'requires_authentication' => $settings->knowledge_management_portal_requires_authentication,
             'service_management_enabled' => $settings->knowledge_management_portal_service_management && $addons?->serviceManagement,
             'service_monitoring_enabled' => $addons?->serviceMonitoring,

@@ -34,30 +34,21 @@
 </COPYRIGHT>
 */
 
-use App\Features\KnowledgeBaseCategoryTabOrderFeature;
-use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
-            try {
-                $this->migrator->add('knowledge_base_portal.category_tab_order', 'all_articles_featured_most_viewed');
-            } catch (SettingAlreadyExists) {
-            }
+        try {
+          $this->migrator->add('knowledge_base_portal.category_tab_order', 'all_articles_featured_most_viewed');
+        } catch (SettingAlreadyExists) {
 
-            KnowledgeBaseCategoryTabOrderFeature::activate();
-        });
+        }
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            KnowledgeBaseCategoryTabOrderFeature::deactivate();
-
-            $this->migrator->deleteIfExists('knowledge_base_portal.category_tab_order');
-        });
+        $this->migrator->deleteIfExists('knowledge_base_portal.category_tab_order');
     }
 };
