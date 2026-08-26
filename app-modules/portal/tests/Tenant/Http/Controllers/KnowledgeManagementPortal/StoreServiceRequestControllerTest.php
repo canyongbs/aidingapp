@@ -105,7 +105,7 @@ it('requires a submitted priority when the type has no configured default priori
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('requires a submitted priority before the default priority feature is activated', function () {
+it('assigns the configured default priority when no priority is submitted', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -116,8 +116,9 @@ it('requires a submitted priority before the default priority feature is activat
         ['Main' => ['title' => 'Portal priority test', 'description' => 'A priority is required.']],
     );
 
-    $response->assertUnprocessable()
-        ->assertJsonValidationErrors('Main.priority');
+    $response->assertSuccessful();
+
+    expect(ServiceRequest::query()->sole()->priority_id)->toBe($priority->getKey());
 });
 
 it('attaches submitted password secrets to the service request', function () {
