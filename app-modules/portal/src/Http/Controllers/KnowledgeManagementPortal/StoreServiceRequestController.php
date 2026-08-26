@@ -173,7 +173,7 @@ class StoreServiceRequestController extends Controller
 
         $rules['Main.priority'] ??= [];
         $rules['Main.priority'][] = Rule::prohibitedIf(
-            fn (): bool => $type->defaultPriority()->exists(),
+            fn(): bool => $type->defaultPriority()->exists(),
         );
 
         $validator = Validator::make($request->all(), $rules);
@@ -267,7 +267,7 @@ class StoreServiceRequestController extends Controller
         }
 
         return collect(range(1, $count))
-            ->map(fn (): string => (string) Str::orderedUuid())
+            ->map(fn(): string => (string) Str::orderedUuid())
             ->sort()
             ->values();
     }
