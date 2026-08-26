@@ -41,9 +41,8 @@ return new class () extends SettingsMigration {
     public function up(): void
     {
         try {
-          $this->migrator->add('knowledge_base_portal.category_tab_order', 'all_articles_featured_most_viewed');
+            $this->migrator->add('knowledge_base_portal.category_tab_order', 'all_articles_featured_most_viewed');
         } catch (SettingAlreadyExists) {
-
         }
     }
 

@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
-use AidingApp\KnowledgeBase\Enums\KnowledgeBaseCategoryTabOrder;
 use AidingApp\KnowledgeBase\Settings\KnowledgeBasePortalSettings;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Models\PortalGuest;
