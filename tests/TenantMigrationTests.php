@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Theme\Settings\ThemeSettings;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
