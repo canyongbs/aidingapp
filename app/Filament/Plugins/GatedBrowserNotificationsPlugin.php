@@ -34,16 +34,34 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Plugins\GatedBrowserNotificationsPlugin;
-use App\Filament\Plugins\NullBrowserNotificationsPlugin;
-use Filament\Facades\Filament;
+namespace App\Filament\Plugins;
 
-it('suppresses the browser notifications plugin on the landlord panel', function () {
-    expect(Filament::getPanel('landlord')->getPlugin('browser-notifications'))
-        ->toBeInstanceOf(NullBrowserNotificationsPlugin::class);
-});
+use App\Features\DesktopNotificationsFeature;
+use Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin;
+use Filament\Panel;
+use Filament\View\PanelsRenderHook;
 
-it('keeps the browser notifications plugin active on the admin panel', function () {
-    expect(Filament::getPanel('admin')->getPlugin('browser-notifications'))
-        ->toBeInstanceOf(GatedBrowserNotificationsPlugin::class);
-});
+/**
+ * The vendor prompt banner posts to /webpush/subscribe, which requires the
+ * push_subscriptions table. This overrides registration so the banner only
+ * renders once DesktopNotificationsFeature is active for the current tenant,
+ * checked inside the render hook closure so it runs at render time rather
+ * than when the plugin itself is registered.
+ */
+final class GatedBrowserNotificationsPlugin extends BrowserNotificationsPlugin
+{
+    public function register(Panel $panel): void
+    {
+        $panel->renderHook(
+            PanelsRenderHook::HEAD_END,
+            fn () => $this->renderVapidMeta(),
+        );
+
+        $panel->renderHook(
+            PanelsRenderHook::BODY_END,
+            fn () => DesktopNotificationsFeature::active()
+                ? view('filament-browser-notifications::webpush-prompt', ['plugin' => $this])
+                : '',
+        );
+    }
+}

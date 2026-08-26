@@ -30,4 +30,5 @@ deploy cycle.
 
 - The following file branches on `DesktopNotificationsFeature::active()` — keep the active branch and delete the inactive branch in each:
     - `app/Filament/Pages/ManageBrowserNotifications.php` (`canAccess()`)
+    - `app/Filament/Plugins/GatedBrowserNotificationsPlugin.php` (`register()` prompt banner hook) — once inactive branch removed, delete this class entirely and register `Emuniq\FilamentBrowserNotifications\BrowserNotificationsPlugin::make()` directly in `AdminPanelProvider` instead.
 - Remove the activation of `DesktopNotificationsFeature` from `database/migrations/2026_08_25_130000_create_push_subscriptions_table.php` when deleting the flag class.

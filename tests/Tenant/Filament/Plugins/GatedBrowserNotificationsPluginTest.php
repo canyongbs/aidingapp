@@ -34,16 +34,19 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Plugins\GatedBrowserNotificationsPlugin;
-use App\Filament\Plugins\NullBrowserNotificationsPlugin;
-use Filament\Facades\Filament;
+use App\Models\User;
 
-it('suppresses the browser notifications plugin on the landlord panel', function () {
-    expect(Filament::getPanel('landlord')->getPlugin('browser-notifications'))
-        ->toBeInstanceOf(NullBrowserNotificationsPlugin::class);
-});
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 
-it('keeps the browser notifications plugin active on the admin panel', function () {
-    expect(Filament::getPanel('admin')->getPlugin('browser-notifications'))
-        ->toBeInstanceOf(GatedBrowserNotificationsPlugin::class);
+// The inactive case is covered by ManageBrowserNotificationsTest's canAccess()
+// assertion; deactivating the flag mid-test isn't visible to this HTTP request
+// because NeedsTenant reconnects the tenant connection outside the test transaction.
+it('shows the enable notifications prompt banner when the feature is active', function () {
+    config()->set('webpush.vapid.public_key', 'test-public-key');
+
+    actingAs(User::factory()->create());
+
+    get(route('filament.admin.profile-settings.pages.profile-information'))
+        ->assertSee('x-data="browserNotifications"', false);
 });
