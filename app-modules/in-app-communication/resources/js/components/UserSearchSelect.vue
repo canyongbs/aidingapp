@@ -148,7 +148,7 @@
                     />
                     <ComboboxButton
                         class="absolute inset-y-0 right-0 flex items-center pr-3"
-                        :aria-label="isSearching ? 'Searching users' : 'Toggle user options'"
+                        aria-label="Toggle user options"
                     >
                         <ArrowPathIcon
                             v-if="isSearching"
@@ -156,6 +156,7 @@
                             aria-hidden="true"
                         />
                         <ChevronUpDownIcon v-else class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <span v-if="isSearching" class="sr-only" role="status">Searching users</span>
                     </ComboboxButton>
                 </div>
 
