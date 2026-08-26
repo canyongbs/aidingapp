@@ -37,31 +37,22 @@
 namespace AidingApp\ServiceManagement\Observers;
 
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ConfidentialServiceMonitoringFeature;
 
 class ServiceMonitoringTargetObserver
 {
     public function creating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        if (! ConfidentialServiceMonitoringFeature::active()) {
-            return;
-        }
-
         $this->assignCreatedByIfBlank($serviceMonitoringTarget);
     }
 
     public function updating(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
-        if (! ConfidentialServiceMonitoringFeature::active()) {
-            return;
-        }
-
         if ($serviceMonitoringTarget->isDirty('is_confidential') && $serviceMonitoringTarget->is_confidential) {
             $this->assignCreatedByIfBlank($serviceMonitoringTarget);
         }
     }
 
-    // Backfills the creator for pre-existing records that predate the confidentiality feature
+    // Assigns a default creator when missing (including legacy records and new confidential records)
     private function assignCreatedByIfBlank(ServiceMonitoringTarget $serviceMonitoringTarget): void
     {
         if (blank($serviceMonitoringTarget->getAttribute('created_by_id')) && auth()->check()) {

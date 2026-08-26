@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ConfidentialServiceMonitoringFeature;
 use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,11 +54,6 @@ class ServiceMonitoringTargetVisibilityScope implements Scope
      */
     public function apply(Builder $builder, Model $model): void
     {
-        // The confidentiality columns may not exist yet for tenants whose migration has not run
-        if (! ConfidentialServiceMonitoringFeature::active()) {
-            return;
-        }
-
         $this->constrainFor($builder, auth()->user());
     }
 

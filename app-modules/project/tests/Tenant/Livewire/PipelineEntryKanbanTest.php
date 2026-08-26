@@ -663,7 +663,7 @@ it('clears related milestone, assets, and service requests when the type is set 
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
-it('can remove a pipeline entry through the dropdown', function () {
+it('can remove a pipeline entry', function () {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -732,7 +732,40 @@ it('hides the remove action without pipeline update permission', function () {
         ->assertActionHidden('removePipelineEntry');
 });
 
-it('hides the edit action without pipeline update permission', function () {
+it('mounts the edit pipeline entry action from the card title with pipeline update permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($user);
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+    ]);
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('project.*.update');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->refresh();
+
+    expect($user->can('update', $pipeline))->toBeTrue();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertActionVisible('editPipelineEntry')
+        ->assertSeeHtml('editPipelineEntry')
+        ->assertDontSeeHtml('viewPipelineEntry')
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('editPipelineEntry');
+});
+
+it('mounts the view pipeline entry action from the card title without pipeline update permission', function () {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -755,37 +788,9 @@ it('hides the edit action without pipeline update permission', function () {
     expect($user->can('update', $pipeline))->toBeFalse();
 
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertActionVisible('viewPipelineEntry')
-        ->assertActionHidden('editPipelineEntry');
-});
-
-it('shows the view and edit actions with update permission on the pipeline\'s project', function () {
-    $user = User::factory()->create();
-
-    actingAs($user);
-
-    $project = Project::factory()->create();
-    $project->managerUsers()->attach($user);
-
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-    ]);
-
-    $user->givePermissionTo('project.view-any');
-    $user->givePermissionTo('project.*.view');
-    $user->givePermissionTo('project.*.update');
-    $user->givePermissionTo('pipeline.view-any');
-    $user->refresh();
-
-    expect($user->can('view', $pipeline))->toBeTrue()
-        ->and($user->can('update', $pipeline))->toBeTrue();
-
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertActionVisible('viewPipelineEntry')
-        ->assertActionVisible('editPipelineEntry');
+        ->assertActionHidden('editPipelineEntry')
+        ->assertSeeHtml('viewPipelineEntry')
+        ->assertDontSeeHtml('editPipelineEntry')
+        ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertActionMounted('viewPipelineEntry');
 });

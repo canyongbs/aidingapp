@@ -136,7 +136,9 @@ class ServiceRequestUpdate extends BaseModel implements Auditable, ProvidesATime
     {
         assert($forModel instanceof ServiceRequest);
 
-        return $forModel->serviceRequestUpdates()->get();
+        return $forModel->serviceRequestUpdates()
+            ->with('createdBy')
+            ->get();
     }
 
     /**

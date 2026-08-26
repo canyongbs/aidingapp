@@ -47,6 +47,11 @@ use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
+use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -54,8 +59,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Actions\Paths\ModulePath;
 use App\Models\Tenant;
+use App\Models\User;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Events\MessageSending;
@@ -72,6 +79,8 @@ use function Pest\Laravel\partialMock;
 use function Pest\Laravel\seed;
 
 use Spatie\Multitenancy\Events\MadeTenantCurrentEvent;
+
+use function Tests\enablePreference;
 
 describe('Spam and virus detection', function () {
     it('handles spam verdict failure properly', function () {
@@ -961,6 +970,326 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $filesystem->assertExists('s3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        assertDatabaseEmpty(EngagementResponse::class);
+
+        $serviceRequests = ServiceRequest::all();
+
+        expect($serviceRequests)->toHaveCount(1);
+
+        $serviceRequest = $serviceRequests->first();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
+        expect($serviceRequest->title)->toBe('This is a test')
+            ->and($serviceRequest->close_details)->toContain('Hello there! This should be put in S3!')
+            ->and($serviceRequest->respondent->is($contact))->toBeTrue()
+            ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue()
+            ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('round robin assigns the created service request to a manager of the type', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$manager, $serviceRequestType] = $tenant->execute(function () {
+            Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $manager = User::factory()->create();
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                    'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin,
+                ]);
+
+            $serviceRequestType->managerUsers()->attach($manager);
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return [$manager, $serviceRequestType];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        $serviceRequest = ServiceRequest::query()->sole();
+
+        expect($serviceRequest->assignedTo)->not->toBeNull()
+            ->and($serviceRequest->assignedTo->user_id)->toBe($manager->getKey())
+            ->and($serviceRequest->assignedTo->status)->toBe(ServiceRequestAssignmentStatus::Active)
+            ->and($serviceRequestType->fresh()->last_assigned_id)->toBe($manager->getKey());
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('individually assigns the created service request to the configured user', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$individual, $serviceRequestType] = $tenant->execute(function () {
+            Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $individual = User::factory()->create();
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                    'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+                    'assignment_type_individual_id' => $individual->getKey(),
+                ]);
+
+            $serviceRequestType->managerUsers()->attach($individual);
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return [$individual, $serviceRequestType];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        $serviceRequest = ServiceRequest::query()->sole();
+
+        expect($serviceRequest->assignedTo)->not->toBeNull()
+            ->and($serviceRequest->assignedTo->user_id)->toBe($individual->getKey())
+            ->and($serviceRequest->assignedTo->status)->toBe(ServiceRequestAssignmentStatus::Active);
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('notifies managers of the type when a service request is created from inbound email', function () {
+        $notificationFake = Notification::fake();
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+                Notification::swap($notificationFake);
+            }
+        );
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        $manager = $tenant->execute(function () {
+            Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $manager = User::factory()->create();
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                ]);
+
+            $serviceRequestType->managerUsers()->attach($manager);
+
+            enablePreference(
+                $serviceRequestType,
+                ServiceRequestEmailTemplateType::Created,
+                ServiceRequestTypeEmailTemplateRole::Manager,
+                ServiceRequestNotificationChannel::Notification,
+            );
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return $manager;
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        /** @var ProcessSesS3InboundEmail $mock */
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        invade($mock)->emailFilePath = 's3_email';
+
+        $mock->handle();
+
+        $notificationFake->assertSentTo($manager, ServiceRequestCreated::class);
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('routes forward-only mail on the SES delivery recipient when the To header is the original mailbox', function () {
+        $tenant = Tenant::query()->firstOrFail();
+
+        assert($tenant instanceof Tenant);
+
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            $contact = Contact::factory()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                ]);
+
+            $assignedPriority = $serviceRequestType->priorities->first();
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+            ]);
+
+            return [$contact, $serviceRequestType, $assignedPriority];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        assert($filesystem instanceof FilesystemAdapter);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forward_only_service_request'));
 
         $file = UploadedFile::fake()->createWithContent('s3_email', $content);
 

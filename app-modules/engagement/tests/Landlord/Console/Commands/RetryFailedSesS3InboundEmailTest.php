@@ -34,14 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 
-use App\Support\AbstractFeatureFlag;
+use function Pest\Laravel\artisan;
 
-class ConfidentialServiceMonitoringFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
-    {
-        return false;
-    }
-}
+it('moves a failed inbound email back out of the failed folder and queues it for reprocessing from its original path', function () {
+    Bus::fake();
+
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $filesystem->putFileAs('failed', UploadedFile::fake()->createWithContent('s3_email', 'raw'), 's3_email');
+
+    $filesystem->assertExists('failed/s3_email');
+
+    artisan('engagement:retry-failed-inbound-email', ['path' => 'failed/s3_email'])
+        ->assertSuccessful();
+
+    $filesystem->assertExists('s3_email');
+    $filesystem->assertMissing('failed/s3_email');
+
+    Bus::assertDispatched(
+        ProcessSesS3InboundEmail::class,
+        fn (ProcessSesS3InboundEmail $job): bool => invade($job)->emailFilePath === 's3_email',
+    );
+});
+
+it('fails and dispatches nothing when the file does not exist', function () {
+    Bus::fake();
+
+    Storage::fake('s3-inbound-email');
+
+    artisan('engagement:retry-failed-inbound-email', ['path' => 'failed/missing'])
+        ->assertFailed();
+
+    Bus::assertNothingDispatched();
+});

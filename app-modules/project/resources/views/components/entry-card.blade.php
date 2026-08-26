@@ -76,6 +76,10 @@
     }
 
     $dueTooltip = $entry->due?->format('M j, Y g:i A');
+
+    $canUpdatePipeline = auth()
+        ->user()
+        ->can('update', $pipeline);
 @endphp
 
 <div
@@ -86,46 +90,25 @@
     wire:key="pipeline-entry-{{ $entry->getKey() }}"
 >
     <div class="flex items-start justify-between gap-2">
-        <div class="min-w-0 break-words text-base font-semibold text-gray-900 dark:text-white">
+        <button
+            type="button"
+            class="min-w-0 wrap-break-word text-left text-base font-semibold text-gray-900 hover:underline dark:text-white"
+            wire:click="mountAction('{{ $canUpdatePipeline ? 'editPipelineEntry' : 'viewPipelineEntry' }}', { entry: '{{ $entry->getKey() }}' })"
+        >
             {{ $entry->name }}
-        </div>
+        </button>
 
-        <x-filament::dropdown placement="bottom-end">
-            <x-slot name="trigger">
-                <x-filament::icon-button
-                    class="shrink-0"
-                    icon="heroicon-m-ellipsis-horizontal"
-                    label="Actions"
-                    size="xs"
-                />
-            </x-slot>
-
-            <x-filament::dropdown.list>
-                <x-filament::dropdown.list.item
-                    icon="heroicon-m-eye"
-                    wire:click="mountAction('viewPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-                >
-                    View
-                </x-filament::dropdown.list.item>
-
-                @can('update', $pipeline)
-                    <x-filament::dropdown.list.item
-                        icon="heroicon-m-pencil"
-                        wire:click="mountAction('editPipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-                    >
-                        Edit
-                    </x-filament::dropdown.list.item>
-
-                    <x-filament::dropdown.list.item
-                        icon="heroicon-m-trash"
-                        color="danger"
-                        wire:click="mountAction('removePipelineEntry', { entry: '{{ $entry->getKey() }}' })"
-                    >
-                        Remove
-                    </x-filament::dropdown.list.item>
-                @endcan
-            </x-filament::dropdown.list>
-        </x-filament::dropdown>
+        @if ($canUpdatePipeline)
+            <x-filament::icon-button
+                class="shrink-0"
+                icon="heroicon-m-trash"
+                color="danger"
+                label="Remove"
+                tooltip="Remove"
+                size="xs"
+                wire:click="mountAction('removePipelineEntry', { entry: '{{ $entry->getKey() }}' })"
+            />
+        @endif
     </div>
 
     <hr class="my-3 border-gray-200 dark:border-gray-700" />

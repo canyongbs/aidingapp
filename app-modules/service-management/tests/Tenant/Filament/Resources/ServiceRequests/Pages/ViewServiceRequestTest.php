@@ -39,6 +39,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
+use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
@@ -55,9 +56,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Carbon\CarbonImmutable;
 use Filament\Infolists\Components\TextEntry;
 
 use function Pest\Laravel\actingAs;
@@ -455,6 +458,78 @@ describe('tabs', function () {
             ->set('tab', ServiceRequestTab::Timeline->value)
             ->assertSuccessful()
             ->assertSeeLivewire(TimelineList::class);
+    });
+
+    it('shows standardized timeline update text and non-linked timeline titles', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $customer = Contact::factory()->create([
+            'first_name' => 'Bob',
+            'last_name' => 'Smith',
+        ]);
+        $agent = User::factory()->create([
+            'name' => 'Richard Down',
+        ]);
+
+        $customerUpdateAt = CarbonImmutable::create(2026, 2, 3, 23, 35, 0, 'UTC');
+        $agentUpdateAt = CarbonImmutable::create(2026, 3, 2, 12, 20, 0, 'UTC');
+        $aiUpdateAt = CarbonImmutable::create(2026, 3, 4, 9, 15, 0, 'UTC');
+
+        $customerUpdate = ServiceRequestUpdate::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->create([
+                'update' => 'This is my update.',
+                'internal' => false,
+                'created_by_id' => $customer->getKey(),
+                'created_by_type' => $customer->getMorphClass(),
+                'created_at' => $customerUpdateAt,
+                'updated_at' => $customerUpdateAt,
+            ]);
+
+        $agentUpdate = ServiceRequestUpdate::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->create([
+                'update' => 'This is also an update.',
+                'internal' => false,
+                'created_by_id' => $agent->getKey(),
+                'created_by_type' => $agent->getMorphClass(),
+                'created_at' => $agentUpdateAt,
+                'updated_at' => $agentUpdateAt,
+            ]);
+
+        $aiUpdate = ServiceRequestUpdate::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->create([
+                'update' => 'AI generated update.',
+                'update_type' => ServiceRequestUpdateType::AiResolutionProposed,
+                'internal' => false,
+                'created_by_id' => $serviceRequest->getKey(),
+                'created_by_type' => $serviceRequest->getMorphClass(),
+                'created_at' => $aiUpdateAt,
+                'updated_at' => $aiUpdateAt,
+            ]);
+
+        $customerPostedAt = $customerUpdate->created_at?->format('M j, Y \\a\\t g:i A');
+        $agentPostedAt = $agentUpdate->created_at?->format('M j, Y \\a\\t g:i A');
+        $aiPostedAt = $aiUpdate->created_at?->format('M j, Y \\a\\t g:i A');
+
+        $customerName = $customer->full_name;
+        $agentName = $agent->name;
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeLivewire(TimelineList::class)
+            ->assertSee("{$customerName} (Customer) posted the following update on {$customerPostedAt}:")
+            ->assertSee("{$agentName} (Agent) posted the following update on {$agentPostedAt}:")
+            ->assertSee("Assistant (AI) posted the following update on {$aiPostedAt}:")
+            ->assertSee('This is my update.')
+            ->assertSee('This is also an update.')
+            ->assertSee('AI generated update.')
+            ->assertDontSeeHtml('Customer Update Sent</a>')
+            ->assertDontSeeHtml('Service Request Assigned</a>')
+            ->assertDontSeeHtml('Service Request Reassigned</a>');
     });
 
     it('renders the media table for the files tab', function () {
