@@ -42,14 +42,14 @@ return new class () extends Migration {
     public function up(): void
     {
         Schema::table('pipeline_entries', function (Blueprint $table): void {
-          $table->timestamp('start_date')->nullable();
+            $table->timestamp('start_date')->nullable();
         });
     }
 
     public function down(): void
     {
         Schema::table('pipeline_entries', function (Blueprint $table): void {
-          $table->dropColumn('start_date');
+            $table->dropColumn('start_date');
         });
     }
 };
