@@ -82,7 +82,7 @@ class CreateConversationController extends Controller
                 : null,
         );
 
-        $conversation->load('conversationParticipants');
+        $conversation->load('conversationParticipants.participant');
 
         $participants = ConversationParticipantResource::collection($conversation->conversationParticipants)->resolve();
 

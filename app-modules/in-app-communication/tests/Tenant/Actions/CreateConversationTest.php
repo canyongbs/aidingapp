@@ -35,9 +35,11 @@
 */
 
 use AidingApp\InAppCommunication\Actions\CreateConversation;
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 
@@ -229,4 +231,91 @@ it('sets `last_activity_at` for direct message participants', function () {
 
     expect($creatorParticipant->last_activity_at)->not->toBeNull();
     expect($participantRecord->last_activity_at)->not->toBeNull();
+});
+
+it('creates a confidential channel with an ephemeral period', function () {
+    $creator = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [],
+        name: 'Legal Review',
+        isConfidential: true,
+        ephemeralPeriod: ConversationEphemeralPeriod::TwentyFourHours,
+    );
+
+    expect($conversation)
+        ->is_confidential->toBeTrue()
+        ->ephemeral_period->toBe(ConversationEphemeralPeriod::TwentyFourHours)
+        ->is_private->toBeTrue();
+});
+
+it('forces a confidential channel to be private even when asked for a public one', function () {
+    $creator = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [],
+        name: 'Legal Review',
+        isPrivate: false,
+        isConfidential: true,
+    );
+
+    expect($conversation)
+        ->is_confidential->toBeTrue()
+        ->is_private->toBeTrue();
+});
+
+it('ignores the ephemeral period when the channel is not confidential', function () {
+    $creator = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [],
+        name: 'General Chat',
+        isConfidential: false,
+        ephemeralPeriod: ConversationEphemeralPeriod::OneMinute,
+    );
+
+    expect($conversation)
+        ->is_confidential->toBeFalse()
+        ->ephemeral_period->toBeNull();
+});
+
+it('does not make a direct message confidential', function () {
+    $creator = User::factory()->create();
+    $participant = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Direct,
+        participantIds: [$participant->getKey()],
+        isConfidential: true,
+        ephemeralPeriod: ConversationEphemeralPeriod::OneHour,
+    );
+
+    expect($conversation)
+        ->is_confidential->toBeFalse()
+        ->ephemeral_period->toBeNull();
+});
+
+it('does not store confidentiality when the feature is inactive', function () {
+    ConfidentialChannelsFeature::deactivate();
+
+    $creator = User::factory()->create();
+
+    $conversation = app(CreateConversation::class)(
+        creator: $creator,
+        type: ConversationType::Channel,
+        participantIds: [],
+        name: 'Legal Review',
+        isConfidential: true,
+        ephemeralPeriod: ConversationEphemeralPeriod::OneHour,
+    );
+
+    expect($conversation->is_confidential)->toBeFalsy()
+        ->and($conversation->ephemeral_period)->toBeNull();
 });

@@ -74,13 +74,6 @@ class Conversation extends BaseModel implements Auditable
         'created_by',
     ];
 
-    /*
-     * TODO: Cleanup Task (confidential-channels): once ConfidentialChannelsFeature is
-     * removed, mirror the column default here with `protected $attributes = ['is_confidential' => false];`.
-     * It is omitted while the flag exists because $attributes is included in the insert
-     * for every new Conversation, which fails on a tenant whose migration has not run yet.
-     */
-
     protected $casts = [
         'type' => ConversationType::class,
         'is_private' => 'boolean',

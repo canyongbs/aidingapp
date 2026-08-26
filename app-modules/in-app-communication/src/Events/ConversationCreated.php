@@ -67,7 +67,7 @@ class ConversationCreated implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        $this->conversation->load('conversationParticipants');
+        $this->conversation->load('conversationParticipants.participant');
 
         $participants = $this->conversation->conversationParticipants->map(function (ConversationParticipant $participant) {
             $participantModel = $participant->participant;

@@ -40,7 +40,6 @@ use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Enums\Feature;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
@@ -65,10 +64,6 @@ class ConversationPolicy
     {
         if ($this->isParticipant($authenticatable, $conversation)) {
             return Response::allow();
-        }
-
-        if (ConfidentialChannelsFeature::active() && $conversation->is_confidential) {
-            return Response::deny('You do not have permission to view this conversation.');
         }
 
         if ($conversation->type === ConversationType::Channel && ! $conversation->is_private) {

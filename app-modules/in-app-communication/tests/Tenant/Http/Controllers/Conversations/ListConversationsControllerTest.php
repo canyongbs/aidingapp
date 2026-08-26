@@ -267,3 +267,63 @@ it('returns correct conversation data structure', function () {
         ->assertJsonPath('data.0.is_pinned', false)
         ->assertJsonPath('data.0.participant_count', 2);
 });
+
+it('returns only confidential conversations when `confidential` is true', function () {
+    $user = User::factory()->create();
+
+    $confidential = Conversation::factory()->confidential()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $confidential->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    $ordinary = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $ordinary->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['confidential' => 1]))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $confidential->getKey())
+        ->assertJsonPath('data.0.is_confidential', true);
+});
+
+it('excludes confidential conversations when `confidential` is false', function () {
+    $user = User::factory()->create();
+
+    $confidential = Conversation::factory()->confidential()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $confidential->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    $ordinary = Conversation::factory()->channel()->create();
+    ConversationParticipant::factory()->create([
+        'conversation_id' => $ordinary->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['confidential' => 0]))
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('data.0.id', $ordinary->getKey());
+});
+
+it('excludes a pinned confidential conversation from the non confidential list', function () {
+    $user = User::factory()->create();
+
+    $confidential = Conversation::factory()->confidential()->create();
+    ConversationParticipant::factory()->pinned()->create([
+        'conversation_id' => $confidential->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->getJson(route('in-app-communication.conversations.index', ['confidential' => 0]))
+        ->assertOk()
+        ->assertJsonCount(0, 'pinned');
+});

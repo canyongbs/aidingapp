@@ -41,6 +41,7 @@ use AidingApp\InAppCommunication\Events\MessagesPruned;
 use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\InAppCommunication\Models\Message;
 use App\Features\ConfidentialChannelsFeature;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -99,15 +100,20 @@ class PruneEphemeralMessages implements ShouldQueue, ShouldBeUnique
 
     protected function clampUnreadCounts(Conversation $conversation): void
     {
+        $remainingForParticipant = Message::query()
+            ->selectRaw('count(*)')
+            ->whereColumn('messages.conversation_id', 'conversation_participants.conversation_id')
+            ->where(fn (Builder $query) => $query
+                ->whereNull('conversation_participants.last_read_at')
+                ->orWhereColumn('messages.created_at', '>', 'conversation_participants.last_read_at'));
+
         $conversation->conversationParticipants()
             ->where('unread_count', '>', 0)
-            ->eachById(function (ConversationParticipant $participant) use ($conversation) {
-                $remaining = $conversation->messages()
-                    ->when(
-                        filled($participant->last_read_at),
-                        fn (Builder $query) => $query->where('created_at', '>', $participant->last_read_at),
-                    )
-                    ->count();
+            ->select('conversation_participants.*')
+            ->selectSub($remainingForParticipant, 'remaining_count')
+            ->lazyById()
+            ->each(function (ConversationParticipant $participant) use ($conversation) {
+                $remaining = (int) $participant->getAttribute('remaining_count');
 
                 if ($participant->unread_count <= $remaining) {
                     return;
