@@ -40,7 +40,6 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
-use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -215,18 +214,6 @@ it('archives a pipeline task from its slide-over modal', function () {
         ->assertCanNotSeeTableRecords([$entry]);
 
     expect($entry->refresh()->isArchived())->toBeTrue();
-});
-
-describe('feature flags', function () {
-    it('hides the Start Date column when the pipeline entry start date flag is inactive', function () {
-        PipelineEntryStartDateFeature::deactivate();
-
-        $project = Project::factory()->create();
-        Pipeline::factory()->for($project)->create();
-
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
-            ->assertTableColumnDoesNotExist('start_date');
-    });
 });
 
 describe('archive authorization', function () {
