@@ -38,9 +38,11 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Features\MonitorTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -84,26 +86,32 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        try {
-            $response = Http::maxRedirects(15)
-                ->get($this->serviceMonitoringTarget->domain);
-
-            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
-        } catch (ConnectionException $exception) {
-            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
-                report($exception);
-            }
-            $this->handleResponses(523, 0, false);
+        if (MonitorTypeFeature::active()) {
+            match ($this->serviceMonitoringTarget->monitor_type) {
+                MonitorType::Availability => $this->handleAvailability(),
+                MonitorType::KeywordMatch => $this->handleKeywordMatch(),
+            };
+        } else {
+            $this->handleAvailability();
         }
     }
 
-    public function handleResponses(int $status, float $responseTime, bool $success): void
+    /**
+     * @param list<string>|null $keywordMatchFailures
+     */
+    public function handleResponses(int $status, float $responseTime, bool $success, ?array $keywordMatchFailures = null): void
     {
-        $history = $this->serviceMonitoringTarget->histories()->create([
+        $historyData = [
             'response' => $status,
             'response_time' => $responseTime,
             'succeeded' => $success,
-        ]);
+        ];
+
+        if ($keywordMatchFailures !== null) {
+            $historyData['keyword_match_failures'] = $keywordMatchFailures;
+        }
+
+        $history = $this->serviceMonitoringTarget->histories()->create($historyData);
 
         if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
@@ -130,5 +138,62 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
             Notification::send($recipients, new ServiceMonitoringNotification($history, $channel));
         }
+    }
+
+    protected function handleAvailability(): void
+    {
+        try {
+            $response = Http::maxRedirects(15)
+                ->head($this->serviceMonitoringTarget->domain);
+
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    protected function handleKeywordMatch(): void
+    {
+        try {
+            $response = Http::maxRedirects(15)
+                ->get($this->serviceMonitoringTarget->domain);
+
+            $responseBody = $this->readableResponseBody($response->body());
+
+            $requiredFailures = collect($this->serviceMonitoringTarget->should_contain ?? [])
+                ->unique()
+                ->reject(fn (string $value): bool => Str::contains($responseBody, $value, true))
+                ->map(fn (string $value): string => "Required string not found: {$value}");
+
+            $prohibitedFailures = collect($this->serviceMonitoringTarget->should_not_contain ?? [])
+                ->unique()
+                ->filter(fn (string $value): bool => Str::contains($responseBody, $value, true))
+                ->map(fn (string $value): string => "Prohibited string found: {$value}");
+
+            $keywordMatchFailures = $requiredFailures
+                ->concat($prohibitedFailures)
+                ->values()
+                ->all();
+
+            $success = $response->status() === 200 && $keywordMatchFailures === [];
+
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $success, $keywordMatchFailures);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    protected function readableResponseBody(string $responseBody): string
+    {
+        $responseBody = preg_replace('/<\s*(script|style)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $responseBody) ?? $responseBody;
+        $responseBody = html_entity_decode(strip_tags($responseBody), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+
+        return (string) preg_replace('/\s+/', ' ', $responseBody);
     }
 }

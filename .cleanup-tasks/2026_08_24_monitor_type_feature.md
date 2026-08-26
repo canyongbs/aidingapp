@@ -9,6 +9,8 @@ created: 2026-08-24
 
 ## Temporary Migrations
 
+- database/migrations/2026_08_25_202818_tmp_activate_monitor_type_feature.php
+
 ## Additional Cleanup
 
 <!--
