@@ -82,6 +82,7 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
+use NotificationChannels\WebPush\HasPushSubscriptions;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -100,6 +101,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     use HasAdvancedFilter;
     use Notifiable;
+    use HasPushSubscriptions;
     use SoftDeletes;
     use HasRelationships;
     use HasUuids;
