@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\DefaultPriorityFeature;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
@@ -111,19 +110,14 @@ it('requires a submitted priority before the default priority feature is activat
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
     $contact = Contact::factory()->create();
-    DefaultPriorityFeature::deactivate();
 
-    try {
-        $response = actingAs($contact, 'contact')->postJson(
-            route('api.portal.service-request.store', ['type' => $type]),
-            ['Main' => ['title' => 'Portal priority test', 'description' => 'A priority is required.']],
-        );
+    $response = actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store', ['type' => $type]),
+        ['Main' => ['title' => 'Portal priority test', 'description' => 'A priority is required.']],
+    );
 
-        $response->assertUnprocessable()
-            ->assertJsonValidationErrors('Main.priority');
-    } finally {
-        DefaultPriorityFeature::activate();
-    }
+    $response->assertUnprocessable()
+        ->assertJsonValidationErrors('Main.priority');
 });
 
 it('attaches submitted password secrets to the service request', function () {
