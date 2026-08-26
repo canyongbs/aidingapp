@@ -86,13 +86,13 @@ class PipelineEntryForm
                 ->tableArguments(['pipelineId' => $pipeline?->getKey()])
                 ->visible($isStageVisible)
                 ->required(),
-                    Grid::make(2)
-                        ->schema([
-                            DateTimePicker::make('start_date')
-                                ->label('Start Date'),
-                            DateTimePicker::make('due')
-                                ->label('Due Date'),
-                        ]),
+            Grid::make(2)
+                ->schema([
+                    DateTimePicker::make('start_date')
+                        ->label('Start Date'),
+                    DateTimePicker::make('due')
+                        ->label('Due Date'),
+                ]),
             Grid::make(2)
                 ->schema([
                     Select::make('project_milestone_id')
@@ -111,7 +111,6 @@ class PipelineEntryForm
                     Toggle::make('is_visible_to_guests')
                         ->label('Visible to Guest')
                         ->default(true),
-                    self::assignedToType(),
                 ]),
             self::assignedToType(),
             ModalTableSelect::make('assigned_to_id')
