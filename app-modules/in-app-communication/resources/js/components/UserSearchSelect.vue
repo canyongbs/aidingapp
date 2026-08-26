@@ -128,9 +128,10 @@
                 <button
                     type="button"
                     class="ml-1 rounded-full p-0.5 hover:bg-primary-200 dark:hover:bg-primary-800 transition-colors"
+                    :aria-label="`Remove ${user.name}`"
                     @click="removeUser(user.id)"
                 >
-                    <XMarkIcon class="h-3 w-3" />
+                    <XMarkIcon class="h-3 w-3" aria-hidden="true" />
                 </button>
             </span>
         </div>
@@ -145,9 +146,16 @@
                         :display-value="() => searchQuery"
                         @change="searchQuery = $event.target.value"
                     />
-                    <ComboboxButton class="absolute inset-y-0 right-0 flex items-center pr-3">
-                        <ArrowPathIcon v-if="isSearching" class="h-5 w-5 animate-spin text-gray-400" />
-                        <ChevronUpDownIcon v-else class="h-5 w-5 text-gray-400" />
+                    <ComboboxButton
+                        class="absolute inset-y-0 right-0 flex items-center pr-3"
+                        :aria-label="isSearching ? 'Searching users' : 'Toggle user options'"
+                    >
+                        <ArrowPathIcon
+                            v-if="isSearching"
+                            class="h-5 w-5 animate-spin text-gray-400"
+                            aria-hidden="true"
+                        />
+                        <ChevronUpDownIcon v-else class="h-5 w-5 text-gray-400" aria-hidden="true" />
                     </ComboboxButton>
                 </div>
 

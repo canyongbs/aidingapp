@@ -108,7 +108,7 @@
 
         <template v-else-if="activeItems.length === 0 && !inline">
             <div class="flex flex-col items-center justify-center p-8 text-center">
-                <ClockIcon class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-2" />
+                <ClockIcon class="w-10 h-10 text-gray-300 dark:text-gray-600 mb-2" aria-hidden="true" />
                 <p class="text-sm text-gray-500 dark:text-gray-400">No pending chat requests</p>
             </div>
         </template>
