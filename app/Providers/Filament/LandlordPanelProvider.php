@@ -36,6 +36,7 @@
 
 namespace App\Providers\Filament;
 
+use App\Filament\Plugins\NullBrowserNotificationsPlugin;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -59,6 +60,13 @@ class LandlordPanelProvider extends PanelProvider
                 AddQueuedCookiesToResponse::class,
                 SubstituteBindings::class,
                 DisableBladeIconComponents::class,
+            ])
+            ->plugins([
+                // Suppress the emuniq browser-notifications plugin, which
+                // auto-registers on every panel. The landlord panel runs
+                // without a current tenant, so push subscriptions cannot be
+                // resolved here.
+                NullBrowserNotificationsPlugin::make(),
             ])
             ->routes(function () {
                 Route::get('/ping', fn () => response()->json(['message' => 'pong']))
