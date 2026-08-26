@@ -34,14 +34,50 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\Project\Enums;
 
-use App\Support\AbstractFeatureFlag;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectFile;
+use Filament\Support\Contracts\HasLabel;
 
-class ContactEmailUniquenessFeature extends AbstractFeatureFlag
+enum ProjectTab: string implements HasLabel
 {
-    public function resolve(mixed $scope): mixed
+    case Access = 'access';
+
+    case Pipelines = 'pipelines';
+
+    case Files = 'files';
+
+    public function getLabel(): string
     {
-        return false;
+        return match ($this) {
+            self::Access => 'Access',
+            self::Pipelines => 'Pipelines',
+            self::Files => 'Files',
+        };
+    }
+
+    public static function default(): self
+    {
+        return self::Access;
+    }
+
+    public function canView(Project $project): bool
+    {
+        return match ($this) {
+            self::Access => ProjectAccessWidget::canView(),
+
+            self::Pipelines => auth()->user()?->can(
+                'viewAny',
+                [Pipeline::class, $project],
+            ) ?? false,
+
+            self::Files => auth()->user()?->can(
+                'viewAny',
+                [ProjectFile::class, $project],
+            ) ?? false,
+        };
     }
 }

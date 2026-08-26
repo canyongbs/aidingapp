@@ -47,7 +47,6 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\PipelineEntryStartDateFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -152,15 +151,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                 IconColumn::make('is_visible_to_guests')
                     ->label('Customer Visible')
                     ->boolean(),
-                ...(PipelineEntryStartDateFeature::active()
-                    ? [
-                        TextColumn::make('start_date')
-                            ->label('Start Date')
-                            ->date()
-                            ->placeholder('N/A')
-                            ->sortable(),
-                    ]
-                    : []),
+                TextColumn::make('start_date')
+                    ->label('Start Date')
+                    ->date()
+                    ->placeholder('N/A')
+                    ->sortable(),
                 TextColumn::make('due')
                     ->label('Target Date')
                     ->date()
