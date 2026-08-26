@@ -336,14 +336,22 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         return Action::make('manageMilestone')
             ->slideOver()
-            ->modalHeading(fn (Action $action): string => $this->getActionMilestone($action)->title ?? 'Milestone')
+            ->modalHeading(function (Action $action): string {
+                $milestone = $this->getActionMilestone($action);
+
+                return $milestone instanceof ProjectMilestone ? $milestone->title : 'Milestone';
+            })
             ->fillForm(function (Action $action): array {
                 $milestone = $this->getActionMilestone($action);
 
                 return $milestone?->attributesToArray() ?? [];
             })
             ->schema(CreateProjectMilestoneAction::formSchema())
-            ->authorize(fn (Action $action): bool => auth()->user()->can('update', $this->getActionMilestone($action)))
+            ->authorize(function (Action $action): bool {
+                $milestone = $this->getActionMilestone($action);
+
+                return $milestone instanceof ProjectMilestone && auth()->user()->can('update', $milestone);
+            })
             ->action(function (Action $action, array $data): void {
                 $milestone = $this->getActionMilestone($action);
 
@@ -363,7 +371,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->icon('heroicon-m-trash')
                     ->color('danger')
                     ->requiresConfirmation()
-                    ->visible(fn (): bool => auth()->user()->can('delete', $this->getActionMilestone($action)))
+                    ->visible(function () use ($action): bool {
+                        $milestone = $this->getActionMilestone($action);
+
+                        return $milestone instanceof ProjectMilestone && auth()->user()->can('delete', $milestone);
+                    })
                     ->action(function () use ($action): void {
                         $milestone = $this->getActionMilestone($action);
 
