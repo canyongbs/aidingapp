@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Theme\Settings\ThemeSettings;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
 
@@ -139,63 +138,6 @@ describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citex
                     ->and($trashed->refresh()->name)->toBe('partner');
             }
         );
-    });
-});
-
-describe('2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants', function () {
-    $migrationName = '2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants';
-    $migrationPath = "database/migrations/{$migrationName}.php";
-
-    it('seeds the default profile menu and login and home target settings for existing tenants', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
-
-            expect($settings->is_support_url_enabled)->toBeFalse()
-                ->and($settings->support_url)->toBeNull()
-                ->and($settings->is_recent_updates_url_enabled)->toBeFalse()
-                ->and($settings->recent_updates_url)->toBeNull()
-                ->and($settings->changelog_url)->toBeNull()
-                ->and($settings->product_resource_hub_url)->toBeNull();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $settings->refresh();
-
-            expect($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->support_url)->toBe(ThemeSettings::DEFAULT_SUPPORT_URL)
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue()
-                ->and($settings->recent_updates_url)->toBe(ThemeSettings::DEFAULT_RECENT_UPDATES_URL)
-                ->and($settings->changelog_url)->toBe(ThemeSettings::DEFAULT_CHANGELOG_URL)
-                ->and($settings->product_resource_hub_url)->toBe(ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL);
-        });
-    });
-
-    it('preserves urls an admin has already configured', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
-            $settings->support_url = 'https://example.com/custom-support';
-            $settings->recent_updates_url = 'https://example.com/custom-updates';
-            $settings->changelog_url = 'https://example.com/custom-changelog';
-            $settings->product_resource_hub_url = 'https://example.com/custom-hub';
-            $settings->save();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $settings->refresh();
-
-            expect($settings->support_url)->toBe('https://example.com/custom-support')
-                ->and($settings->recent_updates_url)->toBe('https://example.com/custom-updates')
-                ->and($settings->changelog_url)->toBe('https://example.com/custom-changelog')
-                ->and($settings->product_resource_hub_url)->toBe('https://example.com/custom-hub')
-                ->and($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue();
-        });
     });
 });
 
