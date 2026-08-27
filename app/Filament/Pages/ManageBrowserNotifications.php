@@ -59,7 +59,7 @@ class ManageBrowserNotifications extends Page
 
     public static function canAccess(): bool
     {
-        // Desktop notifications are only available once VAPID keys are configured for the environment.
+        // Desktop notifications are only available once the VAPID public key is configured for the environment.
         return DesktopNotificationsFeature::active() && filled(config('webpush.vapid.public_key'));
     }
 }
