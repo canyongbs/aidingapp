@@ -121,7 +121,7 @@
                     class="absolute right-2.5 inset-y-0 my-auto text-gray-400 hover:text-gray-600 transition-colors"
                     aria-label="Clear search"
                 >
-                    <XMarkIcon class="w-4 h-4" aria-hidden="true" />
+                    <XMarkIcon class="w-4 h-4" />
                 </button>
             </div>
         </div>

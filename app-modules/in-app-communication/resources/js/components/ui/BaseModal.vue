@@ -128,7 +128,7 @@
                                     aria-label="Close"
                                     @click="handleClose"
                                 >
-                                    <XMarkIcon class="w-5 h-5" aria-hidden="true" />
+                                    <XMarkIcon class="w-5 h-5" />
                                 </button>
                             </div>
 

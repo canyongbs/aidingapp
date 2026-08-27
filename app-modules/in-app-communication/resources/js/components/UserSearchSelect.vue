@@ -37,6 +37,7 @@
         Combobox,
         ComboboxButton,
         ComboboxInput,
+        ComboboxLabel,
         ComboboxOption,
         ComboboxOptions,
         TransitionRoot,
@@ -131,7 +132,7 @@
                     :aria-label="`Remove ${user.name}`"
                     @click="removeUser(user.id)"
                 >
-                    <XMarkIcon class="h-3 w-3" aria-hidden="true" />
+                    <XMarkIcon class="h-3 w-3" />
                 </button>
             </span>
         </div>
@@ -140,6 +141,7 @@
         <Combobox v-if="canSelectMore" :model-value="null" @update:model-value="handleSelection">
             <div class="relative">
                 <div class="relative w-full">
+                    <ComboboxLabel class="sr-only">Search users</ComboboxLabel>
                     <ComboboxInput
                         class="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-4 pr-10 text-sm text-gray-900 placeholder-gray-500 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-800 dark:text-white dark:placeholder-gray-400"
                         placeholder="Search users..."
@@ -150,12 +152,8 @@
                         class="absolute inset-y-0 right-0 flex items-center pr-3"
                         aria-label="Toggle user options"
                     >
-                        <ArrowPathIcon
-                            v-if="isSearching"
-                            class="h-5 w-5 animate-spin text-gray-400"
-                            aria-hidden="true"
-                        />
-                        <ChevronUpDownIcon v-else class="h-5 w-5 text-gray-400" aria-hidden="true" />
+                        <ArrowPathIcon v-if="isSearching" class="h-5 w-5 animate-spin text-gray-400" />
+                        <ChevronUpDownIcon v-else class="h-5 w-5 text-gray-400" />
                         <span v-if="isSearching" class="sr-only" role="status">Searching users</span>
                     </ComboboxButton>
                 </div>
