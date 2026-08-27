@@ -34,29 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Jobs;
 
-use AidingApp\ServiceManagement\Jobs\RecordReclassifiedServiceRequestStatusPeriods;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestStatusPeriod;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use Carbon\CarbonInterface;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-class ServiceRequestStatusObserver
+class RecordReclassifiedServiceRequestStatusPeriods implements ShouldQueue
 {
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
+
+    public function __construct(
+        public ServiceRequestStatus $status,
+        public CarbonInterface $reclassifiedAt,
+    ) {
+        $this->afterCommit = true;
     }
 
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
+    public function handle(RecordServiceRequestStatusPeriod $recordServiceRequestStatusPeriod): void
     {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+        ServiceRequest::query()
+            ->withoutGlobalScope('excludeDrafts')
+            ->where('status_id', $this->status->getKey())
+            ->eachById(function (ServiceRequest $serviceRequest) use ($recordServiceRequestStatusPeriod): void {
+                // Every request here already has this status, so reuse the reclassified instance
+                // to avoid lazily reloading the status relation for each record.
+                $serviceRequest->setRelation('status', $this->status);
+
+                $recordServiceRequestStatusPeriod->execute($serviceRequest, $this->reclassifiedAt);
+            });
     }
 }

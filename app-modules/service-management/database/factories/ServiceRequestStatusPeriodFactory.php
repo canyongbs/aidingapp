@@ -34,29 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Jobs\RecordReclassifiedServiceRequestStatusPeriods;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Carbon\CarbonImmutable;
-use Illuminate\Support\Facades\DB;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatusPeriod;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ServiceRequestStatusObserver
+/**
+ * @extends Factory<ServiceRequestStatusPeriod>
+ */
+class ServiceRequestStatusPeriodFactory extends Factory
 {
-    public function creating(ServiceRequestStatus $serviceRequestStatus): void
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        if (! isset($serviceRequestStatus->sort)) {
-            $serviceRequestStatus->setAttribute(
-                'sort',
-                DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
-            );
-        }
-    }
-
-    public function updated(ServiceRequestStatus $serviceRequestStatus): void
-    {
-        if ($serviceRequestStatus->wasChanged('classification')) {
-            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
-        }
+        return [
+            'service_request_id' => ServiceRequest::factory(),
+            'classification' => fn () => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
+            'service_request_status_id' => fn (array $attributes) => ServiceRequestStatus::factory()->state([
+                'classification' => $attributes['classification'],
+            ]),
+            'started_at' => now(),
+        ];
     }
 }

@@ -92,6 +92,7 @@ class ServiceRequestFeedbackTable extends BaseWidget
                         'serviceRequest.priority.sla',
                         'serviceRequest.respondent',
                         'serviceRequest.assignedTo.user',
+                        'serviceRequest.statusPeriods',
                     ])
                     ->when(
                         $startDate && $endDate,

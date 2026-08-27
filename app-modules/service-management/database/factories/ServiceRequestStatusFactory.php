@@ -106,6 +106,20 @@ class ServiceRequestStatusFactory extends Factory
         });
     }
 
+    /**
+     * @return Factory<ServiceRequestStatus>
+     */
+    public function waiting(): Factory
+    {
+        return $this->state(function (array $attributes) {
+            return [
+                'classification' => SystemServiceRequestClassification::Waiting,
+                'name' => 'Waiting',
+                'color' => Color::Yellow,
+            ];
+        });
+    }
+
     public function getNewOrder(): int
     {
         return $this->maxOrder = $this->getMaxOrder() + 1;
