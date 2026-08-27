@@ -31,17 +31,12 @@
     
     </COPYRIGHT>
 --}}
-@if ($milestone)
-    @can('update', $milestone)
-        <x-filament::link
-            tag="button"
-            wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
-        >
-            {{ $milestone->title }}
-        </x-filament::link>
-    @else
-        {{ $milestone->title }}
-    @endcan
-@else
-    No Associated Milestone
-@endif
+{{--
+    Keep this title plain text with no Blade control structures. Filament reuses the Group
+    title raw (unescaped) inside double-quoted `aria-label` attributes when the group is
+    collapsible, so any HTML containing a double-quoted attribute (e.g. a wire:click button)
+    breaks that markup, and any `@if`/`@else` directive here would leak Blade's conditional
+    comment markers into that same attribute. Interactive milestone actions belong in the
+    description view instead.
+--}}
+{{ $milestone?->title ?? 'No Associated Milestone' }}

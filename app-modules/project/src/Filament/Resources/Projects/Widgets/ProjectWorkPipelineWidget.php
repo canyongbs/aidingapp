@@ -115,6 +115,8 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         $pipeline = $this->getSelectedPipeline();
 
+        $canManageMilestones = auth()->user()->can('update', $this->record);
+
         return $table
             ->query(fn (): Builder => $this->getPipelineEntriesQuery($pipeline))
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
@@ -126,13 +128,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->searchable(['pipeline_entries.name'])
                     ->sortable()
                     ->extraAttributes(fn (PipelineEntry $record): array => $this->isPlaceholderRecord($record) ? [] : ['class' => 'underline'])
-                    ->action(function (PipelineEntry $record): void {
-                        if ($this->isPlaceholderRecord($record)) {
-                            return;
-                        }
-
-                        $this->openPipelineEntry($record);
-                    }),
+                    ->disabledClick(fn (PipelineEntry $record): bool => $this->isPlaceholderRecord($record))
+                    ->action(fn (PipelineEntry $record) => $this->openPipelineEntry($record)),
 
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
@@ -146,7 +143,6 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->view('project::filament.tables.columns.pipeline-entry.tickets'),
                 IconColumn::make('is_visible_to_guests')
                     ->label('Customer Visible')
-                    ->state(fn (PipelineEntry $record): ?bool => $this->isPlaceholderRecord($record) ? null : $record->is_visible_to_guests)
                     ->boolean(),
                 TextColumn::make('start_date')
                     ->label('Start Date')
@@ -193,10 +189,11 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->paginated([5, 10, 20, 50])
             ->defaultPaginationPageOption(50)
             ->defaultGroup(
-                function () use ($pipeline) {
+                function () use ($pipeline, $canManageMilestones) {
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)
+                        ->collapsible()
                         ->orderQueryUsing(function (Builder $query, string $direction): Builder {
                             $model = $query->getModel();
 
@@ -214,15 +211,19 @@ class ProjectWorkPipelineWidget extends TableWidget
                         })
                         ->getTitleFromRecordUsing(
                             fn (PipelineEntry $record): Htmlable => new HtmlString(
-                                view('project::filament.tables.groups.milestone-title', [
+                                trim(view('project::filament.tables.groups.milestone-title', [
                                     'milestone' => $record->milestone,
-                                ])->render()
+                                ])->render())
                             )
                         )
                         ->getDescriptionFromRecordUsing(
-                            fn (PipelineEntry $record): View => view('project::filament.tables.groups.milestone', [
-                                'percentage' => $this->milestoneProgressPercentage($record, $pipeline),
-                            ])
+                            fn (PipelineEntry $record): ?View => filled($record->project_milestone_id)
+                                ? view('project::filament.tables.groups.milestone', [
+                                    'milestone' => $record->milestone,
+                                    'canManageMilestone' => $canManageMilestones,
+                                    'percentage' => $this->milestoneProgressPercentage($record, $pipeline),
+                                ])
+                                : null
                         );
                 }
             )
@@ -424,6 +425,10 @@ class ProjectWorkPipelineWidget extends TableWidget
      */
     protected function buildMilestoneGroupedSubquery(Pipeline $pipeline): Builder
     {
+        // Because the outer query is built from this subquery via fromSub(), every
+        // PipelineEntry is hydrated with only these attributes: any attribute used by a
+        // table column or closure but omitted here will silently resolve to null instead
+        // of raising an error, so this list must include every attribute the table uses.
         $columns = ['id', 'name', 'pipeline_stage_id', 'project_milestone_id', 'is_visible_to_guests', 'start_date', 'due', 'created_by'];
 
         $entries = PipelineEntry::query()
@@ -445,6 +450,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->table('project_milestones')
             ->where('project_milestones.project_id', $pipeline->project_id)
             ->whereNull('project_milestones.archived_at')
+            ->whereNull('project_milestones.deleted_at')
             ->whereNotExists(function (QueryBuilder $query) use ($pipeline): void {
                 $query->select(new Expression('1'))
                     ->from('pipeline_entries')

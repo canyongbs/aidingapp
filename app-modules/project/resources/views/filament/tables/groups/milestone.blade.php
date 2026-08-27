@@ -31,6 +31,35 @@
     
     </COPYRIGHT>
 --}}
-<div class="flex w-full justify-end">
-    <x-project::progress-circle :progress="$percentage" />
-</div>
+{{--
+    The milestone title is rendered here (rather than in the collapsible Group's title)
+    so that it can be an interactive control. Filament's collapsible group toggle button
+    reuses the Group title raw inside its `aria-label` attribute, so interactive markup
+    there would corrupt the surrounding HTML — see milestone-title.blade.php.
+    
+    Filament echoes this description inside a `<p class="fi-ta-group-description">`, which
+    only accepts phrasing content. Keep every element here (span/svg/button) — a `<div>`
+    is flow content, so the browser would auto-close the `<p>` early and reparent it,
+    breaking both the layout and the `:has(+ .fi-ta-group-description)` CSS selector in
+    project-work-pipeline-widget.blade.php.
+--}}
+<span class="flex w-full items-center justify-between gap-x-3">
+    @if ($canManageMilestone)
+        <x-filament::link
+            tag="button"
+            x-on:click.stop
+            wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
+        >
+            {{ $milestone->title }}
+        </x-filament::link>
+    @else
+        <span>{{ $milestone->title }}</span>
+    @endif
+
+    {{-- Color/size classes are scoped to this call site only; the shared component ships unstyled so the dashboard header and List Projects table are unaffected. --}}
+    <x-project::progress-circle
+        :progress="$percentage"
+        tag="span"
+        class="text-sm text-primary-600 dark:text-primary-500"
+    />
+</span>
