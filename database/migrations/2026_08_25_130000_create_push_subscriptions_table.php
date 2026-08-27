@@ -63,7 +63,7 @@ return new class () extends Migration {
         DB::transaction(function () {
             DesktopNotificationsFeature::deactivate();
 
-            Schema::dropIfExists('push_subscriptions');
+            Schema::dropIfExists(config('webpush.table_name', 'push_subscriptions'));
         });
     }
 };
