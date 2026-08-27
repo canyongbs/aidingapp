@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestRequestFactory;
+use App\Features\SlaWaitingExclusionFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Notification;
@@ -120,6 +121,8 @@ test('A successful action on the EditServiceRequest page', function () {
 });
 
 test('check if time to resolution has correct value when status is changed', function () {
+    SlaWaitingExclusionFeature::deactivate();
+
     travel(-10)->seconds();
 
     $serviceRequest = ServiceRequest::factory([

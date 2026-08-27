@@ -70,6 +70,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                         'sla',
                     ],
                     'status',
+                    'statusPeriods',
                 ])
             )
             ->columns([
