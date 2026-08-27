@@ -44,7 +44,7 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            Schema::create('push_subscriptions', function (Blueprint $table) {
+            Schema::create(config('webpush.table_name', 'push_subscriptions'), function (Blueprint $table) {
                 $table->bigIncrements('id');
                 $table->uuidMorphs('subscribable', 'push_subscriptions_subscribable_morph_idx');
                 $table->string('endpoint', 500)->unique();
