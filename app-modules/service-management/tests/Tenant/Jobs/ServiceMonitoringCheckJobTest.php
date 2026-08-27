@@ -380,6 +380,194 @@ it('matches keyword values across HTML tags', function ($frequency) {
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
+it('does not match keyword values across adjacent inline HTML elements', function ($frequency) {
+    Http::fake(fn () => Http::response('<span>Sign</span><span>in</span>'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
+    $history = HistoricalServiceMonitoring::query()
+        ->where('service_monitoring_target_id', $serviceMonitorTarget->getKey())
+        ->latest()
+        ->firstOrFail();
+
+    expect($history->keyword_match_failures)->toBe([
+        'Required string not found: sign in',
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('matches keyword values across adjacent block HTML elements', function ($frequency) {
+    Http::fake(fn () => Http::response('<p>Sign</p><p>in</p>'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('matches keyword values separated by a line break element', function ($frequency) {
+    Http::fake(fn () => Http::response('Sign<br>in'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('matches keyword values across inline HTML elements with source whitespace', function ($frequency) {
+    Http::fake(fn () => Http::response('<strong>sign</strong> <em>in</em>'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('matches keyword values separated by a non-breaking space', function ($frequency) {
+    Http::fake(fn () => Http::response('Sign&nbsp;in'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('preserves block boundaries in minified HTML', function ($frequency) {
+    Http::fake(fn () => Http::response('<div>Sign</div><div>in</div>'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertNothingSent();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
+it('excludes script, style, and noscript content from keyword matching', function ($frequency) {
+    Http::fake(fn () => Http::response('<script>sign in</script><style>sign in</style><noscript>sign in</noscript>'));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['sign in'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
+    $history = HistoricalServiceMonitoring::query()
+        ->where('service_monitoring_target_id', $serviceMonitorTarget->getKey())
+        ->latest()
+        ->firstOrFail();
+
+    expect($history->keyword_match_failures)->toBe([
+        'Required string not found: sign in',
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
+
 it('handles unresolvable host errors gracefully', function ($frequency) {
     Http::fake(function () {
         throw new ConnectionException('Could not resolve host');

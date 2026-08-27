@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
 use App\Features\MonitorTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -178,16 +179,20 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 return;
             }
 
-            $responseBody = $this->readableResponseBody($response->body());
+            $contentType = $response->header('Content-Type');
+            $responseBody = (new HtmlTextExtractor())->extract(
+                $response->body(),
+                $this->responseCharset($contentType),
+            );
 
             $requiredFailures = collect($this->serviceMonitoringTarget->should_contain ?? [])
                 ->unique()
-                ->reject(fn (string $value): bool => Str::contains($responseBody, $value, true))
+                ->reject(fn (string $value): bool => Str::contains($responseBody, HtmlTextExtractor::normalizeWhitespace($value), true))
                 ->map(fn (string $value): string => "Required string not found: {$value}");
 
             $prohibitedFailures = collect($this->serviceMonitoringTarget->should_not_contain ?? [])
                 ->unique()
-                ->filter(fn (string $value): bool => Str::contains($responseBody, $value, true))
+                ->filter(fn (string $value): bool => Str::contains($responseBody, HtmlTextExtractor::normalizeWhitespace($value), true))
                 ->map(fn (string $value): string => "Prohibited string found: {$value}");
 
             $keywordMatchFailures = $requiredFailures
@@ -204,14 +209,6 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             }
             $this->handleResponses(523, 0, false);
         }
-    }
-
-    protected function readableResponseBody(string $responseBody): string
-    {
-        $responseBody = preg_replace('/<\s*(script|style)\b[^>]*>.*?<\s*\/\s*\1\s*>/is', '', $responseBody) ?? $responseBody;
-        $responseBody = html_entity_decode(strip_tags($responseBody), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-
-        return (string) preg_replace('/\s+/', ' ', $responseBody);
     }
 
     protected function hasReadableContentType(?string $contentType): bool
@@ -235,5 +232,16 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             ], true)
             || str_ends_with($mediaType, '+json')
             || str_ends_with($mediaType, '+xml');
+    }
+
+    protected function responseCharset(?string $contentType): ?string
+    {
+        if (blank($contentType)) {
+            return null;
+        }
+
+        preg_match('/(?:^|;)\s*charset\s*=\s*([\w.-]+)/i', $contentType, $matches);
+
+        return $matches[1] ?? null;
     }
 }
