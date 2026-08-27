@@ -49,7 +49,7 @@ return [
     ],
 
     /**
-     * This is model that will be used to for push subscriptions.
+     * This is the model that will be used for push subscriptions.
      */
     'model' => PushSubscription::class,
 
