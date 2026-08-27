@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
 
 class AttachServiceRequestSecrets
@@ -49,6 +50,13 @@ class AttachServiceRequestSecrets
     {
         if ($secretIds === []) {
             return;
+        }
+
+        if (blank($serviceRequest->secret_key)) {
+            $serviceRequest->secret_key = Crypt::encryptString(
+                'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
+            );
+            $serviceRequest->save();
         }
 
         $serviceRequestEncrypter = app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest);

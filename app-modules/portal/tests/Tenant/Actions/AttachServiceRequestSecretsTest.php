@@ -54,6 +54,7 @@ it('re-encrypts a secret with the service request key and associates it to the s
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
+        ->and($serviceRequest->refresh()->secret_key)->toBeString()->not->toBeEmpty()
         ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');

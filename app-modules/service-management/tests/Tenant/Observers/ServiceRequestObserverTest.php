@@ -58,6 +58,12 @@ use Illuminate\Support\Facades\Notification;
 use function Pest\Laravel\actingAs;
 use function Tests\enablePreference;
 
+it('does not generate a secret key when creating a service request', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    expect($serviceRequest->secret_key)->toBeNull();
+});
+
 describe('Created → Customer', function () {
     it('sends customer created notification when preference is enabled and status is Open', function () {
         Notification::fake();

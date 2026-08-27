@@ -65,6 +65,8 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Carbon\CarbonImmutable;
 use Filament\Infolists\Components\TextEntry;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -720,6 +722,10 @@ describe('secrets', function () {
             'service_request.*.update',
         ]);
         $serviceRequest = serviceRequestManagedBy($assignedManager);
+        $serviceRequest->secret_key = Crypt::encryptString(
+            'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
+        );
+        $serviceRequest->save();
 
         ServiceRequestAssignment::factory()
             ->active()
@@ -748,6 +754,10 @@ describe('secrets', function () {
             'service_request.*.update',
         ]);
         $serviceRequest = serviceRequestManagedBy($assignedManager);
+        $serviceRequest->secret_key = Crypt::encryptString(
+            'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
+        );
+        $serviceRequest->save();
 
         ServiceRequestAssignment::factory()
             ->active()

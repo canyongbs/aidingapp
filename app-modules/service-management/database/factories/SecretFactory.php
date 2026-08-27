@@ -45,8 +45,6 @@ use Illuminate\Support\Facades\Crypt;
  */
 class SecretFactory extends Factory
 {
-    protected $model = Secret::class;
-
     public function definition(): array
     {
         return [

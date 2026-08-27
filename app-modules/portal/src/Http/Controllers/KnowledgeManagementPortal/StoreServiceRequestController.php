@@ -183,27 +183,29 @@ class StoreServiceRequestController extends Controller
         assert($contact instanceof Contact);
 
         $validator->after(function (ValidatorInstance $validator) use ($contact, $form, $request): void {
-            foreach ($form->steps as $step) {
-                foreach ($step->fields as $field) {
-                    if ($field->type !== PasswordFormFieldBlock::type()) {
-                        continue;
-                    }
+            if (PasswordFormFieldFeature::active()) {
+                foreach ($form->steps as $step) {
+                    foreach ($step->fields as $field) {
+                        if ($field->type !== PasswordFormFieldBlock::type()) {
+                            continue;
+                        }
 
-                    $secretId = data_get($request->all(), "{$step->label}.{$field->getKey()}");
+                        $secretId = $request->input("{$step->label}.{$field->getKey()}");
 
-                    if (blank($secretId)) {
-                        continue;
-                    }
+                        if (blank($secretId)) {
+                            continue;
+                        }
 
-                    $isOwnedUnrelatedSecret = Secret::query()
-                        ->whereKey($secretId)
-                        ->whereNull('related_id')
-                        ->where('author_type', $contact->getMorphClass())
-                        ->where('author_id', $contact->getKey())
-                        ->exists();
+                        $isOwnedUnrelatedSecret = Secret::query()
+                            ->whereKey($secretId)
+                            ->whereNull('related_id')
+                            ->where('author_type', $contact->getMorphClass())
+                            ->where('author_id', $contact->getKey())
+                            ->exists();
 
-                    if (! $isOwnedUnrelatedSecret) {
-                        $validator->errors()->add("{$step->label}.{$field->getKey()}", 'The selected password is invalid.');
+                        if (! $isOwnedUnrelatedSecret) {
+                            $validator->errors()->add("{$step->label}.{$field->getKey()}", 'The selected password is invalid.');
+                        }
                     }
                 }
             }
