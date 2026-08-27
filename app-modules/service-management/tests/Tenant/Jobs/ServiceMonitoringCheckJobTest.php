@@ -151,10 +151,11 @@ it('sends a notification when any required keyword match value is missing', func
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
 })->with(ServiceMonitoringFrequency::cases());
 
-it('does not send a failure notification when `should_contain` is empty', function ($frequency) {
-    Http::fake(fn () => Http::response('Test 1'));
+it('sends a failure notification when both keyword match fields are empty', function ($frequency) {
+    Http::preventStrayRequests();
     Notification::fake();
 
     $user = User::factory()->create();
@@ -164,13 +165,22 @@ it('does not send a failure notification when `should_contain` is empty', functi
         ->create([
             'monitor_type' => MonitorType::KeywordMatch,
             'should_contain' => [],
+            'should_not_contain' => [],
             'frequency' => $frequency,
             'is_notified_via_email' => true,
         ]);
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
-    Notification::assertNothingSent();
+    Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 0,
+        'response_time' => 0,
+        'succeeded' => false,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+        'keyword_match_failures' => json_encode(['No keyword match values were configured.']),
+    ]);
 })->with(ServiceMonitoringFrequency::cases());
 
 it('sends a notification when a prohibited keyword match value is present', function ($frequency) {
@@ -397,6 +407,36 @@ it('handles unresolvable host errors gracefully', function ($frequency) {
             fn () => ServiceMonitoringFrequency::TwentyFourHours,
         ]
     );
+
+it('sends a notification when a keyword match response has a binary content type', function ($frequency) {
+    Http::fake(fn () => Http::response('Test 1', 200, ['Content-Type' => 'application/octet-stream']));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => [],
+            'should_not_contain' => ['Test 1'],
+            'frequency' => $frequency,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
+    $history = HistoricalServiceMonitoring::query()
+        ->where('service_monitoring_target_id', $serviceMonitorTarget->getKey())
+        ->latest()
+        ->firstOrFail();
+
+    expect($history->keyword_match_failures)->toBe([
+        'The response has an unreadable content type.',
+    ]);
+})->with(ServiceMonitoringFrequency::cases());
 
 it('sends notifications based on configured channels', function (
     bool $emailEnabled,

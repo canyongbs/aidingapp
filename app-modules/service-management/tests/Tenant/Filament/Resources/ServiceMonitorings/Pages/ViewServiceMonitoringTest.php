@@ -178,9 +178,11 @@ test('keyword match values are displayed only for keyword monitors', function ()
         ->assertSuccessful()
         ->assertSeeInOrder([
             'Should Contain',
-            'test 1, test 2',
+            'test 1',
+            'test 2',
             'Should Not Contain',
-            'test 3, test 4',
+            'test 3',
+            'test 4',
         ]);
 
     $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
@@ -194,6 +196,23 @@ test('keyword match values are displayed only for keyword monitors', function ()
         ->assertSuccessful()
         ->assertDontSee('Should Contain')
         ->assertDontSee('Should Not Contain');
+});
+
+test('keyword match values with punctuation retain clear boundaries', function () {
+    $keywordMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
+    ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $keywordMonitor]))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'test1',
+            'test 2',
+            'test 3, "test 4"',
+            '"test 5, test 6"',
+        ]);
 });
 
 test('Reset Monitoring button resets monitoring', function () {

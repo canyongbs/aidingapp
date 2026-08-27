@@ -164,6 +164,14 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['should_not_contain'],
         ],
+        'keyword match requires at least one keyword field' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => null,
+                'should_not_contain' => null,
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
         'should contain does not have double quote in the middle of an unquoted string' => [
             ServiceMonitoringTargetRequestFactory::new()->state([
                 'monitor_type' => MonitorType::KeywordMatch,
@@ -225,6 +233,14 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
                 'monitor_type' => MonitorType::KeywordMatch,
                 'should_contain' => 'test 1',
                 'should_not_contain' => 'test 1',
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
+        'same value with different casing is not in both keyword lists' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'Error',
+                'should_not_contain' => 'error',
             ]),
             ['should_contain', 'should_not_contain'],
         ],
@@ -415,8 +431,8 @@ test('a service monitor saves keyword match values arrays', function () {
         ->fillForm([
             ...$request,
             'monitor_type' => MonitorType::KeywordMatch,
-            'should_contain' => 'available',
-            'should_not_contain' => 'outage',
+            'should_contain' => '"available ""now"""',
+            'should_not_contain' => '"outage ""now"""',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
@@ -426,8 +442,8 @@ test('a service monitor saves keyword match values arrays', function () {
         ->firstOrFail()
         ->refresh();
 
-    expect($serviceMonitoringTarget->should_contain)->toBe(['available'])
-        ->and($serviceMonitoringTarget->should_not_contain)->toBe(['outage']);
+    expect($serviceMonitoringTarget->should_contain)->toBe(['available ""now""'])
+        ->and($serviceMonitoringTarget->should_not_contain)->toBe(['outage ""now""']);
 });
 
 test('a service monitor saves comma-separated `should_contain` values as an array', function () {
@@ -450,6 +466,33 @@ test('a service monitor saves comma-separated `should_contain` values as an arra
         ->refresh();
 
     expect($serviceMonitoringTarget->should_contain)->toBe(['test1', 'test2']);
+});
+
+test('a service monitor preserves double quotes in quoted `should_contain` values', function () {
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => 'test1, test 2, "test 3, "test 4"", """test 5, test 6"""',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()
+        ->where('name', $request['name'])
+        ->firstOrFail()
+        ->refresh();
+
+    expect($serviceMonitoringTarget->should_contain)->toBe([
+        'test1',
+        'test 2',
+        'test 3, "test 4"',
+        '""test 5, test 6""',
+    ]);
 });
 
 test('a service monitor saves comma-separated `should_not_contain` values as an array', function () {

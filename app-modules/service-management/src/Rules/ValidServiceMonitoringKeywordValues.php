@@ -37,11 +37,25 @@
 namespace AidingApp\ServiceManagement\Rules;
 
 use Closure;
+use Illuminate\Contracts\Validation\DataAwareRule;
 use Illuminate\Contracts\Validation\ValidationRule;
 
-class ValidServiceMonitoringKeywordValues implements ValidationRule
+class ValidServiceMonitoringKeywordValues implements DataAwareRule, ValidationRule
 {
-    public function __construct(protected mixed $shouldContain, protected mixed $shouldNotContain) {}
+    /**
+     * @var array<string, mixed>
+     */
+    protected array $data = [];
+
+    /**
+     * @param  array<string, mixed>  $data
+     */
+    public function setData(array $data): static
+    {
+        $this->data = $data;
+
+        return $this;
+    }
 
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
@@ -51,13 +65,22 @@ class ValidServiceMonitoringKeywordValues implements ValidationRule
             return;
         }
 
-        if (is_string($value) && blank(array_filter(array_map('trim', str_getcsv($value)), filled(...)))) {
+        if (is_string($value) && blank(self::parseValues($value))) {
             $fail('Keyword values cannot be empty.');
 
             return;
         }
 
-        if (array_intersect($this->parse($this->shouldContain), $this->parse($this->shouldNotContain)) !== []) {
+        $shouldContain = array_map(
+            fn (string $value): string => mb_strtolower($value),
+            self::parseValues($this->fieldValue('should_contain')),
+        );
+        $shouldNotContain = array_map(
+            fn (string $value): string => mb_strtolower($value),
+            self::parseValues($this->fieldValue('should_not_contain')),
+        );
+
+        if (array_intersect($shouldContain, $shouldNotContain) !== []) {
             $fail('A keyword value cannot appear in both lists.');
 
             return;
@@ -67,8 +90,8 @@ class ValidServiceMonitoringKeywordValues implements ValidationRule
             return;
         }
 
-        foreach ($this->parse($this->shouldNotContain) as $prohibitedValue) {
-            foreach ($this->parse($this->shouldContain) as $requiredValue) {
+        foreach (self::parseValues($this->fieldValue('should_not_contain')) as $prohibitedValue) {
+            foreach (self::parseValues($this->fieldValue('should_contain')) as $requiredValue) {
                 if (str_contains(mb_strtolower($requiredValue), mb_strtolower($prohibitedValue))) {
                     $fail('A prohibited keyword cannot be a substring of a required keyword.');
 
@@ -80,21 +103,31 @@ class ValidServiceMonitoringKeywordValues implements ValidationRule
 
     protected function hasValidQuotePlacement(string $value): bool
     {
-        return preg_match('/^\s*(?:"[^"]+"|[^",]*)\s*(?:,\s*(?:"[^"]+"|[^",]*)\s*)*$/', $value) === 1;
+        return preg_match('/^\s*(?:".*?"|[^",]*)\s*(?:,\s*(?:".*?"|[^",]*)\s*)*$/', $value) === 1;
+    }
+
+    protected function fieldValue(string $field): mixed
+    {
+        return data_get($this->data, "data.data.{$field}", data_get($this->data, "data.{$field}", data_get($this->data, $field)));
     }
 
     /**
      * @return list<string>
      */
-    protected function parse(mixed $value): array
+    public static function parseValues(mixed $value): array
     {
         if (! is_string($value)) {
             return [];
         }
 
-        return array_values(array_unique(array_filter(
-            array_map('trim', str_getcsv($value)),
-            filled(...),
-        )));
+        preg_match_all('/(?:^|,)\s*(?:"(.*?)"|([^",]*))\s*(?=,|$)/', $value, $matches);
+
+        $values = array_map(
+            fn (string $quotedValue, string $unquotedValue): string => trim($quotedValue !== '' ? $quotedValue : $unquotedValue),
+            $matches[1],
+            $matches[2],
+        );
+
+        return array_values(array_unique(array_filter($values, filled(...))));
     }
 }

@@ -82,11 +82,11 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->columnSpanFull(),
                                 TextEntry::make('should_contain')
                                     ->label('Should Contain')
-                                    ->separator(', ')
+                                    ->listWithLineBreaks()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
                                 TextEntry::make('should_not_contain')
                                     ->label('Should Not Contain')
-                                    ->separator(', ')
+                                    ->listWithLineBreaks()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
                             ])
                             ->columns(2),

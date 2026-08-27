@@ -157,9 +157,26 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     protected function handleKeywordMatch(): void
     {
+        if (blank($this->serviceMonitoringTarget->should_contain) && blank($this->serviceMonitoringTarget->should_not_contain)) {
+            $this->handleResponses(0, 0, false, ['No keyword match values were configured.']);
+
+            return;
+        }
+
         try {
             $response = Http::maxRedirects(15)
                 ->get($this->serviceMonitoringTarget->domain);
+
+            if (! $this->hasReadableContentType($response->header('Content-Type'))) {
+                $this->handleResponses(
+                    $response->status(),
+                    $response->transferStats->getTransferTime() ?? 0,
+                    false,
+                    ['The response has an unreadable content type.'],
+                );
+
+                return;
+            }
 
             $responseBody = $this->readableResponseBody($response->body());
 
@@ -195,5 +212,28 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         $responseBody = html_entity_decode(strip_tags($responseBody), ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
         return (string) preg_replace('/\s+/', ' ', $responseBody);
+    }
+
+    protected function hasReadableContentType(?string $contentType): bool
+    {
+        if (blank($contentType)) {
+            return true;
+        }
+
+        $mediaType = Str::lower(trim(explode(';', $contentType, 2)[0]));
+
+        return str_starts_with($mediaType, 'text/')
+            || in_array($mediaType, [
+                'application/ecmascript',
+                'application/javascript',
+                'application/json',
+                'application/ld+json',
+                'application/xml',
+                'application/xhtml+xml',
+                'application/yaml',
+                'application/x-yaml',
+            ], true)
+            || str_ends_with($mediaType, '+json')
+            || str_ends_with($mediaType, '+xml');
     }
 }
