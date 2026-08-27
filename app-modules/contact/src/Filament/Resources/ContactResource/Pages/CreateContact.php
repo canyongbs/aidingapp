@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactEmailUniquenessFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -127,18 +126,10 @@ class CreateContact extends CreateRecord
                 ])->columns(3)->columnSpanFull(),
 
                 Section::make('Contact Information')->schema([
-                    /*
-                     * TODO: ContactEmailUniquenessFeature cleanup — once the feature flag is removed:
-                     * - Remove the ->when(ContactEmailUniquenessFeature::active(), ...) wrapper below
-                     * - Apply ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()) directly on the email field
-                     */
                     TextInput::make('email')
                         ->label('Primary Email')
                         ->email()
-                        ->when(
-                            ContactEmailUniquenessFeature::active(),
-                            fn (TextInput $input) => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                        ),
+                        ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                     PhoneInput::make('mobile')
                         ->label('Mobile')
                         ->string(),

@@ -55,7 +55,7 @@
         @class([
             'h-full max-h-9',
             'w-full' => $logo->mime_type == 'image/svg+xml',
-            'max-w-full' => $logo->mime_type != 'image/svg+xml',
+            'max-w-[50%]' => $logo->mime_type != 'image/svg+xml',
             'dark:hidden' => $darkLogo,
         ])
     />
@@ -73,7 +73,7 @@
             @class([
                 'h-full max-h-9',
                 'w-full' => $darkLogo->mime_type == 'image/svg+xml',
-                'max-w-full' => $darkLogo->mime_type != 'image/svg+xml',
+                'max-w-[50%]' => $darkLogo->mime_type != 'image/svg+xml',
                 'hidden dark:block',
             ])
         />
@@ -81,12 +81,13 @@
 @else
     <img
         src="{{ Vite::asset('resources/images/default-logo-light-1735308866.svg') }}"
+        alt="{{ config('app.name') }}"
         class="h-9 dark:hidden block"
-
     />
 
     <img
         src="{{ Vite::asset('resources/images/default-logo-dark-1733733973.svg') }}"
+        alt="{{ config('app.name') }}"
         class="h-9 hidden dark:block"
     />
 @endif

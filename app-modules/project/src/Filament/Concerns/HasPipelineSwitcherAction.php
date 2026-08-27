@@ -38,11 +38,9 @@ namespace AidingApp\Project\Filament\Concerns;
 
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineArchivingFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
 
 trait HasPipelineSwitcherAction
@@ -70,10 +68,7 @@ trait HasPipelineSwitcherAction
                     blank($pipelineId) ||
                     ! Pipeline::query()
                         ->where('project_id', $this->getPipelineSwitcherProjectId())
-                        ->when(
-                            PipelineArchivingFeature::active(),
-                            fn (Builder $query): Builder => $query->withoutArchived(),
-                        )
+                        ->withoutArchived()
                         ->whereKey($pipelineId)
                         ->exists()
                 ) {
@@ -98,10 +93,6 @@ trait HasPipelineSwitcherAction
 
     public function archivePipelineFromSwitcher(string $pipelineId): void
     {
-        if (! PipelineArchivingFeature::active()) {
-            return;
-        }
-
         $projectId = $this->getPipelineSwitcherProjectId();
 
         $pipeline = Pipeline::query()
@@ -164,7 +155,7 @@ trait HasPipelineSwitcherAction
         return Action::make('archivePipeline')
             ->label('Archive')
             ->color('danger')
-            ->visible(fn (): bool => PipelineArchivingFeature::active() && $this->canArchivePipelinesFromSwitcher())
+            ->visible(fn (): bool => $this->canArchivePipelinesFromSwitcher())
             ->requiresConfirmation()
             ->modalHeading('Archive Pipeline')
             ->modalDescription('Are you sure you want to archive this pipeline? All related milestones and tasks will also be archived.')

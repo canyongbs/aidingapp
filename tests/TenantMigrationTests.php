@@ -34,253 +34,110 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Models\EmailTemplate;
-use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Engagement\Models\EngagementBatch;
-use AidingApp\ServiceManagement\Models\ServiceRequestCustomEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use AidingApp\Theme\Settings\ThemeSettings;
-use App\Models\User;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
 use Illuminate\Console\Command;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 
-use function Tests\richContentText;
-use function Tests\richContentWith;
+describe('2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique', function () {
+    $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique.php';
 
-if (! function_exists('plantLiteralMergeTagContent')) {
-    function plantLiteralMergeTagContent(Model $model, string $attribute, string $text): void
-    {
-        $model->setAttribute($attribute, richContentText($text));
-        $model->saveQuietly();
-    }
-}
-
-describe('2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique', function () {
-    $migrationPath = 'app-modules/contact/database/migrations/2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique.php';
-
-    it('rewrites case-insensitive duplicate emails with plus-addressing and keeps the oldest', function () use ($migrationPath) {
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
         isolatedMigration(
-            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
+            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
             function () use ($migrationPath) {
-                $first = Contact::factory()->create(['email' => 'Match@Example.com', 'created_at' => now()->subMinutes(3)]);
-                $second = Contact::factory()->create(['email' => 'match@example.com', 'created_at' => now()->subMinutes(2)]);
-                $third = Contact::factory()->create(['email' => 'MATCH@EXAMPLE.COM', 'created_at' => now()->subMinutes(1)]);
-                $unique = Contact::factory()->create(['email' => 'solo@example.com', 'created_at' => now()->subMinutes(4)]);
+                $first = Organization::factory()->create(['name' => 'Acme Corp', 'created_at' => now()->subMinutes(3)]);
+                $second = Organization::factory()->create(['name' => 'acme corp', 'created_at' => now()->subMinutes(2)]);
+                $third = Organization::factory()->create(['name' => 'ACME CORP', 'created_at' => now()->subMinutes(1)]);
+                $unique = Organization::factory()->create(['name' => 'Solo Inc', 'created_at' => now()->subMinutes(4)]);
 
                 $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
-                expect($first->refresh()->email)->toBe('Match@Example.com')
-                    ->and($second->refresh()->email)->toBe('match+2@example.com')
-                    ->and($third->refresh()->email)->toBe('MATCH+3@EXAMPLE.COM')
-                    ->and($unique->refresh()->email)->toBe('solo@example.com');
-            }
-        );
-    });
-
-    it('keeps the managed contact and rewrites the unmanaged duplicate', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $user = User::factory()->create();
-
-                $older = Contact::factory()->create(['email' => 'Shared@Example.com', 'created_at' => now()->subMinutes(5)]);
-                $managed = Contact::factory()->create(['email' => 'shared@example.com', 'user_id' => $user->getKey(), 'created_at' => now()->subMinute()]);
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($managed->refresh()->email)->toBe('shared@example.com')
-                    ->and($older->refresh()->email)->toBe('Shared+2@Example.com');
+                expect($first->refresh()->name)->toBe('Acme Corp')
+                    ->and($second->refresh()->name)->toBe('acme corp-2')
+                    ->and($third->refresh()->name)->toBe('ACME CORP-3')
+                    ->and($unique->refresh()->name)->toBe('Solo Inc');
             }
         );
     });
 
     it('leaves soft-deleted duplicates untouched', function () use ($migrationPath) {
         isolatedMigration(
-            '2026_07_23_230730_convert_contacts_email_to_citext_and_enforce_unique',
+            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
             function () use ($migrationPath) {
-                $kept = Contact::factory()->create(['email' => 'dupe@example.com', 'created_at' => now()->subMinutes(2)]);
-                $trashed = Contact::factory()->create(['email' => 'Dupe@Example.com', 'created_at' => now()->subMinute()]);
+                $kept = Organization::factory()->create(['name' => 'Dupe Co', 'created_at' => now()->subMinutes(2)]);
+                $trashed = Organization::factory()->create(['name' => 'dupe co', 'created_at' => now()->subMinute()]);
                 $trashed->delete();
 
                 $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
                 expect($migrate)->toBe(Command::SUCCESS);
 
-                expect($kept->refresh()->email)->toBe('dupe@example.com')
-                    ->and($trashed->refresh()->email)->toBe('Dupe@Example.com');
+                expect($kept->refresh()->name)->toBe('Dupe Co')
+                    ->and($trashed->refresh()->name)->toBe('dupe co');
             }
         );
     });
 });
 
-describe('2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_rich_content', function () {
-    $migrationName = '2026_07_30_182335_tmp_data_convert_literal_merge_tags_in_engagement_rich_content';
-    $migrationPath = "app-modules/engagement/database/migrations/{$migrationName}.php";
+describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique', function () {
+    $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique.php';
 
-    it('converts literal merge tags across the engagement tables', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $engagement = Engagement::factory()->create();
-            $batch = EngagementBatch::factory()->create();
-            $emailTemplate = EmailTemplate::factory()->create();
+    it('rewrites case-insensitive duplicate type names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $first = OrganizationType::factory()->create(['name' => 'Vendor', 'created_at' => now()->subMinutes(3)]);
+                $second = OrganizationType::factory()->create(['name' => 'vendor', 'created_at' => now()->subMinutes(2)]);
+                $third = OrganizationType::factory()->create(['name' => 'VENDOR', 'created_at' => now()->subMinutes(1)]);
 
-            plantLiteralMergeTagContent($engagement, 'body', 'Hello {{ contact full name }}!');
-            plantLiteralMergeTagContent($batch, 'body', 'Hello {{ contact full name }}!');
-            plantLiteralMergeTagContent($emailTemplate, 'content', 'Reach you at {{ contact email }}?');
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+                expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $expectedGreeting = richContentWith([
-                ['type' => 'text', 'text' => 'Hello '],
-                ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
-                ['type' => 'text', 'text' => '!'],
-            ]);
-
-            expect($engagement->refresh()->body)->toEqual($expectedGreeting)
-                ->and($batch->refresh()->body)->toEqual($expectedGreeting)
-                ->and($emailTemplate->refresh()->content)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Reach you at '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'contact email']],
-                    ['type' => 'text', 'text' => '?'],
-                ]));
-        });
+                expect($first->refresh()->name)->toBe('Vendor')
+                    ->and($second->refresh()->name)->toBe('vendor-2')
+                    ->and($third->refresh()->name)->toBe('VENDOR-3');
+            }
+        );
     });
 
-    it('leaves content without a recognised merge tag untouched', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $engagement = Engagement::factory()->create();
+    it('rewrites case-insensitive duplicate industry names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $first = OrganizationIndustry::factory()->create(['name' => 'Technology', 'created_at' => now()->subMinutes(3)]);
+                $second = OrganizationIndustry::factory()->create(['name' => 'technology', 'created_at' => now()->subMinutes(2)]);
 
-            plantLiteralMergeTagContent($engagement, 'body', 'Hello {{ not a merge tag }}!');
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+                expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($engagement->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
-        });
-    });
-});
-
-describe('2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_request_email_templates', function () {
-    $migrationName = '2026_07_30_182417_tmp_data_convert_literal_merge_tags_in_service_request_email_templates';
-    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
-
-    it('converts literal merge tags in the subject and body of every template table', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $typeTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
-            $automationTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create();
-            $customTemplate = ServiceRequestCustomEmailTemplate::factory()->create();
-
-            plantLiteralMergeTagContent($typeTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($typeTemplate, 'body', "Hello {{ recipient's name }}!");
-            plantLiteralMergeTagContent($automationTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($automationTemplate, 'body', 'Assigned to {{ assigned manager }}');
-            plantLiteralMergeTagContent($customTemplate, 'subject', '{{ title }}');
-            plantLiteralMergeTagContent($customTemplate, 'body', "Hi {{ contact's name }}!");
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $expectedSubject = richContentWith([['type' => 'mergeTag', 'attrs' => ['id' => 'title']]]);
-
-            expect($typeTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($typeTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Hello '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']],
-                    ['type' => 'text', 'text' => '!'],
-                ]))
-                ->and($automationTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($automationTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Assigned to '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'assigned staff name']],
-                ]))
-                ->and($customTemplate->refresh()->subject)->toEqual($expectedSubject)
-                ->and($customTemplate->body)->toEqual(richContentWith([
-                    ['type' => 'text', 'text' => 'Hi '],
-                    ['type' => 'mergeTag', 'attrs' => ['id' => 'contact name']],
-                    ['type' => 'text', 'text' => '!'],
-                ]));
-        });
+                expect($first->refresh()->name)->toBe('Technology')
+                    ->and($second->refresh()->name)->toBe('technology-2');
+            }
+        );
     });
 
-    it('leaves content without a recognised merge tag untouched', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $typeTemplate = ServiceRequestTypeEmailTemplate::factory()->create();
+    it('leaves soft-deleted duplicate type names untouched', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $kept = OrganizationType::factory()->create(['name' => 'Partner', 'created_at' => now()->subMinutes(2)]);
+                $trashed = OrganizationType::factory()->create(['name' => 'partner', 'created_at' => now()->subMinute()]);
+                $trashed->delete();
 
-            plantLiteralMergeTagContent($typeTemplate, 'body', 'Hello {{ not a merge tag }}!');
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
 
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+                expect($migrate)->toBe(Command::SUCCESS);
 
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            expect($typeTemplate->refresh()->body)->toEqual(richContentText('Hello {{ not a merge tag }}!'));
-        });
-    });
-});
-
-describe('2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants', function () {
-    $migrationName = '2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants';
-    $migrationPath = "database/migrations/{$migrationName}.php";
-
-    it('seeds the default profile menu and login and home target settings for existing tenants', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
-
-            expect($settings->is_support_url_enabled)->toBeFalse()
-                ->and($settings->support_url)->toBeNull()
-                ->and($settings->is_recent_updates_url_enabled)->toBeFalse()
-                ->and($settings->recent_updates_url)->toBeNull()
-                ->and($settings->changelog_url)->toBeNull()
-                ->and($settings->product_resource_hub_url)->toBeNull();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $settings->refresh();
-
-            expect($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->support_url)->toBe(ThemeSettings::DEFAULT_SUPPORT_URL)
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue()
-                ->and($settings->recent_updates_url)->toBe(ThemeSettings::DEFAULT_RECENT_UPDATES_URL)
-                ->and($settings->changelog_url)->toBe(ThemeSettings::DEFAULT_CHANGELOG_URL)
-                ->and($settings->product_resource_hub_url)->toBe(ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL);
-        });
-    });
-
-    it('preserves urls an admin has already configured', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
-            $settings->support_url = 'https://example.com/custom-support';
-            $settings->recent_updates_url = 'https://example.com/custom-updates';
-            $settings->changelog_url = 'https://example.com/custom-changelog';
-            $settings->product_resource_hub_url = 'https://example.com/custom-hub';
-            $settings->save();
-
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-            expect($migrate)->toBe(Command::SUCCESS);
-
-            $settings->refresh();
-
-            expect($settings->support_url)->toBe('https://example.com/custom-support')
-                ->and($settings->recent_updates_url)->toBe('https://example.com/custom-updates')
-                ->and($settings->changelog_url)->toBe('https://example.com/custom-changelog')
-                ->and($settings->product_resource_hub_url)->toBe('https://example.com/custom-hub')
-                ->and($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue();
-        });
+                expect($kept->refresh()->name)->toBe('Partner')
+                    ->and($trashed->refresh()->name)->toBe('partner');
+            }
+        );
     });
 });
 

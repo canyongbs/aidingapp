@@ -39,7 +39,9 @@ use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\Crea
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Tests\Tenant\OrganizationIndustry\RequestFactories\CreateOrganizationIndustryRequestFactory;
+use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -81,4 +83,60 @@ test('Create New Organization Industry', function () {
         ->assertHasNoFormErrors();
     assertCount(1, OrganizationIndustry::all());
     assertDatabaseHas(OrganizationIndustry::class, $request->toArray());
+});
+
+test('the organization industry name must be unique among non-trashed industries', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    OrganizationIndustry::factory()->create(['name' => 'Technology']);
+
+    $request = collect(CreateOrganizationIndustryRequestFactory::new()->state(['name' => 'Technology'])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganizationIndustry::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+test('the organization industry name uniqueness check is case-insensitive', function () {
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    OrganizationIndustry::factory()->create(['name' => 'Technology']);
+
+    $request = collect(CreateOrganizationIndustryRequestFactory::new()->state(['name' => 'TECHNOLOGY'])->create());
+
+    actingAs($user);
+
+    livewire(CreateOrganizationIndustry::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+test('does not apply the unique form rule when the feature is disabled', function () {
+    OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+    $user->givePermissionTo('settings.create');
+
+    OrganizationIndustry::factory()->create(['name' => 'Technology']);
+
+    $request = collect(CreateOrganizationIndustryRequestFactory::new()->state(['name' => 'Technology'])->create());
+
+    actingAs($user);
+
+    expect(fn () => livewire(CreateOrganizationIndustry::class)
+        ->fillForm($request->toArray())
+        ->call('create'))
+        ->toThrow(UniqueConstraintViolationException::class);
 });

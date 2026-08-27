@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ContactEmailUniquenessFeature extends AbstractFeatureFlag
+class OrganizationNameUniquenessFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

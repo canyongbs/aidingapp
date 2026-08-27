@@ -34,42 +34,50 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Theme\Settings\ThemeSettings;
-use Illuminate\Support\Facades\DB;
-use Spatie\LaravelSettings\Migrations\SettingsMigration;
+namespace AidingApp\Project\Enums;
 
-return new class () extends SettingsMigration {
-    public function up(): void
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectFile;
+use Filament\Support\Contracts\HasLabel;
+
+enum ProjectTab: string implements HasLabel
+{
+    case Access = 'access';
+
+    case Pipelines = 'pipelines';
+
+    case Files = 'files';
+
+    public function getLabel(): string
     {
-        DB::transaction(function () {
-            $this->migrator->update('theme.is_support_url_enabled', fn (): bool => true);
-
-            $this->migrator->update(
-                'theme.support_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_SUPPORT_URL,
-            );
-
-            $this->migrator->update('theme.is_recent_updates_url_enabled', fn (): bool => true);
-
-            $this->migrator->update(
-                'theme.recent_updates_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_RECENT_UPDATES_URL,
-            );
-
-            $this->migrator->update(
-                'theme.changelog_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_CHANGELOG_URL,
-            );
-
-            $this->migrator->update(
-                'theme.product_resource_hub_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL,
-            );
-        });
+        return match ($this) {
+            self::Access => 'Access',
+            self::Pipelines => 'Pipelines',
+            self::Files => 'Files',
+        };
     }
 
-    public function down(): void
+    public static function default(): self
     {
-        // This is a one-time data seed for existing tenants and is not reversible.
+        return self::Access;
     }
-};
+
+    public function canView(Project $project): bool
+    {
+        return match ($this) {
+            self::Access => ProjectAccessWidget::canView(),
+
+            self::Pipelines => auth()->user()?->can(
+                'viewAny',
+                [Pipeline::class, $project],
+            ) ?? false,
+
+            self::Files => auth()->user()?->can(
+                'viewAny',
+                [ProjectFile::class, $project],
+            ) ?? false,
+        };
+    }
+}

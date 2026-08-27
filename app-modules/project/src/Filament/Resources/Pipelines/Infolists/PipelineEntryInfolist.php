@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Filament\Resources\Pipelines\Forms\PipelineEntryForm;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -65,13 +64,9 @@ class PipelineEntryInfolist
                     TextEntry::make('description')
                         ->label('Task Description')
                         ->extraAttributes(['class' => 'break-words']),
-                    ...(PipelineEntryStartDateFeature::active()
-                        ? [
-                            TextEntry::make('start_date')
-                                ->label('Start Date')
-                                ->dateTime(),
-                        ]
-                        : []),
+                    TextEntry::make('start_date')
+                        ->label('Start Date')
+                        ->dateTime(),
                     TextEntry::make('due')
                         ->label('Due Date')
                         ->dateTime(),
@@ -101,8 +96,8 @@ class PipelineEntryInfolist
                     TextEntry::make('pipelineStage.name')
                         ->label('Stage')
                         ->badge(),
-                    TextEntry::make('milestones.title')
-                        ->label('Related Milestones')
+                    TextEntry::make('milestone.title')
+                        ->label('Related Milestone')
                         ->badge(),
                     TextEntry::make('assets.name')
                         ->label('Related Assets')

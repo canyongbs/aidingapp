@@ -125,6 +125,7 @@
                                 <button
                                     type="button"
                                     class="text-gray-400 hover:text-gray-500 dark:text-gray-500 dark:hover:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors rounded-lg p-1.5 -m-1.5"
+                                    aria-label="Close"
                                     @click="handleClose"
                                 >
                                     <XMarkIcon class="w-5 h-5" />

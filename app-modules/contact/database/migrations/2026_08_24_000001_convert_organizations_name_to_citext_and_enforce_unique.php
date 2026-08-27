@@ -34,34 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+use App\Features\OrganizationNameUniquenessFeature;
+use Database\Migrations\Concerns\FixesDuplicateNames;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\Pivot;
+return new class () extends Migration {
+    use FixesDuplicateNames;
 
-/**
- * TODO: Cleanup Task (pipeline-entry-milestone): Remove this model once the milestone feature is fully implemented and the pivot table is no longer needed.
- *
- * @mixin IdeHelperPipelineEntryMilestone
- */
-class PipelineEntryMilestone extends Pivot
-{
-    use HasUuids;
+    private string $table = 'organizations';
 
-    /**
-     * @return BelongsTo<PipelineEntry, $this>
-     */
-    public function pipelineEntry(): BelongsTo
+    private string $column = 'name';
+
+    private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
+
+    public function up(): void
     {
-        return $this->belongsTo(PipelineEntry::class, 'pipeline_entry_id', 'id', 'pipelineEntry');
+        DB::transaction(function () {
+            $this->fixDuplicates();
+
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
+
+            Schema::table($this->table, function (Blueprint $table) {
+                $table->uniqueIndex($this->column, 'organizations_name_unique')
+                    ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            OrganizationNameUniquenessFeature::activate();
+        });
     }
 
-    /**
-     * @return BelongsTo<ProjectMilestone, $this>
-     */
-    public function projectMilestone(): BelongsTo
+    public function down(): void
     {
-        return $this->belongsTo(ProjectMilestone::class, 'project_milestone_id', 'id', 'projectMilestone');
+        DB::transaction(function () {
+            OrganizationNameUniquenessFeature::deactivate();
+
+            DB::statement('DROP INDEX IF EXISTS organizations_name_unique');
+
+            DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+            $this->revertDuplicates();
+        });
     }
-}
+};

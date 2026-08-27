@@ -47,9 +47,6 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\PipelineArchivingFeature;
-use App\Features\PipelineEntryMilestoneFeature;
-use App\Features\PipelineEntryStartDateFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -92,10 +89,7 @@ class ProjectWorkPipelineWidget extends TableWidget
     {
         $this->selectedPipelineId = $this->record
             ->pipelines()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->oldest()
             ->value('id');
     }
@@ -108,10 +102,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $this->record
             ->pipelines()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->whereKey($this->selectedPipelineId)
             ->first();
     }
@@ -128,15 +119,12 @@ class ProjectWorkPipelineWidget extends TableWidget
 
                 return PipelineEntry::query()
                     ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
-                    ->when(
-                        PipelineArchivingFeature::active(),
-                        fn (Builder $query): Builder => $query->withoutArchived(),
-                    )
+                    ->withoutArchived()
                     ->with([
                         'assets',
                         'serviceRequests',
                         'pipelineStage.pipeline.project',
-                        ...(PipelineEntryMilestoneFeature::active() ? ['milestone'] : ['milestones']),
+                        'milestone',
                     ]);
             })
             ->heading(fn (): View => $this->getTableHeadingView($pipeline))
@@ -150,14 +138,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->openPipelineEntry($record);
                     }),
 
-                // TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire ViewColumn below, along with its corresponding Blade file.
-                ViewColumn::make('milestones')
-                    ->label('Milestones')
-                    ->visible(fn (): bool => ! PipelineEntryMilestoneFeature::active())
-                    ->view('project::filament.tables.columns.pipeline-entry.milestones'),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
-                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active())
                     ->badge()
                     ->placeholder('N/A'),
                 ViewColumn::make('assets')
@@ -169,15 +151,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                 IconColumn::make('is_visible_to_guests')
                     ->label('Customer Visible')
                     ->boolean(),
-                ...(PipelineEntryStartDateFeature::active()
-                    ? [
-                        TextColumn::make('start_date')
-                            ->label('Start Date')
-                            ->date()
-                            ->placeholder('N/A')
-                            ->sortable(),
-                    ]
-                    : []),
+                TextColumn::make('start_date')
+                    ->label('Start Date')
+                    ->date()
+                    ->placeholder('N/A')
+                    ->sortable(),
                 TextColumn::make('due')
                     ->label('Target Date')
                     ->date()
@@ -212,12 +190,6 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->defaultPaginationPageOption(50)
             ->defaultGroup(
                 function () use ($pipeline) {
-                    if (! PipelineEntryMilestoneFeature::active()) {
-                        return Group::make('pipelineStage.name')
-                            ->label('Stage')
-                            ->collapsible();
-                    }
-
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)
@@ -302,8 +274,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->resetMilestoneProgressDescriptions();
                         $this->dispatch('projectPipelineUpdated');
                     }),
-                CreateProjectMilestoneAction::make($this->record, 'createMilestone')
-                    ->visible(fn (): bool => PipelineEntryMilestoneFeature::active()),
+                CreateProjectMilestoneAction::make($this->record, 'createMilestone'),
             ]);
     }
 
@@ -477,10 +448,7 @@ class ProjectWorkPipelineWidget extends TableWidget
         $counts = PipelineEntry::query()
             ->whereNotNull('project_milestone_id')
             ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
             ->selectRaw('pipeline_entries.project_milestone_id')
             ->selectRaw('count(*) as total')
@@ -522,10 +490,7 @@ class ProjectWorkPipelineWidget extends TableWidget
 
         return $pipeline
             ->entries()
-            ->when(
-                PipelineArchivingFeature::active(),
-                fn (Builder $query): Builder => $query->withoutArchived(),
-            )
+            ->withoutArchived()
             ->whereKey($entryId)
             ->firstOrFail();
     }

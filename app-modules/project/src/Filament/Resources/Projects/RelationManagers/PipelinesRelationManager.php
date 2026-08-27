@@ -38,7 +38,6 @@ namespace AidingApp\Project\Filament\Resources\Projects\RelationManagers;
 
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\Pipeline;
-use App\Features\PipelineArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -64,10 +63,7 @@ class PipelinesRelationManager extends RelationManager
             ->recordTitleAttribute('name')
             ->modifyQueryUsing(function (Builder $query): Builder {
                 /** @var Builder<Pipeline> $query */
-                return $query->when(
-                    PipelineArchivingFeature::active(),
-                    fn (Builder $query): Builder => $query->withoutArchived(),
-                );
+                return $query->withoutArchived();
             })
             ->columns([
                 TextColumn::make('name'),
@@ -97,7 +93,6 @@ class PipelinesRelationManager extends RelationManager
                     ])),
                 ArchiveAction::make()
                     ->icon(Heroicon::ArchiveBox)
-                    ->visible(fn (): bool => PipelineArchivingFeature::active())
                     ->authorize(fn (Pipeline $record): bool => auth()->user()?->can('delete', $record) ?? false)
                     ->modalHeading('Archive Pipeline')
                     ->modalDescription('Are you sure you want to archive this pipeline? All related milestones and tasks will also be archived.')

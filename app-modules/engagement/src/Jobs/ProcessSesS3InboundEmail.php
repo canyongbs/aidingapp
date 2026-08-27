@@ -47,7 +47,9 @@ use AidingApp\Engagement\Exceptions\UnableToRetrieveContentFromSesS3EmailPayload
 use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -58,7 +60,6 @@ use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
 use Aws\S3\Crypto\S3EncryptionClientV3;
 use Aws\S3\S3Client;
-use Carbon\CarbonImmutable;
 use Exception;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -172,8 +173,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     protected function classifyAddresses(Parser $parser): Collection
     {
         /** @var Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain, sr_number?: string}> */
-        return collect($parser->getAddresses('to'))
-            ->pluck('address')
+        return $this->recipientCandidates($parser)
             ->map(function (string $address) {
                 $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
 
@@ -237,6 +237,60 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             })
             ->filter()
             ->values();
+    }
+
+    /**
+     * Build the list of candidate recipient addresses to route on.
+     *
+     * The MIME `To:` header is unreliable for forwarded mail (forward-only forwarding leaves the
+     * original mailbox in `To:`), so the SES envelope recipient from the trusted `Received … for …`
+     * header it stamps on delivery is included as well.
+     *
+     * @return Collection<int, string>
+     */
+    protected function recipientCandidates(Parser $parser): Collection
+    {
+        $candidates = collect($parser->getAddresses('to'))
+            ->pluck('address');
+
+        $sesRecipient = $this->extractSesDeliveryRecipient($parser);
+
+        if ($sesRecipient !== null) {
+            $candidates->push($sesRecipient);
+        }
+
+        return $candidates
+            ->filter(fn (string $address): bool => trim($address) !== '')
+            ->map(fn (string $address): string => trim($address))
+            ->unique(fn (string $address): string => mb_strtolower($address))
+            ->values();
+    }
+
+    /**
+     * Extract the envelope recipient SES delivered to from the `Received … by inbound-smtp.<region>.amazonaws.com … for <addr>;` header.
+     */
+    protected function extractSesDeliveryRecipient(Parser $parser): ?string
+    {
+        $rawHeaders = str_replace("\r\n", "\n", $parser->getHeadersRaw());
+
+        // Unfold folded header lines (continuation lines begin with whitespace) so each header is a single line.
+        $unfolded = preg_replace('/\n[ \t]+/', ' ', $rawHeaders) ?? $rawHeaders;
+
+        foreach (preg_split('/\n(?=\S)/', $unfolded) ?: [] as $header) {
+            if (! str_starts_with(mb_strtolower($header), 'received:')) {
+                continue;
+            }
+
+            if (! preg_match('/by\s+inbound-smtp\.[^\s]*\bamazonaws\.com\b/i', $header)) {
+                continue;
+            }
+
+            if (preg_match('/\bfor\s+<?([^\s;<>]+@[^\s;<>]+)>?\s*;/i', $header, $matches)) {
+                return $matches[1];
+            }
+        }
+
+        return null;
     }
 
     protected function resolveTenant(string $subdomain): ?Tenant
@@ -546,27 +600,25 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
             }
 
-            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody) {
-                $serviceRequest = $contact->serviceRequests()
-                    ->make([
+            $serviceRequestStatus = ServiceRequestStatus::query()
+                ->where('classification', SystemServiceRequestClassification::Open)
+                ->where('name', 'New')
+                ->where('is_system_protected', true)
+                ->firstOrFail();
+
+            $createServiceRequestAction = app(CreateServiceRequestAction::class);
+
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction) {
+                $serviceRequest = $createServiceRequestAction->execute(
+                    ServiceRequestDataObject::fromData([
+                        'type_id' => $serviceRequestType->getKey(),
+                        'respondent_id' => $contact->getKey(),
+                        'status_id' => $serviceRequestStatus->getKey(),
+                        'priority_id' => $serviceRequestType->email_automatic_creation_priority_id,
                         'title' => $effectiveSubject,
                         'close_details' => $effectiveBody,
-                    ]);
-
-                $serviceRequestStatus = ServiceRequestStatus::query()
-                    ->where('classification', SystemServiceRequestClassification::Open)
-                    ->where('name', 'New')
-                    ->where('is_system_protected', true)
-                    ->firstOrFail();
-
-                $serviceRequest->status()->associate($serviceRequestStatus);
-                $serviceRequest->status_updated_at = CarbonImmutable::now();
-
-                $serviceRequest->respondent()->associate($contact);
-
-                $serviceRequest->priority()->associate($serviceRequestType->email_automatic_creation_priority_id);
-
-                $serviceRequest->saveOrFail();
+                    ])
+                );
 
                 foreach ($parser->getAttachments() as $attachment) {
                     try {

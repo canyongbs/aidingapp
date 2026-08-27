@@ -37,6 +37,7 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Enums\PipelineStageClassification;
+use AidingApp\Project\Enums\ProjectTab;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
@@ -52,6 +53,7 @@ use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
+use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Repeater;
 
 use function Pest\Laravel\actingAs;
@@ -205,6 +207,94 @@ it('can view a record', function () {
         'record' => $project->getRouteKey(),
     ])
         ->assertHasNoErrors();
+});
+
+describe('tabs', function () {
+    it('shows each tab the user can view', function (ProjectTab $tab) {
+        loginAsUserWithProjectViewPermissions();
+
+        $project = Project::factory()->create();
+
+        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
+            ->assertSee($tab->getLabel())
+            ->assertSeeHtml("wire:click=\"\$set('tab', '{$tab->value}')\"");
+    })->with(ProjectTab::cases());
+
+    it('defaults to the access tab when no tab is requested', function () {
+        loginAsUserWithProjectViewPermissions();
+
+        $project = Project::factory()->create();
+
+        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
+            ->assertSet('tab', ProjectTab::Access->value);
+    });
+
+    it('falls back to the access tab when the requested tab is invalid', function () {
+        loginAsUserWithProjectViewPermissions();
+
+        $project = Project::factory()->create();
+
+        livewire(ViewProject::class, [
+            'record' => $project->getRouteKey(),
+            'tab' => 'invalid',
+        ])
+            ->assertSet('tab', ProjectTab::Access->value);
+    });
+
+    it('denies access without the `project.view-any` permission even when the user can view the project', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('project.*.view');
+
+        $project = Project::factory()->create();
+        $project->managerUsers()->attach($user->getKey());
+
+        actingAs($user);
+
+        expect($user->can('view', $project))->toBeTrue()
+            ->and($user->can('viewAny', Project::class))->toBeFalse();
+
+        get(ViewProject::getUrl([
+            'record' => $project->getRouteKey(),
+        ]))
+            ->assertForbidden();
+    });
+
+    it('does not make the files tab available when project management is inactive', function () {
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->projectManagement = false;
+        $settings->save();
+
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+
+        expect(ProjectTab::Files->canView($project))->toBeFalse();
+    });
+
+    it('renders only the active tab widget', function (ProjectTab $tab) {
+        asSuperAdmin();
+
+        $project = Project::factory()->create();
+
+        $page = get(ViewProject::getUrl([
+            'record' => $project->getRouteKey(),
+            'tab' => $tab->value,
+        ]))
+            ->assertSuccessful()
+            ->assertSeeLivewire(match ($tab) {
+                ProjectTab::Access => ProjectAccessWidget::class,
+                ProjectTab::Pipelines => ProjectWorkPipelineWidget::class,
+                ProjectTab::Files => ProjectFilesWidget::class,
+            });
+
+        collect(ProjectTab::cases())
+            ->reject(fn (ProjectTab $inactiveTab): bool => $inactiveTab === $tab)
+            ->each(fn (ProjectTab $inactiveTab) => $page->assertDontSeeLivewire(match ($inactiveTab) {
+                ProjectTab::Access => ProjectAccessWidget::class,
+                ProjectTab::Pipelines => ProjectWorkPipelineWidget::class,
+                ProjectTab::Files => ProjectFilesWidget::class,
+            }));
+    })->with(ProjectTab::cases());
 });
 
 it('can render the project access widget and mount the manage access action', function () {
@@ -601,7 +691,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
         ->setActionData([
             'name' => $entry->name,
             'pipeline_stage_id' => $stage->getKey(),
-            'milestones_type' => 'none',
+            'project_milestone_id' => null,
             'assets_type' => 'none',
             'service_requests_type' => 'none',
         ])

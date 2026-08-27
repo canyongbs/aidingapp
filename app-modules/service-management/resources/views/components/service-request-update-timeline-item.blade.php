@@ -32,24 +32,39 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
+    use AidingApp\Contact\Models\Contact;
+    use AidingApp\ServiceManagement\Models\ServiceRequest;
+    use App\Models\User;
 
     $createdAt = $record->created_at;
+    $formattedPostedAt = $createdAt?->format('M j, Y \\a\\t g:i A') ?? '';
+    $createdBy = $record->createdBy;
+
+    $actorRole = match (true) {
+        $createdBy instanceof ServiceRequest => 'AI',
+        $createdBy instanceof User => 'Agent',
+        $createdBy instanceof Contact => 'Customer',
+        default => 'Unknown',
+    };
+
+    $actorName = match (true) {
+        $createdBy instanceof ServiceRequest => 'Assistant',
+        $createdBy instanceof User => $createdBy->name,
+        $createdBy instanceof Contact => $createdBy->full_name,
+        default => 'Unknown',
+    };
 @endphp
 
 <div>
     <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <a
-                class="font-medium underline"
-                href="{{ ServiceRequestUpdateResource::getUrl('view', ['record' => $record, 'service_request' => $record->service_request_id]) }}"
-            >
+        <h3 class="fi-ta-text mb-1 flex items-center text-base font-semibold text-gray-950 dark:text-white">
+            <span class="font-medium">
                 @if ($record->internal === true)
                     Internal Update Added
                 @else
                     Customer Update Sent
                 @endif
-            </a>
+            </span>
         </h3>
 
         <div>
@@ -60,8 +75,9 @@
     @include('service-management::components.timeline-time', ['datetime' => $createdAt])
 
     <div
-        class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
+        class="fi-ta-text my-4 rounded-lg border-2 border-gray-200 p-2 text-sm font-normal text-gray-950 dark:border-gray-800 dark:text-white"
     >
+        {{ $actorName }} ({{ $actorRole }}) posted the following update on {{ $formattedPostedAt }}:
         {{ $record->update }}
     </div>
 </div>

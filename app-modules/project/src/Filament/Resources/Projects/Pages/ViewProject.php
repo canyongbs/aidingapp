@@ -36,10 +36,12 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Enums\ProjectTab;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\ViewRecord;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Url;
 
 class ViewProject extends ViewRecord
 {
@@ -50,6 +52,31 @@ class ViewProject extends ViewRecord
     protected static ?string $title = 'Project Dashboard';
 
     protected static ?string $navigationLabel = 'View';
+
+    #[Url()]
+    public ?string $tab = null;
+
+    public function mount(int | string $record): void
+    {
+        parent::mount($record);
+
+        $project = $this->getRecord();
+        assert($project instanceof Project);
+
+        $availableTab = collect(ProjectTab::cases())
+            ->first(fn (ProjectTab $tab): bool => $tab->canView($project));
+
+        if ($availableTab === null) {
+            $this->tab = null;
+
+            return;
+        }
+
+        $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
+        $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
+
+        $this->tab = $effectiveTab->value;
+    }
 
     /**
      * @return array<int|string, string|null>

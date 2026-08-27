@@ -34,34 +34,44 @@
 </COPYRIGHT>
 */
 
-use App\Features\PipelineEntryMilestoneFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
+use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
+use Illuminate\Filesystem\FilesystemAdapter;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Storage;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        DB::transaction(function () {
-            DB::statement(<<<'SQL'
-                UPDATE pipeline_entries
-                SET project_milestone_id = first_milestone.project_milestone_id
-                FROM (
-                    SELECT DISTINCT ON (pipeline_entry_id)
-                        pipeline_entry_id,
-                        project_milestone_id
-                    FROM pipeline_entry_milestones
-                    ORDER BY pipeline_entry_id, created_at, id
-                ) AS first_milestone
-                WHERE pipeline_entries.id = first_milestone.pipeline_entry_id
-                    AND pipeline_entries.project_milestone_id IS NULL
-                SQL);
+use function Pest\Laravel\artisan;
 
-            PipelineEntryMilestoneFeature::activate();
-        });
-    }
+it('moves a failed inbound email back out of the failed folder and queues it for reprocessing from its original path', function () {
+    Bus::fake();
 
-    public function down(): void
-    {
-        PipelineEntryMilestoneFeature::deactivate();
-    }
-};
+    $filesystem = Storage::fake('s3-inbound-email');
+
+    assert($filesystem instanceof FilesystemAdapter);
+
+    $filesystem->putFileAs('failed', UploadedFile::fake()->createWithContent('s3_email', 'raw'), 's3_email');
+
+    $filesystem->assertExists('failed/s3_email');
+
+    artisan('engagement:retry-failed-inbound-email', ['path' => 'failed/s3_email'])
+        ->assertSuccessful();
+
+    $filesystem->assertExists('s3_email');
+    $filesystem->assertMissing('failed/s3_email');
+
+    Bus::assertDispatched(
+        ProcessSesS3InboundEmail::class,
+        fn (ProcessSesS3InboundEmail $job): bool => invade($job)->emailFilePath === 's3_email',
+    );
+});
+
+it('fails and dispatches nothing when the file does not exist', function () {
+    Bus::fake();
+
+    Storage::fake('s3-inbound-email');
+
+    artisan('engagement:retry-failed-inbound-email', ['path' => 'failed/missing'])
+        ->assertFailed();
+
+    Bus::assertNothingDispatched();
+});

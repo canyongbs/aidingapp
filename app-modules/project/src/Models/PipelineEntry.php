@@ -41,7 +41,6 @@ use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\Project\Database\Factories\PipelineEntryFactory;
 use AidingApp\Project\Observers\PipelineEntryObserver;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryMilestoneFeature;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -94,16 +93,7 @@ class PipelineEntry extends Model implements Auditable
 
     public function reevaluateLinkedMilestones(): void
     {
-        if (PipelineEntryMilestoneFeature::active()) {
-            $this->milestone?->reevaluateArchivedState();
-
-            return;
-        }
-
-        $this->milestones()->eachById(
-            fn (ProjectMilestone $milestone) => $milestone->reevaluateArchivedState(),
-            column: 'project_milestones.id',
-        );
+        $this->milestone?->reevaluateArchivedState();
     }
 
     /**
@@ -128,19 +118,6 @@ class PipelineEntry extends Model implements Auditable
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
-    }
-
-    /**
-     * TODO: Cleanup Task (pipeline-entry-milestone): Please remove the entire milestones() method below also check references to it in the codebase and remove them as well.
-     *
-     * @return BelongsToMany<ProjectMilestone, $this, PipelineEntryMilestone>
-     */
-    public function milestones(): BelongsToMany
-    {
-        return $this
-            ->belongsToMany(ProjectMilestone::class, 'pipeline_entry_milestones', 'pipeline_entry_id', 'project_milestone_id')
-            ->using(PipelineEntryMilestone::class)
-            ->withTimestamps();
     }
 
     /**

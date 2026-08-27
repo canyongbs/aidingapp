@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ProloadServiceRequestTypeFeature extends AbstractFeatureFlag
+class OrganizationTypeAndIndustryNameUniquenessFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

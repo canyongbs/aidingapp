@@ -37,20 +37,20 @@
 namespace AidingApp\Project\Filament\Resources\Pipelines\Forms;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Tables\PipelineEntryAssetsTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryAssignedToContactsTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryAssignedToUsersTable;
-use AidingApp\Project\Filament\Tables\PipelineEntryMilestonesTable;
 use AidingApp\Project\Filament\Tables\PipelineEntryServiceRequestsTable;
 use AidingApp\Project\Filament\Tables\ProjectPipelinesStageTable;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PipelineEntryMilestoneFeature;
-use App\Features\PipelineEntryStartDateFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -80,31 +80,33 @@ class PipelineEntryForm
             Textarea::make('description')
                 ->label('Task Description')
                 ->maxLength(65535),
-            ...(PipelineEntryStartDateFeature::active()
-                ? [
-                    Grid::make(2)
-                        ->schema([
-                            DateTimePicker::make('start_date')
-                                ->label('Start Date'),
-                            DateTimePicker::make('due')
-                                ->label('Due Date'),
-                        ]),
-                    Grid::make(2)
-                        ->schema([
-                            Toggle::make('is_visible_to_guests')
-                                ->label('Visible to Guest')
-                                ->default(true),
-                            self::assignedToType(),
-                        ]),
-                ]
-                : [
+            Grid::make(2)
+                ->schema([
+                    DateTimePicker::make('start_date')
+                        ->label('Start Date'),
                     DateTimePicker::make('due')
                         ->label('Due Date'),
-                    self::assignedToType(),
+                ]),
+            Grid::make(2)
+                ->schema([
+                    Select::make('project_milestone_id')
+                        ->label('Relate To Milestone')
+                        ->relationship(
+                            name: 'milestone',
+                            titleAttribute: 'title',
+                            modifyQueryUsing: fn (Builder $query): Builder => self::milestoneOptionsQuery($query, $pipeline),
+                        )
+                        ->getOptionLabelFromRecordUsing(fn (ProjectMilestone $record): string => self::milestoneLabel($record))
+                        ->searchable()
+                        ->preload()
+                        ->optionsLimit(100)
+                        ->dehydrated()
+                        ->dehydratedWhenHidden(),
                     Toggle::make('is_visible_to_guests')
                         ->label('Visible to Guest')
                         ->default(true),
                 ]),
+            self::assignedToType(),
             ModalTableSelect::make('assigned_to_id')
                 ->label('Assigned To')
                 ->tableConfiguration(fn (Get $get): string => match (Relation::getMorphedModel((string) $get('assigned_to_type'))) {
@@ -134,72 +136,6 @@ class PipelineEntryForm
                 ->tableArguments(['pipelineId' => $pipeline?->getKey()])
                 ->visible($isStageVisible)
                 ->required(),
-
-            ToggleButtons::make('milestones_type')
-                ->label('Milestones Type')
-                ->options([
-                    'none' => 'None',
-                    'select' => 'Select',
-                ])
-                ->default('none')
-                ->inline()
-                ->live()
-                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
-                    $state = PipelineEntryMilestoneFeature::active()
-                        ? $record?->milestone()->exists()
-                        : $record?->milestones()->exists();
-
-                    if ($state) {
-                        $set('milestones_type', 'select');
-                    } else {
-                        $set('milestones_type', 'none');
-                    }
-                })
-                ->dehydrated(false)
-                ->afterStateUpdated(function (?string $state, Set $set) {
-                    if ($state === 'none') {
-                        if (PipelineEntryMilestoneFeature::active()) {
-                            $set('project_milestone_id', null);
-
-                            return;
-                        }
-
-                        $set('milestones', []);
-                    }
-                }),
-            // TODO: Cleanup Task (pipeline-entry-milestone): remove the legacy `milestones` ModalTableSelect once the feature flag is fully rolled out.
-            ModalTableSelect::make('milestones')
-                ->label('Related Milestones')
-                ->relationship(
-                    name: 'milestones',
-                    titleAttribute: 'title',
-                    modifyQueryUsing: $pipeline
-                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
-                        : null,
-                )
-                ->tableConfiguration(PipelineEntryMilestonesTable::class)
-                ->tableArguments(['projectId' => $pipeline?->project_id])
-                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
-                ->visible(fn (Get $get): bool => ! PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
-                ->multiple()
-                ->dehydrated()
-                ->dehydratedWhenHidden(),
-            ModalTableSelect::make('project_milestone_id')
-                ->label('Related Milestone')
-                ->relationship(
-                    name: 'milestone',
-                    titleAttribute: 'title',
-                    modifyQueryUsing: $pipeline
-                        ? fn (Builder $query) => $query->where('project_id', $pipeline->project_id)
-                        : null,
-                )
-                ->tableConfiguration(PipelineEntryMilestonesTable::class)
-                ->tableArguments(['projectId' => $pipeline?->project_id])
-                ->tableSelect(fn (TableSelect $tableSelect): TableSelect => $tableSelect->relationshipName(null))
-                ->visible(fn (Get $get): bool => PipelineEntryMilestoneFeature::active() && filled($get('milestones_type')) && $get('milestones_type') !== 'none')
-                ->dehydrated()
-                ->dehydratedWhenHidden(),
-
             ToggleButtons::make('assets_type')
                 ->label('Assets Type')
                 ->options([
@@ -275,6 +211,50 @@ class PipelineEntryForm
             : '';
 
         return "({$serviceRequest->service_request_number}){$title}";
+    }
+
+    public static function milestoneLabel(ProjectMilestone $milestone): string
+    {
+        $tasksCount = (int) ($milestone->tasks_count ?? 0);
+        $completedTasksCount = (int) ($milestone->completed_tasks_count ?? 0);
+
+        $percentComplete = $tasksCount === 0
+            ? 0
+            : (int) round(($completedTasksCount / $tasksCount) * 100);
+
+        $taskLabel = Str::plural('Task', $tasksCount);
+
+        return "{$milestone->title} ({$tasksCount} {$taskLabel}) {$percentComplete}% Complete";
+    }
+
+    /**
+     * @param Builder<ProjectMilestone> $query
+     *
+     * @return Builder<ProjectMilestone>
+     */
+    private static function milestoneOptionsQuery(Builder $query, ?Pipeline $pipeline): Builder
+    {
+        return $query
+            ->when($pipeline, fn (Builder $query): Builder => $query->where('project_id', $pipeline->project_id))
+            ->withoutArchivedAndUnused()
+            ->addSelect([
+                'tasks_count' => self::milestonePipelineEntriesQuery(),
+                'completed_tasks_count' => self::milestonePipelineEntriesQuery()
+                    ->where('pipeline_stages.classification', PipelineStageClassification::Complete->value),
+            ])
+            ->orderBy('title');
+    }
+
+    /**
+     * @return Builder<PipelineEntry>
+     */
+    private static function milestonePipelineEntriesQuery(): Builder
+    {
+        return PipelineEntry::query()
+            ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
+            ->whereColumn('pipeline_entries.project_milestone_id', 'project_milestones.id')
+            ->withoutArchived()
+            ->selectRaw('count(*)');
     }
 
     private static function assignedToType(): ToggleButtons

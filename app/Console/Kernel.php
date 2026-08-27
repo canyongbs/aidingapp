@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use App\Models\HealthCheckResultHistoryItem;
+use App\Models\Scopes\ExcludeExpiredSubscriptions;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
@@ -78,6 +79,7 @@ class Kernel extends ConsoleKernel
 
         Tenant::query()
             ->tap(new SetupIsComplete())
+            ->tap(new ExcludeExpiredSubscriptions())
             ->cursor()
             ->each(function (Tenant $tenant) use ($schedule) {
                 try {

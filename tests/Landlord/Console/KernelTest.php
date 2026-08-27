@@ -36,8 +36,10 @@
 
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
+use App\Enums\SubscriptionStatus;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
+use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\artisan;
@@ -130,5 +132,31 @@ describe('ServiceMonitoringReportJob scheduling', function () {
         artisan('schedule:run');
 
         Queue::assertNotPushed(ServiceMonitoringReportJob::class);
+    });
+});
+
+describe('schedule', function () {
+    it('does not schedule tenant tasks for tenants with an expired subscription', function () {
+        $activeTenant = Tenant::factory()->create([
+            'domain' => 'active-subscription.aidingapp.local',
+            'setup_complete' => true,
+            'subscription_status' => SubscriptionStatus::Active,
+        ]);
+
+        $expiredTenant = Tenant::factory()->create([
+            'domain' => 'expired-subscription.aidingapp.local',
+            'setup_complete' => true,
+            'subscription_status' => SubscriptionStatus::Expired,
+        ]);
+
+        $summaries = collect(app(Kernel::class)->resolveConsoleSchedule()->events())
+            ->map(fn ($event) => $event->getSummaryForDisplay());
+
+        expect($summaries->contains(fn (string $summary) => str_contains($summary, $activeTenant->domain)))->toBeTrue()
+            ->and($summaries->contains(fn (string $summary) => str_contains($summary, $expiredTenant->domain)))->toBeFalse();
+
+        // Prevents the shared test tenant teardown from resolving one of these non-migratable tenants via Tenant::firstOrFail().
+        $activeTenant->delete();
+        $expiredTenant->delete();
     });
 });

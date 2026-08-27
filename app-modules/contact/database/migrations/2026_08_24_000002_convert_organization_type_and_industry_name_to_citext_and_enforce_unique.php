@@ -34,64 +34,67 @@
 </COPYRIGHT>
 */
 
-use CanyonGBS\Common\Support\ConvertLiteralMergeTags;
+use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
+use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    /**
-     * @var array<int, string>
-     */
-    private array $mergeTags = [
-        'contact full name',
-        'contact email',
-    ];
+    use FixesDuplicateNames;
+
+    private string $table = '';
+
+    private string $column = 'name';
+
+    private int $chunkSize = 500;
+
+    private bool $usesSoftDeletes = true;
 
     /**
-     * @var array<int, array{table: string, column: string}>
+     * @var array<string>
      */
-    private array $targets = [
-        ['table' => 'email_templates', 'column' => 'content'],
-        ['table' => 'engagement_batches', 'column' => 'body'],
-        ['table' => 'engagements', 'column' => 'body'],
+    private array $tables = [
+        'organization_types',
+        'organization_industries',
     ];
 
     public function up(): void
     {
-        DB::transaction(function (): void {
-            $convertLiteralMergeTags = new ConvertLiteralMergeTags();
+        DB::transaction(function () {
+            foreach ($this->tables as $table) {
+                $this->table = $table;
 
-            foreach ($this->targets as ['table' => $table, 'column' => $column]) {
-                DB::table($table)
-                    ->whereNotNull($column)
-                    // Only rows that could possibly contain a literal merge tag. The `::text`
-                    // cast is required because neither `json` nor `jsonb` supports `like`.
-                    ->whereRaw("{$column}::text like ?", ['%{{%'])
-                    ->select(['id', $column])
-                    ->lazyById(100)
-                    ->each(function (stdClass $row) use ($table, $column, $convertLiteralMergeTags): void {
-                        $content = json_decode($row->{$column}, associative: true);
+                $this->fixDuplicates();
 
-                        if (! is_array($content)) {
-                            return;
-                        }
+                DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE citext");
 
-                        $converted = $convertLiteralMergeTags($content, $this->mergeTags);
-
-                        if ($converted === $content) {
-                            return;
-                        }
-
-                        DB::table($table)
-                            ->where('id', $row->id)
-                            ->update([$column => json_encode($converted)]);
-                    });
+                Schema::table($table, function (Blueprint $blueprint) use ($table) {
+                    $blueprint->uniqueIndex($this->column, "{$table}_name_unique")
+                        ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+                });
             }
+
+            OrganizationTypeAndIndustryNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
-        // This is a data migration and cannot be reversed.
+        DB::transaction(function () {
+            OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
+
+            foreach ($this->tables as $table) {
+                $this->table = $table;
+
+                DB::statement("DROP INDEX IF EXISTS {$table}_name_unique");
+
+                DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE varchar(255)");
+
+                $this->revertDuplicates();
+            }
+        });
     }
 };
