@@ -81,12 +81,13 @@
 @else
     <img
         src="{{ Vite::asset('resources/images/default-logo-light-1735308866.svg') }}"
+        alt="{{ config('app.name') }}"
         class="h-9 dark:hidden block"
-
     />
 
     <img
         src="{{ Vite::asset('resources/images/default-logo-dark-1733733973.svg') }}"
+        alt="{{ config('app.name') }}"
         class="h-9 hidden dark:block"
     />
 @endif
