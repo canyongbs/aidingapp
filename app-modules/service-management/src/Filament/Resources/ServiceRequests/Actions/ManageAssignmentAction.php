@@ -49,14 +49,15 @@ use Livewire\Component;
 
 class ManageAssignmentAction
 {
-    public static function make(ServiceRequest $serviceRequest): Action
+    public static function make(ServiceRequest $serviceRequest, string $actionName = 'manageAssignment', ?string $defaultUserId = null): Action
     {
-        return Action::make('manageAssignment')
+        return Action::make($actionName)
             ->label('Manage Assignment')
             ->color('gray')
             ->slideOver()
             ->modalHeading('Manage Assignment')
             ->modalSubmitActionLabel('Submit')
+            ->fillForm(['userId' => $defaultUserId])
             ->visible(fn (): bool => $serviceRequest->priority?->type_id !== null
                 && auth()->user()->can('update', $serviceRequest))
             ->schema([
