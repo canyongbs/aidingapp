@@ -156,7 +156,7 @@ class CreateServiceMonitoring extends CreateRecord
         foreach (['should_contain', 'should_not_contain'] as $field) {
             if (filled($data[$field] ?? null)) {
                 $values = array_map('trim', str_getcsv($data[$field]));
-                    $data[$field] = ValidServiceMonitoringKeywordValues::parseValues($data[$field]);
+                $data[$field] = ValidServiceMonitoringKeywordValues::parseValues($data[$field]);
             }
         }
 

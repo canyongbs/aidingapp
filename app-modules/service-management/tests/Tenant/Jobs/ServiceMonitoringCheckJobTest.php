@@ -151,7 +151,6 @@ it('sends a notification when any required keyword match value is missing', func
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
-
 })->with(ServiceMonitoringFrequency::cases());
 
 it('sends a failure notification when both keyword match fields are empty', function ($frequency) {

@@ -101,16 +101,6 @@ class ValidServiceMonitoringKeywordValues implements DataAwareRule, ValidationRu
         }
     }
 
-    protected function hasValidQuotePlacement(string $value): bool
-    {
-        return preg_match('/^\s*(?:".*?"|[^",]*)\s*(?:,\s*(?:".*?"|[^",]*)\s*)*$/', $value) === 1;
-    }
-
-    protected function fieldValue(string $field): mixed
-    {
-        return data_get($this->data, "data.data.{$field}", data_get($this->data, "data.{$field}", data_get($this->data, $field)));
-    }
-
     /**
      * @return list<string>
      */
@@ -129,5 +119,15 @@ class ValidServiceMonitoringKeywordValues implements DataAwareRule, ValidationRu
         );
 
         return array_values(array_unique(array_filter($values, filled(...))));
+    }
+
+    protected function hasValidQuotePlacement(string $value): bool
+    {
+        return preg_match('/^\s*(?:".*?"|[^",]*)\s*(?:,\s*(?:".*?"|[^",]*)\s*)*$/', $value) === 1;
+    }
+
+    protected function fieldValue(string $field): mixed
+    {
+        return data_get($this->data, "data.data.{$field}", data_get($this->data, "data.{$field}", data_get($this->data, $field)));
     }
 }
