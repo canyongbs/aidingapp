@@ -483,7 +483,33 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     public function getResolvedAt(): CarbonInterface
     {
-        return $this->status_updated_at ?? $this->updated_at ?? $this->created_at;
+        $legacyResolvedAt = $this->status_updated_at ?? $this->updated_at ?? $this->created_at;
+
+        if (! SlaWaitingExclusionFeature::active()) {
+            return $legacyResolvedAt;
+        }
+
+        $periods = $this->statusPeriods
+            ->sortBy([
+                ['started_at', 'asc'],
+                ['created_at', 'asc'],
+            ])
+            ->values();
+
+        // Anchor resolution to the start of the current trailing run of Closed periods, so moving
+        // between two closed statuses (e.g. Resolved -> Closed) doesn't push the resolved time forward,
+        // while a reopen (a non-closed period) correctly resets it to the most recent close.
+        $resolvedAt = null;
+
+        foreach ($periods->reverse() as $period) {
+            if ($period->classification !== SystemServiceRequestClassification::Closed) {
+                break;
+            }
+
+            $resolvedAt = $period->started_at;
+        }
+
+        return $resolvedAt ?? $legacyResolvedAt;
     }
 
     public function isResolved(): bool

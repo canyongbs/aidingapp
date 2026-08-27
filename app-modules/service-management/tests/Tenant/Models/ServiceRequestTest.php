@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -298,5 +299,127 @@ describe('SLA waiting exclusion', function () {
 
         // Re-close persists 300s elapsed minus the 100s spent closed before the reopen.
         expect((int) $serviceRequest->fresh()->time_to_resolution)->toBe(200);
+    });
+
+    it('accounts for every second across all classifications (the ledger tiles the timeline)', function () {
+        Notification::fake();
+
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $waiting = ServiceRequestStatus::factory()->waiting()->create();
+        $inProgress = ServiceRequestStatus::factory()->inProgress()->create();
+        $closed = ServiceRequestStatus::factory()->closed()->create();
+
+        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+        $this->travelTo($start);
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
+
+        $this->travelTo($start->addSeconds(100));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
+
+        $this->travelTo($start->addSeconds(150));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
+
+        $this->travelTo($start->addSeconds(180));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        $serviceRequest = $serviceRequest->fresh();
+
+        $end = $start->addSeconds(180);
+
+        $classifications = [
+            SystemServiceRequestClassification::Open,
+            SystemServiceRequestClassification::Waiting,
+            SystemServiceRequestClassification::InProgress,
+            SystemServiceRequestClassification::Closed,
+        ];
+
+        $sumOfParts = array_sum(array_map(
+            fn (SystemServiceRequestClassification $classification): int => $serviceRequest->getExcludedSecondsBetween($start, $end, [$classification]),
+            $classifications,
+        ));
+
+        // Every second between creation and resolution belongs to exactly one classification span, and
+        // the union equals the sum of the parts — no gaps, no overlaps, no double counting.
+        expect($sumOfParts)->toBe(180)
+            ->and($serviceRequest->getExcludedSecondsBetween($start, $end, $classifications))->toBe(180);
+    });
+
+    it('anchors the resolved time to the first status change of the trailing closed run', function () {
+        Notification::fake();
+
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $resolved = ServiceRequestStatus::factory()->closed()->state(['name' => 'Resolved'])->create();
+        $closed = ServiceRequestStatus::factory()->closed()->create();
+
+        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+        $this->travelTo($start);
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
+
+        $this->travelTo($start->addSeconds(100));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $resolved->getKey()]);
+
+        $this->travelTo($start->addSeconds(150));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        // Both trailing statuses are Closed-classified, so resolution stays at the first close (100s), not 150s.
+        expect($serviceRequest->fresh()->getResolvedAt()->toDateTimeString())
+            ->toBe($start->addSeconds(100)->toDateTimeString());
+    });
+
+    it('resets the resolved time to the latest close when a request was reopened', function () {
+        Notification::fake();
+
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $inProgress = ServiceRequestStatus::factory()->inProgress()->create();
+        $closed = ServiceRequestStatus::factory()->closed()->create();
+
+        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+        $this->travelTo($start);
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
+
+        $this->travelTo($start->addSeconds(100));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        $this->travelTo($start->addSeconds(200));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
+
+        $this->travelTo($start->addSeconds(300));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        // The intervening reopen breaks the earlier closed run, so resolution is the final close (300s).
+        expect($serviceRequest->fresh()->getResolvedAt()->toDateTimeString())
+            ->toBe($start->addSeconds(300)->toDateTimeString());
+    });
+
+    it('caps the response seconds at the first close when moving between two closed statuses', function () {
+        Notification::fake();
+
+        $open = ServiceRequestStatus::factory()->open()->create();
+        $resolved = ServiceRequestStatus::factory()->closed()->state(['name' => 'Resolved'])->create();
+        $closed = ServiceRequestStatus::factory()->closed()->create();
+
+        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
+
+        $this->travelTo($start);
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
+
+        $this->travelTo($start->addSeconds(50));
+        ServiceRequestUpdate::factory()
+            ->for($serviceRequest)
+            ->for(Contact::factory()->create(), 'createdBy')
+            ->create(['internal' => false]);
+
+        $this->travelTo($start->addSeconds(100));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $resolved->getKey()]);
+
+        $this->travelTo($start->addSeconds(150));
+        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
+
+        // Response runs from the inbound update (50s) to the first close (100s); the trailing
+        // Closed -> Closed hop from 100s to 150s must not inflate it.
+        expect($serviceRequest->fresh()->getLatestResponseSeconds())->toBe(50);
     });
 });
