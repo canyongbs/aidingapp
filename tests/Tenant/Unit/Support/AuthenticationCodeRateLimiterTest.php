@@ -34,49 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Controllers;
+use App\Models\User;
+use App\Support\AuthenticationCodeRateLimiter;
+use Illuminate\Validation\ValidationException;
 
-use AidingApp\Authorization\Models\OtpLoginCode;
-use App\Rules\ValidAuthenticationCode;
-use Filament\Facades\Filament;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Throwable;
+it('allows the first code request and blocks a rapid second request for the same target', function () {
+    $rateLimiter = new AuthenticationCodeRateLimiter();
 
-class VerifyOtpLoginCodeController
-{
-    /**
-     * @throws Throwable
-     */
-    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
-    {
-        if ($request->getMethod() === 'HEAD') {
-            // Protection against link scanning bots, like Microsoft Outlook.
-            return response()->noContent();
-        }
+    $user = User::factory()->create();
 
-        abort_if(
-            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
-                || $otpCode->used_at !== null,
-            code: 403,
-            message: 'This OTP code has already been used or has expired. Please request a new one.'
-        );
+    $rateLimiter->ensureCanRequestCode($user, 'otp-login');
+    $rateLimiter->recordCodeRequest($user, 'otp-login');
 
-        $request->validate([
-            'code' => ['required', 'digits:6', new ValidAuthenticationCode($otpCode)],
-        ]);
+    expect(fn () => $rateLimiter->ensureCanRequestCode($user, 'otp-login'))
+        ->toThrow(ValidationException::class);
+});
 
-        $otpCode->used_at = now();
-        $otpCode->saveOrFail();
+it('scopes the code-request cooldown per target', function () {
+    $rateLimiter = new AuthenticationCodeRateLimiter();
 
-        $user = $otpCode->user;
+    $user = User::factory()->create();
+    $otherUser = User::factory()->create();
 
-        $panel = Filament::getPanel('admin');
+    $rateLimiter->recordCodeRequest($user, 'otp-login');
 
-        Auth::guard($panel->getAuthGuard())->login($user);
+    // Same person, different scope: not throttled.
+    $rateLimiter->ensureCanRequestCode($user, 'km-portal');
 
-        return redirect()->intended($panel->getHomeUrl());
-    }
-}
+    // Different person, same scope: not throttled.
+    $rateLimiter->ensureCanRequestCode($otherUser, 'otp-login');
+})->throwsNoExceptions();

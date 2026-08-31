@@ -38,7 +38,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Testing\TestResponse;
 
@@ -102,4 +104,42 @@ test('it returns a validation error when no contact matches the email', function
     $response
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
+});
+
+test('it throttles repeated assistant authentication requests for the same contact', function () {
+    $contact = Contact::factory()->create([
+        'email' => 'contact@example.com',
+    ]);
+
+    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+
+    requestAssistantAuthentication(['email' => $contact->email])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['email']);
+
+    expect(PortalAuthentication::query()->count())->toBe(1);
+});
+
+test('it invalidates a contact\'s prior authentication when a new assistant code is requested', function () {
+    Notification::fake();
+
+    $contact = Contact::factory()->create([
+        'email' => 'contact@example.com',
+    ]);
+
+    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+
+    $firstAuthentication = PortalAuthentication::query()->latest('id')->first();
+
+    expect($firstAuthentication)->not->toBeNull();
+
+    // Clear the per-target mint cooldown so a second request is allowed.
+    RateLimiter::clear(app(AuthenticationCodeRateLimiter::class)->codeRequestKey($contact, 'assistant-widget'));
+
+    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+
+    $authentications = PortalAuthentication::query()->where('educatable_id', $contact->getKey())->get();
+
+    expect($authentications)->toHaveCount(1)
+        ->and($authentications->first()->id)->not->toBe($firstAuthentication?->id);
 });

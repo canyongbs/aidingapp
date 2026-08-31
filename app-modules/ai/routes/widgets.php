@@ -83,11 +83,11 @@ Route::middleware([
                             ->name('config');
 
                         Route::post('authenticate/request', RequestAuthenticationController::class)
-                            ->middleware(['signed:relative'])
+                            ->middleware(['signed:relative', 'throttle:widget-authentication-request'])
                             ->name('authenticate.request');
 
                         Route::post('authenticate/{authentication}', AuthenticateController::class)
-                            ->middleware(['signed:relative'])
+                            ->middleware(['signed:relative', 'throttle:widget-authenticate'])
                             ->name('authenticate');
 
                         Route::post('messages', SendMessageController::class)

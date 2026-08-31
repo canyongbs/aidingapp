@@ -79,6 +79,18 @@ class PortalAuthentication extends BaseModel
     }
 
     /**
+     * Invalidate any prior, still-live authentication codes for the given
+     * educatable so a newly minted code is the only one that can be used.
+     */
+    public static function invalidateExistingCodesFor(Model $educatable, PortalType $portalType): void
+    {
+        static::query()
+            ->where('portal_type', $portalType)
+            ->whereMorphedTo('educatable', $educatable)
+            ->delete();
+    }
+
+    /**
      * @return MorphTo<Model, $this>
      */
     public function educatable(): MorphTo

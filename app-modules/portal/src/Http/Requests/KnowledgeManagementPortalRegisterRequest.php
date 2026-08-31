@@ -37,7 +37,8 @@
 namespace AidingApp\Portal\Http\Requests;
 
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
-use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
+use AidingApp\Portal\Models\PortalAuthentication;
+use App\Rules\ValidAuthenticationCode;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -54,6 +55,10 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
      */
     public function rules(): array
     {
+        $authentication = $this->route('authentication');
+
+        assert($authentication instanceof PortalAuthentication);
+
         return [
             'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where(fn (Builder $query) => $query->whereNotNull('deleted_at'))],
             'first_name' => ['required', 'string', 'max:255'],
@@ -62,7 +67,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
             'mobile' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
             'sms_opt_out' => ['required', 'boolean'],
-            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+            'code' => ['required', 'integer', 'digits:6', new ValidAuthenticationCode($authentication)],
         ];
     }
 }

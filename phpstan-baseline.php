@@ -906,12 +906,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Models/PortalGuest.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Cannot access property \\$code on object\\|string\\.$#',
-    'identifier' => 'property.nonObject',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Rules/PortalAuthenticateCodeValidation.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Property AidingApp\\\\Portal\\\\Settings\\\\PortalSettings\\:\\:\\$gdpr_banner_text type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
