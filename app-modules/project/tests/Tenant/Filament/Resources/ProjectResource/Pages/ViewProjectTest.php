@@ -683,6 +683,26 @@ it('shows a manage milestone action when the user can manage the project', funct
         ->assertDontSee('Manage');
 });
 
+it('gives the manage milestone link a visually hidden qualifier so its accessible name differs from the collapsible toggle', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
+        ->create();
+    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Alpha']);
+    PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertSeeHtml('<span class="fi-sr-only">Edit milestone: </span>' . e($milestone->title));
+});
+
 it('does not show a manage milestone action when the user cannot manage the project', function () {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
@@ -746,11 +766,7 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
     ]);
-
-    // Filament reuses the Group title raw inside the collapsible toggle's `aria-label`
-    // attribute. If the title view ever renders interactive markup (e.g. a wire:click
-    // button) again, its own double-quoted attribute breaks out of this aria-label and
-    // corrupts the surrounding row markup instead of rendering just the milestone title.
+    
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
@@ -796,9 +812,6 @@ it('does not re-authorize milestone updates per milestone group row', function (
         'record' => $project,
     ]);
 
-    // Rendering 5 milestone groups must not trigger a `can('update', $milestone)`
-    // check per row; the table computes it once (as `can('update', $this->record)`)
-    // and passes the boolean down to the group title view instead.
     expect($milestoneUpdateChecks)->toBe(0);
 });
 
@@ -902,7 +915,7 @@ it('shows milestones that have no pipeline tasks as an empty group', function ()
         'record' => $project,
     ])
         ->assertSee($milestone->title)
-        ->assertSee('No tasks yet');
+        ->assertTableColumnStateSet('name', 'No tasks yet', record: $milestone->getKey());
 });
 
 it('disables the name column click for placeholder rows but keeps it clickable for real entries', function () {
@@ -921,8 +934,8 @@ it('disables the name column click for placeholder rows but keeps it clickable f
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertSeeHtml("wire:click.prevent.stop=\"callTableColumnAction(&#039;name&#039;, &#039;{$entry->getKey()}&#039;)\"")
-        ->assertDontSeeHtml("wire:click.prevent.stop=\"callTableColumnAction(&#039;name&#039;, &#039;{$milestone->getKey()}&#039;)\"");
+        ->assertTableColumnHasExtraAttributes('name', ['class' => 'underline'], $entry)
+        ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'underline'], $milestone);
 });
 
 it('does not show an archived or soft-deleted milestone as an empty group', function () {
@@ -968,7 +981,7 @@ it('keeps placeholder milestone rows visible when the classification filter excl
         ->filterTable('classification', PipelineStageClassification::Planning)
         ->assertCanNotSeeTableRecords([$entry])
         ->assertSee($emptyMilestone->title)
-        ->assertSee('No tasks yet');
+        ->assertTableColumnStateSet('name', 'No tasks yet', record: $emptyMilestone->getKey());
 });
 
 it('updates a milestone from the manage slide-over', function () {

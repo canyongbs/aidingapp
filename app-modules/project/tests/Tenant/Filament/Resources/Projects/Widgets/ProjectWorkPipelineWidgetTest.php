@@ -40,6 +40,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -151,6 +152,25 @@ it('excludes archived tasks from the pipeline board', function () {
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertCanSeeTableRecords([$active])
         ->assertCanNotSeeTableRecords([$archived]);
+});
+
+it('renders a task as having no associated milestone when its milestone has been soft-deleted', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
+
+    $milestone = ProjectMilestone::factory()->for($project)->create();
+
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+
+    $milestone->delete();
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->assertCanSeeTableRecords([$entry])
+        ->assertSee('No Associated Milestone')
+        ->assertDontSee($milestone->title);
 });
 
 it('does not provide a row-level edit action because task editing is accessed through the name column', function () {

@@ -32,14 +32,6 @@
     </COPYRIGHT>
 --}}
 
-{{--
-    The `tag` prop lets callers embedding this inside a Filament table Group description
-    render it as a `<span>` instead of the default `<div>`, since Group descriptions only
-    accept phrasing content (see the "Group descriptions must be phrasing content only"
-    rule). Text styling (size/color) is intentionally left off the label below and must be
-    passed in via `class`, so it only affects the call sites that opt into it.
---}}
-
 @props([
     'progress' => 0,
     'tag' => 'div',

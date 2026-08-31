@@ -210,14 +210,10 @@ class ProjectWorkPipelineWidget extends TableWidget
                                 );
                         })
                         ->getTitleFromRecordUsing(
-                            fn (PipelineEntry $record): Htmlable => new HtmlString(
-                                trim(view('project::filament.tables.groups.milestone-title', [
-                                    'milestone' => $record->milestone,
-                                ])->render())
-                            )
+                            fn (PipelineEntry $record): string => $record->milestone?->title ?? 'No Associated Milestone'
                         )
                         ->getDescriptionFromRecordUsing(
-                            fn (PipelineEntry $record): ?View => filled($record->project_milestone_id)
+                            fn (PipelineEntry $record): ?View => $record->milestone
                                 ? view('project::filament.tables.groups.milestone', [
                                     'milestone' => $record->milestone,
                                     'canManageMilestone' => $canManageMilestones,

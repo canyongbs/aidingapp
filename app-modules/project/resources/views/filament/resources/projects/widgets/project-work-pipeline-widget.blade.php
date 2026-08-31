@@ -36,43 +36,5 @@
         {{ $this->table }}
     </div>
 
-    @assets
-        {{-- Allow the milestone group heading block to fill the row and keep the title and progress vertically aligned. --}}
-        <style>
-            .project-work-pipeline-widget .fi-ta-group-header > div {
-                display: flex;
-                flex: 1 1 auto;
-                align-items: center;
-            }
-
-            .project-work-pipeline-widget .fi-ta-group-header > div > .fi-ta-group-description {
-                flex: 1 1 auto;
-            }
-
-            /* Move the collapse toggle before the milestone title/progress content. */
-            .project-work-pipeline-widget .fi-ta-group-header > .fi-icon-btn {
-                order: -1;
-            }
-
-            /*
-                The milestone title is re-rendered (optionally as a clickable edit control)
-                inside the group description, so hide the duplicate plain-text heading
-                whenever a description is present. The "No Associated Milestone" heading
-                has no description, so it stays visible.
-            */
-            .project-work-pipeline-widget .fi-ta-group-heading:has(+ .fi-ta-group-description) {
-                position: absolute;
-                width: 1px;
-                height: 1px;
-                padding: 0;
-                margin: -1px;
-                overflow: hidden;
-                clip: rect(0, 0, 0, 0);
-                white-space: nowrap;
-                border-width: 0;
-            }
-        </style>
-    @endassets
-
     <x-filament-actions::modals />
 </x-filament-widgets::widget>
