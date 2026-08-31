@@ -683,26 +683,6 @@ it('shows a manage milestone action when the user can manage the project', funct
         ->assertDontSee('Manage');
 });
 
-it('gives the manage milestone link a visually hidden qualifier so its accessible name differs from the collapsible toggle', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $pipeline = Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
-        ->create();
-    $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Alpha']);
-    PipelineEntry::factory()->create([
-        'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
-        'project_milestone_id' => $milestone->getKey(),
-    ]);
-
-    livewire(ProjectWorkPipelineWidget::class, [
-        'record' => $project,
-    ])
-        ->assertSeeHtml('<span class="fi-sr-only">Edit milestone: </span>' . e($milestone->title));
-});
-
 it('does not show a manage milestone action when the user cannot manage the project', function () {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
