@@ -36,7 +36,7 @@
     so that it can be an interactive control. Filament's collapsible group toggle button
     reuses the Group title raw inside its `aria-label` attribute, so interactive markup
     there would corrupt the surrounding HTML.
-
+    
     Filament echoes this description inside a `<p class="fi-ta-group-description">`, which
     only accepts phrasing content per the HTML content model. Keep every element here
     (span/svg/button) — a `<div>` is flow content, so the browser would auto-close the `<p>`
@@ -50,7 +50,8 @@
             x-on:click.stop
             wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
         >
-            <span class="fi-sr-only">Edit milestone: </span>{{ $milestone->title }}
+            <span class="fi-sr-only">Edit milestone:</span>
+            {{ $milestone->title }}
         </x-filament::link>
     @else
         <span>{{ $milestone->title }}</span>

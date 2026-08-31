@@ -766,7 +766,7 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
         'project_milestone_id' => $milestone->getKey(),
     ]);
-    
+
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
