@@ -208,7 +208,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                                 );
                         })
                         ->getTitleFromRecordUsing(
-                            fn (PipelineEntry $record): string => $record->milestone?->title ?? 'No Associated Milestone'
+                            fn (PipelineEntry $record): string => $record->milestone->title ?? 'No Associated Milestone'
                         )
                         ->getDescriptionFromRecordUsing(
                             fn (PipelineEntry $record): ?View => $record->milestone
