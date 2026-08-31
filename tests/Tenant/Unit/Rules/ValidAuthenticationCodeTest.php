@@ -80,12 +80,15 @@ it('clears the failed-attempt counter after a successful validation', function (
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS - 1) as $attempt) {
-        validateAuthenticationCode($authentication, '654321');
+        expect(validateAuthenticationCode($authentication, '654321')->passes())->toBeFalse();
     }
 
     expect(validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
 
-    $validator = validateAuthenticationCode($authentication, '654321');
+    foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS - 1) as $attempt) {
+        $validator = validateAuthenticationCode($authentication, '654321');
 
-    expect($validator->errors()->first('code'))->toBe('The provided code is invalid.');
+        expect($validator->passes())->toBeFalse();
+        expect($validator->errors()->first('code'))->toBe('The provided code is invalid.');
+    }
 });
