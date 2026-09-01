@@ -89,13 +89,13 @@ class PruneEphemeralMessages implements ShouldQueue, ShouldBeUnique
 
     protected function pruneConversation(Conversation $conversation, CarbonInterface $cutoff): void
     {
+        broadcast(new MessagesPruned($conversation, $cutoff));
+
         $conversation->messages()
             ->where('created_at', '<', $cutoff)
             ->chunkById(500, fn (Collection $messages) => $messages->each->delete());
 
         $this->clampUnreadCounts($conversation);
-
-        broadcast(new MessagesPruned($conversation, $cutoff));
     }
 
     protected function clampUnreadCounts(Conversation $conversation): void

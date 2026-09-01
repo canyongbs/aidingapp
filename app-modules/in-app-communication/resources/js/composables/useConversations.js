@@ -40,13 +40,14 @@ export function useConversations() {
     const store = useChatStore();
     const markAsReadTimeout = ref(null);
     const pendingMarkAsRead = ref(null);
+    let latestConversationsRequest = 0;
 
     const conversations = computed(() => store.conversations);
     const loading = computed(() => store.conversationsLoading);
     const hasMore = computed(() => store.conversationsHasMore);
 
     async function loadConversations(loadMore = false, participantType = null, confidential = null) {
-        if (store.conversationsLoading) return store.conversations;
+        const request = ++latestConversationsRequest;
 
         if (!loadMore) {
             store.conversationsLoading = true;
@@ -64,6 +65,10 @@ export function useConversations() {
             }
 
             const { data } = await api.get('/conversations', { params });
+
+            if (request !== latestConversationsRequest) {
+                return [];
+            }
 
             if (loadMore) {
                 // Only append non-pinned conversations when loading more
@@ -98,8 +103,16 @@ export function useConversations() {
             store.setAllUnreadCounts(counts);
 
             return loadMore ? data.data : [...(data.pinned || []), ...data.data];
+        } catch (error) {
+            if (request !== latestConversationsRequest) {
+                return [];
+            }
+
+            throw error;
         } finally {
-            store.conversationsLoading = false;
+            if (!loadMore && request === latestConversationsRequest) {
+                store.conversationsLoading = false;
+            }
         }
     }
 

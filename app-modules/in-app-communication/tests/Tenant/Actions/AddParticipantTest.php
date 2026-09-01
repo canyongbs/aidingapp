@@ -35,6 +35,7 @@
 */
 
 use AidingApp\InAppCommunication\Actions\AddParticipant;
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Events\ParticipantAdded;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
@@ -221,4 +222,21 @@ it('includes conversation data with display_name in `ParticipantAdded` event', f
         ->and($payload['conversation']['id'])->toBe($conversation->getKey())
         ->and($payload['conversation']['display_name'])->toBe('My Private Channel')
         ->and($payload['conversation']['is_private'])->toBeTrue();
+});
+
+it('includes confidentiality data in `ParticipantAdded` event', function () {
+    $conversation = Conversation::factory()
+        ->confidential(ConversationEphemeralPeriod::SevenDays)
+        ->create();
+    $user = User::factory()->create();
+
+    $participant = app(AddParticipant::class)(
+        conversation: $conversation,
+        user: $user,
+    );
+
+    $payload = (new ParticipantAdded($participant))->broadcastWith();
+
+    expect($payload['conversation']['is_confidential'])->toBeTrue()
+        ->and($payload['conversation']['ephemeral_period'])->toBe(ConversationEphemeralPeriod::SevenDays->value);
 });

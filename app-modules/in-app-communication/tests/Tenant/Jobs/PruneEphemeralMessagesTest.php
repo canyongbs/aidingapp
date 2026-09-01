@@ -42,7 +42,9 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
 use App\Features\ConfidentialChannelsFeature;
+use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
@@ -127,7 +129,7 @@ it('only deletes messages belonging to the expired conversation', function () {
     assertModelExists($kept);
 });
 
-it('broadcasts `MessagesPruned` for a conversation it pruned', function () {
+it('queues `MessagesPruned` for a conversation it pruned', function () {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
         ->create();
@@ -136,13 +138,14 @@ it('broadcasts `MessagesPruned` for a conversation it pruned', function () {
         'created_at' => now()->subHours(2),
     ]);
 
-    Event::fake();
+    Queue::fake();
 
     (new PruneEphemeralMessages())->handle();
 
-    Event::assertDispatched(
-        MessagesPruned::class,
-        fn (MessagesPruned $event) => $event->conversation->is($conversation),
+    Queue::assertPushed(
+        BroadcastEvent::class,
+        fn (BroadcastEvent $job) => $job->event instanceof MessagesPruned
+            && $job->event->conversation->is($conversation),
     );
 });
 

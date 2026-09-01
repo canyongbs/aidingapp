@@ -41,13 +41,20 @@ use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
-class MessagesPruned implements ShouldBroadcastNow
+class MessagesPruned implements ShouldBroadcast
 {
     use Dispatchable;
     use InteractsWithSockets;
+    use SerializesModels;
+
+    public int $tries = 3;
+
+    /** @var array<int, int> */
+    public array $backoff = [1, 5, 10];
 
     public function __construct(
         public Conversation $conversation,

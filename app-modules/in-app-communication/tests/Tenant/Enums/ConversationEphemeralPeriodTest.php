@@ -78,3 +78,12 @@ it('does not mutate the date it is given', function () {
 
     expect($date->toDateTimeString())->toBe('2026-08-24 12:00:00');
 });
+
+it('does not overflow calendar period cutoffs', function (ConversationEphemeralPeriod $period, string $date, string $expected) {
+    expect($period->subtractFrom(Carbon::parse($date))->toDateTimeString())->toBe($expected);
+})->with([
+    'one month from the end of March' => [ConversationEphemeralPeriod::OneMonth, '2026-03-31 12:00:00', '2026-02-28 12:00:00'],
+    'three months across February' => [ConversationEphemeralPeriod::ThreeMonths, '2026-05-31 12:00:00', '2026-02-28 12:00:00'],
+    'six months across February' => [ConversationEphemeralPeriod::SixMonths, '2026-08-31 12:00:00', '2026-02-28 12:00:00'],
+    'one year from leap day' => [ConversationEphemeralPeriod::OneYear, '2028-02-29 12:00:00', '2027-02-28 12:00:00'],
+]);

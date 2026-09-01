@@ -90,10 +90,10 @@ enum ConversationEphemeralPeriod: string implements HasLabel
             self::TwentyFourHours => $date->copy()->subHours(24),
             self::SevenDays => $date->copy()->subDays(7),
             self::FourteenDays => $date->copy()->subDays(14),
-            self::OneMonth => $date->copy()->subMonth(),
-            self::ThreeMonths => $date->copy()->subMonths(3),
-            self::SixMonths => $date->copy()->subMonths(6),
-            self::OneYear => $date->copy()->subYear(),
+            self::OneMonth => $date->copy()->subMonthNoOverflow(),
+            self::ThreeMonths => $date->copy()->subMonthsNoOverflow(3),
+            self::SixMonths => $date->copy()->subMonthsNoOverflow(6),
+            self::OneYear => $date->copy()->subYearNoOverflow(),
         };
     }
 }

@@ -144,7 +144,12 @@
 
     const initialUrlParams = new URLSearchParams(window.location.search);
     const requestedTab = initialUrlParams.get('tab');
-    const initialTab = ['contacts', 'confidential'].includes(requestedTab) ? requestedTab : 'users';
+    const enabledTabs = [
+        'users',
+        ...(props.serviceManagementEnabled ? ['contacts'] : []),
+        ...(props.confidentialChannelsEnabled ? ['confidential'] : []),
+    ];
+    const initialTab = enabledTabs.includes(requestedTab) ? requestedTab : 'users';
     const activeTab = ref(initialTab);
 
     const listFilters = computed(() => {
