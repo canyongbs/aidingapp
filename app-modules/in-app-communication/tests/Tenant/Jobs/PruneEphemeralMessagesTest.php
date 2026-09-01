@@ -149,6 +149,28 @@ it('queues `MessagesPruned` for a conversation it pruned', function () {
     );
 });
 
+it('does not queue `MessagesPruned` when deleting a message fails', function () {
+    $conversation = Conversation::factory()
+        ->confidential(ConversationEphemeralPeriod::OneHour)
+        ->create();
+
+    $message = Message::factory()->for($conversation)->create([
+        'created_at' => now()->subHours(2),
+    ]);
+
+    Queue::fake();
+    Event::listen(
+        'eloquent.deleting: ' . Message::class,
+        fn () => throw new RuntimeException('Unable to delete message.'),
+    );
+
+    expect(fn () => (new PruneEphemeralMessages())->handle())
+        ->toThrow(RuntimeException::class, 'Unable to delete message.');
+
+    assertModelExists($message);
+    Queue::assertNothingPushed();
+});
+
 it('does not broadcast `MessagesPruned` when nothing was pruned', function () {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::OneHour)
