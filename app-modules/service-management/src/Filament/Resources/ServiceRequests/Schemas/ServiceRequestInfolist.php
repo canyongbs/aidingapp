@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Filament\Infolists\Components\ServiceRequestSecretsEntry;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
@@ -206,9 +207,8 @@ class ServiceRequestInfolist
                 && $record->secrets()->exists()
                 && Gate::allows('revealSecret', $record))
             ->schema([
-                ViewEntry::make('secrets')
-                    ->hiddenLabel()
-                    ->view('filament.infolists.components.service-request-secrets'),
+                ServiceRequestSecretsEntry::make('secrets')
+                    ->hiddenLabel(),
             ]);
     }
 

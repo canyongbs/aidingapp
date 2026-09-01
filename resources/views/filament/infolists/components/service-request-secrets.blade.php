@@ -36,46 +36,48 @@
     $submittedFields = $record->serviceRequestFormSubmission?->fields ?? collect();
 @endphp
 
-<div class="space-y-4">
-    @foreach ($record->secrets as $secret)
-        @php
-            $field = $submittedFields->first(fn ($field): bool => $field->pivot->response === $secret->getKey());
-        @endphp
+<x-dynamic-component :component="$getEntryWrapperView()" :entry="$entry">
+    <div class="space-y-4">
+        @foreach ($record->secrets as $secret)
+            @php
+                $field = $submittedFields->first(fn ($field): bool => $field->pivot->response === $secret->getKey());
+            @endphp
 
-        <div
-            x-data="{
-                value: null,
-                isLoading: false,
-                async reveal() {
-                    this.isLoading = true
-                    this.value = await $wire.revealServiceRequestSecret(
-                        '{{ $secret->getKey() }}',
-                    )
-                    this.isLoading = false
-                },
-            }"
-            class="flex flex-wrap items-center gap-3"
-        >
-            <span class="font-medium text-sm text-gray-950 dark:text-white">
-                {{ $field?->label ?? 'Password' }}
-            </span>
-
-            <span x-show="value === null" class="text-gray-500">••••••••</span>
-            <code
-                x-show="value !== null"
-                x-text="value"
-                class="rounded bg-gray-100 px-2 py-1 text-sm dark:bg-white/10"
-            ></code>
-
-            <x-filament::button
-                type="button"
-                size="sm"
-                x-show="value === null"
-                x-bind:disabled="isLoading"
-                x-on:click="reveal()"
+            <div
+                x-data="{
+                    value: null,
+                    isLoading: false,
+                    async reveal() {
+                        this.isLoading = true
+                        this.value = await $wire.revealServiceRequestSecret(
+                            '{{ $secret->getKey() }}',
+                        )
+                        this.isLoading = false
+                    },
+                }"
+                class="flex flex-wrap items-center gap-3"
             >
-                Reveal
-            </x-filament::button>
-        </div>
-    @endforeach
-</div>
+                <span class="font-medium text-sm text-gray-950 dark:text-white">
+                    {{ $field?->label ?? 'Password' }}
+                </span>
+
+                <span x-show="value === null" class="text-gray-500">••••••••</span>
+                <code
+                    x-show="value !== null"
+                    x-text="value"
+                    class="rounded bg-gray-100 px-2 py-1 text-sm dark:bg-white/10"
+                ></code>
+
+                <x-filament::button
+                    type="button"
+                    size="sm"
+                    x-show="value === null"
+                    x-bind:disabled="isLoading"
+                    x-on:click="reveal()"
+                >
+                    Reveal
+                </x-filament::button>
+            </div>
+        @endforeach
+    </div>
+</x-dynamic-component>
