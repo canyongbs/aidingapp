@@ -77,7 +77,7 @@ class RequestCommunications extends Dashboard
 
     protected static string $routePath = 'request-communications';
 
-    protected static ?int $navigationSort = 11;
+    protected static ?int $navigationSort = 20;
 
     protected static string | BackedEnum | null $navigationIcon = '';
 
@@ -93,6 +93,11 @@ class RequestCommunications extends Dashboard
         $user = auth()->user();
 
         return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
+    }
+
+    public function booted(): void
+    {
+        $this->refreshEmailTemplates();
     }
 
     public function filtersForm(Schema $schema): Schema
@@ -163,11 +168,6 @@ class RequestCommunications extends Dashboard
             ->find($serviceRequestTypeId);
     }
 
-    public function updatedFiltersServiceRequestType(): void
-    {
-        $this->refreshEmailTemplates();
-    }
-
     /**
      * @return array<int, RichEditor>
      */
@@ -175,11 +175,6 @@ class RequestCommunications extends Dashboard
         ServiceRequestEmailTemplateType $type,
         ServiceRequestTypeEmailTemplateRole $role,
     ): array {
-        // Disabled RichEditor fields render with `wire:ignore`, so their DOM/Alpine
-        // state is only refreshed when the Livewire key changes. Keying by the
-        // selected service request type forces a remount with the fresh state
-        // whenever the user picks a different type, instead of silently keeping
-        // whatever content was present the first time the field mounted.
         $serviceRequestTypeId = $this->getSelectedServiceRequestType()?->getKey() ?? 'none';
 
         return [
