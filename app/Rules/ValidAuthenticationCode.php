@@ -34,32 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Rules;
+namespace App\Rules;
 
+use App\Support\AuthenticationCodeRateLimiter;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
-class PortalAuthenticateCodeValidation implements ValidationRule
+class ValidAuthenticationCode implements ValidationRule
 {
+    public function __construct(
+        protected Model $authentication,
+        protected AuthenticationCodeRateLimiter $rateLimiter = new AuthenticationCodeRateLimiter(),
+    ) {}
+
     /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString $fail
+     * @param  Closure(string): PotentiallyTranslatedString  $fail
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $request = request();
+        if ($this->rateLimiter->isLocked($this->authentication)) {
+            $fail('Too many invalid attempts. Please request a new code.');
 
-        $authentication = $request->route('authentication');
-
-        if (! $authentication) {
-            $fail('Could not find Authentication.');
+            return;
         }
 
-        if (! Hash::check($value, $authentication->code)) {
-            $fail('The provided code is invalid.');
+        $hashedCode = $this->authentication->getAttribute('code');
+
+        if (is_string($hashedCode) && is_scalar($value) && Hash::check((string) $value, $hashedCode)) {
+            $this->rateLimiter->clear($this->authentication);
+
+            return;
         }
+
+        $this->rateLimiter->recordFailedAttempt($this->authentication);
+
+        $fail('The provided code is invalid.');
     }
 }

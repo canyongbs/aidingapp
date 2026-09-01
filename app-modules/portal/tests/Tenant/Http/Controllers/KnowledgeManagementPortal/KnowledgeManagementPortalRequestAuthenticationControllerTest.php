@@ -39,7 +39,9 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\postJson;
@@ -173,4 +175,46 @@ test('it returns validation error when contact and organization domain are not f
     $response
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
+});
+
+test('it throttles repeated authentication requests for the same contact', function () {
+    $contact = Contact::factory()->create([
+        'email' => 'contact@example.com',
+    ]);
+
+    $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
+
+    postJson($url, ['email' => $contact->email])->assertOk();
+
+    postJson($url, ['email' => $contact->email])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['email']);
+
+    expect(PortalAuthentication::query()->count())->toBe(1);
+});
+
+test('it invalidates a contact\'s prior authentication when a new code is requested', function () {
+    Notification::fake();
+
+    $contact = Contact::factory()->create([
+        'email' => 'contact@example.com',
+    ]);
+
+    $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
+
+    postJson($url, ['email' => $contact->email])->assertOk();
+
+    $firstAuthentication = PortalAuthentication::query()->latest('id')->first();
+
+    expect($firstAuthentication)->not->toBeNull();
+
+    // Clear the per-target mint cooldown so a second request is allowed.
+    RateLimiter::clear(app(AuthenticationCodeRateLimiter::class)->codeRequestKey($contact, 'km-portal'));
+
+    postJson($url, ['email' => $contact->email])->assertOk();
+
+    $authentications = PortalAuthentication::query()->where('educatable_id', $contact->getKey())->get();
+
+    expect($authentications)->toHaveCount(1)
+        ->and($authentications->first()->id)->not->toBe($firstAuthentication?->id);
 });

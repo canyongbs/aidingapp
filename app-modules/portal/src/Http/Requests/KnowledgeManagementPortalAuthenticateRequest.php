@@ -36,7 +36,8 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
+use AidingApp\Portal\Models\PortalAuthentication;
+use App\Rules\ValidAuthenticationCode;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -49,8 +50,12 @@ class KnowledgeManagementPortalAuthenticateRequest extends FormRequest
      */
     public function rules(): array
     {
+        $authentication = $this->route('authentication');
+
+        assert($authentication instanceof PortalAuthentication);
+
         return [
-            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+            'code' => ['required', 'integer', 'digits:6', new ValidAuthenticationCode($authentication)],
         ];
     }
 }

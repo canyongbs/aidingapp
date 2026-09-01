@@ -41,6 +41,7 @@ use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use App\Actions\ResolveEducatableFromEmail;
 use App\Http\Controllers\Controller;
+use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
@@ -50,7 +51,7 @@ use Illuminate\Validation\ValidationException;
 
 class RequestAuthenticationController extends Controller
 {
-    public function __invoke(Request $request, ResolveEducatableFromEmail $resolveEducatableFromEmail): JsonResponse
+    public function __invoke(Request $request, ResolveEducatableFromEmail $resolveEducatableFromEmail, AuthenticationCodeRateLimiter $rateLimiter): JsonResponse
     {
         $data = $request->validate([
             'email' => ['required', 'email'],
@@ -64,6 +65,10 @@ class RequestAuthenticationController extends Controller
             ]);
         }
 
+        $rateLimiter->ensureCanRequestCode($contact, 'assistant-widget');
+
+        PortalAuthentication::invalidateExistingCodesFor($contact, PortalType::KnowledgeManagement);
+
         $code = random_int(100000, 999999);
 
         $authentication = new PortalAuthentication();
@@ -75,6 +80,8 @@ class RequestAuthenticationController extends Controller
         Notification::route('mail', [
             $data['email'] => $contact->getAttributeValue($contact::displayNameKey()),
         ])->notify(new AuthenticatePortalNotification($authentication, $code));
+
+        $rateLimiter->recordCodeRequest($contact, 'assistant-widget');
 
         $authenticationUrl = URL::to(
             URL::signedRoute(

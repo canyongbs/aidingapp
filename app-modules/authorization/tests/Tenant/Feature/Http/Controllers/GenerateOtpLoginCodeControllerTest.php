@@ -179,3 +179,28 @@ it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, ar
             ],
         ],
     );
+
+it('throttles repeated OTP code requests for the same user', function () {
+    $user = User::factory()->create();
+
+    withoutMiddleware(CheckOlympusKey::class)
+        ->postJson(
+            route('otp-code.generate'),
+            [
+                'email' => $user->email,
+            ]
+        )
+        ->assertOk();
+
+    withoutMiddleware(CheckOlympusKey::class)
+        ->postJson(
+            route('otp-code.generate'),
+            [
+                'email' => $user->email,
+            ]
+        )
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['email']);
+
+    assertDatabaseCount(OtpLoginCode::class, 1);
+});
