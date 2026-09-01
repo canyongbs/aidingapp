@@ -179,7 +179,7 @@ class RequestCommunications extends Dashboard
                         ))
                         ->columnSpanFull(),
                 ])
-                ->visible(fn (): bool => $this->getSelectedServiceRequestType() !== null),
+                ->visible(fn (): bool => filled($this->filters['serviceRequestType'] ?? null)),
         ]);
     }
 
