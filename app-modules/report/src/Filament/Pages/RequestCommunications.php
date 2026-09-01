@@ -61,8 +61,13 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
+use LogicException;
 use UnitEnum;
 
+/**
+ * @property-read Schema $emailTemplatesForm
+ * @property-read Schema $notificationForm
+ */
 class RequestCommunications extends Dashboard
 {
     use HasFiltersForm;
@@ -271,9 +276,20 @@ class RequestCommunications extends Dashboard
 
     protected function refreshEmailTemplates(): void
     {
-        $this->emailTemplatesForm->fill([
+        $this->getEmailTemplatesForm()->fill([
             'emailTemplates' => $this->getEmailTemplatesState(),
         ]);
+    }
+
+    protected function getEmailTemplatesForm(): Schema
+    {
+        $form = $this->getSchema('emailTemplatesForm');
+
+        if (! $form instanceof Schema) {
+            throw new LogicException(static::class . ' expected the [emailTemplatesForm] schema to be registered.');
+        }
+
+        return $form;
     }
 
     protected function getEmailTemplate(
@@ -339,8 +355,19 @@ class RequestCommunications extends Dashboard
 
     protected function refreshNotifications(): void
     {
-        $this->notificationForm->fill([
+        $this->getNotificationForm()->fill([
             'notificationSettings' => $this->getNotificationState(),
         ]);
+    }
+
+    protected function getNotificationForm(): Schema
+    {
+        $form = $this->getSchema('notificationForm');
+
+        if (! $form instanceof Schema) {
+            throw new LogicException(static::class . ' expected the [notificationForm] schema to be registered.');
+        }
+
+        return $form;
     }
 }
