@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
 use App\Features\MonitorTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -167,6 +168,17 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         try {
             $response = Http::maxRedirects(15)
                 ->get($this->serviceMonitoringTarget->domain);
+
+            if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
+                $this->handleResponses(
+                    $response->status(),
+                    $response->transferStats->getTransferTime() ?? 0,
+                    false,
+                    [$challengePageFailure],
+                );
+
+                return;
+            }
 
             if (! $this->hasReadableContentType($response->header('Content-Type'))) {
                 $this->handleResponses(

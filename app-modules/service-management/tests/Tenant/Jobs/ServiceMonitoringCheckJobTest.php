@@ -625,6 +625,35 @@ it('sends a notification when a keyword match response has a binary content type
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
+it('sends a notification when a keyword match response is an Incapsula challenge page', function () {
+    Http::fake(fn () => Http::response('<iframe src="/_Incapsula_Resource">Request unsuccessful. Incapsula</iframe>', 200));
+    Notification::fake();
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->hasAttached($user)
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['healthy'],
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringNotification::class);
+
+    $history = HistoricalServiceMonitoring::query()
+        ->where('service_monitoring_target_id', $serviceMonitorTarget->getKey())
+        ->latest()
+        ->firstOrFail();
+
+    expect($history->succeeded)->toBeFalse()
+        ->and($history->keyword_match_failures)->toBe([
+            'The response was blocked by an Incapsula challenge page.',
+        ]);
+});
+
 it('sends notifications based on configured channels', function (
     bool $emailEnabled,
     bool $databaseEnabled,
