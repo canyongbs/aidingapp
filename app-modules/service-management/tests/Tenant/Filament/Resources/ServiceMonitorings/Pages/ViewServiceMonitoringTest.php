@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
@@ -163,6 +164,55 @@ test('The Automated Reporting section is hidden when reporting is not active', f
         ->assertDontSee($reportUser->name)
         ->assertDontSee($reportDepartment->name)
         ->assertDontSee($reportContact->full_name);
+});
+
+test('keyword match values are displayed only for keyword monitors', function () {
+    $keywordMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test 1', 'test 2'],
+        'should_not_contain' => ['test 3', 'test 4'],
+    ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $keywordMonitor]))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'Should Contain',
+            'test 1',
+            'test 2',
+            'Should Not Contain',
+            'test 3',
+            'test 4',
+        ]);
+
+    $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::Availability,
+        'should_contain' => ['test 1'],
+        'should_not_contain' => ['test 2'],
+    ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $availabilityMonitor]))
+        ->assertSuccessful()
+        ->assertDontSee('Should Contain')
+        ->assertDontSee('Should Not Contain');
+});
+
+test('keyword match values with punctuation retain clear boundaries', function () {
+    $keywordMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
+    ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $keywordMonitor]))
+        ->assertSuccessful()
+        ->assertSeeInOrder([
+            'test1',
+            'test 2',
+            'test 3, "test 4"',
+            '"test 5, test 6"',
+        ]);
 });
 
 test('Reset Monitoring button resets monitoring', function () {

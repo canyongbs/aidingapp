@@ -34,35 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Services;
 
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
+class ChallengePageDetector
 {
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
     /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     * @param  array<string, list<string>>  $headers
      */
-    public function serviceMonitoringTarget(): BelongsTo
+    public function detect(array $headers, string $body): ?string
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        $headerValues = collect($headers)
+            ->mapWithKeys(fn (array $values, string $name): array => [Str::lower($name) => implode(', ', $values)]);
+
+        if (Str::lower($headerValues->get('cf-mitigated', '')) === 'challenge' || Str::contains($body, 'cf-chl-')) {
+            return 'The response was blocked by a Cloudflare challenge page.';
+        }
+
+        if (Str::contains($body, ['Request unsuccessful. Incapsula', '/_Incapsula_Resource'])) {
+            return 'The response was blocked by an Incapsula challenge page.';
+        }
+
+        return null;
     }
 }

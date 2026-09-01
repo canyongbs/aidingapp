@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -65,6 +66,7 @@ class ServiceMonitoringTargetFactory extends Factory
             'is_reported_via_database' => $this->faker->boolean(),
             'is_reported_via_email' => $this->faker->boolean(),
             'is_confidential' => false,
+            'monitor_type' => MonitorType::Availability,
         ];
     }
 

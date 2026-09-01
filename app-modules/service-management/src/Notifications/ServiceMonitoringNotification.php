@@ -102,10 +102,12 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
     {
         $this->loadServiceMonitoringTarget();
         $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
+        $keywordMatchFailures = $this->historicalServiceMonitoring->keyword_match_failures;
 
         return Notification::make()
             ->danger()
             ->title((string) str("The last service monitoring check for [<ins>{$target->name}</ins>](" . ServiceMonitoringResource::getUrl('view', ['record' => $target]) . ') has failed.')->markdown())
+            ->body(filled($keywordMatchFailures) ? collect($keywordMatchFailures)->map(fn (string $failure): string => "{$failure}")->implode("\n") : null)
             ->getDatabaseMessage();
     }
 

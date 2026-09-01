@@ -34,35 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Enums;
 
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
+enum MonitorType: string implements HasLabel
 {
-    use SoftDeletes;
+    case Availability = 'availability';
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
+    case KeywordMatch = 'keyword_match';
 
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
+    public function getLabel(): string
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        return match ($this) {
+            self::Availability => 'Availability',
+            self::KeywordMatch => 'Keyword Match',
+        };
     }
 }

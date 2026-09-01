@@ -36,10 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\MonitorTypeFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -74,6 +76,18 @@ class ViewServiceMonitoring extends ViewRecord
                                 TextEntry::make('frequency')
                                     ->label('Frequency')
                                     ->columnSpan(1),
+                                TextEntry::make('monitor_type')
+                                    ->label('Monitor Type')
+                                    ->visible(MonitorTypeFeature::active())
+                                    ->columnSpanFull(),
+                                TextEntry::make('should_contain')
+                                    ->label('Should Contain')
+                                    ->listWithLineBreaks()
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                TextEntry::make('should_not_contain')
+                                    ->label('Should Not Contain')
+                                    ->listWithLineBreaks()
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
                             ])
                             ->columns(2),
                         Section::make('Notification Settings')

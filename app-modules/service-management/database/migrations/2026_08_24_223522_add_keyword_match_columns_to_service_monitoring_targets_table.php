@@ -34,35 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->string('monitor_type')->initial('availability');
+            $table->jsonb('should_contain')->nullable();
+            $table->jsonb('should_not_contain')->nullable();
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->dropColumn('monitor_type');
+            $table->dropColumn('should_contain');
+            $table->dropColumn('should_not_contain');
+        });
+    }
+};

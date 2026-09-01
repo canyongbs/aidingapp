@@ -34,35 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+it('detects Incapsula challenge pages', function () {
+    $reason = (new ChallengePageDetector())->detect([], '<iframe src="/_Incapsula_Resource">Request unsuccessful. Incapsula</iframe>');
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    use SoftDeletes;
+    expect($reason)->toBe('The response was blocked by an Incapsula challenge page.');
+});
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
+it('detects Cloudflare challenge pages from response headers', function () {
+    $reason = (new ChallengePageDetector())->detect(['cf-mitigated' => ['challenge']], '');
 
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
+    expect($reason)->toBe('The response was blocked by a Cloudflare challenge page.');
+});
 
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+it('does not detect an ordinary page as a challenge page', function () {
+    $reason = (new ChallengePageDetector())->detect(['content-type' => ['text/html']], '<html><body>Service is healthy.</body></html>');
+
+    expect($reason)->toBeNull();
+});
