@@ -774,15 +774,18 @@ PipelineEntry::factory()->count(3)->create([
     'project_milestone_id' => $milestone->getKey(),
 ]);
 
-    DB::enableQueryLog();
+DB::flushQueryLog();
+DB::enableQueryLog();
 
+try {
     livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee('Milestone:');
 
     $milestoneQueries = collect(DB::getQueryLog())
         ->filter(fn (array $query): bool => str_contains($query['query'], 'project_milestones'));
-
+} finally {
     DB::disableQueryLog();
+}
 
-    expect($milestoneQueries)->toHaveCount(1);
+expect($milestoneQueries)->toHaveCount(1);
 });
