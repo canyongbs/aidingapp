@@ -91,15 +91,15 @@ Route::prefix('api')
                     ->name('resources');
 
                 Route::post('/authenticate/request', KnowledgeManagementPortalRequestAuthenticationController::class)
-                    ->middleware(['signed:relative', 'throttle:widget-authentication-request'])
+                    ->middleware(['signed:relative', 'throttle:authentication-code-request'])
                     ->name('request-authentication');
 
                 Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
-                    ->middleware(['signed:relative', 'throttle:widget-authenticate', EnsureFrontendRequestsAreStateful::class])
+                    ->middleware(['signed:relative', 'throttle:authentication-code-verify', EnsureFrontendRequestsAreStateful::class])
                     ->name('authenticate.embedded');
 
                 Route::post('/register/{authentication}', KnowledgeManagementPortalRegisterController::class)
-                    ->middleware(['signed:relative', 'throttle:widget-authenticate', EnsureFrontendRequestsAreStateful::class])
+                    ->middleware(['signed:relative', 'throttle:authentication-code-verify', EnsureFrontendRequestsAreStateful::class])
                     ->name('authenticate.register.embedded');
 
                 Route::post('/logout', KnowledgeManagementPortalLogoutController::class)

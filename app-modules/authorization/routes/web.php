@@ -58,5 +58,5 @@ Route::middleware('web')->group(function () {
 
     Route::post('/otp-code/{otpCode}/verify', VerifyOtpLoginCodeController::class)
         ->name('otp-code.verify')
-        ->middleware(['signed', 'throttle:widget-authenticate']);
+        ->middleware(['signed', 'throttle:authentication-code-verify']);
 });

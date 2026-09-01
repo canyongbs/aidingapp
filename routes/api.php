@@ -56,6 +56,6 @@ Route::middleware([
         ->name('utilization-metrics');
 
     Route::post('/otp-code', GenerateOtpLoginCodeController::class)
-        ->middleware(['throttle:widget-authentication-request'])
+        ->middleware(['throttle:authentication-code-request'])
         ->name('otp-code.generate');
 });
