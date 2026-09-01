@@ -127,6 +127,7 @@ class ParticipantAdded implements ShouldBroadcastNow
                 'display_name' => $displayName,
                 'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
+                ...$conversation->confidentialityPayload(),
                 'participants' => $participants->values()->all(),
                 'participant_count' => $conversation->conversationParticipants->count(),
                 'last_message' => $lastMessage,

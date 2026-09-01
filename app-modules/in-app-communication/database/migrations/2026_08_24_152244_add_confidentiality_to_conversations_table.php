@@ -34,55 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Database\Factories;
+use App\Features\ConfidentialChannelsFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
-use AidingApp\InAppCommunication\Enums\ConversationType;
-use AidingApp\InAppCommunication\Models\Conversation;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<Conversation>
- */
-class ConversationFactory extends Factory
-{
-    protected $model = Conversation::class;
-
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'type' => $this->faker->randomElement(ConversationType::cases()),
-            'name' => $this->faker->optional()->words(3, true),
-            'is_private' => $this->faker->boolean(80),
-            'is_confidential' => false,
-            'ephemeral_period' => null,
-            'created_by' => User::factory(),
-        ];
+        DB::transaction(function () {
+            Schema::table('conversations', function (Blueprint $table) {
+                $table->boolean('is_confidential')->default(false);
+                $table->string('ephemeral_period')->nullable();
+
+                $table->index(['is_confidential', 'ephemeral_period'], 'conversations_ephemeral_lookup_index');
+            });
+
+            ConfidentialChannelsFeature::activate();
+        });
     }
 
-    public function direct(): static
+    public function down(): void
     {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Direct,
-            'name' => null,
-        ]);
-    }
+        DB::transaction(function () {
+            ConfidentialChannelsFeature::deactivate();
 
-    public function channel(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Channel,
-            'name' => $this->faker->words(3, true),
-        ]);
+            Schema::table('conversations', function (Blueprint $table) {
+                $table->dropIndex('conversations_ephemeral_lookup_index');
+                $table->dropColumn(['is_confidential', 'ephemeral_period']);
+            });
+        });
     }
-
-    public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
-    {
-        return $this->channel()->state(fn (array $attributes) => [
-            'is_private' => true,
-            'is_confidential' => true,
-            'ephemeral_period' => $ephemeralPeriod,
-        ]);
-    }
-}
+};

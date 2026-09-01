@@ -134,4 +134,64 @@ it('validates request', function (array $data, array $expectedErrors) {
         ['type' => 'channel', 'name' => 'Test', 'participant_ids' => ['invalid-uuid']],
         ['participant_ids.0' => 'The participant_ids.0 must be a valid UUID.'],
     ],
+    'is_confidential must be boolean' => [
+        ['type' => 'channel', 'name' => 'Test', 'is_confidential' => 'maybe'],
+        ['is_confidential'],
+    ],
+    'ephemeral_period must be valid' => [
+        ['type' => 'channel', 'name' => 'Test', 'ephemeral_period' => 'forever'],
+        ['ephemeral_period'],
+    ],
 ]);
+
+it('creates a confidential channel', function () {
+    $user = User::factory()->create();
+    $participant = User::factory()->create();
+
+    actingAs($user)
+        ->postJson(route('in-app-communication.conversations.store'), [
+            'type' => 'channel',
+            'name' => 'Legal Review',
+            'participant_ids' => [$participant->getKey()],
+            'is_confidential' => true,
+            'ephemeral_period' => '24_hours',
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.is_confidential', true)
+        ->assertJsonPath('data.ephemeral_period', '24_hours')
+        ->assertJsonPath('data.is_private', true);
+});
+
+it('forces a confidential channel to be private', function () {
+    $user = User::factory()->create();
+    $participant = User::factory()->create();
+
+    actingAs($user)
+        ->postJson(route('in-app-communication.conversations.store'), [
+            'type' => 'channel',
+            'name' => 'Legal Review',
+            'participant_ids' => [$participant->getKey()],
+            'is_private' => false,
+            'is_confidential' => true,
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.is_private', true)
+        ->assertJsonPath('data.is_confidential', true);
+});
+
+it('creates a confidential channel with no ephemeral period', function () {
+    $user = User::factory()->create();
+    $participant = User::factory()->create();
+
+    actingAs($user)
+        ->postJson(route('in-app-communication.conversations.store'), [
+            'type' => 'channel',
+            'name' => 'Legal Review',
+            'participant_ids' => [$participant->getKey()],
+            'is_confidential' => true,
+            'ephemeral_period' => null,
+        ])
+        ->assertCreated()
+        ->assertJsonPath('data.is_confidential', true)
+        ->assertJsonPath('data.ephemeral_period', null);
+});

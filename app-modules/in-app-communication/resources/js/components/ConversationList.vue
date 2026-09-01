@@ -33,9 +33,16 @@
 -->
 
 <script setup>
-    import { ChatBubbleLeftRightIcon, HashtagIcon, PlusIcon } from '@heroicons/vue/24/outline';
+    import {
+        ChatBubbleLeftRightIcon,
+        HashtagIcon,
+        IdentificationIcon,
+        PlusIcon,
+        ShieldCheckIcon,
+        UserIcon,
+    } from '@heroicons/vue/24/outline';
     import axios from 'axios';
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { computed, onMounted, onUnmounted, ref } from 'vue';
     import ConversationListItem from './ConversationListItem.vue';
     import ServiceRequestConversationQueue from './ServiceRequestConversationQueue.vue';
     import EmptyState from './ui/EmptyState.vue';
@@ -51,7 +58,9 @@
         initialTab: { type: String, default: 'users' },
         usersUnreadCount: { type: Number, default: 0 },
         contactsUnreadCount: { type: Number, default: 0 },
+        confidentialUnreadCount: { type: Number, default: 0 },
         serviceManagementEnabled: { type: Boolean, default: false },
+        confidentialChannelsEnabled: { type: Boolean, default: false },
     });
 
     const emit = defineEmits([
@@ -65,7 +74,22 @@
     ]);
 
     const scrollContainer = ref(null);
-    const activeTab = ref(props.serviceManagementEnabled ? props.initialTab : 'users');
+
+    const TAB_DEFINITIONS = [
+        { key: 'confidential', icon: ShieldCheckIcon, label: 'Confidential' },
+        { key: 'users', icon: UserIcon, label: 'Users' },
+        { key: 'contacts', icon: IdentificationIcon, label: 'Contacts' },
+    ];
+
+    const availableTabs = computed(() =>
+        TAB_DEFINITIONS.filter((tab) => {
+            if (tab.key === 'confidential') return props.confidentialChannelsEnabled;
+            if (tab.key === 'contacts') return props.serviceManagementEnabled;
+            return true;
+        }),
+    );
+
+    const activeTab = ref(availableTabs.value.some((tab) => tab.key === props.initialTab) ? props.initialTab : 'users');
     const queueItems = ref([]);
     const queueLoading = ref(true);
     const now = ref(Date.now());
@@ -128,9 +152,14 @@
         emit('queue-accepted', conversationId);
     }
 
-    watch(activeTab, (newTab) => {
-        emit('tab-changed', newTab);
-    });
+    // Only a click announces a tab change. focusTab() is the parent syncing this component to a
+    // switch it has already handled, so emitting there would trigger a second, redundant load.
+    function selectTab(tab) {
+        if (activeTab.value === tab) return;
+
+        activeTab.value = tab;
+        emit('tab-changed', tab);
+    }
 
     function addQueueItem(item) {
         const exists = queueItems.value.some((i) => i.id === item.id);
@@ -139,11 +168,19 @@
         }
     }
 
-    function focusContacts() {
-        activeTab.value = 'contacts';
+    function focusTab(tab) {
+        if (availableTabs.value.some((availableTab) => availableTab.key === tab)) {
+            activeTab.value = tab;
+        }
     }
 
-    defineExpose({ focusContacts, addQueueItem });
+    function unreadCountForTab(tab) {
+        if (tab === 'confidential') return props.confidentialUnreadCount;
+        if (tab === 'contacts') return props.contactsUnreadCount + queueCount.value;
+        return props.usersUnreadCount;
+    }
+
+    defineExpose({ focusTab, addQueueItem });
 </script>
 
 <template>
@@ -179,42 +216,29 @@
         </div>
 
         <!-- Tabs -->
-        <div v-if="serviceManagementEnabled" class="px-3 pt-2 pb-1 shrink-0">
+        <div v-if="availableTabs.length > 1" class="px-3 pt-2 pb-1 shrink-0">
             <div class="flex gap-1 bg-gray-100 dark:bg-gray-800 p-1 rounded-lg">
                 <button
+                    v-for="tab in availableTabs"
+                    :key="tab.key"
                     type="button"
+                    :title="tab.label"
+                    :aria-label="tab.label"
+                    :aria-current="activeTab === tab.key ? 'page' : undefined"
                     :class="[
-                        'flex-1 text-sm font-medium py-2 rounded-md transition-all relative',
-                        activeTab === 'users'
+                        'flex-1 flex items-center justify-center py-2 rounded-md transition-all relative',
+                        activeTab === tab.key
                             ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
                             : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                     ]"
-                    @click="activeTab = 'users'"
+                    @click="selectTab(tab.key)"
                 >
-                    Users
+                    <component :is="tab.icon" class="w-5 h-5" />
                     <span
-                        v-if="usersUnreadCount > 0"
-                        class="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold text-white bg-primary-500 rounded-full"
+                        v-if="unreadCountForTab(tab.key) > 0"
+                        class="absolute top-0.5 right-1/2 -mr-4 inline-flex items-center justify-center min-w-4 h-4 px-1 text-[10px] font-bold text-white bg-primary-500 rounded-full"
                     >
-                        {{ usersUnreadCount > 99 ? '99+' : usersUnreadCount }}
-                    </span>
-                </button>
-                <button
-                    type="button"
-                    :class="[
-                        'flex-1 text-sm font-medium py-2 rounded-md transition-all relative',
-                        activeTab === 'contacts'
-                            ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm'
-                            : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
-                    ]"
-                    @click="activeTab = 'contacts'"
-                >
-                    Contacts
-                    <span
-                        v-if="contactsUnreadCount + queueCount > 0"
-                        class="ml-1 inline-flex items-center justify-center min-w-5 h-5 px-1 text-xs font-bold text-white bg-primary-500 rounded-full"
-                    >
-                        {{ contactsUnreadCount + queueCount > 99 ? '99+' : contactsUnreadCount + queueCount }}
+                        {{ unreadCountForTab(tab.key) > 99 ? '99+' : unreadCountForTab(tab.key) }}
                     </span>
                 </button>
             </div>

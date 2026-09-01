@@ -34,55 +34,63 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Database\Factories;
+namespace AidingApp\InAppCommunication\Events;
 
-use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
-use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use Carbon\CarbonInterface;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Queue\SerializesModels;
 
-/**
- * @extends Factory<Conversation>
- */
-class ConversationFactory extends Factory
+class MessagesPruned implements ShouldBroadcast
 {
-    protected $model = Conversation::class;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    public function definition(): array
+    public int $tries = 3;
+
+    /** @var array<int, int> */
+    public array $backoff = [1, 5, 10];
+
+    public function __construct(
+        public Conversation $conversation,
+        public CarbonInterface $prunedBefore,
+    ) {}
+
+    public function broadcastAs(): string
+    {
+        return 'messages.pruned';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
     {
         return [
-            'type' => $this->faker->randomElement(ConversationType::cases()),
-            'name' => $this->faker->optional()->words(3, true),
-            'is_private' => $this->faker->boolean(80),
-            'is_confidential' => false,
-            'ephemeral_period' => null,
-            'created_by' => User::factory(),
+            'conversation_id' => $this->conversation->getKey(),
+            'pruned_before' => $this->prunedBefore->toIso8601String(),
         ];
     }
 
-    public function direct(): static
+    /**
+     * @return array<int, PrivateChannel>
+     */
+    public function broadcastOn(): array
     {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Direct,
-            'name' => null,
-        ]);
-    }
+        $channels = $this->conversation
+            ->conversationParticipants()
+            ->where('participant_type', app(User::class)->getMorphClass())
+            ->pluck('participant_id')
+            ->map(fn (string $id) => new PrivateChannel("user.{$id}"))
+            ->all();
 
-    public function channel(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Channel,
-            'name' => $this->faker->words(3, true),
-        ]);
-    }
+        $channels[] = new PrivateChannel("conversation.{$this->conversation->getKey()}");
 
-    public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
-    {
-        return $this->channel()->state(fn (array $attributes) => [
-            'is_private' => true,
-            'is_confidential' => true,
-            'ephemeral_period' => $ephemeralPeriod,
-        ]);
+        return $channels;
     }
 }

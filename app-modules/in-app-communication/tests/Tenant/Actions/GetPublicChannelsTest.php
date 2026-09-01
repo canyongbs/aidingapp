@@ -34,55 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\InAppCommunication\Database\Factories;
-
-use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
-use AidingApp\InAppCommunication\Enums\ConversationType;
+use AidingApp\InAppCommunication\Actions\GetPublicChannels;
 use AidingApp\InAppCommunication\Models\Conversation;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @extends Factory<Conversation>
- */
-class ConversationFactory extends Factory
-{
-    protected $model = Conversation::class;
+it('never lists a confidential channel', function () {
+    $user = User::factory()->create();
 
-    public function definition(): array
-    {
-        return [
-            'type' => $this->faker->randomElement(ConversationType::cases()),
-            'name' => $this->faker->optional()->words(3, true),
-            'is_private' => $this->faker->boolean(80),
-            'is_confidential' => false,
-            'ephemeral_period' => null,
-            'created_by' => User::factory(),
-        ];
-    }
+    $confidential = Conversation::factory()->confidential()->create([
+        'is_private' => false,
+    ]);
 
-    public function direct(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Direct,
-            'name' => null,
-        ]);
-    }
+    $results = app(GetPublicChannels::class)(excludeUser: $user);
 
-    public function channel(): static
-    {
-        return $this->state(fn (array $attributes) => [
-            'type' => ConversationType::Channel,
-            'name' => $this->faker->words(3, true),
-        ]);
-    }
+    expect($results->pluck('id')->all())->not->toContain($confidential->getKey());
+});
 
-    public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
-    {
-        return $this->channel()->state(fn (array $attributes) => [
-            'is_private' => true,
-            'is_confidential' => true,
-            'ephemeral_period' => $ephemeralPeriod,
-        ]);
-    }
-}
+it('does not exclude confidential channels when the feature is inactive', function () {
+    $user = User::factory()->create();
+
+    $confidential = Conversation::factory()->confidential()->create([
+        'is_private' => false,
+    ]);
+
+    ConfidentialChannelsFeature::deactivate();
+
+    $results = app(GetPublicChannels::class)(excludeUser: $user);
+
+    expect($results->pluck('id')->all())->toContain($confidential->getKey());
+});

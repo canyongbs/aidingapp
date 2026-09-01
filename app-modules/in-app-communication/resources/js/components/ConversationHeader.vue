@@ -42,6 +42,7 @@
         HashtagIcon,
         LockClosedIcon,
         PencilIcon,
+        ShieldCheckIcon,
         UserGroupIcon,
         XMarkIcon,
     } from '@heroicons/vue/24/outline';
@@ -179,8 +180,12 @@
             <template v-if="conversation.type === 'channel'">
                 <div class="relative bg-white/20 p-2 rounded-lg">
                     <HashtagIcon class="w-5 h-5 text-white" />
+                    <ShieldCheckIcon
+                        v-if="conversation.is_confidential"
+                        class="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-white"
+                    />
                     <LockClosedIcon
-                        v-if="conversation.is_private"
+                        v-else-if="conversation.is_private"
                         class="absolute -bottom-0.5 -right-0.5 h-3 w-3 text-white/80"
                     />
                 </div>
@@ -295,6 +300,7 @@
                 </button>
 
                 <button
+                    v-if="!conversation.is_confidential"
                     type="button"
                     class="w-full flex items-start gap-3 px-3 py-2 rounded-md text-left transition-colors text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                     :disabled="isUpdatingPrivacy"
@@ -319,6 +325,14 @@
                 </button>
             </DropdownMenu>
         </div>
+    </div>
+
+    <!-- Confidentiality Banner -->
+    <div
+        v-if="conversation.is_confidential"
+        class="shrink-0 bg-red-600 px-4 lg:px-6 py-2 text-center text-sm font-medium text-white"
+    >
+        This conversation is privileged and confidential.
     </div>
 
     <!-- Privacy Change Confirmation Modal -->
