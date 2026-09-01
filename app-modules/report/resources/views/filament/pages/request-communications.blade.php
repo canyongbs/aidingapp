@@ -32,28 +32,13 @@
     </COPYRIGHT>
 --}}
 @php
-    use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-    use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
-    use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-
     $serviceRequestType = $this->getSelectedServiceRequestType();
-    $roles = ServiceRequestTypeEmailTemplateRole::cases();
 @endphp
 
 <x-filament-panels::page>
     {{ $this->filtersForm }}
 
     @if ($serviceRequestType)
-        @php
-            $preferences = $serviceRequestType->emailPreferences->keyBy(
-                fn ($preference) => implode(':', [
-                    $preference->service_request_email_template_type->value,
-                    $preference->service_request_email_template_role->value,
-                    $preference->notification_channel->value,
-                ]),
-            );
-        @endphp
-
         {{ $this->notificationForm }}
 
         {{ $this->emailTemplatesForm }}
