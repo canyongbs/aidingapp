@@ -736,3 +736,27 @@ test('a service monitor saves unique `should_not_contain` values', function () {
 
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1']);
 });
+
+test('a service monitor saves case-insensitively unique keyword values', function () {
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => 'Error, error',
+            'should_not_contain' => 'Warning, warning',
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()
+        ->where('name', $request['name'])
+        ->firstOrFail()
+        ->refresh();
+
+    expect($serviceMonitoringTarget->should_contain)->toBe(['Error'])
+        ->and($serviceMonitoringTarget->should_not_contain)->toBe(['Warning']);
+});
