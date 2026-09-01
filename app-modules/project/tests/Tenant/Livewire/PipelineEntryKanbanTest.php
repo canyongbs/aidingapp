@@ -767,10 +767,12 @@ it('eager loads the milestone relation instead of lazy loading it per card', fun
 
     $stageId = $pipeline->stages->first()->getKey();
 
-    PipelineEntry::factory()->count(3)->create([
-        'pipeline_stage_id' => $stageId,
-        'project_milestone_id' => ProjectMilestone::factory()->create(['project_id' => $project->getKey()]),
-    ]);
+$milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+
+PipelineEntry::factory()->count(3)->create([
+    'pipeline_stage_id' => $stageId,
+    'project_milestone_id' => $milestone->getKey(),
+]);
 
     DB::enableQueryLog();
 
