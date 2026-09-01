@@ -38,10 +38,12 @@ namespace AidingApp\Report\Filament\Pages;
 
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
 use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
@@ -51,6 +53,7 @@ use BackedEnum;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\ViewField;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Components\Section;
@@ -66,6 +69,9 @@ class RequestCommunications extends Dashboard
 
     /** @var array<string, array<string, array{subject: array<string, mixed>|null, body: array<string, mixed>|null}>> */
     public array $emailTemplates = [];
+
+    /** @var array<string, bool> */
+    public array $notificationSettings = [];
 
     protected static ?string $cluster = ReportLibrary::class;
 
@@ -98,6 +104,7 @@ class RequestCommunications extends Dashboard
     public function booted(): void
     {
         $this->refreshEmailTemplates();
+        $this->refreshNotifications();
     }
 
     public function filtersForm(Schema $schema): Schema
@@ -116,12 +123,29 @@ class RequestCommunications extends Dashboard
                         ->live()
                         ->afterStateUpdated(function (): void {
                             $this->refreshEmailTemplates();
+                            $this->refreshNotifications();
                         })
                         ->placeholder('Select a service request type'),
                 ])
                 ->columns(1)
                 ->columnSpanFull(),
         ]);
+    }
+
+    public function notificationForm(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Notifications and Alerts')
+                    ->schema([
+                        ViewField::make('settings')
+                            ->statePath('notificationSettings')
+                            ->rules(['array'])
+                            ->disabled(true)
+                            ->view('service-management::filament.resources.service-request-type-resource.pages.edit-service-request-type-notifications.matrix'),
+                    ])
+                    ->extraAttributes(['class' => 'fi-section-no-content-padding']),
+            ]);
     }
 
     public function emailTemplatesForm(Schema $schema): Schema
@@ -272,6 +296,51 @@ class RequestCommunications extends Dashboard
         return [
             'filtersForm',
             'emailTemplatesForm',
+            'notificationForm',
         ];
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    protected function getNotificationState(): array
+    {
+        $serviceRequestType = $this->getSelectedServiceRequestType();
+
+        if ($serviceRequestType === null) {
+            return [];
+        }
+
+        $preferences = $serviceRequestType->emailPreferences()->get();
+
+        $settings = [];
+
+        foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
+            foreach (ServiceRequestTypeEmailTemplateRole::cases() as $templateRole) {
+                $eventSlug = $templateType->getEventSlug();
+                $roleSlug = $templateRole->value . 's';
+
+                foreach (ServiceRequestNotificationChannel::cases() as $channel) {
+                    $preference = $preferences->first(
+                        fn (ServiceRequestTypeEmailPreference $preference): bool => $preference->service_request_email_template_type === $templateType
+                            && $preference->service_request_email_template_role === $templateRole
+                            && $preference->notification_channel === $channel,
+                    );
+
+                    if ($preference !== null) {
+                        $settings["is_{$roleSlug}_{$eventSlug}_{$channel->value}_enabled"] = $preference->is_enabled;
+                    }
+                }
+            }
+        }
+
+        return $settings;
+    }
+
+    protected function refreshNotifications(): void
+    {
+        $this->notificationForm->fill([
+            'notificationSettings' => $this->getNotificationState(),
+        ]);
     }
 }

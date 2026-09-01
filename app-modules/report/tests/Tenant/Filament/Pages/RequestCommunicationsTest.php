@@ -101,9 +101,12 @@ it('displays the selected service request type communication configuration', fun
     livewire(RequestCommunications::class)
         ->set('filters.serviceRequestType', $serviceRequestType->getKey())
         ->assertSee('Notifications and Alerts')
+        ->assertSet('notificationSettings.is_managers_service_request_created_email_enabled', true)
+        ->assertSchemaComponentStateSet('notificationSettings', [
+            'is_managers_service_request_created_email_enabled' => true,
+        ], 'notificationForm')
         ->assertSet('emailTemplates.created.manager.subject', richContent('A request has been received'))
-        ->assertSet('emailTemplates.created.manager.body', richContent('The request is ready for review.'))
-        ->assertSeeHtml('checked');
+        ->assertSet('emailTemplates.created.manager.body', richContent('The request is ready for review.'));
 });
 
 it('renders Filament email-template tabs for each event type', function () {

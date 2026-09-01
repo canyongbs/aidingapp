@@ -54,56 +54,7 @@
             );
         @endphp
 
-        <x-filament::section heading="Notifications and Alerts">
-            <div class="overflow-x-auto">
-                <table class="w-full min-w-[58rem] divide-y divide-gray-950/5 text-sm dark:divide-white/10">
-                    <thead class="text-gray-950 dark:text-white">
-                        <tr class="divide-x divide-gray-950/5 dark:divide-white/10">
-                            <th class="w-full px-3 py-2 text-left font-medium"></th>
-                            @foreach ($roles as $role)
-                                <th class="px-3 py-2 text-center font-medium" colspan="2">{{ $role->getLabel() }}</th>
-                            @endforeach
-                        </tr>
-                        <tr class="divide-x divide-gray-950/5 dark:divide-white/10">
-                            <th class="px-3 py-2"></th>
-                            @foreach ($roles as $role)
-                                @foreach (ServiceRequestNotificationChannel::cases() as $channel)
-                                    <th class="w-20 px-3 py-2 text-center font-medium">{{ $channel->getLabel() }}</th>
-                                @endforeach
-                            @endforeach
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-950/5 dark:divide-white/10">
-                        @foreach (ServiceRequestEmailTemplateType::cases() as $templateType)
-                            <tr class="divide-x divide-gray-950/5 dark:divide-white/10">
-                                <th class="px-3 py-2 text-left font-medium text-gray-950 dark:text-white">
-                                    {{ $templateType->getViewLabel() }}
-                                </th>
-                                @foreach ($roles as $role)
-                                    @foreach (ServiceRequestNotificationChannel::cases() as $channel)
-                                        @php
-                                            $isShown =
-                                                $templateType !== ServiceRequestEmailTemplateType::SurveyResponse ||
-                                                ($role === ServiceRequestTypeEmailTemplateRole::Customer && $channel === ServiceRequestNotificationChannel::Email);
-                                            $preferenceKey = implode(':', [$templateType->value, $role->value, $channel->value]);
-                                        @endphp
-
-                                        <td class="w-20 px-3 py-2 text-center">
-                                            @if ($isShown)
-                                                <x-filament::input.checkbox
-                                                    :checked="$preferences->get($preferenceKey)?->is_enabled ?? false"
-                                                    disabled
-                                                />
-                                            @endif
-                                        </td>
-                                    @endforeach
-                                @endforeach
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </x-filament::section>
+        {{ $this->notificationForm }}
 
         {{ $this->emailTemplatesForm }}
     @endif
