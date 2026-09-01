@@ -767,25 +767,25 @@ it('eager loads the milestone relation instead of lazy loading it per card', fun
 
     $stageId = $pipeline->stages->first()->getKey();
 
-$milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
 
-PipelineEntry::factory()->count(3)->create([
-    'pipeline_stage_id' => $stageId,
-    'project_milestone_id' => $milestone->getKey(),
-]);
+    PipelineEntry::factory()->count(3)->create([
+        'pipeline_stage_id' => $stageId,
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
 
-DB::flushQueryLog();
-DB::enableQueryLog();
+    DB::flushQueryLog();
+    DB::enableQueryLog();
 
-try {
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-        ->assertSee('Milestone:');
+    try {
+        livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+            ->assertSee('Milestone:');
 
-    $milestoneQueries = collect(DB::getQueryLog())
-        ->filter(fn (array $query): bool => str_contains($query['query'], 'project_milestones'));
-} finally {
-    DB::disableQueryLog();
-}
+        $milestoneQueries = collect(DB::getQueryLog())
+            ->filter(fn (array $query): bool => str_contains($query['query'], 'project_milestones'));
+    } finally {
+        DB::disableQueryLog();
+    }
 
-expect($milestoneQueries)->toHaveCount(1);
+    expect($milestoneQueries)->toHaveCount(1);
 });
