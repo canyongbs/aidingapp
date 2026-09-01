@@ -32,7 +32,9 @@
     </COPYRIGHT>
 --}}
 <x-filament-widgets::widget>
-    {{ $this->table }}
+    <div class="project-work-pipeline-widget">
+        {{ $this->table }}
+    </div>
 
     <x-filament-actions::modals />
 </x-filament-widgets::widget>
