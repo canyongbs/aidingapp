@@ -69,6 +69,7 @@
         "laravel/socialite": "^5.15",
         "laravel/tinker": "^3.0",
         "laravel/ui": "^4.6",
+        "league/commonmark": "^2.9.0",
         "league/flysystem-aws-s3-v3": "^3.28",
         "league/oauth2-client": "^2.7",
         "livewire/livewire": "^3.6.1",
@@ -84,7 +85,7 @@
         "socialiteproviders/microsoft-azure": "^5.2",
         "spatie/laravel-cookie-consent": "^3.3",
         "spatie/laravel-data": "^4.0",
-        "spatie/laravel-health": "^1.39.0",
+        "spatie/laravel-health": "^1.40.2",
         "spatie/laravel-json-api-paginate": "^2.0",
         "spatie/laravel-medialibrary": "^11.3",
         "spatie/laravel-multitenancy": "^4.0",
@@ -95,7 +96,7 @@
         "staudenmeir/eloquent-has-many-deep": "^1.19",
         "stechstudio/filament-impersonate": "^4.0",
         "tpetry/laravel-postgresql-enhanced": "^3.5.1",
-        "ysfkaya/filament-phone-input": "^4.2.2"
+        "ysfkaya/filament-phone-input": "^4.2.3"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^3.5",
@@ -139,12 +140,14 @@
         ],
         "post-install-cmd": [
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
-            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
+            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\"",
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force",
             "@php -r \"if (file_exists('vendor/phpdocumentor/reflection/composer.lock')) { unlink('vendor/phpdocumentor/reflection/composer.lock'); }\"",
-            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\""
+            "@php -r \"if (file_exists('vendor/spatie/laravel-health/yarn.lock')) { unlink('vendor/spatie/laravel-health/yarn.lock'); }\"",
+            "@php -r \"if (file_exists('vendor/ysfkaya/filament-phone-input/yarn.lock')) { unlink('vendor/ysfkaya/filament-phone-input/yarn.lock'); }\""
         ],
         "post-root-package-install": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""

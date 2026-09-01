@@ -34,42 +34,29 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Theme\Settings\ThemeSettings;
-use Illuminate\Support\Facades\DB;
-use Spatie\LaravelSettings\Migrations\SettingsMigration;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-return new class () extends SettingsMigration {
+return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            $this->migrator->update('theme.is_support_url_enabled', fn (): bool => true);
+        Schema::create('service_request_status_periods', function (Blueprint $table) {
+            $table->uuid('id')->primary();
 
-            $this->migrator->update(
-                'theme.support_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_SUPPORT_URL,
-            );
+            $table->foreignUuid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
+            $table->foreignUuid('service_request_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
+            $table->string('classification')->nullable();
+            $table->timestamp('started_at');
 
-            $this->migrator->update('theme.is_recent_updates_url_enabled', fn (): bool => true);
+            $table->timestamps();
 
-            $this->migrator->update(
-                'theme.recent_updates_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_RECENT_UPDATES_URL,
-            );
-
-            $this->migrator->update(
-                'theme.changelog_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_CHANGELOG_URL,
-            );
-
-            $this->migrator->update(
-                'theme.product_resource_hub_url',
-                fn ($value) => filled($value) ? $value : ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL,
-            );
+            $table->index(['service_request_id', 'started_at']);
         });
     }
 
     public function down(): void
     {
-        // This is a one-time data seed for existing tenants and is not reversible.
+        Schema::dropIfExists('service_request_status_periods');
     }
 };

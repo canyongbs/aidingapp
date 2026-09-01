@@ -40,6 +40,7 @@ app-modules/**/resources/js/dist/*
 **/psysh_history
 .pdepend/
 .phpmd.result-cache.php
+storage/framework/lsp-*.php
 
 # BEGIN canyongbs/common (common:publish) — do not edit this block manually.
 /boost.json

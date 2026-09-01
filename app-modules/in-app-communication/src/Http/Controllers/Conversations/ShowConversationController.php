@@ -128,6 +128,7 @@ class ShowConversationController extends Controller
                 'display_name' => $displayName,
                 'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
+                ...$conversation->confidentialityPayload(),
                 'is_pinned' => $isPinned,
                 'notification_preference' => $notificationPreference,
                 'unread_count' => $conversation->unread_count ?? 0,

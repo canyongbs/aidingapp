@@ -50,6 +50,7 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
+use App\Features\SlaWaitingExclusionFeature;
 use App\Models\BaseModel;
 use App\Models\Media;
 use App\Models\User;
@@ -276,6 +277,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     }
 
     /**
+     * @return HasMany<ServiceRequestStatusPeriod, $this>
+     */
+    public function statusPeriods(): HasMany
+    {
+        return $this->hasMany(ServiceRequestStatusPeriod::class);
+    }
+
+    /**
      * @return HasMany<ServiceRequestConversation, $this>
      */
     public function conversations(): HasMany
@@ -360,37 +369,84 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function getLatestResponseSeconds(): int
     {
         if (! $this->latestInboundServiceRequestUpdate) {
-            return (int) round($this->created_at->diffInSeconds(now()));
+            return $this->responseSecondsBetween($this->created_at, now());
         }
+
+        $inboundAt = $this->latestInboundServiceRequestUpdate->created_at;
 
         if (
             $this->isResolved() &&
-            ($resolvedAt = $this->getResolvedAt())->isAfter($this->latestInboundServiceRequestUpdate->created_at)
+            ($resolvedAt = $this->getResolvedAt())->isAfter($inboundAt)
         ) {
-            return (int) round($resolvedAt->diffInSeconds($this->latestInboundServiceRequestUpdate->created_at));
+            return $this->responseSecondsBetween($inboundAt, $resolvedAt);
         }
 
         if (
             $this->latestOutboundServiceRequestUpdate &&
-            $this->latestOutboundServiceRequestUpdate->created_at->isAfter(
-                $this->latestInboundServiceRequestUpdate->created_at,
-            )
+            $this->latestOutboundServiceRequestUpdate->created_at->isAfter($inboundAt)
         ) {
-            return (int) round($this->latestOutboundServiceRequestUpdate->created_at->diffInSeconds(
-                $this->latestInboundServiceRequestUpdate->created_at,
-            ));
+            return $this->responseSecondsBetween($inboundAt, $this->latestOutboundServiceRequestUpdate->created_at);
         }
 
-        return (int) round($this->latestInboundServiceRequestUpdate->created_at->diffInSeconds());
+        return $this->responseSecondsBetween($inboundAt, now());
     }
 
     public function getResolutionSeconds(): int
     {
-        if (! $this->isResolved()) {
-            return (int) round($this->created_at->diffInSeconds());
+        $end = $this->isResolved() ? $this->getResolvedAt() : now();
+
+        $seconds = (int) round($this->created_at->diffInSeconds($end));
+
+        if (SlaWaitingExclusionFeature::active()) {
+            $seconds -= $this->getExcludedSecondsBetween($this->created_at, $end, [
+                SystemServiceRequestClassification::Waiting,
+                SystemServiceRequestClassification::Closed,
+            ]);
         }
 
-        return (int) round($this->created_at->diffInSeconds($this->getResolvedAt()));
+        return max(0, $seconds);
+    }
+
+    /**
+     * Sum the seconds this request spent in any of the given classifications within [$start, $end].
+     *
+     * @param array<int, SystemServiceRequestClassification> $classifications
+     */
+    public function getExcludedSecondsBetween(CarbonInterface $start, CarbonInterface $end, array $classifications): int
+    {
+        $periods = $this->statusPeriods
+            ->sortBy([
+                ['started_at', 'asc'],
+                ['created_at', 'asc'],
+            ])
+            ->values();
+
+        if ($periods->isEmpty()) {
+            return 0;
+        }
+
+        $ongoingEnd = $this->isResolved() ? $this->getResolvedAt() : now();
+
+        $excludedSeconds = 0.0;
+
+        foreach ($periods as $index => $period) {
+            if (! in_array($period->classification, $classifications, true)) {
+                continue;
+            }
+
+            $periodStart = $period->started_at;
+            $nextPeriod = $periods->get($index + 1);
+            $periodEnd = $nextPeriod ? $nextPeriod->started_at : $ongoingEnd;
+
+            $overlapStart = $periodStart->greaterThan($start) ? $periodStart : $start;
+            $overlapEnd = $periodEnd->lessThan($end) ? $periodEnd : $end;
+
+            if ($overlapEnd->greaterThan($overlapStart)) {
+                $excludedSeconds += $overlapStart->diffInSeconds($overlapEnd);
+            }
+        }
+
+        return (int) round($excludedSeconds);
     }
 
     public function getSlaResponseSeconds(): ?int
@@ -435,7 +491,33 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     public function getResolvedAt(): CarbonInterface
     {
-        return $this->status_updated_at ?? $this->updated_at ?? $this->created_at;
+        $legacyResolvedAt = $this->status_updated_at ?? $this->updated_at ?? $this->created_at;
+
+        if (! SlaWaitingExclusionFeature::active()) {
+            return $legacyResolvedAt;
+        }
+
+        $periods = $this->statusPeriods
+            ->sortBy([
+                ['started_at', 'asc'],
+                ['created_at', 'asc'],
+            ])
+            ->values();
+
+        // Anchor resolution to the start of the current trailing run of Closed periods, so moving
+        // between two closed statuses (e.g. Resolved -> Closed) doesn't push the resolved time forward,
+        // while a reopen (a non-closed period) correctly resets it to the most recent close.
+        $resolvedAt = null;
+
+        foreach ($periods->reverse() as $period) {
+            if ($period->classification !== SystemServiceRequestClassification::Closed) {
+                break;
+            }
+
+            $resolvedAt = $period->started_at;
+        }
+
+        return $resolvedAt ?? $legacyResolvedAt;
     }
 
     public function isResolved(): bool
@@ -522,5 +604,18 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
+
+    private function responseSecondsBetween(CarbonInterface $start, CarbonInterface $end): int
+    {
+        $seconds = (int) round($start->diffInSeconds($end));
+
+        if (SlaWaitingExclusionFeature::active()) {
+            $seconds -= $this->getExcludedSecondsBetween($start, $end, [
+                SystemServiceRequestClassification::Waiting,
+            ]);
+        }
+
+        return max(0, $seconds);
     }
 }

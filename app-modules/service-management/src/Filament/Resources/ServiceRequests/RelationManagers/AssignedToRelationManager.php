@@ -36,13 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ManageAssignmentAction;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
-use Filament\Actions\Action;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -76,7 +74,11 @@ class AssignedToRelationManager extends RelationManager
             ])
             ->paginated(false)
             ->headerActions([
-                Action::make('assign-to-me')
+                ManageAssignmentAction::make(
+                    $this->getOwnerRecord(),
+                    'assign-to-me',
+                    auth()->user()?->getKey(),
+                )
                     ->visible(function () {
                         $user = auth()->user();
                         $type = $this->getOwnerRecord()->priority?->type;
@@ -90,21 +92,7 @@ class AssignedToRelationManager extends RelationManager
                             );
                     })
                     ->label('Assign To Me')
-                    ->color('gray')
-                    ->requiresConfirmation()
-                    ->action(function () {
-                        $data = [
-                            'user_id' => auth()->user()?->getKey(),
-                            'assigned_by_id' => auth()->user()?->getKey() ?? null,
-                            'assigned_by_type' => auth()->user()?->getMorphClass(),
-                            'assigned_at' => now(),
-                            'status' => ServiceRequestAssignmentStatus::Active,
-                        ];
-
-                        $this->getOwnerRecord()->assignments()->create($data);
-
-                        $this->dispatch('assignment-history-refresh');
-                    }),
+                    ->color('gray'),
                 ManageAssignmentAction::make($this->getOwnerRecord()),
             ])
             ->recordActions([

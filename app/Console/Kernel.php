@@ -43,6 +43,7 @@ use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
 use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
 use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\InAppCommunication\Jobs\PruneEphemeralMessages;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -55,6 +56,7 @@ use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use App\Models\HealthCheckResultHistoryItem;
+use App\Models\Scopes\ExcludeExpiredSubscriptions;
 use App\Models\Scopes\SetupIsComplete;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
@@ -78,6 +80,7 @@ class Kernel extends ConsoleKernel
 
         Tenant::query()
             ->tap(new SetupIsComplete())
+            ->tap(new ExcludeExpiredSubscriptions())
             ->cursor()
             ->each(function (Tenant $tenant) use ($schedule) {
                 try {
@@ -195,6 +198,16 @@ class Kernel extends ConsoleKernel
                     })
                         ->everyMinute()
                         ->name("End Service Request Conversations | Tenant {$tenant->domain}")
+                        ->onOneServer()
+                        ->withoutOverlapping(5);
+
+                    $schedule->call(function () use ($tenant) {
+                        $tenant->execute(function () {
+                            dispatch(new PruneEphemeralMessages());
+                        });
+                    })
+                        ->everyMinute()
+                        ->name("Prune Ephemeral Messages | Tenant {$tenant->domain}")
                         ->onOneServer()
                         ->withoutOverlapping(5);
 

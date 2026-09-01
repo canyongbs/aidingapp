@@ -563,7 +563,7 @@ it('preserves related milestone, assets, and service requests when edited withou
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('editPipelineEntry')
         ->assertActionDataSet([
-            'milestones_type' => 'select',
+            'project_milestone_id' => $milestone->getKey(),
             'assets_type' => 'select',
             'service_requests_type' => 'select',
         ])
@@ -603,12 +603,12 @@ it('clears related milestone, assets, and service requests when the type is set 
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('editPipelineEntry')
         ->assertActionDataSet([
-            'milestones_type' => 'select',
+            'project_milestone_id' => $milestone->getKey(),
             'assets_type' => 'select',
             'service_requests_type' => 'select',
         ])
         ->setActionData([
-            'milestones_type' => 'none',
+            'project_milestone_id' => null,
             'assets_type' => 'none',
             'service_requests_type' => 'none',
         ])

@@ -40,6 +40,7 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestStatusPeriod;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
@@ -55,6 +56,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\SlaWaitingExclusionFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -76,6 +78,8 @@ class ServiceRequestObserver
 
     public function created(ServiceRequest $serviceRequest): void
     {
+        app(RecordServiceRequestStatusPeriod::class)->execute($serviceRequest, $serviceRequest->created_at);
+
         if (! $serviceRequest->isDraft()) {
             $this->writeCreatedHistory($serviceRequest);
         }
@@ -105,22 +109,42 @@ class ServiceRequestObserver
         if ($serviceRequest->isDirty('status_id')) {
             $serviceRequest->status_updated_at = CarbonImmutable::now();
 
-            if (
-                $serviceRequest->status->classification === SystemServiceRequestClassification::Closed &&
-                is_null($serviceRequest->time_to_resolution)
-            ) {
-                $createdTime = $serviceRequest->created_at;
-                $currentTime = Carbon::now();
+            // The status relation may still hold the previously loaded status, so reload it to match the new status_id.
+            $serviceRequest->unsetRelation('status');
 
-                // Calculate the difference in seconds
-                $secondsDifference = $createdTime ? (int) round($createdTime->diffInSeconds($currentTime)) : null;
-                $serviceRequest->time_to_resolution = $secondsDifference;
+            if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
+                if (SlaWaitingExclusionFeature::active() && $serviceRequest->exists) {
+                    $end = $serviceRequest->status_updated_at;
+
+                    $seconds = (int) round($serviceRequest->created_at->diffInSeconds($end));
+
+                    $seconds -= $serviceRequest->getExcludedSecondsBetween($serviceRequest->created_at, $end, [
+                        SystemServiceRequestClassification::Waiting,
+                        SystemServiceRequestClassification::Closed,
+                    ]);
+
+                    $serviceRequest->time_to_resolution = max(0, $seconds);
+                } elseif (is_null($serviceRequest->time_to_resolution)) {
+                    $createdTime = $serviceRequest->created_at;
+                    $currentTime = Carbon::now();
+
+                    // Calculate the difference in seconds
+                    $secondsDifference = $createdTime ? (int) round($createdTime->diffInSeconds($currentTime)) : null;
+                    $serviceRequest->time_to_resolution = $secondsDifference;
+                }
             }
         }
     }
 
     public function saved(ServiceRequest $serviceRequest): void
     {
+        if (! $serviceRequest->wasRecentlyCreated && $serviceRequest->wasChanged('status_id')) {
+            app(RecordServiceRequestStatusPeriod::class)->execute(
+                $serviceRequest,
+                $serviceRequest->status_updated_at,
+            );
+        }
+
         if (! $serviceRequest->isDraft() && ! $serviceRequest->wasRecentlyCreated) {
             $actor = $this->resolveActor();
 

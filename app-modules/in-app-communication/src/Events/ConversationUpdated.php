@@ -66,6 +66,7 @@ class ConversationUpdated implements ShouldBroadcastNow
             'name' => $this->conversation->name,
             'display_name' => $this->conversation->name ?? 'Unnamed Channel',
             'is_private' => $this->conversation->is_private,
+            ...$this->conversation->confidentialityPayload(),
         ];
     }
 

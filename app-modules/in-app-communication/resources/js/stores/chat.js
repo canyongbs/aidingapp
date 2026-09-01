@@ -205,6 +205,19 @@ export const useChatStore = defineStore('chat', () => {
         messages.value[conversationId] = messages.value[conversationId].filter((message) => message.id !== messageId);
     }
 
+    function removeMessagesBefore(conversationId, prunedBefore) {
+        if (!messages.value[conversationId]) return;
+
+        const cutoff = new Date(prunedBefore).getTime();
+
+        messages.value[conversationId] = messages.value[conversationId].filter((message) => {
+            const createdAt = new Date(message.created_at).getTime();
+
+            // Keep anything we cannot place in time rather than discarding a message that still exists.
+            return Number.isNaN(createdAt) || createdAt >= cutoff;
+        });
+    }
+
     function setMessageRetrying(conversationId, messageId) {
         if (!messages.value[conversationId]) return;
 
@@ -294,6 +307,7 @@ export const useChatStore = defineStore('chat', () => {
         updateMessage,
         setMessageFailed,
         removeMessage,
+        removeMessagesBefore,
         setMessageRetrying,
         setTyping,
         clearTyping,

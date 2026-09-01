@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -57,6 +58,10 @@ class GetPublicChannels
         return Conversation::query()
             ->where('type', ConversationType::Channel)
             ->where('is_private', false)
+            ->when(
+                ConfidentialChannelsFeature::active(),
+                fn (Builder $query) => $query->where('is_confidential', false),
+            )
             ->whereDoesntHave('conversationParticipants', function (Builder $query) use ($excludeUser) {
                 $query->whereMorphedTo('participant', $excludeUser);
             })

@@ -37,6 +37,7 @@
 use AidingApp\InAppCommunication\Actions\UpdateConversation;
 use AidingApp\InAppCommunication\Events\ConversationUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
+use App\Features\ConfidentialChannelsFeature;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(fn () => Event::fake());
@@ -140,4 +141,44 @@ it('does not broadcast `ConversationUpdated` event when no changes are made', fu
     );
 
     Event::assertNotDispatched(ConversationUpdated::class);
+});
+
+it('does not let a confidential channel be made public', function () {
+    $conversation = Conversation::factory()->confidential()->create();
+
+    expect(fn () => app(UpdateConversation::class)(
+        conversation: $conversation,
+        isPrivate: false,
+    ))->toThrow(InvalidArgumentException::class, 'Confidential channels cannot be made public.');
+
+    expect($conversation->fresh()->is_private)->toBeTrue();
+
+    Event::assertNotDispatched(ConversationUpdated::class);
+});
+
+it('still renames a confidential channel', function () {
+    $conversation = Conversation::factory()->confidential()->create([
+        'name' => 'Original Name',
+    ]);
+
+    $result = app(UpdateConversation::class)(
+        conversation: $conversation,
+        name: 'New Name',
+    );
+
+    expect($result->name)->toBe('New Name')
+        ->and($conversation->fresh()->is_confidential)->toBeTrue();
+});
+
+it('lets a confidential channel be made public when the feature is inactive', function () {
+    $conversation = Conversation::factory()->confidential()->create();
+
+    ConfidentialChannelsFeature::deactivate();
+
+    $result = app(UpdateConversation::class)(
+        conversation: $conversation,
+        isPrivate: false,
+    );
+
+    expect($result->is_private)->toBeFalse();
 });

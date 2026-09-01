@@ -38,6 +38,7 @@ namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\Scopes\WithCurrentParticipant;
+use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,6 +56,7 @@ class GetUserConversations
         ?string $cursor = null,
         bool $excludePinned = false,
         ?string $participantType = null,
+        ?bool $confidential = null,
     ): CursorPaginator {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
@@ -78,6 +80,9 @@ class GetUserConversations
             ->when($participantType === 'user', function (Builder $query) {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
+            ->when(ConfidentialChannelsFeature::active() && $confidential !== null, function (Builder $query) use ($confidential) {
+                $query->where('conversations.is_confidential', $confidential);
+            })
             ->tap(new WithCurrentParticipant($user))
             ->withCount('conversationParticipants as participant_count')
             ->with(['latestMessage.author'])
@@ -89,7 +94,7 @@ class GetUserConversations
     /**
      * @return Collection<int, Conversation>
      */
-    public function pinned(User $user, ?string $participantType = null): Collection
+    public function pinned(User $user, ?string $participantType = null, ?bool $confidential = null): Collection
     {
         $userType = $user->getMorphClass();
         $userId = $user->getKey();
@@ -110,6 +115,9 @@ class GetUserConversations
             })
             ->when($participantType === 'user', function (Builder $query) {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
+            })
+            ->when(ConfidentialChannelsFeature::active() && $confidential !== null, function (Builder $query) use ($confidential) {
+                $query->where('conversations.is_confidential', $confidential);
             })
             ->tap(new WithCurrentParticipant($user))
             ->withCount('conversationParticipants as participant_count')

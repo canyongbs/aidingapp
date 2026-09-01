@@ -37,9 +37,33 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\Theme\Settings\ThemeSettings;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Carbon\CarbonImmutable;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+if (! function_exists('recordServiceRequestHistory')) {
+    /**
+     * @param array<string, mixed> $originalValues
+     * @param array<string, mixed> $newValues
+     */
+    function recordServiceRequestHistory(ServiceRequest $serviceRequest, array $originalValues, array $newValues, CarbonInterface $createdAt): void
+    {
+        DB::table('service_request_histories')->insert([
+            'id' => (string) Str::uuid(),
+            'service_request_id' => $serviceRequest->getKey(),
+            'original_values' => json_encode($originalValues),
+            'new_values' => json_encode($newValues),
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
+    }
+}
 
 describe('2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique', function () {
     $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique.php';
@@ -142,64 +166,83 @@ describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citex
     });
 });
 
-describe('2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants', function () {
-    $migrationName = '2026_08_18_130641_tmp_seed_profile_menu_and_login_home_theme_settings_for_existing_tenants';
-    $migrationPath = "database/migrations/{$migrationName}.php";
+// Example migration test, leave commented out for future use as a template/example
+describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', function () {
+    $migrationName = '2026_08_12_163559_tmp_backfill_service_request_status_periods';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
 
-    it('seeds the default profile menu and login and home target settings for existing tenants', function () use ($migrationName, $migrationPath) {
+    it('backfills a status period ledger from the service request history', function () use ($migrationName, $migrationPath) {
         isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
+            $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-            expect($settings->is_support_url_enabled)->toBeFalse()
-                ->and($settings->support_url)->toBeNull()
-                ->and($settings->is_recent_updates_url_enabled)->toBeFalse()
-                ->and($settings->recent_updates_url)->toBeNull()
-                ->and($settings->changelog_url)->toBeNull()
-                ->and($settings->product_resource_hub_url)->toBeNull();
+            $open = ServiceRequestStatus::factory()->open()->create();
+            $waiting = ServiceRequestStatus::factory()->waiting()->create();
+            $closed = ServiceRequestStatus::factory()->closed()->create();
 
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            $serviceRequest = ServiceRequest::factory()->create([
+                'status_id' => $closed->getKey(),
+                'created_at' => $start,
+            ]);
 
-            expect($migrate)->toBe(Command::SUCCESS);
+            // Start from a clean slate: drop any ledger and history the observers recorded on create.
+            DB::table('service_request_status_periods')->delete();
+            DB::table('service_request_histories')->delete();
 
-            $settings->refresh();
+            recordServiceRequestHistory($serviceRequest, [], ['status_id' => $open->getKey()], $start);
+            recordServiceRequestHistory($serviceRequest, ['status_id' => $open->getKey()], ['status_id' => $waiting->getKey()], $start->addSeconds(100));
+            recordServiceRequestHistory($serviceRequest, ['status_id' => $waiting->getKey()], ['status_id' => $closed->getKey()], $start->addSeconds(200));
 
-            expect($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->support_url)->toBe(ThemeSettings::DEFAULT_SUPPORT_URL)
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue()
-                ->and($settings->recent_updates_url)->toBe(ThemeSettings::DEFAULT_RECENT_UPDATES_URL)
-                ->and($settings->changelog_url)->toBe(ThemeSettings::DEFAULT_CHANGELOG_URL)
-                ->and($settings->product_resource_hub_url)->toBe(ThemeSettings::DEFAULT_PRODUCT_RESOURCE_HUB_URL);
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            $periods = DB::table('service_request_status_periods')
+                ->where('service_request_id', $serviceRequest->getKey())
+                ->orderBy('started_at')
+                ->get();
+
+            expect($periods)->toHaveCount(3)
+                ->and($periods[0]->service_request_status_id)->toBe($open->getKey())
+                ->and($periods[0]->classification)->toBe(SystemServiceRequestClassification::Open->value)
+                ->and($periods[1]->service_request_status_id)->toBe($waiting->getKey())
+                ->and($periods[1]->classification)->toBe(SystemServiceRequestClassification::Waiting->value)
+                ->and($periods[2]->service_request_status_id)->toBe($closed->getKey())
+                ->and($periods[2]->classification)->toBe(SystemServiceRequestClassification::Closed->value);
         });
     });
 
-    it('preserves urls an admin has already configured', function () use ($migrationName, $migrationPath) {
+    it('records a null classification period when a historical status was hard-deleted', function () use ($migrationName, $migrationPath) {
         isolatedMigration($migrationName, function () use ($migrationPath) {
-            $settings = app(ThemeSettings::class);
-            $settings->refresh();
-            $settings->support_url = 'https://example.com/custom-support';
-            $settings->recent_updates_url = 'https://example.com/custom-updates';
-            $settings->changelog_url = 'https://example.com/custom-changelog';
-            $settings->product_resource_hub_url = 'https://example.com/custom-hub';
-            $settings->save();
+            $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            $open = ServiceRequestStatus::factory()->open()->create();
+            $deletedStatusId = (string) Str::uuid();
 
-            expect($migrate)->toBe(Command::SUCCESS);
+            $serviceRequest = ServiceRequest::factory()->create([
+                'status_id' => $open->getKey(),
+                'created_at' => $start,
+            ]);
 
-            $settings->refresh();
+            DB::table('service_request_status_periods')->delete();
+            DB::table('service_request_histories')->delete();
 
-            expect($settings->support_url)->toBe('https://example.com/custom-support')
-                ->and($settings->recent_updates_url)->toBe('https://example.com/custom-updates')
-                ->and($settings->changelog_url)->toBe('https://example.com/custom-changelog')
-                ->and($settings->product_resource_hub_url)->toBe('https://example.com/custom-hub')
-                ->and($settings->is_support_url_enabled)->toBeTrue()
-                ->and($settings->is_recent_updates_url_enabled)->toBeTrue();
+            recordServiceRequestHistory($serviceRequest, [], ['status_id' => $open->getKey()], $start);
+            recordServiceRequestHistory($serviceRequest, ['status_id' => $open->getKey()], ['status_id' => $deletedStatusId], $start->addSeconds(100));
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            $periods = DB::table('service_request_status_periods')
+                ->where('service_request_id', $serviceRequest->getKey())
+                ->orderBy('started_at')
+                ->get();
+
+            expect($periods)->toHaveCount(2)
+                ->and($periods[0]->service_request_status_id)->toBe($open->getKey())
+                ->and($periods[0]->classification)->toBe(SystemServiceRequestClassification::Open->value)
+                ->and($periods[1]->service_request_status_id)->toBeNull()
+                ->and($periods[1]->classification)->toBeNull();
         });
     });
 });
 
-// Example migration test, leave commented out for future use as a template/example
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
 //        isolatedMigration(
