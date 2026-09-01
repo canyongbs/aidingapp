@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use NotificationChannels\WebPush\PushSubscription;
+use App\Models\PushSubscription;
 
 return [
     /**

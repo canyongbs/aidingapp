@@ -34,36 +34,12 @@
 </COPYRIGHT>
 */
 
-use App\Features\DesktopNotificationsFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+namespace App\Models;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        DB::transaction(function () {
-            Schema::create(config('webpush.table_name', 'push_subscriptions'), function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->uuidMorphs('subscribable', 'push_subscriptions_subscribable_morph_idx');
-                $table->string('endpoint', 500)->unique();
-                $table->string('public_key')->nullable();
-                $table->string('auth_token')->nullable();
-                $table->string('content_encoding')->nullable();
-                $table->timestamps();
-            });
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use NotificationChannels\WebPush\PushSubscription as BasePushSubscription;
 
-            DesktopNotificationsFeature::activate();
-        });
-    }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            DesktopNotificationsFeature::deactivate();
-
-            Schema::dropIfExists(config('webpush.table_name', 'push_subscriptions'));
-        });
-    }
-};
+class PushSubscription extends BasePushSubscription
+{
+    use HasUuids;
+}
