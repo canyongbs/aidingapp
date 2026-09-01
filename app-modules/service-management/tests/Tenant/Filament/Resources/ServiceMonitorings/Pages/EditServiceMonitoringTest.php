@@ -287,6 +287,25 @@ test('EditServiceMonitoring hydrates keyword values as comma-separated text', fu
         ]);
 });
 
+test('EditServiceMonitoring deduplicates keyword values case-insensitively', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm([
+            'should_contain' => 'Error, error',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->should_contain)->toBe(['Error']);
+});
+
 test('EditServiceMonitoring restores quotes for ambiguous keyword values', function () {
     asSuperAdmin();
 

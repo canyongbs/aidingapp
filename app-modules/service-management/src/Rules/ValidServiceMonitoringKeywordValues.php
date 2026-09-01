@@ -118,7 +118,13 @@ class ValidServiceMonitoringKeywordValues implements DataAwareRule, ValidationRu
             $matches[2],
         );
 
-        return array_values(array_unique(array_filter($values, filled(...))));
+        $uniqueValues = [];
+
+        foreach (array_filter($values, filled(...)) as $value) {
+            $uniqueValues[mb_strtolower($value)] ??= $value;
+        }
+
+        return array_values($uniqueValues);
     }
 
     protected function hasValidQuotePlacement(string $value): bool
