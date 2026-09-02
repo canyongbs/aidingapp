@@ -45,7 +45,7 @@ class CreateContactTypeRequestFactory extends RequestFactory
     {
         return [
             'name' => fake()->name(),
-            'color' => fake()->randomElement(Color::cases()),
+            'color' => fake()->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade())),
         ];
     }
 }

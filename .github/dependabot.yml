@@ -5,8 +5,9 @@ updates:
       directory: '/'
       schedule:
           interval: 'weekly'
-      cooldown:
-          default-days: 7
+          day: 'thursday'
+          time: '03:00'
+          timezone: 'America/New_York'
       groups:
           github-actions-group:
               patterns:
@@ -14,6 +15,8 @@ updates:
               update-types:
                   - 'minor'
                   - 'patch' # Only groups minor and patch updates
+      cooldown:
+          default-days: 7
 
     # Enable version updates for npm (root, portals, widgets)
     - package-ecosystem: 'npm'
@@ -23,8 +26,9 @@ updates:
           - '/widgets'
       schedule:
           interval: 'weekly'
-      cooldown:
-          default-days: 7
+          day: 'thursday'
+          time: '03:00'
+          timezone: 'America/New_York'
       groups:
           npm-group:
               patterns:
@@ -36,3 +40,27 @@ updates:
           - dependency-name: '*'
             update-types:
                 - 'version-update:semver-major' # Never auto-bump major versions
+      cooldown:
+          default-days: 7
+
+    # Enable version updates for Composer
+    - package-ecosystem: 'composer'
+      directory: '/'
+      schedule:
+          interval: 'weekly'
+          day: 'thursday'
+          time: '03:00'
+          timezone: 'America/New_York'
+      groups:
+          composer-group:
+              patterns:
+                  - '*' # Groups all Composer updates
+              update-types:
+                  - 'minor'
+                  - 'patch' # Only groups minor and patch updates
+      ignore:
+          - dependency-name: '*'
+            update-types:
+                - 'version-update:semver-major' # Never auto-bump major versions
+      cooldown:
+          default-days: 7

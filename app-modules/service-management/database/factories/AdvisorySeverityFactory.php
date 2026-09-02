@@ -54,7 +54,7 @@ class AdvisorySeverityFactory extends Factory
     {
         return [
             'name' => $this->faker->words(10, true),
-            'color' => $this->faker->randomElement(Color::cases()),
+            'color' => $this->faker->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade())),
         ];
     }
 }

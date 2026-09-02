@@ -56,7 +56,7 @@ class ProjectFactory extends Factory
             'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
             'description' => $this->faker->sentence(),
             'icon' => $this->faker->randomElement(['heroicon-o-clipboard-document-list', 'heroicon-o-folder', 'heroicon-o-pencil', 'heroicon-o-chart-bar']),
-            'color' => $this->faker->randomElement(Color::cases())->value,
+            'color' => $this->faker->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade()))->value,
             'department_id' => Department::factory(),
             'start_date' => $this->faker->date(),
             'target_completion_date' => $this->faker->date(),

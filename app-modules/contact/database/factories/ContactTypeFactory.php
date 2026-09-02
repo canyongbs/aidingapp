@@ -49,7 +49,7 @@ class ContactTypeFactory extends Factory
     {
         return [
             'name' => $this->faker->word,
-            'color' => $this->faker->randomElement(Color::cases()),
+            'color' => $this->faker->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade())),
         ];
     }
 }
