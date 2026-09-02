@@ -34,28 +34,20 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Actions\AttachServiceRequestSecrets;
-use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
-use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Contracts\Encryption\DecryptException;
-use Illuminate\Support\Facades\Crypt;
+namespace AidingApp\ServiceManagement\Http\Requests;
 
-it('re-encrypts a secret with the service request key and associates it to the service request', function () {
-    $contact = Contact::factory()->create();
-    $serviceRequest = ServiceRequest::factory()->create();
-    $secret = Secret::factory()->for($contact, 'author')->create([
-        'value' => Crypt::encryptString('service-request-password'),
-    ]);
+use Illuminate\Foundation\Http\FormRequest;
 
-    app(AttachServiceRequestSecrets::class)->execute($serviceRequest, [$secret->getKey()], $contact);
-
-    $secret->refresh();
-
-    expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($serviceRequest->refresh()->secret_key)->toBeString()->not->toBeEmpty()
-        ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
-        ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
-        ->toBe('service-request-password');
-});
+class StoreServiceRequestSecretRequest extends FormRequest
+{
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
+    {
+        return [
+            'value' => ['required_without:previous_secret_id', 'nullable', 'string', 'max:255'],
+            'previous_secret_id' => ['nullable', 'uuid'],
+        ];
+    }
+}

@@ -34,11 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Infolists\Components;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\Secret;
+use Illuminate\Support\Facades\Crypt;
 
-use Filament\Infolists\Components\Entry;
+use function Pest\Laravel\actingAs;
 
-class ServiceRequestSecretsEntry extends Entry
-{
-    protected string $view = 'filament.infolists.components.service-request-secrets';
-}
+beforeEach(function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->ai_support_assistant = true;
+    $settings->save();
+});
+
+it('stores encrypted assistant secrets authored by the contact', function () {
+    $contact = Contact::factory()->create();
+
+    $response = actingAs($contact, 'contact')->postJson(
+        route('widgets.assistant.api.service-request.store-secret'),
+        ['value' => 'service-request-password'],
+        ['Origin' => config('app.url')],
+    );
+
+    $response->assertOk()->assertJsonStructure(['id']);
+
+    $secret = Secret::query()->findOrFail($response->json('id'));
+
+    expect(Crypt::decryptString($secret->value))->toBe('service-request-password')
+        ->and($secret->author->is($contact))->toBeTrue()
+        ->and($secret->related_id)->toBeNull();
+});
+
+it('denies unauthenticated assistant secret storage', function () {
+    $this->postJson(
+        route('widgets.assistant.api.service-request.store-secret'),
+        ['value' => 'service-request-password'],
+        ['Origin' => config('app.url')],
+    )->assertUnauthorized();
+
+    expect(Secret::query()->exists())->toBeFalse();
+});

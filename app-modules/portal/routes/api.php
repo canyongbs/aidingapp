@@ -146,7 +146,7 @@ Route::prefix('api')
                     ->name('service-request.request-upload-url');
 
                 Route::post('/service-request/store-secret', StoreServiceRequestSecretController::class)
-                    ->middleware(['auth:sanctum'])
+                    ->middleware(['auth:sanctum', 'throttle:service-request-secrets'])
                     ->name('service-request.store-secret');
 
                 Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)

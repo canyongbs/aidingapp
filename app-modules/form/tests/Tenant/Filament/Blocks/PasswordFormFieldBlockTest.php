@@ -34,19 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Requests;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use Illuminate\Support\Facades\Validator;
 
-use Illuminate\Foundation\Http\FormRequest;
+it('allows an optional password to be cleared', function () {
+    $field = new ServiceRequestFormField([
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => false,
+    ]);
 
-class StoreServiceRequestSecretRequest extends FormRequest
-{
-    /**
-     * @return array<string, array<int, string>>
-     */
-    public function rules(): array
-    {
-        return [
-            'value' => ['required', 'string', 'max:255'],
-        ];
-    }
-}
+    $validator = Validator::make(
+        ['password' => null],
+        ['password' => PasswordFormFieldBlock::getValidationRules($field)],
+    );
+
+    expect($validator->passes())->toBeTrue();
+});
+
+it('does not allow a required password to be cleared', function () {
+    $field = new ServiceRequestFormField([
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+    ]);
+
+    $rules = ['required', ...PasswordFormFieldBlock::getValidationRules($field)];
+    $validator = Validator::make(['password' => null], ['password' => $rules]);
+
+    expect($validator->passes())->toBeFalse();
+});

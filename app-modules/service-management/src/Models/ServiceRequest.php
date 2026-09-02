@@ -114,6 +114,15 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'category',
     ];
 
+    protected $hidden = [
+        'secret_key',
+    ];
+
+    /** @var list<string> */
+    protected $auditExclude = [
+        'secret_key',
+    ];
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('inline_attachments');

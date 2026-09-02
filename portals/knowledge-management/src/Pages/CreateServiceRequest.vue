@@ -41,8 +41,9 @@
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
     import { storeToRefs } from 'pinia';
-    import { computed, nextTick, reactive, ref, watch } from 'vue';
+    import { computed, nextTick, provide, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import { createPasswordStorageCoordinator, passwordStorageKey } from '../FormKit/passwordStorage.js';
     import wizard from '../FormKit/wizard.js';
     import { apiPost } from '../Services/api.js';
     import { useAuthStore } from '../Stores/auth.js';
@@ -86,6 +87,9 @@
     const aiResolutionAttempted = ref(null);
     const showAiResolutionStep = ref(false);
     const preloadedResolutionPromise = ref(null);
+    const passwordStorage = createPasswordStorageCoordinator();
+
+    provide(passwordStorageKey, passwordStorage);
 
     watch(
         initialData,
@@ -141,7 +145,12 @@
         visitedSteps,
         activeStep,
         plugins: [wizardPlugin],
-        setStep: (target) => () => {
+        preparePasswordSubmit: passwordStorage.prepareSubmit,
+        setStep: (target) => async () => {
+            if (!(await passwordStorage.flushAll())) {
+                return;
+            }
+
             const currentStepNode = getNode(activeStep.value);
 
             if (currentStepNode) {
@@ -168,7 +177,11 @@
 
             setStep(target);
         },
-        setActiveStep: (stepName) => () => {
+        setActiveStep: (stepName) => async () => {
+            if (!(await passwordStorage.flushAll())) {
+                return;
+            }
+
             const stepNames = Object.keys(steps);
             const targetIndex = stepNames.indexOf(stepName);
 
@@ -256,6 +269,10 @@
 
     async function preloadAiResolution() {
         try {
+            if (!(await passwordStorage.flushAll())) {
+                return null;
+            }
+
             const formNode = getNode('form');
             const formData = formNode ? formNode.value : {};
 
@@ -274,6 +291,10 @@
         isEvaluatingAiResolution.value = true;
 
         try {
+            if (!(await passwordStorage.flushAll())) {
+                return false;
+            }
+
             let response = null;
 
             if (preloadedResolutionPromise.value) {
@@ -316,6 +337,10 @@
     }
 
     async function handleAiResolutionAccepted() {
+        if (!(await passwordStorage.flushAll())) {
+            return;
+        }
+
         const formNode = getNode('form');
         const formData = formNode ? formNode.value : {};
 
@@ -337,6 +362,10 @@
 
     async function handleAiResolutionDeclined() {
         showAiResolutionStep.value = false;
+
+        if (!(await passwordStorage.flushAll())) {
+            return;
+        }
 
         const formNode = getNode('form');
         const formData = formNode ? formNode.value : {};
@@ -415,6 +444,11 @@
 
         if (!hasFields) {
             isGeneratingQuestions.value = true;
+
+            if (!(await passwordStorage.flushAll())) {
+                isGeneratingQuestions.value = false;
+                return;
+            }
 
             preloadedResolutionPromise.value = preloadAiResolution();
 

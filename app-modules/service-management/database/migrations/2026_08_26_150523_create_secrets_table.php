@@ -49,6 +49,8 @@ return new class () extends Migration {
             $table->nullableUuidMorphs('related');
 
             $table->timestamps();
+
+            $table->index(['related_id', 'updated_at']);
         });
     }
 

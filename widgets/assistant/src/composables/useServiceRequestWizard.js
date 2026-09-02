@@ -109,17 +109,21 @@ export function useServiceRequestWizard() {
         currentCustomStepIndex.value++;
     }
 
-    function onCustomStepSubmit() {
-        advanceAfterCustomSteps();
+    async function onCustomStepSubmit() {
+        if (!(await flushCustomPasswordFields())) return;
+
+        await advanceAfterCustomSteps();
     }
 
-    function advanceAfterCustomSteps() {
+    async function advanceAfterCustomSteps() {
+        if (!(await flushCustomPasswordFields())) return;
+
         if (aiClarificationEnabled.value) {
             questionsAndAnswers.value = [];
             generatedQuestions.value = Array(numberOfClarifyingQuestions.value).fill(null);
 
             if (aiResolutionEnabled.value) {
-                preloadAiResolution();
+                await preloadAiResolution();
             }
 
             step.value = 'question-1';
@@ -130,7 +134,9 @@ export function useServiceRequestWizard() {
         }
     }
 
-    function preloadAiResolution() {
+    async function preloadAiResolution() {
+        if (!(await flushCustomPasswordFields())) return;
+
         const url = detailsData.value.rawData.evaluate_ai_resolution_url_base.replace(
             '__TYPE__',
             detailsData.value.type.id,
@@ -244,6 +250,7 @@ export function useServiceRequestWizard() {
 
     async function doSubmit() {
         if (!submitState.value) return;
+        if (!(await flushCustomPasswordFields())) return;
 
         submitError.value = null;
         fieldErrors.value = {};
@@ -290,6 +297,14 @@ export function useServiceRequestWizard() {
 
     function setCustomStepRef(index, el) {
         customStepRefs.value[index] = el;
+    }
+
+    async function flushCustomPasswordFields() {
+        const results = await Promise.all(
+            customStepRefs.value.filter(Boolean).map((stepRef) => stepRef.flushPasswordFields?.() ?? true),
+        );
+
+        return results.every(Boolean);
     }
 
     function setQuestionStepRef(index, el) {

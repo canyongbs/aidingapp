@@ -36,33 +36,39 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\Portal\Http\Requests\StoreServiceRequestSecretRequest;
-use AidingApp\ServiceManagement\Models\Secret;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\StoreServiceRequestSecret;
+use AidingApp\ServiceManagement\Http\Requests\StoreServiceRequestSecretRequest;
 use App\Features\PasswordFormFieldFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Crypt;
+use SensitiveParameter;
 use Symfony\Component\HttpFoundation\Response;
 
 class StoreServiceRequestSecretController extends Controller
 {
-    public function __invoke(StoreServiceRequestSecretRequest $request): JsonResponse
-    {
+    public function __invoke(
+        #[SensitiveParameter] StoreServiceRequestSecretRequest $request,
+        StoreServiceRequestSecret $storeServiceRequestSecret,
+    ): JsonResponse {
         abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
 
         $contact = auth('contact')->user();
 
-        abort_if(is_null($contact), Response::HTTP_UNAUTHORIZED);
+        if (! $contact instanceof Contact) {
+            abort(Response::HTTP_UNAUTHORIZED);
+        }
 
-        $secret = new Secret([
-            'value' => Crypt::encryptString($request->validated('value')),
-        ]);
+        $value = $request->validated('value');
+        $previousSecretId = $request->validated('previous_secret_id');
 
-        $secret->author()->associate($contact);
-        $secret->save();
+        assert(is_string($value) || is_null($value));
+        assert(is_string($previousSecretId) || is_null($previousSecretId));
+
+        $secret = $storeServiceRequestSecret($contact, $value, $previousSecretId);
 
         return response()->json([
-            'id' => $secret->getKey(),
+            'id' => $secret?->getKey(),
         ]);
     }
 }

@@ -33,24 +33,68 @@
 -->
 <script setup>
     import { createMessage } from '@formkit/core';
-    import { ref } from 'vue';
+    import { inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
     import { apiPostUrl } from '../../Services/api.js';
+    import { passwordStorageKey } from '../passwordStorage.js';
 
     const props = defineProps({
         context: Object,
     });
 
     const typedValue = ref('');
-    const storedValue = ref('');
+    const storedSecretId = ref(props.context.node.value ?? null);
+    const isEditing = ref(storedSecretId.value === null);
+    const isDirty = ref(false);
     const isStoring = ref(false);
+    const storagePromise = ref(null);
+    const passwordStorage = inject(passwordStorageKey, null);
+    let unregister = null;
 
-    async function storeSecret() {
-        if (typedValue.value === '' || typedValue.value === storedValue.value) {
-            return;
+    onMounted(() => {
+        unregister = passwordStorage?.register(props.context.id, {
+            flush: storeSecret,
+            needsFlush: () => storagePromise.value !== null || isDirty.value,
+        });
+    });
+
+    onBeforeUnmount(() => unregister?.());
+
+    function editSecret() {
+        typedValue.value = '';
+        isDirty.value = false;
+        isEditing.value = true;
+        nextTick(() => document.getElementById(props.context.id)?.focus());
+    }
+
+    function removeSecret() {
+        typedValue.value = '';
+        isDirty.value = true;
+        isEditing.value = true;
+
+        return storeSecret(true);
+    }
+
+    function storeSecret(shouldRemove = false) {
+        props.context.node.store.remove('secret-storage-failed');
+
+        if (storagePromise.value) {
+            return storagePromise.value;
+        }
+
+        if (!isDirty.value) {
+            isEditing.value = storedSecretId.value === null;
+
+            return Promise.resolve(true);
+        }
+
+        if (!shouldRemove && typedValue.value === '') {
+            isDirty.value = false;
+            isEditing.value = storedSecretId.value === null;
+
+            return Promise.resolve(true);
         }
 
         isStoring.value = true;
-        props.context.node.store.remove('secret-storage-failed');
         props.context.node.store.set(
             createMessage({
                 blocking: true,
@@ -60,37 +104,58 @@
             }),
         );
 
-        try {
-            const { id } = await apiPostUrl(props.context.storeUrl, {
-                value: typedValue.value,
-            });
+        storagePromise.value = (async () => {
+            try {
+                const { id } = await apiPostUrl(props.context.storeUrl, {
+                    value: shouldRemove ? null : typedValue.value,
+                    previous_secret_id: storedSecretId.value,
+                });
 
-            storedValue.value = typedValue.value;
-            props.context.node.input(id);
-        } catch {
-            props.context.node.store.set(
-                createMessage({
-                    blocking: true,
-                    key: 'secret-storage-failed',
-                    value: 'The password could not be saved. Please try again.',
-                }),
-            );
-        } finally {
-            isStoring.value = false;
-            props.context.node.store.remove('storing-secret');
-        }
+                typedValue.value = '';
+                storedSecretId.value = id;
+                isEditing.value = id === null;
+                isDirty.value = false;
+                await props.context.node.input(id);
+
+                return true;
+            } catch {
+                props.context.node.store.set(
+                    createMessage({
+                        blocking: true,
+                        key: 'secret-storage-failed',
+                        value: 'The password could not be saved. Please try again.',
+                    }),
+                );
+
+                return false;
+            } finally {
+                isStoring.value = false;
+                storagePromise.value = null;
+                props.context.node.store.remove('storing-secret');
+            }
+        })();
+
+        return storagePromise.value;
     }
 </script>
 
 <template>
+    <div v-if="storedSecretId !== null && !isEditing" class="flex w-full items-center gap-3 px-3 py-2">
+        <span class="text-gray-500">••••••••</span>
+        <button type="button" class="text-sm font-medium text-brand-600" @click="editSecret">Edit</button>
+        <button type="button" class="text-sm font-medium text-red-600" @click="removeSecret">Remove</button>
+    </div>
+
     <input
+        v-else
         v-model="typedValue"
         type="password"
         autocomplete="new-password"
         :id="context.id"
         :name="context.node.name"
         :disabled="isStoring"
-        class="formkit-input"
-        @blur="storeSecret"
+        :class="context.classes.input"
+        @input="isDirty = true"
+        @blur="storeSecret()"
     />
 </template>

@@ -34,9 +34,11 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Http\Controllers\RevealServiceRequestSecretController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormPreviewController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestFormWidgetController;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
+use AidingApp\ServiceManagement\Http\Controllers\StoreServiceRequestSecretController;
 use AidingApp\ServiceManagement\Http\Middleware\EnsureServiceManagementFeatureIsActive;
 use AidingApp\ServiceManagement\Http\Middleware\FeedbackManagementIsOn;
 use AidingApp\ServiceManagement\Http\Middleware\ServiceRequestTypeFeedbackIsOn;
@@ -64,3 +66,11 @@ Route::get('/service-requests/{serviceRequest}/feedback/', RenderServiceRequestF
 Route::middleware(['web', 'auth'])
     ->get('/service-request/media/{media}/download', ServiceRequestMediaDownloadController::class)
     ->name('service-request.media.download');
+
+Route::middleware(['web', 'auth', EnsureServiceManagementFeatureIsActive::class, 'throttle:service-request-secrets'])
+    ->post('/service-request/store-secret', StoreServiceRequestSecretController::class)
+    ->name('service-request.store-secret');
+
+Route::middleware(['web', 'auth', EnsureServiceManagementFeatureIsActive::class, 'throttle:service-request-secrets'])
+    ->post('/service-request/reveal-secret', RevealServiceRequestSecretController::class)
+    ->name('service-request.reveal-secret');

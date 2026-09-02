@@ -39,9 +39,9 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\GenerateSubmissibleValidation;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
-use AidingApp\Portal\Actions\AttachServiceRequestSecrets;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
+use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
@@ -131,6 +131,12 @@ class StoreServiceRequestController extends Controller
             }
 
             DB::commit();
+        } catch (ValidationException $exception) {
+            DB::rollBack();
+
+            return response()->json([
+                'errors' => (object) $exception->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (Throwable $exception) {
             DB::rollBack();
 
@@ -544,7 +550,7 @@ class StoreServiceRequestController extends Controller
         $serviceRequest->save();
 
         if (PasswordFormFieldFeature::active()) {
-            app(AttachServiceRequestSecrets::class)->execute($serviceRequest, $secretIds, $contact);
+            app(AttachServiceRequestSecrets::class)($serviceRequest, $secretIds, $contact);
         }
 
         return true;

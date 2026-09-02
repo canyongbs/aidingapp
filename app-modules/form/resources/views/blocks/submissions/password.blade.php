@@ -31,6 +31,25 @@
     
     </COPYRIGHT>
 --}}
-<x-form::blocks.field-wrapper class="py-3" :$label :$isRequired>
-    <span class="text-gray-500">•••••••• (see Secrets section to reveal)</span>
+@php
+    use AidingApp\ServiceManagement\Models\Secret;
+    use AidingApp\ServiceManagement\Models\ServiceRequest;
+    use Illuminate\Support\Facades\Gate;
+
+    $serviceRequest = filled($secretId) ? Secret::query()->find($secretId)?->related : null;
+    $canReveal = $serviceRequest instanceof ServiceRequest && Gate::allows('revealSecret', $serviceRequest);
+@endphp
+
+<x-form::blocks.field-wrapper :$label :$isRequired compact>
+    <div class="fi-not-prose flex flex-wrap items-center gap-3" data-secret-row>
+        <span class="text-sm leading-5 text-gray-500" data-secret-mask>••••••••</span>
+        <code class="hidden rounded bg-gray-100 px-2 py-1 text-sm dark:bg-white/10" data-secret-value></code>
+        <span class="hidden text-sm text-danger-600" data-secret-error role="alert"></span>
+
+        @if ($canReveal)
+            <x-filament::link tag="button" type="button" size="sm" data-secret-reveal :data-secret-id="$secretId">
+                Reveal
+            </x-filament::link>
+        @endif
+    </div>
 </x-form::blocks.field-wrapper>

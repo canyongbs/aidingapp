@@ -37,8 +37,10 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\Form\Actions\ResolveBlockRegistry;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
+use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Filament\Forms\Components\Checkbox;
@@ -233,6 +235,12 @@ class GenerateServiceRequestFilamentFormSchema
             'signature' => TextInput::make($field->getKey())
                 ->label($field->label)
                 ->required($field->is_required)
+                ->helperText($description),
+            PasswordFormFieldBlock::type() => ServiceRequestPasswordInput::make($field->getKey())
+                ->label($field->label)
+                ->storeUrl(route('service-request.store-secret'))
+                ->required($field->is_required)
+                ->rules(PasswordFormFieldBlock::getValidationRules($field))
                 ->helperText($description),
             default => TextInput::make($field->getKey())
                 ->label($field->label)

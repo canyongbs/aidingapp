@@ -53,6 +53,7 @@ use AidingApp\Ai\Http\Controllers\AssistantWidget\SendConversationMessageControl
 use AidingApp\Ai\Http\Controllers\AssistantWidget\SendMessageController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\ServeWidgetAssetController;
 use AidingApp\Ai\Http\Controllers\AssistantWidget\StoreServiceRequestController;
+use AidingApp\Ai\Http\Controllers\AssistantWidget\StoreServiceRequestSecretController;
 use AidingApp\Ai\Http\Middleware\AssistantWidgetCors;
 use AidingApp\Ai\Http\Middleware\EnsureAssistantWidgetIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -107,6 +108,10 @@ Route::middleware([
                         Route::get('service-request/upload-url', GetServiceRequestUploadUrlController::class)
                             ->middleware(['auth:sanctum'])
                             ->name('service-request.upload-url');
+
+                        Route::post('service-request/store-secret', StoreServiceRequestSecretController::class)
+                            ->middleware(['auth:sanctum', 'throttle:service-request-secrets'])
+                            ->name('service-request.store-secret');
 
                         Route::post('service-request/{type}', StoreServiceRequestController::class)
                             ->middleware(['auth:sanctum'])

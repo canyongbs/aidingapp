@@ -36,10 +36,12 @@
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Actions\CreateServiceRequestHistory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -52,6 +54,7 @@ use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestStatus
 use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use App\Models\User;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 
@@ -62,6 +65,42 @@ it('does not generate a secret key when creating a service request', function ()
     $serviceRequest = ServiceRequest::factory()->create();
 
     expect($serviceRequest->secret_key)->toBeNull();
+});
+
+it('does not include the secret key in service request history jobs', function () {
+    $serviceRequest = ServiceRequest::factory()->create()->fresh();
+
+    assert($serviceRequest instanceof ServiceRequest);
+
+    Bus::fake();
+
+    $serviceRequest->secret_key = 'encrypted-secret-key';
+    $serviceRequest->save();
+
+    Bus::assertDispatched(
+        CreateServiceRequestHistory::class,
+        fn (CreateServiceRequestHistory $job): bool => ! array_key_exists('secret_key', $job->changes)
+            && ! array_key_exists('secret_key', $job->original),
+    );
+});
+
+it('preserves secrets when soft deleting a service request', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+    $secret = Secret::factory()->for($serviceRequest, 'related')->create();
+
+    $serviceRequest->delete();
+
+    expect($secret->fresh())->not->toBeNull();
+});
+
+it('deletes secrets when force deleting a service request', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+    $secret = Secret::factory()->for($serviceRequest, 'related')->create();
+
+    $serviceRequest->histories()->forceDelete();
+    $serviceRequest->forceDelete();
+
+    expect($secret->fresh())->toBeNull();
 });
 
 describe('Created → Customer', function () {

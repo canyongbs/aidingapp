@@ -37,10 +37,12 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use App\Models\SystemUser;
+use App\Models\User;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
@@ -130,7 +132,16 @@ class ServiceRequestPolicy
 
     public function revealSecret(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        if ($serviceRequest->assignedTo?->user_id !== $authenticatable->getKey()) {
+        $serviceRequestTypeId = $serviceRequest->priority?->type_id;
+
+        if (
+            $serviceRequest->assignedTo?->user_id !== $authenticatable->getKey()
+            || is_null($serviceRequestTypeId)
+            || ! User::query()
+                ->tap(new ManagesServiceRequestType($serviceRequestTypeId))
+                ->whereKey($authenticatable->getKey())
+                ->exists()
+        ) {
             return Response::deny("You don't have permission to reveal secrets on this service request because you're not its assigned manager.");
         }
 

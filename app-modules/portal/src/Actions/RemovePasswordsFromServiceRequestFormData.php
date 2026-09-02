@@ -36,50 +36,42 @@
 
 namespace AidingApp\Portal\Actions;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
-use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Encryption\Encrypter;
-use Illuminate\Support\Facades\Crypt;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Support\Arr;
 
-class AttachServiceRequestSecrets
+class RemovePasswordsFromServiceRequestFormData
 {
-    /** @param array<int, string> $secretIds */
-    public function execute(ServiceRequest $serviceRequest, array $secretIds, Contact $author): void
+    /**
+     * @param array<string, mixed> $formData
+     *
+     * @return array<string, mixed>
+     */
+    public function __invoke(ServiceRequestType $serviceRequestType, array $formData): array
     {
-        if ($secretIds === []) {
-            return;
+        $passwordFieldIds = ServiceRequestFormField::query()
+            ->withTrashed()
+            ->where('type', PasswordFormFieldBlock::type())
+            ->whereIn(
+                'service_request_form_id',
+                ServiceRequestForm::query()
+                    ->withTrashed()
+                    ->where('service_request_type_id', $serviceRequestType->getKey())
+                    ->select('id'),
+            )
+            ->pluck('id')
+            ->all();
+
+        if ($passwordFieldIds === []) {
+            return $formData;
         }
 
-        if (blank($serviceRequest->secret_key)) {
-            $serviceRequest->secret_key = Crypt::encryptString(
-                'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
-            );
-            $serviceRequest->save();
-        }
-
-        $serviceRequestEncrypter = app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest);
-
-        foreach (array_unique($secretIds) as $secretId) {
-            $secret = Secret::query()
-                ->whereKey($secretId)
-                ->whereNull('related_id')
-                ->where('author_type', $author->getMorphClass())
-                ->where('author_id', $author->getKey())
-                ->first();
-
-            if (is_null($secret)) {
-                continue;
-            }
-
-            $secret->value = $serviceRequestEncrypter->encryptString(
-                Crypt::decryptString($secret->value)
-            );
-
-            $secret->related()->associate($serviceRequest);
-
-            $secret->save();
-        }
+        return collect($formData)
+            ->map(fn (mixed $values): mixed => is_array($values)
+                ? Arr::except($values, $passwordFieldIds)
+                : $values)
+            ->all();
     }
 }

@@ -36,7 +36,60 @@
     $submission = $getRecord()->serviceRequestFormSubmission;
 @endphp
 
-<div class="flex flex-col gap-6">
+<div
+    class="flex flex-col gap-6"
+    x-data="{
+        async revealSecret(event) {
+            const button = event.target.closest('[data-secret-reveal]')
+
+            if (! button || button.disabled) {
+                return
+            }
+
+            const row = button.closest('[data-secret-row]')
+            const mask = row?.querySelector('[data-secret-mask]')
+            const value = row?.querySelector('[data-secret-value]')
+            const error = row?.querySelector('[data-secret-error]')
+            const originalLabel = button.textContent
+
+            button.disabled = true
+            button.textContent = 'Revealing...'
+            error?.classList.add('hidden')
+
+            try {
+                const response = await fetch(@js(route('service-request.reveal-secret')), {
+                    method: 'POST',
+                    credentials: 'same-origin',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': @js(csrf_token()),
+                        'X-Requested-With': 'XMLHttpRequest',
+                    },
+                    body: JSON.stringify({ secret_id: button.dataset.secretId }),
+                })
+
+                if (! response.ok) {
+                    throw new Error('Unable to reveal password.')
+                }
+
+                const data = await response.json()
+
+                value.textContent = data.value
+                mask.classList.add('hidden')
+                value.classList.remove('hidden')
+                button.classList.add('hidden')
+            } catch {
+                error.textContent = 'The password could not be revealed.'
+                error.classList.remove('hidden')
+            } finally {
+                button.disabled = false
+                button.textContent = originalLabel
+            }
+        },
+    }"
+    x-on:click="revealSecret($event)"
+>
     @if ($submission->submissible->is_wizard)
         @foreach ($submission->submissible->steps as $step)
             @if (! empty($step->content['content'] ?? []))

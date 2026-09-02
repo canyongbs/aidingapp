@@ -37,17 +37,23 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\ServiceManagement\Database\Factories\SecretFactory;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+/**
+ * @mixin IdeHelperSecret
+ */
 class Secret extends Model
 {
     /** @use HasFactory<SecretFactory> */
     use HasFactory;
 
     use HasUuids;
+    use MassPrunable;
 
     protected $fillable = [
         'value',
@@ -56,6 +62,20 @@ class Secret extends Model
         'related_type',
         'related_id',
     ];
+
+    protected $hidden = [
+        'value',
+    ];
+
+    /**
+      * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->whereNull('related_id')
+            ->where('updated_at', '<=', now()->subDay());
+    }
 
     /**
      * @return MorphTo<Model, $this>

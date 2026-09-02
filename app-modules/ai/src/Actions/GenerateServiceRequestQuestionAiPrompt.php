@@ -38,12 +38,17 @@ namespace AidingApp\Ai\Actions;
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\RemovePasswordsFromServiceRequestFormData;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestQuestionAiPrompt
 {
+    public function __construct(
+        protected RemovePasswordsFromServiceRequestFormData $removePasswordsFromServiceRequestFormData,
+    ) {}
+
     /**
      * @param array<string, mixed> $formData
      * @param array<int, array{question: string, answer: string}> $previousQuestionsAndAnswers
@@ -55,6 +60,8 @@ class GenerateServiceRequestQuestionAiPrompt
         int $questionNumber,
         Contact $contact
     ): string {
+        $formData = ($this->removePasswordsFromServiceRequestFormData)($serviceRequestType, $formData);
+
         $requesterName = $contact->full_name ?? $contact->name ?? 'the user';
 
         $fieldsMap = $this->buildFieldsMapFromType($serviceRequestType);

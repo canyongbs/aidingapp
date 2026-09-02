@@ -68,6 +68,7 @@ class PasswordFormFieldBlock extends FormFieldBlock
     public static function getValidationRules(SubmissibleField $field): array
     {
         return [
+            'nullable',
             'uuid',
             Rule::exists('secrets', 'id')->whereNull('related_id'),
         ];

@@ -55,6 +55,8 @@ use AidingApp\ServiceManagement\Jobs\EndServiceRequestConversations;
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
+use AidingApp\ServiceManagement\Models\Secret;
+use App\Features\PasswordFormFieldFeature;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Scopes\ExcludeExpiredSubscriptions;
 use App\Models\Scopes\SetupIsComplete;
@@ -263,6 +265,12 @@ class Kernel extends ConsoleKernel
                                 ->onOneServer()
                                 ->withoutOverlapping(720)
                         );
+
+                    $schedule->command('tenants:artisan "model:prune --model=' . Secret::class . "\" --tenant={$tenant->id}")
+                        ->daily()
+                        ->onOneServer()
+                        ->withoutOverlapping(720)
+                        ->when(fn (): bool => $tenant->execute(fn (): bool => PasswordFormFieldFeature::active()));
 
                     $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")
                         ->name("health:schedule-check-heartbeat-{$tenant->id}")

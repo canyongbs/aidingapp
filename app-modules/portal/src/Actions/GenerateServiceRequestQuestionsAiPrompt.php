@@ -44,11 +44,17 @@ use Illuminate\Support\Collection;
 
 class GenerateServiceRequestQuestionsAiPrompt
 {
+    public function __construct(
+        protected RemovePasswordsFromServiceRequestFormData $removePasswordsFromServiceRequestFormData,
+    ) {}
+
     /**
      * @param array<string, mixed> $formData
      */
     public function execute(ServiceRequestType $serviceRequestType, array $formData, Contact $contact): string
     {
+        $formData = ($this->removePasswordsFromServiceRequestFormData)($serviceRequestType, $formData);
+
         $requesterName = $contact->full_name ?? $contact->name ?? 'the user';
 
         $fieldsMap = $this->buildFieldsMapFromType($serviceRequestType);

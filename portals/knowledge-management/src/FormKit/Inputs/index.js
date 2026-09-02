@@ -48,6 +48,7 @@ export default {
         props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
     }),
     password: createInput(Password, {
+        family: 'text',
         props: ['storeUrl'],
     }),
 };
