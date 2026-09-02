@@ -38,6 +38,7 @@ namespace App\Providers;
 
 use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Notification\Enums\NotificationChannel;
+use App\Features\DesktopNotificationsFeature;
 use App\Models\Media;
 use App\Models\SystemUser;
 use App\Models\Tenant;
@@ -46,6 +47,7 @@ use App\Overrides\Filament\Actions\Imports\Jobs\PrepareCsvExportOverride;
 use App\Overrides\Laravel\StartSession as OverrideStartSession;
 use App\Settings\SettingsProperties\EmailSettingsProperty;
 use Aws\GeoPlaces\GeoPlacesClient;
+use CanyonGBS\Common\BrowserNotifications\BrowserNotificationsManager;
 use Exception;
 use Filament\Actions\Exports\Jobs\PrepareCsvExport;
 use Filament\Actions\Imports\Jobs\ImportCsv;
@@ -80,6 +82,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         PluginRegistry::register(ModularLivewirePlugin::class);
+
+        app(BrowserNotificationsManager::class)
+            ->availableUsing(fn (): bool => DesktopNotificationsFeature::active())
+            ->iconUsing(fn (): string => asset('/images/default-favicon.png'));
 
         $this->app->scoped(GeoPlacesClient::class, fn (): GeoPlacesClient => new GeoPlacesClient([
             'version' => '2020-11-19',

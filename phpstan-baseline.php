@@ -36,10 +36,76 @@
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\CompletePrompt" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/CompletePrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\CompletePrompt" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/CompletePrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid direct request IP accessors \\(ip\\(\\), ips\\(\\), getClientIp\\(\\), getClientIps\\(\\)\\)\\. Use CanyonGBS\\\\Common\\\\Support\\\\ClientIp\\:\\:resolve\\(\\) instead so client IP resolution remains Cloudflare and ALB aware\\.$#',
+    'identifier' => 'Common.useClientIpResolver',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/CompletePrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\GenerateAssistantEmbedCode" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/GenerateAssistantEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\GenerateAssistantEmbedCode" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/GenerateAssistantEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\GenerateServiceRequestQuestionAiPrompt" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/GenerateServiceRequestQuestionAiPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Ai\\\\Actions\\\\GenerateServiceRequestQuestionAiPrompt" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Actions/GenerateServiceRequestQuestionAiPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid direct request IP accessors \\(ip\\(\\), ips\\(\\), getClientIp\\(\\), getClientIps\\(\\)\\)\\. Use CanyonGBS\\\\Common\\\\Support\\\\ClientIp\\:\\:resolve\\(\\) instead so client IP resolution remains Cloudflare and ALB aware\\.$#',
+    'identifier' => 'Common.useClientIpResolver',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Http/Controllers/AssistantWidget/RetryMessageController.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Avoid direct request IP accessors \\(ip\\(\\), ips\\(\\), getClientIp\\(\\), getClientIps\\(\\)\\)\\. Use CanyonGBS\\\\Common\\\\Support\\\\ClientIp\\:\\:resolve\\(\\) instead so client IP resolution remains Cloudflare and ALB aware\\.$#',
+    'identifier' => 'Common.useClientIpResolver',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/ai/src/Http/Controllers/AssistantWidget/SendMessageController.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Eloquent local scopes are not allowed\\. The "scopeStatus" method on "AidingApp\\\\Alert\\\\Models\\\\Alert" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
     'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Audit\\\\Actions\\\\Finders\\\\AuditableModels" defines disallowed public method "all"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/audit/src/Actions/Finders/AuditableModels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Audit\\\\Actions\\\\Finders\\\\AuditableModels" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/audit/src/Actions/Finders/AuditableModels.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method OwenIt\\\\Auditing\\\\Contracts\\\\Auditable\\:\\:auditAttach\\(\\)\\.$#',
@@ -282,12 +348,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ContactServiceManagement.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Support\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:each\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: mixed, Closure\\(AidingApp\\\\Contact\\\\Models\\\\Contact\\)\\: bool given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/Pages/ListContacts.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$badge of method Filament\\\\Navigation\\\\NavigationItem\\:\\:badge\\(\\) expects Closure\\|string\\|null, int\\<1, max\\>\\|null given\\.$#',
     'identifier' => 'argument.type',
     'count' => 1,
@@ -408,6 +468,18 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Engagement\\\\Actions\\\\CreateEngagement" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagement.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Engagement\\\\Actions\\\\CreateEngagement" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagement.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method App\\\\Models\\\\Contracts\\\\Educatable\\:\\:notify\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -424,6 +496,18 @@ $ignoreErrors[] = [
     'identifier' => 'assign.propertyType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagement.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Engagement\\\\Actions\\\\CreateEngagementBatch" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagementBatch.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Engagement\\\\Actions\\\\CreateEngagementBatch" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/engagement/src/Actions/CreateEngagementBatch.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#1 \\$callback of method Illuminate\\\\Database\\\\Eloquent\\\\Collection\\<\\(int\\|string\\),Illuminate\\\\Database\\\\Eloquent\\\\Model\\>\\:\\:map\\(\\) expects callable\\(Illuminate\\\\Database\\\\Eloquent\\\\Model, int\\|string\\)\\: AidingApp\\\\Engagement\\\\Jobs\\\\CreateBatchedEngagement, Closure\\(AidingApp\\\\Notification\\\\Models\\\\Contracts\\\\CanBeNotified\\)\\: AidingApp\\\\Engagement\\\\Jobs\\\\CreateBatchedEngagement given\\.$#',
@@ -564,6 +648,306 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/engagement/src/Notifications/EngagementNotification.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "__serialize"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "__unserialize"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "afterCommit"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "allOnConnection"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "allOnQueue"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "appendToChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertDeleted"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertDoesntHaveChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertFailed"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertFailedWith"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertHasChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertNotDeleted"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertNotFailed"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertNotReleased"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "assertReleased"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "attempts"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "beforeCommit"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "chain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "delay"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "delete"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatch"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatchAfterResponse"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatchIf"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatchNextJobInChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatchSync"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "dispatchUnless"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "fail"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "invokeChainCatchCallbacks"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "onConnection"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "onGroup"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "onQueue"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "prependToChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "release"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "restoreModel"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "setJob"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "through"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "withChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "withDeduplicator"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "withFakeQueueInteractions"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" defines disallowed public method "withoutDelay"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\DeliverFormSubmissionRequestByEmail" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/DeliverFormSubmissionRequestByEmail.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema" defines disallowed public method "content"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema" defines disallowed public method "grid"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema" defines disallowed public method "text"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateFormKitSchema" defines disallowed public method "wizardContent"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateServiceRequestFeedbackFormEmbedCode" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateServiceRequestFeedbackFormEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateServiceRequestFeedbackFormEmbedCode" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateServiceRequestFeedbackFormEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateSubmissibleValidation" defines disallowed public method "fields"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateSubmissibleValidation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Form\\\\Actions\\\\GenerateSubmissibleValidation" defines disallowed public method "wizardRules"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/form/src/Actions/GenerateSubmissibleValidation.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Variable \\$block in PHPDoc tag @var does not exist\\.$#',
     'identifier' => 'varTag.variableNotFound',
     'count' => 2,
@@ -586,6 +970,12 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/form/src/Notifications/FormSubmissionRequestNotification.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\InAppCommunication\\\\Actions\\\\GetUserConversations" defines disallowed public method "pinned"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/in-app-communication/src/Actions/GetUserConversations.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\IntegrationAwsSesEventHandling\\\\DataTransferObjects\\\\SesBounceData\\:\\:__construct\\(\\) has parameter \\$bouncedRecipients with generic class Spatie\\\\LaravelData\\\\DataCollection but does not specify its types\\: TKey, TValue$#',
@@ -642,10 +1032,28 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Http/Controllers/AwsSesInboundWebhookController.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Avoid direct request IP accessors \\(ip\\(\\), ips\\(\\), getClientIp\\(\\), getClientIps\\(\\)\\)\\. Use CanyonGBS\\\\Common\\\\Support\\\\ClientIp\\:\\:resolve\\(\\) instead so client IP resolution remains Cloudflare and ALB aware\\.$#',
+    'identifier' => 'Common.useClientIpResolver',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/integration-google-recaptcha/src/Rules/RecaptchaTokenValid.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:catchPhrase\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/database/factories/AssetFactory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\InventoryManagement\\\\Actions\\\\UpdateAssetStatusBasedOnMaintenanceActivity" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/inventory-management/src/Actions/UpdateAssetStatusBasedOnMaintenanceActivity.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\InventoryManagement\\\\Actions\\\\UpdateAssetStatusBasedOnMaintenanceActivity" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/inventory-management/src/Actions/UpdateAssetStatusBasedOnMaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
@@ -840,6 +1248,66 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Actions/FindOrganizationByEmailDomain.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateAiResolutionPrompt" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateAiResolutionPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateAiResolutionPrompt" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateAiResolutionPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GeneratePortalEmbedCode" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GeneratePortalEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GeneratePortalEmbedCode" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GeneratePortalEmbedCode.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateServiceRequestForm" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateServiceRequestForm.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateServiceRequestForm" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateServiceRequestForm.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateServiceRequestQuestionsAiPrompt" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateServiceRequestQuestionsAiPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateServiceRequestQuestionsAiPrompt" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/GenerateServiceRequestQuestionsAiPrompt.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\ProcessServiceRequestSubmissionField" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/ProcessServiceRequestSubmissionField.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\ProcessServiceRequestSubmissionField" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/portal/src/Actions/ProcessServiceRequestSubmissionField.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\Portal\\\\DataTransferObjects\\\\KnowledgeBaseArticleData\\:\\:__construct\\(\\) has parameter \\$tags with no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -852,18 +1320,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/DataTransferObjects/KnowledgeBaseArticleData.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Portal\\\\DataTransferObjects\\\\KnowledgeManagementSearchData\\:\\:\\$articles with generic class Spatie\\\\LaravelData\\\\PaginatedDataCollection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/DataTransferObjects/KnowledgeManagementSearchData.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Property AidingApp\\\\Portal\\\\DataTransferObjects\\\\KnowledgeManagementSearchData\\:\\:\\$categories with generic class Spatie\\\\LaravelData\\\\DataCollection does not specify its types\\: TKey, TValue$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/DataTransferObjects/KnowledgeManagementSearchData.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Negated boolean expression is always false\\.$#',
     'identifier' => 'booleanNot.alwaysFalse',
     'count' => 1,
@@ -872,7 +1328,7 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Illuminate\\\\Support\\\\ValidatedInput\\:\\:\\$email\\.$#',
     'identifier' => 'property.notFound',
-    'count' => 3,
+    'count' => 2,
     'path' => __DIR__ . '/app-modules/portal/src/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalRequestAuthenticationController.php',
 ];
 $ignoreErrors[] = [
@@ -948,6 +1404,54 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsTable.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AcceptServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/AcceptServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AcceptServiceRequestConversation" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/AcceptServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AssignServiceRequestToDepartment" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/AssignServiceRequestToDepartment.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AssignServiceRequestToDepartment" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/AssignServiceRequestToDepartment.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\BuildContactServiceRequestTypeTree" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/BuildContactServiceRequestTypeTree.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\BuildContactServiceRequestTypeTree" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/BuildContactServiceRequestTypeTree.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ChangeRequest\\\\ApproveChangeRequest" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ChangeRequest/ApproveChangeRequest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ChangeRequest\\\\ApproveChangeRequest" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ChangeRequest/ApproveChangeRequest.php',
+];
+$ignoreErrors[] = [
     'message' => '#^If condition is always false\\.$#',
     'identifier' => 'if.alwaysFalse',
     'count' => 1,
@@ -972,16 +1476,460 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/ChangeRequest/ApproveChangeRequest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CountActiveServiceRequestConversations" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CountActiveServiceRequestConversations.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CountActiveServiceRequestConversations" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CountActiveServiceRequestConversations.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "__serialize"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "__unserialize"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "afterCommit"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "allOnConnection"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "allOnQueue"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "appendToChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertDeleted"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertDoesntHaveChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertFailed"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertFailedWith"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertHasChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertNotDeleted"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertNotFailed"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertNotReleased"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "assertReleased"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "attempts"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "beforeCommit"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "chain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "delay"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "delete"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatch"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatchAfterResponse"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatchIf"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatchNextJobInChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatchSync"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "dispatchUnless"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "fail"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "invokeChainCatchCallbacks"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "onConnection"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "onGroup"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "onQueue"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "prependToChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "release"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "restoreModel"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "setJob"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "through"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "withChain"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "withDeduplicator"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "withFakeQueueInteractions"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" defines disallowed public method "withoutDelay"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestHistory" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestHistory.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestUpdateAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestUpdateAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\CreateServiceRequestUpdateAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/CreateServiceRequestUpdateAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\DeclineServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/DeclineServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\DeclineServiceRequestConversation" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/DeclineServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\EndServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/EndServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\EndServiceRequestConversation" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/EndServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFilamentFormSchema" defines disallowed public method "content"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFilamentFormSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFilamentFormSchema" defines disallowed public method "grid"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFilamentFormSchema.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submissible\\:\\:\\$type\\.$#',
     'identifier' => 'property.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "content"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "grid"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "text"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "wizardContent"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\NotifyServiceRequestUsers" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/NotifyServiceRequestUsers.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\NotifyServiceRequestUsers" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/NotifyServiceRequestUsers.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\PreloadServiceRequestTypeBaseTemplates" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/PreloadServiceRequestTypeBaseTemplates.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\PreloadServiceRequestTypeBaseTemplates" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/PreloadServiceRequestTypeBaseTemplates.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\QueueServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/QueueServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\QueueServiceRequestConversation" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/QueueServiceRequestConversation.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\RecordServiceRequestStatusPeriod" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/RecordServiceRequestStatusPeriod.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\RecordServiceRequestStatusPeriod" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/RecordServiceRequestStatusPeriod.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ReopenServiceRequestAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ReopenServiceRequestAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ReopenServiceRequestAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ReopenServiceRequestAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ResetMonitoringAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ResetMonitoringAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\ResetMonitoringAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/ResetMonitoringAction.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\Actions\\\\ResolveUploadsMediaCollectionForServiceRequest\\:\\:__invoke\\(\\) should return AidingApp\\\\ServiceManagement\\\\Models\\\\MediaCollections\\\\UploadsMediaCollection\\|null but returns Spatie\\\\MediaLibrary\\\\MediaCollections\\\\MediaCollection\\|null\\.$#',
     'identifier' => 'return.type',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/ResolveUploadsMediaCollectionForServiceRequest.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\SubmitServiceRequestDraft" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/SubmitServiceRequestDraft.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\SubmitServiceRequestDraft" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/SubmitServiceRequestDraft.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\UpdateServiceRequestAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/UpdateServiceRequestAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\UpdateServiceRequestAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/service-management/src/Actions/UpdateServiceRequestAction.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\:\\:fromData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
@@ -1032,6 +1980,12 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Unsafe call to private method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\Advisories\\\\Pages\\\\ManageAdvisoryUpdate\\:\\:managers\\(\\) through static\\:\\:\\.$#',
+    'identifier' => 'staticClassAccess.privateMethod',
+    'count' => 2,
+    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withTrashed\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 2,
@@ -1042,12 +1996,6 @@ $ignoreErrors[] = [
     'identifier' => 'catch.neverThrown',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatuses/Pages/ListServiceRequestStatuses.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$relations of method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\<AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequestTypeCategory\\>\\:\\:with\\(\\) expects array\\<array\\|\\(Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\Relation\\<\\*, \\*, \\*\\>\\)\\: mixed\\)\\|string\\>\\|string, array\\{children\\: Closure\\(Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\HasMany\\)\\: void, types\\: Closure\\(mixed\\)\\: mixed\\} given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/Pages/ListServiceRequestTypes.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',
@@ -1066,18 +2014,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.noStrtolower',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/ListServiceRequests.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unsafe call to private method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\Advisories\\\\Pages\\\\ManageAdvisoryUpdate\\:\\:managers\\(\\) through static\\:\\:\\.$#',
-    'identifier' => 'staticClassAccess.privateMethod',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/ServiceRequestResource.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
@@ -1224,6 +2160,30 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/theme/src/Settings/SettingsProperties/ThemeSettingsProperty.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Timeline\\\\Actions\\\\AggregatesTimelineRecordsForModel" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/AggregatesTimelineRecordsForModel.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Timeline\\\\Actions\\\\AggregatesTimelineRecordsForModel" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/AggregatesTimelineRecordsForModel.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Timeline\\\\Actions\\\\SyncTimelineData" defines disallowed public method "now"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/SyncTimelineData.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Timeline\\\\Actions\\\\SyncTimelineData" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/timeline/src/Actions/SyncTimelineData.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Class name "ModelMustHaveATimeline" is not in PascalCase\\.$#',
     'identifier' => 'MeliorStan.classNameNotPascalCase',
     'count' => 1,
@@ -1236,16 +2196,76 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/timeline/src/Models/Timeline.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Webhook\\\\Actions\\\\StoreInboundWebhook" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/webhook/src/Actions/StoreInboundWebhook.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "AidingApp\\\\Webhook\\\\Actions\\\\StoreInboundWebhook" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app-modules/webhook/src/Actions/StoreInboundWebhook.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to function is_array\\(\\) with string will always evaluate to false\\.$#',
     'identifier' => 'function.impossibleType',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/webhook/src/Http/Middleware/HandleAwsSnsRequest.php',
 ];
 $ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\CreateUserAction" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/CreateUserAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\CreateUserAction" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/CreateUserAction.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\Finders\\\\ApplicationModels" defines disallowed public method "all"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\Finders\\\\ApplicationModels" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
+];
+$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Container\\\\Container\\:\\:getNamespace\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app/Actions/Finders/ApplicationModels.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\Finders\\\\ApplicationModules" defines disallowed public method "moduleConfig"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModules.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\Finders\\\\ApplicationModules" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/Finders/ApplicationModules.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\GetRecordFromMorphAndKey" defines disallowed public method "via"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
+    'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/GetRecordFromMorphAndKey.php',
+];
+$ignoreErrors[] = [
+    'message' => '#^Action class "App\\\\Actions\\\\GetRecordFromMorphAndKey" must define a public "__invoke" method\\. Action classes should be accessed via invocation and keep other behavior in private/protected helpers\\.$#',
+    'identifier' => 'Common.actionClassMustBeInvokable',
+    'count' => 1,
+    'path' => __DIR__ . '/app/Actions/GetRecordFromMorphAndKey.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Class App\\\\Casts\\\\CurrencyCast implements generic interface Illuminate\\\\Contracts\\\\Database\\\\Eloquent\\\\CastsAttributes but does not specify its types\\: TGet, TSet$#',

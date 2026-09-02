@@ -65,6 +65,8 @@ use App\Observers\UserObserver;
 use App\Settings\DisplaySettings;
 use App\Settings\PresenceSettings;
 use App\Support\HasAdvancedFilter;
+use CanyonGBS\Common\BrowserNotifications\Concerns\HasBrowserNotificationSubscriptions;
+use CanyonGBS\Common\BrowserNotifications\Contracts\ReceivesBrowserNotifications;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
 use Filament\Models\Contracts\FilamentUser;
@@ -93,12 +95,13 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperUser
  */
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource, ReceivesBrowserNotifications
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
     use HasAdvancedFilter;
+    use HasBrowserNotificationSubscriptions;
     use Notifiable;
     use SoftDeletes;
     use HasRelationships;

@@ -48,6 +48,7 @@ use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Tenant;
 use App\Models\User;
 use App\Multitenancy\Http\Middleware\NeedsTenant;
+use CanyonGBS\Common\BrowserNotifications\Filament\BrowserNotificationsPlugin;
 use Filament\Actions\Action;
 use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
@@ -147,6 +148,8 @@ class AdminPanelProvider extends PanelProvider
                 FilamentSpatieLaravelHealthPlugin::make()
                     ->usingPage(ProductHealth::class),
                 FilamentFullCalendarPlugin::make(),
+                BrowserNotificationsPlugin::make()
+                    ->prompt(false),
             ])
             ->userMenuItems([
                 MenuItem::make()
