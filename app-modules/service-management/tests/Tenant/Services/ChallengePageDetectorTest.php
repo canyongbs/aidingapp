@@ -34,49 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Controllers;
+use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 
-use AidingApp\Authorization\Models\OtpLoginCode;
-use App\Rules\ValidAuthenticationCode;
-use Filament\Facades\Filament;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Throwable;
+it('detects Incapsula challenge pages', function () {
+    $reason = (new ChallengePageDetector())->detect([], '<iframe src="/_Incapsula_Resource">Request unsuccessful. Incapsula</iframe>');
 
-class VerifyOtpLoginCodeController
-{
-    /**
-     * @throws Throwable
-     */
-    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
-    {
-        if ($request->getMethod() === 'HEAD') {
-            // Protection against link scanning bots, like Microsoft Outlook.
-            return response()->noContent();
-        }
+    expect($reason)->toBe('The response was blocked by an Incapsula challenge page.');
+});
 
-        abort_if(
-            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
-                || $otpCode->used_at !== null,
-            code: 403,
-            message: 'This OTP code has already been used or has expired. Please request a new one.'
-        );
+it('detects Cloudflare challenge pages from response headers', function () {
+    $reason = (new ChallengePageDetector())->detect(['cf-mitigated' => ['challenge']], '');
 
-        $request->validate([
-            'code' => ['required', 'digits:6', new ValidAuthenticationCode($otpCode)],
-        ]);
+    expect($reason)->toBe('The response was blocked by a Cloudflare challenge page.');
+});
 
-        $otpCode->used_at = now();
-        $otpCode->saveOrFail();
+it('does not detect an ordinary page as a challenge page', function () {
+    $reason = (new ChallengePageDetector())->detect(['content-type' => ['text/html']], '<html><body>Service is healthy.</body></html>');
 
-        $user = $otpCode->user;
-
-        $panel = Filament::getPanel('admin');
-
-        Auth::guard($panel->getAuthGuard())->login($user);
-
-        return redirect()->intended($panel->getHomeUrl());
-    }
-}
+    expect($reason)->toBeNull();
+});

@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
@@ -44,10 +45,13 @@ use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use App\Actions\ResolveEducatableFromEmail;
 use App\Http\Controllers\Controller;
+use App\Support\AuthenticationCodeRateLimiter;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 
 class KnowledgeManagementPortalRequestAuthenticationController extends Controller
@@ -55,7 +59,8 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
     public function __invoke(
         KnowledgeManagementPortalAuthenticationRequest $request,
         ResolveEducatableFromEmail $resolveEducatableFromEmail,
-        FindOrganizationByEmailDomain $findOrganizationByEmailDomain
+        FindOrganizationByEmailDomain $findOrganizationByEmailDomain,
+        AuthenticationCodeRateLimiter $rateLimiter,
     ): JsonResponse {
         $email = $request->safe()->email;
 
@@ -65,7 +70,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             $organization = $findOrganizationByEmailDomain($email);
 
             if ($organization) {
-                $authenticationUrl = $this->createPortalAuthentication($request);
+                $authenticationUrl = $this->createPortalAuthentication($request, $rateLimiter, organization: $organization);
 
                 return response()->json([
                     'registrationAllowed' => true,
@@ -79,7 +84,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             ]);
         }
 
-        $authenticationUrl = $this->createPortalAuthentication($request, $educatable);
+        $authenticationUrl = $this->createPortalAuthentication($request, $rateLimiter, $educatable);
 
         return response()->json([
             'message' => "We've sent an authentication code to {$email}.",
@@ -87,8 +92,26 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         ]);
     }
 
-    protected function createPortalAuthentication(KnowledgeManagementPortalAuthenticationRequest $request, ?Contact $contact = null): string
-    {
+    protected function createPortalAuthentication(
+        KnowledgeManagementPortalAuthenticationRequest $request,
+        AuthenticationCodeRateLimiter $rateLimiter,
+        ?Contact $contact = null,
+        ?Organization $organization = null,
+    ): string {
+        $email = $request->safe()->email;
+
+        [$rateLimitTarget, $scope] = $contact
+            ? [$contact, 'km-portal']
+            : [$organization, 'km-portal-register:' . sha1(Str::lower($email))];
+
+        assert($rateLimitTarget instanceof Model);
+
+        $rateLimiter->ensureCanRequestCode($rateLimitTarget, $scope);
+
+        if ($contact) {
+            PortalAuthentication::invalidateExistingCodesFor($contact, PortalType::KnowledgeManagement);
+        }
+
         $code = random_int(100000, 999999);
 
         $authentication = new PortalAuthentication();
@@ -105,11 +128,13 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
             'mail',
             ! is_null($contact)
                 ? [
-                    $request->safe()->email => $contact->getAttributeValue($contact::displayNameKey()),
+                    $email => $contact->getAttributeValue($contact::displayNameKey()),
                 ]
-                : $request->safe()->email
+                : $email
         )
             ->notify(new AuthenticatePortalNotification($authentication, $code));
+
+        $rateLimiter->recordCodeRequest($rateLimitTarget, $scope);
 
         $route = (! is_null($contact))
             ? (

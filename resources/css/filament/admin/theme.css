@@ -95,20 +95,30 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
     @apply p-0;
 }
 
-.fi-ta-group-header:has(.project-milestone-group-actions) {
-    @apply flex-row flex-nowrap items-start;
+.project-work-pipeline-widget .fi-ta-group-header > div {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
 }
 
-.fi-ta-group-header:has(.project-milestone-group-actions) > div {
-    @apply grow;
+.project-work-pipeline-widget .fi-ta-group-header > div > .fi-ta-group-description {
+    flex: 1 1 auto;
 }
 
-.fi-ta-group-header:has(.project-milestone-group-actions) > button {
-    @apply order-first shrink-0 self-start;
+.project-work-pipeline-widget .fi-ta-group-header > .fi-icon-btn {
+    order: -1;
 }
 
-.fi-ta-group-description:has(.project-milestone-group-actions .inline-block:empty):not(:has(.float-right)) {
-    @apply hidden;
+.project-work-pipeline-widget .fi-ta-group-heading:has(+ .fi-ta-group-description) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
 }
 
 .dark_button_border {

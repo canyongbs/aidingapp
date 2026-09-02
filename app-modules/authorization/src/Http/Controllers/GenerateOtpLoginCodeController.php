@@ -40,6 +40,7 @@ use AidingApp\Authorization\Http\Requests\GenerateLoginOtpCodeRequest;
 use AidingApp\Authorization\Models\OtpLoginCode;
 use AidingApp\Authorization\Notifications\OtpCodeNotification;
 use App\Models\User;
+use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -51,22 +52,24 @@ class GenerateOtpLoginCodeController
     /**
      * @throws Throwable
      */
-    public function __invoke(GenerateLoginOtpCodeRequest $request): JsonResponse
+    public function __invoke(GenerateLoginOtpCodeRequest $request, AuthenticationCodeRateLimiter $rateLimiter): JsonResponse
     {
+        $data = $request->validated();
+
+        $user = User::query()
+            ->where('email', $data['email'])
+            ->first();
+
+        if (! $user) {
+            return response()->json([
+                'error' => 'User not found.',
+            ], 422);
+        }
+
+        $rateLimiter->ensureCanRequestCode($user, 'otp-login');
+
         try {
             DB::beginTransaction();
-
-            $data = $request->validated();
-
-            $user = User::query()
-                ->where('email', $data['email'])
-                ->first();
-
-            if (! $user) {
-                return response()->json([
-                    'error' => 'User not found.',
-                ], 422);
-            }
 
             // Remove any existing OTPs for this user
             OtpLoginCode::query()
@@ -83,6 +86,8 @@ class GenerateOtpLoginCodeController
             DB::commit();
 
             $user->notify(new OtpCodeNotification($code));
+
+            $rateLimiter->recordCodeRequest($user, 'otp-login');
 
             return response()->json([
                 'link' => URL::temporarySignedRoute(

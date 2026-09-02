@@ -65,11 +65,11 @@ Route::prefix('portal')
             EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
         ])->group(function () {
             Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
-                ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
+                ->middleware(['signed:relative', 'throttle:authentication-code-verify', EnsureFrontendRequestsAreStateful::class])
                 ->name('authenticate');
 
             Route::post('/register/{authentication}', KnowledgeManagementPortalRegisterController::class)
-                ->middleware(['signed:relative', EnsureFrontendRequestsAreStateful::class])
+                ->middleware(['signed:relative', 'throttle:authentication-code-verify', EnsureFrontendRequestsAreStateful::class])
                 ->name('register');
 
             Route::get('/', RenderKnowledgeManagementPortal::class)

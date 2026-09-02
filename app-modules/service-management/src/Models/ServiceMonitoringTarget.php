@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
@@ -82,13 +83,23 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'is_reported_via_database',
         'is_reported_via_email',
         'is_confidential',
+        'monitor_type',
+        'should_contain',
+        'should_not_contain',
     ];
 
     protected $casts = [
+        'frequency' => ServiceMonitoringFrequency::class,
+        'is_notified_via_database' => 'boolean',
+        'is_notified_via_email' => 'boolean',
         'is_reporting_active' => 'boolean',
         'report_frequency' => ServiceMonitoringReportFrequency::class,
         'is_reported_via_database' => 'boolean',
         'is_reported_via_email' => 'boolean',
+        'is_confidential' => 'boolean',
+        'monitor_type' => MonitorType::class,
+        'should_contain' => 'array',
+        'should_not_contain' => 'array',
     ];
 
     /**
@@ -244,18 +255,5 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'frequency' => ServiceMonitoringFrequency::class,
-            'is_notified_via_database' => 'boolean',
-            'is_notified_via_email' => 'boolean',
-            'is_confidential' => 'boolean',
-        ];
     }
 }

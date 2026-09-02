@@ -51,6 +51,11 @@ class HistoricalServiceMonitoring extends BaseModel
         'response',
         'response_time',
         'succeeded',
+        'keyword_match_failures',
+    ];
+
+    protected $casts = [
+        'keyword_match_failures' => 'array',
     ];
 
     /**

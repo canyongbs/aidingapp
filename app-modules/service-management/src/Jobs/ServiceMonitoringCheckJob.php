@@ -38,9 +38,13 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use AidingApp\ServiceManagement\Services\ChallengePageDetector;
+use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
+use App\Features\MonitorTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -84,26 +88,32 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        try {
-            $response = Http::maxRedirects(15)
-                ->get($this->serviceMonitoringTarget->domain);
-
-            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
-        } catch (ConnectionException $exception) {
-            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
-                report($exception);
-            }
-            $this->handleResponses(523, 0, false);
+        if (MonitorTypeFeature::active()) {
+            match ($this->serviceMonitoringTarget->monitor_type) {
+                MonitorType::Availability => $this->handleAvailability(),
+                MonitorType::KeywordMatch => $this->handleKeywordMatch(),
+            };
+        } else {
+            $this->handleAvailability();
         }
     }
 
-    public function handleResponses(int $status, float $responseTime, bool $success): void
+    /**
+     * @param list<string>|null $keywordMatchFailures
+     */
+    public function handleResponses(int $status, float $responseTime, bool $success, ?array $keywordMatchFailures = null): void
     {
-        $history = $this->serviceMonitoringTarget->histories()->create([
+        $historyData = [
             'response' => $status,
             'response_time' => $responseTime,
             'succeeded' => $success,
-        ]);
+        ];
+
+        if ($keywordMatchFailures !== null) {
+            $historyData['keyword_match_failures'] = $keywordMatchFailures;
+        }
+
+        $history = $this->serviceMonitoringTarget->histories()->create($historyData);
 
         if (! $success) {
             $recipients = $this->serviceMonitoringTarget->users()->get();
@@ -130,5 +140,120 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
             Notification::send($recipients, new ServiceMonitoringNotification($history, $channel));
         }
+    }
+
+    protected function handleAvailability(): void
+    {
+        try {
+            $response = Http::maxRedirects(15)
+                ->head($this->serviceMonitoringTarget->domain);
+
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    protected function handleKeywordMatch(): void
+    {
+        if (blank($this->serviceMonitoringTarget->should_contain) && blank($this->serviceMonitoringTarget->should_not_contain)) {
+            $this->handleResponses(0, 0, false, ['No keyword match values were configured.']);
+
+            return;
+        }
+
+        try {
+            $response = Http::maxRedirects(15)
+                ->get($this->serviceMonitoringTarget->domain);
+
+            if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
+                $this->handleResponses(
+                    $response->status(),
+                    $response->transferStats->getTransferTime() ?? 0,
+                    false,
+                    [$challengePageFailure],
+                );
+
+                return;
+            }
+
+            if (! $this->hasReadableContentType($response->header('Content-Type'))) {
+                $this->handleResponses(
+                    $response->status(),
+                    $response->transferStats->getTransferTime() ?? 0,
+                    false,
+                    ['The response has an unreadable content type.'],
+                );
+
+                return;
+            }
+
+            $contentType = $response->header('Content-Type');
+            $responseBody = (new HtmlTextExtractor())->extract(
+                $response->body(),
+                $this->responseCharset($contentType),
+            );
+
+            $requiredFailures = collect($this->serviceMonitoringTarget->should_contain ?? [])
+                ->unique()
+                ->reject(fn (string $value): bool => Str::contains($responseBody, HtmlTextExtractor::normalizeWhitespace($value), true))
+                ->map(fn (string $value): string => "Required string not found: {$value}");
+
+            $prohibitedFailures = collect($this->serviceMonitoringTarget->should_not_contain ?? [])
+                ->unique()
+                ->filter(fn (string $value): bool => Str::contains($responseBody, HtmlTextExtractor::normalizeWhitespace($value), true))
+                ->map(fn (string $value): string => "Prohibited string found: {$value}");
+
+            $keywordMatchFailures = $requiredFailures
+                ->concat($prohibitedFailures)
+                ->values()
+                ->all();
+
+            $success = $response->status() === 200 && $keywordMatchFailures === [];
+
+            $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $success, $keywordMatchFailures);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    protected function hasReadableContentType(?string $contentType): bool
+    {
+        if (blank($contentType)) {
+            return true;
+        }
+
+        $mediaType = Str::lower(trim(explode(';', $contentType, 2)[0]));
+
+        return str_starts_with($mediaType, 'text/')
+            || in_array($mediaType, [
+                'application/ecmascript',
+                'application/javascript',
+                'application/json',
+                'application/ld+json',
+                'application/xml',
+                'application/xhtml+xml',
+                'application/yaml',
+                'application/x-yaml',
+            ], true)
+            || str_ends_with($mediaType, '+json')
+            || str_ends_with($mediaType, '+xml');
+    }
+
+    protected function responseCharset(?string $contentType): ?string
+    {
+        if (blank($contentType)) {
+            return null;
+        }
+
+        preg_match('/(?:^|;)\s*charset\s*=\s*([\w.-]+)/i', $contentType, $matches);
+
+        return $matches[1] ?? null;
     }
 }

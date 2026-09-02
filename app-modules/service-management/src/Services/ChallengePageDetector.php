@@ -34,49 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Controllers;
+namespace AidingApp\ServiceManagement\Services;
 
-use AidingApp\Authorization\Models\OtpLoginCode;
-use App\Rules\ValidAuthenticationCode;
-use Filament\Facades\Filament;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Throwable;
+use Illuminate\Support\Str;
 
-class VerifyOtpLoginCodeController
+class ChallengePageDetector
 {
     /**
-     * @throws Throwable
+     * @param  array<string, list<string>>  $headers
      */
-    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
+    public function detect(array $headers, string $body): ?string
     {
-        if ($request->getMethod() === 'HEAD') {
-            // Protection against link scanning bots, like Microsoft Outlook.
-            return response()->noContent();
+        $headerValues = collect($headers)
+            ->mapWithKeys(fn (array $values, string $name): array => [Str::lower($name) => implode(', ', $values)]);
+
+        if (Str::lower($headerValues->get('cf-mitigated', '')) === 'challenge' || Str::contains($body, 'cf-chl-')) {
+            return 'The response was blocked by a Cloudflare challenge page.';
         }
 
-        abort_if(
-            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
-                || $otpCode->used_at !== null,
-            code: 403,
-            message: 'This OTP code has already been used or has expired. Please request a new one.'
-        );
+        if (Str::contains($body, ['Request unsuccessful. Incapsula', '/_Incapsula_Resource'])) {
+            return 'The response was blocked by an Incapsula challenge page.';
+        }
 
-        $request->validate([
-            'code' => ['required', 'digits:6', new ValidAuthenticationCode($otpCode)],
-        ]);
-
-        $otpCode->used_at = now();
-        $otpCode->saveOrFail();
-
-        $user = $otpCode->user;
-
-        $panel = Filament::getPanel('admin');
-
-        Auth::guard($panel->getAuthGuard())->login($user);
-
-        return redirect()->intended($panel->getHomeUrl());
+        return null;
     }
 }

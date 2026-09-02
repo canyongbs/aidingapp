@@ -98,6 +98,15 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(60)->by(optional($request->user())->id ?: ClientIp::resolve($request));
         });
 
+        RateLimiter::for('authentication-code-verify', function (Request $request) {
+            return Limit::perMinute(10)->by(optional($request->user())->id ?: ClientIp::resolve($request));
+        });
+
+        RateLimiter::for('authentication-code-request', function (Request $request) {
+            return Limit::perMinute(10)->by(optional($request->user())->id ?: ClientIp::resolve($request));
+        });
+
+
         RateLimiter::for('service-request-secrets', function (Request $request) {
             $authenticatable = $request->user('contact') ?? $request->user();
             $authenticatableId = $authenticatable?->getAuthIdentifier();

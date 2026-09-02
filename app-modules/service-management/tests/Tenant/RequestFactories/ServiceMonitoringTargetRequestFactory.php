@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use Worksome\RequestFactories\RequestFactory;
 
@@ -48,6 +49,7 @@ class ServiceMonitoringTargetRequestFactory extends RequestFactory
             'description' => fake()->paragraph(),
             'domain' => fake()->url(),
             'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
+            'monitor_type' => MonitorType::Availability,
         ];
     }
 }

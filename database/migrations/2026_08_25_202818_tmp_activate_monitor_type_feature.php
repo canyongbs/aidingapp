@@ -34,49 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Authorization\Http\Controllers;
+use App\Features\MonitorTypeFeature;
+use Illuminate\Database\Migrations\Migration;
 
-use AidingApp\Authorization\Models\OtpLoginCode;
-use App\Rules\ValidAuthenticationCode;
-use Filament\Facades\Filament;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\Support\Facades\Auth;
-use Throwable;
-
-class VerifyOtpLoginCodeController
-{
-    /**
-     * @throws Throwable
-     */
-    public function __invoke(Request $request, OtpLoginCode $otpCode): RedirectResponse|Response
+return new class () extends Migration {
+    public function up(): void
     {
-        if ($request->getMethod() === 'HEAD') {
-            // Protection against link scanning bots, like Microsoft Outlook.
-            return response()->noContent();
-        }
-
-        abort_if(
-            boolean: now()->greaterThanOrEqualTo($otpCode->created_at->addMinutes(20))
-                || $otpCode->used_at !== null,
-            code: 403,
-            message: 'This OTP code has already been used or has expired. Please request a new one.'
-        );
-
-        $request->validate([
-            'code' => ['required', 'digits:6', new ValidAuthenticationCode($otpCode)],
-        ]);
-
-        $otpCode->used_at = now();
-        $otpCode->saveOrFail();
-
-        $user = $otpCode->user;
-
-        $panel = Filament::getPanel('admin');
-
-        Auth::guard($panel->getAuthGuard())->login($user);
-
-        return redirect()->intended($panel->getHomeUrl());
+        MonitorTypeFeature::activate();
     }
-}
+
+    public function down(): void
+    {
+        MonitorTypeFeature::deactivate();
+    }
+};

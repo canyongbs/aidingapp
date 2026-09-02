@@ -34,91 +34,39 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\postJson;
 
 beforeEach(function () {
-    $portalSettings = app(PortalSettings::class);
-    $portalSettings->knowledge_management_portal_enabled = true;
-    $portalSettings->knowledge_management_portal_service_management = false;
-    $portalSettings->ai_support_assistant = false;
-    $portalSettings->save();
-
-    $assistantSettings = app(AiSupportAssistantSettings::class);
-    $assistantSettings->is_enabled = false;
-    $assistantSettings->save();
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->ai_support_assistant = true;
+    $settings->save();
 });
 
-test('it returns expired and creates guest session when authentication is expired', function () {
-    $plainCode = 123456;
-
-    $authentication = PortalAuthentication::factory()->create([
-        'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
-        'created_at' => now()->subDay()->subMinute(),
-    ]);
-
+function assistantAuthenticate(PortalAuthentication $authentication, array $body): TestResponse
+{
     $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
+        name: 'widgets.assistant.api.authenticate',
         parameters: ['authentication' => $authentication],
         absolute: false,
     );
 
-    $response = postJson($url, [
-        'code' => $plainCode,
-    ]);
+    return postJson($url, $body, ['Origin' => config('app.url')]);
+}
 
-    $response
-        ->assertOk()
-        ->assertJsonPath('is_expired', true)
-        ->assertSessionHas('guest_id');
-
-    expect(PortalGuest::query()->count())->toBe(1);
-});
-
-test('it reuses existing guest session for expired authentication', function () {
-    $existingGuest = PortalGuest::factory()->create();
-
-    $plainCode = 223344;
-
-    $authentication = PortalAuthentication::factory()->create([
-        'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
-        'created_at' => now()->subDay()->subMinute(),
-    ]);
-
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
-        parameters: ['authentication' => $authentication],
-        absolute: false,
-    );
-
-    session(['guest_id' => $existingGuest->getKey()]);
-
-    $response = postJson($url, ['code' => $plainCode]);
-
-    $response
-        ->assertOk()
-        ->assertJsonPath('is_expired', true)
-        ->assertSessionHas('guest_id', $existingGuest->getKey());
-
-    expect(PortalGuest::query()->count())->toBe(1);
-});
-
-test('it authenticates contact and clears guest session when code is valid', function () {
+test('it authenticates the contact when the code is valid', function () {
     $contact = Contact::factory()->create();
-    $existingGuest = PortalGuest::factory()->create();
 
-    $plainCode = 654321;
+    $plainCode = 123456;
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
@@ -128,30 +76,17 @@ test('it authenticates contact and clears guest session when code is valid', fun
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
-        parameters: ['authentication' => $authentication],
-        absolute: false,
-    );
-
-    session(['guest_id' => $existingGuest->getKey()]);
-
-    $response = postJson($url, ['code' => $plainCode]);
+    $response = assistantAuthenticate($authentication, ['code' => $plainCode]);
 
     $response
         ->assertOk()
-        ->assertJsonPath('success', true)
-        ->assertJsonPath('user.id', $contact->getKey())
-        ->assertJsonPath('assistant_enabled', false)
-        ->assertJsonPath('assistant_widget_loader_url', null)
-        ->assertJsonPath('assistant_widget_config_url', null)
-        ->assertSessionMissing('guest_id');
+        ->assertJsonPath('success', true);
 
     expect($response->json('token'))->not->toBeEmpty()
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns validation error when code is invalid', function () {
+test('it returns a validation error when the code is invalid', function () {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -162,43 +97,31 @@ test('it returns validation error when code is invalid', function () {
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
-        parameters: ['authentication' => $authentication],
-        absolute: false,
-    );
-
-    $response = postJson($url, [
-        'code' => 999999,
-    ]);
-
-    $response
+    assistantAuthenticate($authentication, ['code' => 999999])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code']);
+
+    expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it returns validation error when code is missing', function () {
+test('it returns expired when the authentication has expired', function () {
     $contact = Contact::factory()->create();
+
+    $plainCode = 445566;
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(445566),
-        'created_at' => now(),
+        'code' => Hash::make($plainCode),
+        'created_at' => now()->subDay()->subMinute(),
     ]);
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
-        parameters: ['authentication' => $authentication],
-        absolute: false,
-    );
-
-    $response = postJson($url, []);
-
-    $response
+    assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
-        ->assertJsonValidationErrors(['code']);
+        ->assertJsonPath('is_expired', true);
+
+    expect(auth('contact')->check())->toBeFalse();
 });
 
 test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
@@ -214,19 +137,13 @@ test('it locks the authentication after too many invalid code attempts and rejec
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $url = URL::signedRoute(
-        name: 'api.portal.authenticate.embedded',
-        parameters: ['authentication' => $authentication],
-        absolute: false,
-    );
-
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
-        postJson($url, ['code' => 999999])
+        assistantAuthenticate($authentication, ['code' => 999999])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['code' => 'The provided code is invalid.']);
     }
 
-    postJson($url, ['code' => $plainCode])
+    assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code' => 'Too many invalid attempts. Please request a new code.']);
 
