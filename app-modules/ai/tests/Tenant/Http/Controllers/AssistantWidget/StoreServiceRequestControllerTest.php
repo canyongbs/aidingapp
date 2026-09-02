@@ -35,11 +35,18 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -137,4 +144,108 @@ it('assigns the submitted priority when no default priority is configured', func
         'priority_id' => $priority->getKey(),
         'respondent_id' => $contact->getKey(),
     ]);
+});
+
+it('requires password fields in assistant submissions', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+
+    postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant password test',
+        'description' => 'Password fields are required.',
+        'custom_fields' => [],
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($field->getKey());
+
+    expect(ServiceRequest::query()->exists())->toBeFalse();
+});
+
+it('securely attaches password fields submitted by assistant clients', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+    $secret = Secret::factory()->for($contact, 'author')->create([
+        'value' => Crypt::encryptString('service-request-password'),
+    ]);
+
+    postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant password test',
+        'description' => 'Password fields are supported.',
+        'custom_fields' => [
+            $field->getKey() => $secret->getKey(),
+        ],
+    ])->assertOk();
+
+    $serviceRequest = ServiceRequest::query()->sole();
+    $submittedField = $serviceRequest->serviceRequestFormSubmission->fields()->whereKey($field)->firstOrFail();
+    $secret->refresh();
+
+    expect($secret->related->is($serviceRequest))->toBeTrue()
+        ->and($submittedField->pivot->response)->toBe($secret->getKey())
+        ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
+        ->toBe('service-request-password');
+});
+
+it('rejects password fields owned by another contact', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+    $secret = Secret::factory()->for(Contact::factory(), 'author')->create();
+
+    postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant password test',
+        'description' => 'Password ownership is enforced.',
+        'custom_fields' => [
+            $field->getKey() => $secret->getKey(),
+        ],
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors('passwords');
+
+    expect(ServiceRequest::query()->exists())->toBeFalse()
+        ->and($secret->refresh()->related_id)->toBeNull();
 });

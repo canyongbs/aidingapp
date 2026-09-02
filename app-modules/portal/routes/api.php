@@ -57,6 +57,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorSt
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestSecretController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
@@ -143,6 +144,10 @@ Route::prefix('api')
                 Route::get('/service-request/request-upload-url', GetServiceRequestUploadUrl::class)
                     ->middleware(['auth:sanctum'])
                     ->name('service-request.request-upload-url');
+
+                Route::post('/service-request/store-secret', StoreServiceRequestSecretController::class)
+                    ->middleware(['auth:sanctum', 'throttle:service-request-secrets'])
+                    ->name('service-request.store-secret');
 
                 Route::get('/tags', GetKnowledgeManagementPortalTagsController::class)
                     ->name('tags.index');

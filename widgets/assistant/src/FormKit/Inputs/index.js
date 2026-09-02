@@ -32,10 +32,15 @@
 </COPYRIGHT>
 */
 import { createInput } from '@formkit/vue';
+import Password from './Password.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
 export default {
+    password: createInput(Password, {
+        family: 'text',
+        props: ['storeUrl'],
+    }),
     signature: createInput(Signature, {
         props: [],
     }),

@@ -56,10 +56,12 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
+use App\Features\PasswordFormFieldFeature;
 use App\Features\SlaWaitingExclusionFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 
 class ServiceRequestObserver
@@ -94,8 +96,10 @@ class ServiceRequestObserver
             ServiceRequestTypeEmailTemplateRole::Customer
         );
 
-        if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Open
-            && $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email)) {
+        if (
+            $serviceRequest->status?->classification === SystemServiceRequestClassification::Open
+            && $serviceRequest->priority->type->isPreferenceEnabled(ServiceRequestEmailTemplateType::Created, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email)
+        ) {
             $serviceRequest->respondent->notify(
                 new SendEducatableServiceRequestOpenedNotification($serviceRequest, $customerEmailTemplate)
             );
@@ -148,8 +152,8 @@ class ServiceRequestObserver
 
             CreateServiceRequestHistory::dispatch(
                 $serviceRequest,
-                $serviceRequest->getChanges(),
-                $serviceRequest->getOriginal(),
+                Arr::except($serviceRequest->getChanges(), ['secret_key']),
+                Arr::except($serviceRequest->getOriginal(), ['secret_key']),
                 $actor?->getMorphClass(),
                 $actor?->getKey(),
             );
@@ -197,6 +201,15 @@ class ServiceRequestObserver
     public function updating(ServiceRequest $serviceRequest): void
     {
         throw_if($serviceRequest->isDirty('service_request_number'), new ServiceRequestNumberUpdateAttemptException());
+    }
+
+    public function forceDeleted(ServiceRequest $serviceRequest): void
+    {
+        if (! PasswordFormFieldFeature::active()) {
+            return;
+        }
+
+        $serviceRequest->secrets()->delete();
     }
 
     public function updated(ServiceRequest $serviceRequest): void

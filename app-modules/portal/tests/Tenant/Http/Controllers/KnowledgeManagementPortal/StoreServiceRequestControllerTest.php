@@ -36,10 +36,14 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 
@@ -99,4 +103,131 @@ it('requires a submitted priority when the type has no configured default priori
         ->assertJsonValidationErrors('Main.priority');
 
     expect(ServiceRequest::query()->count())->toBe(0);
+});
+
+it('assigns the configured default priority when no priority is submitted', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $contact = Contact::factory()->create();
+
+    $response = actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store', ['type' => $type]),
+        ['Main' => ['title' => 'Portal priority test', 'description' => 'A priority is required.']],
+    );
+
+    $response->assertSuccessful();
+
+    expect(ServiceRequest::query()->sole()->priority_id)->toBe($priority->getKey());
+});
+
+it('attaches submitted password secrets to the service request', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $contact = Contact::factory()->create();
+    $field = new ServiceRequestFormField([
+        'label' => 'Password',
+        'type' => 'password',
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $form = ServiceRequestForm::factory()->for($type, 'type')->create();
+    $field->submissible()->associate($form);
+    $field->save();
+
+    $form->update([
+        'content' => [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => [
+                    'id' => 'password',
+                    'config' => [
+                        'fieldId' => $field->getKey(),
+                        'label' => 'Password',
+                        'isRequired' => true,
+                    ],
+                ],
+            ]],
+        ],
+    ]);
+
+    $secret = Secret::factory()
+        ->for($contact, 'author')
+        ->create(['value' => Crypt::encryptString('service-request-password')]);
+
+    $response = actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store', ['type' => $type]),
+        [
+            'Main' => [
+                'title' => 'Password submission test',
+                'description' => 'Testing secret attachment.',
+                'priority' => $priority->getKey(),
+            ],
+            'Details' => [
+                $field->getKey() => $secret->getKey(),
+            ],
+        ],
+    );
+
+    $response->assertSuccessful();
+
+    $serviceRequest = ServiceRequest::query()->sole();
+
+    expect($secret->refresh()->related->is($serviceRequest))->toBeTrue();
+});
+
+it('rejects a password secret owned by another contact', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $contact = Contact::factory()->create();
+    $field = new ServiceRequestFormField([
+        'label' => 'Password',
+        'type' => 'password',
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $form = ServiceRequestForm::factory()->for($type, 'type')->create();
+    $field->submissible()->associate($form);
+    $field->save();
+
+    $form->update([
+        'content' => [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => [
+                    'id' => 'password',
+                    'config' => [
+                        'fieldId' => $field->getKey(),
+                        'label' => 'Password',
+                        'isRequired' => true,
+                    ],
+                ],
+            ]],
+        ],
+    ]);
+
+    $secret = Secret::factory()
+        ->for(Contact::factory(), 'author')
+        ->create();
+
+    actingAs($contact, 'contact')->postJson(
+        route('api.portal.service-request.store', ['type' => $type]),
+        [
+            'Main' => [
+                'title' => 'Invalid password submission test',
+                'description' => 'Testing secret ownership.',
+                'priority' => $priority->getKey(),
+            ],
+            'Details' => [
+                $field->getKey() => $secret->getKey(),
+            ],
+        ],
+    )
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors("Details.{$field->getKey()}");
+
+    expect(ServiceRequest::query()->exists())->toBeFalse()
+        ->and($secret->refresh()->related_id)->toBeNull();
 });

@@ -36,6 +36,7 @@
     import { FormKitSchema } from '@formkit/vue';
     import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
     import { computed, provide, ref, watch } from 'vue';
+    import { createPasswordStorageCoordinator, passwordStorageKey } from '../../FormKit/passwordStorage.js';
 
     const props = defineProps({
         step: { type: Object, required: true },
@@ -53,6 +54,8 @@
 
     const isUploadProcessing = ref(false);
     provide('uploadProcessing', isUploadProcessing);
+    const passwordStorage = createPasswordStorageCoordinator();
+    provide(passwordStorageKey, passwordStorage);
 
     const isLastCustomStep = computed(() => props.stepIndex === props.totalSteps - 1);
     const formRef = ref(null);
@@ -105,7 +108,24 @@
         return node.value ?? {};
     }
 
-    defineExpose({ getFieldValues });
+    async function flushPasswordFields() {
+        return passwordStorage.flushAll();
+    }
+
+    defineExpose({ flushPasswordFields, getFieldValues });
+
+    function onFormSubmitRaw(event, node) {
+        const flush = passwordStorage.startFlush();
+
+        if (!flush) return;
+
+        flush.then(async (successful) => {
+            if (!successful) return;
+
+            await node.settled;
+            validateAndProceed();
+        });
+    }
 
     function onFormSubmit() {
         if (isLastCustomStep.value) {
@@ -145,7 +165,14 @@
 
         <!-- Form fields -->
         <div class="flex-1 overflow-y-auto px-4 py-3 flex flex-col">
-            <FormKit ref="formRef" type="form" :actions="false" @submit="onFormSubmit" @node="onFormCreated">
+            <FormKit
+                ref="formRef"
+                type="form"
+                :actions="false"
+                @submit="onFormSubmit"
+                @submit-raw="onFormSubmitRaw"
+                @node="onFormCreated"
+            >
                 <FormKitSchema :schema="step.schema" />
             </FormKit>
 

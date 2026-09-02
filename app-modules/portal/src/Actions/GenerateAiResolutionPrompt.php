@@ -43,6 +43,10 @@ use Illuminate\Support\Collection;
 
 class GenerateAiResolutionPrompt
 {
+    public function __construct(
+        protected RemovePasswordsFromServiceRequestFormData $removePasswordsFromServiceRequestFormData,
+    ) {}
+
     /**
      * @param array<string, mixed> $formData
      * @param array<string, string> $questionsAndAnswers
@@ -53,6 +57,8 @@ class GenerateAiResolutionPrompt
         array $questionsAndAnswers,
         Contact $contact
     ): string {
+        $formData = ($this->removePasswordsFromServiceRequestFormData)($serviceRequestType, $formData);
+
         $requesterName = $contact->full_name ?? $contact->name ?? 'the user';
 
         $fieldsMap = $this->buildFieldsMapFromType($serviceRequestType);

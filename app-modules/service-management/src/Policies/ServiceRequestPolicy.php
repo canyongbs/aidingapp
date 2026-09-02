@@ -37,10 +37,12 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use App\Models\SystemUser;
+use App\Models\User;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
@@ -73,10 +75,12 @@ class ServiceRequestPolicy
         if (! $user->isSuperAdmin() && ! ($user instanceof SystemUser)) {
             $department = $user->department;
 
-            if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) ||
-                 $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))
-                 && ! ($serviceRequest->priority?->type?->auditorDepartments?->contains('id', $department?->getKey()) ||
-                      $serviceRequest->priority?->type?->auditorUsers?->contains('id', $user->getKey()))) {
+            if (
+                ! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) ||
+                    $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))
+                && ! ($serviceRequest->priority?->type?->auditorDepartments?->contains('id', $department?->getKey()) ||
+                    $serviceRequest->priority?->type?->auditorUsers?->contains('id', $user->getKey()))
+            ) {
                 return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
@@ -123,6 +127,27 @@ class ServiceRequestPolicy
         return $authenticatable->canOrElse(
             abilities: ['service_request.*.update'],
             denyResponse: 'You do not have permission to update this service request.'
+        );
+    }
+
+    public function revealSecret(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
+    {
+        $serviceRequestTypeId = $serviceRequest->priority?->type_id;
+
+        if (
+            $serviceRequest->assignedTo?->user_id !== $authenticatable->getKey()
+            || is_null($serviceRequestTypeId)
+            || ! User::query()
+                ->tap(new ManagesServiceRequestType($serviceRequestTypeId))
+                ->whereKey($authenticatable->getKey())
+                ->exists()
+        ) {
+            return Response::deny("You don't have permission to reveal secrets on this service request because you're not its assigned manager.");
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: ['service_request.*.update'],
+            denyResponse: 'You do not have permission to reveal secrets on this service request.'
         );
     }
 

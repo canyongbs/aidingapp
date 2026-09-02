@@ -114,6 +114,15 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         'category',
     ];
 
+    protected $hidden = [
+        'secret_key',
+    ];
+
+    /** @var list<string> */
+    protected $auditExclude = [
+        'secret_key',
+    ];
+
     public function registerMediaCollections(): void
     {
         $this->addMediaCollection('inline_attachments');
@@ -207,6 +216,14 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function outboundEmailMessageIds(): MorphMany
     {
         return $this->morphMany(OutboundEmailMessageId::class, 'trackable');
+    }
+
+    /**
+     * @return MorphMany<Secret, $this>
+     */
+    public function secrets(): MorphMany
+    {
+        return $this->morphMany(Secret::class, 'related');
     }
 
     /**

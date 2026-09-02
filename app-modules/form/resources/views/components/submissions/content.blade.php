@@ -51,7 +51,13 @@
     $sanitizeSubmissionHtml = function (string $html): string {
         $config = app(HtmlSanitizerConfig::class)
             ->allowElement('svg', ['xmlns', 'fill', 'viewBox', 'stroke-width', 'stroke', 'aria-hidden', 'class', 'data-slot'])
-            ->allowElement('path', ['fill-rule', 'clip-rule', 'd', 'stroke-linecap', 'stroke-linejoin']);
+            ->allowElement('path', ['fill-rule', 'clip-rule', 'd', 'stroke-linecap', 'stroke-linejoin'])
+            ->allowAttribute('data-secret-row', 'div')
+            ->allowAttribute('data-secret-mask', 'span')
+            ->allowAttribute('data-secret-value', 'code')
+            ->allowAttribute('data-secret-error', 'span')
+            ->allowAttribute('data-secret-reveal', 'button')
+            ->allowAttribute('data-secret-id', 'button');
 
         return (new HtmlSanitizer($config))->sanitize($html);
     };

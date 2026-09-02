@@ -38,10 +38,12 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\ResolveBlockRegistry;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\Portal\Actions\ProcessServiceRequestSubmissionField;
 use AidingApp\Portal\Jobs\PersistServiceRequestUpload;
+use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
@@ -109,14 +111,14 @@ class StoreServiceRequestController extends Controller
         $form = null;
         $customFieldData = collect();
 
-        if (! empty($data['custom_fields']) && $type->form) {
+        if ($type->form) {
             $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection);
 
             $validation = $this->buildCustomFieldValidation($form);
 
             try {
                 $validated = Validator::make(
-                    $data['custom_fields'],
+                    $data['custom_fields'] ?? [],
                     $validation['rules'],
                     [],
                     $validation['attributes'],
@@ -159,25 +161,45 @@ class StoreServiceRequestController extends Controller
 
             $this->handleAiResolution($data, $serviceRequest, $contact, $type, $updateUuids);
 
-            Bus::batch(
-                array_map(
-                    fn (array $file) => new PersistServiceRequestUpload(
-                        $serviceRequest,
-                        $file['path'],
-                        $file['original_file_name'],
-                        $uploadsMediaCollection->getName(),
-                    ),
-                    $data['attachments'] ?? [],
+            $uploadJobs = array_map(
+                fn (array $file) => new PersistServiceRequestUpload(
+                    $serviceRequest,
+                    $file['path'],
+                    $file['original_file_name'],
+                    $uploadsMediaCollection->getName(),
                 ),
-            )
-                ->name("persist-service-request-uploads-{$serviceRequest->getKey()}")
-                ->dispatchAfterResponse();
+                $data['attachments'] ?? [],
+            );
+
+            if ($uploadJobs !== []) {
+                DB::afterCommit(fn () => Bus::batch(
+                    $uploadJobs,
+                )
+                    ->name("persist-service-request-uploads-{$serviceRequest->getKey()}")
+                    ->dispatchAfterResponse());
+            }
 
             if ($form && $customFieldData->isNotEmpty()) {
                 $this->createFormSubmission($form, $customFieldData, $serviceRequest, $priority);
+
+                $secretIds = $form->steps
+                    ->flatMap->fields
+                    ->filter(fn ($field): bool => $field->type === PasswordFormFieldBlock::type())
+                    ->map(fn ($field): mixed => $customFieldData[$field->getKey()] ?? null)
+                    ->filter(fn (mixed $secretId): bool => filled($secretId))
+                    ->values()
+                    ->all();
+
+                app(AttachServiceRequestSecrets::class)($serviceRequest, $secretIds, $contact);
             }
 
             DB::commit();
+        } catch (ValidationException $exception) {
+            DB::rollBack();
+
+            return response()->json([
+                'errors' => (object) $exception->errors(),
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
         } catch (Throwable $exception) {
             DB::rollBack();
 

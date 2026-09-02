@@ -33,6 +33,7 @@
 */
 import OneTimePassword from '@common/portal/login/OneTimePassword.vue';
 import { createInput } from '@formkit/vue';
+import Password from './Password.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
@@ -45,5 +46,9 @@ export default {
     }),
     upload: createInput(Upload, {
         props: ['accept', 'limit', 'multiple', 'size', 'uploadUrl'],
+    }),
+    password: createInput(Password, {
+        family: 'text',
+        props: ['storeUrl'],
     }),
 };

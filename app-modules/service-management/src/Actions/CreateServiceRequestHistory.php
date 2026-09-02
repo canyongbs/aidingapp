@@ -58,6 +58,7 @@ class CreateServiceRequestHistory implements ShouldQueue
         'status_updated_at',
         'time_to_resolution',
         'service_request_form_submission_id',
+        'secret_key',
     ];
 
     /**

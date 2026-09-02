@@ -38,6 +38,8 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -49,9 +51,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormSubmission;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -62,6 +67,9 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Carbon\CarbonImmutable;
 use Filament\Infolists\Components\TextEntry;
+use Illuminate\Encryption\Encrypter;
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -706,6 +714,84 @@ describe('division', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('division.name');
+    });
+});
+
+describe('password fields', function () {
+    it('shows the reveal control inline to the assigned manager', function () {
+        $assignedManager = user(permissions: [
+            'service_request.view-any',
+            'service_request.*.view',
+            'service_request.*.update',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($assignedManager);
+        $serviceRequest->secret_key = Crypt::encryptString(
+            'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
+        );
+        $serviceRequest->save();
+
+        ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($assignedManager, 'user')
+            ->create();
+
+        $secret = Secret::factory()
+            ->for($serviceRequest, 'related')
+            ->create([
+                'value' => app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)
+                    ->encryptString('service-request-password'),
+            ]);
+
+        $form = ServiceRequestForm::factory()->create();
+        $field = new ServiceRequestFormField([
+            'label' => 'Private credential',
+            'type' => PasswordFormFieldBlock::type(),
+            'is_required' => true,
+            'config' => [],
+        ]);
+        $field->submissible()->associate($form);
+        $field->save();
+
+        $form->content = [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => [
+                    'id' => PasswordFormFieldBlock::type(),
+                    'config' => [
+                        'fieldId' => $field->getKey(),
+                        'label' => $field->label,
+                        'isRequired' => true,
+                    ],
+                ],
+            ]],
+        ];
+        $form->save();
+
+        $submission = ServiceRequestFormSubmission::create([
+            'service_request_form_id' => $form->getKey(),
+            'submitted_at' => now(),
+        ]);
+        $submission->fields()->attach($field, [
+            'id' => Str::orderedUuid(),
+            'response' => $secret->getKey(),
+        ]);
+
+        $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+        $serviceRequest->save();
+
+        actingAs($assignedManager);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSee('••••••••')
+            ->assertDontSee('service-request-password')
+            ->assertDontSee('see Secrets section to reveal')
+            ->assertDontSee('Secrets')
+            ->assertSee('Reveal')
+            ->assertSeeHtml('fi-not-prose')
+            ->assertSeeHtml('data-secret-reveal');
     });
 });
 

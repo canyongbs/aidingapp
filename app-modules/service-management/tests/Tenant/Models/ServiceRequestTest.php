@@ -50,6 +50,18 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
+it('excludes its secret key from serialization and audits', function () {
+    $serviceRequest = ServiceRequest::factory()->create([
+        'secret_key' => 'encrypted-secret-key',
+    ]);
+
+    $audit = $serviceRequest->audits()->latest()->firstOrFail();
+
+    expect($serviceRequest->toArray())->not->toHaveKey('secret_key')
+        ->and($audit->new_values)->not->toHaveKey('secret_key')
+        ->and($audit->old_values)->not->toHaveKey('secret_key');
+});
+
 if (! function_exists('recentUpdateCreatorInfo')) {
     function recentUpdateCreatorInfo(ServiceRequest $serviceRequest): string
     {

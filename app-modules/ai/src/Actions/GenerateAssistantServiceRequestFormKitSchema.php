@@ -38,6 +38,7 @@ namespace AidingApp\Ai\Actions;
 
 use AidingApp\Form\Actions\ResolveBlockRegistry;
 use AidingApp\Form\Filament\Blocks\FormFieldBlock;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -174,6 +175,10 @@ class GenerateAssistantServiceRequestFormKitSchema
 
         if (($schema['$formkit'] ?? null) === 'upload') {
             $schema['uploadUrl'] = route('widgets.assistant.api.service-request.upload-url');
+        }
+
+        if ($block::type() === PasswordFormFieldBlock::type()) {
+            $schema['storeUrl'] = route('widgets.assistant.api.service-request.store-secret');
         }
 
         return [$schema];

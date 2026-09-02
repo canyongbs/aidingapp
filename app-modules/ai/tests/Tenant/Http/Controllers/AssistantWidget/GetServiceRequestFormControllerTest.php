@@ -36,7 +36,11 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Illuminate\Testing\TestResponse;
@@ -86,6 +90,48 @@ it('allows widget contacts of a matching contact type to load a restricted type 
 
     widgetFormRequestAsContact($contact, $restrictedType)
         ->assertOk();
+});
+
+it('includes secure password fields in assistant forms', function () {
+    $type = ServiceRequestType::factory()->create();
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep([
+        'label' => 'Details',
+        'content' => null,
+        'sort' => 1,
+    ]);
+    $step->submissible()->associate($form);
+    $step->save();
+
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+
+    $step->content = [
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'customBlock',
+            'attrs' => [
+                'id' => PasswordFormFieldBlock::type(),
+                'config' => ['fieldId' => $field->getKey()],
+            ],
+        ]],
+    ];
+    $step->save();
+
+    widgetFormRequestAsContact(Contact::factory()->create(), $type)
+        ->assertOk()
+        ->assertJsonFragment([
+            '$formkit' => 'password',
+            'name' => $field->getKey(),
+            'storeUrl' => route('widgets.assistant.api.service-request.store-secret'),
+        ]);
 });
 
 it('blocks a widget type nested under a restricted area from a non-matching contact', function () {

@@ -37,20 +37,30 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
+use function Pest\Laravel\postJson;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -97,6 +107,84 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->toEqual($request->get('priority_id'))
         ->and($serviceRequest->category)
         ->toEqual($request->get('category'));
+});
+
+it('securely stores password fields on staff-created service requests', function () {
+    asSuperAdmin();
+
+    $author = auth()->user();
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $form = ServiceRequestForm::factory()->for($type, 'type')->create();
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->save();
+
+    $form->content = [
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'customBlock',
+            'attrs' => [
+                'id' => PasswordFormFieldBlock::type(),
+                'config' => [
+                    'fieldId' => $field->getKey(),
+                    'label' => $field->label,
+                    'isRequired' => true,
+                ],
+            ],
+        ]],
+    ];
+    $form->save();
+
+    $request = CreateServiceRequestRequestFactory::new()->create([
+        'priority_id' => $priority->getKey(),
+    ]);
+
+    expect(app(GenerateServiceRequestFilamentFormSchema::class)($form))
+        ->toHaveCount(1)
+        ->and(app(GenerateServiceRequestFilamentFormSchema::class)($form)[0])
+        ->toBeInstanceOf(ServiceRequestPasswordInput::class);
+
+    $secretId = postJson(route('service-request.store-secret'), [
+        'value' => 'service-request-password',
+    ])
+        ->assertOk()
+        ->json('id');
+
+    $component = livewire(CreateServiceRequest::class)
+        ->set('data.type_id', $type->getKey())
+        ->fillForm($request);
+
+    $secret = Secret::query()->findOrFail($secretId);
+
+    expect(Crypt::decryptString($secret->value))->toBe('service-request-password')
+        ->and($secret->author->is($author))->toBeTrue();
+
+    $component
+        ->assertDontSee('service-request-password')
+        ->fillForm([
+            'dynamic_fields' => [
+                $field->getKey() => $secretId,
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceRequest = ServiceRequest::query()->sole();
+    $submittedField = $serviceRequest->serviceRequestFormSubmission->fields()->whereKey($field)->firstOrFail();
+    $secret->refresh();
+
+    expect($secret->related->is($serviceRequest))->toBeTrue()
+        ->and($submittedField->pivot->response)->toBe($secret->getKey())
+        ->and($submittedField->pivot->response)->not->toBe('service-request-password')
+        ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
+        ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
+        ->toBe('service-request-password');
 });
 
 test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {

@@ -1,0 +1,95 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+namespace AidingApp\ServiceManagement\Models;
+
+use AidingApp\ServiceManagement\Database\Factories\SecretFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\MassPrunable;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+
+/**
+ * @mixin IdeHelperSecret
+ */
+class Secret extends Model
+{
+    /** @use HasFactory<SecretFactory> */
+    use HasFactory;
+
+    use HasUuids;
+    use MassPrunable;
+
+    protected $fillable = [
+        'value',
+        'author_type',
+        'author_id',
+        'related_type',
+        'related_id',
+    ];
+
+    protected $hidden = [
+        'value',
+    ];
+
+    /**
+      * @return Builder<static>
+     */
+    public function prunable(): Builder
+    {
+        return static::query()
+            ->whereNull('related_id')
+            ->where('updated_at', '<=', now()->subDay());
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function author(): MorphTo
+    {
+        return $this->morphTo('author');
+    }
+
+    /**
+     * @return MorphTo<Model, $this>
+     */
+    public function related(): MorphTo
+    {
+        return $this->morphTo('related');
+    }
+}
