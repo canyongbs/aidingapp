@@ -54,19 +54,17 @@ return [
     'model' => PushSubscription::class,
 
     /**
-     * This is the name of the table that will be created by the migration and
-     * used by the PushSubscription model shipped with this package.
+    * This is the app-owned table used by the configured PushSubscription model.
      */
-    'table_name' => env('WEBPUSH_DB_TABLE', 'push_subscriptions'),
+    'table_name' => 'push_subscriptions',
 
     /**
-     * This is the database connection that will be used by the migration and
-     * the PushSubscription model shipped with this package.
+    * This is the database connection used by the PushSubscription model.
      *
      * Push subscriptions belong to tenant `User` records, so they must live on
      * the per-tenant connection rather than the default (`landlord`) one.
      */
-    'database_connection' => env('WEBPUSH_DB_CONNECTION', 'tenant'),
+    'database_connection' => 'tenant',
 
     /**
      * The Guzzle client options used by Minishlink\WebPush.

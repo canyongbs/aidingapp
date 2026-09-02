@@ -32,5 +32,5 @@
     </COPYRIGHT>
 --}}
 <x-filament-panels::page>
-    @include('filament-browser-notifications::profile-section')
+    @include('common::browser-notifications.settings')
 </x-filament-panels::page>

@@ -65,6 +65,8 @@ use App\Observers\UserObserver;
 use App\Settings\DisplaySettings;
 use App\Settings\PresenceSettings;
 use App\Support\HasAdvancedFilter;
+use CanyonGBS\Common\BrowserNotifications\Concerns\HasBrowserNotificationSubscriptions;
+use CanyonGBS\Common\BrowserNotifications\Contracts\ReceivesBrowserNotifications;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
 use Filament\Models\Contracts\FilamentUser;
@@ -82,7 +84,6 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notifiable;
 use Lab404\Impersonate\Models\Impersonate;
-use NotificationChannels\WebPush\HasPushSubscriptions;
 use OwenIt\Auditing\Contracts\Auditable;
 use Spatie\MediaLibrary\HasMedia;
 use Spatie\MediaLibrary\InteractsWithMedia;
@@ -94,14 +95,14 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperUser
  */
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource, ReceivesBrowserNotifications
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
 
     use HasAdvancedFilter;
+    use HasBrowserNotificationSubscriptions;
     use Notifiable;
-    use HasPushSubscriptions;
     use SoftDeletes;
     use HasRelationships;
     use HasUuids;

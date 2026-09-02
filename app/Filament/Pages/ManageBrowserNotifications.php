@@ -36,9 +36,10 @@
 
 namespace App\Filament\Pages;
 
-use App\Features\DesktopNotificationsFeature;
 use App\Filament\Clusters\ProfileSettings;
+use CanyonGBS\Common\BrowserNotifications\BrowserNotificationsManager;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 
 class ManageBrowserNotifications extends Page
 {
@@ -59,7 +60,6 @@ class ManageBrowserNotifications extends Page
 
     public static function canAccess(): bool
     {
-        // Desktop notifications are only available once the VAPID public key is configured for the environment.
-        return DesktopNotificationsFeature::active() && filled(config('webpush.vapid.public_key'));
+        return app(BrowserNotificationsManager::class)->isAvailable(Auth::user());
     }
 }

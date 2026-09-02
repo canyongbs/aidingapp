@@ -23,8 +23,8 @@
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
       Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as a
-      Software as a Service (SaaS) by Canyon GBS Inc.
+    - The software solution, including services, infrastructure, and code, is offered as
+      a Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
@@ -34,31 +34,50 @@
 </COPYRIGHT>
 */
 
+use App\Features\DesktopNotificationsFeature;
 use App\Models\User;
+use CanyonGBS\Common\BrowserNotifications\BrowserNotificationsManager;
+use CanyonGBS\Common\BrowserNotifications\Filament\BrowserNotificationsPlugin;
 use Filament\Facades\Filament;
+use Filament\Support\Facades\FilamentView;
 use Filament\View\PanelsRenderHook;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 
-it('never shows the vendor floating prompt banner', function () {
+beforeEach(function () {
+    config()->set('webpush.vapid.subject', 'mailto:test@example.com');
     config()->set('webpush.vapid.public_key', 'test-public-key');
+    config()->set('webpush.vapid.private_key', 'test-private-key');
+});
+
+it('registers browser notifications on the admin panel', function () {
+    expect(Filament::getPanel('admin')->getPlugin('browser-notifications'))
+        ->toBeInstanceOf(BrowserNotificationsPlugin::class);
+});
+
+it('uses the Aiding App favicon for desktop notifications', function () {
+    expect(app(BrowserNotificationsManager::class)->resolveIcon())
+        ->toEndWith('/images/default-favicon.png');
+});
+
+it('does not show the browser notification prompt', function () {
+    actingAs(User::factory()->create());
+
+    Filament::setCurrentPanel('admin');
+    Filament::bootCurrentPanel();
+
+    expect(FilamentView::renderHook(PanelsRenderHook::BODY_END)->toHtml())
+        ->not->toContain('x-data="browserNotificationsPrompt"');
+});
+
+it('does not show the browser notification prompt before the tenant migration activates the feature', function () {
+    DesktopNotificationsFeature::deactivate();
 
     actingAs(User::factory()->create());
 
-    get(route('filament.admin.profile-settings.pages.profile-information'))
-        ->assertDontSee('x-data="browserNotifications"', false);
-});
+    Filament::setCurrentPanel('admin');
+    Filament::bootCurrentPanel();
 
-// Panel::make() runs the vendor's Panel::configureUsing() callback before our
-// plugin ever runs, which already queues its own head meta tag and prompt
-// banner onto the panel. Render hooks can only be appended, never removed, so
-// the plugin must clear what was queued before adding its own head meta hook
-// rather than leaving a duplicate alongside it.
-it('clears the duplicate head meta hook the vendor queued before the admin panel plugin registers', function () {
-    $panel = Filament::getPanel('admin');
-    $renderHooks = (new ReflectionProperty($panel, 'renderHooks'))->getValue($panel);
-
-    expect($renderHooks[PanelsRenderHook::HEAD_END][''] ?? [])->toHaveCount(1)
-        ->and($renderHooks[PanelsRenderHook::BODY_END][''] ?? [])->toBeEmpty();
+    expect(FilamentView::renderHook(PanelsRenderHook::BODY_END)->toHtml())
+        ->not->toContain('x-data="browserNotificationsPrompt"');
 });

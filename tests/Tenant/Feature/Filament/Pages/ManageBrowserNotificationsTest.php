@@ -41,6 +41,12 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
+beforeEach(function () {
+    config()->set('webpush.vapid.subject', 'mailto:test@example.com');
+    config()->set('webpush.vapid.public_key', 'test-public-key');
+    config()->set('webpush.vapid.private_key', 'test-private-key');
+});
+
 it('is not accessible when desktop notifications are not configured', function () {
     config()->set('webpush.vapid.public_key', null);
 
@@ -50,8 +56,6 @@ it('is not accessible when desktop notifications are not configured', function (
 });
 
 it('renders the desktop notifications management page when configured', function () {
-    config()->set('webpush.vapid.public_key', 'test-public-key');
-
     actingAs(User::factory()->create());
 
     livewire(ManageBrowserNotifications::class)->assertOk();
@@ -59,8 +63,6 @@ it('renders the desktop notifications management page when configured', function
 
 it('is not accessible when the desktop notifications feature is inactive', function () {
     DesktopNotificationsFeature::deactivate();
-
-    config()->set('webpush.vapid.public_key', 'test-public-key');
 
     actingAs(User::factory()->create());
 
