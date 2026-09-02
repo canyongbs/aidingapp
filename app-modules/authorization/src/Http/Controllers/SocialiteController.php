@@ -43,8 +43,8 @@ use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Notifications\Notification;
 use Illuminate\Database\Query\Expression;
+use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Http\Client\Response;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -102,30 +102,39 @@ class SocialiteController extends Controller
 
         if ($provider === SocialiteProvider::Azure) {
             try {
-                $request = Http::withToken($socialiteUser->token)
+                // Retry transient Azure failures (connection errors, rate limits, server errors) but not client errors.
+                $response = Http::withToken($socialiteUser->token)
                     ->dontTruncateExceptions()
-                    ->retry(3, 500)
-                    ->get('https://graph.microsoft.com/v1.0/me/photo/$value')
-                    ->throwIf(fn (Response $response) => $response->failed() && $response->status() !== 404);
+                    ->retry(3, 500, when: function (?Throwable $exception): bool {
+                        if ($exception instanceof ConnectionException) {
+                            return true;
+                        }
 
-                $mimeType = $request->header('Content-Type');
+                        return $exception instanceof RequestException
+                            && ($exception->response->serverError() || $exception->response->status() === 429);
+                    }, throw: false)
+                    ->get('https://graph.microsoft.com/v1.0/me/photo/$value');
 
-                if (in_array($mimeType, ['image/png', 'image/jpeg', 'image/webp', 'image/jpg', 'image/svg+xml'])) {
-                    $extension = (new MimeTypes())->getExtensions($mimeType)[0] ?? null;
+                if ($response->successful()) {
+                    $mimeType = $response->header('Content-Type');
 
-                    $body = $request->body();
+                    if (in_array($mimeType, ['image/png', 'image/jpeg', 'image/webp', 'image/jpg', 'image/svg+xml'])) {
+                        $extension = (new MimeTypes())->getExtensions($mimeType)[0] ?? null;
 
-                    if ($extension && $body) {
-                        $user->addMediaFromString($body)->usingFileName(Str::uuid() . '.' . $extension)->toMediaCollection('avatar');
+                        $body = $response->body();
+
+                        if ($extension && $body) {
+                            $user->addMediaFromString($body)->usingFileName(Str::uuid() . '.' . $extension)->toMediaCollection('avatar');
+                        }
+                    } else {
+                        throw new InvalidUserAvatarMimeType($mimeType, $user);
                     }
-                } else {
-                    throw new InvalidUserAvatarMimeType($mimeType, $user);
-                }
-            } catch (RequestException $requestException) {
-                if (! str_contains($requestException->getMessage(), 'Microsoft.Fast.Profile.Core.Exception.ImageNotFoundException')) {
-                    report($requestException);
+                } elseif ($response->failed() && $response->status() !== 404) {
+                    // A 404 means the user has no Azure profile photo, which is expected and safe to ignore.
+                    report($response->toException());
                 }
             } catch (Throwable $throwable) {
+                // Fetching the avatar is best-effort; a failure (including an exhausted-retry ConnectionException) must not block login.
                 report($throwable);
             }
         }

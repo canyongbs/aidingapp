@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Database\Factories;
 
+use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Models\User;
@@ -54,6 +55,8 @@ class ConversationFactory extends Factory
             'type' => $this->faker->randomElement(ConversationType::cases()),
             'name' => $this->faker->optional()->words(3, true),
             'is_private' => $this->faker->boolean(80),
+            'is_confidential' => false,
+            'ephemeral_period' => null,
             'created_by' => User::factory(),
         ];
     }
@@ -71,6 +74,15 @@ class ConversationFactory extends Factory
         return $this->state(fn (array $attributes) => [
             'type' => ConversationType::Channel,
             'name' => $this->faker->words(3, true),
+        ]);
+    }
+
+    public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
+    {
+        return $this->channel()->state(fn (array $attributes) => [
+            'is_private' => true,
+            'is_confidential' => true,
+            'ephemeral_period' => $ephemeralPeriod,
         ]);
     }
 }

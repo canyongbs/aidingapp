@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -155,8 +156,193 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['report_frequency' => 'required'],
         ],
+        'should contain does not have opening quote without closing quote' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'test 1, "test 2',
+            ]),
+            ['should_contain'],
+        ],
+        'should not contain does not have opening quote without closing quote' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_not_contain' => 'test 1, "test 2',
+            ]),
+            ['should_not_contain'],
+        ],
+        'should contain does not have empty double quote pair' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => '""',
+            ]),
+            ['should_contain'],
+        ],
+        'should not contain does not have empty double quote pair' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_not_contain' => '""',
+            ]),
+            ['should_not_contain'],
+        ],
+        'keyword match requires at least one keyword field' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => null,
+                'should_not_contain' => null,
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
+        'should contain does not have double quote in the middle of an unquoted string' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'test "1',
+            ]),
+            ['should_contain'],
+        ],
+        'should not contain does not have double quote in the middle of an unquoted string' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_not_contain' => 'test "1',
+            ]),
+            ['should_not_contain'],
+        ],
+        'should contain does not have only commas' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => ',,,',
+            ]),
+            ['should_contain'],
+        ],
+        'should not contain does not have only commas' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_not_contain' => ',,,',
+            ]),
+            ['should_not_contain'],
+        ],
+        'should contain does not have only mixed empty characters' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => '"", , ',
+            ]),
+            ['should_contain'],
+        ],
+        'should not contain does not have only mixed empty characters' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_not_contain' => '"", , ',
+            ]),
+            ['should_not_contain'],
+        ],
+        'same value is not in both keyword lists' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'test 1',
+                'should_not_contain' => 'test 1',
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
+        'same value with different casing is not in both keyword lists' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'Error',
+                'should_not_contain' => 'error',
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
+        'should not contain value cannot be a substring of should contain value' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'test 1',
+                'should_not_contain' => 'test',
+            ]),
+            ['should_not_contain'],
+        ],
+        'keyword values cannot contain multiple pairs or an additional double quote' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'monitor_type' => MonitorType::KeywordMatch,
+                'should_contain' => 'test "1" "2"',
+                'should_not_contain' => 'test "1" 2"',
+            ]),
+            ['should_contain', 'should_not_contain'],
+        ],
     ]
 );
+
+test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test 1', 'test 2'],
+        'should_not_contain' => ['test 3', 'test 4'],
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaStateSet([
+            'should_contain' => 'test 1, test 2',
+            'should_not_contain' => 'test 3, test 4',
+        ]);
+});
+
+test('EditServiceMonitoring deduplicates keyword values case-insensitively', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm([
+            'should_contain' => 'Error, error',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->should_contain)->toBe(['Error']);
+});
+
+test('EditServiceMonitoring restores quotes for ambiguous keyword values', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])->assertSchemaStateSet([
+        'should_contain' => 'test1, test 2, "test 3, "test 4"", ""test 5, test 6""',
+    ]);
+});
+
+test('EditServiceMonitoring appends new keyword values to existing lists', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::KeywordMatch,
+        'should_contain' => ['test 1'],
+        'should_not_contain' => ['test 2'],
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm([
+            'should_contain' => 'test 1, test 3',
+            'should_not_contain' => 'test 2, test 4',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->should_contain)->toBe(['test 1', 'test 3'])
+        ->and($serviceMonitoringTarget->should_not_contain)->toBe(['test 2', 'test 4']);
+});
 
 test('EditServiceMonitoring hydrates report channels from persisted flags', function (array $attributes, array $expectedChannels) {
     asSuperAdmin();

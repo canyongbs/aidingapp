@@ -38,8 +38,8 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\PortalAuthentication;
-use AidingApp\Portal\Rules\PortalAuthenticateCodeValidation;
 use App\Http\Controllers\Controller;
+use App\Rules\ValidAuthenticationCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,7 +53,7 @@ class AuthenticateController extends Controller
         }
 
         $request->validate([
-            'code' => ['required', 'integer', 'digits:6', new PortalAuthenticateCodeValidation()],
+            'code' => ['required', 'integer', 'digits:6', new ValidAuthenticationCode($authentication)],
         ]);
 
         /** @var Contact $contact */

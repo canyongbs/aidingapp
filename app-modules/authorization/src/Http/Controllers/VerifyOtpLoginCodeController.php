@@ -37,12 +37,12 @@
 namespace AidingApp\Authorization\Http\Controllers;
 
 use AidingApp\Authorization\Models\OtpLoginCode;
+use App\Rules\ValidAuthenticationCode;
 use Filament\Facades\Filament;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Throwable;
 
 class VerifyOtpLoginCodeController
@@ -65,14 +65,8 @@ class VerifyOtpLoginCodeController
         );
 
         $request->validate([
-            'code' => ['required', 'digits:6'],
+            'code' => ['required', 'digits:6', new ValidAuthenticationCode($otpCode)],
         ]);
-
-        if (! Hash::check($request->input('code'), $otpCode->code)) {
-            return back()->withErrors([
-                'code' => 'The OTP code you entered is incorrect. Please try again.',
-            ]);
-        }
 
         $otpCode->used_at = now();
         $otpCode->saveOrFail();

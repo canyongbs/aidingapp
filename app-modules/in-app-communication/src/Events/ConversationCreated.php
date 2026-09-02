@@ -67,7 +67,7 @@ class ConversationCreated implements ShouldBroadcastNow
      */
     public function broadcastWith(): array
     {
-        $this->conversation->load('conversationParticipants');
+        $this->conversation->load('conversationParticipants.participant');
 
         $participants = $this->conversation->conversationParticipants->map(function (ConversationParticipant $participant) {
             $participantModel = $participant->participant;
@@ -103,6 +103,7 @@ class ConversationCreated implements ShouldBroadcastNow
             'display_name' => $displayName,
             'avatar_url' => $avatarUrl,
             'is_private' => $this->conversation->is_private,
+            ...$this->conversation->confidentialityPayload(),
             'participants' => $participants->values()->all(),
             'created_at' => $this->conversation->created_at->toIso8601String(),
         ];

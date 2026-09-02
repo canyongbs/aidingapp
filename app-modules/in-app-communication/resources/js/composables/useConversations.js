@@ -40,13 +40,14 @@ export function useConversations() {
     const store = useChatStore();
     const markAsReadTimeout = ref(null);
     const pendingMarkAsRead = ref(null);
+    let latestConversationsRequest = 0;
 
     const conversations = computed(() => store.conversations);
     const loading = computed(() => store.conversationsLoading);
     const hasMore = computed(() => store.conversationsHasMore);
 
-    async function loadConversations(loadMore = false, participantType = null) {
-        if (store.conversationsLoading) return store.conversations;
+    async function loadConversations(loadMore = false, participantType = null, confidential = null) {
+        const request = ++latestConversationsRequest;
 
         if (!loadMore) {
             store.conversationsLoading = true;
@@ -59,8 +60,15 @@ export function useConversations() {
             if (participantType) {
                 params.participant_type = participantType;
             }
+            if (confidential !== null) {
+                params.confidential = confidential ? 1 : 0;
+            }
 
             const { data } = await api.get('/conversations', { params });
+
+            if (request !== latestConversationsRequest) {
+                return [];
+            }
 
             if (loadMore) {
                 // Only append non-pinned conversations when loading more
@@ -95,12 +103,27 @@ export function useConversations() {
             store.setAllUnreadCounts(counts);
 
             return loadMore ? data.data : [...(data.pinned || []), ...data.data];
+        } catch (error) {
+            if (request !== latestConversationsRequest) {
+                return [];
+            }
+
+            throw error;
         } finally {
-            store.conversationsLoading = false;
+            if (!loadMore && request === latestConversationsRequest) {
+                store.conversationsLoading = false;
+            }
         }
     }
 
-    async function createConversation(type, participantIds, name = null, isPrivate = true) {
+    async function createConversation({
+        type,
+        participantIds,
+        name = null,
+        isPrivate = true,
+        isConfidential = false,
+        ephemeralPeriod = null,
+    }) {
         const payload = {
             type,
             participant_ids: participantIds,
@@ -109,6 +132,8 @@ export function useConversations() {
         if (type === 'channel') {
             payload.name = name;
             payload.is_private = isPrivate;
+            payload.is_confidential = isConfidential;
+            payload.ephemeral_period = isConfidential ? ephemeralPeriod : null;
         }
 
         const { data } = await api.post('/conversations', payload);

@@ -34,32 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Rules;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Translation\PotentiallyTranslatedString;
-
-class PortalAuthenticateCodeValidation implements ValidationRule
-{
-    /**
-     * Run the validation rule.
-     *
-     * @param  Closure(string): PotentiallyTranslatedString $fail
-     */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $request = request();
+        Schema::create('service_request_status_periods', function (Blueprint $table) {
+            $table->uuid('id')->primary();
 
-        $authentication = $request->route('authentication');
+            $table->foreignUuid('service_request_id')->constrained('service_requests')->cascadeOnDelete();
+            $table->foreignUuid('service_request_status_id')->nullable()->constrained('service_request_statuses')->nullOnDelete();
+            $table->string('classification')->nullable();
+            $table->timestamp('started_at');
 
-        if (! $authentication) {
-            $fail('Could not find Authentication.');
-        }
+            $table->timestamps();
 
-        if (! Hash::check($value, $authentication->code)) {
-            $fail('The provided code is invalid.');
-        }
+            $table->index(['service_request_id', 'started_at']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::dropIfExists('service_request_status_periods');
+    }
+};

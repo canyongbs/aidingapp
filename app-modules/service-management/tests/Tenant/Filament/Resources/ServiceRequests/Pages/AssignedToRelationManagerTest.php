@@ -126,6 +126,67 @@ test('Assign To Me action visible when the Service Request is unassigned and the
         ->assertTableActionVisible('assign-to-me');
 });
 
+test('Assign To Me preselects the logged-in manager and waits for submission before assigning', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('service_request.*.update');
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($user);
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    asSuperAdmin($user);
+
+    expect($serviceRequest->assignments()
+        ->where('user_id', $user->getKey())
+        ->where('status', ServiceRequestAssignmentStatus::Active)
+        ->exists())->toBeFalse();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])
+        ->assertTableActionVisible('assign-to-me')
+        ->mountTableAction('assign-to-me')
+        ->assertTableActionMounted('assign-to-me');
+
+    expect($serviceRequest->assignments()
+        ->where('user_id', $user->getKey())
+        ->where('status', ServiceRequestAssignmentStatus::Active)
+        ->exists())->toBeFalse();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])
+        ->mountTableAction('assign-to-me')
+        ->setTableActionData(['status_id' => $status->getKey()])
+        ->callMountedTableAction()
+        ->assertHasNoTableActionErrors();
+
+    expect($serviceRequest->assignments()
+        ->where('user_id', $user->getKey())
+        ->where('status', ServiceRequestAssignmentStatus::Active)
+        ->exists())->toBeTrue();
+});
+
 test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
     $settings = app(LicenseSettings::class);
 

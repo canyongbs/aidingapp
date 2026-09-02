@@ -33,7 +33,7 @@
 -->
 
 <script setup>
-    import { HashtagIcon, LockClosedIcon } from '@heroicons/vue/24/outline';
+    import { HashtagIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
     import { MapPinIcon } from '@heroicons/vue/24/solid';
     import { computed, ref } from 'vue';
     import { extractTextFromTipTap } from '../utils/helpers';
@@ -138,8 +138,12 @@
                             class="relative flex h-10 w-10 items-center justify-center rounded-lg bg-primary-100 dark:bg-primary-900/30"
                         >
                             <HashtagIcon class="h-5 w-5 text-primary-600 dark:text-primary-400" />
+                            <ShieldCheckIcon
+                                v-if="conversation.is_confidential"
+                                class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 text-red-600 dark:text-red-400"
+                            />
                             <LockClosedIcon
-                                v-if="conversation.is_private"
+                                v-else-if="conversation.is_private"
                                 class="absolute -bottom-0.5 -right-0.5 h-3.5 w-3.5 text-gray-500 dark:text-gray-400"
                             />
                         </div>

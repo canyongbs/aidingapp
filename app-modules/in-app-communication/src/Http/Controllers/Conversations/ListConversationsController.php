@@ -61,13 +61,16 @@ class ListConversationsController extends Controller
         $limit = min((int) $request->query('limit', 25), 50);
         $currentUserId = $request->user()->getKey();
         $participantType = $request->query('participant_type');
+        $confidential = $request->has('confidential')
+            ? $request->boolean('confidential')
+            : null;
 
         $getUserConversations = app(GetUserConversations::class);
 
         $pinnedConversations = [];
 
         if (! $cursor) {
-            $pinnedItems = $getUserConversations->pinned($request->user(), $participantType);
+            $pinnedItems = $getUserConversations->pinned($request->user(), $participantType, $confidential);
             $pinnedConversations = $this->formatConversations($pinnedItems, $currentUserId);
         }
 
@@ -77,6 +80,7 @@ class ListConversationsController extends Controller
             cursor: $cursor,
             excludePinned: true,
             participantType: $participantType,
+            confidential: $confidential,
         );
 
         /** @var array<int, Conversation> $items */
@@ -106,6 +110,8 @@ class ListConversationsController extends Controller
      *     display_name: ?string,
      *     avatar_url: ?string,
      *     is_private: bool,
+     *     is_confidential: bool,
+     *     ephemeral_period: ?string,
      *     is_pinned: bool,
      *     notification_preference: string,
      *     unread_count: int,
@@ -182,6 +188,7 @@ class ListConversationsController extends Controller
                 'display_name' => $displayName,
                 'avatar_url' => $avatarUrl,
                 'is_private' => $conversation->is_private,
+                ...$conversation->confidentialityPayload(),
                 'is_pinned' => $isPinned,
                 'notification_preference' => $notificationPreference ?? ConversationNotificationPreference::All->value,
                 'unread_count' => $unreadCount,

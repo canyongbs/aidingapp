@@ -34,9 +34,10 @@
 
 @props([
     'progress' => 0,
+    'tag' => 'div',
 ])
 
-<div class="flex items-center gap-1.5">
+<{{ $tag }} {{ $attributes->merge(['class' => 'flex items-center gap-1.5']) }}>
     <svg class="h-4 w-4 shrink-0" viewBox="0 0 20 20" aria-hidden="true">
         <circle
             cx="10"
@@ -62,4 +63,4 @@
         />
     </svg>
     <span>Progress: {{ $progress }}%</span>
-</div>
+</{{ $tag }}>

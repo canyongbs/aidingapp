@@ -103,3 +103,39 @@ it('validates request', function (array $data, array $expectedErrors) {
         ['name' => 'The name may not be greater than 255 characters.'],
     ],
 ]);
+
+it('does not let a confidential channel be made public', function () {
+    $user = User::factory()->create();
+
+    $conversation = Conversation::factory()->confidential()->create();
+    ConversationParticipant::factory()->manager()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->patchJson(route('in-app-communication.conversations.update', $conversation), [
+            'is_private' => false,
+        ])
+        ->assertUnprocessable();
+
+    expect($conversation->fresh()->is_private)->toBeTrue();
+});
+
+it('still renames a confidential channel', function () {
+    $user = User::factory()->create();
+
+    $conversation = Conversation::factory()->confidential()->create(['name' => 'Old Name']);
+    ConversationParticipant::factory()->manager()->create([
+        'conversation_id' => $conversation->getKey(),
+        'participant_id' => $user->getKey(),
+    ]);
+
+    actingAs($user)
+        ->patchJson(route('in-app-communication.conversations.update', $conversation), [
+            'name' => 'New Name',
+        ])
+        ->assertOk()
+        ->assertJsonPath('data.name', 'New Name')
+        ->assertJsonPath('data.is_confidential', true);
+});

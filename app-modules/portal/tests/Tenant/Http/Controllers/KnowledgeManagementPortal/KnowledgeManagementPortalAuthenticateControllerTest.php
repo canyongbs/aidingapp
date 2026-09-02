@@ -40,6 +40,7 @@ use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 
@@ -198,4 +199,36 @@ test('it returns validation error when code is missing', function () {
     $response
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code']);
+});
+
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
+    $contact = Contact::factory()->create();
+
+    $plainCode = 778899;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make($plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
+        postJson($url, ['code' => 999999])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors(['code' => 'The provided code is invalid.']);
+    }
+
+    postJson($url, ['code' => $plainCode])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['code' => 'Too many invalid attempts. Please request a new code.']);
+
+    expect(auth('contact')->check())->toBeFalse();
 });

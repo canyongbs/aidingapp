@@ -36,7 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Observers;
 
+use AidingApp\ServiceManagement\Jobs\RecordReclassifiedServiceRequestStatusPeriods;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\DB;
 
 class ServiceRequestStatusObserver
@@ -48,6 +50,13 @@ class ServiceRequestStatusObserver
                 'sort',
                 DB::raw('(SELECT COALESCE(MAX(service_request_statuses.sort), 0) + 1 FROM service_request_statuses)')
             );
+        }
+    }
+
+    public function updated(ServiceRequestStatus $serviceRequestStatus): void
+    {
+        if ($serviceRequestStatus->wasChanged('classification')) {
+            RecordReclassifiedServiceRequestStatusPeriods::dispatch($serviceRequestStatus, CarbonImmutable::now());
         }
     }
 }

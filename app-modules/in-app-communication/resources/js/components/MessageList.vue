@@ -33,7 +33,7 @@
 -->
 
 <script setup>
-    import { ArrowTopRightOnSquareIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline';
+    import { ArrowTopRightOnSquareIcon, ChatBubbleLeftEllipsisIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
     import { computed, nextTick, onMounted, ref, watch } from 'vue';
     import MessageBubble from './MessageBubble.vue';
     import TypingIndicator from './TypingIndicator.vue';
@@ -277,10 +277,17 @@
                 <div
                     class="mx-auto w-12 h-12 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center mb-3"
                 >
-                    <ChatBubbleLeftEllipsisIcon class="w-6 h-6 text-primary-600 dark:text-primary-400" />
+                    <ShieldCheckIcon
+                        v-if="conversation.is_confidential"
+                        class="w-6 h-6 text-primary-600 dark:text-primary-400"
+                    />
+                    <ChatBubbleLeftEllipsisIcon v-else class="w-6 h-6 text-primary-600 dark:text-primary-400" />
                 </div>
                 <p v-if="conversation.service_request_number" class="text-sm text-gray-600 dark:text-gray-400">
                     You are now connected with {{ conversation.display_name }}.
+                </p>
+                <p v-else-if="conversation.is_confidential" class="text-sm text-gray-600 dark:text-gray-400">
+                    No messages yet. This is a confidential conversation.
                 </p>
                 <p v-else class="text-sm text-gray-600 dark:text-gray-400">No messages yet. Start the conversation!</p>
             </div>

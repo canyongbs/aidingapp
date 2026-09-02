@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Authorization\Models\OtpLoginCode;
+use App\Support\AuthenticationCodeRateLimiter;
 use Filament\Facades\Filament;
 use Illuminate\Support\Facades\URL;
 
@@ -153,6 +154,42 @@ it('returns an error when the OTP code is incorrect', function () {
     ])
         ->assertRedirect()
         ->assertSessionHasErrors(['code']);
+
+    assertGuest($panel->getAuthGuard());
+
+    $otpCode->refresh();
+
+    expect($otpCode->used_at)->toBeNull();
+});
+
+it('locks the OTP code after too many invalid attempts and rejects even the correct code', function () {
+    $code = 123456;
+
+    $otpCode = OtpLoginCode::factory()->withCode($code)->create();
+
+    $signedUrl = URL::temporarySignedRoute(
+        name: 'otp-code.verify',
+        expiration: now()->addMinutes(20)->toImmutable(),
+        parameters: [
+            'otpCode' => $otpCode->getKey(),
+        ],
+    );
+
+    foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
+        post($signedUrl, [
+            'code' => '654321',
+        ])
+            ->assertRedirect()
+            ->assertSessionHasErrors(['code']);
+    }
+
+    post($signedUrl, [
+        'code' => (string) $code,
+    ])
+        ->assertRedirect()
+        ->assertSessionHasErrors(['code']);
+
+    $panel = Filament::getPanel('admin');
 
     assertGuest($panel->getAuthGuard());
 

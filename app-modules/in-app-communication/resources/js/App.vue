@@ -54,6 +54,7 @@
         userName: { type: String, required: true },
         userAvatar: { type: String, default: null },
         serviceManagementEnabled: { type: Boolean, default: false },
+        confidentialChannelsEnabled: { type: Boolean, default: false },
     });
 
     const store = useChatStore();
@@ -84,23 +85,46 @@
     const selectedConversation = computed(() => store.selectedConversation);
 
     const filteredConversations = computed(() => {
-        if (activeParticipantType.value === 'contact') {
+        if (activeTab.value === 'contacts') {
             return conversations.value.filter((conversation) => conversation.service_request_number);
         }
-        return conversations.value.filter((conversation) => !conversation.service_request_number);
+        if (activeTab.value === 'confidential') {
+            return conversations.value.filter((conversation) => conversation.is_confidential);
+        }
+        return conversations.value.filter(
+            (conversation) => !conversation.service_request_number && !conversation.is_confidential,
+        );
     });
 
-    const usersUnreadCount = computed(() => {
-        return conversations.value
-            .filter((conversation) => !conversation.service_request_number)
-            .reduce((sum, conversation) => sum + (store.unreadCounts[conversation.id] || 0), 0);
-    });
+    function tabForConversation(conversation) {
+        if (conversation.service_request_number) {
+            return 'contacts';
+        }
+        if (conversation.is_confidential) {
+            return 'confidential';
+        }
+        return 'users';
+    }
 
-    const contactsUnreadCount = computed(() => {
-        return conversations.value
-            .filter((conversation) => conversation.service_request_number)
-            .reduce((sum, conversation) => sum + (store.unreadCounts[conversation.id] || 0), 0);
-    });
+    function sumUnread(conversationsToCount) {
+        return conversationsToCount.reduce((sum, conversation) => sum + (store.unreadCounts[conversation.id] || 0), 0);
+    }
+
+    const usersUnreadCount = computed(() =>
+        sumUnread(
+            conversations.value.filter(
+                (conversation) => !conversation.service_request_number && !conversation.is_confidential,
+            ),
+        ),
+    );
+
+    const contactsUnreadCount = computed(() =>
+        sumUnread(conversations.value.filter((conversation) => conversation.service_request_number)),
+    );
+
+    const confidentialUnreadCount = computed(() =>
+        sumUnread(conversations.value.filter((conversation) => conversation.is_confidential)),
+    );
 
     const {
         messages,
@@ -119,8 +143,29 @@
     const conversationListRef = ref(null);
 
     const initialUrlParams = new URLSearchParams(window.location.search);
-    const initialTab = initialUrlParams.get('tab') === 'contacts' ? 'contacts' : 'users';
-    const activeParticipantType = ref(initialTab === 'contacts' ? 'contact' : 'user');
+    const requestedTab = initialUrlParams.get('tab');
+    const enabledTabs = [
+        'users',
+        ...(props.serviceManagementEnabled ? ['contacts'] : []),
+        ...(props.confidentialChannelsEnabled ? ['confidential'] : []),
+    ];
+    const initialTab = enabledTabs.includes(requestedTab) ? requestedTab : 'users';
+    const activeTab = ref(initialTab);
+
+    const listFilters = computed(() => {
+        if (activeTab.value === 'contacts') {
+            return { participantType: 'contact', confidential: null };
+        }
+
+        if (activeTab.value === 'confidential') {
+            return { participantType: null, confidential: true };
+        }
+
+        return {
+            participantType: 'user',
+            confidential: props.confidentialChannelsEnabled ? false : null,
+        };
+    });
 
     function handlePageClose() {
         disconnect();
@@ -154,7 +199,11 @@
             },
         });
 
-        const loaded = await loadConversations(false, activeParticipantType.value);
+        const loaded = await loadConversations(
+            false,
+            listFilters.value.participantType,
+            listFilters.value.confidential,
+        );
         subscribeToAllConversations(loaded);
 
         // Check for conversation query parameter and auto-select
@@ -169,12 +218,8 @@
                 const fetched = await fetchConversation(conversationId);
                 subscribeToConversation(conversationId);
 
-                // If this is a contact conversation and we're not already on contacts tab, switch
-                if (fetched.service_request_number && activeParticipantType.value !== 'contact') {
-                    activeParticipantType.value = 'contact';
-                    conversationListRef.value?.focusContacts();
-                    await loadConversations(false, 'contact');
-                }
+                // If the conversation belongs to a different tab, switch to the one that lists it
+                await switchToTab(tabForConversation(fetched));
 
                 store.selectConversation(conversationId);
             }
@@ -227,11 +272,58 @@
         subscribeToConversation(conversation.id);
     }
 
-    function handleConversationCreated(conversation) {
+    function syncTabToUrl(tab) {
+        const url = new URL(window.location.href);
+        url.searchParams.set('tab', tab);
+        window.history.replaceState({}, '', url);
+    }
+
+    // Move to the tab that lists this conversation, keeping the component, the URL and the loaded
+    // list in step. Returns true when a switch actually happened.
+    async function switchToTab(tab) {
+        if (tab === activeTab.value) {
+            return false;
+        }
+
+        activeTab.value = tab;
+        conversationListRef.value?.focusTab(tab);
+        syncTabToUrl(tab);
+        await reloadConversationList();
+
+        return true;
+    }
+
+    // The list payload is lighter than the show payload — it carries no participants — so reloading
+    // the list drops them from whichever conversation is open. Restore the open one afterwards.
+    async function reloadConversationList() {
+        const loaded = await loadConversations(
+            false,
+            listFilters.value.participantType,
+            listFilters.value.confidential,
+        );
+
+        subscribeToAllConversations(loaded);
+
+        if (selectedConversationId.value) {
+            await fetchConversation(selectedConversationId.value);
+        }
+
+        return loaded;
+    }
+
+    async function handleConversationCreated(conversation) {
         showNewConversationModal.value = false;
         store.addConversation(conversation);
+
+        // A confidential channel is listed under its own tab, so follow it there rather than
+        // selecting a conversation the current tab does not show.
+        await switchToTab(tabForConversation(conversation));
+
         store.selectConversation(conversation.id);
         subscribeToConversation(conversation.id);
+
+        // Re-assert the full payload; a list reload strips participants.
+        await fetchConversation(conversation.id);
     }
 
     async function handleSendMessage(content) {
@@ -275,7 +367,11 @@
 
         loadingMoreConversations.value = true;
         try {
-            const loaded = await loadConversations(true, activeParticipantType.value);
+            const loaded = await loadConversations(
+                true,
+                listFilters.value.participantType,
+                listFilters.value.confidential,
+            );
             subscribeToAllConversations(loaded);
         } finally {
             loadingMoreConversations.value = false;
@@ -283,15 +379,11 @@
     }
 
     async function handleTabChanged(tab) {
-        activeParticipantType.value = tab === 'contacts' ? 'contact' : 'user';
+        activeTab.value = tab;
 
-        // Sync tab to URL
-        const url = new URL(window.location.href);
-        url.searchParams.set('tab', tab);
-        window.history.replaceState({}, '', url);
+        syncTabToUrl(tab);
 
-        const loaded = await loadConversations(false, activeParticipantType.value);
-        subscribeToAllConversations(loaded);
+        await reloadConversationList();
     }
 
     async function handleParticipantsUpdated() {
@@ -344,7 +436,9 @@
                 :initial-tab="initialTab"
                 :users-unread-count="usersUnreadCount"
                 :contacts-unread-count="contactsUnreadCount"
+                :confidential-unread-count="confidentialUnreadCount"
                 :service-management-enabled="serviceManagementEnabled"
+                :confidential-channels-enabled="confidentialChannelsEnabled"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
@@ -473,6 +567,7 @@
         <NewConversationModal
             :is-open="showNewConversationModal"
             :current-user-id="userId"
+            :confidential-channels-enabled="confidentialChannelsEnabled"
             @close="showNewConversationModal = false"
             @created="handleConversationCreated"
         />
