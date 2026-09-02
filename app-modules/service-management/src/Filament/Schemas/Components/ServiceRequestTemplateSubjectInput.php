@@ -34,45 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Concerns;
+namespace AidingApp\ServiceManagement\Filament\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
-use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateBodyInput;
-use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateSubjectInput;
-use App\Support\RichContentDocument;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use Filament\Forms\Components\RichEditor;
-use Filament\Schemas\Components\Utilities\Get;
 
-trait HasServiceRequestTemplateEditorSchema
+class ServiceRequestTemplateSubjectInput
 {
-    /**
-     * @return array<int, RichEditor>
-     */
-    protected function getServiceRequestTemplateEditorSchema(
-        ServiceRequestEmailTemplateType $type,
-        string $subjectLabel = 'Subject',
-        string $subjectPlaceholder = 'Enter the email subject here...',
-        ?string $subjectHelperText = null,
-        string $bodyLabel = 'Body',
-        string $bodyPlaceholder = 'Enter the email body here...',
-    ): array {
-        $hasAnyContent = function (Get $get): bool {
-            return RichContentDocument::hasContent($get('subject'))
-                || RichContentDocument::hasContent($get('body'));
-        };
+    public static function make(ServiceRequestEmailTemplateType $type): RichEditor
+    {
+        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
-        return [
-            ServiceRequestTemplateSubjectInput::make($type)
-                ->label($subjectLabel)
-                ->placeholder($subjectPlaceholder)
-                ->helperText($subjectHelperText)
-                ->required(fn (Get $get): bool => $hasAnyContent($get))
-                ->live(onBlur: true),
-            ServiceRequestTemplateBodyInput::make($type, supportsAttachments: false)
-                ->label($bodyLabel)
-                ->placeholder($bodyPlaceholder)
-                ->required(fn (Get $get): bool => $hasAnyContent($get))
-                ->live(onBlur: true),
-        ];
+        if ($type !== ServiceRequestEmailTemplateType::Update) {
+            unset($mergeTags['recent update']);
+        }
+
+        return RichEditor::make('subject')
+            ->label('Subject')
+            ->placeholder('Enter the email subject here...')
+            ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
+            ->toolbarButtons([])
+            ->mergeTags($mergeTags)
+            ->json();
     }
 }

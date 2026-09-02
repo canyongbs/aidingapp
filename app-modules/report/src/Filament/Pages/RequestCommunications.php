@@ -40,8 +40,9 @@ use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
-use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
-use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
+use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateBodyInput;
+use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateSubjectInput;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
@@ -50,9 +51,8 @@ use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\ViewField;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
@@ -117,13 +117,9 @@ class RequestCommunications extends Dashboard
         return $schema->components([
             Section::make('Service Request Type')
                 ->schema([
-                    Select::make('serviceRequestType')
+                    SelectTree::make('serviceRequestType')
                         ->label('Service Request Type')
-                        ->options(fn (): array => ServiceRequestType::query()
-                            ->withoutArchived()
-                            ->orderBy('name')
-                            ->pluck('name', 'id')
-                            ->all())
+                        ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(withoutArchived: true))
                         ->searchable()
                         ->live()
                         ->afterStateUpdated(function (): void {
@@ -207,35 +203,15 @@ class RequestCommunications extends Dashboard
         $serviceRequestTypeId = $this->getSelectedServiceRequestType()?->getKey() ?? 'none';
 
         return [
-            RichEditor::make('subject')
+            ServiceRequestTemplateSubjectInput::make($type)
                 ->key("email-template-subject-{$type->value}-{$role->value}-{$serviceRequestTypeId}")
-                ->label('Subject')
                 ->placeholder('No email template has been configured for this event and recipient.')
-                ->toolbarButtons([])
                 ->disabled()
-                ->json()
                 ->columnSpanFull(),
-            RichEditor::make('body')
+            ServiceRequestTemplateBodyInput::make($type)
                 ->key("email-template-body-{$type->value}-{$role->value}-{$serviceRequestTypeId}")
-                ->label('Body')
                 ->placeholder('No email template has been configured for this event and recipient.')
-                ->toolbarButtons([
-                    ['bold', 'italic', 'link'],
-                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
-                    ['textColor', 'small'],
-                    ['attachFiles', 'mergeTags', 'customBlocks'],
-                    ['clearFormatting'],
-                    ['undo', 'redo'],
-                ])
-                ->mergeTags(ServiceRequestTypeEmailTemplate::getMergeTags())
-                ->customBlocks([
-                    ServiceRequestTypeEmailTemplateButtonBlock::class,
-                    SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-                ])
-                ->fileAttachmentsDisk('s3-public')
-                ->resizableImages()
                 ->disabled()
-                ->json()
                 ->columnSpanFull(),
         ];
     }
