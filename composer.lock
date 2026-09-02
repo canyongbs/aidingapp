@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4fdf06a55e3330476457f20275a79665",
+    "content-hash": "a39828a18068bee5ed666b7ed1675418",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1633,22 +1633,23 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.37.0",
+            "version": "2.38.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "30e054d84f73d3e99e4b55a5286b1206a62b0547"
+                "reference": "748ac9f36ae8b62aeccb49842885a7a0b491051f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/30e054d84f73d3e99e4b55a5286b1206a62b0547",
-                "reference": "30e054d84f73d3e99e4b55a5286b1206a62b0547",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/748ac9f36ae8b62aeccb49842885a7a0b491051f",
+                "reference": "748ac9f36ae8b62aeccb49842885a7a0b491051f",
                 "shasum": ""
             },
             "require": {
                 "filament/filament": "^4.11.6 || ^5.0",
                 "internachi/modular": "^3.0",
                 "internachi/modularize": "^1.1",
+                "laravel-notification-channels/webpush": "^11.0",
                 "laravel/framework": "^12.0|^13.0",
                 "laravel/pennant": "^1.0",
                 "laravel/prompts": "^0.3",
@@ -1669,7 +1670,8 @@
                 "php-mock/php-mock-phpunit": "^2.13",
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "^12.0",
-                "rector/rector": "^2.0"
+                "rector/rector": "^2.0",
+                "symfony/yaml": "^7.0 || ^8.0"
             },
             "type": "package",
             "extra": {
@@ -1697,9 +1699,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.37.0"
+                "source": "https://github.com/canyongbs/common/tree/2.38.0"
             },
-            "time": "2026-08-07T15:59:17+00:00"
+            "time": "2026-09-02T16:22:26+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",
@@ -3622,70 +3624,6 @@
                 }
             ],
             "time": "2025-03-06T22:45:56+00:00"
-        },
-        {
-            "name": "emuniq/filament-browser-notifications",
-            "version": "v1.2.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Emuniq/filament-browser-notifications.git",
-                "reference": "7d3af0d406b66a91d3f42b4ecddce80b92b9a003"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Emuniq/filament-browser-notifications/zipball/7d3af0d406b66a91d3f42b4ecddce80b92b9a003",
-                "reference": "7d3af0d406b66a91d3f42b4ecddce80b92b9a003",
-                "shasum": ""
-            },
-            "require": {
-                "filament/filament": "^3.0|^4.0|^5.0",
-                "laravel-notification-channels/webpush": "^8.0|^9.0|^10.0|^11.0",
-                "php": "^8.1"
-            },
-            "require-dev": {
-                "orchestra/testbench": "^9.0|^10.0",
-                "pestphp/pest": "^2.0|^3.0",
-                "pestphp/pest-plugin-laravel": "^2.0|^3.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "Emuniq\\FilamentBrowserNotifications\\BrowserNotificationsServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "Emuniq\\FilamentBrowserNotifications\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Emuniq",
-                    "homepage": "https://github.com/Emuniq"
-                }
-            ],
-            "description": "Zero-config browser push notifications for Filament. Piggybacks on database notifications — every sendToDatabase() automatically triggers a Web Push via VAPID.",
-            "keywords": [
-                "browser-notifications",
-                "filament",
-                "laravel",
-                "notifications",
-                "push-notifications",
-                "service-worker",
-                "vapid",
-                "web-push"
-            ],
-            "support": {
-                "issues": "https://github.com/Emuniq/filament-browser-notifications/issues",
-                "source": "https://github.com/Emuniq/filament-browser-notifications"
-            },
-            "time": "2026-06-21T20:44:41+00:00"
         },
         {
             "name": "ezyang/htmlpurifier",

@@ -39,6 +39,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use NotificationChannels\WebPush\PushSubscription as BasePushSubscription;
 
+/**
+ * @mixin IdeHelperPushSubscription
+ */
 class PushSubscription extends BasePushSubscription
 {
     use HasUuids;
