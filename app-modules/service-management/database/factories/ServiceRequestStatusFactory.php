@@ -53,7 +53,7 @@ class ServiceRequestStatusFactory extends Factory
         return [
             'classification' => $this->faker->randomElement(SystemServiceRequestClassification::cases()),
             'name' => $this->faker->unique()->word(),
-            'color' => $this->faker->randomElement(Color::cases()),
+            'color' => $this->faker->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade())),
             'is_system_protected' => false,
             'sort' => $this->getNewOrder(),
         ];

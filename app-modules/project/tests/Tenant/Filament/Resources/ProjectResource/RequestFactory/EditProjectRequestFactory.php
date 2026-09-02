@@ -48,7 +48,7 @@ class EditProjectRequestFactory extends RequestFactory
             'name' => str($this->faker->unique()->words(3, true))->title()->toString(),
             'description' => $this->faker->paragraph(),
             'icon' => 'heroicon-o-clipboard-document-list',
-            'color' => $this->faker->randomElement(Color::cases())->value,
+            'color' => $this->faker->randomElement(array_filter(Color::cases(), fn (Color $color): bool => ! $color->isShade()))->value,
             'department_id' => Department::factory()->create()->getKey(),
             'start_date' => $this->faker->date(),
             'target_completion_date_type' => 'indefinite',
