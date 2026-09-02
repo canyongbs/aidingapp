@@ -370,7 +370,6 @@ it('can create a milestone through the project milestones widget create action',
         ->callTableAction('createMilestone', data: [
             'title' => $milestone->title,
             'description' => $milestone->description,
-            'status_id' => $milestone->status_id,
             'target_date' => $milestone->target_date,
         ])
         ->assertHasNoTableActionErrors();

@@ -43,7 +43,6 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -80,11 +79,6 @@ class ManageMilestones extends ManageRelatedRecords
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
-                Select::make('status_id')
-                    ->searchable()
-                    ->preload()
-                    ->required()
-                    ->relationship('status', 'name'),
                 DatePicker::make('target_date'),
             ]);
     }
@@ -101,8 +95,6 @@ class ManageMilestones extends ManageRelatedRecords
                 IdColumn::make(),
                 TextColumn::make('title'),
                 TextColumn::make('description'),
-                TextColumn::make('status.name')
-                    ->label('Status'),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime(),
