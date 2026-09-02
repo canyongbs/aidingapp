@@ -46,6 +46,7 @@ use AidingApp\Report\Filament\Pages\ContractManagement;
 use AidingApp\Report\Filament\Pages\KnowledgeBase;
 use AidingApp\Report\Filament\Pages\LicenseManagement;
 use AidingApp\Report\Filament\Pages\Projects;
+use AidingApp\Report\Filament\Pages\RequestCommunications;
 use AidingApp\Report\Filament\Pages\ServiceMonitoring;
 use AidingApp\Report\Filament\Pages\ServiceRequestFeedback;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
@@ -71,6 +72,7 @@ enum ReportAccessKey: string
     case AiSupportAssistant = 'ai-support-assistant';
     case AiClarification = 'ai-clarification';
     case AiResolution = 'ai-resolution';
+    case RequestCommunications = 'request-communications';
 
     /**
      * @return class-string
@@ -91,6 +93,7 @@ enum ReportAccessKey: string
             self::AiSupportAssistant => AiSupportAssistant::class,
             self::AiClarification => AiClarification::class,
             self::AiResolution => AiResolution::class,
+            self::RequestCommunications => RequestCommunications::class,
         };
     }
 
@@ -110,12 +113,14 @@ enum ReportAccessKey: string
             self::AiSupportAssistant => 'AI Support Assistant',
             self::AiClarification => 'AI Clarification',
             self::AiResolution => 'AI Resolution',
+            self::RequestCommunications => 'Request Communications',
         };
     }
 
     public function getCategory(): string
     {
         return match ($this) {
+            self::RequestCommunications,
             self::ServiceRequests,
             self::ServiceRequestFeedback,
             self::KnowledgeBase,
@@ -137,6 +142,7 @@ enum ReportAccessKey: string
     public function isAvailableForTenant(): bool
     {
         return match ($this) {
+            self::RequestCommunications,
             self::ServiceRequests => Gate::check(Feature::ServiceManagement->getGateName()),
 
             self::ServiceRequestFeedback => Gate::check(Feature::ServiceManagement->getGateName())

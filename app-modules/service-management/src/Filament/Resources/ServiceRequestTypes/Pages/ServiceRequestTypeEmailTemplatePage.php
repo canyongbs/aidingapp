@@ -39,15 +39,14 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Filament\Actions\FillServiceRequestEmailTemplatesWithAiAction;
-use AidingApp\ServiceManagement\Filament\Blocks\ServiceRequestTypeEmailTemplateButtonBlock;
-use AidingApp\ServiceManagement\Filament\Blocks\SurveyResponseEmailTemplateTakeSurveyButtonBlock;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateBodyInput;
+use AidingApp\ServiceManagement\Filament\Schemas\Components\ServiceRequestTemplateSubjectInput;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
 use App\Support\RichContentDocument;
 use Filament\Forms\Components\RichEditor;
-use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
@@ -174,45 +173,14 @@ class ServiceRequestTypeEmailTemplatePage extends EditRecord
     /** @return array<int, RichEditor> */
     protected function getEmailTemplateFormSchema(ServiceRequestTypeEmailTemplateRole $role): array
     {
-        $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
-
-        if ($this->type !== ServiceRequestEmailTemplateType::Update) {
-            unset($mergeTags['recent update']);
-        }
-
         $normalizeEmptyContent = fn ($state) => $this->normalizeRichContent($state);
 
         return [
-            RichEditor::make('subject')
-                ->label('Subject')
-                ->placeholder('Enter the email subject here...')
-                ->extraInputAttributes(['style' => 'min-height: 2rem; overflow-y:none;'])
-                ->toolbarButtons([])
-                ->mergeTags($mergeTags)
+            ServiceRequestTemplateSubjectInput::make($this->type)
                 ->helperText('You may use “merge tags” to substitute information about a service request into your subject line. Insert a “{{“ in the subject line field to see a list of available merge tags')
-                ->dehydrateStateUsing($normalizeEmptyContent)
-                ->json(),
-            RichEditor::make('body')
+                ->dehydrateStateUsing($normalizeEmptyContent),
+            ServiceRequestTemplateBodyInput::make($this->type)
                 ->key("email-template-body-{$role->value}")
-                ->label('Body')
-                ->placeholder('Enter the email body here...')
-                ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                ->toolbarButtons([
-                    ['bold', 'italic', 'link'],
-                    [ToolbarButtonGroup::make('Heading', ['h1', 'h2', 'h3', 'h4', 'h5', 'h6'])->textualButtons(), 'bulletList', 'orderedList', 'horizontalRule'],
-                    ['textColor', 'small'],
-                    ['attachFiles', 'mergeTags', 'customBlocks'],
-                    ['clearFormatting'],
-                    ['undo', 'redo'],
-                ])
-                ->mergeTags($mergeTags)
-                ->customBlocks([
-                    ServiceRequestTypeEmailTemplateButtonBlock::class,
-                    SurveyResponseEmailTemplateTakeSurveyButtonBlock::class,
-                ])
-                ->fileAttachmentsDisk('s3-public')
-                ->resizableImages()
-                ->columnSpanFull()
                 ->dehydrateStateUsing($normalizeEmptyContent)
                 ->saveRelationshipsUsing(function (RichEditor $component) use ($normalizeEmptyContent): void {
                     $record = $component->getRecord();
