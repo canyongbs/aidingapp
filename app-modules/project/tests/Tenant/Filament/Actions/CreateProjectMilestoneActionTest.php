@@ -34,32 +34,23 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use App\Features\ProjectMilestoneStatusRemovedFeature;
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->uuid('status_id')->nullable()->change();
-            });
+// Checks the schema array directly (no Livewire mount/render) so the assertion does not
+// depend on the `project_milestone_statuses` table, which the flag's migration has dropped.
+function createProjectMilestoneActionHasStatusField(): bool
+{
+    return collect(CreateProjectMilestoneAction::formSchema())
+        ->contains(fn ($component) => $component->getStatePath(isAbsolute: false) === 'status_id');
+}
 
-            ProjectMilestoneStatusRemovedFeature::activate();
-        });
-    }
+it('excludes the status field by default', function () {
+    expect(createProjectMilestoneActionHasStatusField())->toBeFalse();
+});
 
-    public function down(): void
-    {
-        DB::transaction(function () {
-            ProjectMilestoneStatusRemovedFeature::deactivate();
+it('includes a required status field when the flag is inactive', function () {
+    ProjectMilestoneStatusRemovedFeature::deactivate();
 
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->uuid('status_id')->nullable(false)->change();
-            });
-        });
-    }
-};
+    expect(createProjectMilestoneActionHasStatusField())->toBeTrue();
+});

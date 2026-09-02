@@ -35,12 +35,9 @@
 */
 
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
-use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use App\Features\ProjectMilestoneStatusRemovedFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -48,7 +45,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
-use function Pest\Laravel\seed;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -189,63 +185,6 @@ it('can edit milestones', function () {
     $request = ProjectMilestone::factory()->make([
         'project_id' => $project->id,
         'description' => 'Changed Test project milestone',
-        'created_by_id' => auth()->id(),
-    ]);
-
-    livewire(ManageMilestones::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('edit', record: $milestone->getKey(), data: $request->toArray())
-        ->assertHasNoTableActionErrors();
-
-    assertDatabaseHas(
-        ProjectMilestone::class,
-        $request->toArray()
-    );
-});
-
-// ---------------------------------------------------------------------------
-// Pre-migration behaviour (ProjectMilestoneStatusRemovedFeature inactive)
-// ---------------------------------------------------------------------------
-
-it('requires a status when the flag is inactive', function () {
-    ProjectMilestoneStatusRemovedFeature::deactivate();
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $milestone = ProjectMilestone::factory()->make(['status_id' => null]);
-
-    livewire(ManageMilestones::class, [
-        'record' => $project->getKey(),
-    ])
-        ->callTableAction('create', data: $milestone->toArray())
-        ->assertHasTableActionErrors(['status_id' => 'required']);
-});
-
-it('can edit milestones with a status when the flag is inactive', function () {
-    ProjectMilestoneStatusRemovedFeature::deactivate();
-
-    seed(ProjectMilestoneStatusSeeder::class);
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $plannedStatus = ProjectMilestoneStatus::where('name', 'Planned')->first();
-    $delayedStatus = ProjectMilestoneStatus::where('name', 'Delayed')->first();
-
-    $milestone = ProjectMilestone::factory()->state([
-        'project_id' => $project->id,
-        'description' => 'Test project milestone',
-        'status_id' => $plannedStatus->id,
-        'created_by_id' => auth()->id(),
-    ])->create();
-
-    $request = ProjectMilestone::factory()->make([
-        'project_id' => $project->id,
-        'description' => 'Changed Test project milestone',
-        'status_id' => $delayedStatus->id,
         'created_by_id' => auth()->id(),
     ]);
 

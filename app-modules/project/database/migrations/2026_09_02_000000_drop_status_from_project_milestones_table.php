@@ -34,43 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses;
-
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\CreateProjectMilestoneStatus;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProjectMilestoneStatus;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Features\ProjectMilestoneStatusRemovedFeature;
-use App\Filament\Clusters\ProjectManagement;
-use BackedEnum;
-use Filament\Resources\Resource;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-class ProjectMilestoneStatusResource extends Resource
-{
-    protected static ?string $model = ProjectMilestoneStatus::class;
-
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
-
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?string $cluster = ProjectManagement::class;
-
-    protected static ?int $navigationSort = 20;
-
-    // TODO: Cleanup Task (project-milestone-status-removed): delete this override once the flag is removed.
-    public static function shouldRegisterNavigation(): bool
+return new class () extends Migration {
+    public function up(): void
     {
-        return ! ProjectMilestoneStatusRemovedFeature::active();
+        DB::transaction(function () {
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('status_id');
+            });
+
+            Schema::dropIfExists('project_milestone_statuses');
+
+            ProjectMilestoneStatusRemovedFeature::activate();
+        });
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListProjectMilestoneStatuses::route('/'),
-            'create' => CreateProjectMilestoneStatus::route('/create'),
-            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
-            'view' => ViewProjectMilestoneStatus::route('/{record}'),
-        ];
+        DB::transaction(function () {
+            ProjectMilestoneStatusRemovedFeature::deactivate();
+
+            Schema::create('project_milestone_statuses', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->string('description')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+
+                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->uuid('status_id')->nullable();
+            });
+        });
     }
-}
+};

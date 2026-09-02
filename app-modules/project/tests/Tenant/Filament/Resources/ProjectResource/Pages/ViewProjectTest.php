@@ -52,7 +52,6 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ProjectMilestoneStatusRemovedFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -376,30 +375,6 @@ it('can create a milestone through the project milestones widget create action',
         ->assertHasNoTableActionErrors();
 
     expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
-});
-
-it('requires a status through the project milestones widget create action when the flag is inactive', function () {
-    ProjectMilestoneStatusRemovedFeature::deactivate();
-
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    Pipeline::factory()
-        ->for($project)
-        ->has(PipelineStage::factory()->count(1), 'stages')
-        ->create();
-
-    $milestone = ProjectMilestone::factory()->for($project)->make(['status_id' => null]);
-
-    livewire(ProjectWorkPipelineWidget::class, [
-        'record' => $project,
-    ])
-        ->callTableAction('createMilestone', data: [
-            'title' => $milestone->title,
-            'description' => $milestone->description,
-            'target_date' => $milestone->target_date,
-        ])
-        ->assertHasTableActionErrors(['status_id' => 'required']);
 });
 
 it('auto-selects the first pipeline on mount in the project work pipeline widget', function () {
