@@ -34,40 +34,26 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\Project\Database\Factories;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\Project\Models\ProjectMilestoneStatus;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<ProjectMilestoneStatus>
+ */
+class ProjectMilestoneStatusFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('status_id');
-            });
-
-            Schema::dropIfExists('project_milestone_statuses');
-        });
+        return [
+            'name' => $this->faker->unique()->word(),
+            'description' => $this->faker->sentence(),
+        ];
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->string('description')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
-
-                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-            });
-
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->uuid('status_id')->nullable();
-            });
-        });
-    }
-};
+}

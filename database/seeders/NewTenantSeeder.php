@@ -45,6 +45,7 @@ use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
+use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestStatusSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ChangeRequestTypeSeeder;
 use AidingApp\ServiceManagement\Database\Seeders\ServiceRequestNotificationAutomationSettingsSeeder;
@@ -82,6 +83,8 @@ class NewTenantSeeder extends Seeder
             //Organization Seeder
             OrganizationTypeSeeder::class,
             OrganizationIndustrySeeder::class,
+
+            ProjectMilestoneStatusSeeder::class,
 
             // AI
             AiSupportAssistantSettingsSeeder::class,

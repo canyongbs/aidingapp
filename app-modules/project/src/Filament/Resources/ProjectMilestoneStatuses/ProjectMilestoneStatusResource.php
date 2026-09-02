@@ -34,41 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses;
 
-use AidingApp\Project\Livewire\PipelineEntryKanban;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\CreateProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProjectMilestoneStatus;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
+use App\Filament\Clusters\ProjectManagement;
+use BackedEnum;
+use Filament\Resources\Resource;
 
-class ProjectServiceProvider extends ServiceProvider
+class ProjectMilestoneStatusResource extends Resource
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
+    protected static ?string $model = ProjectMilestoneStatus::class;
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'pipeline_entry' => PipelineEntry::class,
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-        Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);
+    protected static ?string $navigationLabel = 'Statuses';
+
+    protected static ?string $cluster = ProjectManagement::class;
+
+    protected static ?int $navigationSort = 20;
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ListProjectMilestoneStatuses::route('/'),
+            'create' => CreateProjectMilestoneStatus::route('/create'),
+            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
+            'view' => ViewProjectMilestoneStatus::route('/{record}'),
+        ];
     }
 }

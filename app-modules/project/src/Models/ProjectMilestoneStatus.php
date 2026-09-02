@@ -37,95 +37,36 @@
 namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
-use AidingApp\Project\Observers\ProjectMilestoneObserver;
-use App\Models\User;
-use CanyonGBS\Common\Models\Concerns\CanBeArchived;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
- * @mixin IdeHelperProjectMilestone
+ * @mixin IdeHelperProjectMilestoneStatus
  */
-#[ObservedBy(ProjectMilestoneObserver::class)]
-class ProjectMilestone extends Model implements Auditable
+class ProjectMilestoneStatus extends Model implements Auditable
 {
-    /** @use HasFactory<ProjectMilestoneFactory> */
+    /** @use HasFactory<ProjectMilestoneStatusFactory> */
     use HasFactory;
 
     use HasUuids;
     use SoftDeletes;
     use AuditableTrait;
-    use CanBeArchived;
 
     protected $fillable = [
-        'title',
+        'name',
         'description',
-        'status_id',
-        'target_date',
-    ];
-
-    protected $casts = [
-        'target_date' => 'date',
     ];
 
     /**
-     * @return BelongsTo<User, $this>
+     * @return HasMany<ProjectMilestone, $this>
      */
-    public function createdBy(): BelongsTo
+    public function milestones(): HasMany
     {
-        return $this->belongsTo(User::class, 'created_by_id');
-    }
-
-    /**
-     * @return BelongsTo<ProjectMilestoneStatus, $this>
-     */
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(ProjectMilestoneStatus::class, 'status_id');
-    }
-
-    /**
-     * @return BelongsTo<Project, $this>
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class);
-    }
-
-    /**
-     * @return HasMany<PipelineEntry, $this>
-     */
-    public function pipelineEntries(): HasMany
-    {
-        return $this->hasMany(PipelineEntry::class, 'project_milestone_id');
-    }
-
-    public function reevaluateArchivedState(): void
-    {
-        if (! $this->pipelineEntries()->exists()) {
-            return;
-        }
-
-        $hasActiveTask = $this->pipelineEntries()->withoutArchived()->exists();
-
-        if (! $hasActiveTask && ! $this->isArchived()) {
-            $this->archiveQuietly();
-        }
-    }
-
-    /**
-     * @param Builder<ProjectMilestone> $query
-     */
-    public function used(Builder $query): void
-    {
-        $query->whereHas('pipelineEntries');
+        return $this->hasMany(ProjectMilestone::class, 'status_id');
     }
 }

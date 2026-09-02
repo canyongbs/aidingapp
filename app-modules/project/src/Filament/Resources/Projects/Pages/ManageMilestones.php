@@ -38,11 +38,13 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\ManageRelatedRecords;
@@ -79,6 +81,14 @@ class ManageMilestones extends ManageRelatedRecords
                 Textarea::make('description')
                     ->required()
                     ->maxLength(65535),
+                // TODO: Cleanup Task (project-milestone-status-removed): delete this field once the flag is removed.
+                ...(ProjectMilestoneStatusRemovedFeature::active() ? [] : [
+                    Select::make('status_id')
+                        ->searchable()
+                        ->preload()
+                        ->required()
+                        ->relationship('status', 'name'),
+                ]),
                 DatePicker::make('target_date'),
             ]);
     }
@@ -95,6 +105,11 @@ class ManageMilestones extends ManageRelatedRecords
                 IdColumn::make(),
                 TextColumn::make('title'),
                 TextColumn::make('description'),
+                // TODO: Cleanup Task (project-milestone-status-removed): delete this column once the flag is removed.
+                ...(ProjectMilestoneStatusRemovedFeature::active() ? [] : [
+                    TextColumn::make('status.name')
+                        ->label('Status'),
+                ]),
                 TextColumn::make('created_at')
                     ->label('Created')
                     ->dateTime(),

@@ -34,41 +34,56 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
-
-use AidingApp\Project\Livewire\PipelineEntryKanban;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
+use App\Models\User;
+use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 
-class ProjectServiceProvider extends ServiceProvider
-{
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'pipeline_entry' => PipelineEntry::class,
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+it('is gated with proper access control', function () {
+    $settings = app(LicenseSettings::class);
 
-        Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);
-    }
-}
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('settings.view-any');
+
+    actingAs($user);
+
+    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
+
+    $settings->data->addons->projectManagement = true;
+    $settings->save();
+
+    $user->revokePermissionTo('settings.view-any');
+
+    get(ListProjectMilestoneStatuses::getUrl())->assertForbidden();
+
+    $user->givePermissionTo('settings.view-any');
+
+    get(ListProjectMilestoneStatuses::getUrl())->assertSuccessful();
+});
+
+it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+    ProjectMilestoneStatus::factory(15)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('settings.view-any', 'settings.*.view');
+
+    actingAs($user);
+
+    livewire(ListProjectMilestoneStatuses::class)
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    $user->givePermissionTo('settings.*.delete');
+
+    livewire(ListProjectMilestoneStatuses::class)
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});

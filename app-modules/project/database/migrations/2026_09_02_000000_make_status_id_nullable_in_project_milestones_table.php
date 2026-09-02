@@ -34,41 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Livewire\PipelineEntryKanban;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
-
-class ProjectServiceProvider extends ServiceProvider
-{
-    public function register()
+return new class () extends Migration {
+    public function up(): void
     {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
+        DB::transaction(function () {
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->uuid('status_id')->nullable()->change();
+            });
+
+            ProjectMilestoneStatusRemovedFeature::activate();
+        });
     }
 
-    public function boot(): void
+    public function down(): void
     {
-        Relation::morphMap([
-            'pipeline_entry' => PipelineEntry::class,
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
+        DB::transaction(function () {
+            ProjectMilestoneStatusRemovedFeature::deactivate();
 
-        Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->uuid('status_id')->nullable(false)->change();
+            });
+        });
     }
-}
+};

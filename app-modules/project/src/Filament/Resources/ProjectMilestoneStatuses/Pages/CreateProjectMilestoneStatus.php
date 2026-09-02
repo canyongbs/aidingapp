@@ -34,41 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Providers;
+namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
 
-use AidingApp\Project\Livewire\PipelineEntryKanban;
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectFile;
-use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use AidingApp\Project\ProjectPlugin;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\ServiceProvider;
-use Livewire\Livewire;
+use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Schema;
 
-class ProjectServiceProvider extends ServiceProvider
+class CreateProjectMilestoneStatus extends CreateRecord
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new ProjectPlugin()));
-    }
+    protected static string $resource = ProjectMilestoneStatusResource::class;
 
-    public function boot(): void
+    public function form(Schema $schema): Schema
     {
-        Relation::morphMap([
-            'pipeline_entry' => PipelineEntry::class,
-            'pipeline' => Pipeline::class,
-            'pipeline_stage' => PipelineStage::class,
-            'project' => Project::class,
-            'project_file' => ProjectFile::class,
-            'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
-        ]);
-
-        Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->label('Name')
+                    ->maxLength(255)
+                    ->autofocus()
+                    ->required()
+                    ->string()
+                    ->unique(),
+                Textarea::make('description')
+                    ->label('Description')
+                    ->maxLength(65535)
+                    ->required(),
+            ]);
     }
 }
