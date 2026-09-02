@@ -44,7 +44,7 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            Schema::create(config('webpush.table_name', 'push_subscriptions'), function (Blueprint $table) {
+            Schema::create('push_subscriptions', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->uuidMorphs('subscribable', 'push_subscriptions_subscribable_morph_idx');
                 $table->string('endpoint', 500)->unique();
@@ -63,7 +63,7 @@ return new class () extends Migration {
         DB::transaction(function () {
             DesktopNotificationsFeature::deactivate();
 
-            Schema::dropIfExists(config('webpush.table_name', 'push_subscriptions'));
+            Schema::dropIfExists('push_subscriptions');
         });
     }
 };

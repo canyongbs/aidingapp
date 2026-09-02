@@ -103,6 +103,14 @@ pls npmsetup
 pls ih php artisan key:generate
 ```
 
+##### 1.5 Generate Web Push Keys
+
+Generate the VAPID keys used for desktop browser notifications:
+
+```bash
+pls ih php artisan webpush:vapid
+```
+
 ---
 
 #### 2. Start the containers and open a shell into the main PHP container
