@@ -130,7 +130,7 @@ class ProjectFilesWidget extends TableWidget
                 Action::make('download')
                     ->icon('heroicon-m-arrow-down-on-square')
                     ->color('info')
-                    ->authorize('view')
+                    ->authorize(fn (ProjectFile $record): bool => auth()->user()->can('view', $record))
                     ->visible(fn (ProjectFile $record): bool => filled($record->getMedia('file')->first()?->getPathRelativeToRoot()))
                     ->action(
                         fn (ProjectFile $record) => Storage::disk('s3')
@@ -145,7 +145,7 @@ class ProjectFilesWidget extends TableWidget
             ->headerActions([
                 Action::make('manageFiles')
                     ->label('Manage')
-                    ->authorize('create', $this->record)
+                    ->authorize(fn (): bool => auth()->user()->can('create', [ProjectFile::class, $this->record]))
                     ->color('gray')
                     ->url(fn (): string => ProjectResource::getUrl('manage-files', ['record' => $this->record])),
             ]);

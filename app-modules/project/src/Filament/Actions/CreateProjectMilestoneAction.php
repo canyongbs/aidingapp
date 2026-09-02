@@ -37,6 +37,7 @@
 namespace AidingApp\Project\Filament\Actions;
 
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -55,7 +56,7 @@ class CreateProjectMilestoneAction
             ->label('Milestone')
             ->icon('heroicon-m-plus')
             ->color('primary')
-            ->authorize('create', $project)
+            ->authorize(fn (): bool => auth()->user()->can('create', [ProjectMilestone::class, $project]))
             ->slideOver()
             ->modalHeading('Create Project Milestone')
             ->schema(static::formSchema())

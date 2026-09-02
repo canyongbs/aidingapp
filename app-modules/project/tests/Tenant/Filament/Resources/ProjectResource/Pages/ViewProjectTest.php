@@ -378,6 +378,48 @@ it('can create a milestone through the project milestones widget create action',
     expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
 });
 
+it('shows the create milestone action to users who can update the project', function () {
+    $manager = User::factory()->create();
+    $manager->givePermissionTo('project.view-any');
+    $manager->givePermissionTo('project.*.view');
+    $manager->givePermissionTo('project.*.update');
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($manager);
+
+    actingAs($manager);
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionVisible('createMilestone');
+});
+
+it('hides the create milestone action from users who cannot update the project', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionHidden('createMilestone');
+});
+
 it('auto-selects the first pipeline on mount in the project work pipeline widget', function () {
     asSuperAdmin();
 
@@ -1105,6 +1147,38 @@ it('can list files in the project files widget', function () {
         'record' => $project,
     ])
         ->assertCanSeeTableRecords($files);
+});
+
+it('shows the manage files action to users who can update the project', function () {
+    $manager = User::factory()->create();
+    $manager->givePermissionTo('project.view-any');
+    $manager->givePermissionTo('project.*.view');
+    $manager->givePermissionTo('project.*.update');
+
+    $project = Project::factory()->create();
+    $project->managerUsers()->attach($manager);
+
+    actingAs($manager);
+
+    livewire(ProjectFilesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionVisible('manageFiles');
+});
+
+it('hides the manage files action from users who cannot update the project', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+
+    actingAs($user);
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectFilesWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionHidden('manageFiles');
 });
 
 it('calculates progress as 0 when the project has no pipeline entries', function () {
