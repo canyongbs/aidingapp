@@ -23,8 +23,8 @@
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
       Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
       vigorously.
-    - The software solution, including services, infrastructure, and code, is offered as
-      a Software as a Service (SaaS) by Canyon GBS Inc.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
 
