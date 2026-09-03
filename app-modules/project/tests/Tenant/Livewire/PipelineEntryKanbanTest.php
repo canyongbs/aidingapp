@@ -46,7 +46,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -774,18 +773,12 @@ it('eager loads the milestone relation instead of lazy loading it per card', fun
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    DB::flushQueryLog();
-    DB::enableQueryLog();
+    $component = livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee($milestone->title)
+        ->instance();
 
-    try {
-        livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
-            ->assertSee('Milestone:');
+    $entries = $component->getPipelineEntries()->flatten(1);
 
-        $milestoneQueries = collect(DB::getQueryLog())
-            ->filter(fn (array $query): bool => str_contains($query['query'], 'project_milestones'));
-    } finally {
-        DB::disableQueryLog();
-    }
-
-    expect($milestoneQueries)->toHaveCount(1);
+    expect($entries)->toHaveCount(3)
+        ->and($entries->every(fn (PipelineEntry $entry): bool => $entry->relationLoaded('milestone')))->toBeTrue();
 });
