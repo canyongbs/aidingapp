@@ -41,6 +41,7 @@ use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProj
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
 use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 use App\Filament\Clusters\ProjectManagement;
 use BackedEnum;
 use Filament\Resources\Resource;
@@ -56,6 +57,12 @@ class ProjectMilestoneStatusResource extends Resource
     protected static ?string $cluster = ProjectManagement::class;
 
     protected static ?int $navigationSort = 20;
+
+    // TODO: Cleanup Task (project-milestone-status-removed): delete this override once the flag is removed.
+    public static function shouldRegisterNavigation(): bool
+    {
+        return ! ProjectMilestoneStatusRemovedFeature::active();
+    }
 
     public static function getPages(): array
     {

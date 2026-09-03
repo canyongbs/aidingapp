@@ -34,30 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectMilestone;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ProjectMilestone>
- */
-class ProjectMilestoneFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'project_id' => Project::factory(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'description' => $this->faker->sentence(3),
-            'created_by_id' => User::factory(),
-        ];
+        DB::transaction(function () {
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('status_id');
+            });
+
+            Schema::dropIfExists('project_milestone_statuses');
+
+            ProjectMilestoneStatusRemovedFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ProjectMilestoneStatusRemovedFeature::deactivate();
+
+            Schema::create('project_milestone_statuses', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->string('description')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+
+                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->uuid('status_id')->nullable();
+            });
+        });
+    }
+};

@@ -34,30 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectMilestone;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ProjectMilestone>
- */
-class ProjectMilestoneFactory extends Factory
+// Checks the schema array directly (no Livewire mount/render) so the assertion does not
+// depend on the `project_milestone_statuses` table, which the flag's migration has dropped.
+function createProjectMilestoneActionHasStatusField(): bool
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            'project_id' => Project::factory(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'description' => $this->faker->sentence(3),
-            'created_by_id' => User::factory(),
-        ];
-    }
+    return collect(CreateProjectMilestoneAction::formSchema())
+        ->contains(fn ($component) => $component->getStatePath(isAbsolute: false) === 'status_id');
 }
+
+it('excludes the status field by default', function () {
+    expect(createProjectMilestoneActionHasStatusField())->toBeFalse();
+});
+
+it('includes a required status field when the flag is inactive', function () {
+    ProjectMilestoneStatusRemovedFeature::deactivate();
+
+    expect(createProjectMilestoneActionHasStatusField())->toBeTrue();
+});

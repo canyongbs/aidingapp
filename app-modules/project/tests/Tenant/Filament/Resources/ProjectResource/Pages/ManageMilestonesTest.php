@@ -35,11 +35,9 @@
 */
 
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
-use AidingApp\Project\Database\Seeders\ProjectMilestoneStatusSeeder;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 
@@ -47,7 +45,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
-use function Pest\Laravel\seed;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -155,7 +152,6 @@ it('can validate create milestone inputs', function ($data, $errors) {
     '`title` is max 255 characters' => [['title' => str_repeat('a', 256)], 'title', 'The title may not be greater than 255 characters.'],
     '`description` is required' => [['description' => null], 'description', 'The description field is required.'],
     '`description` is max 65535 characters' => [['description' => str_repeat('a', 65536)], 'description', 'The description may not be greater than 65535 characters.'],
-    '`status_id` is required' => [['status_id' => null], 'status_id', 'The status field is required.'],
 ]);
 
 it('can create milestones', function () {
@@ -176,26 +172,19 @@ it('can create milestones', function () {
 });
 
 it('can edit milestones', function () {
-    seed(ProjectMilestoneStatusSeeder::class);
-
     asSuperAdmin();
 
     $project = Project::factory()->create();
 
-    $plannedStatus = ProjectMilestoneStatus::where('name', 'Planned')->first();
-    $delayedStatus = ProjectMilestoneStatus::where('name', 'Delayed')->first();
-
     $milestone = ProjectMilestone::factory()->state([
         'project_id' => $project->id,
         'description' => 'Test project milestone',
-        'status_id' => $plannedStatus->id,
         'created_by_id' => auth()->id(),
     ])->create();
 
     $request = ProjectMilestone::factory()->make([
         'project_id' => $project->id,
         'description' => 'Changed Test project milestone',
-        'status_id' => $delayedStatus->id,
         'created_by_id' => auth()->id(),
     ]);
 

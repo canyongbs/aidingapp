@@ -39,6 +39,7 @@ namespace AidingApp\Project\Policies;
 use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Concerns\PerformsFeatureChecks;
 use App\Enums\Feature;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 use App\Models\Authenticatable;
 use Illuminate\Auth\Access\Response;
 
@@ -50,6 +51,11 @@ class ProjectMilestoneStatusPolicy
     {
         if (! is_null($response = $this->hasFeatures())) {
             return $response;
+        }
+
+        // TODO: Cleanup Task (project-milestone-status-removed): delete this check once the flag is removed.
+        if (ProjectMilestoneStatusRemovedFeature::active()) {
+            return Response::deny('Project milestone statuses have been removed.');
         }
 
         return null;

@@ -34,30 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Database\Factories;
+namespace App\Features;
 
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectMilestone;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @extends Factory<ProjectMilestone>
- */
-class ProjectMilestoneFactory extends Factory
+class ProjectMilestoneStatusRemovedFeature extends AbstractFeatureFlag
 {
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'project_id' => Project::factory(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'description' => $this->faker->sentence(3),
-            'created_by_id' => User::factory(),
-        ];
+        return false;
     }
 }
