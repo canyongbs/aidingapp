@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -752,4 +753,39 @@ it('mounts the view pipeline entry action from the card title without pipeline u
         ->assertDontSeeHtml('editPipelineEntry')
         ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('viewPipelineEntry');
+});
+
+it('eager loads the milestone relation instead of lazy loading it per card', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stageId = $pipeline->stages->first()->getKey();
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+
+    PipelineEntry::factory()->count(3)->create([
+        'pipeline_stage_id' => $stageId,
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    try {
+        livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+            ->assertSee('Milestone:');
+
+        $milestoneQueries = collect(DB::getQueryLog())
+            ->filter(fn (array $query): bool => str_contains($query['query'], 'project_milestones'));
+    } finally {
+        DB::disableQueryLog();
+    }
+
+    expect($milestoneQueries)->toHaveCount(1);
 });
