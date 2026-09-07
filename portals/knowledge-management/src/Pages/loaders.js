@@ -34,6 +34,7 @@
 
 import { defineColadaLoader } from 'vue-router/experimental/pinia-colada';
 import { apiGet } from '../Services/api.js';
+import { fetchMockProject, fetchMockProjects } from '../Services/mockProjectsApi.js';
 
 const fiveMinutes = 1000 * 60 * 5;
 
@@ -128,4 +129,17 @@ export const useCreateServiceRequestData = defineColadaLoader({
         tolerant(apiGet(`/service-request/create/${to.params.typeId}`, { category: to.query.category }), {
             notFound: true,
         }),
+});
+
+// TODO(BE): swap fetchMockProjects() for tolerant(apiGet('/projects')) once GET /api/portal/projects ships.
+export const useProjectsData = defineColadaLoader({
+    key: () => ['knowledge-management', 'projects'],
+    query: () => tolerant(fetchMockProjects()),
+    staleTime: fiveMinutes,
+});
+
+// TODO(BE): swap fetchMockProject() for tolerant(apiGet(`/projects/${id}`), { notFound: true }) once GET /api/portal/projects/{project} ships.
+export const useProjectData = defineColadaLoader({
+    key: (to) => ['knowledge-management', 'project', String(to.params.projectId)],
+    query: (to) => tolerant(fetchMockProject(to.params.projectId), { notFound: true }),
 });
