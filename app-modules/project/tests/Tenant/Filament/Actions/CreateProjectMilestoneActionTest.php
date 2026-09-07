@@ -37,8 +37,7 @@
 use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use App\Features\ProjectMilestoneStatusRemovedFeature;
 
-// Checks the schema array directly (no Livewire mount/render) so the assertion does not
-// depend on the `project_milestone_statuses` table, which the flag's migration has dropped.
+// Checked directly against the schema array since the status table is already dropped by the time tests run.
 function createProjectMilestoneActionHasStatusField(): bool
 {
     return collect(CreateProjectMilestoneAction::formSchema())
