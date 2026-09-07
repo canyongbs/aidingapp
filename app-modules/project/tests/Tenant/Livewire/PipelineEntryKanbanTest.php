@@ -753,3 +753,32 @@ it('mounts the view pipeline entry action from the card title without pipeline u
         ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('viewPipelineEntry');
 });
+
+it('eager loads the milestone relation instead of lazy loading it per card', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $stageId = $pipeline->stages->first()->getKey();
+
+    $milestone = ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+
+    PipelineEntry::factory()->count(3)->create([
+        'pipeline_stage_id' => $stageId,
+        'project_milestone_id' => $milestone->getKey(),
+    ]);
+
+    $component = livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee($milestone->title)
+        ->instance();
+
+    $entries = $component->getPipelineEntries()->flatten(1);
+
+    expect($entries)->toHaveCount(3)
+        ->and($entries->every(fn (PipelineEntry $entry): bool => $entry->relationLoaded('milestone')))->toBeTrue();
+});

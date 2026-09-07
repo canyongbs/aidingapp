@@ -81,7 +81,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
          */
         $entries = $this->pipeline->entries()
             ->withoutArchived()
-            ->with(['assignedTo', 'pipelineStage'])
+            ->with(['assignedTo', 'pipelineStage', 'milestone'])
             ->withCount([
                 'assets',
                 'serviceRequests',
