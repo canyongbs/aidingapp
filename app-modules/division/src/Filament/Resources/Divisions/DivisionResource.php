@@ -52,7 +52,7 @@ class DivisionResource extends Resource
 
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 70;
 
     public static function getRelations(): array
     {

@@ -79,7 +79,7 @@ class Reporting extends Page implements HasActions, HasForms, HasTable
 
     protected static ?string $title = 'Reporting';
 
-    protected static ?int $navigationSort = 31;
+    protected static ?int $navigationSort = 50;
 
     public static function canAccess(): bool
     {
