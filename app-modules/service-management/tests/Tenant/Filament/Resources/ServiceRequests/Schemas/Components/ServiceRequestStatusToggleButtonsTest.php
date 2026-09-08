@@ -34,23 +34,47 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
-
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusToggleButtons;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Forms\Components\ToggleButtons;
 
-class ServiceRequestStatusToggleButtons
-{
-    public static function make(string $name = 'status_id'): ToggleButtons
-    {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        $statuses = ServiceRequestStatus::orderBy('sort')->get(['id', 'name', 'color']);
+it('builds a status_id toggle buttons field with no default by default', function () {
+    $toggleButtons = ServiceRequestStatusToggleButtons::make();
 
-        return ToggleButtons::make($name)
-            ->label('Status')
-            ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
-    }
-}
+    expect($toggleButtons)->toBeInstanceOf(ToggleButtons::class)
+        ->and($toggleButtons->getName())->toBe('status_id')
+        ->and($toggleButtons->getDefaultState())->toBeNull()
+        ->and($toggleButtons->isInline())->toBeTrue();
+});
+
+it('builds a toggle buttons field for a custom field name', function () {
+    ServiceRequestStatus::factory()->create();
+
+    $toggleButtons = ServiceRequestStatusToggleButtons::make('automated_status_id');
+
+    expect($toggleButtons->getName())->toBe('automated_status_id');
+});
+
+it('applies a chained default when provided', function () {
+    $status = ServiceRequestStatus::factory()->create();
+
+    $toggleButtons = ServiceRequestStatusToggleButtons::make()->default($status->getKey());
+
+    expect($toggleButtons->getDefaultState())->toBe($status->getKey());
+});
+
+it('maps statuses to options labelled by name', function () {
+    $status = ServiceRequestStatus::factory()->create();
+
+    $toggleButtons = ServiceRequestStatusToggleButtons::make();
+
+    expect($toggleButtons->getOptions())->toHaveKey($status->getKey(), $status->name);
+});
+
+it('maps statuses to colors matching their color option', function () {
+    $status = ServiceRequestStatus::factory()->create();
+
+    $toggleButtons = ServiceRequestStatusToggleButtons::make();
+
+    expect($toggleButtons->getColors())->toHaveKey($status->getKey(), $status->color->value);
+});
