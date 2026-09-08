@@ -106,5 +106,12 @@ describe('authorization', function () {
             'ownerRecord' => $group,
             'pageClass' => EditGroup::class,
         ])->assertActionHidden(TestAction::make(AttachAction::class)->table());
+
+        $user->givePermissionTo('group.*.update');
+
+        livewire(UsersRelationManager::class, [
+            'ownerRecord' => $group,
+            'pageClass' => EditGroup::class,
+        ])->assertActionVisible(TestAction::make(AttachAction::class)->table());
     });
 });
