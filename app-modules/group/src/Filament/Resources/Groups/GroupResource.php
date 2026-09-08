@@ -33,11 +33,6 @@ class GroupResource extends Resource
         return GroupManagementFeature::active() && parent::canAccess();
     }
 
-    public static function shouldRegisterNavigation(): bool
-    {
-        return GroupManagementFeature::active() && parent::shouldRegisterNavigation();
-    }
-
     public static function getRelations(): array
     {
         return [
