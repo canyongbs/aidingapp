@@ -48,7 +48,10 @@ class GroupObserver
         }
 
         $user = auth()->user();
-        assert($user instanceof User);
+
+        if (! $user instanceof User) {
+            return;
+        }
 
         $group->createdBy()->associate($user);
     }
