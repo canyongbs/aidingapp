@@ -42,6 +42,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
@@ -57,7 +58,7 @@ beforeEach(function () {
     $licenseSettings->save();
 });
 
-it('lists directly assigned projects with progress based on guest-visible tasks', function () {
+it('lists directly assigned projects with progress based on non-archived tasks', function () {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create([
         'name' => 'Campus Network Upgrade',
@@ -82,6 +83,12 @@ it('lists directly assigned projects with progress based on guest-visible tasks'
     ]);
     $archivedEntry = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
     $archivedEntry->archive();
+    $archivedMilestone = ProjectMilestone::factory()->for($project)->create();
+    PipelineEntry::factory()
+        ->for($completeStage, 'pipelineStage')
+        ->for($archivedMilestone, 'milestone')
+        ->create();
+    $archivedMilestone->archive();
 
     Project::factory()->create(['name' => 'Unrelated Project']);
 

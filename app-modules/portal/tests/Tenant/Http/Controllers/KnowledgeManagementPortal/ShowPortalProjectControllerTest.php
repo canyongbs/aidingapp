@@ -132,7 +132,7 @@ it('shows guest-visible pipeline tasks grouped by milestone', function () {
         ->assertJsonMissing(['name' => 'Internal Review']);
 });
 
-it('does not show archived pipelines tasks or milestones', function () {
+it('does not show archived pipeline tasks or milestones', function () {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);

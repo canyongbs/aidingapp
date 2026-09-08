@@ -60,10 +60,12 @@ class GetPortalProjectsController
         $entries = PipelineEntry::query()
             ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
             ->join('pipelines', 'pipelines.id', '=', 'pipeline_stages.pipeline_id')
+            ->leftJoin('project_milestones', 'project_milestones.id', '=', 'pipeline_entries.project_milestone_id')
             ->whereColumn('pipelines.project_id', 'projects.id')
             ->whereNull('pipeline_entries.archived_at')
             ->whereNull('pipeline_stages.archived_at')
-            ->whereNull('pipelines.archived_at');
+            ->whereNull('pipelines.archived_at')
+            ->whereNull('project_milestones.archived_at');
 
         $projects = Project::query()
             ->withoutArchived()
@@ -83,7 +85,7 @@ class GetPortalProjectsController
             ])
             ->orderBy('projects.name')
             ->paginate(10)
-            ->through(fn (Project $project): ProjectData => new ProjectData(
+            ->through(fn(Project $project): ProjectData => new ProjectData(
                 id: $project->getKey(),
                 name: $project->name,
                 description: $project->description,

@@ -67,7 +67,10 @@
             </tr>
         </BaseTableHeader>
         <BaseTableBody>
-            <template v-for="group in groups" :key="group.milestone_id ?? 'no-milestone'">
+            <template
+                v-for="(group, groupIndex) in groups"
+                :key="`${group.milestone_id ?? 'no-milestone'}-${groupIndex}`"
+            >
                 <tr class="bg-gray-50/70">
                     <td colspan="4" class="px-4 py-2">
                         <div class="flex items-center justify-between gap-2">
