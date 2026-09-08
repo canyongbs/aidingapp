@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use Worksome\RequestFactories\RequestFactory;
 
 class EditAdvisoryUpdateRequestFactory extends RequestFactory
@@ -45,6 +46,7 @@ class EditAdvisoryUpdateRequestFactory extends RequestFactory
         return [
             'update' => fake()->sentence,
             'internal' => fake()->boolean,
+            'status_id' => AdvisoryStatus::factory()->create()->id,
         ];
     }
 }

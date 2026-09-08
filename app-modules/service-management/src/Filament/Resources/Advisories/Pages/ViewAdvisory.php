@@ -37,11 +37,21 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
+use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\TableSelect;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
@@ -56,27 +66,90 @@ class ViewAdvisory extends ViewRecord
     {
         return $schema
             ->schema([
-                Section::make()
+                Section::make('Properties')
+                    ->key('properties')
+                    ->headerActions([
+                        EditAction::make('editProperties')
+                            ->slideOver()
+                            ->schema([
+                                TextInput::make('title')
+                                    ->label('Title')
+                                    ->required()
+                                    ->maxLength(255)
+                                    ->string()
+                                    ->columnSpanFull(),
+                                Textarea::make('description')
+                                    ->label('Description')
+                                    ->required()
+                                    ->maxLength(65535)
+                                    ->string()
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
                     ->schema([
                         TextEntry::make('title')
-                            ->label('Title'),
+                            ->label('Title')
+                            ->columnSpanFull(),
                         TextEntry::make('description')
-                            ->label('Description'),
+                            ->label('Description')
+                            ->columnSpanFull(),
+                    ]),
+                Section::make('Tracking Details')
+                    ->key('trackingDetails')
+                    ->headerActions([
+                        EditAction::make('editTrackingDetails')
+                            ->slideOver()
+                            ->schema([
+                                ToggleButtons::make('severity_id')
+                                    ->label('Severity')
+                                    ->inline()
+                                    ->options(fn (): array => AdvisorySeverity::query()->orderBy('name')->pluck('name', 'id')->all())
+                                    ->exists((new AdvisorySeverity())->getTable(), 'id')
+                                    ->required()
+                                    ->columnSpanFull(),
+                                ToggleButtons::make('status_id')
+                                    ->label('Status')
+                                    ->inline()
+                                    ->options(fn (): array => AdvisoryStatus::query()->orderBy('name')->pluck('name', 'id')->all())
+                                    ->exists((new AdvisoryStatus())->getTable(), 'id')
+                                    ->required()
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->schema([
                         ColorEntry::make('severity.rgb_color')
                             ->label('Severity')
-                            ->tooltip(fn (Advisory $record) => $record->severity->name),
+                            ->tooltip(fn (Advisory $record) => $record->severity->name)
+                            ->columnSpan(1),
                         TextEntry::make('status.name')
-                            ->label('Status'),
-                        TextEntry::make('assignedDepartment.name')
-                            ->label('Assigned Department'),
-                        TextEntry::make('created_at')
-                            ->datetime()
-                            ->label('Created'),
-                        TextEntry::make('updated_at')
-                            ->datetime()
-                            ->label('Last Updated'),
+                            ->label('Status')
+                            ->columnSpan(1),
                     ])
-                    ->columns(),
+                    ->columns(2),
+                Section::make('Assignment')
+                    ->key('assignment')
+                    ->headerActions([
+                        EditAction::make('editAssignment')
+                            ->slideOver()
+                            ->schema([
+                                TableSelect::make('assigned_department_id')
+                                    ->label('Department')
+                                    ->relationship('assignedDepartment')
+                                    ->tableConfiguration(DepartmentsTable::class)
+                                    ->columnSpanFull(),
+                            ]),
+                    ])
+                    ->schema([
+                        TextEntry::make('assignedDepartment.name')
+                            ->label('Department'),
+                    ]),
+                Section::make('Advisory Updates')
+                    ->schema([
+                        Livewire::make(AdvisoryUpdatesRelationManager::class, fn (Advisory $record): array => [
+                            'ownerRecord' => $record,
+                            'pageClass' => static::class,
+                        ])->key(AdvisoryUpdatesRelationManager::class),
+                    ]),
             ]);
     }
 
@@ -92,7 +165,7 @@ class ViewAdvisory extends ViewRecord
         /** @var array<string, string> $breadcrumbs */
         $breadcrumbs = [
             $resource::getUrl() => $resource::getBreadcrumb(),
-            $resource::getUrl('edit', ['record' => $record]) => Str::limit($record->title, 16),
+            $resource::getUrl('view', ['record' => $record]) => Str::limit($record->title, 16),
             ...(filled($breadcrumb = $this->getBreadcrumb()) ? [$breadcrumb] : []),
         ];
 
@@ -106,7 +179,7 @@ class ViewAdvisory extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
 }

@@ -39,11 +39,18 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\EditAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages\ViewAdvisoryUpdate;
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use BackedEnum;
+use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 
 class AdvisoryUpdateResource extends Resource
@@ -66,16 +73,60 @@ class AdvisoryUpdateResource extends Resource
     {
         return $schema
             ->components([
-                Textarea::make('update')
-                    ->label('Update')
-                    ->rows(3)
-                    ->columnSpan('full')
+                static::getPropertiesSectionSchema(),
+                ToggleButtons::make('status_id')
+                    ->label('Status')
+                    ->inline()
+                    ->options(fn (AdvisoryUpdate $record): array => static::getStatusOptions($record->advisory))
+                    ->default(fn (AdvisoryUpdate $record): string => $record->advisory->status->getKey())
+                    ->exists((new AdvisoryStatus())->getTable(), 'id')
                     ->required()
-                    ->string(),
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function getPropertiesSectionSchema(): Section
+    {
+        return Section::make('Properties')
+            ->schema([
+                TextInput::make('title')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(255)
+                    ->string()
+                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
+                    ->columnSpanFull(),
+                Textarea::make('update')
+                    ->label('Description')
+                    ->rows(3)
+                    ->required()
+                    ->string()
+                    ->columnSpanFull(),
                 Toggle::make('internal')
                     ->label('Internal')
-                    ->rule(['boolean']),
+                    ->rule(['boolean'])
+                    ->columnSpanFull(),
+                DateTimePicker::make('date')
+                    ->label('Date')
+                    ->required()
+                    ->default(now())
+                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
+                    ->columnSpanFull(),
             ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function getStatusOptions(Advisory $currentAdvisory): array
+    {
+        return AdvisoryStatus::orderBy('classification')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (AdvisoryStatus $status): array => [
+                $status->getKey() => $status->name . ($status->getKey() === $currentAdvisory->status->getKey() ? ' (Current)' : ''),
+            ])
+            ->all();
     }
 
     public static function getPages(): array

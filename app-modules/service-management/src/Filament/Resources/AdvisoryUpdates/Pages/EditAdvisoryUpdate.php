@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\EditRecord;
@@ -47,6 +48,8 @@ use Illuminate\Support\Str;
 class EditAdvisoryUpdate extends EditRecord
 {
     protected static string $resource = AdvisoryUpdateResource::class;
+
+    protected ?string $statusIdBeforeSave = null;
 
     public function getSubNavigationParameters(): array
     {
@@ -72,6 +75,24 @@ class EditAdvisoryUpdate extends EditRecord
             AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => Str::limit($parentRecord->title, 16),
             AdvisoryResource::getUrl('manage-advisory-update', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
         ];
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $this->statusIdBeforeSave = $data['status_id'] ?? null;
+
+        unset($data['status_id']);
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        if (filled($this->statusIdBeforeSave)) {
+            assert($this->record instanceof AdvisoryUpdate);
+
+            $this->record->advisory->update(['status_id' => $this->statusIdBeforeSave]);
+        }
     }
 
     protected function getHeaderActions(): array

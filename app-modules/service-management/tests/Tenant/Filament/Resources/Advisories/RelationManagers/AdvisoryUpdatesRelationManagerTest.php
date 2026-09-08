@@ -37,12 +37,14 @@
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\DateTimePicker;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -159,6 +161,129 @@ test('creating an advisory update updates the advisory status', function () {
     expect($advisory->fresh()->status_id)->toBe($newStatus->getKey());
 
     expect(AdvisoryUpdate::query()->where('advisory_id', $advisory->getKey())->count())->toBe(1);
+});
+
+test('the create form date field defaults to now', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    asSuperAdmin();
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('date', function (DateTimePicker $field): bool {
+            $default = $field->getState();
+
+            return $default !== null && now()->diffInSeconds($default) < 10;
+        });
+});
+
+test('the update column is shown instead of title when the feature is inactive', function () {
+    $advisory = Advisory::factory()->create();
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    asSuperAdmin();
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ])
+        ->assertTableColumnExists('update')
+        ->assertTableColumnDoesNotExist('title')
+        ->assertTableColumnDoesNotExist('date')
+        ->assertTableColumnStateSet('update', $advisoryUpdate->update, record: $advisoryUpdate);
+});
+
+test('the title column with a description replaces the update column', function () {
+    $advisory = Advisory::factory()->create();
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    asSuperAdmin();
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ])
+        ->assertTableColumnDoesNotExist('update')
+        ->assertTableColumnExists('title')
+        ->assertTableColumnExists('date')
+        ->assertTableColumnStateSet('title', $advisoryUpdate->title, record: $advisoryUpdate)
+        ->assertTableColumnHasDescription('title', $advisoryUpdate->update, record: $advisoryUpdate);
+});
+
+test('the title column links to the edit page when the user can update the advisory update', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    asSuperAdmin();
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ]);
+
+    $column = $component->instance()->getTable()->getColumn('title');
+
+    expect($column->getUrl($advisoryUpdate))->toBe(AdvisoryUpdateResource::getUrl('edit', [
+        'record' => $advisoryUpdate,
+        'advisory' => $advisory,
+    ]));
+});
+
+test('the title column links to the view page when the user cannot update the advisory update', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Resolved,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view');
+
+    actingAs($user);
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ]);
+
+    $column = $component->instance()->getTable()->getColumn('title');
+
+    // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
+    expect($column->getUrl($advisoryUpdate))->toBe(AdvisoryUpdateResource::getUrl('view', [
+        'record' => $advisoryUpdate,
+        'advisory' => $advisory,
+    ]));
+});
+
+test('the row-level view action is no longer present on the table', function () {
+    $advisory = Advisory::factory()->create();
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    asSuperAdmin();
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ManageAdvisoryUpdate::class,
+    ])
+        ->assertTableActionDoesNotExist('view', record: $advisoryUpdate);
 });
 
 // Permission Tests
