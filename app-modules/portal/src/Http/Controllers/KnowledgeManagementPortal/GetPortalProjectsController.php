@@ -25,8 +25,8 @@
       vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
       Software as a Service (SaaS) by Canyon GBS Inc.
-        - Use of this software implies agreement to the license terms and conditions as stated
-            in the Elastic License 2.0.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
 
     For more information or inquiries please visit our website at
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
