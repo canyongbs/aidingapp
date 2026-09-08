@@ -33,6 +33,7 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import { ChartPieIcon } from '@heroicons/vue/20/solid';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
@@ -71,7 +72,7 @@
                     <td colspan="4" class="px-4 py-2">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-sm font-semibold text-gray-700">{{ group.milestone_title }}</span>
-                            <BaseBadge v-if="group.progress_percentage !== null" color="gray">
+                            <BaseBadge v-if="group.progress_percentage !== null" color="gray" :icon="ChartPieIcon">
                                 Progress: {{ group.progress_percentage }}%
                             </BaseBadge>
                         </div>

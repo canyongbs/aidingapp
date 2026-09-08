@@ -40,6 +40,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\AssetManagementP
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\EvaluateServiceRequestAiResolutionController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GenerateServiceRequestQuestionsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetKnowledgeManagementPortalTagsController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetPortalProjectsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestFormController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestsController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\GetServiceRequestUploadUrl;
@@ -55,6 +56,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowPortalProjectController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestSecretController;
@@ -175,5 +177,13 @@ Route::prefix('api')
                 Route::get('/assets', AssetManagementPortalController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('assets.index');
+
+                Route::get('/projects', GetPortalProjectsController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('projects.index');
+
+                Route::get('/projects/{project}', ShowPortalProjectController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('projects.show');
             });
     });

@@ -35,13 +35,49 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
-    import { computed } from 'vue';
+    import Pagination from '@common/portal/Pagination.vue';
+    import { useQuery } from '@pinia/colada';
+    import { computed, ref, watch } from 'vue';
     import ProjectsTable from '../Components/Projects/ProjectsTable.vue';
+    import { apiGet } from '../Services/api.js';
     import { useProjectsData } from './loaders.js';
 
-    const { data: projectsData } = useProjectsData();
+    const { data: initialData } = useProjectsData();
+    const currentPage = ref(1);
 
-    const projects = computed(() => projectsData.value?.data ?? []);
+    const pageQuery = useQuery({
+        key: () => ['knowledge-management', 'projects', currentPage.value],
+        query: () => apiGet('/projects', { page: currentPage.value }),
+        enabled: () => currentPage.value > 1,
+    });
+
+    const currentEnvelope = computed(() =>
+        currentPage.value > 1 ? (pageQuery.data.value ?? null) : (initialData.value ?? null),
+    );
+
+    const shownEnvelope = ref(null);
+    watch(
+        currentEnvelope,
+        (envelope) => {
+            if (envelope) {
+                shownEnvelope.value = envelope;
+            }
+        },
+        { immediate: true },
+    );
+
+    const projects = computed(() => shownEnvelope.value?.data ?? []);
+    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
+    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
+    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
+    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
+    const loadingPage = computed(() => (currentPage.value > 1 && pageQuery.isLoading.value ? currentPage.value : null));
+
+    function fetchPage(page) {
+        if (page !== currentPage.value) {
+            currentPage.value = page;
+        }
+    }
 </script>
 
 <template>
@@ -55,6 +91,19 @@
 
         <PageCard>
             <ProjectsTable :projects="projects" />
+
+            <Pagination
+                v-if="lastPage > 1"
+                :current-page="currentPage"
+                :last-page="lastPage"
+                :from-item="fromItem"
+                :to-item="toItem"
+                :total-items="totalItems"
+                :loading-page="loadingPage"
+                @fetchPreviousPage="fetchPage(currentPage - 1)"
+                @fetchNextPage="fetchPage(currentPage + 1)"
+                @fetchPage="fetchPage"
+            />
         </PageCard>
     </Page>
 </template>

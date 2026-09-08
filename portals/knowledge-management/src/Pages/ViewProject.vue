@@ -37,6 +37,7 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
     import { computed, ref, watch } from 'vue';
     import PipelineSelect from '../Components/Projects/PipelineSelect.vue';
     import ProjectPipelineTable from '../Components/Projects/ProjectPipelineTable.vue';
@@ -76,6 +77,20 @@
         <template #breadcrumbs>
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb" />
         </template>
+
+        <div
+            role="note"
+            class="flex items-start gap-3 rounded-[var(--rounding-md)] border border-blue-200 bg-blue-50 px-4 py-3 text-blue-950"
+        >
+            <InformationCircleIcon class="mt-0.5 size-5 shrink-0 text-blue-600" aria-hidden="true" />
+            <div class="grid gap-1">
+                <p class="text-sm font-semibold">About milestone progress</p>
+                <p class="text-sm text-pretty text-blue-800">
+                    Milestone progress represents all work required to complete the milestone. Internal tasks may
+                    contribute to progress even when they are not visible in the portal.
+                </p>
+            </div>
+        </div>
 
         <PageCard>
             <PipelineSelect v-if="pipelines.length > 1" v-model="selectedPipelineId" :pipelines="pipelines" />
