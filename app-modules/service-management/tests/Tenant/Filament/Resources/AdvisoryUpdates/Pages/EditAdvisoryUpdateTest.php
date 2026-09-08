@@ -80,7 +80,9 @@ test('A successful action on the EditAdvisoryUpdate page', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(AdvisoryUpdate::class, $request->toArray());
+    assertDatabaseHas(AdvisoryUpdate::class, $request->except('status_id')->toArray());
+
+    expect($advisoryUpdate->advisory()->first()->fresh()->status_id)->toBe($request['status_id']);
 });
 
 test('EditAdvisoryUpdate requires valid data', function ($data, $errors) {
@@ -112,8 +114,76 @@ test('EditAdvisoryUpdate requires valid data', function ($data, $errors) {
         'update missing' => [EditAdvisoryUpdateRequestFactory::new()->state(['update' => null]), ['update' => 'required']],
         'update is not a string' => [EditAdvisoryUpdateRequestFactory::new()->state(['update' => 99]), ['update' => 'string']],
         'internal not a boolean' => [EditAdvisoryUpdateRequestFactory::new()->state(['internal' => 'invalid']), ['internal' => 'boolean']],
+        'status_id missing' => [EditAdvisoryUpdateRequestFactory::new()->state(['status_id' => null]), ['status_id' => 'required']],
+        'status_id does not exist' => [EditAdvisoryUpdateRequestFactory::new()->state(['status_id' => 'invalid']), ['status_id' => 'exists']],
     ]
 );
+
+test('the title and date fields are hidden and not required when the feature is inactive', function () {
+    $advisory = Advisory::factory([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()
+        ->for($advisory, 'advisory')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(EditAdvisoryUpdate::class, [
+        'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
+    ])
+        ->assertFormFieldHidden('title')
+        ->assertFormFieldHidden('date')
+        ->fillForm(EditAdvisoryUpdateRequestFactory::new()->create())
+        ->call('save')
+        ->assertHasNoFormErrors();
+});
+
+test('the title and date fields are visible, required and saved', function () {
+    $advisory = Advisory::factory([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()
+        ->for($advisory, 'advisory')
+        ->create();
+
+    asSuperAdmin();
+
+    livewire(EditAdvisoryUpdate::class, [
+        'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
+    ])
+        ->assertFormFieldVisible('title')
+        ->assertFormFieldVisible('date')
+        ->fillForm(EditAdvisoryUpdateRequestFactory::new(['title' => null])->create())
+        ->call('save')
+        ->assertHasFormErrors(['title' => 'required']);
+
+    $request = collect(EditAdvisoryUpdateRequestFactory::new([
+        'title' => fake()->sentence(),
+        'date' => now()->subDay(),
+    ])->create());
+
+    livewire(EditAdvisoryUpdate::class, [
+        'record' => $advisoryUpdate->getRouteKey(),
+        'parentRecord' => $advisoryUpdate->advisory,
+    ])
+        ->fillForm($request->toArray())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(AdvisoryUpdate::class, [
+        'id' => $advisoryUpdate->getKey(),
+        'title' => $request['title'],
+    ]);
+});
 
 // Permission Tests
 
@@ -167,7 +237,7 @@ test('EditAdvisoryUpdate is gated with proper access control', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseHas(AdvisoryUpdate::class, $request->toArray());
+    assertDatabaseHas(AdvisoryUpdate::class, $request->except('status_id')->toArray());
 });
 
 test('EditAdvisoryUpdate is gated with proper feature access control', function () {

@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\CreateAdvisory;
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\EditAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
@@ -67,7 +66,6 @@ class AdvisoryResource extends Resource
     {
         $navigationItems = [
             ViewAdvisory::class,
-            EditAdvisory::class,
             ManageAdvisoryUpdate::class,
         ];
 
@@ -80,7 +78,6 @@ class AdvisoryResource extends Resource
             'index' => ListAdvisories::route('/'),
             'create' => CreateAdvisory::route('/create'),
             'view' => ViewAdvisory::route('/{record}'),
-            'edit' => EditAdvisory::route('/{record}/edit'),
             'manage-advisory-update' => ManageAdvisoryUpdate::route('/{record}/updates'),
         ];
     }

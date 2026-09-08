@@ -41,20 +41,17 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdat
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Collection;
 
 class AdvisoryUpdatesRelationManager extends RelationManager
 {
@@ -68,27 +65,15 @@ class AdvisoryUpdatesRelationManager extends RelationManager
 
         return $schema
             ->components([
-                Textarea::make('update')
-                    ->label('Update')
-                    ->rows(3)
-                    ->columnSpan('full')
-                    ->required()
-                    ->string(),
-                Toggle::make('internal')
-                    ->label('Internal')
-                    ->rule(['boolean'])
-                    ->columnSpan('full'),
-                Select::make('status_id')
+                AdvisoryUpdateResource::getPropertiesSectionSchema(),
+                ToggleButtons::make('status_id')
                     ->label('Status')
-                    ->options(fn () => AdvisoryStatus::orderBy('classification')
-                        ->orderBy('name')
-                        ->get(['id', 'name', 'classification'])
-                        ->groupBy(fn (AdvisoryStatus $status) => $status->classification->getlabel())
-                        ->map(fn (Collection $group) => $group->pluck('name', 'id')->map(
-                            fn ($name, $id) => $name . ($id === $this->getOwnerRecord()->status->getKey() ? ' (Current)' : '')
-                        )))
+                    ->inline()
+                    ->options(fn (): array => AdvisoryUpdateResource::getStatusOptions($this->getOwnerRecord()))
+                    ->default($this->getOwnerRecord()->status->getKey())
                     ->exists((new AdvisoryStatus())->getTable(), 'id')
-                    ->default($this->getOwnerRecord()->status->getKey()),
+                    ->required()
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -96,20 +81,42 @@ class AdvisoryUpdatesRelationManager extends RelationManager
     {
         assert($this->getOwnerRecord() instanceof Advisory);
 
+        $advisory = $this->getOwnerRecord();
+
         return $table
             ->columns([
                 IdColumn::make(),
-                TextColumn::make('update')
-                    ->label('Update')
-                    ->words(6),
+                ...(AdvisoryUpdateTitleAndDateFeature::active()
+                    ? [
+                        TextColumn::make('title')
+                            ->label('Title')
+                            ->description(fn (AdvisoryUpdate $record): string => $record->update)
+                            ->url(fn (AdvisoryUpdate $record): string => static::getRecordUrl($record, $advisory))
+                            ->searchable(),
+                    ]
+                    : [
+                        TextColumn::make('update')
+                            ->label('Update')
+                            ->words(6)
+                            ->url(fn (AdvisoryUpdate $record): string => static::getRecordUrl($record, $advisory)),
+                    ]),
                 IconColumn::make('internal')
                     ->boolean(),
-                TextColumn::make('created_at')
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->sortable(),
+                ...(AdvisoryUpdateTitleAndDateFeature::active()
+                    ? [
+                        TextColumn::make('date')
+                            ->label('Date')
+                            ->dateTime()
+                            ->sortable(),
+                    ]
+                    : [
+                        TextColumn::make('created_at')
+                            ->sortable(),
+                        TextColumn::make('updated_at')
+                            ->sortable(),
+                    ]),
             ])
-            ->defaultSort('created_at', 'desc')
+            ->defaultSort(AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at', 'desc')
             ->headerActions([
                 CreateAction::make()
                     ->visible($this->getOwnerRecord()->status->classification === SystemAdvisoryStatusClassification::Resolved ? false : true)
@@ -117,14 +124,20 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                         $advisoryUpdate->advisory->update(['status_id' => $data['status_id']]);
                     }),
             ])
-            ->recordActions([
-                ViewAction::make(),
-            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
                 ]),
             ]);
+    }
+
+    protected static function getRecordUrl(AdvisoryUpdate $record, Advisory $advisory): string
+    {
+        $routeParameters = ['record' => $record, 'advisory' => $advisory];
+
+        return auth()->user()->can('update', $record)
+            ? AdvisoryUpdateResource::getUrl('edit', $routeParameters)
+            : AdvisoryUpdateResource::getUrl('view', $routeParameters);
     }
 }
