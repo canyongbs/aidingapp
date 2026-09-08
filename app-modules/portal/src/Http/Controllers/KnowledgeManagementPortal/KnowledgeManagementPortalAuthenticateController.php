@@ -38,6 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticateRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -46,13 +47,15 @@ use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class KnowledgeManagementPortalAuthenticateController extends Controller
 {
-    public function __invoke(KnowledgeManagementPortalAuthenticateRequest $request, PortalAuthentication $authentication): JsonResponse
-    {
+    public function __invoke(
+        KnowledgeManagementPortalAuthenticateRequest $request,
+        PortalAuthentication $authentication,
+        AuthenticatePortalContact $authenticatePortalContact,
+    ): JsonResponse {
         if ($authentication->isExpired()) {
             if (! session()->has('guest_id')) {
                 $portalGuest = PortalGuest::create();
@@ -70,16 +73,12 @@ class KnowledgeManagementPortalAuthenticateController extends Controller
         /** @var Contact $contact */
         $contact = $authentication->educatable;
 
-        Auth::guard('contact')->login($contact);
+        $authenticatePortalContact($contact);
 
         $settings = resolve(PortalSettings::class);
         $addons = resolve(LicenseSettings::class)->data?->addons;
 
         $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
 
         $assistantEnabled = app(AiSupportAssistantSettings::class)->is_enabled && app(PortalSettings::class)->ai_support_assistant;
 

@@ -34,29 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers;
+namespace AidingApp\Portal\Actions;
 
-use AidingApp\Portal\Actions\AuthenticatePortalContact;
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
+use AidingApp\Contact\Models\Contact;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
-class EmployeeSelfServiceController extends Controller
+/**
+ * Authenticates a contact into the portal without expiring pages already open in the
+ * admin panel.
+ *
+ * Both panels share one session, and therefore one CSRF token. Authenticating rotates that token,
+ * but the admin panel renders its token into the page rather than re-reading it, so open
+ * pages were left holding one the session no longer recognised. The session id is still rotated,
+ * so session-fixation protection is unaffected; only the token the other panel holds is preserved.
+ */
+class AuthenticatePortalContact
 {
-    public function __invoke(AuthenticatePortalContact $authenticatePortalContact): RedirectResponse
+    private const CSRF_TOKEN_KEY = '_token';
+
+    public function __construct(private Session $session) {}
+
+    public function __invoke(Contact $contact): void
     {
-        $user = Auth::user();
+        $token = $this->session->isStarted() ? $this->session->token() : null;
 
-        abort_unless($user instanceof User, Response::HTTP_FORBIDDEN);
+        Auth::guard('contact')->login($contact);
 
-        $contact = $user->managedContact()->first();
-
-        abort_if(is_null($contact), Response::HTTP_FORBIDDEN);
-
-        $authenticatePortalContact($contact);
-
-        return redirect()->route('portal.show');
+        if (filled($token)) {
+            $this->session->put(self::CSRF_TOKEN_KEY, $token);
+        }
     }
 }
