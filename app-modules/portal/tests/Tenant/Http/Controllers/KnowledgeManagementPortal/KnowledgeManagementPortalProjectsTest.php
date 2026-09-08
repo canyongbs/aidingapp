@@ -117,3 +117,10 @@ it('renders the portal projects route', function () {
 
     $response->assertSuccessful();
 });
+
+it('renders the portal project show route', function () {
+    $project = Project::factory()->create();
+    $response = get(route('portal.projects.show', ['project' => $project->id]));
+
+    $response->assertSuccessful();
+});
