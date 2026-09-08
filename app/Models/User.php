@@ -42,6 +42,8 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagementBatches;
 use AidingApp\Engagement\Models\Concerns\HasManyEngagements;
+use AidingApp\Group\Models\Group;
+use AidingApp\Group\Models\GroupUser;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\ManagerKnowledgeBaseItem;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
@@ -425,6 +427,15 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function receivesBroadcastNotificationsOn(): string
     {
         return "user.{$this->getKey()}";
+    }
+
+    /** @return BelongsToMany<Group, $this, GroupUser> */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'group_user')
+            ->using(GroupUser::class)
+            ->withPivot('id')
+            ->withTimestamps();
     }
 
     protected function serializeDate(DateTimeInterface $date): string
