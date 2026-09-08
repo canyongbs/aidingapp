@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusToggleButtons;
 use AidingApp\ServiceManagement\Filament\Tables\ManagersTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Filament\Actions\Action;
@@ -57,7 +57,11 @@ class ManageAssignmentAction
             ->slideOver()
             ->modalHeading('Manage Assignment')
             ->modalSubmitActionLabel('Submit')
-            ->fillForm(['userId' => $defaultUserId])
+            ->fillForm([
+                'userId' => $defaultUserId,
+                // fillForm() disables default-state hydration for the whole schema, so status_id must be filled explicitly to be pre-selected.
+                'status_id' => $serviceRequest->status_id,
+            ])
             ->visible(fn (): bool => $serviceRequest->priority?->type_id !== null
                 && auth()->user()->can('update', $serviceRequest))
             ->schema([
@@ -76,8 +80,7 @@ class ManageAssignmentAction
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
-                ServiceRequestStatusSelect::make()
-                    ->default($serviceRequest->status_id)
+                ServiceRequestStatusToggleButtons::make()
                     ->label('Update Status')
                     ->required()
                     ->helperText('You may simultaneously update the status along with this change.'),
