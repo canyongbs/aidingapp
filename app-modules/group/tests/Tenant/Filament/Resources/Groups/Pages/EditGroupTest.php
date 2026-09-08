@@ -37,6 +37,7 @@
 use AidingApp\Group\Filament\Resources\Groups\GroupResource;
 use AidingApp\Group\Filament\Resources\Groups\Pages\EditGroup;
 use AidingApp\Group\Models\Group;
+use AidingApp\Group\Tests\Tenant\Filament\Resources\Groups\RequestFactories\GroupRequestFactory;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -88,6 +89,23 @@ it('allows saving with the same name as the current group', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 });
+
+it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
+    asSuperAdmin();
+
+    Group::factory()->create(['name' => 'Student Success']);
+    $group = Group::factory()->create();
+
+    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+        ->fillForm($data->create())
+        ->call('save')
+        ->assertHasFormErrors($errors);
+})->with([
+    'name required' => [GroupRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
+    'name max' => [GroupRequestFactory::new()->state(['name' => str()->random(256)]), ['name' => 'max']],
+    'name unique case insensitive' => [GroupRequestFactory::new()->state(['name' => 'student success']), ['name' => 'unique']],
+    'description max' => [GroupRequestFactory::new()->state(['description' => str()->random(65536)]), ['description' => 'max']],
+]);
 
 describe('authorization', function () {
     it('denies access without the `group.*.update` permission', function () {
