@@ -34,29 +34,58 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers;
-
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Actions\AuthenticatePortalContact;
-use App\Http\Controllers\Controller;
-use App\Models\User;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Contracts\Session\Session;
 use Illuminate\Support\Facades\Auth;
-use Symfony\Component\HttpFoundation\Response;
 
-class EmployeeSelfServiceController extends Controller
-{
-    public function __invoke(AuthenticatePortalContact $authenticatePortalContact): RedirectResponse
-    {
-        $user = Auth::user();
+it('authenticates the contact into the portal', function () {
+    $contact = Contact::factory()->create();
 
-        abort_unless($user instanceof User, Response::HTTP_FORBIDDEN);
+    app(Session::class)->start();
 
-        $contact = $user->managedContact()->first();
+    expect(Auth::guard('contact')->check())->toBeFalse();
 
-        abort_if(is_null($contact), Response::HTTP_FORBIDDEN);
+    app(AuthenticatePortalContact::class)($contact);
 
-        $authenticatePortalContact($contact);
+    expect(Auth::guard('contact')->id())->toBe($contact->getKey());
+});
 
-        return redirect()->route('portal.show');
-    }
-}
+it('preserves the csrf token so pages open in the admin panel stay valid', function () {
+    $contact = Contact::factory()->create();
+
+    $session = app(Session::class);
+
+    $session->start();
+
+    $token = $session->token();
+
+    app(AuthenticatePortalContact::class)($contact);
+
+    expect($session->token())->toBe($token);
+});
+
+it('still rotates the session id', function () {
+    $contact = Contact::factory()->create();
+
+    $session = app(Session::class);
+
+    $session->start();
+
+    $id = $session->getId();
+
+    app(AuthenticatePortalContact::class)($contact);
+
+    expect($session->getId())->not->toBe($id);
+});
+
+it('authenticates the contact when the session has not been started', function () {
+    $contact = Contact::factory()->create();
+
+    expect(app(Session::class)->isStarted())->toBeFalse()
+        ->and(Auth::guard('contact')->check())->toBeFalse();
+
+    app(AuthenticatePortalContact::class)($contact);
+
+    expect(Auth::guard('contact')->id())->toBe($contact->getKey());
+});
