@@ -174,8 +174,11 @@
                                 class="absolute w-3 h-3 rounded-full bg-gray-300 border-2 border-white -inset-s-1.5"
                             ></div>
                             <time class="block text-sm font-normal leading-none text-gray-400">{{
-                                formatDateTime(updateData.created_at)
+                                formatDateTime(updateData.date ?? updateData.created_at)
                             }}</time>
+                            <p v-if="updateData.title" class="mt-1 text-sm font-semibold text-gray-700">
+                                {{ updateData.title }}
+                            </p>
                             <p class="mt-1 text-sm text-gray-700">{{ updateData.update }}</p>
                         </li>
                     </ol>

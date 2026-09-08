@@ -72,3 +72,38 @@ test('Can fetch all advisories with updates', function () {
     $response->assertStatus(200);
     $response->assertJsonCount(5, 'data.data');
 });
+
+test('advisory updates are ordered by date', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    $advisory = Advisory::factory()
+        ->for(AdvisoryStatus::factory(), 'status')
+        ->for(AdvisorySeverity::factory(), 'severity')
+        ->create();
+
+    $olderUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create([
+        'created_at' => now(),
+        'date' => now()->subDay(),
+    ]);
+
+    $newerUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create([
+        'created_at' => now()->subDay(),
+        'date' => now(),
+    ]);
+
+    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
+    $response = get($url);
+
+    $response->assertStatus(200);
+
+    $updateIds = collect($response->json('data.data.0.advisory_updates'))->pluck('id');
+
+    expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
+});

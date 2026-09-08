@@ -34,26 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
+namespace AidingApp\ServiceManagement\Filament\Tables;
 
-use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\AdvisoryUpdateTitleAndDateFeature;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use AidingApp\Department\Models\Department;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class AdvisoryController
+class DepartmentsTable
 {
-    public function __invoke(Request $request): JsonResponse
+    public static function configure(Table $table): Table
     {
-        $perPage = $request->get('per_page', 15);
-        $advisories = Advisory::with([
-            'severity',
-            'advisoryUpdates' => fn ($query) => $query->orderByDesc(
-                AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at'
-            ),
-            'status',
-        ])->orderBy('created_at', 'desc')->paginate($perPage);
-
-        return response()->json(['data' => $advisories]);
+        return $table
+            ->query(fn (): Builder => Department::query())
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->defaultSort('name')
+            ->paginationPageOptions([5]);
     }
 }

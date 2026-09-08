@@ -34,26 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
-
-use AidingApp\ServiceManagement\Models\Advisory;
 use App\Features\AdvisoryUpdateTitleAndDateFeature;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-class AdvisoryController
-{
-    public function __invoke(Request $request): JsonResponse
+return new class () extends Migration {
+    public function up(): void
     {
-        $perPage = $request->get('per_page', 15);
-        $advisories = Advisory::with([
-            'severity',
-            'advisoryUpdates' => fn ($query) => $query->orderByDesc(
-                AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at'
-            ),
-            'status',
-        ])->orderBy('created_at', 'desc')->paginate($perPage);
+        DB::transaction(function () {
+            DB::table('advisory_updates')->delete();
+            DB::table('advisories')->delete();
 
-        return response()->json(['data' => $advisories]);
+            Schema::table('advisory_updates', function (Blueprint $table) {
+                $table->string('title');
+                $table->timestamp('date');
+            });
+
+            AdvisoryUpdateTitleAndDateFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AdvisoryUpdateTitleAndDateFeature::deactivate();
+
+            Schema::table('advisory_updates', function (Blueprint $table) {
+                $table->dropColumn(['title', 'date']);
+            });
+        });
+    }
+};
