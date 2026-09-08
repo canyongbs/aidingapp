@@ -289,15 +289,23 @@ trait InteractsWithVectorStores
         }
     }
 
-    protected function fileHasParsingResults(AiFile $file): bool
+    /**
+     * Resolves the file to use for vector store operations. If the given
+     * file instance was loaded with partial attributes and therefore has no
+     * parsing results, it is re-hydrated from the database so downstream
+     * vector store logic can reuse the fully loaded instance instead of
+     * fetching it fresh again.
+     */
+    protected function resolveFileForVectorStore(AiFile $file): ?AiFile
     {
         $parsingResults = $file->getParsingResults();
 
         if (blank($parsingResults) && ($file instanceof Model)) {
-            $parsingResults = $file->fresh()?->getParsingResults();
+            $file = $file->fresh() ?? $file;
+            $parsingResults = $file->getParsingResults();
         }
 
-        return filled($parsingResults);
+        return filled($parsingResults) ? $file : null;
     }
 
     protected function uploadFileForVectorStore(AiFile $file): ?OpenAiVectorStore
