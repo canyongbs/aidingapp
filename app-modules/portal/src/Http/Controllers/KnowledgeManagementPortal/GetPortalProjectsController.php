@@ -85,7 +85,7 @@ class GetPortalProjectsController
             ])
             ->orderBy('projects.name')
             ->paginate(10)
-            ->through(fn(Project $project): ProjectData => new ProjectData(
+            ->through(fn (Project $project): ProjectData => new ProjectData(
                 id: $project->getKey(),
                 name: $project->name,
                 description: $project->description,
