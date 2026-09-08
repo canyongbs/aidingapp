@@ -289,6 +289,17 @@ trait InteractsWithVectorStores
         }
     }
 
+    protected function fileHasParsingResults(AiFile $file): bool
+    {
+        $parsingResults = $file->getParsingResults();
+
+        if (blank($parsingResults) && ($file instanceof Model)) {
+            $parsingResults = $file->fresh()?->getParsingResults();
+        }
+
+        return filled($parsingResults);
+    }
+
     protected function uploadFileForVectorStore(AiFile $file): ?OpenAiVectorStore
     {
         $vectorStore = new OpenAiVectorStore();
@@ -306,12 +317,6 @@ trait InteractsWithVectorStores
         }
 
         if (blank($parsingResults)) {
-            report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as parsing results are blank.'));
-
-            return null;
-        }
-
-        if (blank($name)) {
             report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as the file name is blank.'));
 
             return null;
