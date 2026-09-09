@@ -38,6 +38,8 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringReportNotification;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -55,11 +57,13 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
     use Queueable;
     use SerializesModels;
 
-    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget) {}
+    public function __construct(public ServiceMonitoringTarget|ServiceMonitoringReportConfiguration $reportable) {}
 
     public function uniqueId(): string
     {
-        return $this->serviceMonitoringTarget->getKey();
+        // Using the reportable's own key (rather than the target's) keeps daily/weekly/monthly
+        // configurations for the same target from colliding when they fire on the same day
+        return $this->reportable->getKey();
     }
 
     /**
@@ -72,9 +76,9 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        $recipientUsers = $this->serviceMonitoringTarget->reportUsers()->get();
+        $recipientUsers = $this->reportable->reportUsers()->get();
 
-        $departmentUsers = $this->serviceMonitoringTarget
+        $departmentUsers = $this->reportable
             ->reportDepartments()
             ->with('users')
             ->get()
@@ -82,12 +86,12 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
             ->flatten(1);
 
         $recipientUsers = $recipientUsers->merge($departmentUsers)->unique('id');
-        $reportRecipients = $recipientUsers->concat($this->serviceMonitoringTarget->reportContacts()->get());
+        $reportRecipients = $recipientUsers->concat($this->reportable->reportContacts()->get());
 
         $channel = match (true) {
-            $this->serviceMonitoringTarget->is_reported_via_email && $this->serviceMonitoringTarget->is_reported_via_database => 'both',
-            $this->serviceMonitoringTarget->is_reported_via_email => MailChannel::class,
-            $this->serviceMonitoringTarget->is_reported_via_database => DatabaseChannel::class,
+            $this->reportable->is_reported_via_email && $this->reportable->is_reported_via_database => 'both',
+            $this->reportable->is_reported_via_email => MailChannel::class,
+            $this->reportable->is_reported_via_database => DatabaseChannel::class,
             default => null,
         };
 
@@ -95,6 +99,14 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        Notification::send($reportRecipients, new ServiceMonitoringReportNotification($this->serviceMonitoringTarget, $channel));
+        $serviceMonitoringTarget = $this->reportable instanceof ServiceMonitoringReportConfiguration
+            ? $this->reportable->serviceMonitoringTarget
+            : $this->reportable;
+
+        $frequency = $this->reportable instanceof ServiceMonitoringReportConfiguration
+            ? $this->reportable->frequency
+            : $this->reportable->report_frequency;
+
+        Notification::send($reportRecipients, new ServiceMonitoringReportNotification($serviceMonitoringTarget, $frequency ?? ServiceMonitoringReportFrequency::Monthly, $channel));
     }
 }

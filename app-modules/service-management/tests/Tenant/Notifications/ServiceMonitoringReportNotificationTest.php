@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
@@ -44,8 +45,11 @@ use App\Settings\DisplaySettings;
 use Carbon\CarbonInterface;
 
 it('routes notifications to the expected channels', function (string $channel, array $expectedChannels) {
+    $target = ServiceMonitoringTarget::factory()->create();
+
     $notification = new ServiceMonitoringReportNotification(
-        ServiceMonitoringTarget::factory()->create(),
+        $target,
+        $target->report_frequency,
         $channel,
     );
 
@@ -57,8 +61,11 @@ it('routes notifications to the expected channels', function (string $channel, a
 ]);
 
 it('throws an error for an unsupported channel', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
     $notification = new ServiceMonitoringReportNotification(
-        ServiceMonitoringTarget::factory()->create(),
+        $target,
+        $target->report_frequency,
         'unsupported-channel',
     );
 
@@ -69,7 +76,7 @@ it('throws an error for an unsupported channel', function () {
 it('returns N/A statistics when no checks exist in the reporting period', function () {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
 
-    $notification = new ServiceMonitoringReportNotification($target, DatabaseChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, DatabaseChannel::class);
     $databaseMessage = $notification->toDatabase(User::factory()->create());
 
     expect($databaseMessage['title'])->toContain('Your ' . $target->report_frequency->value . ' service monitor report for Payment API is ready.')
@@ -82,7 +89,7 @@ it('returns N/A statistics when no checks exist in the reporting period', functi
 it('returns N/A statistics when no checks exist in the reporting period for mail notification', function () {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
 
-    $notification = new ServiceMonitoringReportNotification($target, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
@@ -117,7 +124,7 @@ it('builds expected report statistics and incident summary in the mail payload',
     createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
     createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
 
-    $notification = new ServiceMonitoringReportNotification($target, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
@@ -158,7 +165,7 @@ it('uses tenant display timezone boundaries for daily reports', function () {
     createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
     createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
 
-    $notification = new ServiceMonitoringReportNotification($target, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
@@ -169,6 +176,44 @@ it('uses tenant display timezone boundaries for daily reports', function () {
         ->and($viewData['totalDowntime'])->toBe('50%')
         ->and($viewData['averageResponseTime'])->toBe('1.00 s')
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
+});
+
+it('suppresses delivery to a user without confidential access to a confidential target', function () {
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $user = User::factory()->create();
+
+    $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Daily, MailChannel::class);
+
+    expect($notification->via($user))->toBe([]);
+});
+
+it('delivers to a user granted confidential access to a confidential target', function () {
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $user = User::factory()->create();
+    $target->confidentialUsers()->attach($user->getKey());
+
+    $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Daily, MailChannel::class);
+
+    expect($notification->via($user))->toBe(['mail']);
+});
+
+it('suppresses delivery to a contact without confidential access to a confidential target', function () {
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $contact = Contact::factory()->create();
+
+    $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Daily, MailChannel::class);
+
+    expect($notification->via($contact))->toBe([]);
+});
+
+it('delivers to a contact granted confidential access to a confidential target', function () {
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $contact = Contact::factory()->create();
+    $target->confidentialContacts()->attach($contact->getKey());
+
+    $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Daily, MailChannel::class);
+
+    expect($notification->via($contact))->toBe(['mail']);
 });
 
 function createHistoryAt(
