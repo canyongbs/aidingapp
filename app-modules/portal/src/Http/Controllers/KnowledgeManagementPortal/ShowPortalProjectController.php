@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Settings\LicenseSettings;
@@ -79,9 +80,13 @@ class ShowPortalProjectController
         $entries = $selectedPipeline->entries()
             ->withoutArchived()
             ->where('is_visible_to_guests', true)
-            ->whereHas('pipelineStage', function (Builder $query): void {
-                $query->withoutArchived(); /** @phpstan-ignore-line */
-            })
+            ->whereHas(
+                'pipelineStage',
+                function (Builder $query): void {
+                    /** @var Builder<PipelineStage> $query */
+                    $query->withoutArchived();
+                },
+            )
             ->where(function (Builder $query): void {
                 $query->whereNull('project_milestone_id')
                     ->orWhereIn(
@@ -120,11 +125,11 @@ class ShowPortalProjectController
             ->withoutArchived()
             ->whereKey($milestoneIds)
             ->withCount([
-                'pipelineEntries as total_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
-                'pipelineEntries as complete_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
+                'pipelineEntries as total_entries_count' => fn(Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
+                'pipelineEntries as complete_entries_count' => fn(Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
                     ->whereHas(
                         'pipelineStage',
-                        fn (Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
+                        fn(Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
                     ),
             ])
             ->get(['id', 'title']);
@@ -164,7 +169,7 @@ class ShowPortalProjectController
             'data' => [
                 'id' => $project->getKey(),
                 'name' => $project->name,
-                'pipelines' => $pipelines->map(fn (Pipeline $pipeline): array => [
+                'pipelines' => $pipelines->map(fn(Pipeline $pipeline): array => [
                     'id' => $pipeline->getKey(),
                     'name' => $pipeline->name,
                     ...($pipeline->is($selectedPipeline) ? [
@@ -187,7 +192,7 @@ class ShowPortalProjectController
             ->withoutArchived()
             ->whereHas(
                 'pipelineStage',
-                fn (Builder $query): Builder => $query
+                fn(Builder $query): Builder => $query
                     ->withoutArchived()
                     ->whereBelongsTo($pipeline, 'pipeline'),
             );
