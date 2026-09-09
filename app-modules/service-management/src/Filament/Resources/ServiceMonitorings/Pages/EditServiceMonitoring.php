@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
+use AidingApp\ServiceManagement\Actions\SaveServiceMonitoringReportConfigurationsAction;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
@@ -45,6 +46,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
 use App\Features\MonitorTypeFeature;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
@@ -64,6 +66,9 @@ use Illuminate\Support\Str;
 class EditServiceMonitoring extends EditRecord
 {
     protected static string $resource = ServiceMonitoringResource::class;
+
+    /** @var array<string, mixed> */
+    private array $reportConfigurationsData = [];
 
     public function form(Schema $schema): Schema
     {
@@ -198,6 +203,41 @@ class EditServiceMonitoring extends EditRecord
             }
         }
 
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            $this->reportConfigurationsData = $data['report_configurations'] ?? [];
+            unset($data['report_configurations']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * @param  array<string, mixed>  $data
+     *
+     * @return array<string, mixed>
+     */
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        if (! ServiceMonitoringReportConfigurationsFeature::active()) {
+            return $data;
+        }
+
+        /** @var ServiceMonitoringTarget $record */
+        $record = $this->getRecord();
+
+        foreach ($record->reportConfigurations()->with(['reportUsers', 'reportDepartments', 'reportContacts'])->get() as $configuration) {
+            $data['report_configurations'][$configuration->frequency->value] = [
+                'is_active' => $configuration->is_active,
+                'report_users' => $configuration->reportUsers->pluck('id')->all(),
+                'report_departments' => $configuration->reportDepartments->pluck('id')->all(),
+                'report_contacts' => $configuration->reportContacts->pluck('id')->all(),
+                'report_channels' => [
+                    ...($configuration->is_reported_via_email ? ['email'] : []),
+                    ...($configuration->is_reported_via_database ? ['database'] : []),
+                ],
+            ];
+        }
+
         return $data;
     }
 
@@ -205,6 +245,10 @@ class EditServiceMonitoring extends EditRecord
     {
         /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
+
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            app(SaveServiceMonitoringReportConfigurationsAction::class)($record, $this->reportConfigurationsData);
+        }
 
         if (! $record->wasChanged('is_confidential') || $record->is_confidential) {
             return;

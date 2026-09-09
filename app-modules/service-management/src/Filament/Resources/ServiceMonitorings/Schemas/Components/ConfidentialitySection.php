@@ -36,8 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess;
+use AidingApp\ServiceManagement\Rules\ServiceMonitorReportRecipientsMustHaveConfidentialAccess;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
@@ -68,6 +71,20 @@ class ConfidentialitySection
                             confidentialDepartmentIds: Arr::wrap($get('confidentialDepartments')),
                             creatorId: $record?->getAttribute('created_by_id') ?? auth()->id(),
                         ),
+                        ...(ServiceMonitoringReportConfigurationsFeature::active()
+                            ? collect(ServiceMonitoringReportFrequency::cases())
+                                ->filter(fn (ServiceMonitoringReportFrequency $frequency): bool => (bool) $get("report_configurations.{$frequency->value}.is_active"))
+                                ->map(fn (ServiceMonitoringReportFrequency $frequency): ServiceMonitorReportRecipientsMustHaveConfidentialAccess => new ServiceMonitorReportRecipientsMustHaveConfidentialAccess(
+                                    frequency: $frequency,
+                                    reportedUserIds: Arr::wrap($get("report_configurations.{$frequency->value}.report_users")),
+                                    reportedDepartmentIds: Arr::wrap($get("report_configurations.{$frequency->value}.report_departments")),
+                                    confidentialUserIds: Arr::wrap($get('confidentialUsers')),
+                                    confidentialDepartmentIds: Arr::wrap($get('confidentialDepartments')),
+                                    creatorId: $record?->getAttribute('created_by_id') ?? auth()->id(),
+                                ))
+                                ->values()
+                                ->all()
+                            : []),
                     ])
                     ->afterStateUpdated(function (bool $state, Set $set): void {
                         if ($state) {

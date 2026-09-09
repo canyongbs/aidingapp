@@ -36,13 +36,16 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
+use AidingApp\ServiceManagement\Actions\SaveServiceMonitoringReportConfigurationsAction;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Components\AutomatedReportingSection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
 use App\Features\MonitorTypeFeature;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Radio;
@@ -59,6 +62,9 @@ use Filament\Schemas\Schema;
 class CreateServiceMonitoring extends CreateRecord
 {
     protected static string $resource = ServiceMonitoringResource::class;
+
+    /** @var array<string, mixed> */
+    private array $reportConfigurationsData = [];
 
     public function form(Schema $schema): Schema
     {
@@ -160,6 +166,23 @@ class CreateServiceMonitoring extends CreateRecord
             }
         }
 
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            $this->reportConfigurationsData = $data['report_configurations'] ?? [];
+            unset($data['report_configurations']);
+        }
+
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        if (! ServiceMonitoringReportConfigurationsFeature::active()) {
+            return;
+        }
+
+        /** @var ServiceMonitoringTarget $record */
+        $record = $this->getRecord();
+
+        app(SaveServiceMonitoringReportConfigurationsAction::class)($record, $this->reportConfigurationsData);
     }
 }

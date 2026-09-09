@@ -37,10 +37,12 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -128,13 +130,6 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->without('frequency'),
             ['frequency' => 'required'],
-        ],
-        'report frequency required when reporting is active' => [
-            ServiceMonitoringTargetRequestFactory::new()->state([
-                'is_reporting_active' => true,
-                'report_frequency' => null,
-            ]),
-            ['report_frequency' => 'required'],
         ],
         'should contain does not have opening quote without closing quote' => [
             ServiceMonitoringTargetRequestFactory::new()->state([
@@ -262,6 +257,22 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
         ],
     ]
 );
+
+// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
+test('report frequency is required when reporting is active and the feature is inactive', function () {
+    ServiceMonitoringReportConfigurationsFeature::deactivate();
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state([
+        'is_reporting_active' => true,
+        'report_frequency' => null,
+    ])->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['report_frequency' => 'required']);
+});
 
 test('CreateServiceMonitor with notification group User or Department', function () {
     asSuperAdmin();
@@ -420,6 +431,94 @@ test('a confidential service monitor cannot be created while a notification reci
         ->assertHasFormErrors(['is_confidential']);
 
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('creating a service monitor persists report configurations for multiple frequencies', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+    $weeklyDepartment = Department::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => ['email'],
+                ],
+                'weekly' => [
+                    'is_active' => true,
+                    'report_departments' => [$weeklyDepartment->getKey()],
+                    'report_channels' => ['database'],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()->where('name', $request['name'])->firstOrFail();
+
+    $daily = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Daily);
+    expect($daily->is_active)->toBeTrue()
+        ->and($daily->is_reported_via_email)->toBeTrue()
+        ->and($daily->is_reported_via_database)->toBeFalse()
+        ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$dailyUser->getKey()]);
+
+    $weekly = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Weekly);
+    expect($weekly->is_active)->toBeTrue()
+        ->and($weekly->is_reported_via_database)->toBeTrue()
+        ->and($weekly->reportDepartments()->pluck('departments.id')->all())->toBe([$weeklyDepartment->getKey()]);
+
+    $monthly = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Monthly);
+    expect($monthly->is_active)->toBeFalse();
+});
+
+test('a confidential service monitor cannot be created while a report recipient has no confidential access', function () {
+    asSuperAdmin();
+
+    $reportUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$reportUser->getKey()],
+                ],
+            ],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a confidential service monitor can be created when a report recipient has confidential access', function () {
+    asSuperAdmin();
+
+    $reportUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$reportUser->getKey()],
+                ],
+            ],
+            'is_confidential' => true,
+            'confidentialUsers' => [$reportUser->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
 });
 
 test('a service monitor saves keyword match values arrays', function () {
