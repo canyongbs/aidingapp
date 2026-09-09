@@ -110,6 +110,20 @@ it('lists directly assigned projects with progress based on non-archived tasks',
         ->assertJsonPath('meta.per_page', 10);
 });
 
+it('does not list projects the contact cannot access', function () {
+    $contact = Contact::factory()->create();
+    $assignedProject = Project::factory()->create();
+    $assignedProject->guestContacts()->attach($contact);
+    $unassignedProject = Project::factory()->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.index'))
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $assignedProject->getKey())
+        ->assertJsonMissing(['id' => $unassignedProject->getKey()]);
+});
+
 it('paginates assigned projects', function () {
     $contact = Contact::factory()->create();
 
