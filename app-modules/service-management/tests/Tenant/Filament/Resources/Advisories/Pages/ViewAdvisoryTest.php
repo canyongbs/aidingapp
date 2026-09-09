@@ -221,6 +221,43 @@ test('the Tracking Details section can be updated', function () {
         ->status_id->toEqual($status->getKey());
 });
 
+test('the Status entry reflects the new value immediately after updating the Tracking Details section', function () {
+    $user = User::factory()->create();
+
+    $oldStatus = AdvisoryStatus::factory()->create();
+    $oldSeverity = AdvisorySeverity::factory()->create();
+
+    $advisory = Advisory::factory()->create([
+        'status_id' => $oldStatus->getKey(),
+        'severity_id' => $oldSeverity->getKey(),
+    ]);
+
+    $newSeverity = AdvisorySeverity::factory()->create();
+    $newStatus = AdvisoryStatus::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
+    $user->givePermissionTo('advisory.*.update');
+
+    $component = livewire(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'), data: [
+            'severity_id' => $newSeverity->getKey(),
+            'status_id' => $newStatus->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    dump([
+        'old severity seen' => str_contains($component->html(), e($oldSeverity->name)),
+        'new severity seen' => str_contains($component->html(), e($newSeverity->name)),
+        'old status seen' => str_contains($component->html(), e($oldStatus->name)),
+        'new status seen' => str_contains($component->html(), e($newStatus->name)),
+    ]);
+});
+
 test('the Tracking Details section validates the inputs', function ($overrides, $errors) {
     $user = User::factory()->create();
 
