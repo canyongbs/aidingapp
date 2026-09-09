@@ -36,9 +36,9 @@
 
 use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
