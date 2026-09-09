@@ -412,6 +412,45 @@ test('Manage Assignment action visible when the Service Request is unassigned an
         ->assertTableActionVisible('manageAssignment');
 });
 
+test('Manage Assignment action mounts with the Service Request current status pre-filled', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $manager = User::factory()->create();
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    // Only fills userId, relying on the action mounting with status_id already pre-filled to its current value.
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->setTableActionData(['userId' => $manager->getKey()])
+        ->callMountedTableAction()
+        ->assertHasNoTableActionErrors();
+
+    expect($serviceRequest->refresh()->status_id)->toBe($status->getKey());
+});
+
 test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function () {
     $settings = app(LicenseSettings::class);
 

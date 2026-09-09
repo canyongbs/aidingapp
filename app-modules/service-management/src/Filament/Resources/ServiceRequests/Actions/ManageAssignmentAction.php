@@ -59,7 +59,6 @@ class ManageAssignmentAction
             ->modalSubmitActionLabel('Submit')
             ->fillForm([
                 'userId' => $defaultUserId,
-                // fillForm() disables default-state hydration for the whole schema, so status_id must be filled explicitly to be pre-selected.
                 'status_id' => $serviceRequest->status_id,
             ])
             ->visible(fn (): bool => $serviceRequest->priority?->type_id !== null
