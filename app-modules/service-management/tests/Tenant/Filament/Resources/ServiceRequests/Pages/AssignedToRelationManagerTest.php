@@ -423,9 +423,6 @@ test('Manage Assignment action mounts with the Service Request current status pr
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    $manager = User::factory()->create();
-    $serviceRequestType->managerUsers()->attach($manager);
-
     $status = ServiceRequestStatus::factory()->create([
         'classification' => SystemServiceRequestClassification::Open,
     ]);
@@ -438,17 +435,14 @@ test('Manage Assignment action mounts with the Service Request current status pr
     ])
         ->create();
 
-    // Only fills userId, relying on the action mounting with status_id already pre-filled to its current value.
     livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
         ->mountTableAction('manageAssignment')
-        ->setTableActionData(['userId' => $manager->getKey()])
-        ->callMountedTableAction()
-        ->assertHasNoTableActionErrors();
-
-    expect($serviceRequest->refresh()->status_id)->toBe($status->getKey());
+        ->assertTableActionDataSet([
+            'status_id' => $status->getKey(),
+        ]);
 });
 
 test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function () {
