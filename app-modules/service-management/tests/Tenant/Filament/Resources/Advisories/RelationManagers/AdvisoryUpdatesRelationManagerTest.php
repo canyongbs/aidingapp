@@ -35,9 +35,8 @@
 */
 
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
@@ -69,7 +68,7 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertSuccessful()
         ->assertCanSeeTableRecords($advisoryUpdates)
@@ -89,7 +88,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
@@ -97,7 +96,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
@@ -113,7 +112,7 @@ test('the create action is hidden when the advisory is resolved', function () {
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionHidden('create');
 });
@@ -129,7 +128,7 @@ test('the create action is visible when the advisory is open', function () {
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionVisible('create');
 });
@@ -149,9 +148,10 @@ test('creating an advisory update updates the advisory status', function () {
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->callTableAction('create', data: [
+            'title' => 'A new title',
             'update' => 'A new update',
             'internal' => false,
             'status_id' => $newStatus->getKey(),
@@ -174,7 +174,7 @@ test('the create form date field defaults to now', function () {
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->mountTableAction('create')
         ->assertFormFieldExists('date', function (DateTimePicker $field): bool {
@@ -182,23 +182,6 @@ test('the create form date field defaults to now', function () {
 
             return $default !== null && now()->diffInSeconds($default) < 10;
         });
-});
-
-test('the update column is shown instead of title when the feature is inactive', function () {
-    $advisory = Advisory::factory()->create();
-
-    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
-
-    asSuperAdmin();
-
-    livewire(AdvisoryUpdatesRelationManager::class, [
-        'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
-    ])
-        ->assertTableColumnExists('update')
-        ->assertTableColumnDoesNotExist('title')
-        ->assertTableColumnDoesNotExist('date')
-        ->assertTableColumnStateSet('update', $advisoryUpdate->update, record: $advisoryUpdate);
 });
 
 test('the title column with a description replaces the update column', function () {
@@ -210,7 +193,7 @@ test('the title column with a description replaces the update column', function 
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableColumnDoesNotExist('update')
         ->assertTableColumnExists('title')
@@ -219,7 +202,7 @@ test('the title column with a description replaces the update column', function 
         ->assertTableColumnHasDescription('title', $advisoryUpdate->update, record: $advisoryUpdate);
 });
 
-test('the title column links to the edit page when the user can update the advisory update', function () {
+test('clicking the title opens an editable modal when the user can update the advisory update', function () {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Open,
@@ -230,20 +213,17 @@ test('the title column links to the edit page when the user can update the advis
 
     asSuperAdmin();
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
-    ]);
-
-    $column = $component->instance()->getTable()->getColumn('title');
-
-    expect($column->getUrl($advisoryUpdate))->toBe(AdvisoryUpdateResource::getUrl('edit', [
-        'record' => $advisoryUpdate,
-        'advisory' => $advisory,
-    ]));
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->mountAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertActionMounted(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertFormFieldEnabled('title');
 });
 
-test('the title column links to the view page when the user cannot update the advisory update', function () {
+test('clicking the title opens a read-only modal when the user cannot update the advisory update', function () {
+    // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
             'classification' => SystemAdvisoryStatusClassification::Resolved,
@@ -254,36 +234,74 @@ test('the title column links to the view page when the user cannot update the ad
 
     $user = User::factory()
         ->create()
-        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view');
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
 
     actingAs($user);
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
-    ]);
-
-    $column = $component->instance()->getTable()->getColumn('title');
-
-    // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
-    expect($column->getUrl($advisoryUpdate))->toBe(AdvisoryUpdateResource::getUrl('view', [
-        'record' => $advisoryUpdate,
-        'advisory' => $advisory,
-    ]));
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->mountAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertActionMounted(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertFormFieldDisabled('title');
 });
 
-test('the row-level view action is no longer present on the table', function () {
-    $advisory = Advisory::factory()->create();
+test('a user cannot mount the view or edit advisory update action without the view permission', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
 
     $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any');
+
+    actingAs($user);
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->assertActionHidden(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate));
+});
+
+test('submitting the view or edit advisory update action updates the advisory update and the advisory status', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    $newStatus = AdvisoryStatus::factory()->create([
+        'classification' => SystemAdvisoryStatusClassification::Open,
+    ]);
 
     asSuperAdmin();
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
-        ->assertTableActionDoesNotExist('view', record: $advisoryUpdate);
+        ->callAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate), data: [
+            'title' => 'An updated title',
+            'update' => 'An updated update',
+            'internal' => true,
+            'status_id' => $newStatus->getKey(),
+        ])
+        ->assertHasNoActionErrors();
+
+    expect($advisoryUpdate->refresh())
+        ->title->toBe('An updated title')
+        ->update->toBe('An updated update')
+        ->internal->toBeTrue();
+
+    expect($advisory->refresh()->status_id)->toBe($newStatus->getKey());
 });
 
 // Permission Tests
@@ -303,7 +321,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionHidden('create');
 
@@ -311,7 +329,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
 
     livewire(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
-        'pageClass' => ManageAdvisoryUpdate::class,
+        'pageClass' => ViewAdvisory::class,
     ])
         ->assertTableActionVisible('create');
 });

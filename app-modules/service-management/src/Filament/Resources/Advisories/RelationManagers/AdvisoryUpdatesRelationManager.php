@@ -37,27 +37,31 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers;
 
 use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
-use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Arr;
 
 class AdvisoryUpdatesRelationManager extends RelationManager
 {
     protected static string $relationship = 'advisoryUpdates';
-
-    protected static ?string $relatedResource = AdvisoryUpdateResource::class;
 
     public function form(Schema $schema): Schema
     {
@@ -65,11 +69,11 @@ class AdvisoryUpdatesRelationManager extends RelationManager
 
         return $schema
             ->components([
-                AdvisoryUpdateResource::getPropertiesSectionSchema(),
+                static::getPropertiesSectionSchema(),
                 ToggleButtons::make('status_id')
                     ->label('Status')
                     ->inline()
-                    ->options(fn (): array => AdvisoryUpdateResource::getStatusOptions($this->getOwnerRecord()))
+                    ->options(fn (): array => static::getStatusOptions($this->getOwnerRecord()))
                     ->default($this->getOwnerRecord()->status->getKey())
                     ->exists((new AdvisoryStatus())->getTable(), 'id')
                     ->required()
@@ -81,8 +85,6 @@ class AdvisoryUpdatesRelationManager extends RelationManager
     {
         assert($this->getOwnerRecord() instanceof Advisory);
 
-        $advisory = $this->getOwnerRecord();
-
         return $table
             ->columns([
                 IdColumn::make(),
@@ -91,14 +93,14 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                         TextColumn::make('title')
                             ->label('Title')
                             ->description(fn (AdvisoryUpdate $record): string => $record->update)
-                            ->url(fn (AdvisoryUpdate $record): string => static::getRecordUrl($record, $advisory))
-                            ->searchable(),
+                            ->searchable()
+                            ->color('primary')
+                            ->action(static::getViewOrEditAdvisoryUpdateAction()),
                     ]
                     : [
                         TextColumn::make('update')
                             ->label('Update')
-                            ->words(6)
-                            ->url(fn (AdvisoryUpdate $record): string => static::getRecordUrl($record, $advisory)),
+                            ->words(6),
                     ]),
                 IconColumn::make('internal')
                     ->boolean(),
@@ -132,12 +134,81 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ]);
     }
 
-    protected static function getRecordUrl(AdvisoryUpdate $record, Advisory $advisory): string
+    private static function getViewOrEditAdvisoryUpdateAction(): Action
     {
-        $routeParameters = ['record' => $record, 'advisory' => $advisory];
+        return Action::make('viewOrEditAdvisoryUpdate')
+            ->authorize(fn (AdvisoryUpdate $record): bool => auth()->user()->can('view', $record))
+            ->label(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit' : 'View')
+            ->modalHeading(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit advisory update' : 'View advisory update')
+            ->schema([
+                static::getPropertiesSectionSchema(),
+                ToggleButtons::make('status_id')
+                    ->label('Status')
+                    ->inline()
+                    ->options(fn (AdvisoryUpdate $record): array => static::getStatusOptions($record->advisory))
+                    ->exists((new AdvisoryStatus())->getTable(), 'id')
+                    ->required()
+                    ->columnSpanFull(),
+            ])
+            ->fillForm(fn (AdvisoryUpdate $record): array => [
+                'title' => $record->title,
+                'update' => $record->update,
+                'internal' => $record->internal,
+                'date' => $record->date,
+                'status_id' => $record->advisory->status_id,
+            ])
+            ->disabledForm(fn (AdvisoryUpdate $record): bool => auth()->user()->cannot('update', $record))
+            ->modalSubmitAction(fn (AdvisoryUpdate $record): bool|null => auth()->user()->can('update', $record) ? null : false)
+            ->modalCancelActionLabel(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Cancel' : 'Close')
+            ->action(function (array $data, AdvisoryUpdate $record): void {
+                abort_unless(auth()->user()->can('update', $record), 403);
 
-        return auth()->user()->can('update', $record)
-            ? AdvisoryUpdateResource::getUrl('edit', $routeParameters)
-            : AdvisoryUpdateResource::getUrl('view', $routeParameters);
+                $record->update(Arr::except($data, ['status_id']));
+                $record->advisory->update(['status_id' => $data['status_id']]);
+            });
+    }
+
+    private static function getPropertiesSectionSchema(): Section
+    {
+        return Section::make('Properties')
+            ->schema([
+                TextInput::make('title')
+                    ->label('Title')
+                    ->required()
+                    ->maxLength(255)
+                    ->string()
+                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
+                    ->columnSpanFull(),
+                Textarea::make('update')
+                    ->label('Description')
+                    ->rows(3)
+                    ->required()
+                    ->string()
+                    ->columnSpanFull(),
+                Toggle::make('internal')
+                    ->label('Internal')
+                    ->rule(['boolean'])
+                    ->columnSpanFull(),
+                DateTimePicker::make('date')
+                    ->label('Date')
+                    ->required()
+                    ->default(now())
+                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function getStatusOptions(Advisory $currentAdvisory): array
+    {
+        return AdvisoryStatus::orderBy('classification')
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->mapWithKeys(fn (AdvisoryStatus $status): array => [
+                $status->getKey() => $status->name . ($status->getKey() === $currentAdvisory->status->getKey() ? ' (Current)' : ''),
+            ])
+            ->all();
     }
 }
