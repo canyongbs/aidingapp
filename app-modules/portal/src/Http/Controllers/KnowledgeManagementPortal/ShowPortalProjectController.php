@@ -40,7 +40,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
-use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Settings\LicenseSettings;
@@ -80,12 +79,9 @@ class ShowPortalProjectController
         $entries = $selectedPipeline->entries()
             ->withoutArchived()
             ->where('is_visible_to_guests', true)
-            ->whereIn(
-                'pipeline_stage_id',
-                PipelineStage::query()
-                    ->withoutArchived()
-                    ->select('id'),
-            )
+            ->whereHas('pipelineStage', function (Builder $query): void {
+                $query->withoutArchived(); /** @phpstan-ignore-line */
+            })
             ->where(function (Builder $query): void {
                 $query->whereNull('project_milestone_id')
                     ->orWhereIn(
