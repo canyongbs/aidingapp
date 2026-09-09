@@ -2840,8 +2840,10 @@ describe('Service request reply threading', function () {
 
             expect($media)->toHaveCount(2);
             expect($media->first()->file_name)->toBe('SampleJPGImage_1mbmb.jpg');
+            expect($media->first()->name)->toBe('SampleJPGImage_1mbmb');
             expect($media->first()->extension)->toBe('jpg');
             expect($media->last()->file_name)->toBe('SampleJPGImage_50kbmb.jpg');
+            expect($media->last()->name)->toBe('SampleJPGImage_50kbmb');
             expect($media->last()->extension)->toBe('jpg');
 
             $inlineAttachments = $serviceRequestUpdate->getMedia('inline_attachments');

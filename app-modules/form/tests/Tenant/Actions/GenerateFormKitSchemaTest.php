@@ -34,22 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Http\Controllers;
+use AidingApp\Form\Actions\GenerateFormKitSchema;
 
-use AidingApp\KnowledgeBase\Http\Requests\KnowledgeBaseArticleMediaDownloadRequest;
-use App\Http\Controllers\Controller;
-use App\Models\Media;
-use Illuminate\Http\RedirectResponse;
+it('renders a heading block that has no content', function () {
+    $schema = app(GenerateFormKitSchema::class)->content([], [
+        ['type' => 'heading', 'attrs' => ['level' => 2]],
+    ]);
 
-class KnowledgeBaseArticleMediaDownloadController extends Controller
-{
-    public function __invoke(KnowledgeBaseArticleMediaDownloadRequest $request, Media $media): RedirectResponse
-    {
-        return redirect(
-            $media->getTemporaryUrl(
-                expiration: now()->addMinute(),
-                options: ['ResponseContentDisposition' => $media->attachmentContentDisposition()]
-            )
-        );
-    }
-}
+    expect($schema)->toBe([
+        ['$el' => 'h2', 'children' => []],
+    ]);
+});
+
+it('renders a gridColumn block that has no content', function () {
+    $schema = app(GenerateFormKitSchema::class)->content([], [
+        ['type' => 'gridColumn'],
+    ]);
+
+    expect($schema)->toBe([
+        ['$el' => 'div', 'children' => [], 'attrs' => ['class' => ['grid-col' => true]]],
+    ]);
+});
