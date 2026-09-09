@@ -34,9 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Ai\Models\AiMessage;
 use AidingApp\Ai\Models\AiMessageFile;
-use AidingApp\Ai\Models\AiThread;
 use AidingApp\IntegrationOpenAi\Models\OpenAiVectorStore;
 use AidingApp\IntegrationOpenAi\Services\OpenAiGptTestService;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -45,27 +43,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertSoftDeleted;
-
-function createAiMessageFile(array $attributes = []): AiMessageFile
-{
-    // AiMessage's "id" column is a non-incrementing uuid, but the model keeps
-    // Eloquent's default incrementing int key, which mangles the returned id
-    // when inserted through the model. Insert it directly to get a real uuid.
-    $messageId = (string) Str::uuid();
-
-    AiMessage::query()->insert([
-        'id' => $messageId,
-        'thread_id' => AiThread::factory()->create()->id,
-        'content' => fake()->sentence(),
-        'created_at' => now(),
-        'updated_at' => now(),
-    ]);
-
-    return AiMessageFile::factory()->create([
-        'message_id' => $messageId,
-        ...$attributes,
-    ]);
-}
 
 it('skips uploading a file that has no parsing results instead of sending an empty file to OpenAI', function () {
     Http::fake([
@@ -105,7 +82,7 @@ it('uploads files with parsing results while excluding files that have none', fu
 
     $service = app(OpenAiGptTestService::class);
 
-    $fileWithResults = createAiMessageFile();
+    $fileWithResults = AiMessageFile::factory()->create();
     $blankFile = AiMessageFile::factory()->create([
         'parsing_results' => '',
     ]);
