@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
 use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
@@ -322,6 +323,16 @@ it('resolves every type the user manages or audits as an affiliated type', funct
     $auditorDepartmentType = ServiceRequestType::factory()->create();
     $auditorDepartmentType->auditorDepartments()->attach($department);
 
+    $managerGroup = Group::factory()->create();
+    $managerGroup->users()->attach($user);
+    $managerGroupType = ServiceRequestType::factory()->create();
+    $managerGroupType->managerGroups()->attach($managerGroup);
+
+    $auditorGroup = Group::factory()->create();
+    $auditorGroup->users()->attach($user);
+    $auditorGroupType = ServiceRequestType::factory()->create();
+    $auditorGroupType->auditorGroups()->attach($auditorGroup);
+
     $archivedUserAffiliatedType = ServiceRequestType::factory()->create();
     $archivedUserAffiliatedType->managerUsers()->attach($user);
     $archivedUserAffiliatedType->archive();
@@ -344,6 +355,8 @@ it('resolves every type the user manages or audits as an affiliated type', funct
             $auditorUserType->getKey(),
             $managerDepartmentType->getKey(),
             $auditorDepartmentType->getKey(),
+            $managerGroupType->getKey(),
+            $auditorGroupType->getKey(),
         ])
         ->not->toContain($archivedUserAffiliatedType->getKey())
         ->not->toContain($archivedDepartmentAffiliatedType->getKey())

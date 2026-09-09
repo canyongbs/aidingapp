@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -155,6 +156,39 @@ test('it can change status of multiple service requests for user belonging to a 
     $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
         expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
+});
+
+test('it can change status of multiple service requests for user belonging to a manager group', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerGroups()->attach($group);
+
+    $originalStatus = ServiceRequestStatus::factory()->open()->create();
+    $newStatus = ServiceRequestStatus::factory()->open()->create(['name' => 'Group Managed']);
+    $serviceRequests = ServiceRequest::factory()
+        ->state([
+            'status_id' => $originalStatus->getKey(),
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(2)
+        ->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+    actingAs($user);
+
+    livewire(ListServiceRequests::class)
+        ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+            'statusId' => $newStatus->getKey(),
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    $serviceRequests->each(fn (ServiceRequest $serviceRequest) => expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey()));
 });
 
 test('it cannot change status of service requests for user who is not a manager', function () {
