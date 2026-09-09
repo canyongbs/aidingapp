@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -100,11 +101,31 @@ it('can attach manager departments to a service request type', function () {
         ->toContain($department->getKey());
 });
 
-it('can attach both manager users and manager departments to a service request type', function () {
+it('can attach manager groups to a service request type', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $group = Group::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypeManagers::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'managerGroups' => [$group->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->managerGroups->pluck('id'))
+        ->toContain($group->getKey());
+});
+
+it('can attach manager users, departments, and groups to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
     $department = Department::factory()->create();
+    $group = Group::factory()->create();
 
     asSuperAdmin();
 
@@ -114,14 +135,16 @@ it('can attach both manager users and manager departments to a service request t
         ->fillForm([
             'managerUsers' => [$user->getKey()],
             'managerDepartments' => [$department->getKey()],
+            'managerGroups' => [$group->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     $serviceRequestType->refresh();
 
-    expect($serviceRequestType->managerUsers->pluck('id'))->toContain($user->getKey());
-    expect($serviceRequestType->managerDepartments->pluck('id'))->toContain($department->getKey());
+    expect($serviceRequestType->managerUsers->pluck('id'))->toContain($user->getKey())
+        ->and($serviceRequestType->managerDepartments->pluck('id'))->toContain($department->getKey())
+        ->and($serviceRequestType->managerGroups->pluck('id'))->toContain($group->getKey());
 });
 
 test('ManageServiceRequestTypeManagers is gated with proper access control', function () {

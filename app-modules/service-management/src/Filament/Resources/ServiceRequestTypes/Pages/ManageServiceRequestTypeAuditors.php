@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
@@ -78,8 +79,15 @@ class ManageServiceRequestTypeAuditors extends EditRecord
                             ->multiple()
                             ->relationship('auditorDepartments', 'name')
                             ->preload(),
+                        ...(ServiceRequestTypeGroupAssignmentsFeature::active() ? [
+                            Select::make('auditorGroups')
+                                ->label('Groups')
+                                ->multiple()
+                                ->relationship('auditorGroups', 'name')
+                                ->preload(),
+                        ] : []),
                     ])
-                    ->columns(2),
+                    ->columns(3),
             ]);
     }
 }

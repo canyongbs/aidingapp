@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Pages\EditRecord;
@@ -78,8 +79,15 @@ class ManageServiceRequestTypeManagers extends EditRecord
                             ->multiple()
                             ->relationship('managerDepartments', 'name')
                             ->preload(),
+                        ...(ServiceRequestTypeGroupAssignmentsFeature::active() ? [
+                            Select::make('managerGroups')
+                                ->label('Groups')
+                                ->multiple()
+                                ->relationship('managerGroups', 'name')
+                                ->preload(),
+                        ] : []),
                     ])
-                    ->columns(2),
+                    ->columns(3),
             ]);
     }
 }

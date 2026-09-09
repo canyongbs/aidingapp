@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
@@ -124,6 +125,37 @@ test('Assign To Me action visible when the Service Request is unassigned and the
         'pageClass' => ViewServiceRequest::class,
     ])
         ->assertTableActionVisible('assign-to-me');
+});
+
+test('Assign To Me action is visible when the logged-in user belongs to a manager group', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.*.update');
+
+    $group = Group::factory()->create();
+    $group->users()->attach($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerGroups()->attach($group);
+
+    actingAs($user);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])->assertTableActionVisible('assign-to-me');
 });
 
 test('Assign To Me preselects the logged-in manager and waits for submission before assigning', function () {
