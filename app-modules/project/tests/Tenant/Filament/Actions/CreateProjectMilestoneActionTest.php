@@ -34,33 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
-
-class CreateProjectMilestoneStatus extends CreateRecord
+// Checked directly against the schema array since the status table is already dropped by the time tests run.
+function createProjectMilestoneActionHasStatusField(): bool
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->maxLength(255)
-                    ->autofocus()
-                    ->required()
-                    ->string()
-                    ->unique(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->maxLength(65535)
-                    ->required(),
-            ]);
-    }
+    return collect(CreateProjectMilestoneAction::formSchema())
+        ->contains(fn ($component) => $component->getStatePath(isAbsolute: false) === 'status_id');
 }
+
+it('excludes the status field by default', function () {
+    expect(createProjectMilestoneActionHasStatusField())->toBeFalse();
+});
+
+it('includes a required status field when the flag is inactive', function () {
+    ProjectMilestoneStatusRemovedFeature::deactivate();
+
+    expect(createProjectMilestoneActionHasStatusField())->toBeTrue();
+});

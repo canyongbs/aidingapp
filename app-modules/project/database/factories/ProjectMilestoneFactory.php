@@ -38,7 +38,6 @@ namespace AidingApp\Project\Database\Factories;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -58,7 +57,6 @@ class ProjectMilestoneFactory extends Factory
             'project_id' => Project::factory(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'description' => $this->faker->sentence(3),
-            'status_id' => ProjectMilestoneStatus::factory(),
             'created_by_id' => User::factory(),
         ];
     }

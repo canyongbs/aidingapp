@@ -34,37 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
+namespace App\Features;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
+use App\Support\AbstractFeatureFlag;
 
-class ViewProjectMilestoneStatus extends ViewRecord
+class ProjectMilestoneStatusRemovedFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function infolist(Schema $schema): Schema
+    public function resolve(mixed $scope): mixed
     {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                    ]),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            EditAction::make(),
-        ];
+        return false;
     }
 }
