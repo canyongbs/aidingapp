@@ -79,7 +79,7 @@ it('skips uploading a file that has no parsing results instead of sending an emp
 
     $service = app(OpenAiGptTestService::class);
 
-    $file = createAiMessageFile([
+    $file = AiMessageFile::factory()->create([
         'parsing_results' => '',
     ]);
 
@@ -106,7 +106,7 @@ it('uploads files with parsing results while excluding files that have none', fu
     $service = app(OpenAiGptTestService::class);
 
     $fileWithResults = createAiMessageFile();
-    $blankFile = createAiMessageFile([
+    $blankFile = AiMessageFile::factory()->create([
         'parsing_results' => '',
     ]);
 

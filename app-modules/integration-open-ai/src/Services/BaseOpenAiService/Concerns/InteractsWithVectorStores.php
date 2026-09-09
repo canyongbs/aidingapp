@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait InteractsWithVectorStores
 {
@@ -296,16 +297,15 @@ trait InteractsWithVectorStores
      * vector store logic can reuse the fully loaded instance instead of
      * fetching it fresh again.
      */
-    protected function resolveFileForVectorStore(AiFile $file): ?AiFile
+    protected function fileHasParsingResults(AiFile $file): bool
     {
         $parsingResults = $file->getParsingResults();
 
         if (blank($parsingResults) && ($file instanceof Model)) {
-            $file = $file->fresh() ?? $file;
-            $parsingResults = $file->getParsingResults();
+            $parsingResults = $file->fresh()?->getParsingResults();
         }
 
-        return filled($parsingResults) ? $file : null;
+        return filled($parsingResults);
     }
 
     protected function uploadFileForVectorStore(AiFile $file): ?OpenAiVectorStore
@@ -325,7 +325,7 @@ trait InteractsWithVectorStores
         }
 
         if (blank($parsingResults)) {
-            report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as the file name is blank.'));
+            Log::info('Skipping file [' . $file->getKey() . '] for vector store, as it has no parsing results to upload.');
 
             return null;
         }

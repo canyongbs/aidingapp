@@ -523,7 +523,7 @@ abstract class BaseOpenAiService implements AiService
      */
     public function getReadyVectorStoreId(array $files): ?string
     {
-        $files = array_values(array_filter(array_map(fn (AiFile $file): ?AiFile => $this->resolveFileForVectorStore($file), $files)));
+        $files = array_values(array_filter($files, fn (AiFile $file): bool => $this->fileHasParsingResults($file)));
 
         if (blank($files)) {
             return null;
@@ -561,7 +561,7 @@ abstract class BaseOpenAiService implements AiService
     public function areFilesReady(array $files, ?Model $context = null): bool
     {
         $allFiles = $files;
-        $files = array_values(array_filter(array_map(fn (AiFile $file): ?AiFile => $this->resolveFileForVectorStore($file), $files)));
+        $files = array_values(array_filter($files, fn (AiFile $file): bool => $this->fileHasParsingResults($file)));
 
         if (! $files) {
             $primaryVectorStore = Arr::first($this->getValidExistingVectorStoresForFiles($allFiles));
