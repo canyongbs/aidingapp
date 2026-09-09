@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringReportConfigurationFactory;
@@ -45,14 +46,17 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use OwenIt\Auditing\Contracts\Auditable;
 
 /**
  * @mixin IdeHelperServiceMonitoringReportConfiguration
  */
-class ServiceMonitoringReportConfiguration extends BaseModel
+class ServiceMonitoringReportConfiguration extends BaseModel implements Auditable
 {
     /** @use HasFactory<ServiceMonitoringReportConfigurationFactory> */
     use HasFactory;
+
+    use AuditableTrait;
 
     protected $fillable = [
         'service_monitoring_target_id',

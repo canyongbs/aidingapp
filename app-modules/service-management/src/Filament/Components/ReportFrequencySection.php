@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use App\Filament\Forms\Components\UserSelect;
+use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
@@ -67,7 +68,7 @@ class ReportFrequencySection
                             ->label('Users')
                             ->multiple()
                             ->preload()
-                            ->options(fn (): array => User::query()->orderBy('name')->pluck('name', 'id')->all()),
+                            ->options(fn (): array => User::query()->tap(new WithoutAnyAdmin())->orderBy('name')->pluck('name', 'id')->all()),
                         Select::make("{$prefix}.report_departments")
                             ->label('Departments')
                             ->multiple()

@@ -150,9 +150,9 @@ test('The Automated Reporting section is hidden when no reporting frequency is a
 
     $configuration = ServiceMonitoringReportConfiguration::factory()
         ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->inactive()
         ->create([
             'frequency' => ServiceMonitoringReportFrequency::Weekly,
-            'is_active' => false,
             'is_reported_via_email' => true,
             'is_reported_via_database' => true,
         ]);

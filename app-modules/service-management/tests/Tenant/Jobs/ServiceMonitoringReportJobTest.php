@@ -117,9 +117,8 @@ it('only dispatches for configurations matching the specified report frequency',
 it('does not dispatch for configurations that are inactive', function (ServiceMonitoringReportFrequency $frequency) {
     Queue::fake();
 
-    ServiceMonitoringReportConfiguration::factory()->count(3)->create([
+    ServiceMonitoringReportConfiguration::factory()->count(3)->inactive()->create([
         'frequency' => $frequency,
-        'is_active' => false,
     ]);
 
     (new ServiceMonitoringReportJob($frequency))->handle();

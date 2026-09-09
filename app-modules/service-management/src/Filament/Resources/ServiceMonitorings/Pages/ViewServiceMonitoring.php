@@ -61,6 +61,14 @@ class ViewServiceMonitoring extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            $this->getRecord()->loadMissing([
+                'reportConfigurations.reportUsers',
+                'reportConfigurations.reportDepartments',
+                'reportConfigurations.reportContacts',
+            ]);
+        }
+
         return $schema
             ->schema([
                 Section::make()

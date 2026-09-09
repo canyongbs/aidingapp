@@ -36,21 +36,14 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
-use AidingApp\Department\Models\Department;
-use App\Models\Scopes\WithoutAnyAdmin;
-use App\Models\User;
-use Closure;
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Translation\PotentiallyTranslatedString;
 
 /**
  * A confidential service monitor only notifies recipients who are allowed to see it, so a
  * recipient without confidential access would silently never be alerted. This rejects that
  * combination at the form instead of letting the outage alert disappear at delivery time.
  */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess implements ValidationRule
+class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
 {
     /**
      * @param list<string> $notifiedUserIds
@@ -59,77 +52,22 @@ class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess implements 
      * @param list<string> $confidentialDepartmentIds
      */
     public function __construct(
-        protected array $notifiedUserIds,
-        protected array $notifiedDepartmentIds,
-        protected array $confidentialUserIds,
-        protected array $confidentialDepartmentIds,
-        protected ?string $creatorId,
-    ) {}
+        array $notifiedUserIds,
+        array $notifiedDepartmentIds,
+        array $confidentialUserIds,
+        array $confidentialDepartmentIds,
+        ?string $creatorId,
+    ) {
+        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
+    }
 
     /**
-     * @param Closure(string): PotentiallyTranslatedString $fail
+     * @param Collection<int, string> $unreachable
      */
-    public function validate(string $attribute, mixed $value, Closure $fail): void
+    protected function failureMessage(Collection $unreachable): string
     {
-        if (! $value) {
-            return;
-        }
-
-        $unreachable = $this->unreachableDepartmentNames()
-            ->concat($this->unreachableUserNames());
-
-        if ($unreachable->isEmpty()) {
-            return;
-        }
-
-        $fail(
-            'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
+        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
             . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.'
-        );
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    protected function unreachableDepartmentNames(): Collection
-    {
-        return Department::query()
-            ->whereKey($this->notifiedDepartmentIds)
-            ->when(
-                filled($this->confidentialDepartmentIds),
-                fn (Builder $query) => $query->whereKeyNot($this->confidentialDepartmentIds),
-            )
-            ->orderBy('name')
-            ->pluck('name');
-    }
-
-    /**
-     * @return Collection<int, string>
-     */
-    protected function unreachableUserNames(): Collection
-    {
-        return User::query()
-            ->whereKey($this->notifiedUserIds)
-            // Admins can already see every confidential monitor
-            ->tap(new WithoutAnyAdmin())
-            ->when(
-                filled($this->confidentialUserIds),
-                fn (Builder $query) => $query->whereKeyNot($this->confidentialUserIds),
-            )
-            ->when(
-                filled($this->confidentialDepartmentIds),
-                // A user with no department is never covered by a granted department, and
-                // `whereNotIn` alone would drop them from the results because NULL NOT IN (…) is NULL
-                fn (Builder $query) => $query->where(fn (Builder $query) => $query
-                    ->whereNull('department_id')
-                    ->orWhereNotIn('department_id', $this->confidentialDepartmentIds)),
-            )
-            ->when(
-                filled($this->creatorId),
-                fn (Builder $query) => $query->whereKeyNot($this->creatorId),
-            )
-            ->orderBy('name')
-            ->pluck('name');
+            . '. Grant them confidential access below, or remove them from the notification settings.';
     }
 }
