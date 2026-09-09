@@ -182,7 +182,7 @@ Route::prefix('api')
                     ->middleware(['auth:sanctum'])
                     ->name('projects.index');
 
-                Route::get('/projects/{project}', ShowPortalProjectController::class)
+                Route::get('/projects/{portalProject}', ShowPortalProjectController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('projects.show');
             });

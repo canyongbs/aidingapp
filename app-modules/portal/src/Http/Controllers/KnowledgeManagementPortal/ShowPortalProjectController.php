@@ -42,16 +42,16 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 class ShowPortalProjectController
 {
-    public function __invoke(string $project): JsonResponse
+    public function __invoke(Request $request, Project $portalProject): JsonResponse
     {
         $contact = auth('contact')->user();
 
@@ -60,30 +60,26 @@ class ShowPortalProjectController
             Response::HTTP_FORBIDDEN,
         );
 
-        $project = Project::query()
-            ->withoutArchived()
-            ->tap(new VisibleToPortalContact($contact))
-            ->whereKey($project)
-            ->firstOrFail();
-
-        $pipelines = $project->pipelines()
+        $pipelines = $portalProject->pipelines()
             ->withoutArchived()
             ->oldest()
             ->get(['id', 'name']);
 
-        $milestones = $project->milestones()
-            ->withoutArchived()
-            ->orderBy('title')
-            ->get(['id', 'title']);
+        $requestedPipelineId = $request->string('pipeline')->toString();
+        $selectedPipeline = filled($requestedPipelineId)
+            ? $pipelines->firstWhere('id', $requestedPipelineId)
+            : $pipelines->first();
 
-        $entries = PipelineEntry::query()
+        abort_if(filled($requestedPipelineId) && ! $selectedPipeline, Response::HTTP_NOT_FOUND);
+
+        if (! $selectedPipeline) {
+            return $this->response($portalProject, $pipelines, null, collect(), $this->emptyMeta());
+        }
+
+        $entries = $selectedPipeline->entries()
             ->withoutArchived()
-            ->whereHas(
-                'pipelineStage',
-                fn (Builder $query): Builder => $query
-                    ->withoutArchived()
-                    ->whereIn('pipeline_id', $pipelines->modelKeys()),
-            )
+            ->where('is_visible_to_guests', true)
+            ->whereHas('pipelineStage', fn (Builder $query): Builder => $query->withoutArchived())
             ->where(function (Builder $query): void {
                 $query->whereNull('project_milestone_id')
                     ->orWhereHas(
@@ -93,19 +89,73 @@ class ShowPortalProjectController
             })
             ->with([
                 'pipelineStage:id,pipeline_id,name,classification',
-                'milestone:id,title',
             ])
-            ->oldest()
-            ->get([
-                'id',
-                'name',
-                'pipeline_stage_id',
-                'project_milestone_id',
-                'is_visible_to_guests',
-                'start_date',
-                'due',
+            ->orderByRaw('pipeline_entries.project_milestone_id IS NULL')
+            ->orderBy(
+                ProjectMilestone::query()
+                    ->select('title')
+                    ->whereColumn('project_milestones.id', 'pipeline_entries.project_milestone_id'),
+            )
+            ->oldest('pipeline_entries.created_at')
+            ->paginate(1, [
+                'pipeline_entries.id',
+                'pipeline_entries.name',
+                'pipeline_entries.pipeline_stage_id',
+                'pipeline_entries.project_milestone_id',
+                'pipeline_entries.start_date',
+                'pipeline_entries.due',
             ]);
 
+        $milestoneIds = $entries->getCollection()
+            ->pluck('project_milestone_id')
+            ->filter()
+            ->unique()
+            ->values();
+
+        $milestones = ProjectMilestone::query()
+            ->withoutArchived()
+            ->whereKey($milestoneIds)
+            ->withCount([
+                'pipelineEntries as total_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
+                'pipelineEntries as complete_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
+                    ->whereHas(
+                        'pipelineStage',
+                        fn (Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
+                    ),
+            ])
+            ->get(['id', 'title']);
+
+        return $this->response(
+            $portalProject,
+            $pipelines,
+            $selectedPipeline,
+            $entries->getCollection(),
+            [
+                'current_page' => $entries->currentPage(),
+                'last_page' => $entries->lastPage(),
+                'from' => $entries->firstItem() ?? 0,
+                'to' => $entries->lastItem() ?? 0,
+                'total' => $entries->total(),
+                'per_page' => $entries->perPage(),
+            ],
+            $milestones,
+        );
+    }
+
+    /**
+     * @param Collection<int, Pipeline> $pipelines
+     * @param Collection<int, PipelineEntry> $entries
+     * @param Collection<int, ProjectMilestone> $milestones
+     * @param array{current_page: int, last_page: int, from: int, to: int, total: int, per_page: int} $meta
+     */
+    private function response(
+        Project $project,
+        Collection $pipelines,
+        ?Pipeline $selectedPipeline,
+        Collection $entries,
+        array $meta,
+        Collection $milestones = new Collection(),
+    ): JsonResponse {
         return response()->json([
             'data' => [
                 'id' => $project->getKey(),
@@ -113,15 +163,45 @@ class ShowPortalProjectController
                 'pipelines' => $pipelines->map(fn (Pipeline $pipeline): array => [
                     'id' => $pipeline->getKey(),
                     'name' => $pipeline->name,
-                    'groups' => $this->pipelineGroups(
-                        $entries->filter(
-                            fn (PipelineEntry $entry): bool => $entry->pipelineStage->pipeline_id === $pipeline->getKey(),
-                        ),
-                        $milestones,
-                    ),
+                    ...($pipeline->is($selectedPipeline) ? [
+                        'groups' => $this->pipelineGroups($entries, $milestones),
+                    ] : []),
                 ]),
             ],
+            'meta' => $meta,
         ]);
+    }
+
+    /**
+     * @param Builder<PipelineEntry> $query
+     *
+     * @return Builder<PipelineEntry>
+     */
+    private function constrainMilestoneEntries(Builder $query, Pipeline $pipeline): Builder
+    {
+        return $query
+            ->withoutArchived()
+            ->whereHas(
+                'pipelineStage',
+                fn (Builder $query): Builder => $query
+                    ->withoutArchived()
+                    ->whereBelongsTo($pipeline, 'pipeline'),
+            );
+    }
+
+    /**
+     * @return array{current_page: int, last_page: int, from: int, to: int, total: int, per_page: int}
+     */
+    private function emptyMeta(): array
+    {
+        return [
+            'current_page' => 1,
+            'last_page' => 1,
+            'from' => 0,
+            'to' => 0,
+            'total' => 0,
+            'per_page' => 50,
+        ];
     }
 
     /**
@@ -135,19 +215,14 @@ class ShowPortalProjectController
         $milestoneGroups = $milestones
             ->map(function (ProjectMilestone $milestone) use ($entries): array {
                 $milestoneEntries = $entries->where('project_milestone_id', $milestone->getKey());
-                $totalEntries = $milestoneEntries->count();
-                $completeEntries = $milestoneEntries->filter(
-                    fn (PipelineEntry $entry): bool => $entry->pipelineStage->classification === PipelineStageClassification::Complete,
-                )->count();
 
                 return [
                     'milestone_id' => $milestone->getKey(),
                     'milestone_title' => $milestone->title,
-                    'progress_percentage' => $totalEntries === 0
+                    'progress_percentage' => ((int) $milestone->total_entries_count) === 0
                         ? 0
-                        : (int) round(($completeEntries / $totalEntries) * 100),
+                        : (int) round(((int) $milestone->complete_entries_count / (int) $milestone->total_entries_count) * 100),
                     'entries' => $milestoneEntries
-                        ->where('is_visible_to_guests', true)
                         ->map($this->mapEntry(...))
                         ->values()
                         ->all(),
@@ -157,8 +232,7 @@ class ShowPortalProjectController
             ->all();
 
         $unassignedEntries = $entries
-            ->whereNull('project_milestone_id')
-            ->where('is_visible_to_guests', true);
+            ->whereNull('project_milestone_id');
 
         if ($unassignedEntries->isNotEmpty()) {
             $milestoneGroups[] = [

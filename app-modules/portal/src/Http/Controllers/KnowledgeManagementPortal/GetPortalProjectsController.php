@@ -38,10 +38,9 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\DataTransferObjects\ProjectData;
-use AidingApp\Project\Enums\PipelineStageClassification;
-use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
+use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -57,16 +56,6 @@ class GetPortalProjectsController
             Response::HTTP_FORBIDDEN,
         );
 
-        $entries = PipelineEntry::query()
-            ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
-            ->join('pipelines', 'pipelines.id', '=', 'pipeline_stages.pipeline_id')
-            ->leftJoin('project_milestones', 'project_milestones.id', '=', 'pipeline_entries.project_milestone_id')
-            ->whereColumn('pipelines.project_id', 'projects.id')
-            ->whereNull('pipeline_entries.archived_at')
-            ->whereNull('pipeline_stages.archived_at')
-            ->whereNull('pipelines.archived_at')
-            ->whereNull('project_milestones.archived_at');
-
         $projects = Project::query()
             ->withoutArchived()
             ->tap(new VisibleToPortalContact($contact))
@@ -77,12 +66,7 @@ class GetPortalProjectsController
                 'projects.start_date',
                 'projects.target_completion_date',
             ])
-            ->addSelect([
-                'total_pipeline_entries_count' => (clone $entries)->selectRaw('count(*)'),
-                'complete_pipeline_entries_count' => (clone $entries)
-                    ->where('pipeline_stages.classification', PipelineStageClassification::Complete->value)
-                    ->selectRaw('count(*)'),
-            ])
+            ->tap(new WithProgressCounts(excludeArchived: true))
             ->orderBy('projects.name')
             ->paginate(10)
             ->through(fn (Project $project): ProjectData => new ProjectData(

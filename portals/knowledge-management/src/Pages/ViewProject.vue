@@ -37,20 +37,26 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import Pagination from '@common/portal/Pagination.vue';
     import { InformationCircleIcon } from '@heroicons/vue/20/solid';
+    import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import PipelineSelect from '../Components/Projects/PipelineSelect.vue';
     import ProjectPipelineTable from '../Components/Projects/ProjectPipelineTable.vue';
+    import { apiGet } from '../Services/api.js';
     import { useProjectData } from './loaders.js';
 
-    const { data: projectData } = useProjectData();
+    const { data: initialEnvelope } = useProjectData();
 
-    const project = computed(() => projectData.value?.data ?? null);
+    const project = computed(() => initialEnvelope.value?.data ?? null);
     const pipelines = computed(() => project.value?.pipelines ?? []);
+    const initialPipelineId = computed(
+        () => pipelines.value.find((pipeline) => Array.isArray(pipeline.groups))?.id ?? pipelines.value[0]?.id ?? null,
+    );
 
     const selectedPipelineId = ref(null);
+    const currentPage = ref(1);
 
-    // Auto-select the only pipeline (or default to the first) whenever the project data changes.
     watch(
         pipelines,
         (value) => {
@@ -61,9 +67,55 @@
         { immediate: true },
     );
 
-    const selectedPipeline = computed(
-        () => pipelines.value.find((pipeline) => pipeline.id === selectedPipelineId.value) ?? null,
+    watch(selectedPipelineId, (value, previousValue) => {
+        if (previousValue !== null && value !== previousValue) {
+            currentPage.value = 1;
+        }
+    });
+
+    const pageQuery = useQuery({
+        key: () => ['knowledge-management', 'project', project.value?.id, selectedPipelineId.value, currentPage.value],
+        query: () =>
+            apiGet(`/projects/${project.value.id}`, {
+                pipeline: selectedPipelineId.value,
+                page: currentPage.value,
+            }),
+        enabled: () =>
+            Boolean(project.value && selectedPipelineId.value) &&
+            (selectedPipelineId.value !== initialPipelineId.value || currentPage.value > 1),
+    });
+
+    const currentEnvelope = computed(() =>
+        selectedPipelineId.value === initialPipelineId.value && currentPage.value === 1
+            ? (initialEnvelope.value ?? null)
+            : (pageQuery.data.value ?? null),
     );
+
+    const shownEnvelope = ref(null);
+    watch(
+        currentEnvelope,
+        (envelope) => {
+            if (envelope) {
+                shownEnvelope.value = envelope;
+            }
+        },
+        { immediate: true },
+    );
+
+    const displayedPipeline = computed(
+        () => shownEnvelope.value?.data?.pipelines?.find((pipeline) => Array.isArray(pipeline.groups)) ?? null,
+    );
+    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
+    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
+    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
+    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
+    const loadingPage = computed(() => (pageQuery.isLoading.value ? currentPage.value : null));
+
+    function fetchPage(page) {
+        if (page !== currentPage.value) {
+            currentPage.value = page;
+        }
+    }
 
     const breadcrumbs = computed(() => [{ name: 'Projects', route: 'projects' }]);
     const currentCrumb = computed(() => project.value?.name ?? 'Not Found');
@@ -95,7 +147,20 @@
         <PageCard>
             <PipelineSelect v-if="pipelines.length > 1" v-model="selectedPipelineId" :pipelines="pipelines" />
 
-            <ProjectPipelineTable :groups="selectedPipeline?.groups ?? []" />
+            <ProjectPipelineTable :groups="displayedPipeline?.groups ?? []" />
+
+            <Pagination
+                v-if="lastPage > 1"
+                :current-page="currentPage"
+                :last-page="lastPage"
+                :from-item="fromItem"
+                :to-item="toItem"
+                :total-items="totalItems"
+                :loading-page="loadingPage"
+                @fetchPreviousPage="fetchPage(currentPage - 1)"
+                @fetchNextPage="fetchPage(currentPage + 1)"
+                @fetchPage="fetchPage"
+            />
         </PageCard>
     </Page>
 

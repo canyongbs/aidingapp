@@ -105,7 +105,7 @@ it('shows guest-visible pipeline tasks grouped by milestone', function () {
 
     actingAs($contact, 'contact');
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertOk()
         ->assertJsonPath('data.id', $project->getKey())
         ->assertJsonPath('data.name', 'Office Renovation')
@@ -119,17 +119,67 @@ it('shows guest-visible pipeline tasks grouped by milestone', function () {
         ->assertJsonPath('data.pipelines.0.groups.0.entries.0.start_date', '2026-08-01')
         ->assertJsonPath('data.pipelines.0.groups.0.entries.0.due', '2026-08-28')
         ->assertJsonPath('data.pipelines.0.groups.0.entries.1.id', $completeEntry->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.1.milestone_id', $hiddenMilestone->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.1.progress_percentage', 0)
-        ->assertJsonPath('data.pipelines.0.groups.1.entries', [])
-        ->assertJsonPath('data.pipelines.0.groups.2.milestone_id', $emptyMilestone->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.2.progress_percentage', 0)
-        ->assertJsonPath('data.pipelines.0.groups.2.entries', [])
-        ->assertJsonPath('data.pipelines.0.groups.3.milestone_id', null)
-        ->assertJsonPath('data.pipelines.0.groups.3.milestone_title', 'No Associated Milestone')
-        ->assertJsonPath('data.pipelines.0.groups.3.progress_percentage', null)
-        ->assertJsonPath('data.pipelines.0.groups.3.entries.0.id', $unassignedEntry->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.1.milestone_id', null)
+        ->assertJsonPath('data.pipelines.0.groups.1.milestone_title', 'No Associated Milestone')
+        ->assertJsonPath('data.pipelines.0.groups.1.progress_percentage', null)
+        ->assertJsonPath('data.pipelines.0.groups.1.entries.0.id', $unassignedEntry->getKey())
+        ->assertJsonPath('meta.current_page', 1)
+        ->assertJsonPath('meta.total', 3)
+        ->assertJsonPath('meta.per_page', 50)
+        ->assertJsonMissing(['milestone_id' => $hiddenMilestone->getKey()])
+        ->assertJsonMissing(['milestone_id' => $emptyMilestone->getKey()])
         ->assertJsonMissing(['name' => 'Internal Review']);
+});
+
+it('paginates guest-visible tasks for the selected pipeline', function () {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+
+    $firstPipeline = Pipeline::factory()->for($project)->create();
+    $firstStage = PipelineStage::factory()->for($firstPipeline)->create();
+    PipelineEntry::factory()->count(2)->for($firstStage, 'pipelineStage')->create();
+
+    $selectedPipeline = Pipeline::factory()->for($project)->create();
+    $selectedStage = PipelineStage::factory()->for($selectedPipeline)->create();
+    $selectedEntries = PipelineEntry::factory()
+        ->count(51)
+        ->for($selectedStage, 'pipelineStage')
+        ->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', [
+        'portalProject' => $project->getKey(),
+        'pipeline' => $selectedPipeline->getKey(),
+        'page' => 2,
+    ]))
+        ->assertOk()
+        ->assertJsonPath('data.pipelines.0.id', $firstPipeline->getKey())
+        ->assertJsonMissingPath('data.pipelines.0.groups')
+        ->assertJsonPath('data.pipelines.1.id', $selectedPipeline->getKey())
+        ->assertJsonCount(1, 'data.pipelines.1.groups.0.entries')
+        ->assertJsonPath('data.pipelines.1.groups.0.entries.0.id', $selectedEntries->last()->getKey())
+        ->assertJsonPath('meta.current_page', 2)
+        ->assertJsonPath('meta.last_page', 2)
+        ->assertJsonPath('meta.from', 51)
+        ->assertJsonPath('meta.to', 51)
+        ->assertJsonPath('meta.total', 51)
+        ->assertJsonPath('meta.per_page', 50);
+});
+
+it('does not allow selecting a pipeline from another project', function () {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+    $otherPipeline = Pipeline::factory()->for(Project::factory())->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', [
+        'portalProject' => $project->getKey(),
+        'pipeline' => $otherPipeline->getKey(),
+    ]))->assertNotFound();
 });
 
 it('does not show archived pipeline tasks or milestones', function () {
@@ -161,7 +211,7 @@ it('does not show archived pipeline tasks or milestones', function () {
 
     actingAs($contact, 'contact');
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertOk()
         ->assertJsonCount(1, 'data.pipelines')
         ->assertJsonPath('data.pipelines.0.name', 'Active Pipeline')
@@ -179,14 +229,14 @@ it('does not disclose an archived project', function () {
 
     actingAs($contact, 'contact');
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertNotFound();
 });
 
 it('requires contact authentication', function () {
     $project = Project::factory()->create();
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertUnauthorized();
 });
 
@@ -201,7 +251,7 @@ it('denies access when Project Management is not licensed', function () {
 
     actingAs($contact, 'contact');
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertForbidden();
 });
 
@@ -211,6 +261,6 @@ it('does not disclose an inaccessible project', function () {
 
     actingAs($contact, 'contact');
 
-    getJson(route('api.portal.projects.show', ['project' => $project->getKey()]))
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
         ->assertNotFound();
 });
