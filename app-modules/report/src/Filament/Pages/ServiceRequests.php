@@ -45,6 +45,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
 use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
+use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
@@ -63,7 +64,6 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
@@ -180,21 +180,9 @@ class ServiceRequests extends Dashboard
         /** @var User $user */
         $user = auth()->user();
 
-        $departmentId = $user->department?->getKey();
-
         return ServiceRequestType::query()
             ->withoutArchived()
-            ->where(function (Builder $query) use ($user, $departmentId): void {
-                $query->whereHas('managerUsers', fn (Builder $query) => $query->whereKey($user->getKey()))
-                    ->orWhereHas('auditorUsers', fn (Builder $query) => $query->whereKey($user->getKey()));
-
-                if (blank($departmentId)) {
-                    return;
-                }
-
-                $query->orWhereHas('managerDepartments', fn (Builder $query) => $query->whereKey($departmentId))
-                    ->orWhereHas('auditorDepartments', fn (Builder $query) => $query->whereKey($departmentId));
-            })
+            ->tap(new AccessibleServiceRequestTypes($user))
             ->orderBy('name')
             ->pluck('id')
             ->all();

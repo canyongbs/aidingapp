@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Filament\Tables\ManagersTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
@@ -61,6 +62,22 @@ it('includes users that belong to a manager department of the type', function ()
 
     $manager = User::factory()->create();
     $manager->department()->associate($department)->save();
+
+    $nonManager = User::factory()->create();
+
+    $ids = ManagersTable::query($type->getKey())->pluck('id');
+
+    expect($ids->all())->toContain($manager->getKey())
+        ->and($ids->all())->not->toContain($nonManager->getKey());
+});
+
+it('includes users that belong to a manager group of the type', function () {
+    $type = ServiceRequestType::factory()->create();
+    $group = Group::factory()->create();
+    $type->managerGroups()->attach($group);
+
+    $manager = User::factory()->create();
+    $group->users()->attach($manager);
 
     $nonManager = User::factory()->create();
 

@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\NotifyServiceRequestUsers;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
@@ -362,6 +363,44 @@ it('can notify a direct user auditor of a service request type', function () {
 
     Notification::assertSentTo($directAuditor, ServiceRequestCreated::class);
     Notification::assertNotSentTo($nonAuditor, ServiceRequestCreated::class);
+});
+
+it('notifies manager and auditor group members once when assignments overlap', function () {
+    Notification::fake();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestTypeEmailTemplate = ServiceRequestTypeEmailTemplate::factory()
+        ->state([
+            'type' => ServiceRequestEmailTemplateType::Created,
+            'role' => ServiceRequestTypeEmailTemplateRole::Manager,
+        ])
+        ->for($serviceRequestType, 'serviceRequestType')
+        ->create();
+
+    $manager = User::factory()->create();
+    $managerGroup = Group::factory()->create();
+    $managerGroup->users()->attach($manager);
+    $serviceRequestType->managerGroups()->attach($managerGroup);
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $auditor = User::factory()->create();
+    $auditorGroup = Group::factory()->create();
+    $auditorGroup->users()->attach($auditor);
+    $serviceRequestType->auditorGroups()->attach($auditorGroup);
+
+    $serviceRequest = ServiceRequest::factory()
+        ->for(ServiceRequestPriority::factory()->for($serviceRequestType, 'type'), 'priority')
+        ->create();
+
+    app(NotifyServiceRequestUsers::class)->execute(
+        $serviceRequest,
+        new ServiceRequestCreated($serviceRequest, $serviceRequestTypeEmailTemplate, MailChannel::class),
+        true,
+        true,
+    );
+
+    Notification::assertSentToTimes($manager, ServiceRequestCreated::class, 1);
+    Notification::assertSentToTimes($auditor, ServiceRequestCreated::class, 1);
 });
 
 it('does not notify a direct user manager twice if they are also on a managing department', function () {

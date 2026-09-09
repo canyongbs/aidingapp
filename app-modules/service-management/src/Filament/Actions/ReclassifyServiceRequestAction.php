@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Actions;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -136,18 +137,14 @@ class ReclassifyServiceRequestAction extends Action
                             ->searchable()
                             ->options(
                                 fn (Get $get): array => User::query()
-                                    ->where(fn (Builder $query) => $query
-                                        ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
-                                        ->orWhereHas('department.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                    ->tap(new ManagesServiceRequestType((string) $get('type_id')))
                                     ->orderBy('name')
                                     ->limit(50)
                                     ->pluck('name', 'id')
                                     ->all()
                             )
                             ->getSearchResultsUsing(fn (string $search, Get $get): array => User::query()
-                                ->where(fn (Builder $query) => $query
-                                    ->whereHas('manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id')))
-                                    ->orWhereHas('department.manageableServiceRequestTypes', fn (Builder $query) => $query->where('service_request_type_id', $get('type_id'))))
+                                ->tap(new ManagesServiceRequestType((string) $get('type_id')))
                                 ->when(filled($search), fn (Builder $query) => $query
                                     ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%'))
                                 ->orderBy('name')

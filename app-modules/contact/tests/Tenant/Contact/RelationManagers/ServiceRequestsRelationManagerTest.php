@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Servic
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Division\Models\Division;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -473,6 +474,45 @@ test('Non-super admin can only see service requests from directly managed or dir
     ])
         ->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest])
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
+});
+
+test('Non-super admin can see service requests from group-managed and group-audited types', function () {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.view');
+
+    $managedType = ServiceRequestType::factory()->create();
+    $managerGroup = Group::factory()->create();
+    $managerGroup->users()->attach($user);
+    $managedType->managerGroups()->attach($managerGroup);
+
+    $auditedType = ServiceRequestType::factory()->create();
+    $auditorGroup = Group::factory()->create();
+    $auditorGroup->users()->attach($user);
+    $auditedType->auditorGroups()->attach($auditorGroup);
+
+    $contact = Contact::factory()->create();
+
+    $managedServiceRequest = ServiceRequest::factory()->state([
+        'respondent_id' => $contact->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->state(['type_id' => $managedType->getKey()]),
+    ])->create();
+
+    $auditedServiceRequest = ServiceRequest::factory()->state([
+        'respondent_id' => $contact->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->state(['type_id' => $auditedType->getKey()]),
+    ])->create();
+
+    actingAs($user);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest]);
 });
 
 describe('feedback visibility', function () {

@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -184,6 +185,39 @@ test('it can add updates to multiple service requests for user belonging to a ma
     $serviceRequests->each(function (ServiceRequest $serviceRequest) {
         assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
     });
+});
+
+test('it can add updates to multiple service requests for user belonging to a manager group', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerGroups()->attach($group);
+
+    $serviceRequests = ServiceRequest::factory()
+        ->state([
+            'status_id' => ServiceRequestStatus::factory()->open()->create()->getKey(),
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])
+        ->count(2)
+        ->create();
+
+    $user->givePermissionTo('service_request.view-any');
+    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo('service_request_update.create');
+    actingAs($user);
+
+    livewire(ListServiceRequests::class)
+        ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
+            'update' => 'Test Update',
+            'internal' => true,
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    $serviceRequests->each(fn (ServiceRequest $serviceRequest) => assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates));
 });
 
 test('it cannot add updates to service requests for user who is not a manager', function () {

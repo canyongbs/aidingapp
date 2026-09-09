@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,10 +56,7 @@ class RoundRobinAssigner extends ServiceRequestTypeAssigner
 
         if ($lastAssignee) {
             $user = User::query()
-                ->where(function (Builder $query) use ($serviceRequestType) {
-                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                })
+                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->where('name', '>=', $lastAssignee->name)
                 ->where(fn (Builder $query) => $query
                     ->where('name', '!=', $lastAssignee->name)
@@ -68,10 +66,7 @@ class RoundRobinAssigner extends ServiceRequestTypeAssigner
 
         if ($user === null) {
             $user = User::query()
-                ->where(function (Builder $query) use ($serviceRequestType) {
-                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                })
+                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->orderBy('name')->orderBy('id')->first();
         }
 

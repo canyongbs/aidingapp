@@ -40,6 +40,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Servic
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
@@ -214,6 +215,35 @@ test('The correct details are displayed on the ListServiceRequests page via dire
             ->assertSee($serviceRequest->created_at->format('M j, Y') . ' (0 days)')
             ->assertSee($serviceRequest->updated_at->format('M j, Y') . ' (0 days)')
     );
+});
+
+it('lists service requests for manager and auditor group members', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_request.view-any');
+
+    $managerType = ServiceRequestType::factory()->create();
+    $managerGroup = Group::factory()->create();
+    $managerGroup->users()->attach($user);
+    $managerType->managerGroups()->attach($managerGroup);
+
+    $auditorType = ServiceRequestType::factory()->create();
+    $auditorGroup = Group::factory()->create();
+    $auditorGroup->users()->attach($user);
+    $auditorType->auditorGroups()->attach($auditorGroup);
+
+    $visibleRequests = collect([$managerType, $auditorType])->map(fn (ServiceRequestType $type) => ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $type->getKey(),
+        ])->getKey(),
+    ])->create());
+
+    $hiddenRequest = ServiceRequest::factory()->create();
+
+    actingAs($user);
+
+    livewire(ListServiceRequests::class)
+        ->assertCanSeeTableRecords($visibleRequests)
+        ->assertCanNotSeeTableRecords([$hiddenRequest]);
 });
 
 test('category is rendered inline with the service request number on the ListServiceRequests page', function () {

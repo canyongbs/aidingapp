@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ManageServiceRequestTypeAuditors;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -100,11 +101,31 @@ it('can attach auditor departments to a service request type', function () {
         ->toContain($department->getKey());
 });
 
-it('can attach both auditor users and auditor departments to a service request type', function () {
+it('can attach auditor groups to a service request type', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $group = Group::factory()->create();
+
+    asSuperAdmin();
+
+    livewire(ManageServiceRequestTypeAuditors::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->fillForm([
+            'auditorGroups' => [$group->getKey()],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequestType->refresh()->auditorGroups->pluck('id'))
+        ->toContain($group->getKey());
+});
+
+it('can attach auditor users, departments, and groups to a service request type', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
     $department = Department::factory()->create();
+    $group = Group::factory()->create();
 
     asSuperAdmin();
 
@@ -114,14 +135,16 @@ it('can attach both auditor users and auditor departments to a service request t
         ->fillForm([
             'auditorUsers' => [$user->getKey()],
             'auditorDepartments' => [$department->getKey()],
+            'auditorGroups' => [$group->getKey()],
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
     $serviceRequestType->refresh();
 
-    expect($serviceRequestType->auditorUsers->pluck('id'))->toContain($user->getKey());
-    expect($serviceRequestType->auditorDepartments->pluck('id'))->toContain($department->getKey());
+    expect($serviceRequestType->auditorUsers->pluck('id'))->toContain($user->getKey())
+        ->and($serviceRequestType->auditorDepartments->pluck('id'))->toContain($department->getKey())
+        ->and($serviceRequestType->auditorGroups->pluck('id'))->toContain($group->getKey());
 });
 
 // Permission Tests

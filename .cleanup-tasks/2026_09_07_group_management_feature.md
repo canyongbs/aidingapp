@@ -6,6 +6,7 @@ created: 2026-09-07
 ## Feature Flags
 
 - App\Features\GroupManagementFeature
+- App\Features\ServiceRequestTypeGroupAssignmentsFeature
 
 ## Temporary Migrations
 

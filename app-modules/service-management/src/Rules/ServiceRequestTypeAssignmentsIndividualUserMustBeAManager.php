@@ -36,7 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Translation\PotentiallyTranslatedString;
@@ -54,11 +56,13 @@ class ServiceRequestTypeAssignmentsIndividualUserMustBeAManager implements Valid
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $isManager = $this->serviceRequestType->managerUsers()->where('users.id', $value)->exists() ||
-            $this->serviceRequestType->managerDepartments()->whereRelation('users', 'users.id', $value)->exists();
+        $isManager = User::query()
+            ->tap(new ManagesServiceRequestType($this->serviceRequestType->getKey()))
+            ->whereKey($value)
+            ->exists();
 
         if (! $isManager) {
-            $fail('The selected user must be a manager user or belong to a department designated as managers of this Service Request Type.');
+            $fail('The selected user must be a manager or belong to a department or group designated as managers of this Service Request Type.');
         }
     }
 }

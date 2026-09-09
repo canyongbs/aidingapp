@@ -46,6 +46,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
+/**
+ * @mixin IdeHelperGroup
+ */
 #[ObservedBy([GroupObserver::class])]
 class Group extends Model
 {
