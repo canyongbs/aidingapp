@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
+use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Settings\LicenseSettings;
@@ -79,12 +80,19 @@ class ShowPortalProjectController
         $entries = $selectedPipeline->entries()
             ->withoutArchived()
             ->where('is_visible_to_guests', true)
-            ->whereHas('pipelineStage', fn (Builder $query): Builder => $query->withoutArchived())
+            ->whereIn(
+                'pipeline_stage_id',
+                PipelineStage::query()
+                    ->withoutArchived()
+                    ->select('id'),
+            )
             ->where(function (Builder $query): void {
                 $query->whereNull('project_milestone_id')
-                    ->orWhereHas(
-                        'milestone',
-                        fn (Builder $query): Builder => $query->withoutArchived(),
+                    ->orWhereIn(
+                        'project_milestone_id',
+                        ProjectMilestone::query()
+                            ->withoutArchived()
+                            ->select('id'),
                     );
             })
             ->with([
@@ -97,7 +105,7 @@ class ShowPortalProjectController
                     ->whereColumn('project_milestones.id', 'pipeline_entries.project_milestone_id'),
             )
             ->oldest('pipeline_entries.created_at')
-            ->paginate(1, [
+            ->paginate(50, [
                 'pipeline_entries.id',
                 'pipeline_entries.name',
                 'pipeline_entries.pipeline_stage_id',
@@ -215,13 +223,15 @@ class ShowPortalProjectController
         $milestoneGroups = $milestones
             ->map(function (ProjectMilestone $milestone) use ($entries): array {
                 $milestoneEntries = $entries->where('project_milestone_id', $milestone->getKey());
+                $totalEntriesCount = (int) $milestone->getAttribute('total_entries_count');
+                $completeEntriesCount = (int) $milestone->getAttribute('complete_entries_count');
 
                 return [
                     'milestone_id' => $milestone->getKey(),
                     'milestone_title' => $milestone->title,
-                    'progress_percentage' => ((int) $milestone->total_entries_count) === 0
+                    'progress_percentage' => $totalEntriesCount === 0
                         ? 0
-                        : (int) round(((int) $milestone->complete_entries_count / (int) $milestone->total_entries_count) * 100),
+                        : (int) round(($completeEntriesCount / $totalEntriesCount) * 100),
                     'entries' => $milestoneEntries
                         ->map($this->mapEntry(...))
                         ->values()
