@@ -34,46 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Providers;
+namespace AidingApp\Project\Models\Scopes;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\Portal\PortalPlugin;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
 use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
-use Symfony\Component\HttpFoundation\Response;
+use Illuminate\Database\Eloquent\Builder;
 
-class PortalServiceProvider extends ServiceProvider
+class VisibleToPortalContact
 {
-    public function register()
+    public function __construct(private readonly Contact $contact) {}
+
+    /**
+     * @param Builder<Project> $query
+     */
+    public function __invoke(Builder $query): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new PortalPlugin()));
-    }
+        $query->where(function (Builder $query): void {
+            $query->whereHas(
+                'guestContacts',
+                fn (Builder $query): Builder => $query->whereKey($this->contact->getKey()),
+            );
 
-    public function boot(): void
-    {
-        Route::bind('portalProject', function (string $value): Project {
-            $contact = auth('contact')->user();
-
-            abort_unless($contact instanceof Contact, Response::HTTP_NOT_FOUND);
-
-            return Project::query()
-                ->withoutArchived()
-                ->tap(new VisibleToPortalContact($contact))
-                ->whereKey($value)
-                ->firstOrFail();
+            if ($this->contact->organization_id) {
+                $query->orWhereHas(
+                    'guestOrganizations',
+                    fn (Builder $query): Builder => $query->whereKey($this->contact->organization_id),
+                );
+            }
         });
-
-        Relation::morphMap([
-            'portal_settings_property' => PortalSettingsProperty::class,
-            'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
-            'portal_guest' => PortalGuest::class,
-        ]);
     }
 }
