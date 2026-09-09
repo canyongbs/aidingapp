@@ -476,6 +476,51 @@ test('creating a service monitor persists report configurations for multiple fre
     expect($monthly->is_active)->toBeFalse();
 });
 
+test('a service monitor cannot be created with an active reporting frequency and no channel selected', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => [],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['report_configurations.daily.report_channels' => 'required']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a service monitor can be created with an active reporting frequency once a channel is selected', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->where('name', $request['name'])->exists())->toBeTrue();
+});
+
 test('a confidential service monitor cannot be created while a report recipient has no confidential access', function () {
     asSuperAdmin();
 
@@ -510,6 +555,7 @@ test('a confidential service monitor can be created when a report recipient has 
                 'daily' => [
                     'is_active' => true,
                     'report_users' => [$reportUser->getKey()],
+                    'report_channels' => ['email'],
                 ],
             ],
             'is_confidential' => true,

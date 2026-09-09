@@ -68,25 +68,26 @@ class ReportFrequencySection
                             ->label('Users')
                             ->multiple()
                             ->preload()
-                            ->options(fn (): array => User::query()->tap(new WithoutAnyAdmin())->orderBy('name')->pluck('name', 'id')->all()),
+                            ->options(fn (): array => once(fn (): array => User::query()->tap(new WithoutAnyAdmin())->orderBy('name')->pluck('name', 'id')->all())),
                         Select::make("{$prefix}.report_departments")
                             ->label('Departments')
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->options(fn (): array => Department::query()->orderBy('name')->pluck('name', 'id')->all()),
+                            ->options(fn (): array => once(fn (): array => Department::query()->orderBy('name')->pluck('name', 'id')->all())),
                         Select::make("{$prefix}.report_contacts")
                             ->label('Contacts')
                             ->multiple()
                             ->preload()
                             ->searchable()
-                            ->options(fn (): array => Contact::query()->orderBy('full_name')->pluck('full_name', 'id')->all()),
+                            ->options(fn (): array => once(fn (): array => Contact::query()->orderBy('full_name')->pluck('full_name', 'id')->all())),
                         CheckboxList::make("{$prefix}.report_channels")
                             ->label('Channels')
                             ->options([
                                 'email' => 'Email',
                                 'database' => 'Application',
                             ])
+                            ->required(fn (Get $get): bool => (bool) $get($isActiveField))
                             ->columnSpanFull(),
                     ])
                     ->columns(3)
