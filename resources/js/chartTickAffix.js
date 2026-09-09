@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -34,54 +32,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Filament\Widgets\Concerns;
+// Filament serializes chart widget options to plain JSON, so a Chart.js
+// `ticks.callback` function cannot be expressed from PHP. This plugin bridges
+// that gap: a widget declares a JSON-safe `ticks.prefix` / `ticks.suffix`
+// string on any axis, and the plugin installs the corresponding Chart.js tick
+// callback at runtime to render e.g. `80%` on the axis labels.
+//
+// Registered via Filament's documented `window.filamentChartJsPlugins` hook so
+// it applies to every chart widget without overriding other plugins.
 
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use Carbon\Carbon;
-use Filament\Widgets\Concerns\InteractsWithPageFilters as InteractsWithPageFiltersBase;
+const chartTickAffixPlugin = {
+    id: 'canyonChartTickAffix',
+    beforeInit(chart) {
+        const scales = chart?.config?.options?.scales ?? {};
 
-trait InteractsWithPageFilters
-{
-    use InteractsWithPageFiltersBase;
+        Object.values(scales).forEach((scale) => {
+            const ticks = scale?.ticks;
 
-    public function getStartDate(): ?Carbon
-    {
-        $startDate = $this->pageFilters['startDate'] ?? null;
+            if (!ticks) {
+                return;
+            }
 
-        return filled($startDate) ? Carbon::parse($startDate)->startOfDay() : null;
-    }
+            const prefix = ticks.prefix ?? '';
+            const suffix = ticks.suffix ?? '';
 
-    public function getEndDate(): ?Carbon
-    {
-        $endDate = $this->pageFilters['endDate'] ?? null;
+            if (prefix === '' && suffix === '') {
+                return;
+            }
 
-        return filled($endDate) ? Carbon::parse($endDate)->endOfDay() : null;
-    }
+            ticks.callback = function (value) {
+                // `this.getLabelForValue` applies Chart.js' own number
+                // formatting (locale, decimals) before we wrap it.
+                const label = typeof this?.getLabelForValue === 'function' ? this.getLabelForValue(value) : value;
 
-    /**
-     * @return array<int, string>|null
-     */
-    public function getServiceRequestTypes(): ?array
-    {
-        $types = $this->pageFilters['serviceRequestTypes'] ?? null;
+                return `${prefix}${label}${suffix}`;
+            };
+        });
+    },
+};
 
-        return filled($types) ? array_values((array) $types) : null;
-    }
-
-    public function getClassification(): ?ServiceRequestCategory
-    {
-        $classification = $this->pageFilters['classification'] ?? null;
-
-        return filled($classification) ? ServiceRequestCategory::tryFrom($classification) : null;
-    }
-
-    /**
-     * @return array<int, string>|null
-     */
-    public function getAssignedAgents(): ?array
-    {
-        $agents = $this->pageFilters['assignedAgents'] ?? null;
-
-        return filled($agents) ? array_values((array) $agents) : null;
-    }
-}
+window.filamentChartJsPlugins ??= [];
+window.filamentChartJsPlugins.push(chartTickAffixPlugin);
