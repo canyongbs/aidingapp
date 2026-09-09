@@ -70,6 +70,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('properties')
                     ->headerActions([
                         EditAction::make('editProperties')
+                            ->label('Properties Section Edit')
+                            ->modalHeading('Properties Section Edit')
                             ->slideOver()
                             ->schema([
                                 TextInput::make('title')
@@ -98,6 +100,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('trackingDetails')
                     ->headerActions([
                         EditAction::make('editTrackingDetails')
+                            ->label('Tracking Details Section Edit')
+                            ->modalHeading('Tracking Details Section Edit')
                             ->slideOver()
                             ->schema([
                                 ToggleButtons::make('severity_id')
@@ -114,7 +118,8 @@ class ViewAdvisory extends ViewRecord
                                     ->exists((new AdvisoryStatus())->getTable(), 'id')
                                     ->required()
                                     ->columnSpanFull(),
-                            ]),
+                            ])
+                            ->after(fn (Advisory $record) => $record->refresh()),
                     ])
                     ->schema([
                         ColorEntry::make('severity.rgb_color')
@@ -130,6 +135,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('assignment')
                     ->headerActions([
                         EditAction::make('editAssignment')
+                            ->label('Assignment Section Edit')
+                            ->modalHeading('Assignment Section Edit')
                             ->slideOver()
                             ->schema([
                                 TableSelect::make('assigned_department_id')
