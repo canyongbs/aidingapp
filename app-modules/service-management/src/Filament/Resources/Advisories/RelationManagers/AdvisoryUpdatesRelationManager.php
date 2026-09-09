@@ -69,11 +69,11 @@ class AdvisoryUpdatesRelationManager extends RelationManager
 
         return $schema
             ->components([
-                static::getPropertiesSectionSchema(),
+                self::getPropertiesSectionSchema(),
                 ToggleButtons::make('status_id')
                     ->label('Status')
                     ->inline()
-                    ->options(fn (): array => static::getStatusOptions($this->getOwnerRecord()))
+                    ->options(fn (): array => self::getStatusOptions($this->getOwnerRecord()))
                     ->default($this->getOwnerRecord()->status->getKey())
                     ->exists((new AdvisoryStatus())->getTable(), 'id')
                     ->required()
@@ -95,7 +95,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                             ->description(fn (AdvisoryUpdate $record): string => $record->update)
                             ->searchable()
                             ->color('primary')
-                            ->action(static::getViewOrEditAdvisoryUpdateAction()),
+                            ->action(self::getViewOrEditAdvisoryUpdateAction()),
                     ]
                     : [
                         TextColumn::make('update')
@@ -141,11 +141,11 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ->label(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit' : 'View')
             ->modalHeading(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit advisory update' : 'View advisory update')
             ->schema([
-                static::getPropertiesSectionSchema(),
+                self::getPropertiesSectionSchema(),
                 ToggleButtons::make('status_id')
                     ->label('Status')
                     ->inline()
-                    ->options(fn (AdvisoryUpdate $record): array => static::getStatusOptions($record->advisory))
+                    ->options(fn (AdvisoryUpdate $record): array => self::getStatusOptions($record->advisory))
                     ->exists((new AdvisoryStatus())->getTable(), 'id')
                     ->required()
                     ->columnSpanFull(),
