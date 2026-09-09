@@ -125,11 +125,11 @@ class ShowPortalProjectController
             ->withoutArchived()
             ->whereKey($milestoneIds)
             ->withCount([
-                'pipelineEntries as total_entries_count' => fn(Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
-                'pipelineEntries as complete_entries_count' => fn(Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
+                'pipelineEntries as total_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
+                'pipelineEntries as complete_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
                     ->whereHas(
                         'pipelineStage',
-                        fn(Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
+                        fn (Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
                     ),
             ])
             ->get(['id', 'title']);
@@ -169,7 +169,7 @@ class ShowPortalProjectController
             'data' => [
                 'id' => $project->getKey(),
                 'name' => $project->name,
-                'pipelines' => $pipelines->map(fn(Pipeline $pipeline): array => [
+                'pipelines' => $pipelines->map(fn (Pipeline $pipeline): array => [
                     'id' => $pipeline->getKey(),
                     'name' => $pipeline->name,
                     ...($pipeline->is($selectedPipeline) ? [
@@ -192,7 +192,7 @@ class ShowPortalProjectController
             ->withoutArchived()
             ->whereHas(
                 'pipelineStage',
-                fn(Builder $query): Builder => $query
+                fn (Builder $query): Builder => $query
                     ->withoutArchived()
                     ->whereBelongsTo($pipeline, 'pipeline'),
             );
