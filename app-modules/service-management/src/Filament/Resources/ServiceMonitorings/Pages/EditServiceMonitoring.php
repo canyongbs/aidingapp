@@ -222,8 +222,8 @@ class EditServiceMonitoring extends EditRecord
             return $data;
         }
 
-        /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
+        assert($record instanceof ServiceMonitoringTarget);
 
         foreach ($record->reportConfigurations()->with(['reportUsers', 'reportDepartments', 'reportContacts'])->get() as $configuration) {
             $data['report_configurations'][$configuration->frequency->value] = [
