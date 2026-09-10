@@ -42,8 +42,6 @@ use Filament\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
-use Illuminate\Contracts\Pagination\CursorPaginator;
-use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
@@ -66,7 +64,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
     ];
 
     /**
-     * @var Collection<int, array{id: string|null, agent: string, requests: int, response_sla: float, resolution_sla: float, sla_breaches: int, avg_response_seconds: int|null, avg_resolution_seconds: int|null}>|null
+     * @var Collection<int, mixed>|null
      */
     private ?Collection $agentRows = null;
 
@@ -86,7 +84,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
     public function table(Table $table): Table
     {
         return $table
-            ->records(function (int $page, int $recordsPerPage, ?string $sortColumn, ?string $sortDirection): Paginator|CursorPaginator {
+            ->records(function (int $page, int $recordsPerPage, ?string $sortColumn, ?string $sortDirection): LengthAwarePaginator {
                 $rows = $this->getAgentRows();
 
                 if (filled($sortColumn)) {
@@ -108,21 +106,21 @@ class SlaPerformanceByAgentTable extends BaseWidget
                 TextColumn::make('requests')
                     ->label('Requests')
                     ->sortable(),
-                TextColumn::make('response_sla')
+                TextColumn::make('responseSla')
                     ->label('Response SLA')
                     ->formatStateUsing(fn (float $state): string => "{$state}%")
                     ->sortable(),
-                TextColumn::make('resolution_sla')
+                TextColumn::make('resolutionSla')
                     ->label('Resolution SLA')
                     ->formatStateUsing(fn (float $state): string => "{$state}%")
                     ->sortable(),
-                TextColumn::make('sla_breaches')
+                TextColumn::make('slaBreaches')
                     ->label('SLA Breaches')
                     ->sortable(),
-                TextColumn::make('avg_response_seconds')
+                TextColumn::make('avgResponseSeconds')
                     ->label('Avg Response Time')
                     ->formatStateUsing(fn (?int $state): string => $this->formatSlaDuration($state)),
-                TextColumn::make('avg_resolution_seconds')
+                TextColumn::make('avgResolutionSeconds')
                     ->label('Avg Resolution Time')
                     ->formatStateUsing(fn (?int $state): string => $this->formatSlaDuration($state)),
             ])
@@ -162,11 +160,11 @@ class SlaPerformanceByAgentTable extends BaseWidget
                 fputcsv($handle, [
                     $row['agent'],
                     $row['requests'],
-                    "{$row['response_sla']}%",
-                    "{$row['resolution_sla']}%",
-                    $row['sla_breaches'],
-                    $this->formatSlaDuration($row['avg_response_seconds']),
-                    $this->formatSlaDuration($row['avg_resolution_seconds']),
+                    "{$row['responseSla']}%",
+                    "{$row['resolutionSla']}%",
+                    $row['slaBreaches'],
+                    $this->formatSlaDuration($row['avgResponseSeconds']),
+                    $this->formatSlaDuration($row['avgResolutionSeconds']),
                 ]);
             }
 
@@ -177,7 +175,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
     }
 
     /**
-     * @return Collection<int, array{id: string|null, agent: string, requests: int, response_sla: float, resolution_sla: float, sla_breaches: int, avg_response_seconds: int|null, avg_resolution_seconds: int|null}>
+        * @return Collection<int, mixed>
      */
     private function getAgentRows(): Collection
     {
@@ -190,10 +188,10 @@ class SlaPerformanceByAgentTable extends BaseWidget
             ->with($this->slaEagerLoads())
             ->get();
 
-        return $this->agentRows = $serviceRequests
+        $agentRows = $serviceRequests
             ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->assignedTo?->user_id)
             ->filter(fn (Collection $group, ?string $agentId): bool => filled($agentId))
-            ->map(function (Collection $group) {
+            ->map(function (Collection $group): array {
                 $metrics = $this->summarizeSlaMetrics($group);
 
                 $first = $group->first();
@@ -203,14 +201,18 @@ class SlaPerformanceByAgentTable extends BaseWidget
                     'id' => $first->assignedTo?->user_id,
                     'agent' => $first->assignedTo?->user->name ?? 'Unassigned',
                     'requests' => $metrics['total'],
-                    'response_sla' => $metrics['response_compliance_percentage'],
-                    'resolution_sla' => $metrics['resolution_compliance_percentage'],
-                    'sla_breaches' => $metrics['breaches'],
-                    'avg_response_seconds' => $metrics['average_response_seconds'],
-                    'avg_resolution_seconds' => $metrics['average_resolution_seconds'],
+                    'responseSla' => $metrics['response_compliance_percentage'],
+                    'resolutionSla' => $metrics['resolution_compliance_percentage'],
+                    'slaBreaches' => $metrics['breaches'],
+                    'avgResponseSeconds' => $metrics['average_response_seconds'],
+                    'avgResolutionSeconds' => $metrics['average_resolution_seconds'],
                 ];
             })
             ->sortByDesc('requests')
             ->values();
+
+        $this->agentRows = $agentRows;
+
+        return $agentRows;
     }
 }
