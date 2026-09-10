@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -218,6 +219,8 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 });
 
 it('lists service requests for manager and auditor group members', function () {
+    ServiceRequestTypeGroupAssignmentsFeature::activate();
+
     $user = User::factory()->create();
     $user->givePermissionTo('service_request.view-any');
 
