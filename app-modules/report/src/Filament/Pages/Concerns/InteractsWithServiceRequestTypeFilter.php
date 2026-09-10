@@ -62,8 +62,8 @@ trait InteractsWithServiceRequestTypeFilter
      */
     public function getAffiliatedServiceRequestTypeIds(): array
     {
-        /** @var User $user */
         $user = auth()->user();
+        assert($user instanceof User);
 
         $departmentId = $user->department?->getKey();
 

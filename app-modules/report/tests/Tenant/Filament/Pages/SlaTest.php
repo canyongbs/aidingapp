@@ -45,6 +45,7 @@ use AidingApp\Report\Filament\Widgets\SlaPerformanceByAgentTable;
 use AidingApp\Report\Filament\Widgets\SlaStats;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -305,6 +306,39 @@ it('plots response and resolution compliance over a rolling 12 months', function
         ->and(end($resolutionData))->toBe(50.0);
 });
 
+it('applies the selected date range to the SLA compliance over time chart', function () {
+    $priority = slaReportPriority();
+    $status = openServiceRequestStatus();
+
+    makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: false);
+    makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
+
+    $unfilteredWidget = new SlaComplianceOverTimeLineChart();
+    $unfilteredWidget->cacheTag = 'sla-over-time-date-filter-test';
+    $unfilteredWidget->pageFilters = [];
+
+    $unfilteredData = $unfilteredWidget->getData();
+
+    $filteredWidget = new SlaComplianceOverTimeLineChart();
+    $filteredWidget->cacheTag = 'sla-over-time-date-filter-test';
+    $filteredWidget->pageFilters = [
+        'startDate' => now()->toDateString(),
+        'endDate' => now()->toDateString(),
+    ];
+
+    $filteredData = $filteredWidget->getData();
+
+    $unfilteredResponseData = $unfilteredData['datasets'][0]['data'];
+    $unfilteredResolutionData = $unfilteredData['datasets'][1]['data'];
+    $filteredResponseData = $filteredData['datasets'][0]['data'];
+    $filteredResolutionData = $filteredData['datasets'][1]['data'];
+
+    expect(end($unfilteredResponseData))->toBe(50.0)
+        ->and(end($unfilteredResolutionData))->toBe(50.0)
+        ->and(end($filteredResponseData))->toBe(100.0)
+        ->and(end($filteredResolutionData))->toBe(100.0);
+});
+
 it('groups SLA performance by assigned agent and exports it', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = slaReportPriority($type);
@@ -399,6 +433,38 @@ it('respects the assigned agent filter in the SLA stats', function () {
     $stats = $widget->getStats();
 
     expect($stats[0]->getValue())->toEqual('1');
+});
+
+it('only returns agents with active assignments in the assigned agent filter options', function () {
+    $type = ServiceRequestType::factory()->create();
+    $priority = slaReportPriority($type);
+    $status = openServiceRequestStatus();
+
+    $activeAgent = User::factory()->create(['name' => 'Active Agent']);
+    $inactiveAgent = User::factory()->create(['name' => 'Inactive Agent']);
+
+    $type->managerUsers()->attach([$activeAgent->getKey(), $inactiveAgent->getKey()]);
+
+    $activeRequest = makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
+    $inactiveRequest = makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
+
+    ServiceRequestAssignment::factory()->create([
+        'service_request_id' => $activeRequest->getKey(),
+        'user_id' => $activeAgent->getKey(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    ServiceRequestAssignment::factory()->create([
+        'service_request_id' => $inactiveRequest->getKey(),
+        'user_id' => $inactiveAgent->getKey(),
+        'status' => ServiceRequestAssignmentStatus::Inactive,
+    ]);
+
+    $page = new Sla();
+
+    expect($page->getAssignedAgentOptions())
+        ->toHaveKey((string) $activeAgent->getKey(), 'Active Agent')
+        ->not->toHaveKey((string) $inactiveAgent->getKey());
 });
 
 it('respects the selected service request types in the SLA stats', function () {

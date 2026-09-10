@@ -85,11 +85,13 @@ class SlaComplianceOverTimeLineChart extends ChartReportWidget
 
     public function getData(): array
     {
+        $startDate = $this->getStartDate();
+        $endDate = $this->getEndDate();
         $types = $this->getServiceRequestTypes();
         $classification = $this->getClassification();
         $assignedAgents = $this->getAssignedAgents();
 
-        $shouldBypassCache = filled($types) || filled($classification) || filled($assignedAgents);
+        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types) || filled($classification) || filled($assignedAgents);
 
         $compliance = $shouldBypassCache
             ? $this->getComplianceOverTimeData()
@@ -128,7 +130,7 @@ class SlaComplianceOverTimeLineChart extends ChartReportWidget
     {
         $windowStart = now()->subMonthsNoOverflow(11)->startOfMonth();
 
-        $serviceRequests = $this->applySlaFilters(ServiceRequest::query(), applyDateRange: false)
+        $serviceRequests = $this->applySlaFilters(ServiceRequest::query())
             ->where('created_at', '>=', $windowStart)
             ->with($this->slaEagerLoads())
             ->get()

@@ -45,6 +45,7 @@ use AidingApp\Report\Filament\Widgets\SlaBreachesByServiceRequestTypeTable;
 use AidingApp\Report\Filament\Widgets\SlaComplianceOverTimeLineChart;
 use AidingApp\Report\Filament\Widgets\SlaPerformanceByAgentTable;
 use AidingApp\Report\Filament\Widgets\SlaStats;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Enums\Feature;
@@ -91,8 +92,8 @@ class Sla extends Dashboard
             return false;
         }
 
-        /** @var User $user */
         $user = auth()->user();
+        assert($user instanceof User);
 
         return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
@@ -142,7 +143,9 @@ class Sla extends Dashboard
     public function getAssignedAgentOptions(): array
     {
         return User::query()
-            ->whereIn('id', ServiceRequestAssignment::query()->select('user_id'))
+            ->whereIn('id', ServiceRequestAssignment::query()
+                ->where('status', ServiceRequestAssignmentStatus::Active)
+                ->select('user_id'))
             ->orderBy('name')
             ->pluck('name', 'id')
             ->all();
