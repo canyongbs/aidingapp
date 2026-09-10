@@ -180,8 +180,8 @@ class CreateServiceMonitoring extends CreateRecord
             return;
         }
 
-        /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
+        assert($record instanceof ServiceMonitoringTarget);
 
         app(SaveServiceMonitoringReportConfigurationsAction::class)($record, $this->reportConfigurationsData);
     }
