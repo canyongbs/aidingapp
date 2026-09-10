@@ -1193,6 +1193,7 @@ it('calculates progress as 0 when the project has no pipeline entries', function
     livewire(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
+        ->assertActionDoesNotExist('manageAccess')
         ->assertSee('Progress: 0%');
 });
 
