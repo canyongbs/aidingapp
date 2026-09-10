@@ -44,12 +44,14 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Exceptions\AttemptedToAssignNonManagerToServiceRequest;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Notifications\Concerns\FetchServiceRequestTemplate;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestAssignedNotification;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use App\Models\User;
 
 class ServiceRequestAssignmentObserver
 {
@@ -59,10 +61,10 @@ class ServiceRequestAssignmentObserver
     {
         $type = $serviceRequestAssignment->serviceRequest->priority->type;
 
-        $user = auth()->user();
-
-        $isManager = $type->managerUsers()->where('users.id', $serviceRequestAssignment->user_id)->exists() ||
-            $type->managerDepartments()->whereRelation('users', 'users.id', $serviceRequestAssignment->user_id)->exists();
+        $isManager = User::query()
+            ->tap(new ManagesServiceRequestType($type->getKey()))
+            ->whereKey($serviceRequestAssignment->user_id)
+            ->exists();
 
         throw_if(! $isManager, new AttemptedToAssignNonManagerToServiceRequest());
 

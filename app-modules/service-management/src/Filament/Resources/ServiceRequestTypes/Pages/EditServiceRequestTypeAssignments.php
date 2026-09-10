@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
@@ -113,17 +114,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                             ->relationship(
                                 name: 'assignmentTypeIndividual',
                                 modifyQueryUsing: function (Builder $query) {
-                                    $query->whereRelation(
-                                        'department.manageableServiceRequestTypes',
-                                        'service_request_types.id',
-                                        $this->record->getKey(),
-                                    );
-
-                                    $query->orWhereRelation(
-                                        'manageableServiceRequestTypes',
-                                        'service_request_types.id',
-                                        $this->record->getKey(),
-                                    );
+                                    $query->tap(new ManagesServiceRequestType($this->record->getKey()));
                                 }
                             )
                             ->preload()

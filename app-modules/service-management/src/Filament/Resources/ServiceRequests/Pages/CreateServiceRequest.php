@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -53,6 +54,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\Authenticatable;
+use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -114,14 +116,10 @@ class CreateServiceRequest extends CreateRecord
                                     ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
                                         withoutArchived: true,
                                         allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
-                                            $query->where(function (Builder $query): void {
-                                                $query->whereHas('managerUsers', function (Builder $query): void {
-                                                    $query->where('users.id', auth()->user()->getKey());
-                                                });
-                                                $query->orWhereHas('managerDepartments', function (Builder $query): void {
-                                                    $query->where('departments.id', auth()->user()->department?->getKey());
-                                                });
-                                            });
+                                            $user = auth()->user();
+                                            assert($user instanceof User);
+
+                                            $query->tap(new ManagedServiceRequestTypes($user));
                                         })
                                             ->pluck('id')
                                             ->all(),

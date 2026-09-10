@@ -41,6 +41,8 @@ use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
+use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -49,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
@@ -115,10 +118,10 @@ class ServiceRequestsRelationManager extends RelationManager
                                         fn (Builder $query) => $query
                                             ->withoutArchived()
                                             ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                                $query->where(function (Builder $query) {
-                                                    $query->whereHas('managerUsers', fn (Builder $query) => $query->where('users.id', auth()->user()->getKey()))
-                                                        ->orWhereHas('managerDepartments', fn (Builder $query) => $query->where('departments.id', auth()->user()->department?->getKey()));
-                                                });
+                                                $user = auth()->user();
+                                                assert($user instanceof User);
+
+                                                $query->tap(new ManagedServiceRequestTypes($user));
                                             }),
                                     )
                                     ->when(
@@ -187,20 +190,11 @@ class ServiceRequestsRelationManager extends RelationManager
             ->recordTitleAttribute('id')
             ->modifyQueryUsing(function (Builder $query) {
                 $query->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                    return $query->where(function (Builder $query) {
-                        $query->whereHas('priority.type.managerDepartments', function (Builder $query): void {
-                            $query->where('departments.id', auth()->user()->department?->getKey());
-                        })
-                            ->orWhereHas('priority.type.managerUsers', function (Builder $query): void {
-                                $query->where('users.id', auth()->user()->getKey());
-                            })
-                            ->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
-                                $query->where('departments.id', auth()->user()->department?->getKey());
-                            })
-                            ->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
-                                $query->where('users.id', auth()->user()->getKey());
-                            });
-                    })
+                    $user = auth()->user();
+                    assert($user instanceof User);
+
+                    return $query
+                        ->tap(new AccessibleServiceRequests($user))
                         ->whereHas('respondent', fn (Builder $query) => $query->where('respondent_id', $this->getOwnerRecord()->getKey()));
                 });
             })

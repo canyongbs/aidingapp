@@ -34,46 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Group\Models;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\Group\Database\Factories\GroupFactory;
-use AidingApp\Group\Observers\GroupObserver;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerGroupFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * @mixin IdeHelperGroup
+ * @mixin IdeHelperServiceRequestTypeManagerGroup
  */
-#[ObservedBy([GroupObserver::class])]
-class Group extends Model
+class ServiceRequestTypeManagerGroup extends Pivot
 {
-    /** @use HasFactory<GroupFactory> */
+    /** @use HasFactory<ServiceRequestTypeManagerGroupFactory> */
     use HasFactory;
 
     use HasUuids;
 
-    protected $fillable = [
-        'name',
-        'description',
-    ];
+    protected $table = 'service_request_type_manager_groups';
 
-    /** @return BelongsTo<User, $this> */
-    public function createdBy(): BelongsTo
+    /** @return BelongsTo<ServiceRequestType, $this> */
+    public function serviceRequestType(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'created_by_id');
+        return $this->belongsTo(ServiceRequestType::class);
     }
 
-    /** @return BelongsToMany<User, $this, GroupUser> */
-    public function users(): BelongsToMany
+    /** @return BelongsTo<Group, $this> */
+    public function group(): BelongsTo
     {
-        return $this->belongsToMany(User::class, 'group_user')
-            ->using(GroupUser::class)
-            ->withPivot('id')
-            ->withTimestamps();
+        return $this->belongsTo(Group::class);
     }
 }

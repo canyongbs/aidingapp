@@ -44,6 +44,8 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\AddServiceRequestUpdateBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\ChangeServiceRequestStatusBulkAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -86,19 +88,10 @@ class ListServiceRequests extends ListRecords
                 'status',
             ])
                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                    return $query->where(function (Builder $query) {
-                        $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
-                            $query->where('users.id', auth()->user()->getKey());
-                        })->orWhereHas('priority.type.auditorUsers', function (Builder $query): void {
-                            $query->where('users.id', auth()->user()->getKey());
-                        });
+                    $user = auth()->user();
+                    assert($user instanceof User);
 
-                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
-                            $query->where('departments.id', auth()->user()->department?->getKey());
-                        })->orWhereHas('priority.type.auditorDepartments', function (Builder $query): void {
-                            $query->where('departments.id', auth()->user()->department?->getKey());
-                        });
-                    });
+                    return $query->tap(new AccessibleServiceRequests($user));
                 }))
             ->columns([
                 IdColumn::make(),
@@ -194,8 +187,8 @@ class ListServiceRequests extends ListRecords
                     ))
                     ->indicateUsing(
                         fn (array $data): ?string => empty($data['types'])
-                        ? null
-                        : 'Type: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
+                            ? null
+                            : 'Type: ' . ServiceRequestType::whereIn('id', $data['types'])->pluck('name')->implode(', ')
                     ),
                 SelectFilter::make('status')
                     ->relationship('status', 'name')
@@ -277,15 +270,10 @@ class ListServiceRequests extends ListRecords
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
                                 ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
-                                    $query->where(function (Builder $query): void {
-                                        $query->whereHas('priority.type.managerUsers', function (Builder $query): void {
-                                            $query->where('users.id', auth()->user()->getKey());
-                                        });
+                                    $user = auth()->user();
+                                    assert($user instanceof User);
 
-                                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query): void {
-                                            $query->where('departments.id', auth()->user()->department?->getKey());
-                                        });
-                                    });
+                                    $query->tap(new ManagedServiceRequests($user));
                                 })
                                 ->delete();
 

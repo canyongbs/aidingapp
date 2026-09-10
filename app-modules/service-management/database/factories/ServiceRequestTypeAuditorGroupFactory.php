@@ -34,46 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Group\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\Group\Database\Factories\GroupFactory;
-use AidingApp\Group\Observers\GroupObserver;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditorGroup;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-/**
- * @mixin IdeHelperGroup
- */
-#[ObservedBy([GroupObserver::class])]
-class Group extends Model
+/** @extends Factory<ServiceRequestTypeAuditorGroup> */
+class ServiceRequestTypeAuditorGroupFactory extends Factory
 {
-    /** @use HasFactory<GroupFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /** @return BelongsTo<User, $this> */
-    public function createdBy(): BelongsTo
+    /** @return array<string, mixed> */
+    public function definition(): array
     {
-        return $this->belongsTo(User::class, 'created_by_id');
-    }
-
-    /** @return BelongsToMany<User, $this, GroupUser> */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'group_user')
-            ->using(GroupUser::class)
-            ->withPivot('id')
-            ->withTimestamps();
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'group_id' => Group::factory(),
+        ];
     }
 }

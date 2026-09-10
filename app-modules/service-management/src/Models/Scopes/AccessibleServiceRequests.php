@@ -36,47 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 
-class ManagesServiceRequestType
+class AccessibleServiceRequests
 {
     public function __construct(
-        protected string $serviceRequestTypeId,
-        protected ?ServiceRequest $serviceRequest = null,
+        protected User $user,
     ) {}
 
-    /**
-     * @param Builder<covariant Model> $query
-     */
+    /** @param Builder<covariant Model> $query */
     public function __invoke(Builder $query): void
     {
-        $query->where(function (Builder $query): void {
-            $query
-                ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
-                })
-                ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
-                });
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
-                    $query->whereIn(
-                        'groups.id',
-                        ServiceRequestTypeManagerGroup::query()
-                            ->select('group_id')
-                            ->where('service_request_type_id', $this->serviceRequestTypeId),
-                    );
-                });
-            }
-        });
+        $query->whereHas(
+            'priority.type',
+            fn (Builder $query) => $query->tap(new AccessibleServiceRequestTypes($this->user)),
+        );
     }
 }

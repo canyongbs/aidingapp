@@ -34,46 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Group\Models;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Group\Database\Factories\GroupFactory;
-use AidingApp\Group\Observers\GroupObserver;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Concerns\HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-
-/**
- * @mixin IdeHelperGroup
- */
-#[ObservedBy([GroupObserver::class])]
-class Group extends Model
-{
-    /** @use HasFactory<GroupFactory> */
-    use HasFactory;
-
-    use HasUuids;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /** @return BelongsTo<User, $this> */
-    public function createdBy(): BelongsTo
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->belongsTo(User::class, 'created_by_id');
+        DB::transaction(function () {
+            Schema::create('service_request_type_auditor_groups', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
+                $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
+                $table->timestamps();
+
+                $table->uniqueIndex(['service_request_type_id', 'group_id']);
+            });
+
+            ServiceRequestTypeGroupAssignmentsFeature::activate();
+        });
     }
 
-    /** @return BelongsToMany<User, $this, GroupUser> */
-    public function users(): BelongsToMany
+    public function down(): void
     {
-        return $this->belongsToMany(User::class, 'group_user')
-            ->using(GroupUser::class)
-            ->withPivot('id')
-            ->withTimestamps();
+        DB::transaction(function () {
+            ServiceRequestTypeGroupAssignmentsFeature::deactivate();
+
+            Schema::dropIfExists('service_request_type_auditor_groups');
+        });
     }
-}
+};

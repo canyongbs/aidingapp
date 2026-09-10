@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
@@ -57,10 +58,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
 
         if ($lastAssignee) {
             $lowestServiceRequest = User::query()
-                ->where(function (Builder $query) use ($serviceRequestType) {
-                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                })
+                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
                     'serviceRequests as service_request_count' => function (Builder $query) {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
@@ -70,10 +68,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                 ->first()?->getAttributeValue('service_request_count') ?? 0;
 
             $user = User::query()
-                ->where(function (Builder $query) use ($serviceRequestType) {
-                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                })
+                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->where(function (QueryBuilder $query) {
                     $query->selectRaw('count(*)')
                         ->from('service_requests')
@@ -98,10 +93,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
 
         if ($user === null) {
             $user = User::query()
-                ->where(function (Builder $query) use ($serviceRequestType) {
-                    $query->whereRelation('department.manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                    $query->orWhereRelation('manageableServiceRequestTypes', 'service_request_types.id', $serviceRequestType->getKey());
-                })
+                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
                     'serviceRequests as service_request_count' => function (Builder $query) {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);

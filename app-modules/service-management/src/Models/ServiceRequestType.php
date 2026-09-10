@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeFactory;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
@@ -47,6 +48,8 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
 use AidingApp\ServiceManagement\Models\Concerns\RestrictsVisibilityToContactTypes;
+use AidingApp\ServiceManagement\Models\Scopes\AuditedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use App\Models\BaseModel;
 use App\Models\User;
@@ -157,6 +160,17 @@ class ServiceRequestType extends BaseModel implements Auditable
     }
 
     /**
+     * @return BelongsToMany<Group, $this, covariant ServiceRequestTypeManagerGroup>
+     */
+    public function managerGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'service_request_type_manager_groups')
+            ->using(ServiceRequestTypeManagerGroup::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /**
      * @return BelongsToMany<User, $this, covariant ServiceRequestTypeUserAuditor>
      */
     public function auditorUsers(): BelongsToMany
@@ -184,6 +198,33 @@ class ServiceRequestType extends BaseModel implements Auditable
             ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
             ->withTimestamps();
+    }
+
+    /**
+     * @return BelongsToMany<Group, $this, covariant ServiceRequestTypeAuditorGroup>
+     */
+    public function auditorGroups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class, 'service_request_type_auditor_groups')
+            ->using(ServiceRequestTypeAuditorGroup::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    public function isManagedBy(User $user): bool
+    {
+        return self::query()
+            ->whereKey($this->getKey())
+            ->tap(new ManagedServiceRequestTypes($user))
+            ->exists();
+    }
+
+    public function isAuditedBy(User $user): bool
+    {
+        return self::query()
+            ->whereKey($this->getKey())
+            ->tap(new AuditedServiceRequestTypes($user))
+            ->exists();
     }
 
     /**
