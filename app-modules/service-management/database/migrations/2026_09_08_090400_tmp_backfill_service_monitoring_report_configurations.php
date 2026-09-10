@@ -55,8 +55,7 @@ return new class () extends Migration {
     {
         DB::transaction(function (): void {
             DB::table('service_monitoring_targets')
-                ->select(['id', 'report_frequency', 'is_reported_via_email', 'is_reported_via_database'])
-                ->where('is_reporting_active', true)
+                ->select(['id', 'report_frequency', 'is_reporting_active', 'is_reported_via_email', 'is_reported_via_database'])
                 ->whereNotNull('report_frequency')
                 ->whereNotExists(function (Builder $query): void {
                     $query->select(DB::raw(1))
@@ -72,7 +71,7 @@ return new class () extends Migration {
                             'id' => $configurationId,
                             'service_monitoring_target_id' => $target->id,
                             'frequency' => $target->report_frequency,
-                            'is_active' => true,
+                            'is_active' => $target->is_reporting_active,
                             'is_reported_via_email' => $target->is_reported_via_email,
                             'is_reported_via_database' => $target->is_reported_via_database,
                             'created_at' => now(),

@@ -54,6 +54,8 @@ return new class () extends Migration {
             $table->timestamps();
 
             $table->unique(['service_monitoring_target_id', 'frequency'], 'smrc_target_id_frequency_unique');
+            // The scheduled report job filters by frequency + is_active across all targets
+            $table->index(['frequency', 'is_active'], 'smrc_frequency_active_index');
         });
     }
 

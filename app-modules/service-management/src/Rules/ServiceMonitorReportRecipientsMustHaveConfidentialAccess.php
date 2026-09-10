@@ -51,6 +51,8 @@ class ServiceMonitorReportRecipientsMustHaveConfidentialAccess extends Recipient
      * @param list<string> $reportedDepartmentIds
      * @param list<string> $confidentialUserIds
      * @param list<string> $confidentialDepartmentIds
+     * @param list<string> $reportedContactIds
+     * @param list<string> $confidentialContactIds
      */
     public function __construct(
         protected ServiceMonitoringReportFrequency $frequency,
@@ -59,8 +61,10 @@ class ServiceMonitorReportRecipientsMustHaveConfidentialAccess extends Recipient
         array $confidentialUserIds,
         array $confidentialDepartmentIds,
         ?string $creatorId,
+        array $reportedContactIds = [],
+        array $confidentialContactIds = [],
     ) {
-        parent::__construct($reportedUserIds, $reportedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
+        parent::__construct($reportedUserIds, $reportedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId, $reportedContactIds, $confidentialContactIds);
     }
 
     /**

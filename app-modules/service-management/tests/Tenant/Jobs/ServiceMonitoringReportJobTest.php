@@ -146,6 +146,21 @@ it('still dispatches for confidential targets, since delivery suppression happen
     Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, 1);
 });
 
+it('does not dispatch a configuration whose target has been soft-deleted', function () {
+    Queue::fake();
+
+    $target = ServiceMonitoringTarget::factory()->create();
+    ServiceMonitoringReportConfiguration::factory()->active()->for($target, 'serviceMonitoringTarget')->create([
+        'frequency' => ServiceMonitoringReportFrequency::Daily,
+    ]);
+
+    $target->delete();
+
+    (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
+
+    Queue::assertNotPushed(ServiceMonitoringReportNotifyJob::class);
+});
+
 // The following tests cover the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
 it('falls back to legacy targets when the feature is inactive', function (ServiceMonitoringReportFrequency $frequency) {
     ServiceMonitoringReportConfigurationsFeature::deactivate();

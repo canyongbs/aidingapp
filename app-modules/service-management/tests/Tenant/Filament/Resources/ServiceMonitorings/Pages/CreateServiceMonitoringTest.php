@@ -567,6 +567,53 @@ test('a confidential service monitor can be created when a report recipient has 
     expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
 });
 
+test('a confidential service monitor cannot be created while a report contact has no confidential access', function () {
+    asSuperAdmin();
+
+    $reportContact = Contact::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_contacts' => [$reportContact->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a confidential service monitor can be created when a report contact has confidential access', function () {
+    asSuperAdmin();
+
+    $reportContact = Contact::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_contacts' => [$reportContact->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+            'is_confidential' => true,
+            'confidentialContacts' => [$reportContact->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
+});
+
 test('a service monitor saves keyword match values arrays', function () {
     asSuperAdmin();
 

@@ -81,6 +81,8 @@ class ConfidentialitySection
                                     confidentialUserIds: Arr::wrap($get('confidentialUsers')),
                                     confidentialDepartmentIds: Arr::wrap($get('confidentialDepartments')),
                                     creatorId: $record?->getAttribute('created_by_id') ?? auth()->id(),
+                                    reportedContactIds: Arr::wrap($get("report_configurations.{$frequency->value}.report_contacts")),
+                                    confidentialContactIds: Arr::wrap($get('confidentialContacts')),
                                 ))
                                 ->values()
                                 ->all()

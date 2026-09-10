@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
@@ -57,6 +58,8 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
      * @param list<string> $recipientDepartmentIds
      * @param list<string> $confidentialUserIds
      * @param list<string> $confidentialDepartmentIds
+     * @param list<string> $recipientContactIds
+     * @param list<string> $confidentialContactIds
      */
     public function __construct(
         protected array $recipientUserIds,
@@ -64,6 +67,8 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
         protected array $confidentialUserIds,
         protected array $confidentialDepartmentIds,
         protected ?string $creatorId,
+        protected array $recipientContactIds = [],
+        protected array $confidentialContactIds = [],
     ) {}
 
     /**
@@ -76,7 +81,8 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
         }
 
         $unreachable = $this->unreachableDepartmentNames()
-            ->concat($this->unreachableUserNames());
+            ->concat($this->unreachableUserNames())
+            ->concat($this->unreachableContactNames());
 
         if ($unreachable->isEmpty()) {
             return;
@@ -132,5 +138,20 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
             )
             ->orderBy('name')
             ->pluck('name');
+    }
+
+    /**
+     * @return Collection<int, string>
+     */
+    protected function unreachableContactNames(): Collection
+    {
+        return Contact::query()
+            ->whereKey($this->recipientContactIds)
+            ->when(
+                filled($this->confidentialContactIds),
+                fn (Builder $query) => $query->whereKeyNot($this->confidentialContactIds),
+            )
+            ->orderBy('full_name')
+            ->pluck('full_name');
     }
 }

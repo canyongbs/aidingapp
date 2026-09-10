@@ -44,6 +44,7 @@ use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -93,6 +94,8 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
         ServiceMonitoringReportConfiguration::query()
             ->where('frequency', $this->frequency)
             ->where('is_active', true)
+            // A soft-deleted target leaves its configuration row behind; skip it rather than dispatch a notify job with no target
+            ->whereHas('serviceMonitoringTarget', fn (Builder $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class))
             // Report delivery is confidentiality-aware per recipient, so confidential targets must not be filtered out here
             ->with(['serviceMonitoringTarget' => fn (Relation $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)])
             ->chunkById(100, function (Collection $configurations) {
