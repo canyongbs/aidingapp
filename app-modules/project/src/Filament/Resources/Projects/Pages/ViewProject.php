@@ -38,8 +38,15 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Enums\ProjectTab;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
+use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Project;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 
@@ -76,6 +83,39 @@ class ViewProject extends ViewRecord
         $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
 
         $this->tab = $effectiveTab->value;
+    }
+
+    public function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Tabs::make()
+                    ->columnSpanFull()
+                    ->livewireProperty('tab')
+                    ->tabs([
+                        ProjectTab::Access->value => Tab::make(ProjectTab::Access->getLabel())
+                            ->visible(fn (Project $record): bool => ProjectTab::Access->canView($record))
+                            ->schema([
+                                Livewire::make(ProjectAccessWidget::class, fn (Project $record): array => [
+                                    'record' => $record,
+                                ])->key(ProjectAccessWidget::class),
+                            ]),
+                        ProjectTab::Pipelines->value => Tab::make(ProjectTab::Pipelines->getLabel())
+                            ->visible(fn (Project $record): bool => ProjectTab::Pipelines->canView($record))
+                            ->schema([
+                                Livewire::make(ProjectWorkPipelineWidget::class, fn (Project $record): array => [
+                                    'record' => $record,
+                                ])->key(ProjectWorkPipelineWidget::class),
+                            ]),
+                        ProjectTab::Files->value => Tab::make(ProjectTab::Files->getLabel())
+                            ->visible(fn (Project $record): bool => ProjectTab::Files->canView($record))
+                            ->schema([
+                                Livewire::make(ProjectFilesWidget::class, fn (Project $record): array => [
+                                    'record' => $record,
+                                ])->key(ProjectFilesWidget::class),
+                            ]),
+                    ]),
+            ]);
     }
 
     /**
