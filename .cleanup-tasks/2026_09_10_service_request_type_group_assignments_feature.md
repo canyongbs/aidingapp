@@ -1,11 +1,11 @@
 ---
-title: Group Management Feature
-created: 2026-09-07
+title: Service Request Type Group Assignments Feature
+created: 2026-09-10
 ---
 
 ## Feature Flags
 
-- App\Features\GroupManagementFeature
+- App\Features\ServiceRequestTypeGroupAssignmentsFeature
 
 ## Temporary Migrations
 

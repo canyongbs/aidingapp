@@ -71,6 +71,7 @@ class AddServiceRequestUpdateBulkAction
             ])
             ->action(function (array $data, Collection $records) {
                 $records->loadMissing([
+                    'priority',
                     'serviceRequestUpdates',
                 ]);
 

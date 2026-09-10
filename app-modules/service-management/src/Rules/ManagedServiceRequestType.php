@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Rules;
 
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\SystemUser;
 use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
@@ -53,11 +54,11 @@ class ManagedServiceRequestType implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         $user = auth()->user();
-        assert($user instanceof User);
 
-        if ($user->isSuperAdmin()) {
+        if ($user instanceof SystemUser || $user->isSuperAdmin()) {
             return;
         }
+        assert($user instanceof User);
 
         $isManager = ServiceRequestType::query()
             ->whereKey($value)
