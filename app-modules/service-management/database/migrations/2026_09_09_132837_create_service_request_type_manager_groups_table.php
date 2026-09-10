@@ -35,29 +35,24 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('service_request_type_manager_groups', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
-                $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
-                $table->timestamps();
+        Schema::create('service_request_type_manager_groups', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
+            $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
+            $table->timestamps();
 
-                $table->uniqueIndex(['service_request_type_id', 'group_id']);
-            });
+            $table->uniqueIndex(['service_request_type_id', 'group_id']);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::dropIfExists('service_request_type_manager_groups');
-        });
+        Schema::dropIfExists('service_request_type_manager_groups');
     }
 };

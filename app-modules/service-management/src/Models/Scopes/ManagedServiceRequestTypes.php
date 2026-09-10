@@ -53,14 +53,8 @@ class ManagedServiceRequestTypes
         $query->where(function (Builder $query): void {
             $query
                 ->whereHas('managerUsers', fn (Builder $query) => $query->whereKey($this->user->getKey()))
-                ->orWhereHas('managerDepartments', fn (Builder $query) => $query->whereKey($this->user->department?->getKey()));
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas(
-                    'managerGroups.users',
-                    fn (Builder $query) => $query->whereKey($this->user->getKey()),
-                );
-            }
+                ->orWhereHas('managerDepartments', fn (Builder $query) => $query->whereKey($this->user->department?->getKey()))
+                ->when(ServiceRequestTypeGroupAssignmentsFeature::active(), fn (Builder $query) => $query->orWhereHas('managerGroups.users', fn (Builder $query) => $query->whereKey($this->user->getKey())));
         });
     }
 }
