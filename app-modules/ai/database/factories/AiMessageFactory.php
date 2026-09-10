@@ -37,6 +37,7 @@
 namespace AidingApp\Ai\Database\Factories;
 
 use AidingApp\Ai\Models\AiMessage;
+use AidingApp\Ai\Models\AiThread;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -57,6 +58,7 @@ class AiMessageFactory extends Factory
             'content' => $this->faker->sentence(),
             'context' => $this->faker->word(),
             'request' => $this->faker->word(),
+            'thread_id' => AiThread::factory(),
             'user_id' => User::factory(),
         ];
     }

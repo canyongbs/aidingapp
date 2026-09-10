@@ -412,6 +412,39 @@ test('Manage Assignment action visible when the Service Request is unassigned an
         ->assertTableActionVisible('manageAssignment');
 });
 
+test('Manage Assignment action mounts with the Service Request current status pre-filled', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $status->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])
+        ->create();
+
+    livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])
+        ->mountTableAction('manageAssignment')
+        ->assertTableActionDataSet([
+            'status_id' => $status->getKey(),
+        ]);
+});
+
 test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function () {
     $settings = app(LicenseSettings::class);
 

@@ -129,3 +129,14 @@ export const useCreateServiceRequestData = defineColadaLoader({
             notFound: true,
         }),
 });
+
+export const useProjectsData = defineColadaLoader({
+    key: () => ['knowledge-management', 'projects'],
+    query: () => tolerant(apiGet('/projects')),
+    staleTime: fiveMinutes,
+});
+
+export const useProjectData = defineColadaLoader({
+    key: (to) => ['knowledge-management', 'project', String(to.params.projectId)],
+    query: (to) => tolerant(apiGet(`/projects/${to.params.projectId}`), { notFound: true }),
+});

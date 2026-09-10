@@ -34,33 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
+namespace App\Features;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use App\Support\AbstractFeatureFlag;
 
-class CreateProjectMilestoneStatus extends CreateRecord
+class ProjectMilestoneStatusRemovedFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function form(Schema $schema): Schema
+    public function resolve(mixed $scope): mixed
     {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->maxLength(255)
-                    ->autofocus()
-                    ->required()
-                    ->string()
-                    ->unique(),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->maxLength(65535)
-                    ->required(),
-            ]);
+        return false;
     }
 }

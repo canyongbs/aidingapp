@@ -34,46 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Providers;
+use App\Models\Media;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\Portal\PortalPlugin;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
-use Symfony\Component\HttpFoundation\Response;
+describe('attachmentContentDisposition', function () {
+    it('builds an ISO-8859-1 safe disposition for a file name that is not Latin-1 representable', function () {
+        // macOS screenshots use a narrow no-break space (U+202F) before AM/PM, which S3 rejects in the header.
+        $media = new Media();
+        $media->file_name = "Screenshot-2026-09-08-at-7.48.39\u{202F}PM.jpg";
 
-class PortalServiceProvider extends ServiceProvider
-{
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new PortalPlugin()));
-    }
+        $disposition = $media->attachmentContentDisposition();
 
-    public function boot(): void
-    {
-        Route::bind('portalProject', function (string $value): Project {
-            $contact = auth('contact')->user();
+        expect(mb_check_encoding($disposition, 'ISO-8859-1'))->toBeTrue()
+            ->and($disposition)->toStartWith('attachment;')
+            ->and($disposition)->toContain("filename*=utf-8''")
+            ->and(rawurldecode($disposition))->toContain($media->file_name);
+    });
 
-            abort_unless($contact instanceof Contact, Response::HTTP_NOT_FOUND);
+    it('builds a simple disposition for an ASCII file name', function () {
+        $media = new Media();
+        $media->file_name = 'report.png';
 
-            return Project::query()
-                ->withoutArchived()
-                ->tap(new VisibleToPortalContact($contact))
-                ->whereKey($value)
-                ->firstOrFail();
-        });
+        $disposition = $media->attachmentContentDisposition();
 
-        Relation::morphMap([
-            'portal_settings_property' => PortalSettingsProperty::class,
-            'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
-            'portal_guest' => PortalGuest::class,
-        ]);
-    }
-}
+        expect(mb_check_encoding($disposition, 'ISO-8859-1'))->toBeTrue()
+            ->and($disposition)->toStartWith('attachment;')
+            ->and($disposition)->toContain('report.png')
+            ->and($disposition)->not->toContain('filename*');
+    });
+});

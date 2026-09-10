@@ -34,36 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses;
+use AidingApp\Form\Actions\GenerateFormKitSchema;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\CreateProjectMilestoneStatus;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\EditProjectMilestoneStatus;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ListProjectMilestoneStatuses;
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages\ViewProjectMilestoneStatus;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use App\Filament\Clusters\ProjectManagement;
-use BackedEnum;
-use Filament\Resources\Resource;
+it('renders a heading block that has no content', function () {
+    $schema = app(GenerateFormKitSchema::class)->content([], [
+        ['type' => 'heading', 'attrs' => ['level' => 2]],
+    ]);
 
-class ProjectMilestoneStatusResource extends Resource
-{
-    protected static ?string $model = ProjectMilestoneStatus::class;
+    expect($schema)->toBe([
+        ['$el' => 'h2', 'children' => []],
+    ]);
+});
 
-    protected static string | BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+it('renders a gridColumn block that has no content', function () {
+    $schema = app(GenerateFormKitSchema::class)->content([], [
+        ['type' => 'gridColumn'],
+    ]);
 
-    protected static ?string $navigationLabel = 'Statuses';
-
-    protected static ?string $cluster = ProjectManagement::class;
-
-    protected static ?int $navigationSort = 20;
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListProjectMilestoneStatuses::route('/'),
-            'create' => CreateProjectMilestoneStatus::route('/create'),
-            'edit' => EditProjectMilestoneStatus::route('/{record}/edit'),
-            'view' => ViewProjectMilestoneStatus::route('/{record}'),
-        ];
-    }
-}
+    expect($schema)->toBe([
+        ['$el' => 'div', 'children' => [], 'attrs' => ['class' => ['grid-col' => true]]],
+    ]);
+});

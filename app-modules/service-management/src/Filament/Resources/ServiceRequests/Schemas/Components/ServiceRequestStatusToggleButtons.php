@@ -34,46 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Providers;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\Portal\PortalPlugin;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
-use Symfony\Component\HttpFoundation\Response;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Filament\Forms\Components\ToggleButtons;
 
-class PortalServiceProvider extends ServiceProvider
+class ServiceRequestStatusToggleButtons
 {
-    public function register()
+    public static function make(string $name = 'status_id'): ToggleButtons
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new PortalPlugin()));
-    }
+        // Fetched once so options() and colors() derive from the same result instead of querying twice.
+        $statuses = ServiceRequestStatus::orderBy('sort')->get(['id', 'name', 'color']);
 
-    public function boot(): void
-    {
-        Route::bind('portalProject', function (string $value): Project {
-            $contact = auth('contact')->user();
-
-            abort_unless($contact instanceof Contact, Response::HTTP_NOT_FOUND);
-
-            return Project::query()
-                ->withoutArchived()
-                ->tap(new VisibleToPortalContact($contact))
-                ->whereKey($value)
-                ->firstOrFail();
-        });
-
-        Relation::morphMap([
-            'portal_settings_property' => PortalSettingsProperty::class,
-            'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
-            'portal_guest' => PortalGuest::class,
-        ]);
+        return ToggleButtons::make($name)
+            ->label('Status')
+            ->inline()
+            ->options($statuses->pluck('name', 'id'))
+            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
+            ->exists((new ServiceRequestStatus())->getTable(), 'id');
     }
 }

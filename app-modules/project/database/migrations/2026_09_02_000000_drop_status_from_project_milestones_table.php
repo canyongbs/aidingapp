@@ -34,37 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
-use Filament\Actions\EditAction;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Schema;
-
-class ViewProjectMilestoneStatus extends ViewRecord
-{
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function infolist(Schema $schema): Schema
+return new class () extends Migration {
+    public function up(): void
     {
-        return $schema
-            ->schema([
-                Section::make()
-                    ->schema([
-                        TextEntry::make('name')
-                            ->label('Name'),
-                        TextEntry::make('description')
-                            ->label('Description'),
-                    ]),
-            ]);
+        DB::transaction(function () {
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->dropConstrainedForeignId('status_id');
+            });
+
+            Schema::dropIfExists('project_milestone_statuses');
+
+            ProjectMilestoneStatusRemovedFeature::activate();
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            EditAction::make(),
-        ];
+        DB::transaction(function () {
+            ProjectMilestoneStatusRemovedFeature::deactivate();
+
+            Schema::create('project_milestone_statuses', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->string('name');
+                $table->string('description')->nullable();
+                $table->timestamps();
+                $table->softDeletes();
+
+                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            });
+
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->uuid('status_id')->nullable();
+            });
+        });
     }
-}
+};

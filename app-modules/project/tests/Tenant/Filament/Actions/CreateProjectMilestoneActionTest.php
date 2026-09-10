@@ -34,46 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Providers;
+use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
+use App\Features\ProjectMilestoneStatusRemovedFeature;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
-use AidingApp\Portal\Models\PortalGuest;
-use AidingApp\Portal\PortalPlugin;
-use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
-use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\ServiceProvider;
-use Symfony\Component\HttpFoundation\Response;
-
-class PortalServiceProvider extends ServiceProvider
+// Checked directly against the schema array since the status table is already dropped by the time tests run.
+function createProjectMilestoneActionHasStatusField(): bool
 {
-    public function register()
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new PortalPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Route::bind('portalProject', function (string $value): Project {
-            $contact = auth('contact')->user();
-
-            abort_unless($contact instanceof Contact, Response::HTTP_NOT_FOUND);
-
-            return Project::query()
-                ->withoutArchived()
-                ->tap(new VisibleToPortalContact($contact))
-                ->whereKey($value)
-                ->firstOrFail();
-        });
-
-        Relation::morphMap([
-            'portal_settings_property' => PortalSettingsProperty::class,
-            'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,
-            'portal_guest' => PortalGuest::class,
-        ]);
-    }
+    return collect(CreateProjectMilestoneAction::formSchema())
+        ->contains(fn ($component) => $component->getStatePath(isAbsolute: false) === 'status_id');
 }
+
+it('excludes the status field by default', function () {
+    expect(createProjectMilestoneActionHasStatusField())->toBeFalse();
+});
+
+it('includes a required status field when the flag is inactive', function () {
+    ProjectMilestoneStatusRemovedFeature::deactivate();
+
+    expect(createProjectMilestoneActionHasStatusField())->toBeTrue();
+});

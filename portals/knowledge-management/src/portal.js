@@ -51,6 +51,8 @@ import {
     useCategoryData,
     useCreateServiceRequestData,
     useLicensesData,
+    useProjectData,
+    useProjectsData,
     useServiceMonitorData,
     useServiceRequestData,
     useServiceRequestsData,
@@ -209,7 +211,20 @@ customElements.define(
                     {
                         path: baseUrl + '/projects',
                         name: 'projects',
-                        component: () => import('./Pages/ComingSoon.vue'),
+                        component: () => import('./Pages/Projects.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useProjectsData],
+                        },
+                    },
+                    {
+                        path: baseUrl + '/projects/:projectId',
+                        name: 'view-project',
+                        component: () => import('./Pages/ViewProject.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useProjectData],
+                        },
                     },
                 ],
             });

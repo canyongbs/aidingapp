@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,45 +30,39 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { ChevronDownIcon } from '@heroicons/vue/16/solid';
 
-namespace AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\Pages;
+    defineProps({
+        modelValue: {
+            type: String,
+            default: null,
+        },
+        pipelines: {
+            type: Array,
+            required: true,
+        },
+    });
 
-use AidingApp\Project\Filament\Resources\ProjectMilestoneStatuses\ProjectMilestoneStatusResource;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+    defineEmits(['update:modelValue']);
+</script>
 
-class EditProjectMilestoneStatus extends EditRecord
-{
-    protected static string $resource = ProjectMilestoneStatusResource::class;
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components([
-                TextInput::make('name')
-                    ->label('Name')
-                    ->maxLength(255)
-                    ->autofocus()
-                    ->required()
-                    ->string()
-                    ->unique(ignoreRecord: true),
-                Textarea::make('description')
-                    ->label('Description')
-                    ->maxLength(65535)
-                    ->required(),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
-}
+<template>
+    <div class="relative inline-block w-full max-w-xs">
+        <select
+            :value="modelValue"
+            aria-label="Select pipeline"
+            class="w-full appearance-none rounded-[var(--rounding-md)] border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
+            @change="$emit('update:modelValue', $event.target.value)"
+        >
+            <option v-for="pipeline in pipelines" :key="pipeline.id" :value="pipeline.id">
+                {{ pipeline.name }}
+            </option>
+        </select>
+        <ChevronDownIcon
+            class="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+            aria-hidden="true"
+        />
+    </div>
+</template>

@@ -81,7 +81,16 @@ class ServiceRequestMediaTable extends TableWidget
             ->columns([
                 TextColumn::make('display_name')
                     ->label('File Name')
-                    ->getStateUsing(fn (Media $record): string => $record->name . '.' . pathinfo($record->file_name, PATHINFO_EXTENSION))
+                    ->getStateUsing(function (Media $record): string {
+                        $extension = pathinfo($record->file_name, PATHINFO_EXTENSION);
+
+                        // Some ingestion paths store the extension in the name; don't append it twice.
+                        if ($extension === '' || str_ends_with(mb_strtolower($record->name), '.' . mb_strtolower($extension))) {
+                            return $record->name;
+                        }
+
+                        return $record->name . '.' . $extension;
+                    })
                     ->searchable(
                         query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
                     )
