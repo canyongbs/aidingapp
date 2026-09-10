@@ -55,16 +55,16 @@ class NotifyServiceRequestUsers
 
         $user = User::query()
             ->when($excludeUser, fn (Builder $query) => $query->whereNot('id', $excludeUser->getKey()))
-            ->where(function (Builder $query) use ($shouldSendToManagers, $shouldSendToAuditors, $typeKey) {
+            ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors, $typeKey) {
                 if ($shouldSendToManagers) {
                     $query->where(
-                        fn (Builder $query) => $query->tap(new ManagesServiceRequestType($typeKey)),
+                        fn (Builder $query) => $query->tap(new ManagesServiceRequestType($typeKey, $serviceRequest)),
                     );
                 }
 
                 if ($shouldSendToAuditors) {
                     $method = $shouldSendToManagers ? 'orWhere' : 'where';
-                    $query->{$method}(fn (Builder $query) => $query->tap(new AuditsServiceRequestType($typeKey)));
+                    $query->{$method}(fn (Builder $query) => $query->tap(new AuditsServiceRequestType($typeKey, $serviceRequest)));
                 }
             })
             ->get()

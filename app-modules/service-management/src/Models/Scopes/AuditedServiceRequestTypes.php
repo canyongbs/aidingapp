@@ -53,14 +53,8 @@ class AuditedServiceRequestTypes
         $query->where(function (Builder $query): void {
             $query
                 ->whereHas('auditorUsers', fn (Builder $query) => $query->whereKey($this->user->getKey()))
-                ->orWhereHas('auditorDepartments', fn (Builder $query) => $query->whereKey($this->user->department?->getKey()));
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas(
-                    'auditorGroups.users',
-                    fn (Builder $query) => $query->whereKey($this->user->getKey()),
-                );
-            }
+                ->orWhereHas('auditorDepartments', fn (Builder $query) => $query->whereKey($this->user->department?->getKey()))
+                ->when(ServiceRequestTypeGroupAssignmentsFeature::active(), fn (Builder $query) => $query->orWhereHas('auditorGroups.users', fn (Builder $query) => $query->whereKey($this->user->getKey())));
         });
     }
 }

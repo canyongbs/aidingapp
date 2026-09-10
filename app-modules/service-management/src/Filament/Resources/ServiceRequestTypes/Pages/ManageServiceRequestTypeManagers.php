@@ -79,15 +79,14 @@ class ManageServiceRequestTypeManagers extends EditRecord
                             ->multiple()
                             ->relationship('managerDepartments', 'name')
                             ->preload(),
-                        ...(ServiceRequestTypeGroupAssignmentsFeature::active() ? [
-                            Select::make('managerGroups')
-                                ->label('Groups')
-                                ->multiple()
-                                ->relationship('managerGroups', 'name')
-                                ->preload(),
-                        ] : []),
+                        Select::make('managerGroups')
+                            ->label('Groups')
+                            ->multiple()
+                            ->relationship('managerGroups', 'name')
+                            ->visible(fn () => ServiceRequestTypeGroupAssignmentsFeature::active())
+                            ->preload(),
                     ])
-                    ->columns(3),
+                    ->columns(fn () => ServiceRequestTypeGroupAssignmentsFeature::active() ? 3 : 2),
             ]);
     }
 }

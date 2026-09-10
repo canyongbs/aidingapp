@@ -79,15 +79,14 @@ class ManageServiceRequestTypeAuditors extends EditRecord
                             ->multiple()
                             ->relationship('auditorDepartments', 'name')
                             ->preload(),
-                        ...(ServiceRequestTypeGroupAssignmentsFeature::active() ? [
-                            Select::make('auditorGroups')
-                                ->label('Groups')
-                                ->multiple()
-                                ->relationship('auditorGroups', 'name')
-                                ->preload(),
-                        ] : []),
+                        Select::make('auditorGroups')
+                            ->label('Groups')
+                            ->multiple()
+                            ->relationship('auditorGroups', 'name')
+                            ->visible(fn () => ServiceRequestTypeGroupAssignmentsFeature::active())
+                            ->preload(),
                     ])
-                    ->columns(3),
+                    ->columns(fn () => ServiceRequestTypeGroupAssignmentsFeature::active() ? 3 : 2),
             ]);
     }
 }
