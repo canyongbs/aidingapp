@@ -60,10 +60,8 @@ class FormSubmissionRequestNotification extends Notification implements ShouldQu
 
     public function toMail(object $notifiable): MailMessage
     {
-        $division = $this->submission->requester->department?->division;
-
         return MailMessage::make()
-            ->subject("Request to Complete: {$this->submission->submissible->name}" . (filled($division?->name) ? " | {$division->name}" : ''))
+            ->subject("Request to Complete: {$this->submission->submissible->name}")
             ->greeting('Hello ' . $this->submission->author->display_name . '!')
             ->line("Please complete the attached form: {$this->submission->submissible->name}")
             ->lineIf(filled($this->submission->request_note), $this->submission->request_note)

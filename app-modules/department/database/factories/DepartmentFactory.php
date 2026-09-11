@@ -37,7 +37,6 @@
 namespace AidingApp\Department\Database\Factories;
 
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -50,14 +49,6 @@ class DepartmentFactory extends Factory
         return [
             'name' => $this->faker->unique()->sentence(),
             'description' => $this->faker->sentence(),
-            'division_id' => null,
         ];
-    }
-
-    public function withDivision(): static
-    {
-        return $this->state(fn () => [
-            'division_id' => Division::factory(),
-        ]);
     }
 }
