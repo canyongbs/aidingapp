@@ -2004,12 +2004,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$types of method Filament\\\\Forms\\\\Components\\\\BaseFileUpload\\:\\:acceptedFileTypes\\(\\) expects array\\<string\\>\\|Closure\\|Illuminate\\\\Contracts\\\\Support\\\\Arrayable, array\\<string, array\\<string\\>\\> given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/EditServiceRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
     'identifier' => 'Common.noStrtolower',
     'count' => 2,

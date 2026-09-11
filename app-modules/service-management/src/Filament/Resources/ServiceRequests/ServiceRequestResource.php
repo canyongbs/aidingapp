@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewLiveChatTranscript;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
@@ -123,7 +122,6 @@ class ServiceRequestResource extends Resource
             'index' => ListServiceRequests::route('/'),
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
-            'edit' => EditServiceRequest::route('/{record}/edit'),
             'view-live-chat-transcript' => ViewLiveChatTranscript::route('/{record}/live-chats/{conversation}'),
         ];
     }

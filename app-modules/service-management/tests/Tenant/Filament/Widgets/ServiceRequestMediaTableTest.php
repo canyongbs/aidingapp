@@ -37,7 +37,9 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
@@ -355,6 +357,211 @@ describe('ServiceRequest', function () {
             ->assertSuccessful()
             ->assertSeeText('No uploads');
     });
+
+    // Authorization
+
+    test('uploadFile action is visible for a user who can update the service request', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionVisible('uploadFile');
+    });
+
+    test('uploadFile action is hidden for a user who cannot update the service request', function () {
+        actingAs(User::factory()->create());
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('uploadFile');
+    });
+
+    test('delete action is visible for a user who can update the service request', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionVisible('delete', record: $media);
+    });
+
+    test('delete action is hidden for a user who cannot update the service request', function () {
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->toMediaCollection('uploads');
+
+        actingAs(User::factory()->create());
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('delete', record: $media);
+    });
+
+    // Validation
+
+    test('uploadFile action requires a file', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => null,
+            ])
+            ->assertHasTableActionErrors(['file' => ['required']]);
+
+        expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(0);
+    });
+
+    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('malware.exe', 10, 'application/x-msdownload'),
+            ])
+            ->assertHasTableActionErrors(['file']);
+
+        expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(0);
+    });
+
+    // Success
+
+    test('can upload a new file', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('report.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors()
+            ->assertNotified();
+
+        $media = $serviceRequest->fresh()->getMedia('uploads');
+
+        expect($media)->toHaveCount(1)
+            ->and($media->first()->file_name)->toBe('report.pdf');
+    });
+
+    test('uploading a file records a history entry for the timeline', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('report.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $history = ServiceRequestHistory::where('service_request_id', $serviceRequest->getKey())
+            ->get()
+            ->first(fn (ServiceRequestHistory $history): bool => $history->isFileUploadedEvent());
+
+        expect($history)->not->toBeNull()
+            ->and($history->uploadedFileName())->toBe('report.pdf')
+            ->and($history->eventTitle())->toBe('File Uploaded');
+    });
+
+    test('can delete a file', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->toMediaCollection('uploads');
+
+        $component = livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$media]);
+
+        $component
+            ->callTableAction('delete', record: $media->getKey())
+            ->assertHasNoTableActionErrors()
+            ->assertNotified();
+
+        $component->assertCanNotSeeTableRecords([$media]);
+
+        expect(Media::find($media->getKey()))->toBeNull();
+    });
+
+    test('deleting a file records a history entry for the timeline', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->usingFileName('report.png')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('delete', record: $media->getKey())
+            ->assertHasNoTableActionErrors();
+
+        $history = ServiceRequestHistory::where('service_request_id', $serviceRequest->getKey())
+            ->get()
+            ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
+
+        expect($history)->not->toBeNull()
+            ->and($history->deletedFileName())->toBe('report.png')
+            ->and($history->eventTitle())->toBe('File Deleted');
+    });
 });
 
 describe('ServiceRequestUpdate', function () {
@@ -520,5 +727,56 @@ describe('ServiceRequestUpdate', function () {
         ])
             ->assertSuccessful()
             ->assertSeeText('No uploads');
+    });
+
+    test('uploading a file records a history entry on the parent service request for the timeline', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('attachment.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $history = ServiceRequestHistory::where('service_request_id', $serviceRequestUpdate->serviceRequest->getKey())
+            ->get()
+            ->first(fn (ServiceRequestHistory $history): bool => $history->isFileUploadedEvent());
+
+        expect($history)->not->toBeNull()
+            ->and($history->uploadedFileName())->toBe('attachment.pdf');
+    });
+
+    test('deleting a file records a history entry on the parent service request for the timeline', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $media = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->usingName('attachment')
+            ->usingFileName('attachment.png')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('delete', record: $media->getKey())
+            ->assertHasNoTableActionErrors();
+
+        $history = ServiceRequestHistory::where('service_request_id', $serviceRequestUpdate->serviceRequest->getKey())
+            ->get()
+            ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
+
+        expect($history)->not->toBeNull()
+            ->and($history->deletedFileName())->toBe('attachment.png');
     });
 });

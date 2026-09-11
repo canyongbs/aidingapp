@@ -142,9 +142,6 @@ class ListServiceRequestTableWidgets extends BaseWidget
                 Action::make('View')->url(function (ServiceRequest $serviceRequest) {
                     return ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
                 }),
-                Action::make('Edit')->url(function (ServiceRequest $serviceRequest) {
-                    return ServiceRequestResource::getUrl('edit', ['record' => $serviceRequest]);
-                }),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
