@@ -40,7 +40,6 @@ use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
 use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
 use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
 use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
 use AidingApp\Division\Models\Division;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
@@ -53,13 +52,6 @@ class DivisionResource extends Resource
     protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
 
     protected static ?int $navigationSort = 50;
-
-    public static function getRelations(): array
-    {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
 
     public static function getPages(): array
     {
