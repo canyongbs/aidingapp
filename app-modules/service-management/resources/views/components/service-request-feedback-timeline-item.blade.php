@@ -38,9 +38,7 @@
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="fi-ta-text mb-1 flex items-center text-base font-semibold text-gray-950 dark:text-white">
-            <span class="font-medium">
-                Feedback Submitted
-            </span>
+            <span class="font-medium">Feedback Submitted</span>
         </h3>
 
         <div>
