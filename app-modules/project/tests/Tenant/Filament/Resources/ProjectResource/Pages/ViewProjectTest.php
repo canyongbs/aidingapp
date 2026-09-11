@@ -291,8 +291,8 @@ describe('tabs', function () {
             });
 
         collect(ProjectTab::cases())
-            ->reject(fn(ProjectTab $inactiveTab): bool => $inactiveTab === $tab)
-            ->each(fn(ProjectTab $inactiveTab) => $page->assertDontSeeLivewire(match ($inactiveTab) {
+            ->reject(fn (ProjectTab $inactiveTab): bool => $inactiveTab === $tab)
+            ->each(fn (ProjectTab $inactiveTab) => $page->assertDontSeeLivewire(match ($inactiveTab) {
                 ProjectTab::Access => ProjectAccessWidget::class,
                 ProjectTab::Pipelines => ProjectWorkPipelineWidget::class,
                 ProjectTab::Files => ProjectFilesWidget::class,
@@ -608,7 +608,7 @@ it('can create a pipeline through the create pipeline action', function () {
             ],
         ])
         ->assertHasNoActionErrors()
-        ->assertSet('selectedPipelineId', fn(?string $state): bool => filled($state));
+        ->assertSet('selectedPipelineId', fn (?string $state): bool => filled($state));
 
     $pipeline = Pipeline::query()->where('name', 'Delivery Pipeline')->first();
 
