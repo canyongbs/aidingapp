@@ -38,15 +38,22 @@ namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFeedbackFactory;
+use AidingApp\ServiceManagement\Observers\ServiceRequestFeedbackObserver;
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
+use AidingApp\Timeline\Timelines\ServiceRequestFeedbackTimeline;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
 
 /**
  * @mixin IdeHelperServiceRequestFeedback
  */
-class ServiceRequestFeedback extends BaseModel
+#[ObservedBy([ServiceRequestFeedbackObserver::class])]
+class ServiceRequestFeedback extends BaseModel implements ProvidesATimeline
 {
     use SoftDeletes;
 
@@ -74,5 +81,17 @@ class ServiceRequestFeedback extends BaseModel
     public function contact(): BelongsTo
     {
         return $this->belongsTo(Contact::class);
+    }
+
+    public function timeline(): ServiceRequestFeedbackTimeline
+    {
+        return new ServiceRequestFeedbackTimeline($this);
+    }
+
+    public static function getTimelineData(Model $forModel): Collection
+    {
+        assert($forModel instanceof ServiceRequest);
+
+        return $forModel->feedback()->get();
     }
 }
