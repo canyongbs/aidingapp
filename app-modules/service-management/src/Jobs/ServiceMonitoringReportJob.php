@@ -37,11 +37,16 @@
 namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -75,7 +80,35 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        ServiceMonitoringTarget::where('report_frequency', $this->frequency)
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            $this->dispatchForConfigurations();
+
+            return;
+        }
+
+        $this->dispatchForLegacyTargets();
+    }
+
+    private function dispatchForConfigurations(): void
+    {
+        ServiceMonitoringReportConfiguration::query()
+            ->where('frequency', $this->frequency)
+            ->where('is_active', true)
+            // A soft-deleted target leaves its configuration row behind; skip it rather than dispatch a notify job with no target
+            ->whereHas('serviceMonitoringTarget', fn (Builder $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class))
+            // Report delivery is confidentiality-aware per recipient, so confidential targets must not be filtered out here
+            ->with(['serviceMonitoringTarget' => fn (Relation $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)])
+            ->chunkById(100, function (Collection $configurations) {
+                foreach ($configurations as $configuration) {
+                    dispatch(new ServiceMonitoringReportNotifyJob($configuration));
+                }
+            });
+    }
+
+    private function dispatchForLegacyTargets(): void
+    {
+        ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->where('report_frequency', $this->frequency)
             ->where('is_reporting_active', true)
             ->chunkById(100, function (Collection $serviceMonitoringTargets) {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {

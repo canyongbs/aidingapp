@@ -36,72 +36,63 @@
 
 namespace AidingApp\ServiceManagement\Filament\Components;
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
+use App\Models\Scopes\WithoutAnyAdmin;
+use App\Models\User;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 
-class AutomatedReportingSection
+class ReportFrequencySection
 {
-    public static function make(): Section
+    public static function make(ServiceMonitoringReportFrequency $frequency): Section
     {
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            return Section::make('Automated Reporting')
-                ->schema([
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Daily),
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Weekly),
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Monthly),
-                ])
-                ->columns(1);
-        }
+        $prefix = "report_configurations.{$frequency->value}";
+        $isActiveField = "{$prefix}.is_active";
 
-        // Legacy single-frequency schema, kept until ServiceMonitoringReportConfigurationsFeature is cleaned up
-        return Section::make('Automated Reporting')
+        return Section::make($frequency->getLabel() . ' Reporting')
             ->schema([
-                Toggle::make('is_reporting_active')
-                    ->label('Activate Reporting')
-                    ->default(false)
+                Toggle::make($isActiveField)
+                    ->label('Activate ' . $frequency->getLabel() . ' Reporting')
                     ->live()
+                    ->default(false)
                     ->columnSpanFull(),
-                Radio::make('report_frequency')
-                    ->label('Frequency')
-                    ->options(ServiceMonitoringReportFrequency::class)
-                    ->enum(ServiceMonitoringReportFrequency::class)
-                    ->required(fn (Get $get) => $get('is_reporting_active'))
-                    ->visible(fn (Get $get) => $get('is_reporting_active')),
-                Hidden::make('is_reported_via_email')
-                    ->default(false),
-                Hidden::make('is_reported_via_database')
-                    ->default(false),
-                ReportChannelCheckboxList::make(),
                 Section::make('Recipients')
                     ->schema([
-                        UserSelect::make('report_users')
-                            ->relationship('reportUsers')
+                        UserSelect::make("{$prefix}.report_users")
                             ->label('Users')
                             ->multiple()
-                            ->preload(),
-                        Select::make('report_departments')
-                            ->relationship('reportDepartments', 'name')
+                            ->preload()
+                            ->options(fn (): array => once(fn (): array => User::query()->tap(new WithoutAnyAdmin())->orderBy('name')->pluck('name', 'id')->all())),
+                        Select::make("{$prefix}.report_departments")
                             ->label('Departments')
                             ->multiple()
                             ->preload()
-                            ->searchable(),
-                        Select::make('report_contacts')
-                            ->relationship('reportContacts', 'full_name')
+                            ->searchable()
+                            ->options(fn (): array => once(fn (): array => Department::query()->orderBy('name')->pluck('name', 'id')->all())),
+                        Select::make("{$prefix}.report_contacts")
                             ->label('Contacts')
                             ->multiple()
                             ->preload()
-                            ->searchable(),
+                            ->searchable()
+                            ->options(fn (): array => once(fn (): array => Contact::query()->orderBy('full_name')->pluck('full_name', 'id')->all())),
+                        CheckboxList::make("{$prefix}.report_channels")
+                            ->label('Channels')
+                            ->options([
+                                'email' => 'Email',
+                                'database' => 'Application',
+                            ])
+                            ->required(fn (Get $get): bool => (bool) $get($isActiveField))
+                            ->columnSpanFull(),
                     ])
                     ->columns(3)
-                    ->visible(fn (Get $get) => $get('is_reporting_active')),
+                    ->visible(fn (Get $get): bool => (bool) $get($isActiveField)),
             ])
-            ->columns(2);
+            ->columns(1);
     }
 }

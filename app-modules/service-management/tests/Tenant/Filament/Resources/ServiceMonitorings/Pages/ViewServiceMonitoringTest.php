@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
@@ -94,15 +95,19 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
         ->hasAttached(Department::factory())
         ->hasAttached(User::factory())
-        ->hasAttached($reportDepartment, [], 'reportDepartments')
-        ->hasAttached($reportUser, [], 'reportUsers')
-        ->hasAttached($reportContact, [], 'reportContacts')
+        ->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
         ->create([
-            'is_reporting_active' => true,
-            'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'is_active' => true,
             'is_reported_via_email' => true,
             'is_reported_via_database' => true,
         ]);
+    $configuration->reportDepartments()->attach($reportDepartment->getKey());
+    $configuration->reportUsers()->attach($reportUser->getKey());
+    $configuration->reportContacts()->attach($reportContact->getKey());
 
     asSuperAdmin()
         ->get(
@@ -128,8 +133,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
             ]
         )
         ->assertSee('Automated Reporting')
-        ->assertSee('Frequency')
-        ->assertSee($serviceMonitoringTarget->report_frequency->getLabel())
+        ->assertSee('Weekly Reporting')
         ->assertSee('Email')
         ->assertSee('Application')
         ->assertSee($reportUser->name)
@@ -137,21 +141,24 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         ->assertSee($reportContact->full_name);
 });
 
-test('The Automated Reporting section is hidden when reporting is not active', function () {
+test('The Automated Reporting section is hidden when no reporting frequency is active', function () {
     $reportDepartment = Department::factory()->create();
     $reportUser = User::factory()->create();
     $reportContact = Contact::factory()->create();
 
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
-        ->hasAttached($reportDepartment, [], 'reportDepartments')
-        ->hasAttached($reportUser, [], 'reportUsers')
-        ->hasAttached($reportContact, [], 'reportContacts')
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->inactive()
         ->create([
-            'is_reporting_active' => false,
-            'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'frequency' => ServiceMonitoringReportFrequency::Weekly,
             'is_reported_via_email' => true,
             'is_reported_via_database' => true,
         ]);
+    $configuration->reportDepartments()->attach($reportDepartment->getKey());
+    $configuration->reportUsers()->attach($reportUser->getKey());
+    $configuration->reportContacts()->attach($reportContact->getKey());
 
     asSuperAdmin()
         ->get(

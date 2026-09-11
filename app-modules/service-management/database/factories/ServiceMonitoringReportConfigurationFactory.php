@@ -34,40 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Support\Collection;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
+ * @extends Factory<ServiceMonitoringReportConfiguration>
  */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+class ServiceMonitoringReportConfigurationFactory extends Factory
 {
     /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
-     * @param list<string> $confidentialUserIds
-     * @param list<string> $confidentialDepartmentIds
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
-        array $confidentialUserIds,
-        array $confidentialDepartmentIds,
-        ?string $creatorId,
-    ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
+    public function definition(): array
+    {
+        return [
+            'service_monitoring_target_id' => ServiceMonitoringTarget::factory(),
+            'frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
+            'is_active' => $this->faker->boolean(),
+            'is_reported_via_email' => $this->faker->boolean(),
+            'is_reported_via_database' => $this->faker->boolean(),
+        ];
     }
 
-    /**
-     * @param Collection<int, string> $unreachable
-     */
-    protected function failureMessage(Collection $unreachable): string
+    public function active(): static
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+        return $this->state(fn (array $attributes) => [
+            'is_active' => true,
+        ]);
+    }
+
+    public function inactive(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'is_active' => false,
+        ]);
     }
 }

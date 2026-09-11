@@ -190,6 +190,19 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
     }
 
     /**
+     * @return HasMany<ServiceMonitoringReportConfiguration, $this>
+     */
+    public function reportConfigurations(): HasMany
+    {
+        return $this->hasMany(ServiceMonitoringReportConfiguration::class);
+    }
+
+    public function reportConfigurationFor(ServiceMonitoringReportFrequency $frequency): ?ServiceMonitoringReportConfiguration
+    {
+        return $this->reportConfigurations->firstWhere('frequency', $frequency);
+    }
+
+    /**
      * @return MorphTo<Model, $this>
      */
     public function createdBy(): MorphTo

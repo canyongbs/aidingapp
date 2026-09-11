@@ -41,13 +41,16 @@ use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification as BaseNotification;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -66,13 +69,30 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
      **/
     private ?array $statistics = null;
 
-    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public string $channel) {}
+    public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public ServiceMonitoringReportFrequency $frequency, public string $channel) {}
+
+    /**
+     * Restore notifications queued by the previous release, which had no `frequency` property.
+     * The private cache properties are left at their default (null) and recomputed lazily.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function __unserialize(array $values): void
+    {
+        $this->serviceMonitoringTarget = $values['serviceMonitoringTarget'];
+        $this->frequency = $values['frequency'] ?? ServiceMonitoringReportFrequency::Monthly;
+        $this->channel = $values['channel'];
+    }
 
     /**
      * @return array<int, string>
      */
     public function via(User|Contact $notifiable): array
     {
+        if (! $this->notifiableCanViewTarget($notifiable)) {
+            return [];
+        }
+
         return match ($this->channel) {
             DatabaseChannel::class => ['database'],
             MailChannel::class => ['mail'],
@@ -87,9 +107,10 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         $stats = $this->getStatistics();
 
         return MailMessage::make()
-            ->subject(($this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly)->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
+            ->subject($this->frequency->getLabel() . ' Service Monitor Report: ' . $this->serviceMonitoringTarget->name)
             ->markdown('service-management::mail.service-monitoring-report', [
                 'serviceMonitoringTarget' => $this->serviceMonitoringTarget,
+                'frequency' => $this->frequency,
                 'reportPeriodStart' => $reportPeriodStart->format('M j, Y g:i a (T)'),
                 'reportPeriodEnd' => $reportPeriodEnd->format('M j, Y g:i a (T)'),
                 'timezone' => $timezone,
@@ -110,7 +131,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         $stats = $this->getStatistics();
 
         return Notification::make()
-            ->title('Your ' . Str::lower($this->serviceMonitoringTarget->report_frequency->value ?? ServiceMonitoringReportFrequency::Monthly->value) . ' service monitor report for ' . $this->serviceMonitoringTarget->name . ' is ready.')
+            ->title('Your ' . Str::lower($this->frequency->value) . ' service monitor report for ' . $this->serviceMonitoringTarget->name . ' is ready.')
             ->body(
                 'Uptime: ' . $stats['uptime_percentage'] . "\n" .
                 'Successful checks: ' . $stats['successful_checks'] . "\n" .
@@ -132,9 +153,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         $timezone = Tenant::current()?->getTimezone() ?? config('app.timezone');
         $now = now()->setTimezone($timezone);
 
-        $reportFrequency = $this->serviceMonitoringTarget->report_frequency ?? ServiceMonitoringReportFrequency::Monthly;
-
-        $this->reportPeriod = match ($reportFrequency) {
+        $this->reportPeriod = match ($this->frequency) {
             ServiceMonitoringReportFrequency::Daily => [
                 $now->copy()->subDay()->startOfDay(),
                 $now->copy()->subDay()->endOfDay(),
@@ -211,6 +230,23 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         ];
 
         return $this->statistics;
+    }
+
+    // Reports are queued and run without an authenticated user, so confidentiality must be re-checked per recipient
+    private function notifiableCanViewTarget(object $notifiable): bool
+    {
+        if (! $this->serviceMonitoringTarget->is_confidential) {
+            return true;
+        }
+
+        return ServiceMonitoringTarget::query()
+            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->whereKey($this->serviceMonitoringTarget->getKey())
+            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
+                $query,
+                $notifiable instanceof Authenticatable ? $notifiable : null,
+            ))
+            ->exists();
     }
 
     private function getIncidentSummary(): string
