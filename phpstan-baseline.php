@@ -1980,12 +1980,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Unsafe call to private method AidingApp\\\\ServiceManagement\\\\Filament\\\\Resources\\\\Advisories\\\\Pages\\\\ManageAdvisoryUpdate\\:\\:managers\\(\\) through static\\:\\:\\.$#',
-    'identifier' => 'staticClassAccess.privateMethod',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/Advisories/Pages/ManageAdvisoryUpdate.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withTrashed\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 2,

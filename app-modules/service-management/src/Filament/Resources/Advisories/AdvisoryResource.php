@@ -37,13 +37,10 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\CreateAdvisory;
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\EditAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ManageAdvisoryUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Models\Advisory;
 use App\Enums\NavigationGroup;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use UnitEnum;
 
@@ -63,25 +60,12 @@ class AdvisoryResource extends Resource
 
     protected static ?string $breadcrumb = 'Advisories';
 
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        $navigationItems = [
-            ViewAdvisory::class,
-            EditAdvisory::class,
-            ManageAdvisoryUpdate::class,
-        ];
-
-        return $page->generateNavigationItems($navigationItems);
-    }
-
     public static function getPages(): array
     {
         return [
             'index' => ListAdvisories::route('/'),
             'create' => CreateAdvisory::route('/create'),
             'view' => ViewAdvisory::route('/{record}'),
-            'edit' => EditAdvisory::route('/{record}/edit'),
-            'manage-advisory-update' => ManageAdvisoryUpdate::route('/{record}/updates'),
         ];
     }
 }

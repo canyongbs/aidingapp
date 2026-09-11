@@ -34,17 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Filament\Tables;
 
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\Department\Models\Department;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class EditAdvisoryUpdateRequestFactory extends RequestFactory
+class DepartmentsTable
 {
-    public function definition(): array
+    public static function configure(Table $table): Table
     {
-        return [
-            'update' => fake()->sentence,
-            'internal' => fake()->boolean,
-        ];
+        return $table
+            ->query(fn (): Builder => Department::query())
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('division.name')
+                    ->label('Division')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->defaultSort('name')
+            ->paginationPageOptions([5]);
     }
 }
