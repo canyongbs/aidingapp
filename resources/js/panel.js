@@ -36,4 +36,5 @@
 // hook (`panels::body.end`). Add future panel-wide behaviour by importing it
 // here rather than registering additional render hooks.
 
+import './chartTickAffix';
 import './richContentCodeBlocks';

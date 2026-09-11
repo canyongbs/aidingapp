@@ -39,18 +39,22 @@ namespace AidingApp\Report\Filament\Pages;
 use AidingApp\Report\Enums\ReportAccessKey;
 use AidingApp\Report\Filament\Pages\Concerns\InteractsWithServiceRequestTypeFilter;
 use AidingApp\Report\Filament\Widgets\RefreshWidget;
-use AidingApp\Report\Filament\Widgets\ServiceRequestCategoryDistributionDonutChart;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsOverTimeBarChart;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsStats;
-use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
-use AidingApp\Report\Filament\Widgets\ServiceRequestStatusDistributionDonutChart;
-use AidingApp\Report\Filament\Widgets\ServiceRequestTypesTable;
+use AidingApp\Report\Filament\Widgets\ResolutionSlaByClassificationDonutChart;
+use AidingApp\Report\Filament\Widgets\ResponseSlaByClassificationDonutChart;
+use AidingApp\Report\Filament\Widgets\SlaBreachesByServiceRequestTypeTable;
+use AidingApp\Report\Filament\Widgets\SlaComplianceOverTimeLineChart;
+use AidingApp\Report\Filament\Widgets\SlaPerformanceByAgentTable;
+use AidingApp\Report\Filament\Widgets\SlaStats;
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
 use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Select;
 use Filament\Pages\Dashboard;
 use Filament\Pages\Dashboard\Concerns\HasFiltersForm;
 use Filament\Schemas\Components\Section;
@@ -59,7 +63,7 @@ use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
 use UnitEnum;
 
-class ServiceRequests extends Dashboard
+class Sla extends Dashboard
 {
     use HasFiltersForm;
     use InteractsWithServiceRequestTypeFilter;
@@ -68,17 +72,17 @@ class ServiceRequests extends Dashboard
 
     protected static string | UnitEnum | null $navigationGroup = ReportLibraryNavigationGroup::ServiceDesk;
 
-    protected static ?string $navigationLabel = 'Service Requests';
+    protected static ?string $navigationLabel = 'SLA';
 
-    protected static ?string $title = 'Service Requests';
+    protected static ?string $title = 'SLA';
 
-    protected static string $routePath = 'service-requests';
+    protected static string $routePath = 'sla';
 
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 15;
 
     protected static string | BackedEnum | null $navigationIcon = '';
 
-    protected string $cacheTag = 'report-service-requests';
+    protected string $cacheTag = 'report-sla';
 
     protected string $view = 'report::filament.pages.report';
 
@@ -88,8 +92,8 @@ class ServiceRequests extends Dashboard
             return false;
         }
 
-        /** @var User $user */
         $user = auth()->user();
+        assert($user instanceof User);
 
         return ReportAccessKey::fromPageClass(static::class)?->userCanAccess($user) ?? false;
     }
@@ -97,12 +101,9 @@ class ServiceRequests extends Dashboard
     public function filtersForm(Schema $schema): Schema
     {
         return $schema->components([
-            Section::make()
-                ->schema($this->serviceRequestTypeFilterComponents())
-                ->columns(1)
-                ->columnSpanFull(),
-            Section::make()
+            Section::make('Filters')
                 ->schema([
+                    ...$this->serviceRequestTypeFilterComponents(),
                     DatePicker::make('startDate')
                         ->native(false)
                         ->maxDate(fn (Get $get) => $get('endDate') ?: now())
@@ -120,21 +121,46 @@ class ServiceRequests extends Dashboard
                                 $set('startDate', $state);
                             }
                         }),
+                    Select::make('classification')
+                        ->label('Classification')
+                        ->options(ServiceRequestCategory::class)
+                        ->native(false)
+                        ->placeholder('All'),
+                    Select::make('assignedAgents')
+                        ->label('Assigned Agent')
+                        ->multiple()
+                        ->searchable()
+                        ->options(fn (): array => $this->getAssignedAgentOptions())
+                        ->placeholder('All'),
                 ])
                 ->columns(2),
         ]);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getAssignedAgentOptions(): array
+    {
+        return User::query()
+            ->whereIn('id', ServiceRequestAssignment::query()
+                ->where('status', ServiceRequestAssignmentStatus::Active)
+                ->select('user_id'))
+            ->orderBy('name')
+            ->pluck('name', 'id')
+            ->all();
     }
 
     public function getWidgets(): array
     {
         return [
             RefreshWidget::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsStats::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestStatusDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestCategoryDistributionDonutChart::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsOverTimeBarChart::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestTypesTable::make(['cacheTag' => $this->cacheTag]),
-            ServiceRequestsTable::make(['cacheTag' => $this->cacheTag]),
+            SlaStats::make(['cacheTag' => $this->cacheTag]),
+            SlaComplianceOverTimeLineChart::make(['cacheTag' => $this->cacheTag]),
+            ResponseSlaByClassificationDonutChart::make(['cacheTag' => $this->cacheTag]),
+            ResolutionSlaByClassificationDonutChart::make(['cacheTag' => $this->cacheTag]),
+            SlaPerformanceByAgentTable::make(['cacheTag' => $this->cacheTag]),
+            SlaBreachesByServiceRequestTypeTable::make(['cacheTag' => $this->cacheTag]),
         ];
     }
 
