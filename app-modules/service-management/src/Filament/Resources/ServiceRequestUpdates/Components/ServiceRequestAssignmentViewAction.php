@@ -36,17 +36,56 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestAssignmentInfolist;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\User;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry;
 
 class ServiceRequestAssignmentViewAction extends ViewAction
 {
-    use ServiceRequestAssignmentInfolist;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->schema($this->serviceRequestAssignmentInfolist());
+        $this->schema([
+            TextEntry::make('serviceRequest.service_request_number')
+                ->label('Service Request')
+                ->url(fn (ServiceRequestAssignment $serviceRequestAssignment): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestAssignment->serviceRequest]))
+                ->color('primary'),
+            TextEntry::make('assigned_user_name')
+                ->label('Assigned To')
+                ->state(function (ServiceRequestAssignment $serviceRequestAssignment): string {
+                    if (! $serviceRequestAssignment->user_id) {
+                        return 'Deleted user';
+                    }
+
+                    /** @var User|null $user */
+                    $user = User::withTrashed()->find($serviceRequestAssignment->user_id);
+
+                    if ($user === null) {
+                        return 'Deleted user';
+                    }
+
+                    return $user->name;
+                })
+                ->url(function (ServiceRequestAssignment $serviceRequestAssignment): ?string {
+                    /** @var User|null $user */
+                    $user = $serviceRequestAssignment->user;
+
+                    if ($user === null) {
+                        return null;
+                    }
+
+                    return UserResource::getUrl('view', ['record' => $user]);
+                })
+                ->color(function (ServiceRequestAssignment $serviceRequestAssignment): ?string {
+                    /** @var User|null $user */
+                    $user = $serviceRequestAssignment->user;
+
+                    return $user === null ? null : 'primary';
+                }),
+        ]);
     }
 }

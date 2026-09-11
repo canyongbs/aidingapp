@@ -540,6 +540,54 @@ describe('tabs', function () {
             ->assertDontSeeHtml('Service Request Reassigned</a>');
     });
 
+    it('shows a new assignment on the timeline', function () {
+        $manager = User::factory()->create([
+            'name' => 'Jane Doe',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($manager);
+
+        asSuperAdmin();
+
+        ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($manager, 'user')
+            ->create();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Service Request Assigned')
+            ->assertSeeText('Jane Doe');
+    });
+
+    it('shows submitted feedback on the timeline', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $contact = Contact::factory()->create([
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
+            'full_name' => 'Alice Smith',
+        ]);
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create([
+                'csat_answer' => 4,
+                'nps_answer' => 8,
+            ]);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Feedback Submitted')
+            ->assertSeeText('Alice Smith')
+            ->assertSeeText('4')
+            ->assertSeeText('8');
+    });
+
     it('renders the media table for the files tab', function () {
         asSuperAdmin();
 

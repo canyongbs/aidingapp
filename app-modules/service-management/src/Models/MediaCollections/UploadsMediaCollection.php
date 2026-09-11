@@ -124,7 +124,7 @@ class UploadsMediaCollection extends MediaCollection
     }
 
     /**
-     * @return array<string, array<string>>
+     * @return array<int, string>
      */
     public function getMimes(): array
     {

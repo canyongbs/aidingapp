@@ -80,6 +80,16 @@
                     <span class="font-semibold">{{ $type->name }}</span>
                 </div>
             @endif
+        @elseif ($record->isFileDeletedEvent())
+            Deleted
+            <span class="font-semibold">{{ $record->deletedFileName() }}</span>
+            by
+            <span class="font-semibold">{{ $actorName }}</span>
+        @elseif ($record->isFileUploadedEvent())
+            Uploaded
+            <span class="font-semibold">{{ $record->uploadedFileName() }}</span>
+            by
+            <span class="font-semibold">{{ $actorName }}</span>
         @else
             @php
                 $field = $record->changedField();
