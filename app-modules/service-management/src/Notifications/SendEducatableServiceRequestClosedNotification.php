@@ -48,7 +48,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
-use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -92,7 +91,6 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
         )?->toHtml();
 
         $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject(filled($subject) ? strip_tags($subject) : __('[Ticket #:ticketno]: Your Issue Has Been Resolved', ['ticketno' => $this->serviceRequest->service_request_number]));
 
         if (filled($body)) {
@@ -123,10 +121,5 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
     protected function getServiceRequest(): ServiceRequest
     {
         return $this->serviceRequest;
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
     }
 }

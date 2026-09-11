@@ -38,10 +38,7 @@ namespace AidingApp\Engagement\Notifications;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
-use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\NotificationSetting;
-use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -79,7 +76,6 @@ class EngagementFailedNotification extends Notification implements ShouldQueue
         };
 
         return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject("Delivery Failed: {$this->engagement->subject}")
             ->markdown('engagement::mail.engagement-failed-notification', [
                 'from' => "{$fromName} <{$fromEmail}>",
@@ -96,10 +92,5 @@ class EngagementFailedNotification extends Notification implements ShouldQueue
             ->title('An engagement failed to deliver')
             ->body("Your engagement {$this->engagement->channel->getLabel()} failed to be delivered to {$this->engagement->recipient->display_name}.")
             ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(CanBeNotified $notifiable): ?NotificationSetting
-    {
-        return $notifiable instanceof User ? $this->engagement->createdBy->department?->division?->notificationSetting?->setting : null;
     }
 }

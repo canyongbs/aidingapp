@@ -47,7 +47,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -101,7 +100,6 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
         )?->toHtml();
 
         $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject(filled($subject) ? strip_tags($subject) : "New update on service request {$this->serviceRequestUpdate->serviceRequest->service_request_number}");
 
         if (filled($body)) {
@@ -127,10 +125,5 @@ class ServiceRequestUpdated extends BaseNotification implements ShouldQueue, Has
     public function beforeSend(AnonymousNotifiable|CanBeNotified $notifiable, Message $message, NotificationChannel $channel): void
     {
         $message->related()->associate($this->serviceRequestUpdate);
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequestUpdate->serviceRequest->division?->notificationSetting?->setting;
     }
 }

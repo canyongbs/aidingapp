@@ -39,7 +39,6 @@ namespace AidingApp\Project\Notifications;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Project\Filament\Resources\Pipelines\PipelineResource;
 use AidingApp\Project\Models\PipelineEntry;
-use App\Models\NotificationSetting;
 use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
@@ -65,7 +64,6 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
     public function toMail(User $notifiable): MailMessage
     {
         return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject('You have been assigned a new Pipeline Task')
             ->line('You have been assigned the pipeline task: ')
             ->line("\"{$this->pipelineEntry->name}\"");
@@ -91,10 +89,5 @@ class PipelineEntryAssignedToUserNotification extends Notification implements Sh
             ->success()
             ->title($message)
             ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return $this->pipelineEntry->createdBy?->department?->division?->notificationSetting?->setting;
     }
 }

@@ -36,11 +36,16 @@
 
 namespace AidingApp\Notification\Notifications\Messages;
 
-use App\Models\NotificationSetting;
+use App\Settings\NotificationSettings;
 use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
 
 class MailMessage extends BaseMailMessage
 {
+    public function __construct(?NotificationSettings $settings = null)
+    {
+        $this->settings($settings ?? app(NotificationSettings::class));
+    }
+
     public static function make(): static
     {
         return app(static::class);
@@ -55,7 +60,7 @@ class MailMessage extends BaseMailMessage
         return $this;
     }
 
-    public function settings(?NotificationSetting $setting): static
+    public function settings(?NotificationSettings $setting): static
     {
         if (! empty($setting->from_name)) {
             $this->from(

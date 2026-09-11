@@ -46,9 +46,7 @@ use AidingApp\Notification\Models\Contracts\Message;
 use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\NotificationSetting;
 use App\Models\Tenant;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\AnonymousNotifiable;
@@ -96,7 +94,6 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
         );
 
         $mail = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($this->engagement->user))
             ->subject((string) ($this->engagement->subject ?? ''))
             ->greeting("Hello {$this->engagement->recipient->display_name}!")
             ->content($bodyContent);
@@ -146,10 +143,5 @@ class EngagementNotification extends Notification implements ShouldQueue, HasBef
                 'processed_engagements' => DB::raw('processed_engagements + 1'),
                 ...($result->success ? ['successful_engagements' => DB::raw('successful_engagements + 1')] : []),
             ]);
-    }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return $notifiable->department?->division?->notificationSetting?->setting;
     }
 }
