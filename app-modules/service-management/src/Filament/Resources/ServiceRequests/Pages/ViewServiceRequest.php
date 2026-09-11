@@ -140,10 +140,10 @@ class ViewServiceRequest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
             ReclassifyServiceRequestAction::make('reclassify')
                 ->record($this->getRecord())
                 ->slideOver(),
+            DeleteAction::make(),
         ];
     }
 
