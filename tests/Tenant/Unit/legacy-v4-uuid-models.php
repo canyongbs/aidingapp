@@ -142,6 +142,8 @@ use App\Models\FailedImportRow;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Import;
 use App\Models\LandlordSettingsProperty;
+use App\Models\NotificationSetting;
+use App\Models\NotificationSettingPivot;
 use App\Models\Pronouns;
 use App\Models\SettingsProperty;
 use App\Models\SystemUser;
@@ -258,6 +260,8 @@ return [
     HealthCheckResultHistoryItem::class,
     Import::class,
     LandlordSettingsProperty::class,
+    NotificationSetting::class, // TODO: Cleanup Task NotificationSettingsFeature - delete this line
+    NotificationSettingPivot::class, // TODO: Cleanup Task NotificationSettingsFeature - delete this line
     Pronouns::class,
     SettingsProperty::class,
     SystemUser::class,
