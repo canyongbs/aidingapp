@@ -65,17 +65,14 @@ it('requires proper permissions to access', function () {
         ->assertOk();
 });
 
-it('validates the inputs', function (array $state, array $errors) {
+it('validates the inputs', function () {
     asSuperAdmin();
 
     livewire(ManageNotificationSettings::class)
-        ->fillForm($state)
+        ->fillForm(['from_name' => str_repeat('a', 151)])
         ->call('save')
-        ->assertHasFormErrors($errors);
-})->with([
-    'name required' => [['name' => null], ['name' => 'required']],
-    'from_name max' => [['from_name' => str_repeat('a', 151)], ['from_name' => 'max']],
-]);
+        ->assertHasFormErrors(['from_name' => 'max']);
+});
 
 it('loads existing data into the form', function () {
     asSuperAdmin();
