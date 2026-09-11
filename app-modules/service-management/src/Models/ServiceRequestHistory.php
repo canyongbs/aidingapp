@@ -154,6 +154,26 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         return array_key_first($this->new_values);
     }
 
+    public function isFileDeletedEvent(): bool
+    {
+        return $this->changedField() === 'deleted_file';
+    }
+
+    public function deletedFileName(): ?string
+    {
+        return $this->original_values['deleted_file'] ?? null;
+    }
+
+    public function isFileUploadedEvent(): bool
+    {
+        return $this->changedField() === 'uploaded_file';
+    }
+
+    public function uploadedFileName(): ?string
+    {
+        return $this->new_values['uploaded_file'] ?? null;
+    }
+
     public function eventTitle(): string
     {
         if ($this->isCreatedEvent()) {
@@ -175,6 +195,8 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             'issue_category' => 'Category Updated',
             'title' => 'Title Updated',
             'respondent_id' => 'Respondent Updated',
+            'deleted_file' => 'File Deleted',
+            'uploaded_file' => 'File Uploaded',
             default => $this->transformReadableKey($field) . ' Updated',
         };
     }

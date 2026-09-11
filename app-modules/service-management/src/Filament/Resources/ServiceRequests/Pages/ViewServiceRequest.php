@@ -55,7 +55,7 @@ use AidingApp\Timeline\Livewire\TimelineList;
 use App\Enums\Feature;
 use App\Filament\Concerns\FiltersManagersFromGroups;
 use App\Settings\DisplaySettings;
-use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -127,6 +127,7 @@ class ViewServiceRequest extends ViewRecord
                                         ServiceRequestUpdate::class,
                                         ServiceRequestAssignment::class,
                                         ServiceRequestHistory::class,
+                                        ServiceRequestFeedback::class,
                                     ],
                                     'emptyStateMessage' => 'There is no timeline available for this Service Request.',
                                     'noMoreRecordsMessage' => "You have reached the end of this service request's timeline.",
@@ -139,7 +140,7 @@ class ViewServiceRequest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
+            DeleteAction::make(),
             ReclassifyServiceRequestAction::make('reclassify')
                 ->record($this->getRecord())
                 ->slideOver(),

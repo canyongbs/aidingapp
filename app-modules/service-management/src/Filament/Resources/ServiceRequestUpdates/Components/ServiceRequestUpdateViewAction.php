@@ -36,17 +36,50 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
-use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestUpdateInfolist;
+use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\SystemUser;
+use App\Models\User;
+use Exception;
 use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
 
 class ServiceRequestUpdateViewAction extends ViewAction
 {
-    use ServiceRequestUpdateInfolist;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->schema($this->serviceRequestUpdateInfolist());
+        $this->schema([
+            TextEntry::make('serviceRequest.service_request_number')
+                ->label('Service Request')
+                ->url(fn (ServiceRequestUpdate $serviceRequestUpdate): string => ServiceRequestResource::getUrl('view', ['record' => $serviceRequestUpdate->serviceRequest]))
+                ->color('primary'),
+            IconEntry::make('internal')
+                ->boolean(),
+            TextEntry::make('createdBy')
+                ->label('Created By')
+                ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
+                    User::class => $record->createdBy->name,
+                    Contact::class => $record->createdBy->full_name,
+                    SystemUser::class => $record->createdBy->name,
+                    ServiceRequest::class => 'AI',
+                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                })
+                ->url(fn (ServiceRequestUpdate $record): ?string => match ($record->createdBy::class) {
+                    User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
+                    Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
+                    SystemUser::class => null,
+                    ServiceRequest::class => null,
+                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                }),
+            TextEntry::make('update')
+                ->columnSpanFull(),
+        ]);
     }
 }
