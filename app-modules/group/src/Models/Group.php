@@ -34,40 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+namespace AidingApp\Group\Models;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Group\Database\Factories\GroupFactory;
+use AidingApp\Group\Observers\GroupObserver;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class DivisionResource extends Resource
+#[ObservedBy([GroupObserver::class])]
+class Group extends Model
 {
-    protected static ?string $model = Division::class;
+    /** @use HasFactory<GroupFactory> */
+    use HasFactory;
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
+    use HasUuids;
 
-    protected static ?int $navigationSort = 70;
+    protected $fillable = [
+        'name',
+        'description',
+    ];
 
-    public static function getRelations(): array
+    /** @return BelongsTo<User, $this> */
+    public function createdBy(): BelongsTo
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
+        return $this->belongsTo(User::class, 'created_by_id');
     }
 
-    public static function getPages(): array
+    /** @return BelongsToMany<User, $this, GroupUser> */
+    public function users(): BelongsToMany
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        return $this->belongsToMany(User::class, 'group_user')
+            ->using(GroupUser::class)
+            ->withPivot('id')
+            ->withTimestamps();
     }
 }

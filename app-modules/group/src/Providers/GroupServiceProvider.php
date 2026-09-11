@@ -34,40 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+namespace AidingApp\Group\Providers;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use AidingApp\Group\GroupPlugin;
+use Filament\Panel;
+use Illuminate\Support\ServiceProvider;
 
-class DivisionResource extends Resource
+class GroupServiceProvider extends ServiceProvider
 {
-    protected static ?string $model = Division::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
-
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+    public function register(): void
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new GroupPlugin()));
     }
 }

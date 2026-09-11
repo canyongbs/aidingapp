@@ -1,0 +1,119 @@
+<?php
+
+/*
+<COPYRIGHT>
+
+    Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
+
+    Aiding App® is licensed under the Elastic License 2.0. For more details,
+    see <https://github.com/canyongbs/aidingapp/blob/main/LICENSE.>
+
+    Notice:
+
+    - You may not provide the software to third parties as a hosted or managed
+      service, where the service provides users with access to any substantial set of
+      the features or functionality of the software.
+    - You may not move, change, disable, or circumvent the license key functionality
+      in the software, and you may not remove or obscure any functionality in the
+      software that is protected by the license key.
+    - You may not alter, remove, or obscure any licensing, copyright, or other notices
+      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      to applicable law.
+    - Canyon GBS Inc. respects the intellectual property rights of others and expects the
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
+    - The software solution, including services, infrastructure, and code, is offered as a
+      Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
+
+</COPYRIGHT>
+*/
+
+use AidingApp\Group\Filament\Resources\Groups\GroupResource;
+use AidingApp\Group\Filament\Resources\Groups\Pages\EditGroup;
+use AidingApp\Group\Models\Group;
+use AidingApp\Group\Tests\Tenant\Filament\Resources\Groups\RequestFactories\GroupRequestFactory;
+use App\Models\User;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
+
+it('can render the edit group page', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
+
+    get(GroupResource::getUrl('edit', ['record' => $group]))->assertSuccessful();
+});
+
+it('displays the group data', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
+
+    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+        ->assertSchemaStateSet([
+            'name' => $group->name,
+            'description' => $group->description,
+        ]);
+});
+
+it('can update a group', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
+
+    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+        ->fillForm(['name' => 'Advisors', 'description' => 'Academic advisors'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Group::class, [
+        'id' => $group->getKey(),
+        'name' => 'Advisors',
+        'description' => 'Academic advisors',
+    ]);
+});
+
+it('allows saving with the same name as the current group', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
+
+    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+        ->fillForm(['name' => $group->name])
+        ->call('save')
+        ->assertHasNoFormErrors();
+});
+
+it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
+    asSuperAdmin();
+
+    Group::factory()->create(['name' => 'Student Success']);
+    $group = Group::factory()->create();
+
+    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+        ->fillForm($data->create())
+        ->call('save')
+        ->assertHasFormErrors($errors);
+})->with([
+    'name required' => [GroupRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
+    'name max' => [GroupRequestFactory::new()->state(['name' => str()->random(256)]), ['name' => 'max']],
+    'name unique case insensitive' => [GroupRequestFactory::new()->state(['name' => 'student success']), ['name' => 'unique']],
+    'description max' => [GroupRequestFactory::new()->state(['description' => str()->random(65536)]), ['description' => 'max']],
+]);
+
+describe('authorization', function () {
+    it('denies access without the `group.*.update` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('group.view-any');
+        actingAs($user);
+        $group = Group::factory()->create();
+
+        get(GroupResource::getUrl('edit', ['record' => $group]))->assertForbidden();
+    });
+});

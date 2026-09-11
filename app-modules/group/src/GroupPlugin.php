@@ -34,40 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+namespace AidingApp\Group;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use Filament\Contracts\Plugin;
+use Filament\Panel;
 
-class DivisionResource extends Resource
+class GroupPlugin implements Plugin
 {
-    protected static ?string $model = Division::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
-
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+    public function getId(): string
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
+        return 'group';
     }
 
-    public static function getPages(): array
+    public function register(Panel $panel): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        $panel->discoverResources(
+            in: __DIR__ . '/Filament/Resources',
+            for: 'AidingApp\\Group\\Filament\\Resources'
+        );
     }
+
+    public function boot(Panel $panel): void {}
 }

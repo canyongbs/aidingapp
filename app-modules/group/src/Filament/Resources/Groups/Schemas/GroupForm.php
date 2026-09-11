@@ -34,40 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+namespace AidingApp\Group\Filament\Resources\Groups\Schemas;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
 
-class DivisionResource extends Resource
+class GroupForm
 {
-    protected static ?string $model = Division::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
-
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+    public static function configure(Schema $schema): Schema
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        return $schema
+            ->components([
+                Section::make('Properties')
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->unique(ignoreRecord: true)
+                            ->columnSpanFull(),
+                        Textarea::make('description')
+                            ->string()
+                            ->maxLength(65535)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
     }
 }

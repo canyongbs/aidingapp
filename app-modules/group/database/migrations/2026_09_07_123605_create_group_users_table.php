@@ -34,40 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+use App\Features\GroupManagementFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
-
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
-
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
+        DB::transaction(function () {
+            Schema::create('group_user', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
+                $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
+                $table->timestamps();
+
+                $table->uniqueIndex(['group_id', 'user_id']);
+            });
+
+            GroupManagementFeature::activate();
+        });
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        DB::transaction(function () {
+            GroupManagementFeature::deactivate();
+
+            Schema::dropIfExists('group_user');
+        });
     }
-}
+};

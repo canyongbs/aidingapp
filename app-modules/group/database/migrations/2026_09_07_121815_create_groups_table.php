@@ -34,40 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
-
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
-
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
+        Schema::create('groups', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->caseInsensitiveText('name');
+            $table->text('description')->nullable();
+            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
+            $table->timestamps();
+
+            $table->uniqueIndex('name');
+        });
     }
 
-    public static function getPages(): array
+    public function down(): void
     {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        Schema::dropIfExists('groups');
     }
-}
+};

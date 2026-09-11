@@ -34,40 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+namespace AidingApp\Group\Filament\Resources\Groups\RelationManagers;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use Filament\Actions\AttachAction;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 
-class DivisionResource extends Resource
+class UsersRelationManager extends RelationManager
 {
-    protected static ?string $model = Division::class;
+    protected static string $relationship = 'users';
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
+    protected static ?string $recordTitleAttribute = 'email';
 
-    protected static ?int $navigationSort = 70;
-
-    public static function getRelations(): array
+    public function table(Table $table): Table
     {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('email')
+                    ->searchable()
+                    ->sortable(),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->label('Associate users')
+                    ->multiple()
+                    ->slideOver()
+                    ->preloadRecordSelect(),
+            ])
+            ->recordActions([
+                DetachAction::make(),
+            ])
+            ->toolbarActions([
+                DetachBulkAction::make(),
+            ])
+            ->inverseRelationship('groups');
     }
 }
