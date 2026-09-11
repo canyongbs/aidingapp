@@ -95,7 +95,7 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
     @apply p-0;
 }
 
-.fi-ta-group-heading {
+.project-work-pipeline-widget .fi-ta-group-heading {
     @apply text-gray-500! dark:text-gray-400!;
 }
 

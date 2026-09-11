@@ -174,6 +174,21 @@ it('renders a task as having no associated milestone when its milestone has been
         ->assertDontSee($milestone->title);
 });
 
+it('calculates progress for unassociated pipeline tasks', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Complete]);
+
+    PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => null,
+    ]);
+
+    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        ->filterTable('classification', [PipelineStageClassification::Complete->value])
+        ->assertSee('No Associated Milestone')
+        ->assertSee('Progress: 100%');
+});
+
 it('does not provide a row-level edit action because task editing is accessed through the name column', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();

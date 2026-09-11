@@ -503,13 +503,15 @@ class ProjectWorkPipelineWidget extends TableWidget
 
     protected function milestoneProgressPercentage(PipelineEntry $record, ?Pipeline $pipeline): int
     {
-        if (! $pipeline || blank($record->project_milestone_id)) {
+        if (! $pipeline) {
             return 0;
         }
 
         $this->loadMilestoneProgressPercentages($pipeline);
 
-        return $this->milestoneProgressPercentages["{$pipeline->getKey()}:{$record->project_milestone_id}"] ?? 0;
+        $milestoneId = $record->project_milestone_id ?? 'unassociated';
+
+        return $this->milestoneProgressPercentages["{$pipeline->getKey()}:{$milestoneId}"] ?? 0;
     }
 
     protected function resetMilestoneProgressPercentages(): void
@@ -529,7 +531,6 @@ class ProjectWorkPipelineWidget extends TableWidget
         }
 
         $counts = PipelineEntry::query()
-            ->whereNotNull('project_milestone_id')
             ->whereHas('pipelineStage', fn (Builder $query) => $query->where('pipeline_id', $pipeline->getKey()))
             ->withoutArchived()
             ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
@@ -542,7 +543,8 @@ class ProjectWorkPipelineWidget extends TableWidget
         foreach ($counts as $count) {
             $attributes = $count->getAttributes();
 
-            $cacheKey = "{$pipeline->getKey()}:{$attributes['project_milestone_id']}";
+            $milestoneId = $attributes['project_milestone_id'] ?? 'unassociated';
+            $cacheKey = "{$pipeline->getKey()}:{$milestoneId}";
 
             $total = (int) $attributes['total'];
             $completed = (int) $attributes['completed'];

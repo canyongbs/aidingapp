@@ -51,10 +51,10 @@
             wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
         >
             <span class="fi-sr-only">Edit milestone:</span>
-            <span class="fi-ta-group-heading text-gray-500 dark:text-gray-400">{{ $milestone->title }}</span>
+            <span class="fi-ta-group-heading">{{ $milestone->title }}</span>
         </x-filament::link>
     @else
-        <span class="fi-ta-group-heading text-gray-500 dark:text-gray-400">
+        <span class="fi-ta-group-heading">
             {{ $milestone?->title ?? 'No Associated Milestone' }}
         </span>
     @endif
