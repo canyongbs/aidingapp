@@ -211,13 +211,11 @@ class ProjectWorkPipelineWidget extends TableWidget
                             fn (PipelineEntry $record): string => $record->milestone->title ?? 'No Associated Milestone'
                         )
                         ->getDescriptionFromRecordUsing(
-                            fn (PipelineEntry $record): ?View => $record->milestone
-                                ? view('project::filament.tables.groups.milestone', [
-                                    'milestone' => $record->milestone,
-                                    'canManageMilestone' => $canManageMilestones,
-                                    'percentage' => $this->milestoneProgressPercentage($record, $pipeline),
-                                ])
-                                : null
+                            fn (PipelineEntry $record): View => view('project::filament.tables.groups.milestone', [
+                                'milestone' => $record->milestone,
+                                'canManageMilestone' => $canManageMilestones,
+                                'percentage' => $this->milestoneProgressPercentage($record, $pipeline),
+                            ])
                         );
                 }
             )

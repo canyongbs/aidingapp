@@ -170,6 +170,7 @@ it('renders a task as having no associated milestone when its milestone has been
     livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertCanSeeTableRecords([$entry])
         ->assertSee('No Associated Milestone')
+        ->assertSee('Progress: 0%')
         ->assertDontSee($milestone->title);
 });
 

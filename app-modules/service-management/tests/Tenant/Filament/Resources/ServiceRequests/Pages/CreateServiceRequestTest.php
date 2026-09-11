@@ -106,7 +106,11 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
         ->and($serviceRequest->category)
-        ->toEqual($request->get('category'));
+        ->toEqual($request->get('category'))
+        ->and($serviceRequest->respondent->id)
+        ->toEqual($request->get('respondent_id'))
+        ->and($serviceRequest->type->id)
+        ->toEqual($request->get('type_id'));
 });
 
 it('securely stores password fields on staff-created service requests', function () {
