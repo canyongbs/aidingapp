@@ -588,6 +588,35 @@ describe('tabs', function () {
             ->assertSeeText('8');
     });
 
+    it('hides submitted feedback from the timeline when the `FeedbackManagement` feature is disabled', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $contact = Contact::factory()->create([
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
+            'full_name' => 'Alice Smith',
+        ]);
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create([
+                'csat_answer' => 4,
+                'nps_answer' => 8,
+            ]);
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->feedbackManagement = false;
+        $settings->save();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertDontSeeText('Feedback Submitted')
+            ->assertDontSeeText('Alice Smith');
+    });
+
     it('renders the media table for the files tab', function () {
         asSuperAdmin();
 

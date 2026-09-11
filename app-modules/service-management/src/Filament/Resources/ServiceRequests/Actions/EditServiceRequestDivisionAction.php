@@ -34,29 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Validation\Rules\Exists;
+use AidingApp\Division\Models\Division;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Select;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 
-class ServiceRequestPriorityToggleButtons
+class EditServiceRequestDivisionAction
 {
-    public static function make(string $typeId, string $name = 'priority_id'): ToggleButtons
+    public static function make(ServiceRequest $serviceRequest): Action
     {
-        return ToggleButtons::make($name)
-            ->label('Priority')
-            ->inline()
-            ->options(filled($typeId)
-                ? ServiceRequestPriority::query()
-                    ->where('type_id', $typeId)
-                    ->orderBy('order')
-                    ->pluck('name', 'id')
-                : collect())
-            ->exists(
-                table: (new ServiceRequestPriority())->getTable(),
-                column: 'id',
-                modifyRuleUsing: fn (Exists $rule): Exists => $rule->where('type_id', $typeId),
-            );
+        return Action::make('editDivision')
+            ->label('Edit division')
+            ->icon(Heroicon::Pencil)
+            ->iconButton()
+            ->authorize('update', $serviceRequest)
+            ->slideOver()
+            ->modalHeading('Edit Division')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm([
+                'division_id' => $serviceRequest->division_id,
+            ])
+            ->schema([
+                Select::make('division_id')
+                    ->label('Division')
+                    ->relationship('division', 'name')
+                    ->required()
+                    ->exists((new Division())->getTable(), 'id'),
+            ])
+            ->action(function (array $data) use ($serviceRequest): void {
+                $serviceRequest->division_id = $data['division_id'];
+                $serviceRequest->save();
+
+                Notification::make()
+                    ->title('Division updated.')
+                    ->success()
+                    ->send();
+            });
     }
 }

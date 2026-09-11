@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -50,7 +51,9 @@ use function Tests\asSuperAdmin;
 
 // Authorization
 
-test('editPriority action is visible for manager department member with update permission', function () {
+test('editDivision action is visible for manager department member with update permission', function () {
+    Division::factory()->create();
+
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -79,10 +82,12 @@ test('editPriority action is visible for manager department member with update p
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
+        ->assertActionVisible(TestAction::make('editDivision')->schemaComponent('division.name'));
 });
 
-test('editPriority action is hidden for user without update permission', function () {
+test('editDivision action is hidden for user without update permission', function () {
+    Division::factory()->create();
+
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -111,37 +116,17 @@ test('editPriority action is hidden for user without update permission', functio
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
-});
-
-test('editPriority action is hidden when the service request has no priority', function () {
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => null,
-    ])->create();
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
+        ->assertActionHidden(TestAction::make('editDivision')->schemaComponent('division.name'));
 });
 
 // Validation
 
-test('editPriority requires priority_id', function () {
-    $serviceRequestType = ServiceRequestType::factory()->create();
+test('editDivision requires division_id', function () {
+    Division::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
         ])->getKey(),
     ])->create();
 
@@ -150,59 +135,21 @@ test('editPriority requires priority_id', function () {
     livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
-        ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
-            'priority_id' => null,
+        ->callAction(TestAction::make('editDivision')->schemaComponent('division.name'), data: [
+            'division_id' => null,
         ])
-        ->assertHasFormErrors(['priority_id' => 'required']);
-});
-
-test('editPriority rejects a priority belonging to a different service request type', function () {
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $serviceRequest = ServiceRequest::factory()->state([
-        'status_id' => ServiceRequestStatus::factory()->create([
-            'classification' => SystemServiceRequestClassification::Open,
-        ])->getKey(),
-        'priority_id' => ServiceRequestPriority::factory()->create([
-            'type_id' => $serviceRequestType->getKey(),
-        ])->getKey(),
-    ])->create();
-
-    $otherTypePriority = ServiceRequestPriority::factory()->create([
-        'type_id' => ServiceRequestType::factory()->create()->getKey(),
-    ]);
-
-    asSuperAdmin();
-
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
-            'priority_id' => $otherTypePriority->getKey(),
-        ])
-        ->assertHasFormErrors(['priority_id']);
-
-    expect($serviceRequest->fresh()->priority_id)->not->toBe($otherTypePriority->getKey());
+        ->assertHasFormErrors(['division_id' => 'required']);
 });
 
 // Success
 
-test('can update the service request priority', function () {
-    $serviceRequestType = ServiceRequestType::factory()->create();
-
-    $originalPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $serviceRequestType->getKey(),
-    ]);
-
-    $newPriority = ServiceRequestPriority::factory()->create([
-        'type_id' => $serviceRequestType->getKey(),
-    ]);
+test('can update the service request division', function () {
+    $newDivision = Division::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
         ])->getKey(),
-        'priority_id' => $originalPriority->getKey(),
     ])->create();
 
     asSuperAdmin();
@@ -210,11 +157,38 @@ test('can update the service request priority', function () {
     livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
-        ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
-            'priority_id' => $newPriority->getKey(),
+        ->callAction(TestAction::make('editDivision')->schemaComponent('division.name'), data: [
+            'division_id' => $newDivision->getKey(),
         ])
         ->assertHasNoFormErrors()
         ->assertNotified();
 
-    expect($serviceRequest->fresh()->priority_id)->toBe($newPriority->getKey());
+    expect($serviceRequest->fresh()->division_id)->toBe($newDivision->getKey());
+});
+
+test('updating the service request division records history', function () {
+    $newDivision = Division::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+    ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editDivision')->schemaComponent('division.name'), data: [
+            'division_id' => $newDivision->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    $history = $serviceRequest->fresh()->histories()->get()->first(
+        fn ($history) => $history->changedField() === 'division_id',
+    );
+
+    expect($history)->not->toBeNull()
+        ->and($history->eventTitle())->toBe('Division Updated');
 });

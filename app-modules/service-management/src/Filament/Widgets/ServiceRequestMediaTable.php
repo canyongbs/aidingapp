@@ -53,6 +53,7 @@ use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 
 class ServiceRequestMediaTable extends TableWidget
 {
@@ -151,6 +152,10 @@ class ServiceRequestMediaTable extends TableWidget
     {
         $collection = $this->record->getMediaCollection($this->collectionName);
 
+        $maxNumberOfFiles = $this->getMaxNumberOfFiles($collection);
+
+        $collectionName = $this->collectionName;
+
         $fileUpload = FileUpload::make('file')
             ->label('File')
             ->disk('s3')
@@ -164,21 +169,37 @@ class ServiceRequestMediaTable extends TableWidget
             if ($maxFileSizeInMb = $collection->getMaxFileSizeInMb()) {
                 $fileUpload->maxSize($maxFileSizeInMb * 1024);
             }
+        } elseif ($collection instanceof MediaCollection && filled($collection->acceptsMimeTypes)) {
+            $fileUpload->acceptedFileTypes($collection->acceptsMimeTypes);
         }
+
+        $hasReachedFileLimit = fn (): bool => ($maxNumberOfFiles !== null)
+            && ($this->record->getMedia($collectionName)->count() >= $maxNumberOfFiles);
 
         return Action::make('uploadFile')
             ->label('Upload File')
             ->icon(Heroicon::ArrowUpTray)
             ->authorize('update', $this->record)
+            ->disabled($hasReachedFileLimit)
+            ->tooltip(fn (): ?string => $hasReachedFileLimit() ? "You have reached the maximum of {$maxNumberOfFiles} uploaded files." : null)
             ->schema([$fileUpload])
-            ->action(function (array $data): void {
+            ->action(function (array $data) use ($hasReachedFileLimit, $maxNumberOfFiles, $collectionName): void {
+                if ($hasReachedFileLimit()) {
+                    Notification::make()
+                        ->title("You have reached the maximum of {$maxNumberOfFiles} uploaded files.")
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
                 $path = $data['file'];
 
                 $media = $this->record
                     ->addMediaFromDisk($path, 's3')
                     ->usingName(pathinfo($path, PATHINFO_FILENAME))
                     ->usingFileName(basename($path))
-                    ->toMediaCollection($this->collectionName);
+                    ->toMediaCollection($collectionName);
 
                 app(RecordServiceRequestFileUploadHistory::class)($this->record, $media->file_name);
 
@@ -187,6 +208,19 @@ class ServiceRequestMediaTable extends TableWidget
                     ->success()
                     ->send();
             });
+    }
+
+    protected function getMaxNumberOfFiles(?MediaCollection $collection): ?int
+    {
+        if ($collection instanceof UploadsMediaCollection) {
+            return $collection->getMaxNumberOfFiles();
+        }
+
+        if (($collection instanceof MediaCollection) && is_int($collection->collectionSizeLimit)) {
+            return $collection->collectionSizeLimit;
+        }
+
+        return null;
     }
 
     protected function deleteFileAction(): Action
