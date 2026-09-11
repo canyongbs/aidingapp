@@ -72,6 +72,19 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public ServiceMonitoringReportFrequency $frequency, public string $channel) {}
 
     /**
+     * Restore notifications queued by the previous release, which had no `frequency` property.
+     * The private cache properties are left at their default (null) and recomputed lazily.
+     *
+     * @param array<string, mixed> $values
+     */
+    public function __unserialize(array $values): void
+    {
+        $this->serviceMonitoringTarget = $values['serviceMonitoringTarget'];
+        $this->frequency = $values['frequency'] ?? ServiceMonitoringReportFrequency::Monthly;
+        $this->channel = $values['channel'];
+    }
+
+    /**
      * @return array<int, string>
      */
     public function via(User|Contact $notifiable): array

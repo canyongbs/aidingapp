@@ -216,6 +216,22 @@ it('delivers to a contact granted confidential access to a confidential target',
     expect($notification->via($contact))->toBe(['mail']);
 });
 
+it('restores a notification serialized under the previous payload shape with no frequency property', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $values = [
+        'serviceMonitoringTarget' => $target,
+        'channel' => MailChannel::class,
+    ];
+
+    $restored = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class);
+    $restored->__unserialize($values);
+
+    expect($restored->serviceMonitoringTarget->is($target))->toBeTrue()
+        ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Monthly)
+        ->and($restored->channel)->toBe(MailChannel::class);
+});
+
 function createHistoryAt(
     ServiceMonitoringTarget $target,
     bool $succeeded,
