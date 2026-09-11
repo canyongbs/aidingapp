@@ -37,13 +37,10 @@
 namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
-use AidingApp\Division\Models\Division;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
 
 class CreateDepartment extends CreateRecord
 {
@@ -61,11 +58,6 @@ class CreateDepartment extends CreateRecord
                 Textarea::make('description')
                     ->required()
                     ->string(),
-                Select::make('division_id')
-                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'desc'))
-                    ->searchable()
-                    ->preload()
-                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
             ]);
     }
 }
