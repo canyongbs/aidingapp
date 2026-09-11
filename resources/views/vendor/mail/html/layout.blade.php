@@ -107,7 +107,12 @@
         }
 
         @php
-            $buttonColor = FilamentColor::convertToRgb(FilamentColor::all()[$settings?->primary_color?->value ?? Color::Blue->value][600]);
+            $primaryColor = NotificationSettingsFeature::active()
+                ? $settings?->primary_color
+                : Color::tryFrom($settings?->primary_color ?? '');
+            $buttonColor = FilamentColor::convertToRgb(
+                FilamentColor::all()[$primaryColor?->value ?? Color::Blue->value][600],
+            );
         @endphp
 
         .button-primary {
