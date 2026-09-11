@@ -37,7 +37,6 @@
 namespace AidingApp\Department\Models;
 
 use AidingApp\Department\Database\Factories\DepartmentFactory;
-use AidingApp\Division\Models\Division;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectAuditorDepartment;
 use AidingApp\Project\Models\ProjectManagerDepartment;
@@ -49,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeDepartmentManager;
 use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -124,14 +122,6 @@ class Department extends BaseModel
             ->using(ServiceRequestTypeDepartmentAuditor::class)
             ->withPivot('id')
             ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsTo<Division, $this>
-     */
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class);
     }
 
     /**

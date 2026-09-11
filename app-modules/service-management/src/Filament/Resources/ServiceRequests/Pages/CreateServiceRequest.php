@@ -91,8 +91,7 @@ class CreateServiceRequest extends CreateRecord
                             ->visible(fn (): bool => Division::count() > 1)
                             ->saveRelationshipsWhenHidden()
                             ->default(
-                                fn () => Division::count() === 1 ? (auth()->user()->department?->division?->getKey()
-                                    ?? Division::query()->first()?->getKey()) : null
+                                fn () => Division::count() === 1 ? (Division::query()->first()?->getKey()) : null
                             ),
                         Grid::make(6)
                             ->schema([
