@@ -48,7 +48,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
-use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -89,7 +88,6 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
         )?->toHtml();
 
         $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject(filled($subject) ? strip_tags($subject) : "There’s an update on your service request {$this->serviceRequest->service_request_number}");
 
         if (filled($body)) {
@@ -115,10 +113,5 @@ class SendEducatableServiceRequestUpdatedNotification extends Notification imple
     protected function getServiceRequest(): ServiceRequest
     {
         return $this->serviceRequest;
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
     }
 }

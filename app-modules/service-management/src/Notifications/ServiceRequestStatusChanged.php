@@ -42,7 +42,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
-use App\Models\NotificationSetting;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -92,7 +91,6 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
         )?->toHtml();
 
         $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject(filled($subject) ? strip_tags($subject) : "Service request {$this->serviceRequest->service_request_number} status changed to {$this->serviceRequest->status?->name}");
 
         if (filled($body)) {
@@ -113,10 +111,5 @@ class ServiceRequestStatusChanged extends BaseNotification implements ShouldQueu
             ->success()
             ->title((string) str("[Service request {$this->serviceRequest->service_request_number}](" . ServiceRequestResource::getUrl('view', ['record' => $this->serviceRequest]) . ") status changed to {$this->serviceRequest->status?->name}")->markdown())
             ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
     }
 }

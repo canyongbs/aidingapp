@@ -34,37 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettings\Forms;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
-use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Schemas\Schema;
-
-class NotificationSettingForm
-{
-    public function form(Schema $schema): Schema
+return new class () extends Migration {
+    public function up(): void
     {
-        return $schema
-            ->columns(1)
-            ->components([
-                TextInput::make('name')
-                    ->string()
-                    ->required()
-                    ->autocomplete(false),
-                TextInput::make('from_name')
-                    ->string()
-                    ->maxLength(150)
-                    ->autocomplete(false),
-                Textarea::make('description')
-                    ->string(),
-                ColorSelect::make('primary_color'),
-                SpatieMediaLibraryFileUpload::make('logo')
-                    ->disk('s3-public')
-                    ->collection('logo')
-                    ->visibility('public')
-                    ->image(),
-            ]);
+        DB::transaction(function () {
+            Schema::dropIfExists('notification_settings_pivot');
+            Schema::dropIfExists('notification_settings');
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            Schema::create('notification_settings', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+
+                $table->string('name');
+                $table->string('from_name')->nullable();
+                $table->string('primary_color')->nullable();
+                $table->longText('description')->nullable();
+
+                $table->timestamps();
+                $table->softDeletes();
+            });
+
+            Schema::create('notification_settings_pivot', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+
+                $table->foreignUuid('notification_setting_id')->constrained('notification_settings');
+                $table->uuidMorphs('related_to');
+
+                $table->timestamps();
+
+                $table->unique(['notification_setting_id', 'related_to_type', 'related_to_id']);
+            });
+        });
+    }
+};

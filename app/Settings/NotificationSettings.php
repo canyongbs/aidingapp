@@ -34,19 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettings\Pages;
+namespace App\Settings;
 
-use App\Filament\Resources\NotificationSettings\Forms\NotificationSettingForm;
-use App\Filament\Resources\NotificationSettings\NotificationSettingResource;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use App\Settings\SettingsProperties\NotificationSettingsProperty;
+use CanyonGBS\Common\Enums\Color;
 
-class CreateNotificationSetting extends CreateRecord
+class NotificationSettings extends SettingsWithMedia
 {
-    protected static string $resource = NotificationSettingResource::class;
+    public ?string $from_name = null;
 
-    public function form(Schema $schema): Schema
+    public null $logo = null;
+
+    public ?Color $primary_color = null;
+
+    public static function getSettingsPropertyModelClass(): string
     {
-        return resolve(NotificationSettingForm::class)->form($schema);
+        return NotificationSettingsProperty::class;
+    }
+
+    public static function group(): string
+    {
+        return 'notifications';
     }
 }

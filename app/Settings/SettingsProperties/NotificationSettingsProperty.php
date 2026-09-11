@@ -34,38 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettings;
+namespace App\Settings\SettingsProperties;
 
-use App\Enums\CommunicationNavigationGroup;
-use App\Filament\Clusters\Communication;
-use App\Filament\Resources\NotificationSettings\Pages\CreateNotificationSetting;
-use App\Filament\Resources\NotificationSettings\Pages\EditNotificationSetting;
-use App\Filament\Resources\NotificationSettings\Pages\ListNotificationSettings;
-use App\Models\NotificationSetting;
-use Filament\Resources\Resource;
-use UnitEnum;
+use App\Models\SettingsPropertyWithMedia;
+use Override;
 
-class NotificationSettingResource extends Resource
+/**
+ * @mixin IdeHelperNotificationSettingsProperty
+ */
+class NotificationSettingsProperty extends SettingsPropertyWithMedia
 {
-    protected static ?string $model = NotificationSetting::class;
-
-    protected static string | UnitEnum | null $navigationGroup = CommunicationNavigationGroup::Communication;
-
-    protected static ?int $navigationSort = 110;
-
-    protected static ?string $cluster = Communication::class;
-
-    public static function getRelations(): array
+    #[Override]
+    public function registerMediaCollections(): void
     {
-        return [];
-    }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListNotificationSettings::route('/'),
-            'create' => CreateNotificationSetting::route('/create'),
-            'edit' => EditNotificationSetting::route('/{record}/edit'),
-        ];
+        $this->addMediaCollection('logo')->singleFile();
     }
 }

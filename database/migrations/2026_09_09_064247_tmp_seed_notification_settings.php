@@ -34,32 +34,52 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Notification\Tests\Fixtures\TestEmailSettingFromNameNotification;
-use App\Models\User;
+use App\Features\NotificationSettingsFeature;
+use App\Models\NotificationSetting;
 use App\Settings\NotificationSettings;
-use Illuminate\Support\Facades\Notification;
+use CanyonGBS\Common\Enums\Color;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-it('sets the mail from name based on settings fromName if set', function () {
-    Notification::fake();
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            if (Schema::hasTable('notification_settings')) {
+                $notificationSetting = NotificationSetting::query()->oldest()->first();
 
-    $user = User::factory()->create();
+                if ($notificationSetting) {
+                    $settings = app(NotificationSettings::class);
 
-    $notificationSetting = app(NotificationSettings::class);
+                    $settings->from_name = $notificationSetting->getAttribute('from_name');
+                    $settings->primary_color = Color::tryFrom((string) $notificationSetting->getAttribute('primary_color'));
 
-    $notificationSetting->from_name = fake()->name();
+                    $settings->save();
 
-    $notificationSetting->save();
+                    $logo = $notificationSetting->getFirstMedia('logo');
 
-    $notification = new TestEmailSettingFromNameNotification($notificationSetting);
+                    $logo?->copy(NotificationSettings::getSettingsPropertyModel('notifications.logo'), 'logo', 's3-public');
+                }
+            }
 
-    $user->notify($notification);
+            NotificationSettingsFeature::activate();
+        });
+    }
 
-    Notification::assertSentTo(
-        $user,
-        function (TestEmailSettingFromNameNotification $notification, array $channels) use ($notificationSetting, $user) {
-            $mailMessage = $notification->toMail($user);
+    public function down(): void
+    {
+        DB::transaction(function () {
+            NotificationSettingsFeature::deactivate();
 
-            return $mailMessage->from[1] === $notificationSetting->from_name;
-        }
-    );
-});
+            $settings = app(NotificationSettings::class);
+
+            $settings->from_name = null;
+            $settings->primary_color = null;
+
+            $settings->save();
+
+            NotificationSettings::getSettingsPropertyModel('notifications.logo')->clearMediaCollection('logo');
+        });
+    }
+};

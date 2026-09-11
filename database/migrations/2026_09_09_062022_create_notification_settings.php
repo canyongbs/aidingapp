@@ -34,27 +34,40 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettings\Pages;
+use Illuminate\Support\Facades\DB;
+use Spatie\LaravelSettings\Exceptions\SettingAlreadyExists;
+use Spatie\LaravelSettings\Migrations\SettingsMigration;
 
-use App\Filament\Resources\NotificationSettings\Forms\NotificationSettingForm;
-use App\Filament\Resources\NotificationSettings\NotificationSettingResource;
-use Filament\Actions\DeleteAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-
-class EditNotificationSetting extends EditRecord
-{
-    protected static string $resource = NotificationSettingResource::class;
-
-    public function form(Schema $schema): Schema
+return new class () extends SettingsMigration {
+    public function up(): void
     {
-        return resolve(NotificationSettingForm::class)->form($schema);
+        DB::transaction(function () {
+            try {
+                $this->migrator->add('notifications.from_name');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            try {
+                $this->migrator->add('notifications.logo');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+
+            try {
+                $this->migrator->add('notifications.primary_color');
+            } catch (SettingAlreadyExists $exception) {
+                // do nothing
+            }
+        });
     }
 
-    protected function getHeaderActions(): array
+    public function down(): void
     {
-        return [
-            DeleteAction::make(),
-        ];
+        DB::transaction(function () {
+            $this->migrator->deleteIfExists('notifications.from_name');
+            $this->migrator->deleteIfExists('notifications.logo');
+            $this->migrator->deleteIfExists('notifications.primary_color');
+        });
     }
-}
+};

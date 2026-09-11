@@ -38,8 +38,6 @@ namespace App\Notifications;
 
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\NotificationSetting;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
@@ -61,7 +59,6 @@ class SetPasswordNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject('Set up your password')
             ->line('A new account has been created for you.')
             ->action('Set up your password', url(URL::temporarySignedRoute(
@@ -72,10 +69,5 @@ class SetPasswordNotification extends Notification implements ShouldQueue
             )))
             ->line('For security reasons, this link will expire in 24 hours.')
             ->line('Please contact support if you need a new link or have any issues setting up your account.');
-    }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return $notifiable->department?->division?->notificationSetting?->setting;
     }
 }
