@@ -123,12 +123,7 @@ class ViewServiceRequest extends ViewRecord
                             ->schema([
                                 Livewire::make(TimelineList::class, fn (ServiceRequest $record): array => [
                                     'record' => $record,
-                                    'modelsToTimeline' => [
-                                        ServiceRequestUpdate::class,
-                                        ServiceRequestAssignment::class,
-                                        ServiceRequestHistory::class,
-                                        ServiceRequestFeedback::class,
-                                    ],
+                                    'modelsToTimeline' => $this->timelineModels($record),
                                     'emptyStateMessage' => 'There is no timeline available for this Service Request.',
                                     'noMoreRecordsMessage' => "You have reached the end of this service request's timeline.",
                                 ])->key(TimelineList::class),
@@ -206,6 +201,24 @@ class ViewServiceRequest extends ViewRecord
     private function canViewTimeline(): bool
     {
         return auth()->user()->can(['engagement.view-any', 'engagement.*.view']);
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    private function timelineModels(ServiceRequest $record): array
+    {
+        $models = [
+            ServiceRequestUpdate::class,
+            ServiceRequestAssignment::class,
+            ServiceRequestHistory::class,
+        ];
+
+        if ($this->canViewFeedback($record)) {
+            $models[] = ServiceRequestFeedback::class;
+        }
+
+        return $models;
     }
 
     private function buildFeedbackNoticeMessage(ServiceRequest $serviceRequest): string

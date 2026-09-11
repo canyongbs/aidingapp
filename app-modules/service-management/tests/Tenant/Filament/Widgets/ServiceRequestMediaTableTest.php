@@ -458,6 +458,59 @@ describe('ServiceRequest', function () {
         expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
+    test('uploadFile action is disabled once the collection has reached its 6 file limit', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        foreach (range(1, 6) as $index) {
+            $serviceRequest
+                ->addMedia(UploadedFile::fake()->image("report-{$index}.png"))
+                ->usingName("report-{$index}")
+                ->toMediaCollection('uploads');
+        }
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionDisabled('uploadFile');
+    });
+
+    test('uploadFile action rejects uploading a new file once the collection has reached its 6 file limit', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        foreach (range(1, 6) as $index) {
+            $serviceRequest
+                ->addMedia(UploadedFile::fake()->image("report-{$index}.png"))
+                ->usingName("report-{$index}")
+                ->toMediaCollection('uploads');
+        }
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('report-7.pdf', 100, 'application/pdf'),
+            ]);
+
+        expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(6)
+            ->and($serviceRequest->fresh()->getMedia('uploads')->pluck('name'))->not->toContain('report-7');
+
+        $history = ServiceRequestHistory::where('service_request_id', $serviceRequest->getKey())
+            ->get()
+            ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
+
+        expect($history)->toBeNull();
+    });
+
     // Success
 
     test('can upload a new file', function () {
@@ -727,6 +780,25 @@ describe('ServiceRequestUpdate', function () {
         ])
             ->assertSuccessful()
             ->assertSeeText('No uploads');
+    });
+
+    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('malware.exe', 10, 'application/x-msdownload'),
+            ])
+            ->assertHasTableActionErrors(['file']);
+
+        expect($serviceRequestUpdate->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
     test('uploading a file records a history entry on the parent service request for the timeline', function () {

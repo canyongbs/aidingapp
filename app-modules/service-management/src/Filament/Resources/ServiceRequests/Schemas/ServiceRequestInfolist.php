@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestCategoryAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestContactAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestDescriptionAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestDivisionAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestPriorityAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestTitleAction;
@@ -92,7 +93,8 @@ class ServiceRequestInfolist
             ->schema([
                 TextEntry::make('division.name')
                     ->visible(fn (ServiceRequest $record): bool => Division::count() > 1 && filled($record->division))
-                    ->label('Division'),
+                    ->label('Division')
+                    ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestDivisionAction::make($record)),
                 Grid::make(3)
                     ->schema([
                         TextEntry::make('respondent')
