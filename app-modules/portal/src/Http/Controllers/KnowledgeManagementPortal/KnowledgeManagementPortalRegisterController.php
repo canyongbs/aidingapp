@@ -39,6 +39,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
@@ -47,13 +48,15 @@ use AidingApp\Portal\Settings\PortalSettings;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 
 class KnowledgeManagementPortalRegisterController extends Controller
 {
-    public function __invoke(KnowledgeManagementPortalRegisterRequest $request, PortalAuthentication $authentication): JsonResponse
-    {
+    public function __invoke(
+        KnowledgeManagementPortalRegisterRequest $request,
+        PortalAuthentication $authentication,
+        AuthenticatePortalContact $authenticatePortalContact,
+    ): JsonResponse {
         if ($authentication->isExpired()) {
             return response()->json([
                 'is_expired' => true,
@@ -88,13 +91,9 @@ class KnowledgeManagementPortalRegisterController extends Controller
 
         $contact->save();
 
-        Auth::guard('contact')->login($contact);
+        $authenticatePortalContact($contact);
 
         $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
 
         $settings = resolve(PortalSettings::class);
         $addons = resolve(LicenseSettings::class)->data?->addons;

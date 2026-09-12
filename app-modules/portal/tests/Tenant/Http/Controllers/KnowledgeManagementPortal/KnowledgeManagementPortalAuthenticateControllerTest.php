@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\postJson;
+use function Pest\Laravel\withHeader;
 
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
@@ -148,6 +149,43 @@ test('it authenticates contact and clears guest session when code is valid', fun
         ->assertSessionMissing('guest_id');
 
     expect($response->json('token'))->not->toBeEmpty()
+        ->and(auth('contact')->check())->toBeTrue();
+});
+
+test('it does not rotate the csrf token shared with the admin panel', function () {
+    $contact = Contact::factory()->create();
+
+    $plainCode = 654321;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make($plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    $host = parse_url(route('api.portal.define'), PHP_URL_HOST);
+
+    config(['sanctum.stateful' => [$host]]);
+
+    session()->start();
+
+    $token = session()->token();
+
+    expect($token)->not->toBeEmpty();
+
+    withHeader('Referer', 'https://' . $host)
+        ->postJson($url, ['code' => $plainCode])
+        ->assertOk();
+
+    expect(session()->token())->toBe($token)
         ->and(auth('contact')->check())->toBeTrue();
 });
 
