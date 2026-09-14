@@ -38,7 +38,6 @@ namespace AidingApp\KnowledgeBase\Models;
 
 use AidingApp\Ai\Models\Contracts\AiFile;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseItemFactory;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseItemObserver;
@@ -127,14 +126,6 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     public function category(): BelongsTo
     {
         return $this->belongsTo(KnowledgeBaseCategory::class);
-    }
-
-    /**
-     * @return BelongsToMany<Division, $this>
-     */
-    public function division(): BelongsToMany
-    {
-        return $this->belongsToMany(Division::class);
     }
 
     public function registerMediaCollections(): void
