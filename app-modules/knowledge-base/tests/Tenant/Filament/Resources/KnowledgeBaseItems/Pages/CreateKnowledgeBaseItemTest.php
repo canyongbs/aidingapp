@@ -47,7 +47,6 @@ use Illuminate\Support\Facades\Config;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 
 // TODO: Write CreateKnowledgeBaseItem tests
 //test('A successful action on the CreateKnowledgeBaseItem page', function () {});
