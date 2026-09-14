@@ -50,6 +50,7 @@ return new class () extends Migration {
             Schema::table('advisory_updates', function (Blueprint $table) {
                 $table->string('title');
                 $table->timestamp('date');
+                $table->index(['advisory_id', 'date']);
             });
 
             AdvisoryUpdateTitleAndDateFeature::activate();
@@ -62,6 +63,7 @@ return new class () extends Migration {
             AdvisoryUpdateTitleAndDateFeature::deactivate();
 
             Schema::table('advisory_updates', function (Blueprint $table) {
+                $table->dropIndex(['advisory_id', 'date']);
                 $table->dropColumn(['title', 'date']);
             });
         });

@@ -95,7 +95,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                             ->description(fn (AdvisoryUpdate $record): string => $record->update)
                             ->searchable()
                             ->color('primary')
-                            ->action(self::getViewOrEditAdvisoryUpdateAction()),
+                            ->action($this->getViewOrEditAdvisoryUpdateAction()),
                     ]
                     : [
                         TextColumn::make('update')
@@ -121,9 +121,10 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ->defaultSort(AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at', 'desc')
             ->headerActions([
                 CreateAction::make()
-                    ->visible($this->getOwnerRecord()->status->classification === SystemAdvisoryStatusClassification::Resolved ? false : true)
-                    ->after(function (array $data, AdvisoryUpdate $advisoryUpdate) {
-                        $advisoryUpdate->advisory->update(['status_id' => $data['status_id']]);
+                    ->visible(fn (): bool => $this->getOwnerRecord()->status->classification !== SystemAdvisoryStatusClassification::Resolved)
+                    ->after(function (array $data): void {
+                        $this->getOwnerRecord()->update(['status_id' => $data['status_id']]);
+                        $this->getOwnerRecord()->refresh();
                     }),
             ])
             ->toolbarActions([
@@ -134,7 +135,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ]);
     }
 
-    private static function getViewOrEditAdvisoryUpdateAction(): Action
+    private function getViewOrEditAdvisoryUpdateAction(): Action
     {
         return Action::make('viewOrEditAdvisoryUpdate')
             ->authorize(fn (AdvisoryUpdate $record): bool => auth()->user()->can('view', $record))
@@ -164,7 +165,8 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                 abort_unless(auth()->user()->can('update', $record), 403);
 
                 $record->update(Arr::except($data, ['status_id']));
-                $record->advisory->update(['status_id' => $data['status_id']]);
+                $this->getOwnerRecord()->update(['status_id' => $data['status_id']]);
+                $this->getOwnerRecord()->refresh();
             });
     }
 
