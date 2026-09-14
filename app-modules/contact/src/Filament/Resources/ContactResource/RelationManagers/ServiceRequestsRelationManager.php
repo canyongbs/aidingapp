@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
@@ -82,16 +81,6 @@ class ServiceRequestsRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                Select::make('division_id')
-                    ->relationship('division', 'name')
-                    ->label('Division')
-                    ->required()
-                    ->exists((new Division())->getTable(), 'id')
-                    ->visible(fn (): bool => Division::count() > 1)
-                    ->saveRelationshipsWhenHidden()
-                    ->default(
-                        fn () => Division::count() === 1 ? (Division::query()->first()?->getKey()) : null
-                    ),
                 Select::make('status_id')
                     ->relationship('status', 'name')
                     ->label('Status')

@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestHistoryFactory;
 use AidingApp\ServiceManagement\Observers\ServiceRequestHistoryObserver;
 use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
@@ -190,7 +189,6 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             'status_id' => 'Status Updated',
             'priority_id' => 'Priority Updated',
             'type_id' => 'Type Updated',
-            'division_id' => 'Division Updated',
             'category' => 'Category Updated',
             'issue_category' => 'Category Updated',
             'title' => 'Title Updated',
@@ -261,7 +259,6 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         $relationsMap = [
             'priority_id' => [ServiceRequestPriority::class, 'name'],
             'status_id' => [ServiceRequestStatus::class, 'name'],
-            'division_id' => [Division::class, 'name'],
             'type_id' => [ServiceRequestType::class, 'name'],
             'respondent_id' => [
                 [Contact::class],
