@@ -75,11 +75,11 @@ class UsersRelationManager extends RelationManager
                     ),
             ])
             ->recordActions([
-            DetachAction::make(),
-        ])
+                DetachAction::make(),
+            ])
             ->toolbarActions([
-            DetachBulkAction::make(),
-        ])
+                DetachBulkAction::make(),
+            ])
             ->inverseRelationship('groups');
     }
 }
