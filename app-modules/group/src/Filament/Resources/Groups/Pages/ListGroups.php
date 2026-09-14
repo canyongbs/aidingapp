@@ -58,7 +58,7 @@ class ListGroups extends ListRecords
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (Group $record): ?string => Str::limit($record->description, 40))
+                    ->description(fn (Group $record): string => Str::limit($record->description, 40))
                     ->tooltip(fn (Group $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
