@@ -37,7 +37,9 @@
 namespace AidingApp\Group\Providers;
 
 use AidingApp\Group\GroupPlugin;
+use AidingApp\Group\Models\Group;
 use Filament\Panel;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class GroupServiceProvider extends ServiceProvider
@@ -45,5 +47,12 @@ class GroupServiceProvider extends ServiceProvider
     public function register(): void
     {
         Panel::configureUsing(fn (Panel $panel) => $panel->getId() !== 'admin' || $panel->plugin(new GroupPlugin()));
+    }
+
+    public function boot(): void
+    {
+        Relation::morphMap([
+            'group' => Group::class,
+        ]);
     }
 }

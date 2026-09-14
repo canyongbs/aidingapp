@@ -85,6 +85,22 @@ it('can create a group without a description', function () {
     assertDatabaseHas(Group::class, $request);
 });
 
+it('can create a group with a soft deleted group name', function () {
+    asSuperAdmin();
+
+    $deletedGroup = Group::factory()->create(['name' => 'Student Success']);
+    $deletedGroup->delete();
+
+    $request = GroupRequestFactory::new()->state(['name' => 'Student Success'])->create();
+
+    livewire(CreateGroup::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Group::class, $request);
+});
+
 it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
     asSuperAdmin();
 

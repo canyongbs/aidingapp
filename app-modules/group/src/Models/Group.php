@@ -36,23 +36,31 @@
 
 namespace AidingApp\Group\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Group\Database\Factories\GroupFactory;
 use AidingApp\Group\Observers\GroupObserver;
 use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use OwenIt\Auditing\Contracts\Auditable;
 
 #[ObservedBy([GroupObserver::class])]
-class Group extends Model
+class Group extends Model implements Auditable
 {
+    use AuditableTrait;
+    use CanBeArchived;
+
     /** @use HasFactory<GroupFactory> */
     use HasFactory;
 
     use HasUuids;
+    use SoftDeletes;
 
     protected $fillable = [
         'name',

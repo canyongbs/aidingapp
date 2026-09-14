@@ -47,6 +47,7 @@ use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class ListGroups extends ListRecords
 {
@@ -57,7 +58,8 @@ class ListGroups extends ListRecords
         return $table
             ->columns([
                 TextColumn::make('name')
-                    ->description(fn (Group $record): ?string => $record->description)
+                    ->description(fn (Group $record): ?string => Str::limit($record->description, 40))
+                    ->tooltip(fn (Group $record): ?string => $record->description)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('users_count')

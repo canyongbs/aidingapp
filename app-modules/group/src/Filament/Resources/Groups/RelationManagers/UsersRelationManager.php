@@ -36,12 +36,14 @@
 
 namespace AidingApp\Group\Filament\Resources\Groups\RelationManagers;
 
+use App\Models\Scopes\WithoutAnyAdmin;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class UsersRelationManager extends RelationManager
 {
@@ -65,14 +67,19 @@ class UsersRelationManager extends RelationManager
                     ->label('Associate users')
                     ->multiple()
                     ->slideOver()
-                    ->preloadRecordSelect(),
+                    ->preloadRecordSelect()
+                    ->recordSelectOptionsQuery(
+                        fn (Builder $query): Builder => config('app.filter_admins_from_selection', true)
+                        ? $query->tap(new WithoutAnyAdmin())
+                        : $query,
+                    ),
             ])
             ->recordActions([
-                DetachAction::make(),
-            ])
+            DetachAction::make(),
+        ])
             ->toolbarActions([
-                DetachBulkAction::make(),
-            ])
+            DetachBulkAction::make(),
+        ])
             ->inverseRelationship('groups');
     }
 }

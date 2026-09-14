@@ -53,7 +53,7 @@ class GroupForm
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            ->unique(ignoreRecord: true)
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn ($rule) => $rule->whereNull('deleted_at'))
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->string()

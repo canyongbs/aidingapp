@@ -37,11 +37,14 @@
 use AidingApp\Group\Filament\Resources\Groups\Pages\EditGroup;
 use AidingApp\Group\Filament\Resources\Groups\RelationManagers\UsersRelationManager;
 use AidingApp\Group\Models\Group;
+use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -63,6 +66,85 @@ it('can associate multiple users with a group', function () {
 
     expect($group->users()->pluck('users.id')->all())
         ->toEqualCanonicalizing($users->modelKeys());
+});
+
+it('does not show admin users in the associate users selection by default', function () {
+    asSuperAdmin();
+
+    $group = Group::factory()->create();
+    $regularUser = User::factory()->create();
+    $adminUsers = collect([
+        Authenticatable::SUPER_ADMIN_ROLE,
+        Authenticatable::PARTNER_ADMIN_ROLE,
+        Authenticatable::AI_ADMIN_ROLE,
+    ])->map(function (string $role): User {
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        return $user;
+    });
+
+    $component = livewire(UsersRelationManager::class, [
+        'ownerRecord' => $group,
+        'pageClass' => EditGroup::class,
+    ]);
+
+    $component->mountTableAction(AttachAction::class);
+
+    $recordSelect = $component->instance()->getMountedTableActionForm()?->getComponent('recordId');
+
+    assert($recordSelect instanceof Select);
+
+    expect($recordSelect->getSearchResults($regularUser->email))->not->toBeEmpty()
+        ->and($adminUsers->every(fn (User $user): bool => empty($recordSelect->getSearchResults($user->email))))->toBeTrue();
+});
+
+it('allows admin users in the associate users selection when admin filtering is disabled', function () {
+    Config::set('app.filter_admins_from_selection', false);
+    asSuperAdmin();
+
+    $group = Group::factory()->create();
+    $adminUsers = collect([
+        Authenticatable::SUPER_ADMIN_ROLE,
+        Authenticatable::PARTNER_ADMIN_ROLE,
+        Authenticatable::AI_ADMIN_ROLE,
+    ])->map(function (string $role): User {
+        $user = User::factory()->create();
+        $user->assignRole($role);
+
+        return $user;
+    });
+
+    $component = livewire(UsersRelationManager::class, [
+        'ownerRecord' => $group,
+        'pageClass' => EditGroup::class,
+    ]);
+
+    $component->mountTableAction(AttachAction::class);
+
+    $recordSelect = $component->instance()->getMountedTableActionForm()?->getComponent('recordId');
+
+    assert($recordSelect instanceof Select);
+
+    expect($adminUsers->every(fn (User $user): bool => ! empty($recordSelect->getSearchResults($user->email))))->toBeTrue();
+});
+
+it('does not associate an admin user when admin filtering is enabled', function () {
+    asSuperAdmin();
+
+    $group = Group::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(UsersRelationManager::class, [
+        'ownerRecord' => $group,
+        'pageClass' => EditGroup::class,
+    ])
+        ->callAction(TestAction::make(AttachAction::class)->table(), data: [
+            'recordId' => [$adminUser->getKey()],
+        ]);
+
+    expect($group->users()->whereKey($adminUser->getKey())->exists())->toBeFalse();
 });
 
 it('can detach a user from a group', function () {

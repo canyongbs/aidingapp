@@ -34,29 +34,35 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+use AidingApp\Group\Models\Group;
 
-return new class () extends Migration {
-    public function up(): void
-    {
-        Schema::create('groups', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-            $table->caseInsensitiveText('name');
-            $table->text('description')->nullable();
-            $table->foreignUuid('created_by_id')->nullable()->constrained('users')->nullOnDelete();
-            $table->timestamp('archived_at')->nullable();
-            $table->timestamps();
-            $table->softDeletes();
+use function Pest\Laravel\assertSoftDeleted;
 
-            $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-        });
-    }
+it('can be archived', function () {
+    $group = Group::factory()->create();
 
-    public function down(): void
-    {
-        Schema::dropIfExists('groups');
-    }
-};
+    expect($group->isArchived())->toBeFalse();
+
+    $group->archive();
+
+    expect($group->refresh()->isArchived())->toBeTrue();
+});
+
+it('is audited', function () {
+    $group = Group::factory()->create();
+
+    expect($group->audits()->exists())->toBeTrue();
+});
+
+it('allows reusing a soft deleted group name', function () {
+    $deletedGroup = Group::factory()->create(['name' => 'Student Success']);
+
+    $deletedGroup->delete();
+
+    assertSoftDeleted($deletedGroup);
+
+    $group = Group::factory()->create(['name' => 'Student Success']);
+
+    expect($group->name)->toBe('Student Success')
+        ->and(Group::query()->count())->toBe(1);
+});
