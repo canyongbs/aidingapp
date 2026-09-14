@@ -57,7 +57,7 @@ class SystemUserResource extends Resource
 
     protected static ?string $breadcrumb = 'Programmatic Users';
 
-    protected static ?int $navigationSort = 40;
+    protected static ?int $navigationSort = 60;
 
     public static function getRelations(): array
     {

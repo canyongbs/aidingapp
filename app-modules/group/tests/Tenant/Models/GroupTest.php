@@ -34,40 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+use AidingApp\Group\Models\Group;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use function Pest\Laravel\assertSoftDeleted;
 
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
+it('can be archived', function () {
+    $group = Group::factory()->create();
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
+    expect($group->isArchived())->toBeFalse();
 
-    protected static ?int $navigationSort = 70;
+    $group->archive();
 
-    public static function getRelations(): array
-    {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
+    expect($group->refresh()->isArchived())->toBeTrue();
+});
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
-    }
-}
+it('is audited', function () {
+    $group = Group::factory()->create();
+
+    expect($group->audits()->exists())->toBeTrue();
+});
+
+it('allows reusing a soft deleted group name', function () {
+    $deletedGroup = Group::factory()->create(['name' => 'Student Success']);
+
+    $deletedGroup->delete();
+
+    assertSoftDeleted($deletedGroup);
+
+    $group = Group::factory()->create(['name' => 'Student Success']);
+
+    expect($group->name)->toBe('Student Success')
+        ->and(Group::query()->count())->toBe(1);
+});

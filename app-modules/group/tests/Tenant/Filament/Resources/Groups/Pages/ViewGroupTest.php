@@ -34,40 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Division\Filament\Resources\Divisions;
+use AidingApp\Group\Filament\Resources\Groups\GroupResource;
+use AidingApp\Group\Filament\Resources\Groups\Pages\ViewGroup;
+use AidingApp\Group\Models\Group;
+use App\Models\User;
 
-use AidingApp\Division\Filament\Resources\Divisions\Pages\CreateDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\EditDivision;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ListDivisions;
-use AidingApp\Division\Filament\Resources\Divisions\Pages\ViewDivision;
-use AidingApp\Division\Filament\Resources\Divisions\RelationManagers\DepartmentsRelationManager;
-use AidingApp\Division\Models\Division;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use UnitEnum;
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-class DivisionResource extends Resource
-{
-    protected static ?string $model = Division::class;
+it('can render the view group page', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
 
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Users;
+    get(GroupResource::getUrl('view', ['record' => $group]))->assertSuccessful();
+});
 
-    protected static ?int $navigationSort = 70;
+it('displays the group data', function () {
+    asSuperAdmin();
+    $group = Group::factory()->create();
 
-    public static function getRelations(): array
-    {
-        return [
-            DepartmentsRelationManager::make(),
-        ];
-    }
+    livewire(ViewGroup::class, ['record' => $group->getRouteKey()])
+        ->assertSchemaStateSet([
+            'name' => $group->name,
+            'description' => $group->description,
+        ]);
+});
 
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListDivisions::route('/'),
-            'create' => CreateDivision::route('/create'),
-            'view' => ViewDivision::route('/{record}'),
-            'edit' => EditDivision::route('/{record}/edit'),
-        ];
-    }
-}
+describe('authorization', function () {
+    it('denies access without the `group.*.view` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('group.view-any');
+        actingAs($user);
+        $group = Group::factory()->create();
+
+        get(GroupResource::getUrl('view', ['record' => $group]))->assertForbidden();
+    });
+});
