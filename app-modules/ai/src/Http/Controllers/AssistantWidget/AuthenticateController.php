@@ -37,17 +37,20 @@
 namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use AidingApp\Portal\Models\PortalAuthentication;
 use App\Http\Controllers\Controller;
 use App\Rules\ValidAuthenticationCode;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class AuthenticateController extends Controller
 {
-    public function __invoke(Request $request, PortalAuthentication $authentication): JsonResponse
-    {
+    public function __invoke(
+        Request $request,
+        PortalAuthentication $authentication,
+        AuthenticatePortalContact $authenticatePortalContact,
+    ): JsonResponse {
         if ($authentication->isExpired()) {
             return response()->json(['is_expired' => true], 422);
         }
@@ -59,13 +62,9 @@ class AuthenticateController extends Controller
         /** @var Contact $contact */
         $contact = $authentication->educatable;
 
-        Auth::guard('contact')->login($contact);
+        $authenticatePortalContact($contact);
 
         $token = $contact->createToken('knowledge-management-portal-access-token');
-
-        if ($request->hasSession()) {
-            $request->session()->regenerate();
-        }
 
         return response()->json([
             'success' => true,

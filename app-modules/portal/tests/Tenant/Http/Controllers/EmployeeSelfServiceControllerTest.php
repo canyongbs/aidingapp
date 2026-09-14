@@ -61,6 +61,27 @@ it('logs the managed contact into the portal and redirects', function () {
     expect(Auth::guard('contact')->id())->toBe($contact->getKey());
 });
 
+it('does not rotate the csrf token shared with the admin panel', function () {
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create();
+
+    app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    session()->start();
+
+    $token = session()->token();
+
+    expect($token)->not->toBeEmpty();
+
+    actingAs($user)
+        ->get(employeeSelfServiceUrl())
+        ->assertRedirect(route('portal.show'));
+
+    expect(session()->token())->toBe($token)
+        ->and(Auth::guard('contact')->check())->toBeTrue();
+});
+
 it('forbids a user without a managed contact', function () {
     $user = User::factory()->create();
 
