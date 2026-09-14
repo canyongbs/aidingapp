@@ -43,7 +43,6 @@ use Spatie\LaravelData\Optional;
 class ServiceRequestDataObject extends Data
 {
     public function __construct(
-        public string|Optional $division_id,
         public string|Optional $status_id,
         public string $type_id,
         public string|Optional $priority_id,
@@ -56,7 +55,6 @@ class ServiceRequestDataObject extends Data
     public static function fromData(array $data): static
     {
         return new self(
-            division_id: $data['division_id'] ?? Optional::create(),
             status_id: $data['status_id'] ?? Optional::create(),
             type_id: $data['type_id'],
             priority_id: $data['priority_id'] ?? Optional::create(),

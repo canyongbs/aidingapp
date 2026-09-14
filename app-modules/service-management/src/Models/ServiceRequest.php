@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Models;
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Database\Factories\ServiceRequestFactory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
@@ -95,7 +94,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     protected $fillable = [
         'respondent_id',
-        'division_id',
         'status_id',
         'priority_id',
         'assigned_to_id',
@@ -192,14 +190,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function respondent(): BelongsTo
     {
         return $this->belongsTo(Contact::class, 'respondent_id');
-    }
-
-    /**
-     * @return BelongsTo<Division, $this>
-     */
-    public function division(): BelongsTo
-    {
-        return $this->belongsTo(Division::class, 'division_id');
     }
 
     /**

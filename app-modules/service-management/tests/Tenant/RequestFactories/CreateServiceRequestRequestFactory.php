@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -49,7 +48,6 @@ class CreateServiceRequestRequestFactory extends RequestFactory
     {
         return [
             'title' => fake()->words(2, true),
-            'division_id' => Division::factory()->create()->id,
             'status_id' => ServiceRequestStatus::factory()->create()->id,
             'type_id' => function (array $attributes) {
                 return ServiceRequestPriority::find($attributes['priority_id'])->type->getKey();

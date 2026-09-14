@@ -106,7 +106,6 @@ test('The correct details are displayed on the ListServiceRequests page', functi
         ->assertTableColumnExists('service_request_number')
         ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
-        ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
         ->assertTableColumnExists('feedback_summary')
         ->assertTableColumnExists('dates')
@@ -124,11 +123,6 @@ test('The correct details are displayed on the ListServiceRequests page', functi
             ->assertTableColumnStateSet(
                 'service_request_number',
                 $serviceRequest->service_request_number,
-                $serviceRequest
-            )
-            ->assertTableColumnStateSet(
-                'division.name',
-                $serviceRequest->division->name,
                 $serviceRequest
             )
             ->assertSee($serviceRequest->service_request_number)
@@ -182,7 +176,6 @@ test('The correct details are displayed on the ListServiceRequests page via dire
         ->assertTableColumnExists('service_request_number')
         ->assertTableColumnExists('priority.type.name')
         ->assertTableColumnExists('related_to')
-        ->assertTableColumnExists('division.name')
         ->assertTableColumnExists('sla')
         ->assertTableColumnExists('feedback_summary')
         ->assertTableColumnExists('dates')
@@ -200,11 +193,6 @@ test('The correct details are displayed on the ListServiceRequests page via dire
             ->assertTableColumnStateSet(
                 'service_request_number',
                 $serviceRequest->service_request_number,
-                $serviceRequest
-            )
-            ->assertTableColumnStateSet(
-                'division.name',
-                $serviceRequest->division->name,
                 $serviceRequest
             )
             ->assertSee($serviceRequest->service_request_number)

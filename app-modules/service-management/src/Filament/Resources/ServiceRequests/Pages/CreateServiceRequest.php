@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
@@ -83,16 +82,6 @@ class CreateServiceRequest extends CreateRecord
             ->components([
                 Section::make('New Service Request')
                     ->schema([
-                        Select::make('division_id')
-                            ->relationship('division', 'name')
-                            ->label('Division')
-                            ->required()
-                            ->exists((new Division())->getTable(), 'id')
-                            ->visible(fn (): bool => Division::count() > 1)
-                            ->saveRelationshipsWhenHidden()
-                            ->default(
-                                fn () => Division::count() === 1 ? (Division::query()->first()?->getKey()) : null
-                            ),
                         Grid::make(6)
                             ->schema([
                                 Select::make('status_id')

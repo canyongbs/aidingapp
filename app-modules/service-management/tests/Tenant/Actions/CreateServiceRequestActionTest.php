@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
@@ -62,14 +61,12 @@ if (! function_exists('createServiceRequestViaAction')) {
         $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
         $status ??= ServiceRequestStatus::factory()->open()->create();
         $respondent = Contact::factory()->create();
-        $division = Division::factory()->create();
 
         return app(CreateServiceRequestAction::class)->execute(
             ServiceRequestDataObject::fromData([
                 'type_id' => $type->getKey(),
                 'priority_id' => $priority->getKey(),
                 'status_id' => $status->getKey(),
-                'division_id' => $division->getKey(),
                 'respondent_id' => $respondent->getKey(),
                 'title' => 'Test service request',
             ])

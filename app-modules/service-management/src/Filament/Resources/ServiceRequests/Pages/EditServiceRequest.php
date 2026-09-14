@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
@@ -81,12 +80,6 @@ class EditServiceRequest extends EditRecord
             ->components([
                 Section::make('Service Request: ' . $serviceRequest->service_request_number)
                     ->schema([
-                        Select::make('division_id')
-                            ->relationship('division', 'name')
-                            ->label('Division')
-                            ->required()
-                            ->visible(fn (): bool => Division::count() > 1)
-                            ->exists((new Division())->getTable(), 'id'),
                         ToggleButtons::make('category')
                             ->options(ServiceRequestCategory::class)
                             ->enum(ServiceRequestCategory::class)

@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
@@ -83,9 +82,6 @@ class ServiceRequestInfolist
                 ])->render()
             ))
             ->schema([
-                TextEntry::make('division.name')
-                    ->visible(fn (ServiceRequest $record): bool => Division::count() > 1 && filled($record->division))
-                    ->label('Division'),
                 Grid::make(3)
                     ->schema([
                         TextEntry::make('respondent')
