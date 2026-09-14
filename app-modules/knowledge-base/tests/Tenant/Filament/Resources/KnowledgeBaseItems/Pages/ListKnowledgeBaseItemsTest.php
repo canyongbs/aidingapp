@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
@@ -678,10 +677,8 @@ test('an authorised user can duplicate a knowledge base article', function () {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
     $tags = Tag::factory()->count(3)->forClass(new KnowledgeBaseItem())->create();
     $knowledgeBaseItem->tags()->attach($tags);
-    $divisions = Division::factory()->count(3)->create();
-    $knowledgeBaseItem->division()->attach($divisions);
 
-    $knowledgeBaseItem->load(['tags', 'division']);
+    $knowledgeBaseItem->load(['tags']);
 
     $user = User::factory()->create();
     $user->givePermissionTo('knowledge_base_item.view-any');
@@ -697,7 +694,6 @@ test('an authorised user can duplicate a knowledge base article', function () {
             'status_id' => $knowledgeBaseItem->status_id,
             'category_id' => $knowledgeBaseItem->category_id,
             'tags' => $knowledgeBaseItem->tags->pluck('id')->toArray(),
-            'division' => $knowledgeBaseItem->division->pluck('id')->toArray(),
         ])
         ->assertHasNoTableActionErrors();
 
@@ -710,7 +706,6 @@ test('an authorised user can duplicate a knowledge base article', function () {
     expect($replicatedKnowledgeBaseItem->status_id)->toBe($knowledgeBaseItem->status_id);
     expect($replicatedKnowledgeBaseItem->category_id)->toBe($knowledgeBaseItem->category_id);
     expect($replicatedKnowledgeBaseItem->tags->pluck('id'))->toEqual($knowledgeBaseItem->tags->pluck('id'));
-    expect($replicatedKnowledgeBaseItem->division->pluck('id'))->toEqual($knowledgeBaseItem->division->pluck('id'));
 });
 
 test('duplicating a knowledge base article is gated by the knowledge_base_item.create ability', function () {

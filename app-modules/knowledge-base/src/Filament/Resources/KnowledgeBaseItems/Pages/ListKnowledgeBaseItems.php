@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Actions\AssignManagerBulkAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -179,7 +178,6 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->slideOver()
                     ->mutateRecordDataUsing(function (array $data, KnowledgeBaseItem $record): array {
                         $data['tags'] = $record->tags()->pluck('id')->toArray();
-                        $data['division'] = $record->division()->pluck('id')->toArray();
 
                         return $data;
                     })
@@ -226,21 +224,9 @@ class ListKnowledgeBaseItems extends ListRecords
                                     ->searchable()
                                     ->preload()
                                     ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
-                                Select::make('division')
-                                    ->label('Division')
-                                    ->multiple()
-                                    ->options(fn () => Division::query()->limit(50)->pluck('name', 'id'))
-                                    ->searchable()
-                                    ->getOptionLabelUsing(fn ($value): ?string => filled($value)
-                                        ? Division::query()
-                                            ->whereKey($value)
-                                            ->value('name')
-                                        : null)
-                                    ->preload(),
                             ]),
                     ])
                     ->after(function (array $data, KnowledgeBaseItem $replica, KnowledgeBaseItem $record): void {
-                        $replica->division()->attach($data['division'] ?? []);
                         $replica->tags()->attach($data['tags'] ?? []);
 
                         $media = $record->getMedia('article_details');

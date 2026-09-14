@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Database\Factories;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
@@ -57,17 +56,5 @@ class KnowledgeBaseItemFactory extends Factory
             'status_id' => KnowledgeBaseStatus::factory(),
             'category_id' => KnowledgeBaseCategory::factory(),
         ];
-    }
-
-    public function configure(): static
-    {
-        return $this->afterMaking(function (KnowledgeBaseItem $knowledgeBaseItem) {
-            // ...
-        })->afterCreating(function (KnowledgeBaseItem $knowledgeBaseItem) {
-            if ($knowledgeBaseItem->division->isEmpty()) {
-                $knowledgeBaseItem->division()->attach(Division::first()?->id ?? Division::factory()->create()->id);
-                $knowledgeBaseItem->save();
-            }
-        });
     }
 }
