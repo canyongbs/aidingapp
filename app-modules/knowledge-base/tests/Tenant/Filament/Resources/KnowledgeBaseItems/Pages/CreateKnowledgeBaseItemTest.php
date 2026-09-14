@@ -45,6 +45,7 @@ use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
@@ -77,7 +78,7 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
-    assertCount(1, KnowledgeBaseItem::all());
+    assertDatabaseHas(KnowledgeBaseItem::class, $request->toArray());
 });
 
 test('CreateKnowledgeBaseItem is gated with proper feature access control', function () {
@@ -110,7 +111,7 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
-    assertCount(1, KnowledgeBaseItem::all());
+    assertDatabaseHas(KnowledgeBaseItem::class, $request->toArray());
 });
 
 // UserSelect (manager_ids field) admin-filtering tests
