@@ -163,6 +163,35 @@ test('creating an advisory update updates the advisory status', function () {
     expect(AdvisoryUpdate::query()->where('advisory_id', $advisory->getKey())->count())->toBe(1);
 });
 
+test('creating an advisory update that resolves the advisory hides the create action without a page refresh', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $resolvedStatus = AdvisoryStatus::factory()->create([
+        'classification' => SystemAdvisoryStatusClassification::Resolved,
+    ]);
+
+    asSuperAdmin();
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->assertTableActionVisible('create')
+        ->callTableAction('create', data: [
+            'title' => 'A new title',
+            'update' => 'A new update',
+            'internal' => false,
+            'status_id' => $resolvedStatus->getKey(),
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $component->assertTableActionHidden('create');
+});
+
 test('the create form date field defaults to now', function () {
     $advisory = Advisory::factory()->create([
         'status_id' => AdvisoryStatus::factory()->create([
@@ -302,6 +331,37 @@ test('submitting the view or edit advisory update action updates the advisory up
         ->internal->toBeTrue();
 
     expect($advisory->refresh()->status_id)->toBe($newStatus->getKey());
+});
+
+test('submitting the view or edit advisory update action that resolves the advisory hides the create action without a page refresh', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    $resolvedStatus = AdvisoryStatus::factory()->create([
+        'classification' => SystemAdvisoryStatusClassification::Resolved,
+    ]);
+
+    asSuperAdmin();
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->assertTableActionVisible('create')
+        ->callAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate), data: [
+            'title' => $advisoryUpdate->title,
+            'update' => $advisoryUpdate->update,
+            'internal' => $advisoryUpdate->internal,
+            'status_id' => $resolvedStatus->getKey(),
+        ])
+        ->assertHasNoActionErrors();
+
+    $component->assertTableActionHidden('create');
 });
 
 // Permission Tests

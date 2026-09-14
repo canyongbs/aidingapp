@@ -241,21 +241,18 @@ test('the Status entry reflects the new value immediately after updating the Tra
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    $component = livewire(ViewAdvisory::class, [
+    livewire(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'), data: [
             'severity_id' => $newSeverity->getKey(),
             'status_id' => $newStatus->getKey(),
         ])
-        ->assertHasNoFormErrors();
-
-    dump([
-        'old severity seen' => str_contains($component->html(), e($oldSeverity->name)),
-        'new severity seen' => str_contains($component->html(), e($newSeverity->name)),
-        'old status seen' => str_contains($component->html(), e($oldStatus->name)),
-        'new status seen' => str_contains($component->html(), e($newStatus->name)),
-    ]);
+        ->assertHasNoFormErrors()
+        ->assertSee($newSeverity->name)
+        ->assertSee($newStatus->name)
+        ->assertDontSee($oldSeverity->name)
+        ->assertDontSee($oldStatus->name);
 });
 
 test('the Tracking Details section validates the inputs', function ($overrides, $errors) {
