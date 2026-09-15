@@ -60,13 +60,13 @@ trait InteractsWithSlaReportData
     protected function slaEagerLoads(): array
     {
         return [
-            'status',
-            'priority.sla',
-            'priority.type',
-            'assignedTo.user',
-            'latestInboundServiceRequestUpdate.createdBy',
-            'latestOutboundServiceRequestUpdate.createdBy',
-            'statusPeriods',
+            'status:id,classification',
+            'priority.sla:id,response_seconds,resolution_seconds',
+            'priority.type:id,name',
+            'assignedTo.user:id,name',
+            'latestInboundServiceRequestUpdate.createdBy:id',
+            'latestOutboundServiceRequestUpdate.createdBy:id',
+            'statusPeriods:id,service_request_id,service_request_status_id,classification,started_at,created_at',
         ];
     }
 
@@ -77,7 +77,17 @@ trait InteractsWithSlaReportData
      */
     protected function slaServiceRequestsQuery(): Builder
     {
-        return $this->applySlaFilters(ServiceRequest::query());
+        return $this->applySlaFilters(
+            ServiceRequest::query()->select([
+                'id',
+                'created_at',
+                'status_id',
+                'updated_at',
+                'status_updated_at',
+                'priority_id',
+                'category',
+            ])
+        );
     }
 
     /**
@@ -194,10 +204,10 @@ trait InteractsWithSlaReportData
             'response_breaches' => $responseBreaches,
             'resolution_breaches' => $resolutionBreaches,
             'breaches' => $breaches,
-            'response_breach_percentage' => $this->slaPercentage($responseBreaches, $responseSlaTotal),
-            'resolution_breach_percentage' => $this->slaPercentage($resolutionBreaches, $resolutionSlaTotal),
-            'response_compliance_percentage' => $this->slaPercentage($responseSlaTotal - $responseBreaches, $responseSlaTotal),
-            'resolution_compliance_percentage' => $this->slaPercentage($resolutionSlaTotal - $resolutionBreaches, $resolutionSlaTotal),
+            'response_breach_percentage' => $this->slaPercentage($responseBreaches, $total),
+            'resolution_breach_percentage' => $this->slaPercentage($resolutionBreaches, $total),
+            'response_compliance_percentage' => $this->slaPercentage($total - $responseBreaches, $total),
+            'resolution_compliance_percentage' => $this->slaPercentage($total - $resolutionBreaches, $total),
             'average_response_seconds' => $responseSlaTotal > 0 ? (int) round($responseSecondsSum / $responseSlaTotal) : null,
             'average_resolution_seconds' => $resolutionSecondsCount > 0 ? (int) round($resolutionSecondsSum / $resolutionSecondsCount) : null,
         ];

@@ -106,6 +106,12 @@ class Sla extends Dashboard
                     ...$this->serviceRequestTypeFilterComponents(),
                     DatePicker::make('startDate')
                         ->native(false)
+                        ->default(now()->subMonths(12)->startOfDay())
+                        ->afterStateHydrated(function (callable $set, mixed $state): void {
+                            if (blank($state)) {
+                                $set('startDate', now()->subMonths(12)->startOfDay()->toDateTimeString());
+                            }
+                        })
                         ->maxDate(fn (Get $get) => $get('endDate') ?: now())
                         ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
                             if (blank($get('endDate')) && filled($state)) {
@@ -114,6 +120,12 @@ class Sla extends Dashboard
                         }),
                     DatePicker::make('endDate')
                         ->native(false)
+                        ->default(now()->endOfDay())
+                        ->afterStateHydrated(function (callable $set, mixed $state): void {
+                            if (blank($state)) {
+                                $set('endDate', now()->endOfDay()->toDateTimeString());
+                            }
+                        })
                         ->minDate(fn (Get $get) => $get('startDate') ?: now())
                         ->maxDate(now())
                         ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {

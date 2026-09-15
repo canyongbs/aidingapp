@@ -195,6 +195,8 @@ it('renders the report filters', function () {
 
     livewire(Sla::class)
         ->assertOk()
+        ->assertSet('filters.startDate', now()->subMonths(12)->startOfDay()->toDateTimeString())
+        ->assertSet('filters.endDate', now()->endOfDay()->toDateTimeString())
         ->assertSee('Service Request Types')
         ->assertSee('Classification')
         ->assertSee('Assigned Agent');
@@ -223,12 +225,15 @@ it('renders every SLA widget on the page', function () {
 });
 
 it('computes the SLA stats for the filtered service requests', function () {
-    $priority = slaReportPriority();
+    $orderWithSla = slaReportPriority();
     $status = openServiceRequestStatus();
 
-    makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
-    makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
-    makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Request, breaching: false);
+    makeSlaServiceRequest($orderWithSla, $status, ServiceRequestCategory::Incident, breaching: true);
+    makeSlaServiceRequest($orderWithSla, $status, ServiceRequestCategory::Incident, breaching: false);
+
+    // Create a priority without an SLA
+    $orderWithoutSla = ServiceRequestPriority::factory()->create();
+    makeSlaServiceRequest($orderWithoutSla, $status, ServiceRequestCategory::Request, breaching: false);
 
     $widget = new SlaStats();
     $widget->cacheTag = 'sla-stats-test';
@@ -237,9 +242,9 @@ it('computes the SLA stats for the filtered service requests', function () {
     $stats = $widget->getStats();
 
     expect($stats[0]->getValue())->toEqual('3')
-        ->and($stats[1]->getValue())->toEqual('2')
-        ->and($stats[2]->getValue())->toEqual('66.7%')
-        ->and($stats[3]->getValue())->toEqual('66.7%');
+        ->and($stats[1]->getValue())->toEqual('1')
+        ->and($stats[2]->getValue())->toEqual('33.3%')
+        ->and($stats[3]->getValue())->toEqual('33.3%');
 });
 
 it('splits response SLA breaches by classification', function () {

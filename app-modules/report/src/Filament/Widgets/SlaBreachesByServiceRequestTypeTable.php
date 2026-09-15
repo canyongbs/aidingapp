@@ -44,6 +44,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -171,6 +172,11 @@ class SlaBreachesByServiceRequestTypeTable extends BaseWidget
 
     /**
      * @return Collection<int, array{id: mixed, type: string, sla_requests: int, response_breaches: int, resolution_breaches: int, response_compliance: float, resolution_compliance: float}>
+     *
+     * Note: This table uses instance-level caching ($typeRows) per widget lifecycle, not Laravel's
+     * global cache. It is compatible with the parent report's filter-aware cache keys because each
+     * filter state change dispatches a refresh event that clears $typeRows, forcing recalculation
+     * with applySlaFilters' filter state (which is always present due to default dates).
      */
     private function getTypeRows(): Collection
     {
@@ -178,31 +184,54 @@ class SlaBreachesByServiceRequestTypeTable extends BaseWidget
             return $this->typeRows;
         }
 
-        $serviceRequests = $this->slaServiceRequestsQuery()
-            ->whereHas('priority.type')
-            ->with($this->slaEagerLoads())
-            ->get();
+        $types = $this->getServiceRequestTypes();
+        if ($types !== null) {
+            sort($types);
+        }
 
-        return $this->typeRows = $serviceRequests
-            ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->priority?->type?->getKey())
-            ->filter(fn (Collection $group, ?string $typeId): bool => filled($typeId))
-            ->map(function (Collection $group) {
-                $metrics = $this->summarizeSlaMetrics($group);
+        $assignedAgents = $this->getAssignedAgents();
+        if ($assignedAgents !== null) {
+            sort($assignedAgents);
+        }
 
-                /** @var ServiceRequest $first */
-                $first = $group->first();
+        $cacheKey = 'sla-breaches-by-type-' . md5(serialize([
+            'startDate' => $this->getStartDate()?->toDateString(),
+            'endDate' => $this->getEndDate()?->toDateString(),
+            'types' => $types,
+            'classification' => $this->getClassification()?->value,
+            'assignedAgents' => $assignedAgents,
+        ]));
 
-                return [
-                    'id' => $first->priority?->type?->getKey(),
-                    'type' => $first->priority?->type->name ?? 'Unknown',
-                    'sla_requests' => $metrics['sla_total'],
-                    'response_breaches' => $metrics['response_breaches'],
-                    'resolution_breaches' => $metrics['resolution_breaches'],
-                    'response_compliance' => $metrics['response_compliance_percentage'],
-                    'resolution_compliance' => $metrics['resolution_compliance_percentage'],
-                ];
-            })
-            ->sortByDesc('sla_requests')
-            ->values();
+        $cachedRows = Cache::tags(["{{$this->cacheTag}}"])->remember($cacheKey, now()->addHours(24), function (): array {
+            $serviceRequests = $this->slaServiceRequestsQuery()
+                ->whereHas('priority.type')
+                ->with($this->slaEagerLoads())
+                ->get();
+
+            return $serviceRequests
+                ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->priority?->type?->getKey())
+                ->filter(fn (Collection $group, ?string $typeId): bool => filled($typeId))
+                ->map(function (Collection $group) {
+                    $metrics = $this->summarizeSlaMetrics($group);
+
+                    /** @var ServiceRequest $first */
+                    $first = $group->first();
+
+                    return [
+                        'id' => $first->priority?->type?->getKey(),
+                        'type' => $first->priority?->type->name ?? 'Unknown',
+                        'sla_requests' => $metrics['sla_total'],
+                        'response_breaches' => $metrics['response_breaches'],
+                        'resolution_breaches' => $metrics['resolution_breaches'],
+                        'response_compliance' => $metrics['response_compliance_percentage'],
+                        'resolution_compliance' => $metrics['resolution_compliance_percentage'],
+                    ];
+                })
+                ->sortByDesc('sla_requests')
+                ->values()
+                ->all();
+        });
+
+        return $this->typeRows = collect($cachedRows);
     }
 }

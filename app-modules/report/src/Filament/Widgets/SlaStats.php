@@ -58,11 +58,16 @@ class SlaStats extends StatsOverviewReportWidget
         $classification = $this->getClassification();
         $assignedAgents = $this->getAssignedAgents();
 
-        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types) || filled($classification) || filled($assignedAgents);
+        // Use a filter-aware cache key so the default view (with default dates) is still cached
+        $cacheKey = 'sla-stats-' . md5(json_encode([
+            'startDate' => $startDate?->toDateString(),
+            'endDate' => $endDate?->toDateString(),
+            'types' => $types,
+            'classification' => $classification,
+            'assignedAgents' => $assignedAgents,
+        ]));
 
-        $metrics = $shouldBypassCache
-            ? $this->calculateSlaStats()
-            : Cache::tags(["{{$this->cacheTag}}"])->remember('sla-stats', now()->addHours(24), fn (): array => $this->calculateSlaStats());
+        $metrics = Cache::tags(["{{$this->cacheTag}}"])->remember($cacheKey, now()->addHours(24), fn (): array => $this->calculateSlaStats());
 
         return [
             Stat::make('Total Requests', number_format($metrics['total'])),

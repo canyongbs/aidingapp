@@ -44,6 +44,7 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Attributes\On;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -175,7 +176,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
     }
 
     /**
-        * @return Collection<int, mixed>
+     * @return Collection<int, mixed>
      */
     private function getAgentRows(): Collection
     {
@@ -183,36 +184,55 @@ class SlaPerformanceByAgentTable extends BaseWidget
             return $this->agentRows;
         }
 
-        $serviceRequests = $this->slaServiceRequestsQuery()
-            ->whereHas('assignedTo')
-            ->with($this->slaEagerLoads())
-            ->get();
+        $types = $this->getServiceRequestTypes();
+        if ($types !== null) {
+            sort($types);
+        }
 
-        $agentRows = $serviceRequests
-            ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->assignedTo?->user_id)
-            ->filter(fn (Collection $group, ?string $agentId): bool => filled($agentId))
-            ->map(function (Collection $group): array {
-                $metrics = $this->summarizeSlaMetrics($group);
+        $assignedAgents = $this->getAssignedAgents();
+        if ($assignedAgents !== null) {
+            sort($assignedAgents);
+        }
 
-                $first = $group->first();
-                assert($first instanceof ServiceRequest);
+        $cacheKey = 'sla-performance-by-agent-' . md5(serialize([
+            'startDate' => $this->getStartDate()?->toDateString(),
+            'endDate' => $this->getEndDate()?->toDateString(),
+            'types' => $types,
+            'classification' => $this->getClassification()?->value,
+            'assignedAgents' => $assignedAgents,
+        ]));
 
-                return [
-                    'id' => $first->assignedTo?->user_id,
-                    'agent' => $first->assignedTo?->user->name ?? 'Unassigned',
-                    'requests' => $metrics['total'],
-                    'responseSla' => $metrics['response_compliance_percentage'],
-                    'resolutionSla' => $metrics['resolution_compliance_percentage'],
-                    'slaBreaches' => $metrics['breaches'],
-                    'avgResponseSeconds' => $metrics['average_response_seconds'],
-                    'avgResolutionSeconds' => $metrics['average_resolution_seconds'],
-                ];
-            })
-            ->sortByDesc('requests')
-            ->values();
+        $cachedRows = Cache::tags(["{{$this->cacheTag}}"])->remember($cacheKey, now()->addHours(24), function (): array {
+            $serviceRequests = $this->slaServiceRequestsQuery()
+                ->whereHas('assignedTo')
+                ->with($this->slaEagerLoads())
+                ->get();
 
-        $this->agentRows = $agentRows;
+            return $serviceRequests
+                ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->assignedTo?->user_id)
+                ->filter(fn (Collection $group, ?string $agentId): bool => filled($agentId))
+                ->map(function (Collection $group): array {
+                    $metrics = $this->summarizeSlaMetrics($group);
 
-        return $agentRows;
+                    $first = $group->first();
+                    assert($first instanceof ServiceRequest);
+
+                    return [
+                        'id' => $first->assignedTo?->user_id,
+                        'agent' => $first->assignedTo?->user->name ?? 'Unassigned',
+                        'requests' => $metrics['total'],
+                        'responseSla' => $metrics['response_compliance_percentage'],
+                        'resolutionSla' => $metrics['resolution_compliance_percentage'],
+                        'slaBreaches' => $metrics['breaches'],
+                        'avgResponseSeconds' => $metrics['average_response_seconds'],
+                        'avgResolutionSeconds' => $metrics['average_resolution_seconds'],
+                    ];
+                })
+                ->sortByDesc('requests')
+                ->values()
+                ->all();
+        });
+ 
+            return $this->agentRows = collect($cachedRows);
     }
 }

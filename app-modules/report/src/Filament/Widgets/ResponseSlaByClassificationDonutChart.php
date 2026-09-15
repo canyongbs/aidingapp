@@ -81,11 +81,16 @@ class ResponseSlaByClassificationDonutChart extends ChartReportWidget
         $classification = $this->getClassification();
         $assignedAgents = $this->getAssignedAgents();
 
-        $shouldBypassCache = filled($startDate) || filled($endDate) || filled($types) || filled($classification) || filled($assignedAgents);
+        // Use a filter-aware cache key so the default view (with default dates) is still cached
+        $cacheKey = 'response-sla-by-classification-' . md5(json_encode([
+            'startDate' => $startDate?->toDateString(),
+            'endDate' => $endDate?->toDateString(),
+            'types' => $types,
+            'classification' => $classification,
+            'assignedAgents' => $assignedAgents,
+        ]));
 
-        $breachesByClassification = $shouldBypassCache
-            ? $this->getResponseBreachesByClassification()
-            : Cache::tags(["{{$this->cacheTag}}"])->remember('response-sla-by-classification', now()->addHours(24), fn (): Collection => $this->getResponseBreachesByClassification());
+        $breachesByClassification = Cache::tags(["{{$this->cacheTag}}"])->remember($cacheKey, now()->addHours(24), fn (): Collection => $this->getResponseBreachesByClassification());
 
         return [
             'labels' => $breachesByClassification->pluck('label'),
