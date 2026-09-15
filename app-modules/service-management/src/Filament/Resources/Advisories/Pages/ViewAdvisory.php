@@ -55,12 +55,19 @@ use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 
 class ViewAdvisory extends ViewRecord
 {
     protected static string $resource = AdvisoryResource::class;
 
     protected static ?string $navigationLabel = 'View';
+
+    #[On('advisory-updated')]
+    public function refreshAdvisory(): void
+    {
+        $this->getRecord()->refresh();
+    }
 
     public function infolist(Schema $schema): Schema
     {

@@ -125,6 +125,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->after(function (array $data): void {
                         $this->getOwnerRecord()->update(['status_id' => $data['status_id']]);
                         $this->getOwnerRecord()->refresh();
+                        $this->dispatch('advisory-updated');
                     }),
             ])
             ->toolbarActions([
@@ -167,6 +168,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                 $record->update(Arr::except($data, ['status_id']));
                 $this->getOwnerRecord()->update(['status_id' => $data['status_id']]);
                 $this->getOwnerRecord()->refresh();
+                $this->dispatch('advisory-updated');
             });
     }
 
