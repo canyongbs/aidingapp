@@ -115,14 +115,28 @@ class ShowPortalProjectController
                 'pipeline_entries.due',
             ]);
 
-        $milestoneIds = ProjectMilestone::query()
-            ->withoutArchived()
-            ->where('project_id', $portalProject->getKey())
-            ->pluck('id');
+        $milestoneIdsOnPage = $entries->getCollection()
+            ->pluck('project_milestone_id')
+            ->filter()
+            ->unique()
+            ->values();
 
         $milestones = ProjectMilestone::query()
             ->withoutArchived()
-            ->whereKey($milestoneIds)
+            ->where('project_id', $portalProject->getKey())
+            ->when(
+                $entries->currentPage() === 1,
+                fn (Builder $query): Builder => $query->where(
+                    fn (Builder $query) => $query
+                        ->whereKey($milestoneIdsOnPage)
+                        ->orWhereDoesntHave(
+                            'pipelineEntries',
+                            fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
+                                ->where('is_visible_to_guests', true),
+                        ),
+                ),
+                fn (Builder $query): Builder => $query->whereKey($milestoneIdsOnPage),
+            )
             ->withCount([
                 'pipelineEntries as total_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline),
                 'pipelineEntries as complete_entries_count' => fn (Builder $query): Builder => $this->constrainMilestoneEntries($query, $selectedPipeline)
@@ -131,6 +145,7 @@ class ShowPortalProjectController
                         fn (Builder $query): Builder => $query->where('classification', PipelineStageClassification::Complete->value),
                     ),
             ])
+            ->orderBy('title')
             ->get(['id', 'title']);
 
         return $this->response(

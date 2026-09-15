@@ -119,11 +119,11 @@ it('shows guest-visible pipeline tasks grouped by milestone', function () {
         ->assertJsonPath('data.pipelines.0.groups.0.entries.0.start_date', '2026-08-01')
         ->assertJsonPath('data.pipelines.0.groups.0.entries.0.due', '2026-08-28')
         ->assertJsonPath('data.pipelines.0.groups.0.entries.1.id', $completeEntry->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.1.milestone_id', $emptyMilestone->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.1.milestone_title', 'Security Systems')
+        ->assertJsonPath('data.pipelines.0.groups.1.milestone_id', $hiddenMilestone->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.1.milestone_title', 'Internal Work')
         ->assertJsonPath('data.pipelines.0.groups.1.entries', [])
-        ->assertJsonPath('data.pipelines.0.groups.2.milestone_id', $hiddenMilestone->getKey())
-        ->assertJsonPath('data.pipelines.0.groups.2.milestone_title', 'Internal Work')
+        ->assertJsonPath('data.pipelines.0.groups.2.milestone_id', $emptyMilestone->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.2.milestone_title', 'Security Systems')
         ->assertJsonPath('data.pipelines.0.groups.2.entries', [])
         ->assertJsonPath('data.pipelines.0.groups.3.milestone_id', null)
         ->assertJsonPath('data.pipelines.0.groups.3.milestone_title', 'No Associated Milestone')
@@ -170,6 +170,46 @@ it('paginates guest-visible tasks for the selected pipeline', function () {
         ->assertJsonPath('meta.to', 51)
         ->assertJsonPath('meta.total', 51)
         ->assertJsonPath('meta.per_page', 50);
+});
+
+it('does not report a milestone as empty when its tasks fall on a later page', function () {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+
+    $fullMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'A Milestone']);
+    $laterPageMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'B Milestone']);
+    $emptyMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'C Milestone']);
+
+    PipelineEntry::factory()->count(50)->for($stage, 'pipelineStage')->for($fullMilestone, 'milestone')->create();
+    $laterPageEntry = PipelineEntry::factory()->for($stage, 'pipelineStage')->for($laterPageMilestone, 'milestone')->create();
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', [
+        'portalProject' => $project->getKey(),
+        'pipeline' => $pipeline->getKey(),
+        'page' => 1,
+    ]))
+        ->assertOk()
+        ->assertJsonCount(2, 'data.pipelines.0.groups')
+        ->assertJsonPath('data.pipelines.0.groups.0.milestone_id', $fullMilestone->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.1.milestone_id', $emptyMilestone->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.1.entries', [])
+        ->assertJsonMissing(['milestone_id' => $laterPageMilestone->getKey()]);
+
+    getJson(route('api.portal.projects.show', [
+        'portalProject' => $project->getKey(),
+        'pipeline' => $pipeline->getKey(),
+        'page' => 2,
+    ]))
+        ->assertOk()
+        ->assertJsonCount(1, 'data.pipelines.0.groups')
+        ->assertJsonPath('data.pipelines.0.groups.0.milestone_id', $laterPageMilestone->getKey())
+        ->assertJsonPath('data.pipelines.0.groups.0.entries.0.id', $laterPageEntry->getKey());
 });
 
 it('does not allow selecting a pipeline from another project', function () {
