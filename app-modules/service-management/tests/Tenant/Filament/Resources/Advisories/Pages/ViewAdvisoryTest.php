@@ -83,6 +83,35 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
         );
 });
 
+test('the Tracking Details status refreshes when an advisory update changes the status', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
+
+    $originalStatus = AdvisoryStatus::factory()->create(['name' => 'Original Status']);
+    $newStatus = AdvisoryStatus::factory()->create(['name' => 'New Status']);
+
+    $advisory = Advisory::factory()->create([
+        'status_id' => $originalStatus->getKey(),
+    ]);
+
+    $component = livewire(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSee($originalStatus->name);
+
+    $advisory->update(['status_id' => $newStatus->getKey()]);
+
+    $component
+        ->dispatch('advisory-updated')
+        ->assertSee($newStatus->name)
+        ->assertDontSee($originalStatus->name);
+});
+
 test('ViewAdvisory is gated with proper access control', function () {
     $user = User::factory()->create();
 
