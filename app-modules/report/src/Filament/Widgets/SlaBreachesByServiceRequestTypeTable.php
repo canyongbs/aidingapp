@@ -185,11 +185,13 @@ class SlaBreachesByServiceRequestTypeTable extends BaseWidget
         }
 
         $types = $this->getServiceRequestTypes();
+
         if ($types !== null) {
             sort($types);
         }
 
         $assignedAgents = $this->getAssignedAgents();
+
         if ($assignedAgents !== null) {
             sort($assignedAgents);
         }

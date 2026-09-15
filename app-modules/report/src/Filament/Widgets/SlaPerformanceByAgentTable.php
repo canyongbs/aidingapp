@@ -185,11 +185,13 @@ class SlaPerformanceByAgentTable extends BaseWidget
         }
 
         $types = $this->getServiceRequestTypes();
+
         if ($types !== null) {
             sort($types);
         }
 
         $assignedAgents = $this->getAssignedAgents();
+
         if ($assignedAgents !== null) {
             sort($assignedAgents);
         }
@@ -232,7 +234,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
                 ->values()
                 ->all();
         });
- 
-            return $this->agentRows = collect($cachedRows);
+
+        return $this->agentRows = collect($cachedRows);
     }
 }
