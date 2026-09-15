@@ -37,7 +37,6 @@
 namespace AidingApp\Division\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Department\Models\Department;
 use AidingApp\Division\Database\Factories\DivisionFactory;
 use AidingApp\Division\Observers\DivisionObserver;
 use App\Models\BaseModel;
@@ -45,7 +44,6 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
@@ -88,13 +86,5 @@ class Division extends BaseModel implements Auditable
     {
         return $this
             ->belongsTo(User::class);
-    }
-
-    /**
-     * @return HasMany<Department, $this>
-     */
-    public function departments(): HasMany
-    {
-        return $this->hasMany(Department::class);
     }
 }
