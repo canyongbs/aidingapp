@@ -219,15 +219,25 @@ it('delivers to a contact granted confidential access to a confidential target',
 it('restores a notification serialized under the previous payload shape with no frequency property', function () {
     $target = ServiceMonitoringTarget::factory()->create();
 
+    // Mirrors the payload shape queued by the previous release: no `frequency` key, and the target
+    // serialized as a full model rather than a ModelIdentifier, since that class had no SerializesModels
     $values = [
         'serviceMonitoringTarget' => $target,
         'channel' => MailChannel::class,
     ];
 
-    $restored = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class);
-    $restored->__unserialize($values);
+    $class = ServiceMonitoringReportNotification::class;
+    $body = '';
 
-    expect($restored->serviceMonitoringTarget->is($target))->toBeTrue()
+    foreach ($values as $key => $value) {
+        $body .= serialize($key) . serialize($value);
+    }
+    $serialized = 'O:' . strlen($class) . ':"' . $class . '":' . count($values) . ':{' . $body . '}';
+
+    $restored = unserialize($serialized);
+
+    expect($restored)->toBeInstanceOf(ServiceMonitoringReportNotification::class)
+        ->and($restored->serviceMonitoringTarget->is($target))->toBeTrue()
         ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Monthly)
         ->and($restored->channel)->toBe(MailChannel::class);
 });

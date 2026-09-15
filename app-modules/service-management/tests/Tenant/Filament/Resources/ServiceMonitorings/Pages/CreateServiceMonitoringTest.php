@@ -476,6 +476,17 @@ test('creating a service monitor persists report configurations for multiple fre
     expect($monthly->is_active)->toBeFalse();
 });
 
+test('the Recipients section for a frequency is only visible while that frequency is active', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertDontSee('report_configurations.daily.report_channels', escape: false)
+        ->fillForm(['report_configurations' => ['daily' => ['is_active' => true]]])
+        ->assertSee('report_configurations.daily.report_channels', escape: false)
+        ->fillForm(['report_configurations' => ['daily' => ['is_active' => false]]])
+        ->assertDontSee('report_configurations.daily.report_channels', escape: false);
+});
+
 test('a service monitor cannot be created with an active reporting frequency and no channel selected', function () {
     asSuperAdmin();
 

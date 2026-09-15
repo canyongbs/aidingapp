@@ -40,24 +40,27 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Concerns\ChecksServiceMonitoringTargetVisibility;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\Tenant;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Notifications\Notification as BaseNotification;
+use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
 
 class ServiceMonitoringReportNotification extends BaseNotification implements ShouldQueue
 {
+    use ChecksServiceMonitoringTargetVisibility;
     use Queueable;
+    use SerializesModels {
+        SerializesModels::__unserialize as private unserializeModels;
+    }
 
     /**
      * @var array<CarbonInterface>
@@ -72,16 +75,15 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public ServiceMonitoringReportFrequency $frequency, public string $channel) {}
 
     /**
-     * Restore notifications queued by the previous release, which had no `frequency` property.
-     * The private cache properties are left at their default (null) and recomputed lazily.
+     * Restore notifications queued by the previous release, which had no `frequency` property
      *
      * @param array<string, mixed> $values
      */
     public function __unserialize(array $values): void
     {
-        $this->serviceMonitoringTarget = $values['serviceMonitoringTarget'];
-        $this->frequency = $values['frequency'] ?? ServiceMonitoringReportFrequency::Monthly;
-        $this->channel = $values['channel'];
+        $values['frequency'] ??= ServiceMonitoringReportFrequency::Monthly;
+
+        $this->unserializeModels($values);
     }
 
     /**
@@ -89,7 +91,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
      */
     public function via(User|Contact $notifiable): array
     {
-        if (! $this->notifiableCanViewTarget($notifiable)) {
+        if (! $this->targetIsVisibleTo($this->serviceMonitoringTarget, $notifiable)) {
             return [];
         }
 
@@ -230,23 +232,6 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
         ];
 
         return $this->statistics;
-    }
-
-    // Reports are queued and run without an authenticated user, so confidentiality must be re-checked per recipient
-    private function notifiableCanViewTarget(object $notifiable): bool
-    {
-        if (! $this->serviceMonitoringTarget->is_confidential) {
-            return true;
-        }
-
-        return ServiceMonitoringTarget::query()
-            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
-            ->whereKey($this->serviceMonitoringTarget->getKey())
-            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
-                $query,
-                $notifiable instanceof Authenticatable ? $notifiable : null,
-            ))
-            ->exists();
     }
 
     private function getIncidentSummary(): string

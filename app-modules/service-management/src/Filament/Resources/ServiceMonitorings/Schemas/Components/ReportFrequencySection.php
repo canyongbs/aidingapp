@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
@@ -47,6 +47,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Database\Eloquent\Builder;
 
 class ReportFrequencySection
 {
@@ -68,7 +69,21 @@ class ReportFrequencySection
                             ->label('Users')
                             ->multiple()
                             ->preload()
-                            ->options(fn (): array => once(fn (): array => User::query()->tap(new WithoutAnyAdmin())->orderBy('name')->pluck('name', 'id')->all())),
+                            ->options(function (UserSelect $component): array {
+                                $alreadySelected = array_map('strval', array_filter((array) $component->getState()));
+
+                                return User::query()
+                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected) {
+                                        $query->tap(new WithoutAnyAdmin());
+
+                                        if (filled($alreadySelected)) {
+                                            $query->orWhereIn('id', $alreadySelected);
+                                        }
+                                    }))
+                                    ->orderBy('name')
+                                    ->pluck('name', 'id')
+                                    ->all();
+                            }),
                         Select::make("{$prefix}.report_departments")
                             ->label('Departments')
                             ->multiple()

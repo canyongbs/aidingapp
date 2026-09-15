@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Support\Facades\DB;
 
 class SaveServiceMonitoringReportConfigurationsAction
 {
@@ -46,35 +47,37 @@ class SaveServiceMonitoringReportConfigurationsAction
      */
     public function __invoke(ServiceMonitoringTarget $serviceMonitoringTarget, array $reportConfigurationsData): void
     {
-        foreach (ServiceMonitoringReportFrequency::cases() as $frequency) {
-            $frequencyData = $reportConfigurationsData[$frequency->value] ?? [];
+        DB::transaction(function () use ($serviceMonitoringTarget, $reportConfigurationsData) {
+            foreach (ServiceMonitoringReportFrequency::cases() as $frequency) {
+                $frequencyData = $reportConfigurationsData[$frequency->value] ?? [];
 
-            $attributes = ['is_active' => (bool) ($frequencyData['is_active'] ?? false)];
+                $attributes = ['is_active' => (bool) ($frequencyData['is_active'] ?? false)];
 
-            // The Recipients section (channels + recipients) is hidden while inactive, so Filament
-            // omits its fields entirely: only touch them when present, to keep the prior selections
-            if (array_key_exists('report_channels', $frequencyData)) {
-                $channels = $frequencyData['report_channels'];
-                $attributes['is_reported_via_email'] = in_array('email', $channels, true);
-                $attributes['is_reported_via_database'] = in_array('database', $channels, true);
+                // The Recipients section (channels + recipients) is hidden while inactive, so Filament
+                // omits its fields entirely: only touch them when present, to keep the prior selections
+                if (array_key_exists('report_channels', $frequencyData)) {
+                    $channels = $frequencyData['report_channels'];
+                    $attributes['is_reported_via_email'] = in_array('email', $channels, true);
+                    $attributes['is_reported_via_database'] = in_array('database', $channels, true);
+                }
+
+                $configuration = $serviceMonitoringTarget->reportConfigurations()->updateOrCreate(
+                    ['frequency' => $frequency],
+                    $attributes,
+                );
+
+                if (array_key_exists('report_users', $frequencyData)) {
+                    $configuration->reportUsers()->sync($frequencyData['report_users']);
+                }
+
+                if (array_key_exists('report_departments', $frequencyData)) {
+                    $configuration->reportDepartments()->sync($frequencyData['report_departments']);
+                }
+
+                if (array_key_exists('report_contacts', $frequencyData)) {
+                    $configuration->reportContacts()->sync($frequencyData['report_contacts']);
+                }
             }
-
-            $configuration = $serviceMonitoringTarget->reportConfigurations()->updateOrCreate(
-                ['frequency' => $frequency],
-                $attributes,
-            );
-
-            if (array_key_exists('report_users', $frequencyData)) {
-                $configuration->reportUsers()->sync($frequencyData['report_users']);
-            }
-
-            if (array_key_exists('report_departments', $frequencyData)) {
-                $configuration->reportDepartments()->sync($frequencyData['report_departments']);
-            }
-
-            if (array_key_exists('report_contacts', $frequencyData)) {
-                $configuration->reportContacts()->sync($frequencyData['report_contacts']);
-            }
-        }
+        });
     }
 }

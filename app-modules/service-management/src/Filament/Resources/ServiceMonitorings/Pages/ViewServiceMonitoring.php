@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Page
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
-use AidingApp\ServiceManagement\Filament\Components\ReportFrequencyInfolistSection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ReportFrequencyInfolistSection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -131,7 +131,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Weekly),
                                     ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Monthly),
                                 ])
-                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->reportConfigurations()->where('is_active', true)->exists())
+                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->reportConfigurations->contains('is_active', true))
                                 ->columns(1),
                         ] : [
                             // Legacy single-frequency section, kept until ServiceMonitoringReportConfigurationsFeature is cleaned up

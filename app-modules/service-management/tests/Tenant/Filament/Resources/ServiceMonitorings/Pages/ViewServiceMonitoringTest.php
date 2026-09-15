@@ -134,6 +134,8 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         )
         ->assertSee('Automated Reporting')
         ->assertSee('Weekly Reporting')
+        ->assertDontSee('Daily Reporting')
+        ->assertDontSee('Monthly Reporting')
         ->assertSee('Email')
         ->assertSee('Application')
         ->assertSee($reportUser->name)

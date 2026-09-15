@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Components;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ReportFrequencySection;
 use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Hidden;
