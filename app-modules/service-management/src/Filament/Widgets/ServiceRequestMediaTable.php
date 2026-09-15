@@ -37,19 +37,27 @@
 namespace AidingApp\ServiceManagement\Filament\Widgets;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestFileDeletionHistory;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestFileUploadHistory;
+use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use App\Models\Media;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Actions\Action;
+use Filament\Forms\Components\FileUpload;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 
 class ServiceRequestMediaTable extends TableWidget
 {
-    public Model $record;
+    public Model&HasMedia $record;
 
     public string $collectionName = 'uploads';
 
@@ -57,7 +65,7 @@ class ServiceRequestMediaTable extends TableWidget
 
     protected int|string|array $columnSpan = 'full';
 
-    public function mount(Model $record, string $collectionName = 'uploads'): void
+    public function mount(Model&HasMedia $record, string $collectionName = 'uploads'): void
     {
         $this->record = $record;
         $this->collectionName = $collectionName;
@@ -125,14 +133,115 @@ class ServiceRequestMediaTable extends TableWidget
                     ->dateTime()
                     ->sortable(),
             ])
+            ->headerActions([
+                $this->uploadFileAction(),
+            ])
             ->recordActions([
                 Action::make('download')
                     ->label('Download')
                     ->icon('heroicon-m-arrow-down-tray')
                     ->color('primary')
                     ->url(fn (Media $record): string => route('service-request.media.download', ['media' => $record->getKey()])),
+                $this->deleteFileAction(),
             ])
             ->emptyStateHeading('No uploads')
             ->defaultSort('created_at', 'desc');
+    }
+
+    protected function uploadFileAction(): Action
+    {
+        $collection = $this->record->getMediaCollection($this->collectionName);
+
+        $maxNumberOfFiles = $this->getMaxNumberOfFiles($collection);
+
+        $collectionName = $this->collectionName;
+
+        $fileUpload = FileUpload::make('file')
+            ->label('File')
+            ->disk('s3')
+            ->visibility('private')
+            ->preserveFilenames()
+            ->required();
+
+        if ($collection instanceof UploadsMediaCollection) {
+            $fileUpload->acceptedFileTypes($collection->getMimes());
+
+            if ($maxFileSizeInMb = $collection->getMaxFileSizeInMb()) {
+                $fileUpload->maxSize($maxFileSizeInMb * 1024);
+            }
+        } elseif ($collection instanceof MediaCollection && filled($collection->acceptsMimeTypes)) {
+            $fileUpload->acceptedFileTypes($collection->acceptsMimeTypes);
+        }
+
+        $hasReachedFileLimit = fn (): bool => ($maxNumberOfFiles !== null)
+            && ($this->record->getMedia($collectionName)->count() >= $maxNumberOfFiles);
+
+        return Action::make('uploadFile')
+            ->label('Upload File')
+            ->icon(Heroicon::ArrowUpTray)
+            ->authorize('update', $this->record)
+            ->disabled($hasReachedFileLimit)
+            ->tooltip(fn (): ?string => $hasReachedFileLimit() ? "You have reached the maximum of {$maxNumberOfFiles} uploaded files." : null)
+            ->schema([$fileUpload])
+            ->action(function (array $data) use ($hasReachedFileLimit, $maxNumberOfFiles, $collectionName): void {
+                if ($hasReachedFileLimit()) {
+                    Notification::make()
+                        ->title("You have reached the maximum of {$maxNumberOfFiles} uploaded files.")
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
+
+                $path = $data['file'];
+
+                $media = $this->record
+                    ->addMediaFromDisk($path, 's3')
+                    ->usingName(pathinfo($path, PATHINFO_FILENAME))
+                    ->usingFileName(basename($path))
+                    ->toMediaCollection($collectionName);
+
+                app(RecordServiceRequestFileUploadHistory::class)($this->record, $media->file_name);
+
+                Notification::make()
+                    ->title('File uploaded.')
+                    ->success()
+                    ->send();
+            });
+    }
+
+    protected function getMaxNumberOfFiles(?MediaCollection $collection): ?int
+    {
+        if ($collection instanceof UploadsMediaCollection) {
+            return $collection->getMaxNumberOfFiles();
+        }
+
+        if (($collection instanceof MediaCollection) && is_int($collection->collectionSizeLimit)) {
+            return $collection->collectionSizeLimit;
+        }
+
+        return null;
+    }
+
+    protected function deleteFileAction(): Action
+    {
+        return Action::make('delete')
+            ->label('Delete')
+            ->icon(Heroicon::Trash)
+            ->color('danger')
+            ->requiresConfirmation()
+            ->authorize('update', $this->record)
+            ->action(function (Media $record): void {
+                $fileName = $record->file_name;
+
+                $record->delete();
+
+                app(RecordServiceRequestFileDeletionHistory::class)($this->record, $fileName);
+
+                Notification::make()
+                    ->title('File deleted.')
+                    ->success()
+                    ->send();
+            });
     }
 }

@@ -34,22 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Textarea;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 
-class EditServiceRequestRequestFactory extends RequestFactory
+class EditServiceRequestDescriptionAction
 {
-    public function definition(): array
+    public static function make(ServiceRequest $serviceRequest): Action
     {
-        return [
-            'division_id' => Division::factory()->create()->id,
-            'status_id' => ServiceRequestStatus::factory()->create()->id,
-            'close_details' => $this->faker->sentence,
-            'category' => fake()->randomElement(ServiceRequestCategory::cases()),
-        ];
+        return Action::make('editDescription')
+            ->label('Edit description')
+            ->icon(Heroicon::Pencil)
+            ->iconButton()
+            ->authorize('update', $serviceRequest)
+            ->slideOver()
+            ->modalHeading('Edit Description')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm([
+                'close_details' => $serviceRequest->close_details,
+            ])
+            ->schema([
+                Textarea::make('close_details')
+                    ->label('Description')
+                    ->nullable()
+                    ->string(),
+            ])
+            ->action(function (array $data) use ($serviceRequest): void {
+                $serviceRequest->close_details = $data['close_details'];
+                $serviceRequest->save();
+
+                Notification::make()
+                    ->title('Description updated.')
+                    ->success()
+                    ->send();
+            });
     }
 }
