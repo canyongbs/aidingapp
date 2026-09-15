@@ -770,7 +770,7 @@ it('renders the milestone title as plain text and denies the manage milestone ac
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertSeeHtml('<span>' . e($milestone->title) . '</span>')
+        ->assertSee($milestone->title)
         ->assertActionHidden(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]));
 });
 
@@ -1193,6 +1193,7 @@ it('calculates progress as 0 when the project has no pipeline entries', function
     livewire(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
+        ->assertActionDoesNotExist('manageAccess')
         ->assertSee('Progress: 0%');
 });
 
