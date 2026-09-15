@@ -36,29 +36,35 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use Illuminate\Support\Collection;
 
 /**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
+ * A confidential service monitor only sends its automated reports to recipients who are allowed to
+ * see it, so a recipient without confidential access would silently never receive the report. This
+ * rejects that combination at the form instead of letting the report disappear at delivery time.
  */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+class ServiceMonitorReportRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
 {
     /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
+     * @param list<string> $reportedUserIds
+     * @param list<string> $reportedDepartmentIds
      * @param list<string> $confidentialUserIds
      * @param list<string> $confidentialDepartmentIds
+     * @param list<string> $reportedContactIds
+     * @param list<string> $confidentialContactIds
      */
     public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
+        protected ServiceMonitoringReportFrequency $frequency,
+        array $reportedUserIds,
+        array $reportedDepartmentIds,
         array $confidentialUserIds,
         array $confidentialDepartmentIds,
         ?string $creatorId,
+        array $reportedContactIds = [],
+        array $confidentialContactIds = [],
     ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
+        parent::__construct($reportedUserIds, $reportedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId, $reportedContactIds, $confidentialContactIds);
     }
 
     /**
@@ -66,8 +72,8 @@ class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends Rec
      */
     protected function failureMessage(Collection $unreachable): string
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
+        return 'These ' . $this->frequency->getLabel() . ' report recipients would not be able to see this service monitor, so they would never receive its automated report: '
             . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+            . '. Grant them confidential access below, or remove them from the ' . $this->frequency->getLabel() . ' reporting settings.';
     }
 }

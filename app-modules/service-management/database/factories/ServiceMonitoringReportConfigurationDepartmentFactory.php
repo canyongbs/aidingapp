@@ -34,40 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use Illuminate\Support\Collection;
+use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfigurationDepartment;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
+ * @extends Factory<ServiceMonitoringReportConfigurationDepartment>
  */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+class ServiceMonitoringReportConfigurationDepartmentFactory extends Factory
 {
     /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
-     * @param list<string> $confidentialUserIds
-     * @param list<string> $confidentialDepartmentIds
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
-        array $confidentialUserIds,
-        array $confidentialDepartmentIds,
-        ?string $creatorId,
-    ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
-    }
-
-    /**
-     * @param Collection<int, string> $unreachable
-     */
-    protected function failureMessage(Collection $unreachable): string
+    public function definition(): array
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+        return [
+            'service_monitoring_report_configuration_id' => ServiceMonitoringReportConfiguration::factory(),
+            'department_id' => Department::factory(),
+        ];
     }
 }

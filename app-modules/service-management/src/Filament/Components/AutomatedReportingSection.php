@@ -37,6 +37,8 @@
 namespace AidingApp\ServiceManagement\Filament\Components;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ReportFrequencySection;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
@@ -49,6 +51,17 @@ class AutomatedReportingSection
 {
     public static function make(): Section
     {
+        if (ServiceMonitoringReportConfigurationsFeature::active()) {
+            return Section::make('Automated Reporting')
+                ->schema([
+                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Daily),
+                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Weekly),
+                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Monthly),
+                ])
+                ->columns(1);
+        }
+
+        // Legacy single-frequency schema, kept until ServiceMonitoringReportConfigurationsFeature is cleaned up
         return Section::make('Automated Reporting')
             ->schema([
                 Toggle::make('is_reporting_active')

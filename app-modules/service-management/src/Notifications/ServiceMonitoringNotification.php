@@ -39,22 +39,21 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Concerns\ChecksServiceMonitoringTargetVisibility;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Notifications\Notification as BaseNotification;
 use InvalidArgumentException;
 
 class ServiceMonitoringNotification extends BaseNotification implements ShouldQueue
 {
+    use ChecksServiceMonitoringTargetVisibility;
     use Queueable;
 
     public function __construct(public HistoricalServiceMonitoring $historicalServiceMonitoring, public string $channel) {}
@@ -66,7 +65,7 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
     {
         $this->loadServiceMonitoringTarget();
 
-        if (! $this->notifiableCanViewTarget($notifiable)) {
+        if (! $this->targetIsVisibleTo($this->historicalServiceMonitoring->serviceMonitoringTarget, $notifiable)) {
             return [];
         }
 
@@ -121,24 +120,5 @@ class ServiceMonitoringNotification extends BaseNotification implements ShouldQu
         $this->historicalServiceMonitoring->load([
             'serviceMonitoringTarget' => fn (BelongsTo $query) => $query->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class),
         ]);
-    }
-
-    // The scope is bypassed above, so confidential targets must be re-checked against this specific notifiable
-    private function notifiableCanViewTarget(object $notifiable): bool
-    {
-        $target = $this->historicalServiceMonitoring->serviceMonitoringTarget;
-
-        if (! $target?->is_confidential) {
-            return true;
-        }
-
-        return ServiceMonitoringTarget::query()
-            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
-            ->whereKey($target->getKey())
-            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
-                $query,
-                $notifiable instanceof Authenticatable ? $notifiable : null,
-            ))
-            ->exists();
     }
 }

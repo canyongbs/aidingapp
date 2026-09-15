@@ -34,40 +34,43 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Models;
 
-use Illuminate\Support\Collection;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringReportConfigurationContactFactory;
+use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
+ * @mixin IdeHelperServiceMonitoringReportConfigurationContact
  */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+class ServiceMonitoringReportConfigurationContact extends Pivot
 {
-    /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
-     * @param list<string> $confidentialUserIds
-     * @param list<string> $confidentialDepartmentIds
-     */
-    public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
-        array $confidentialUserIds,
-        array $confidentialDepartmentIds,
-        ?string $creatorId,
-    ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
+    use HasUuids;
+
+    /** @use HasFactory<ServiceMonitoringReportConfigurationContactFactory> */
+    use HasFactory;
+
+    public function getTable(): string
+    {
+        return 'service_monitoring_report_configuration_contact';
     }
 
     /**
-     * @param Collection<int, string> $unreachable
+     * @return BelongsTo<ServiceMonitoringReportConfiguration, $this>
      */
-    protected function failureMessage(Collection $unreachable): string
+    public function serviceMonitoringReportConfiguration(): BelongsTo
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+        return $this->belongsTo(ServiceMonitoringReportConfiguration::class);
+    }
+
+    /**
+     * @return BelongsTo<Contact, $this>
+     */
+    public function contact(): BelongsTo
+    {
+        return $this->belongsTo(Contact::class);
     }
 }

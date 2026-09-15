@@ -34,40 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace App\Features;
 
-use Illuminate\Support\Collection;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
- */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+class ServiceMonitoringReportConfigurationsFeature extends AbstractFeatureFlag
 {
-    /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
-     * @param list<string> $confidentialUserIds
-     * @param list<string> $confidentialDepartmentIds
-     */
-    public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
-        array $confidentialUserIds,
-        array $confidentialDepartmentIds,
-        ?string $creatorId,
-    ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
-    }
-
-    /**
-     * @param Collection<int, string> $unreachable
-     */
-    protected function failureMessage(Collection $unreachable): string
+    public function resolve(mixed $scope): mixed
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+        return false;
     }
 }
