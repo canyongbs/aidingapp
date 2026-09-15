@@ -955,8 +955,34 @@ it('disables the name column click for placeholder rows but keeps it clickable f
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertTableColumnHasExtraAttributes('name', ['class' => 'underline'], $entry)
-        ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'underline'], $milestone);
+        ->assertTableColumnHasExtraAttributes('name', ['class' => 'ps-6 underline'], $entry)
+        ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'ps-6 underline'], $milestone);
+});
+
+it('shows the inbox icon for milestone placeholder rows and the clipboard icon for real tasks', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->state(['classification' => PipelineStageClassification::Planning]), 'stages')
+        ->create();
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
+    ]);
+    $milestone = ProjectMilestone::factory()->for($project)->create();
+
+    $livewire = livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ]);
+
+    $column = $livewire->instance()->getTable()->getColumn('name');
+
+    $placeholderRecord = $livewire->instance()->getTableRecord($milestone->getKey());
+    $entryRecord = $livewire->instance()->getTableRecord($entry->getKey());
+
+    expect($column->record($placeholderRecord)->getIcon($placeholderRecord))->toBe('heroicon-o-inbox');
+    expect($column->record($entryRecord)->getIcon($entryRecord))->toBe('heroicon-o-clipboard-document');
 });
 
 it('does not show an archived or soft-deleted milestone as an empty group', function () {
