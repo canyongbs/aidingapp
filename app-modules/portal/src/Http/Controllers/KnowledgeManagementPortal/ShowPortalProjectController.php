@@ -115,11 +115,10 @@ class ShowPortalProjectController
                 'pipeline_entries.due',
             ]);
 
-        $milestoneIds = $entries->getCollection()
-            ->pluck('project_milestone_id')
-            ->filter()
-            ->unique()
-            ->values();
+        $milestoneIds = ProjectMilestone::query()
+            ->withoutArchived()
+            ->where('project_id', $portalProject->getKey())
+            ->pluck('id');
 
         $milestones = ProjectMilestone::query()
             ->withoutArchived()

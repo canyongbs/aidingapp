@@ -955,8 +955,8 @@ it('disables the name column click for placeholder rows but keeps it clickable f
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertTableColumnHasExtraAttributes('name', ['class' => 'underline'], $entry)
-        ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'underline'], $milestone);
+        ->assertTableColumnHasExtraAttributes('name', ['class' => 'ps-6 underline'], $entry)
+        ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'ps-6 underline'], $milestone);
 });
 
 it('does not show an archived or soft-deleted milestone as an empty group', function () {
