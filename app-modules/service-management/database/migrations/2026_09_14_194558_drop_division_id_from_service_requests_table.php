@@ -34,33 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<ServiceRequest>
- */
-class ServiceRequestFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'respondent_id' => Contact::factory(),
-            'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
-            'title' => str($this->faker->words(asText: true))->headline()->toString(),
-            'close_details' => $this->faker->sentence(),
-            'status_id' => ServiceRequestStatus::factory(),
-            'priority_id' => ServiceRequestPriority::factory(),
-            'category' => $this->faker->randomElement(ServiceRequestCategory::cases()),
-            'created_by_id' => User::factory(),
-        ];
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('division_id');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->foreignUuid('division_id')->nullable()->constrained('divisions');
+        });
+    }
+};

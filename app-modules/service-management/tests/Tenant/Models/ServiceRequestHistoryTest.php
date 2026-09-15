@@ -171,7 +171,6 @@ it('renders specific event titles for known field changes', function () {
         'status_id' => 'Status Updated',
         'priority_id' => 'Priority Updated',
         'type_id' => 'Type Updated',
-        'division_id' => 'Division Updated',
         'category' => 'Category Updated',
         'title' => 'Title Updated',
         'respondent_id' => 'Respondent Updated',

@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
@@ -101,7 +100,6 @@ test('A successful action on the EditServiceRequest page', function () {
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
             ]
@@ -110,9 +108,7 @@ test('A successful action on the EditServiceRequest page', function () {
 
     $serviceRequest->refresh();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
@@ -186,24 +182,12 @@ test('EditServiceRequest requires valid data', function ($data, $errors, $setup 
 
     assertDatabaseHas(ServiceRequest::class, $serviceRequest->withoutRelations()->toArray());
 
-    expect($serviceRequest->fresh()->division->id)
-        ->toEqual($serviceRequest->division->id)
-        ->and($serviceRequest->fresh()->status->id)
+    expect($serviceRequest->fresh()->status->id)
         ->toEqual($serviceRequest->status->id)
         ->and($serviceRequest->fresh()->priority->id)
         ->toEqual($serviceRequest->priority->id);
 })->with(
     [
-        'division_id missing' => [
-            EditServiceRequestRequestFactory::new()->state(['division_id' => null]),
-            ['division_id' => 'required'],
-            fn () => Division::factory()->count(2)->create(),
-        ],
-        'division_id does not exist' => [
-            EditServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'in'],
-            fn () => Division::factory()->count(2)->create(),
-        ],
         'status_id missing' => [EditServiceRequestRequestFactory::new()->state(['status_id' => null]), ['status_id' => 'required']],
         'status_id does not exist' => [
             EditServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),
@@ -286,7 +270,6 @@ test('EditServiceRequest is gated with proper access control', function () {
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
             ]
@@ -295,9 +278,7 @@ test('EditServiceRequest is gated with proper access control', function () {
 
     $serviceRequest->refresh();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
@@ -363,7 +344,6 @@ test('EditServiceRequest is gated with proper access control for direct user man
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
             ]
@@ -372,9 +352,7 @@ test('EditServiceRequest is gated with proper access control for direct user man
 
     $serviceRequest->refresh();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
@@ -443,9 +421,8 @@ test('EditServiceRequest is gated with proper feature access control', function 
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequest->fresh()->only($request->except('division_id')->keys()->toArray()))
-        ->toEqual($request->except('division_id')->toArray())
-        ->and($serviceRequest->fresh()->division->id)->toEqual($request['division_id']);
+    expect($serviceRequest->fresh()->only($request->keys()->toArray()))
+        ->toEqual($request->toArray());
 });
 
 test('EditServiceRequest is gated with proper feature access control for direct user manager', function () {
@@ -505,9 +482,8 @@ test('EditServiceRequest is gated with proper feature access control for direct 
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($serviceRequest->fresh()->only($request->except('division_id')->keys()->toArray()))
-        ->toEqual($request->except('division_id')->toArray())
-        ->and($serviceRequest->fresh()->division->id)->toEqual($request['division_id']);
+    expect($serviceRequest->fresh()->only($request->keys()->toArray()))
+        ->toEqual($request->toArray());
 });
 
 test('send feedback email if service request is closed', function () {
@@ -577,7 +553,6 @@ test('send feedback email if service request is closed', function () {
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority',
             ]
@@ -658,7 +633,6 @@ test('send feedback email if service request is closed for direct user manager',
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority',
             ]
