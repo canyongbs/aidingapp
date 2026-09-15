@@ -34,17 +34,38 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use App\Features\AdvisoryUpdateTitleAndDateFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use Worksome\RequestFactories\RequestFactory;
-
-class EditAdvisoryUpdateRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'update' => fake()->sentence,
-            'internal' => fake()->boolean,
-        ];
+        DB::transaction(function () {
+            DB::table('advisory_updates')->delete();
+            DB::table('advisories')->delete();
+
+            Schema::table('advisory_updates', function (Blueprint $table) {
+                $table->string('title');
+                $table->timestamp('date');
+                $table->index(['advisory_id', 'date']);
+            });
+
+            AdvisoryUpdateTitleAndDateFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            AdvisoryUpdateTitleAndDateFeature::deactivate();
+
+            Schema::table('advisory_updates', function (Blueprint $table) {
+                $table->dropIndex(['advisory_id', 'date']);
+                $table->dropColumn(['title', 'date']);
+            });
+        });
+    }
+};

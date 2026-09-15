@@ -34,51 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\Pages;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
-use AidingApp\ServiceManagement\Filament\Resources\AdvisoryUpdates\AdvisoryUpdateResource;
-use AidingApp\ServiceManagement\Models\Advisory;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Str;
+use App\Support\AbstractFeatureFlag;
 
-class EditAdvisoryUpdate extends EditRecord
+class AdvisoryUpdateTitleAndDateFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = AdvisoryUpdateResource::class;
-
-    public function getSubNavigationParameters(): array
+    public function resolve(mixed $scope): mixed
     {
-        return ['record' => $this->getParentRecord()];
-    }
-
-    public function getRedirectUrl(): ?string
-    {
-        return static::getResource()::getUrl('view', [
-            'record' => $this->record,
-            'advisory' => $this->getParentRecord()->getRouteKey(),
-        ]);
-    }
-
-    public function getResourceBreadcrumbs(): array
-    {
-        $parentRecord = $this->getParentRecord();
-
-        assert($parentRecord instanceof Advisory);
-
-        return [
-            AdvisoryResource::getUrl() => AdvisoryResource::getBreadcrumb(),
-            AdvisoryResource::getUrl('view', ['record' => $parentRecord]) => Str::limit($parentRecord->title, 16),
-            AdvisoryResource::getUrl('manage-advisory-update', ['record' => $parentRecord]) => static::getResource()::getBreadcrumb(),
-        ];
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        return false;
     }
 }
