@@ -35,8 +35,10 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 
 it('includes direct manager users of the type and excludes non-managers', function () {
@@ -68,6 +70,39 @@ it('includes users that belong to a manager department of the type', function ()
 
     expect($ids->all())->toContain($manager->getKey())
         ->and($ids->all())->not->toContain($nonManager->getKey());
+});
+
+it('includes users that belong to a manager group of the type', function () {
+    $type = ServiceRequestType::factory()->create();
+
+    $group = Group::factory()->create();
+    $type->managerGroups()->attach($group);
+
+    $manager = User::factory()->create();
+    $group->users()->attach($manager);
+
+    $nonManager = User::factory()->create();
+
+    $ids = User::query()->tap(new ManagesServiceRequestType($type->getKey()))->pluck('id');
+
+    expect($ids->all())->toContain($manager->getKey())
+        ->and($ids->all())->not->toContain($nonManager->getKey());
+});
+
+it('does not query manager groups while the feature is inactive', function () {
+    $type = ServiceRequestType::factory()->create();
+
+    $group = Group::factory()->create();
+    $type->managerGroups()->attach($group);
+
+    $manager = User::factory()->create();
+    $group->users()->attach($manager);
+
+    ServiceRequestTypeGroupAssignmentsFeature::deactivate();
+
+    $ids = User::query()->tap(new ManagesServiceRequestType($type->getKey()))->pluck('id');
+
+    expect($ids->all())->not->toContain($manager->getKey());
 });
 
 it('does not include managers of a different type', function () {

@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Actions;
 
+use AidingApp\ServiceManagement\Models\Scopes\AuditsServiceRequestType;
+use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
@@ -55,51 +57,14 @@ class NotifyServiceRequestUsers
             ->when($excludeUser, fn (Builder $query) => $query->whereNot('id', $excludeUser->getKey()))
             ->where(function (Builder $query) use ($serviceRequest, $shouldSendToManagers, $shouldSendToAuditors, $typeKey) {
                 if ($shouldSendToManagers) {
-                    $query->whereHas(
-                        'department',
-                        fn (Builder $query) => $query->whereHas(
-                            'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
-                                'serviceRequests',
-                                fn (Builder $query) => $query->whereKey($serviceRequest),
-                            ),
-                        ),
-                    );
-
-                    $query->orWhereHas(
-                        'manageableServiceRequestTypes',
-                        fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
-                            'serviceRequests',
-                            fn (Builder $query) => $query->whereKey($serviceRequest),
-                        ),
+                    $query->where(
+                        fn (Builder $query) => $query->tap(new ManagesServiceRequestType($typeKey, $serviceRequest)),
                     );
                 }
 
                 if ($shouldSendToAuditors) {
-                    $query->{$shouldSendToManagers ? 'orWhereHas' : 'whereHas'}(
-                        'department',
-                        fn (Builder $query) => $query->whereHas(
-                            'auditableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
-                                'serviceRequests',
-                                fn (Builder $query) => $query->whereKey($serviceRequest),
-                            ),
-                        )->whereDoesntHave(
-                            'manageableServiceRequestTypes',
-                            fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
-                                'serviceRequests',
-                                fn (Builder $query) => $query->whereKey($serviceRequest),
-                            ),
-                        ),
-                    );
-
-                    $query->orWhereHas(
-                        'auditableServiceRequestTypes',
-                        fn (Builder $query) => $query->where('service_request_type_id', $typeKey)->whereHas(
-                            'serviceRequests',
-                            fn (Builder $query) => $query->whereKey($serviceRequest),
-                        ),
-                    );
+                    $method = $shouldSendToManagers ? 'orWhere' : 'where';
+                    $query->{$method}(fn (Builder $query) => $query->tap(new AuditsServiceRequestType($typeKey, $serviceRequest)));
                 }
             })
             ->get()

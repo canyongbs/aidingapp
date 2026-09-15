@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -142,6 +143,32 @@ test('round robin assigner wraps around after all managers have been assigned', 
 
     expect($serviceRequestType->last_assigned_id)->toBe($firstUser->getKey());
     expect($serviceRequest->assignedTo?->user_id)->toBe($firstUser->getKey());
+});
+
+it('assigns to a manager through group membership', function () {
+    asSuperAdmin();
+
+    $manager = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($manager);
+
+    $serviceRequestType = ServiceRequestType::factory()
+        ->hasAttached($group, relationship: 'managerGroups')
+        ->state(['assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin])
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    app(RoundRobinAssigner::class)->execute($serviceRequest);
+
+    expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
 test('round robin assigner does not assign when no managers exist', function () {

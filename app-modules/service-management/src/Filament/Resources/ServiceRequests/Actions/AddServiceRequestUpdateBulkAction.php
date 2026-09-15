@@ -36,8 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Models\User;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Actions\BulkAction;
@@ -68,17 +71,19 @@ class AddServiceRequestUpdateBulkAction
             ])
             ->action(function (array $data, Collection $records) {
                 $records->loadMissing([
-                    'priority.type.managerUsers',
-                    'priority.type.managerDepartments',
+                    'priority',
                     'serviceRequestUpdates',
                 ]);
 
                 $user = auth()->user();
+                assert($user instanceof User);
+
+                $managedTypeIds = $user->isSuperAdmin()
+                    ? collect()
+                    : ServiceRequestType::query()->tap(new ManagedServiceRequestTypes($user))->pluck('id');
 
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
-                        $user = auth()->user();
-
                         if (
                             $user->can('service_request.*.update') && $user->can('service_request_update.create')
                         ) {
@@ -93,17 +98,12 @@ class AddServiceRequestUpdateBulkAction
                             return "Service request update cannot be created for {$count} service requests because you do not have permission.";
                         };
                     })
-                    ->check(function (ServiceRequest $serviceRequest) use ($user): ?Closure {
+                    ->check(function (ServiceRequest $serviceRequest) use ($user, $managedTypeIds): ?Closure {
                         if ($user->isSuperAdmin()) {
                             return null;
                         }
 
-                        $department = $user->department;
-
-                        if (
-                            ($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
-                            $serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey())
-                        ) {
+                        if ($managedTypeIds->contains($serviceRequest->priority?->type_id)) {
                             return null;
                         }
 

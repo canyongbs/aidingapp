@@ -34,49 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use App\Support\AbstractFeatureFlag;
 
-class RoundRobinAssigner extends ServiceRequestTypeAssigner
+class ServiceRequestTypeGroupAssignmentsFeature extends AbstractFeatureFlag
 {
-    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
+    public function resolve(mixed $scope): mixed
     {
-        $serviceRequestType = $serviceRequest->priority?->type;
-
-        if (is_null($serviceRequestType)) {
-            return null;
-        }
-
-        $lastAssignee = $serviceRequestType->lastAssignedUser;
-        $user = null;
-
-        if ($lastAssignee) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            return null;
-        }
-
-        $serviceRequestType->last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-
-        return $user;
+        return false;
     }
 }

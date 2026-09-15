@@ -37,8 +37,11 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
 use App\Support\BulkProcessingMachine;
 use Closure;
 use Filament\Actions\BulkAction;
@@ -65,15 +68,18 @@ class ChangeServiceRequestStatusBulkAction
             ])
             ->action(function (array $data, Collection $records) {
                 $records->loadMissing([
-                    'priority.type.managerUsers',
-                    'priority.type.managerDepartments',
+                    'priority',
                     'respondent',
                     'status',
                 ]);
 
                 $user = auth()->user();
+                assert($user instanceof User);
                 $isUserSuperAdmin = $user->isSuperAdmin();
                 $canUserUpdateServiceRequest = $user->can('service_request.*.update');
+                $managedTypeIds = $isUserSuperAdmin
+                    ? collect()
+                    : ServiceRequestType::query()->tap(new ManagedServiceRequestTypes($user))->pluck('id');
 
                 BulkProcessingMachine::make($records->all())
                     ->check(function (ServiceRequest $serviceRequest) use ($canUserUpdateServiceRequest): ?Closure {
@@ -102,16 +108,12 @@ class ChangeServiceRequestStatusBulkAction
                             return "{$count} service requests are closed and cannot be edited.";
                         };
                     })
-                    ->check(function (ServiceRequest $serviceRequest) use ($user, $isUserSuperAdmin): ?Closure {
+                    ->check(function (ServiceRequest $serviceRequest) use ($isUserSuperAdmin, $managedTypeIds): ?Closure {
                         if ($isUserSuperAdmin) {
                             return null;
                         }
 
-                        $department = $user->department;
-
-                        if (($serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey())) ||
-                            $serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey())
-                        ) {
+                        if ($managedTypeIds->contains($serviceRequest->priority?->type_id)) {
                             return null;
                         }
 

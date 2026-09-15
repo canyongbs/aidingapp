@@ -34,49 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class RoundRobinAssigner extends ServiceRequestTypeAssigner
+/** @extends Factory<ServiceRequestTypeManagerGroup> */
+class ServiceRequestTypeManagerGroupFactory extends Factory
 {
-    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
+    /** @return array<string, mixed> */
+    public function definition(): array
     {
-        $serviceRequestType = $serviceRequest->priority?->type;
-
-        if (is_null($serviceRequestType)) {
-            return null;
-        }
-
-        $lastAssignee = $serviceRequestType->lastAssignedUser;
-        $user = null;
-
-        if ($lastAssignee) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            return null;
-        }
-
-        $serviceRequestType->last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-
-        return $user;
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'group_id' => Group::factory(),
+        ];
     }
 }

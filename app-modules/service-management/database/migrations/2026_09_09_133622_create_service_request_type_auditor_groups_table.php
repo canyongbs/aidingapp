@@ -34,49 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
-
-class RoundRobinAssigner extends ServiceRequestTypeAssigner
-{
-    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
+return new class () extends Migration {
+    public function up(): void
     {
-        $serviceRequestType = $serviceRequest->priority?->type;
+        DB::transaction(function () {
+            Schema::create('service_request_type_auditor_groups', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
+                $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
+                $table->timestamps();
 
-        if (is_null($serviceRequestType)) {
-            return null;
-        }
+                $table->uniqueIndex(['service_request_type_id', 'group_id']);
+            });
 
-        $lastAssignee = $serviceRequestType->lastAssignedUser;
-        $user = null;
-
-        if ($lastAssignee) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            return null;
-        }
-
-        $serviceRequestType->last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-
-        return $user;
+            ServiceRequestTypeGroupAssignmentsFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestTypeGroupAssignmentsFeature::deactivate();
+
+            Schema::dropIfExists('service_request_type_auditor_groups');
+        });
+    }
+};

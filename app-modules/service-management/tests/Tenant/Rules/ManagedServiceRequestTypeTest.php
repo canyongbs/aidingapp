@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\User;
@@ -81,6 +82,24 @@ test('direct user manager passes ManagedServiceRequestType rule', function () {
 
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerUsers()->attach($user);
+
+    actingAs($user);
+
+    $validator = Validator::make(
+        ['type_id' => $serviceRequestType->getKey()],
+        ['type_id' => [new ManagedServiceRequestType()]]
+    );
+
+    expect($validator->passes())->toBeTrue();
+});
+
+test('group manager passes ManagedServiceRequestType rule', function () {
+    $user = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($user);
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+    $serviceRequestType->managerGroups()->attach($group);
 
     actingAs($user);
 

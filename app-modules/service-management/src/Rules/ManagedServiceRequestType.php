@@ -36,10 +36,12 @@
 
 namespace AidingApp\ServiceManagement\Rules;
 
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\SystemUser;
+use App\Models\User;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Translation\PotentiallyTranslatedString;
 
 class ManagedServiceRequestType implements ValidationRule
@@ -53,22 +55,14 @@ class ManagedServiceRequestType implements ValidationRule
     {
         $user = auth()->user();
 
-        if ($user->isSuperAdmin()) {
+        if ($user instanceof SystemUser || $user->isSuperAdmin()) {
             return;
         }
+        assert($user instanceof User);
 
-        $department = $user->department;
-
-        $isManager = ServiceRequestType::where('id', $value)
-            ->where(function (Builder $query) use ($department, $user) {
-                $query->whereHas('managerDepartments', function (Builder $query) use ($department) {
-                    $query->where('departments.id', $department?->getKey());
-                });
-
-                $query->orWhereHas('managerUsers', function (Builder $query) use ($user) {
-                    $query->where('users.id', $user->getKey());
-                });
-            })
+        $isManager = ServiceRequestType::query()
+            ->whereKey($value)
+            ->tap(new ManagedServiceRequestTypes($user))
             ->exists();
 
         if (! $isManager) {

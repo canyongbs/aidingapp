@@ -37,11 +37,12 @@
 namespace AidingApp\ServiceManagement\Policies;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
-use App\Models\SystemUser;
 use App\Models\User;
 use App\Support\FeatureAccessResponse;
 use Illuminate\Auth\Access\Response;
@@ -70,17 +71,10 @@ class ServiceRequestPolicy
 
     public function view(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        $user = auth()->user();
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            $type = $serviceRequest->priority?->type;
 
-        if (! $user->isSuperAdmin() && ! ($user instanceof SystemUser)) {
-            $department = $user->department;
-
-            if (
-                ! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) ||
-                    $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))
-                && ! ($serviceRequest->priority?->type?->auditorDepartments?->contains('id', $department?->getKey()) ||
-                    $serviceRequest->priority?->type?->auditorUsers?->contains('id', $user->getKey()))
-            ) {
+            if (is_null($type) || (! $type->isManagedBy($authenticatable) && ! $type->isAuditedBy($authenticatable))) {
                 return Response::deny("You don't have permission to view this service request because you're not an auditor or manager.");
             }
         }
@@ -93,12 +87,8 @@ class ServiceRequestPolicy
 
     public function create(Authenticatable $authenticatable): Response
     {
-        $user = auth()->user();
-
-        if (! $user->isSuperAdmin()) {
-            $department = $user->department;
-
-            if (! ($department?->manageableServiceRequestTypes()->exists() || $user->manageableServiceRequestTypes()->exists())) {
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            if (! ServiceRequestType::query()->tap(new ManagedServiceRequestTypes($authenticatable))->exists()) {
                 return Response::deny("You don't have permission to create service requests because you're not a manager of any service request types.");
             }
         }
@@ -114,12 +104,9 @@ class ServiceRequestPolicy
         if ($serviceRequest->status?->classification === SystemServiceRequestClassification::Closed) {
             return Response::deny('Closed service request cannot be edited.');
         }
-        $user = auth()->user();
 
-        if (! $user->isSuperAdmin() && ! $user instanceof SystemUser) {
-            $department = $user->department;
-
-            if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) || $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))) {
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            if (! $this->isManagedBy($serviceRequest, $authenticatable)) {
                 return Response::deny("You don't have permission to update this service request because you're not a manager of it's type.");
             }
         }
@@ -153,12 +140,8 @@ class ServiceRequestPolicy
 
     public function delete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        $user = auth()->user();
-
-        if (! $user->isSuperAdmin()) {
-            $department = $user->department;
-
-            if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) || $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))) {
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            if (! $this->isManagedBy($serviceRequest, $authenticatable)) {
                 return Response::deny("You don't have permission to delete this service request because you're not a manager of it's type.");
             }
         }
@@ -179,12 +162,8 @@ class ServiceRequestPolicy
 
     public function restore(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        $user = auth()->user();
-
-        if (! $user->isSuperAdmin()) {
-            $department = $user->department;
-
-            if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) || $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))) {
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            if (! $this->isManagedBy($serviceRequest, $authenticatable)) {
                 return Response::deny("You don't have permission to restore this service request because you're not a manager of it's type.");
             }
         }
@@ -205,12 +184,8 @@ class ServiceRequestPolicy
 
     public function forceDelete(Authenticatable $authenticatable, ServiceRequest $serviceRequest): Response
     {
-        $user = auth()->user();
-
-        if (! $user->isSuperAdmin()) {
-            $department = $user->department;
-
-            if (! ($serviceRequest->priority?->type?->managerDepartments?->contains('id', $department?->getKey()) || $serviceRequest->priority?->type?->managerUsers?->contains('id', $user->getKey()))) {
+        if ($authenticatable instanceof User && ! $authenticatable->isSuperAdmin()) {
+            if (! $this->isManagedBy($serviceRequest, $authenticatable)) {
                 return Response::deny("You don't have permission to permanently delete this service request because you're not a manager of it's type.");
             }
         }
@@ -235,5 +210,10 @@ class ServiceRequestPolicy
     protected function requiredFeatures(): array
     {
         return [Feature::ServiceManagement];
+    }
+
+    private function isManagedBy(ServiceRequest $serviceRequest, User $user): bool
+    {
+        return $serviceRequest->priority?->type?->isManagedBy($user) ?? false;
     }
 }

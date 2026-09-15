@@ -36,66 +36,50 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
-use AidingApp\ServiceManagement\Filament\Tables\ManagersTable;
+use AidingApp\ServiceManagement\Models\Scopes\AuditsServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 
-it('includes direct manager users of the type and excludes non-managers', function () {
+it('includes direct and department auditors of the type', function () {
     $type = ServiceRequestType::factory()->create();
-
-    $manager = User::factory()->create();
-    $type->managerUsers()->attach($manager);
-
-    $nonManager = User::factory()->create();
-
-    $ids = ManagersTable::query($type->getKey())->pluck('id');
-
-    expect($ids->all())->toContain($manager->getKey())
-        ->and($ids->all())->not->toContain($nonManager->getKey());
-});
-
-it('includes users that belong to a manager department of the type', function () {
-    $type = ServiceRequestType::factory()->create();
+    $directAuditor = User::factory()->create();
+    $type->auditorUsers()->attach($directAuditor);
 
     $department = Department::factory()->create();
-    $type->managerDepartments()->attach($department);
+    $type->auditorDepartments()->attach($department);
+    $departmentAuditor = User::factory()->create();
+    $departmentAuditor->department()->associate($department)->save();
 
-    $manager = User::factory()->create();
-    $manager->department()->associate($department)->save();
+    $ids = User::query()->tap(new AuditsServiceRequestType($type->getKey()))->pluck('id');
 
-    $nonManager = User::factory()->create();
-
-    $ids = ManagersTable::query($type->getKey())->pluck('id');
-
-    expect($ids->all())->toContain($manager->getKey())
-        ->and($ids->all())->not->toContain($nonManager->getKey());
+    expect($ids->all())->toContain($directAuditor->getKey(), $departmentAuditor->getKey());
 });
 
-it('includes users that belong to a manager group of the type', function () {
+it('includes users that belong to an auditor group of the type', function () {
     $type = ServiceRequestType::factory()->create();
     $group = Group::factory()->create();
-    $type->managerGroups()->attach($group);
+    $type->auditorGroups()->attach($group);
 
-    $manager = User::factory()->create();
-    $group->users()->attach($manager);
+    $auditor = User::factory()->create();
+    $group->users()->attach($auditor);
 
-    $nonManager = User::factory()->create();
+    $ids = User::query()->tap(new AuditsServiceRequestType($type->getKey()))->pluck('id');
 
-    $ids = ManagersTable::query($type->getKey())->pluck('id');
-
-    expect($ids->all())->toContain($manager->getKey())
-        ->and($ids->all())->not->toContain($nonManager->getKey());
+    expect($ids->all())->toContain($auditor->getKey());
 });
 
-it('excludes the given excludeUserId', function () {
+it('does not query auditor groups while the feature is inactive', function () {
     $type = ServiceRequestType::factory()->create();
+    $group = Group::factory()->create();
+    $type->auditorGroups()->attach($group);
 
-    $current = User::factory()->create();
-    $other = User::factory()->create();
-    $type->managerUsers()->attach([$current->getKey(), $other->getKey()]);
+    $auditor = User::factory()->create();
+    $group->users()->attach($auditor);
 
-    $ids = ManagersTable::query($type->getKey(), $current->getKey())->pluck('id');
+    ServiceRequestTypeGroupAssignmentsFeature::deactivate();
 
-    expect($ids->all())->not->toContain($current->getKey())
-        ->and($ids->all())->toContain($other->getKey());
+    $ids = User::query()->tap(new AuditsServiceRequestType($type->getKey()))->pluck('id');
+
+    expect($ids->all())->not->toContain($auditor->getKey());
 });

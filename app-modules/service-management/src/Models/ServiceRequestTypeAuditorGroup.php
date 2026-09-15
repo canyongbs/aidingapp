@@ -34,49 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeAuditorGroupFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class RoundRobinAssigner extends ServiceRequestTypeAssigner
+/**
+ * @mixin IdeHelperServiceRequestTypeAuditorGroup
+ */
+class ServiceRequestTypeAuditorGroup extends Pivot
 {
-    protected function resolveAssignee(ServiceRequest $serviceRequest): ?User
+    /** @use HasFactory<ServiceRequestTypeAuditorGroupFactory> */
+    use HasFactory;
+
+    use HasUuids;
+
+    protected $table = 'service_request_type_auditor_groups';
+
+    /** @return BelongsTo<ServiceRequestType, $this> */
+    public function serviceRequestType(): BelongsTo
     {
-        $serviceRequestType = $serviceRequest->priority?->type;
+        return $this->belongsTo(ServiceRequestType::class);
+    }
 
-        if (is_null($serviceRequestType)) {
-            return null;
-        }
-
-        $lastAssignee = $serviceRequestType->lastAssignedUser;
-        $user = null;
-
-        if ($lastAssignee) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            $user = User::query()
-                ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->orderBy('name')->orderBy('id')->first();
-        }
-
-        if ($user === null) {
-            return null;
-        }
-
-        $serviceRequestType->last_assigned_id = $user->getKey();
-        $serviceRequestType->save();
-
-        return $user;
+    /** @return BelongsTo<Group, $this> */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }
