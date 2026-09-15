@@ -34,41 +34,24 @@
 </COPYRIGHT>
 */
 
-use App\Filament\Resources\NotificationSettings\Pages\ListNotificationSettings;
-use App\Models\NotificationSetting;
+use AidingApp\Notification\Tests\Fixtures\TestEmailSettingFromNameNotification;
 use App\Models\User;
-use Filament\Actions\Testing\TestAction;
+use App\Settings\NotificationSettings;
+use CanyonGBS\Common\Enums\Color;
+use Filament\Support\Colors\Color as FilamentColor;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
-
-it('is gated with proper access control', function () {
+it('renders the notification mail with the configured `primary_color`', function () {
     $user = User::factory()->create();
 
-    actingAs($user);
+    $expected = FilamentColor::convertToRgb(FilamentColor::all()[Color::Gray->value][600]);
 
-    livewire(ListNotificationSettings::class)->assertForbidden();
+    expect((string) (new TestEmailSettingFromNameNotification())->toMail($user)->render())
+        ->not->toContain($expected);
 
-    $user->givePermissionTo('settings.view-any');
-    $user->refresh();
+    $settings = app(NotificationSettings::class);
+    $settings->primary_color = Color::Gray;
+    $settings->save();
 
-    livewire(ListNotificationSettings::class)->assertOk();
-});
-
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
-    new NotificationSetting(['name' => 'test']);
-
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('settings.view-any', 'settings.*.view');
-
-    actingAs($user);
-
-    livewire(ListNotificationSettings::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
-
-    $user->givePermissionTo('settings.*.delete');
-
-    livewire(ListNotificationSettings::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+    expect((string) (new TestEmailSettingFromNameNotification())->toMail($user)->render())
+        ->toContain($expected);
 });

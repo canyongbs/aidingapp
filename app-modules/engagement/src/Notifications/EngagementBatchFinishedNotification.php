@@ -39,8 +39,6 @@ namespace AidingApp\Engagement\Notifications;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use App\Models\NotificationSetting;
-use App\Models\User;
 use Filament\Notifications\Notification as FilamentNotification;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -64,8 +62,7 @@ class EngagementBatchFinishedNotification extends Notification implements Should
 
     public function toMail(object $notifiable): MailMessage
     {
-        $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable));
+        $message = MailMessage::make();
 
         if ($this->engagementBatch->successful_engagements < $this->engagementBatch->total_engagements) {
             return $message
@@ -105,10 +102,5 @@ class EngagementBatchFinishedNotification extends Notification implements Should
             })
             ->body("{$this->engagementBatch->total_engagements} engagements sent successfully.")
             ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(User $notifiable): ?NotificationSetting
-    {
-        return $this->engagementBatch->user->department?->division?->notificationSetting?->setting;
     }
 }

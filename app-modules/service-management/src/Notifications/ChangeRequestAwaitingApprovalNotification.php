@@ -39,8 +39,6 @@ namespace AidingApp\ServiceManagement\Notifications;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequests\ChangeRequestResource;
 use AidingApp\ServiceManagement\Models\ChangeRequest;
-use App\Models\NotificationSetting;
-use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Notifications\Notification;
 use Illuminate\Bus\Queueable;
@@ -66,7 +64,6 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
     public function toMail(object $notifiable): MailMessage
     {
         return MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject('A Change Request is awaiting your approval')
             ->line("Hello {$notifiable->name}, the following Change Request is awaiting your approval:")
             ->line("{$this->changeRequest->title}")
@@ -88,12 +85,5 @@ class ChangeRequestAwaitingApprovalNotification extends BaseNotification impleme
                     ->url(ChangeRequestResource::getUrl('view', ['record' => $this->changeRequest])),
             ])
             ->getDatabaseMessage();
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $notifiable instanceof User
-          ? $notifiable->department?->division?->notificationSetting?->setting
-          : null;
     }
 }

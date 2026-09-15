@@ -34,9 +34,13 @@
 @props(['url' => null,'settings' => null])
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
+    use App\Features\NotificationSettingsFeature;
     use App\Settings\EmailSettings;
-    use Filament\Forms\Components\RichEditor\RichContentRenderer;use App\Models\SettingsProperty;
+    use App\Settings\NotificationSettings;
     use AidingApp\Theme\Settings\ThemeSettings;
+    use CanyonGBS\Common\Enums\Color;
+    use Filament\Forms\Components\RichEditor\RichContentRenderer;
+    use Filament\Support\Colors\Color as FilamentColor;
 
     $themeSettings = app(ThemeSettings::class);
     $settingsProperty = $themeSettings::getSettingsPropertyModel('theme.is_logo_active');
@@ -52,8 +56,8 @@
     $headerLogo = $headerLogoModel->getFirstMedia('header_logo')
         ? $headerLogoModel->getFirstMediaUrl('header_logo')
         : null;
-    $settingsLogoUrl = $settings?->getFirstMedia('logo')
-        ? $settings->getFirstMediaUrl('logo')
+    $settingsLogoUrl = (NotificationSettingsFeature::active() && $settings)
+        ? NotificationSettings::getSettingsPropertyModel('notifications.logo')->getFirstMediaUrl('logo')
         : null;
 @endphp
 
@@ -103,7 +107,12 @@
         }
 
         @php
-            $buttonColor = \Filament\Support\Colors\Color::convertToRgb(\Filament\Support\Colors\Color::all()[$settings?->primary_color ?? 'blue'][600]);
+            $primaryColor = NotificationSettingsFeature::active()
+                ? $settings?->primary_color
+                : Color::tryFrom($settings?->primary_color ?? '');
+            $buttonColor = FilamentColor::convertToRgb(
+                FilamentColor::all()[$primaryColor?->value ?? Color::Blue->value][600],
+            );
         @endphp
 
         .button-primary {
