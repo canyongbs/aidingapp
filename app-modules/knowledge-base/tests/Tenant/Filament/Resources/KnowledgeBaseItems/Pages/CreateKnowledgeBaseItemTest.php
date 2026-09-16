@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\CreateKnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnowledgeBaseItems;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -48,7 +47,6 @@ use Illuminate\Support\Facades\Config;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
-use function PHPUnit\Framework\assertCount;
 
 // TODO: Write CreateKnowledgeBaseItem tests
 //test('A successful action on the CreateKnowledgeBaseItem page', function () {});
@@ -59,8 +57,6 @@ use function PHPUnit\Framework\assertCount;
 
 test('CreateKnowledgeBaseItem is gated with proper access control', function () {
     $user = User::factory()->create();
-
-    Division::factory(3)->create();
 
     actingAs($user);
 
@@ -81,21 +77,11 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
-    assertCount(1, KnowledgeBaseItem::all());
-
-    $data = $request->except('division')->toArray();
-
-    assertDatabaseHas(KnowledgeBaseItem::class, $data);
-
-    $knowledgeBaseItem = KnowledgeBaseItem::first();
-
-    expect($knowledgeBaseItem->division->pluck('id')->toArray())->toEqual($request['division']);
+    assertDatabaseHas(KnowledgeBaseItem::class, $request->toArray());
 });
 
 test('CreateKnowledgeBaseItem is gated with proper feature access control', function () {
     $settings = app(LicenseSettings::class);
-
-    Division::factory(3)->create();
 
     $settings->data->addons->knowledgeManagement = false;
 
@@ -124,15 +110,7 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
-    assertCount(1, KnowledgeBaseItem::all());
-
-    $data = $request->except('division')->toArray();
-
-    assertDatabaseHas(KnowledgeBaseItem::class, $data);
-
-    $knowledgeBaseItem = KnowledgeBaseItem::first();
-
-    expect($knowledgeBaseItem->division->pluck('id')->toArray())->toEqual($request['division']);
+    assertDatabaseHas(KnowledgeBaseItem::class, $request->toArray());
 });
 
 // UserSelect (manager_ids field) admin-filtering tests

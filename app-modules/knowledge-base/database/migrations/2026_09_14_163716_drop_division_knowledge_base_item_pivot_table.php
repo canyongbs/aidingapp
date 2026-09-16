@@ -34,27 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\KnowledgeBase\Database\Factories;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<KnowledgeBaseItem>
- */
-class KnowledgeBaseItemFactory extends Factory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'public' => $this->faker->boolean(),
-            'title' => $this->faker->sentence(),
-            'article_details' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
-            'notes' => $this->faker->paragraph(),
-            'status_id' => KnowledgeBaseStatus::factory(),
-            'category_id' => KnowledgeBaseCategory::factory(),
-        ];
+        Schema::dropIfExists('division_knowledge_base_item');
     }
-}
+
+    public function down(): void
+    {
+        Schema::create('division_knowledge_base_item', function (Blueprint $table) {
+            $table->foreignUuid('knowledge_base_item_id')->references('id')->on('knowledge_base_articles')->onDelete('cascade');
+            $table->foreignUuid('division_id')->references('id')->on('divisions');
+        });
+    }
+};
