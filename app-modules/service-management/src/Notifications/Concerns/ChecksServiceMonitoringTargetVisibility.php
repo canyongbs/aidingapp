@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Concerns;
+namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;

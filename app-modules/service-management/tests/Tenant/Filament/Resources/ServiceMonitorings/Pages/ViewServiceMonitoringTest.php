@@ -141,6 +141,18 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         ->assertSee($reportUser->name)
         ->assertSee($reportDepartment->name)
         ->assertSee($reportContact->full_name);
+
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSchemaStateSet([
+            'reportConfigurations.weekly.email' => true,
+            'reportConfigurations.weekly.database' => true,
+            'reportConfigurations.weekly.users' => [$reportUser->name],
+            'reportConfigurations.weekly.departments' => [$reportDepartment->name],
+            'reportConfigurations.weekly.contacts' => [$reportContact->full_name],
+        ]);
 });
 
 test('The Automated Reporting section is hidden when no reporting frequency is active', function () {

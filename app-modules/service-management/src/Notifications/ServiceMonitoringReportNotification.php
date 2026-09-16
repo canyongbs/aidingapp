@@ -40,7 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
-use AidingApp\ServiceManagement\Concerns\ChecksServiceMonitoringTargetVisibility;
+use AidingApp\ServiceManagement\Notifications\Concerns\ChecksServiceMonitoringTargetVisibility;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\Tenant;
