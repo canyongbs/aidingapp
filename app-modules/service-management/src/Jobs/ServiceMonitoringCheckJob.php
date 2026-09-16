@@ -38,17 +38,20 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
@@ -137,10 +140,28 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
     }
 
+    /**
+     * Build the base HTTP client for this monitor's requests, applying auth so every
+     * request verb (current and future) inherits it without repeating the logic.
+     */
+    protected function buildRequest(): PendingRequest
+    {
+        $request = Http::maxRedirects(15);
+
+        if (ServiceMonitoringAuthTypeFeature::active() && $this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
+            $request = $request->withBasicAuth(
+                $this->serviceMonitoringTarget->auth_username ?? '',
+                $this->serviceMonitoringTarget->auth_password ?? '',
+            );
+        }
+
+        return $request;
+    }
+
     protected function handleAvailability(): void
     {
         try {
-            $response = Http::maxRedirects(15)
+            $response = $this->buildRequest()
                 ->head($this->serviceMonitoringTarget->domain);
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
@@ -161,7 +182,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
 
         try {
-            $response = Http::maxRedirects(15)
+            $response = $this->buildRequest()
                 ->get($this->serviceMonitoringTarget->domain);
 
             if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
