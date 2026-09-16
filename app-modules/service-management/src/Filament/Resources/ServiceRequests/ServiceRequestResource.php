@@ -70,7 +70,7 @@ class ServiceRequestResource extends Resource
     }
 
     /**
-     * @return Builder<Model>
+     * @return Builder<ServiceRequest>
      */
     public static function getGlobalSearchEloquentQuery(): Builder
     {

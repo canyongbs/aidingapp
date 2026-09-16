@@ -36,35 +36,29 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
 use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class ManagesServiceRequestType
 {
     public function __construct(
         protected string $serviceRequestTypeId,
-        protected ?ServiceRequest $serviceRequest = null,
     ) {}
 
     /**
-     * @param Builder<covariant Model> $query
+     * @param Builder<User> $query
      */
     public function __invoke(Builder $query): void
     {
         $query->where(function (Builder $query): void {
             $query
                 ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
+                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
                 })
                 ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
+                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
                 });
 
             if (ServiceRequestTypeGroupAssignmentsFeature::active()) {

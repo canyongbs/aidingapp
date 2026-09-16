@@ -36,33 +36,27 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditorGroup;
 use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class AuditsServiceRequestType
 {
     public function __construct(
         protected string $serviceRequestTypeId,
-        protected ?ServiceRequest $serviceRequest = null,
     ) {}
 
-    /** @param Builder<covariant Model> $query */
+    /** @param Builder<User> $query */
     public function __invoke(Builder $query): void
     {
         $query->where(function (Builder $query): void {
             $query
                 ->whereHas('department.auditableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
+                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
                 })
                 ->orWhereHas('auditableServiceRequestTypes', function (Builder $query): void {
-                    $query
-                        ->where('service_request_type_id', $this->serviceRequestTypeId)
-                        ->when($this->serviceRequest, fn (Builder $query) => $query->whereHas('serviceRequests', fn (Builder $query) => $query->whereKey($this->serviceRequest)));
+                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
                 })
                 ->when(ServiceRequestTypeGroupAssignmentsFeature::active(), fn (Builder $query) => $query->orWhereHas('groups', fn (Builder $query) => $query->whereIn(
                     'groups.id',
