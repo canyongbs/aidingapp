@@ -77,7 +77,7 @@ class ServiceRequestResource extends Resource
         $user = auth()->user();
         assert($user instanceof User);
 
-        return parent::getGlobalSearchEloquentQuery()
+        return ServiceRequest::query()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
                 return $query->tap(new AccessibleServiceRequests($user));
