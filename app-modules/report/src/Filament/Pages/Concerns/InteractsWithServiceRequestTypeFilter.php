@@ -37,6 +37,7 @@
 namespace AidingApp\Report\Filament\Pages\Concerns;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
+use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -47,7 +48,6 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Icons\Heroicon;
-use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Shared "Service Request Types" report filter: the type SelectTree plus the
@@ -65,21 +65,9 @@ trait InteractsWithServiceRequestTypeFilter
         $user = auth()->user();
         assert($user instanceof User);
 
-        $departmentId = $user->department?->getKey();
-
         return ServiceRequestType::query()
             ->withoutArchived()
-            ->where(function (Builder $query) use ($user, $departmentId): void {
-                $query->whereHas('managerUsers', fn (Builder $query) => $query->whereKey($user->getKey()))
-                    ->orWhereHas('auditorUsers', fn (Builder $query) => $query->whereKey($user->getKey()));
-
-                if (blank($departmentId)) {
-                    return;
-                }
-
-                $query->orWhereHas('managerDepartments', fn (Builder $query) => $query->whereKey($departmentId))
-                    ->orWhereHas('auditorDepartments', fn (Builder $query) => $query->whereKey($departmentId));
-            })
+            ->tap(new AccessibleServiceRequestTypes($user))
             ->orderBy('name')
             ->pluck('id')
             ->all();
