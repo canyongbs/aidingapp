@@ -420,6 +420,34 @@ describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories',
                 now(),
             );
 
+            $historiesBeforeMigration = DB::table('service_request_histories')
+                ->where('service_request_id', $serviceRequest->getKey())
+                ->orderBy('created_at')
+                ->get();
+
+            DB::table('timelines')->insert([
+                [
+                    'id' => (string) Str::uuid(),
+                    'entity_type' => 'service_request',
+                    'entity_id' => $serviceRequest->getKey(),
+                    'timelineable_type' => 'service_request_history',
+                    'timelineable_id' => $historiesBeforeMigration[0]->id,
+                    'record_sortable_date' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+                [
+                    'id' => (string) Str::uuid(),
+                    'entity_type' => 'service_request',
+                    'entity_id' => $serviceRequest->getKey(),
+                    'timelineable_type' => 'service_request_history',
+                    'timelineable_id' => $historiesBeforeMigration[1]->id,
+                    'record_sortable_date' => now(),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ],
+            ]);
+
             // Run the migration
             $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_09_14_220000_tmp_remove_division_from_service_request_histories.php']);
             // Confirm migration ran successfully
@@ -433,6 +461,14 @@ describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories',
             expect($histories)->toHaveCount(1)
                 ->and(json_decode($histories->first()->original_values, true))->toBe(['title' => 'Old title'])
                 ->and(json_decode($histories->first()->new_values, true))->toBe(['title' => 'New title']);
+
+            $timelines = DB::table('timelines')
+                ->where('timelineable_type', 'service_request_history')
+                ->whereIn('timelineable_id', $historiesBeforeMigration->pluck('id'))
+                ->get();
+
+            expect($timelines)->toHaveCount(1)
+                ->and($timelines->first()->timelineable_id)->toBe($historiesBeforeMigration[1]->id);
         });
     });
 });

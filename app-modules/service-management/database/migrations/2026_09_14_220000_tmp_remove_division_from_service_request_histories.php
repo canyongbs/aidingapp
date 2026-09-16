@@ -49,7 +49,6 @@ return new class () extends Migration {
                         ->whereRaw("jsonb_exists(original_values::jsonb, 'division_id')")
                         ->orWhereRaw("jsonb_exists(new_values::jsonb, 'division_id')");
                 })
-                ->orderBy('id')
                 ->chunkById(100, function (Collection $histories): void {
                     foreach ($histories as $history) {
                         $originalValues = json_decode($history->original_values, true) ?? [];
@@ -57,7 +56,12 @@ return new class () extends Migration {
 
                         unset($originalValues['division_id'], $newValues['division_id']);
 
-                        if ($newValues === []) {
+                        if (($originalValues === []) && ($newValues === [])) {
+                            DB::table('timelines')
+                                ->where('timelineable_type', 'service_request_history')
+                                ->where('timelineable_id', $history->id)
+                                ->delete();
+
                             DB::table('service_request_histories')
                                 ->where('id', $history->id)
                                 ->delete();
