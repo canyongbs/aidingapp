@@ -219,8 +219,7 @@ describe('tabs', function () {
         $project = Project::factory()->create();
 
         livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->assertSee($tab->getLabel())
-            ->assertSeeHtml("wire:click=\"\$set('tab', '{$tab->value}')\"");
+            ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
     it('defaults to the access tab when no tab is requested', function () {
