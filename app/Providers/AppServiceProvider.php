@@ -118,6 +118,8 @@ class AppServiceProvider extends ServiceProvider
                 ->allowAttribute('src', allowedElements: ['img', 'video', 'source', 'iframe'])
                 ->allowAttribute('type', allowedElements: 'source'),
         );
+
+        $this->loadMigrationsFrom(database_path('migrations/Legacy'));
     }
 
     /**
