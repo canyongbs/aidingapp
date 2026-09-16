@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -62,6 +63,7 @@ class ServiceMonitoringTargetFactory extends Factory
             'is_notified_via_email' => $this->faker->boolean(),
             'is_confidential' => false,
             'monitor_type' => MonitorType::Availability,
+            'auth_type' => AuthType::None,
         ];
     }
 
@@ -69,6 +71,15 @@ class ServiceMonitoringTargetFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_confidential' => true,
+        ]);
+    }
+
+    public function basicAuth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'auth_type' => AuthType::Basic,
+            'auth_username' => $this->faker->userName(),
+            'auth_password' => $this->faker->password(),
         ]);
     }
 }
