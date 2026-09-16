@@ -69,9 +69,6 @@ class ServiceRequestResource extends Resource
         return ['service_request_number', 'title'];
     }
 
-    /**
-     * @return Builder<Model>
-     */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         $user = auth()->user();
@@ -80,6 +77,7 @@ class ServiceRequestResource extends Resource
         return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
+                // @phpstan-ignore argument.type (The resource base class does not specify generics, so the builder type is not covariant.)
                 return $query->tap(new AccessibleServiceRequests($user));
             });
     }
