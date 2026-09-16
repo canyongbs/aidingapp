@@ -70,14 +70,14 @@ class ServiceRequestResource extends Resource
     }
 
     /**
-     * @return Builder<ServiceRequest>
+     * @return Builder<Model>
      */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         $user = auth()->user();
         assert($user instanceof User);
 
-        return ServiceRequest::query()
+        return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
                 return $query->tap(new AccessibleServiceRequests($user));

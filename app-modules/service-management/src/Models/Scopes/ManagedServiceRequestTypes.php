@@ -36,10 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class ManagedServiceRequestTypes
 {
@@ -47,7 +47,7 @@ class ManagedServiceRequestTypes
         protected User $user,
     ) {}
 
-    /** @param Builder<covariant Model> $query */
+    /** @param Builder<ServiceRequestType> $query */
     public function __invoke(Builder $query): void
     {
         $query->where(function (Builder $query): void {

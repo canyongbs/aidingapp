@@ -36,9 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 class ManagedServiceRequests
 {
@@ -46,7 +46,7 @@ class ManagedServiceRequests
         protected User $user,
     ) {}
 
-    /** @param Builder<covariant Model> $query */
+    /** @param Builder<ServiceRequest> $query */
     public function __invoke(Builder $query): void
     {
         $query->whereHas(
