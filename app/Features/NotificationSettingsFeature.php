@@ -34,43 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Filament\Resources\NotificationSettings\Pages;
+namespace App\Features;
 
-use App\Filament\Resources\NotificationSettings\NotificationSettingResource;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Table;
+use App\Support\AbstractFeatureFlag;
 
-class ListNotificationSettings extends ListRecords
+class NotificationSettingsFeature extends AbstractFeatureFlag
 {
-    protected static string $resource = NotificationSettingResource::class;
-
-    public function table(Table $table): Table
+    public function resolve(mixed $scope): mixed
     {
-        return $table
-            ->columns([
-                TextColumn::make('name'),
-                TextColumn::make('description'),
-            ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                ]),
-            ]);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            CreateAction::make(),
-        ];
+        return false;
     }
 }

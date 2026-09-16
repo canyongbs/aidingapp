@@ -48,7 +48,6 @@ use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
-use App\Models\NotificationSetting;
 use App\Models\Tenant;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -107,7 +106,6 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
         }
 
         $message = MailMessage::make()
-            ->settings($this->resolveNotificationSetting($notifiable))
             ->subject($resolvedSubject);
 
         if (filled($body)) {
@@ -144,10 +142,5 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
     protected function getServiceRequest(): ServiceRequest
     {
         return $this->serviceRequest;
-    }
-
-    private function resolveNotificationSetting(object $notifiable): ?NotificationSetting
-    {
-        return $this->serviceRequest->division?->notificationSetting?->setting;
     }
 }
