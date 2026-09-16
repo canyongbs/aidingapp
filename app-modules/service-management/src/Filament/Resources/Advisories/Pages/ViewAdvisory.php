@@ -77,8 +77,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('properties')
                     ->headerActions([
                         EditAction::make('editProperties')
-                            ->label('Properties Section Edit')
-                            ->modalHeading('Properties Section Edit')
+                            ->label('Edit')
+                            ->modalHeading('Edit properties')
                             ->slideOver()
                             ->schema([
                                 TextInput::make('title')
@@ -107,8 +107,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('trackingDetails')
                     ->headerActions([
                         EditAction::make('editTrackingDetails')
-                            ->label('Tracking Details Section Edit')
-                            ->modalHeading('Tracking Details Section Edit')
+                            ->label('Edit')
+                            ->modalHeading('Edit tracking details')
                             ->slideOver()
                             ->schema([
                                 ToggleButtons::make('severity_id')
@@ -142,8 +142,8 @@ class ViewAdvisory extends ViewRecord
                     ->key('assignment')
                     ->headerActions([
                         EditAction::make('editAssignment')
-                            ->label('Assignment Section Edit')
-                            ->modalHeading('Assignment Section Edit')
+                            ->label('Edit')
+                            ->modalHeading('Edit assignment')
                             ->slideOver()
                             ->schema([
                                 TableSelect::make('assigned_department_id')
@@ -157,13 +157,10 @@ class ViewAdvisory extends ViewRecord
                         TextEntry::make('assignedDepartment.name')
                             ->label('Department'),
                     ]),
-                Section::make('Advisory Updates')
-                    ->schema([
-                        Livewire::make(AdvisoryUpdatesRelationManager::class, fn (Advisory $record): array => [
-                            'ownerRecord' => $record,
-                            'pageClass' => static::class,
-                        ])->key(AdvisoryUpdatesRelationManager::class),
-                    ]),
+                Livewire::make(AdvisoryUpdatesRelationManager::class, fn (Advisory $record): array => [
+                    'ownerRecord' => $record,
+                    'pageClass' => static::class,
+                ])->key(AdvisoryUpdatesRelationManager::class),
             ]);
     }
 
