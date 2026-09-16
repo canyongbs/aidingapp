@@ -41,7 +41,6 @@ use AidingApp\Authorization\Models\Role;
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
-use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseStatusSeeder;
@@ -64,7 +63,6 @@ class NewTenantSeeder extends Seeder
         ]);
 
         $this->call([
-            DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,

@@ -858,41 +858,6 @@
             }
         },
         {
-            "name": "canyon-gbs/aiding-app-division",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/division",
-                "reference": "593c859008abc579bc59ca1eea7506d8ede34b0a"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Division\\Providers\\DivisionServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Division\\": "src/",
-                    "AidingApp\\Division\\Tests\\": "tests/",
-                    "AidingApp\\Division\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Division\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
             "name": "canyon-gbs/aiding-app-engagement",
             "version": "1.0",
             "dist": {
