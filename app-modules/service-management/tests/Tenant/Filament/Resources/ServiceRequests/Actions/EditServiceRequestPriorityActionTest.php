@@ -131,6 +131,31 @@ test('editPriority action is hidden when the service request has no priority', f
         ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
+test('editPriority action is visible when the service request priority is soft-deleted', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $trashedPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $trashedPriority->getKey(),
+    ])->create();
+
+    $trashedPriority->delete();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
+});
+
 // Validation
 
 test('editPriority requires priority_id', function () {
@@ -204,6 +229,40 @@ test('can update the service request priority', function () {
         ])->getKey(),
         'priority_id' => $originalPriority->getKey(),
     ])->create();
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
+            'priority_id' => $newPriority->getKey(),
+        ])
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect($serviceRequest->fresh()->priority_id)->toBe($newPriority->getKey());
+});
+
+test('can update the service request priority away from a soft-deleted priority', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $trashedPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $serviceRequestType->getKey(),
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $trashedPriority->getKey(),
+    ])->create();
+
+    $trashedPriority->delete();
 
     asSuperAdmin();
 

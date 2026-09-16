@@ -66,6 +66,7 @@ use AidingApp\Timeline\Livewire\TimelineList;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Testing\TestAction;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
@@ -144,6 +145,49 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->close_details,
             ]
         );
+});
+
+test('the status, priority, and type still display and remain editable when soft-deleted', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'status_id' => $status->getKey(),
+        'priority_id' => $priority->getKey(),
+    ]);
+
+    $status->delete();
+    $priority->delete();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('view', [
+                'record' => $serviceRequest,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeTextInOrder(
+            [
+                'Type',
+                $serviceRequestType->name,
+                'Status',
+                $status->name,
+                'Priority',
+                $priority->name,
+            ]
+        );
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionVisible(TestAction::make('editStatus')->schemaComponent('status.name'))
+        ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('The Description entry has Markdown rendering enabled on the underlying component', function () {

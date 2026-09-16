@@ -46,12 +46,14 @@ class EditServiceRequestPriorityAction
 {
     public static function make(ServiceRequest $serviceRequest): Action
     {
+        $typeId = $serviceRequest->priorityIncludingTrashed()?->type_id;
+
         return Action::make('editPriority')
             ->label('Edit priority')
             ->icon(Heroicon::Pencil)
             ->iconButton()
             ->authorize('update', $serviceRequest)
-            ->visible(fn (): bool => filled($serviceRequest->priority?->type_id))
+            ->visible(fn (): bool => filled($typeId))
             ->slideOver()
             ->modalHeading('Edit Priority')
             ->modalSubmitActionLabel('Save')
@@ -59,8 +61,10 @@ class EditServiceRequestPriorityAction
                 'priority_id' => $serviceRequest->priority_id,
             ])
             ->schema([
-                ServiceRequestPriorityToggleButtons::make($serviceRequest->priority->type_id ?? '')
-                    ->required(),
+                ServiceRequestPriorityToggleButtons::make(
+                    typeId: $typeId ?? '',
+                    selectedId: $serviceRequest->priority_id,
+                )->required(),
             ])
             ->action(function (array $data) use ($serviceRequest): void {
                 $serviceRequest->priority_id = $data['priority_id'];

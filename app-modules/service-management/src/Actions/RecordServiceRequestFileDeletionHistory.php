@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use Illuminate\Database\Eloquent\Model;
 
 class RecordServiceRequestFileDeletionHistory
@@ -46,7 +45,6 @@ class RecordServiceRequestFileDeletionHistory
     {
         $serviceRequest = match (true) {
             $record instanceof ServiceRequest => $record,
-            $record instanceof ServiceRequestUpdate => $record->serviceRequest,
             default => null,
         };
 

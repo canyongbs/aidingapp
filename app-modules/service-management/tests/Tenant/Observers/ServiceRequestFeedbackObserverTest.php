@@ -34,21 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Observers;
-
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
-use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use Illuminate\Support\Facades\Event;
 
-class ServiceRequestFeedbackObserver
-{
-    public function created(ServiceRequestFeedback $serviceRequestFeedback): void
-    {
-        TimelineableRecordCreated::dispatch($serviceRequestFeedback->serviceRequest, $serviceRequestFeedback);
-    }
+it('dispatches TimelineableRecordDeleted when a service request feedback is deleted', function () {
+    $serviceRequestFeedback = ServiceRequestFeedback::factory()->create();
 
-    public function deleted(ServiceRequestFeedback $serviceRequestFeedback): void
-    {
-        TimelineableRecordDeleted::dispatch($serviceRequestFeedback->serviceRequest, $serviceRequestFeedback);
-    }
-}
+    Event::fake([TimelineableRecordDeleted::class]);
+
+    $serviceRequestFeedback->delete();
+
+    Event::assertDispatched(
+        TimelineableRecordDeleted::class,
+        fn (TimelineableRecordDeleted $event): bool => $event->entity->is($serviceRequestFeedback->serviceRequest)
+            && $event->timelineableModel->is($serviceRequestFeedback)
+    );
+});

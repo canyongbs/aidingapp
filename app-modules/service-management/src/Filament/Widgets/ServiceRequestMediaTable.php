@@ -52,7 +52,10 @@ use Filament\Tables\Table;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\MediaCollections\Exceptions\FileCannotBeAdded;
 use Spatie\MediaLibrary\MediaCollections\MediaCollection;
 
 class ServiceRequestMediaTable extends TableWidget
@@ -159,6 +162,7 @@ class ServiceRequestMediaTable extends TableWidget
         $fileUpload = FileUpload::make('file')
             ->label('File')
             ->disk('s3')
+            ->directory(fn (): string => 'tmp/' . Str::uuid())
             ->visibility('private')
             ->preserveFilenames()
             ->required();
@@ -167,7 +171,7 @@ class ServiceRequestMediaTable extends TableWidget
             $fileUpload->acceptedFileTypes($collection->getMimes());
 
             if ($maxFileSizeInMb = $collection->getMaxFileSizeInMb()) {
-                $fileUpload->maxSize($maxFileSizeInMb * 1024);
+                $fileUpload->maxSize((int) floor($maxFileSizeInMb * 1000 * 1000 / 1024));
             }
         } elseif ($collection instanceof MediaCollection && filled($collection->acceptsMimeTypes)) {
             $fileUpload->acceptedFileTypes($collection->acceptsMimeTypes);
@@ -195,11 +199,23 @@ class ServiceRequestMediaTable extends TableWidget
 
                 $path = $data['file'];
 
-                $media = $this->record
-                    ->addMediaFromDisk($path, 's3')
-                    ->usingName(pathinfo($path, PATHINFO_FILENAME))
-                    ->usingFileName(basename($path))
-                    ->toMediaCollection($collectionName);
+                try {
+                    $media = $this->record
+                        ->addMediaFromDisk($path, 's3')
+                        ->usingName(pathinfo($path, PATHINFO_FILENAME))
+                        ->usingFileName(basename($path))
+                        ->toMediaCollection($collectionName);
+                } catch (FileCannotBeAdded $exception) {
+                    Storage::disk('s3')->delete($path);
+
+                    Notification::make()
+                        ->title('That file could not be uploaded.')
+                        ->body($exception->getMessage())
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
 
                 app(RecordServiceRequestFileUploadHistory::class)($this->record, $media->file_name);
 

@@ -87,7 +87,7 @@ class ServiceRequestInfolist
                 view('filament.infolists.components.service-request-heading', [
                     'serviceRequestNumber' => $record->service_request_number,
                     'category' => $record->category,
-                    'type' => $record->priority?->type()->first()?->name,
+                    'type' => $record->priorityIncludingTrashed()?->type()->first()?->name,
                 ])->render()
             ))
             ->schema([
@@ -133,10 +133,12 @@ class ServiceRequestInfolist
                         TextEntry::make('status.name')
                             ->label('Status')
                             ->badge()
-                            ->color(fn (ServiceRequest $record): string => $record->status->color->value)
+                            ->state(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->name)
+                            ->color(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->color->value)
                             ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestStatusAction::make($record)),
                         TextEntry::make('priority.name')
                             ->label('Priority')
+                            ->state(fn (ServiceRequest $record): ?string => $record->priorityIncludingTrashed()?->name)
                             ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestPriorityAction::make($record)),
                     ])->columns(3),
             ])

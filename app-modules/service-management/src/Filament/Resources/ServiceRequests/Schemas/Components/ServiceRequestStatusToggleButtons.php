@@ -38,13 +38,20 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Forms\Components\ToggleButtons;
+use Illuminate\Database\Eloquent\Builder;
 
 class ServiceRequestStatusToggleButtons
 {
-    public static function make(string $name = 'status_id'): ToggleButtons
+    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
     {
         // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        $statuses = ServiceRequestStatus::orderBy('sort')->get(['id', 'name', 'color']);
+        // Trashed statuses are excluded, except the currently-selected one, so a request left
+        // pointing at a soft-deleted status can still show and keep that value.
+        $statuses = ServiceRequestStatus::query()
+            ->withTrashed()
+            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
+            ->orderBy('sort')
+            ->get(['id', 'name', 'color']);
 
         return ToggleButtons::make($name)
             ->label('Status')

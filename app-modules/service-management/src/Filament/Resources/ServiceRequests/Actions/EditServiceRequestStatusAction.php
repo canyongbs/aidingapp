@@ -58,7 +58,7 @@ class EditServiceRequestStatusAction
                 'status_id' => $serviceRequest->status_id,
             ])
             ->schema([
-                ServiceRequestStatusToggleButtons::make()
+                ServiceRequestStatusToggleButtons::make(selectedId: $serviceRequest->status_id)
                     ->required(),
             ])
             ->action(function (array $data) use ($serviceRequest): void {

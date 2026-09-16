@@ -328,6 +328,37 @@ test('can update the service request status', function () {
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
+test('editStatus action is visible and can update away from a soft-deleted status', function () {
+    $trashedStatus = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => $trashedStatus->getKey(),
+    ])->create();
+
+    $trashedStatus->delete();
+
+    $newStatus = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::InProgress,
+    ]);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionVisible(TestAction::make('editStatus')->schemaComponent('status.name'))
+        ->callAction(TestAction::make('editStatus')->schemaComponent('status.name'), data: [
+            'status_id' => $newStatus->getKey(),
+        ])
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
+});
+
 test('send feedback email if service request is closed', function () {
     Notification::fake();
 

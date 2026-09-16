@@ -38,18 +38,21 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas
 
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Filament\Forms\Components\ToggleButtons;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Exists;
 
 class ServiceRequestPriorityToggleButtons
 {
-    public static function make(string $typeId, string $name = 'priority_id'): ToggleButtons
+    public static function make(string $typeId, string $name = 'priority_id', ?string $selectedId = null): ToggleButtons
     {
         return ToggleButtons::make($name)
             ->label('Priority')
             ->inline()
             ->options(filled($typeId)
                 ? ServiceRequestPriority::query()
+                    ->withTrashed()
                     ->where('type_id', $typeId)
+                    ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
                     ->orderBy('order')
                     ->pluck('name', 'id')
                 : collect())

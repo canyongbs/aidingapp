@@ -801,7 +801,7 @@ describe('ServiceRequestUpdate', function () {
         expect($serviceRequestUpdate->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
-    test('uploading a file records a history entry on the parent service request for the timeline', function () {
+    test('uploading a file to a service request update does not record a history entry on the parent service request', function () {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -821,11 +821,10 @@ describe('ServiceRequestUpdate', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileUploadedEvent());
 
-        expect($history)->not->toBeNull()
-            ->and($history->uploadedFileName())->toBe('attachment.pdf');
+        expect($history)->toBeNull();
     });
 
-    test('deleting a file records a history entry on the parent service request for the timeline', function () {
+    test('deleting a file from a service request update does not record a history entry on the parent service request', function () {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -848,7 +847,6 @@ describe('ServiceRequestUpdate', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
 
-        expect($history)->not->toBeNull()
-            ->and($history->deletedFileName())->toBe('attachment.png');
+        expect($history)->toBeNull();
     });
 });
