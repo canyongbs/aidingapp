@@ -62,12 +62,12 @@ class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends Rec
     }
 
     /**
-     * @param Collection<int, string> $unreachable
+     * @param Collection<string, Collection<int, string>> $unreachable
      */
     protected function failureMessage(Collection $unreachable): string
     {
         return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the notification settings.';
+            . $this->formatUnreachableGroups($unreachable)
+            . ' Grant them confidential access below, or remove them from the notification settings.';
     }
 }

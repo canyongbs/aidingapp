@@ -573,6 +573,101 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
         });
 });
 
+// report_configurations.daily.report_users UserSelect admin-filtering tests
+
+test('daily report_users UserSelect does not show admin users in options by default on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($regularUser->getKey(), $options)
+                && ! array_key_exists($adminUser->getKey(), $options);
+        });
+});
+
+test('daily report_users UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_active' => true,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($adminUser->getKey());
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
+test('a daily report user who is an admin is still saved when editing', function () {
+    asSuperAdmin();
+
+    $adminReportUser = User::factory()->create();
+    $adminReportUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_active' => true,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($adminReportUser->getKey());
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($configuration->refresh()->reportUsers()->pluck('users.id')->all())->toBe([$adminReportUser->getKey()]);
+});
+
 test('EditServiceMonitoring updates report configurations for multiple frequencies', function () {
     asSuperAdmin();
 

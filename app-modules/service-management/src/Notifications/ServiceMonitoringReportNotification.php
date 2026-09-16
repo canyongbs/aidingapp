@@ -75,15 +75,21 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public ServiceMonitoringReportFrequency $frequency, public string $channel) {}
 
     /**
-     * Restore notifications queued by the previous release, which had no `frequency` property
+     * TODO: Cleanup Task (service-monitoring-report-configurations-feature): delete this override
+     * entirely once `ServiceMonitoringTarget::$report_frequency` is dropped.
+     *
+     * Restore notifications queued by the previous release, which had no `frequency` property.
      *
      * @param array<string, mixed> $values
      */
     public function __unserialize(array $values): void
     {
-        $values['frequency'] ??= ServiceMonitoringReportFrequency::Monthly;
-
         $this->unserializeModels($values);
+
+        if (! isset($this->frequency)) {
+            $this->frequency = $this->serviceMonitoringTarget->report_frequency
+                ?? ServiceMonitoringReportFrequency::Monthly;
+        }
     }
 
     /**

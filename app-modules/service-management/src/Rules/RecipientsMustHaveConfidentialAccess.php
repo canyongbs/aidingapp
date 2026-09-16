@@ -80,9 +80,11 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
             return;
         }
 
-        $unreachable = $this->unreachableDepartmentNames()
-            ->concat($this->unreachableUserNames())
-            ->concat($this->unreachableContactNames());
+        $unreachable = collect([
+            'Users' => $this->unreachableUserNames(),
+            'Departments' => $this->unreachableDepartmentNames(),
+            'Contacts' => $this->unreachableContactNames(),
+        ])->filter(fn (Collection $names): bool => $names->isNotEmpty());
 
         if ($unreachable->isEmpty()) {
             return;
@@ -92,9 +94,19 @@ abstract class RecipientsMustHaveConfidentialAccess implements ValidationRule
     }
 
     /**
-     * @param Collection<int, string> $unreachable
+     * @param Collection<string, Collection<int, string>> $unreachable
      */
     abstract protected function failureMessage(Collection $unreachable): string;
+
+    /**
+     * @param Collection<string, Collection<int, string>> $unreachable
+     */
+    protected function formatUnreachableGroups(Collection $unreachable): string
+    {
+        return $unreachable
+            ->map(fn (Collection $names, string $label): string => "{$label}: " . $names->join(', ', ' and ') . '.')
+            ->implode(' ');
+    }
 
     /**
      * @return Collection<int, string>

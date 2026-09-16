@@ -216,29 +216,42 @@ it('delivers to a contact granted confidential access to a confidential target',
     expect($notification->via($contact))->toBe(['mail']);
 });
 
-it('restores a notification serialized under the previous payload shape with no frequency property', function () {
+it('restores a notification serialized under the previous payload shape with no frequency property, falling back to the target\'s legacy frequency', function () {
+    $target = ServiceMonitoringTarget::factory()->create(['report_frequency' => ServiceMonitoringReportFrequency::Weekly]);
+
+    $values = (new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class))->__serialize();
+    unset($values['frequency']);
+
+    // A real unserialize() never runs the constructor, so `frequency` starts genuinely uninitialized
+    $restored = (new ReflectionClass(ServiceMonitoringReportNotification::class))->newInstanceWithoutConstructor();
+    $restored->__unserialize($values);
+
+    expect($restored->serviceMonitoringTarget->is($target))->toBeTrue()
+        ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly)
+        ->and($restored->channel)->toBe(MailChannel::class);
+});
+
+it('restores a notification serialized under the previous payload shape with no frequency property, defaulting to Monthly when the target has no legacy frequency either', function () {
+    $target = ServiceMonitoringTarget::factory()->create(['report_frequency' => null]);
+
+    $values = (new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class))->__serialize();
+    unset($values['frequency']);
+
+    $restored = (new ReflectionClass(ServiceMonitoringReportNotification::class))->newInstanceWithoutConstructor();
+    $restored->__unserialize($values);
+
+    expect($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Monthly);
+});
+
+it('restores a notification through a real serialize/unserialize round trip', function () {
     $target = ServiceMonitoringTarget::factory()->create();
 
-    // Mirrors the payload shape queued by the previous release: no `frequency` key, and the target
-    // serialized as a full model rather than a ModelIdentifier, since that class had no SerializesModels
-    $values = [
-        'serviceMonitoringTarget' => $target,
-        'channel' => MailChannel::class,
-    ];
+    $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class);
 
-    $class = ServiceMonitoringReportNotification::class;
-    $body = '';
+    $restored = unserialize(serialize($notification));
 
-    foreach ($values as $key => $value) {
-        $body .= serialize($key) . serialize($value);
-    }
-    $serialized = 'O:' . strlen($class) . ':"' . $class . '":' . count($values) . ':{' . $body . '}';
-
-    $restored = unserialize($serialized);
-
-    expect($restored)->toBeInstanceOf(ServiceMonitoringReportNotification::class)
-        ->and($restored->serviceMonitoringTarget->is($target))->toBeTrue()
-        ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Monthly)
+    expect($restored->serviceMonitoringTarget->is($target))->toBeTrue()
+        ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly)
         ->and($restored->channel)->toBe(MailChannel::class);
 });
 

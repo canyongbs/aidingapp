@@ -372,6 +372,46 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
         });
 });
 
+// report_configurations.daily.report_users UserSelect admin-filtering tests
+
+test('daily report_users UserSelect does not show admin users in options by default on CreateServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.create');
+    actingAs($actor);
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($regularUser->getKey(), $options)
+                && ! array_key_exists($adminUser->getKey(), $options);
+        });
+});
+
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.create');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
 test('creating a confidential service monitor persists the granted users, departments, and contacts', function () {
     asSuperAdmin();
 

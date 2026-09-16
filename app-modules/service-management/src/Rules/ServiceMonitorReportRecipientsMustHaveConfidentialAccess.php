@@ -68,12 +68,12 @@ class ServiceMonitorReportRecipientsMustHaveConfidentialAccess extends Recipient
     }
 
     /**
-     * @param Collection<int, string> $unreachable
+     * @param Collection<string, Collection<int, string>> $unreachable
      */
     protected function failureMessage(Collection $unreachable): string
     {
         return 'These ' . $this->frequency->getLabel() . ' report recipients would not be able to see this service monitor, so they would never receive its automated report: '
-            . $unreachable->join(', ', ' and ')
-            . '. Grant them confidential access below, or remove them from the ' . $this->frequency->getLabel() . ' reporting settings.';
+            . $this->formatUnreachableGroups($unreachable)
+            . ' Grant them confidential access below, or remove them from the ' . $this->frequency->getLabel() . ' reporting settings.';
     }
 }
