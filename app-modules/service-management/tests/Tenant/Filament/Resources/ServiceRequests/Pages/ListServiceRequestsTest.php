@@ -221,6 +221,8 @@ test('The correct details are displayed on the ListServiceRequests page via dire
 it('lists service requests for manager and auditor group members', function () {
     ServiceRequestTypeGroupAssignmentsFeature::activate();
 
+    $openStatus = ServiceRequestStatus::factory()->open()->create();
+
     $user = User::factory()->create();
     $user->givePermissionTo('service_request.view-any');
 
@@ -235,6 +237,7 @@ it('lists service requests for manager and auditor group members', function () {
     $auditorType->auditorGroups()->attach($auditorGroup);
 
     $visibleRequests = collect([$managerType, $auditorType])->map(fn (ServiceRequestType $type) => ServiceRequest::factory()->state([
+        'status_id' => $openStatus->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $type->getKey(),
         ])->getKey(),
