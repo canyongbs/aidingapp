@@ -219,8 +219,7 @@ describe('tabs', function () {
         $project = Project::factory()->create();
 
         livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->assertSee($tab->getLabel())
-            ->assertSeeHtml("wire:click=\"\$set('tab', '{$tab->value}')\"");
+            ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
     it('defaults to the access tab when no tab is requested', function () {
@@ -370,7 +369,6 @@ it('can create a milestone through the project milestones widget create action',
         ->callTableAction('createMilestone', data: [
             'title' => $milestone->title,
             'description' => $milestone->description,
-            'status_id' => $milestone->status_id,
             'target_date' => $milestone->target_date,
         ])
         ->assertHasNoTableActionErrors();
@@ -771,7 +769,7 @@ it('renders the milestone title as plain text and denies the manage milestone ac
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertSeeHtml('<span>' . e($milestone->title) . '</span>')
+        ->assertSee($milestone->title)
         ->assertActionHidden(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]));
 });
 
@@ -1194,6 +1192,7 @@ it('calculates progress as 0 when the project has no pipeline entries', function
     livewire(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
+        ->assertActionDoesNotExist('manageAccess')
         ->assertSee('Progress: 0%');
 });
 

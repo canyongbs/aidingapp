@@ -43,6 +43,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class WithProgressCounts
 {
+    public function __construct(private readonly bool $excludeArchived = false) {}
+
     /**
      * @param Builder<Project> $query
      */
@@ -50,20 +52,43 @@ class WithProgressCounts
     {
         $query->addSelect([
             'total_pipeline_entries_count' => $this->entries(),
-            'complete_pipeline_entries_count' => $this->entries()
-                ->where('pipeline_stages.classification', PipelineStageClassification::Complete->value),
+            'complete_pipeline_entries_count' => $this->entries(onlyComplete: true),
         ]);
     }
 
     /**
      * @return Builder<PipelineEntry>
      */
-    protected function entries(): Builder
+    protected function entries(bool $onlyComplete = false): Builder
     {
-        return PipelineEntry::query()
-            ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
-            ->join('pipelines', 'pipelines.id', '=', 'pipeline_stages.pipeline_id')
-            ->whereColumn('pipelines.project_id', 'projects.id')
-            ->selectRaw('count(*)');
+        $query = PipelineEntry::query()
+            ->whereHas('pipelineStage', function (Builder $query) use ($onlyComplete): void {
+                if ($this->excludeArchived) {
+                    $query->withoutArchived();
+                }
+
+                if ($onlyComplete) {
+                    $query->where('classification', PipelineStageClassification::Complete->value);
+                }
+
+                $query->whereHas('pipeline', function (Builder $query): void {
+                    if ($this->excludeArchived) {
+                        $query->withoutArchived();
+                    }
+
+                    $query->whereColumn('pipelines.project_id', 'projects.id');
+                });
+            });
+
+        if ($this->excludeArchived) {
+            $query->withoutArchived()
+                ->where(
+                    fn (Builder $query): Builder => $query
+                        ->whereNull('project_milestone_id')
+                        ->orWhereHas('milestone', fn (Builder $query): Builder => $query->withoutArchived()),
+                );
+        }
+
+        return $query->selectRaw('count(*)');
     }
 }

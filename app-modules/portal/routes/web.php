@@ -96,6 +96,8 @@ Route::prefix('portal')
                 ->name('licenses');
             Route::get('/projects', RenderKnowledgeManagementPortal::class)
                 ->name('projects');
+            Route::get('/projects/{project}', RenderKnowledgeManagementPortal::class)
+                ->name('projects.show');
             Route::get('/status', RenderKnowledgeManagementPortal::class)
                 ->name('status');
         });

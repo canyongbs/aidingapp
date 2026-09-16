@@ -36,13 +36,18 @@
 
 namespace AidingApp\Portal\Providers;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\PortalPlugin;
 use AidingApp\Portal\Settings\SettingsProperties\PortalSettingsProperty;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Symfony\Component\HttpFoundation\Response;
 
 class PortalServiceProvider extends ServiceProvider
 {
@@ -53,6 +58,18 @@ class PortalServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        Route::bind('portalProject', function (string $value): Project {
+            $contact = auth('contact')->user();
+
+            abort_unless($contact instanceof Contact, Response::HTTP_NOT_FOUND);
+
+            return Project::query()
+                ->withoutArchived()
+                ->tap(new VisibleToPortalContact($contact))
+                ->whereKey($value)
+                ->firstOrFail();
+        });
+
         Relation::morphMap([
             'portal_settings_property' => PortalSettingsProperty::class,
             'knowledgebase_article_vote' => KnowledgeBaseArticleVote::class,

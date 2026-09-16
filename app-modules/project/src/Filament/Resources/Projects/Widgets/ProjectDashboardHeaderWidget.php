@@ -36,7 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
-use AidingApp\Project\Filament\Actions\ProjectManageAccessAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
@@ -73,13 +72,6 @@ class ProjectDashboardHeaderWidget extends Widget implements HasActions, HasSche
             ->extraAttributes(['class' => 'grow'])
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->url(fn (): string => ProjectResource::getUrl('edit', ['record' => $this->record]));
-    }
-
-    public function manageAccessAction(): Action
-    {
-        return ProjectManageAccessAction::make('manageAccess')
-            ->extraAttributes(['class' => 'grow'])
-            ->record($this->record);
     }
 
     public function getProgress(): int

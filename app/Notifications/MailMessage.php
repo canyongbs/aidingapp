@@ -36,7 +36,7 @@
 
 namespace App\Notifications;
 
-use App\Models\NotificationSetting;
+use App\Settings\NotificationSettings;
 use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
 
 class MailMessage extends BaseMailMessage
@@ -56,7 +56,7 @@ class MailMessage extends BaseMailMessage
         return $this;
     }
 
-    public function settings(?NotificationSetting $setting): static
+    public function settings(?NotificationSettings $setting): static
     {
         $this->viewData = [
             $this->viewData,

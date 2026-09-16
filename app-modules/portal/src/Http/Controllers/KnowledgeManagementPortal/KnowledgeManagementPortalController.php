@@ -37,10 +37,13 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiSupportAssistantSettings;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Settings\KnowledgeBasePortalSettings;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\Scopes\VisibleToPortalContact;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Filament\Support\Colors\Color;
@@ -59,6 +62,7 @@ class KnowledgeManagementPortalController extends Controller
             ->getFirstMedia('logo');
         $favicon = $settings->getSettingsPropertyModel('portal.favicon')
             ->getFirstMedia('portal_favicon');
+        $contact = auth()->guard('contact')->user();
 
         if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
@@ -89,7 +93,12 @@ class KnowledgeManagementPortalController extends Controller
             'asset_management_enabled' => $addons?->assetManagement,
             'has_license' => auth()->guard('contact')->user()?->productLicenses()->exists() ?: false,
             'license_management_enabled' => $addons?->licenseManagement,
-            'has_projects' => auth()->guard('contact')->user()?->guestProjects()->exists() ?: false,
+            'has_projects' => ($addons?->projectManagement && $contact instanceof Contact)
+                ? Project::query()
+                    ->withoutArchived()
+                    ->tap(new VisibleToPortalContact($contact))
+                    ->exists()
+                : false,
             'authentication_url' => URL::to(
                 URL::signedRoute(
                     name: 'api.portal.request-authentication',

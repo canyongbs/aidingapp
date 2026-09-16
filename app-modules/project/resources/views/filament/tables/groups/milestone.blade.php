@@ -44,17 +44,19 @@
     CSS selector in resources/css/filament/admin/theme.css.
 --}}
 <span class="flex w-full items-center justify-between gap-x-3">
-    @if ($canManageMilestone)
+    @if ($milestone && $canManageMilestone)
         <x-filament::link
             tag="button"
             x-on:click.stop
             wire:click="mountAction('manageMilestone', { milestone: '{{ $milestone->getKey() }}' })"
         >
             <span class="fi-sr-only">Edit milestone:</span>
-            {{ $milestone->title }}
+            <span class="fi-ta-group-heading">{{ $milestone->title }}</span>
         </x-filament::link>
     @else
-        <span>{{ $milestone->title }}</span>
+        <span class="fi-ta-group-heading">
+            {{ $milestone?->title ?? 'No Associated Milestone' }}
+        </span>
     @endif
 
     {{-- Color/size classes are scoped to this call site only; the shared component ships unstyled so the dashboard header and List Projects table are unaffected. --}}

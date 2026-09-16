@@ -35,18 +35,26 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Project\Models\Project;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-test('portal returns has_projects as false when contact has no pipeline entries', function () {
+beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->projectManagement = true;
+    $licenseSettings->save();
+});
+
+it('returns `has_projects` as false when the contact has no assigned projects', function () {
     $contact = Contact::factory()->create();
 
     actingAs($contact, 'contact');
@@ -58,11 +66,7 @@ test('portal returns has_projects as false when contact has no pipeline entries'
     $response->assertJsonPath('has_projects', false);
 });
 
-test('portal returns has_projects as true when contact has pipeline entries', function () {
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
+it('returns `has_projects` as true when the contact is a direct project guest', function () {
     $contact = Contact::factory()->create();
 
     $project = Project::factory()->create();
@@ -77,12 +81,46 @@ test('portal returns has_projects as true when contact has pipeline entries', fu
     $response->assertJsonPath('has_projects', true);
 });
 
-test('portal projects route renders successfully', function () {
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+it('returns `has_projects` as true when the contact organization is a project guest', function () {
+    $organization = Organization::factory()->create();
+    $contact = Contact::factory()->for($organization)->create();
+    $project = Project::factory()->create();
+    $project->guestOrganizations()->attach($organization);
 
+    actingAs($contact, 'contact');
+
+    $response = get(URL::signedRoute(name: 'api.portal.define', absolute: false));
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('has_projects', true);
+});
+
+it('returns `has_projects` as false when Project Management is not licensed', function () {
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->projectManagement = false;
+    $licenseSettings->save();
+
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create();
+    $project->guestContacts()->attach($contact);
+
+    actingAs($contact, 'contact');
+
+    $response = get(URL::signedRoute(name: 'api.portal.define', absolute: false));
+
+    $response->assertSuccessful();
+    $response->assertJsonPath('has_projects', false);
+});
+
+it('renders the portal projects route', function () {
     $response = get(route('portal.projects'));
+
+    $response->assertSuccessful();
+});
+
+it('renders the portal project show route', function () {
+    $project = Project::factory()->create();
+    $response = get(route('portal.projects.show', ['project' => $project->id]));
 
     $response->assertSuccessful();
 });

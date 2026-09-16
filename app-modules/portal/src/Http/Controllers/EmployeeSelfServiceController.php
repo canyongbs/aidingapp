@@ -36,6 +36,7 @@
 
 namespace AidingApp\Portal\Http\Controllers;
 
+use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\RedirectResponse;
@@ -44,7 +45,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class EmployeeSelfServiceController extends Controller
 {
-    public function __invoke(): RedirectResponse
+    public function __invoke(AuthenticatePortalContact $authenticatePortalContact): RedirectResponse
     {
         $user = Auth::user();
 
@@ -54,7 +55,7 @@ class EmployeeSelfServiceController extends Controller
 
         abort_if(is_null($contact), Response::HTTP_FORBIDDEN);
 
-        Auth::guard('contact')->login($contact);
+        $authenticatePortalContact($contact);
 
         return redirect()->route('portal.show');
     }

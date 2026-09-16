@@ -46,6 +46,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 trait InteractsWithVectorStores
 {
@@ -289,6 +290,24 @@ trait InteractsWithVectorStores
         }
     }
 
+    /**
+     * Resolves the file to use for vector store operations. If the given
+     * file instance was loaded with partial attributes and therefore has no
+     * parsing results, it is re-hydrated from the database so downstream
+     * vector store logic can reuse the fully loaded instance instead of
+     * fetching it fresh again.
+     */
+    protected function fileHasParsingResults(AiFile $file): bool
+    {
+        $parsingResults = $file->getParsingResults();
+
+        if (blank($parsingResults) && ($file instanceof Model)) {
+            $parsingResults = $file->fresh()?->getParsingResults();
+        }
+
+        return filled($parsingResults);
+    }
+
     protected function uploadFileForVectorStore(AiFile $file): ?OpenAiVectorStore
     {
         $vectorStore = new OpenAiVectorStore();
@@ -306,13 +325,7 @@ trait InteractsWithVectorStores
         }
 
         if (blank($parsingResults)) {
-            report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as parsing results are blank.'));
-
-            return null;
-        }
-
-        if (blank($name)) {
-            report(new Exception('Failed to create file [' . $file->getKey() . '] for vector store, as the file name is blank.'));
+            Log::info('Skipping file [' . $file->getKey() . '] for vector store, as it has no parsing results to upload.');
 
             return null;
         }

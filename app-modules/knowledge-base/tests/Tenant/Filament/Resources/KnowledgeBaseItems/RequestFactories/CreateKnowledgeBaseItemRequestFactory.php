@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseItems\RequestFactories;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use Worksome\RequestFactories\RequestFactory;
@@ -51,7 +50,6 @@ class CreateKnowledgeBaseItemRequestFactory extends RequestFactory
             'notes' => fake()->paragraph(),
             'status_id' => KnowledgeBaseStatus::factory()->create()->id,
             'category_id' => KnowledgeBaseCategory::factory()->create()->id,
-            'division' => [Division::factory()->create()->id],
         ];
     }
 }

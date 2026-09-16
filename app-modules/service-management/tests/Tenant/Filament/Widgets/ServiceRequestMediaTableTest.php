@@ -66,6 +66,47 @@ describe('ServiceRequest', function () {
             ->assertCanSeeTableRecords($serviceRequest->getMedia('uploads'));
     });
 
+    test('appends the extension to the display name when the name has none', function () {
+        Storage::fake('s3');
+
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->usingFileName('report.png')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertSuccessful()
+            ->assertTableColumnStateSet('display_name', 'report.png', record: $media);
+    });
+
+    test('does not double the extension when the name already includes it', function () {
+        Storage::fake('s3');
+
+        asSuperAdmin();
+
+        // Mirrors email-ingested media, where the name was stored with its extension.
+        $serviceRequest = ServiceRequest::factory()->create();
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('Screenshot.jpg'))
+            ->usingName('Screenshot.jpg')
+            ->usingFileName('Screenshot.jpg')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertSuccessful()
+            ->assertTableColumnStateSet('display_name', 'Screenshot.jpg', record: $media);
+    });
+
     test('shows uploader name for a User', function () {
         Storage::fake('s3');
 

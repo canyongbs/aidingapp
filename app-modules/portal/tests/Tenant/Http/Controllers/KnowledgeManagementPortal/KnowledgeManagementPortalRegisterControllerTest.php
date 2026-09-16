@@ -44,6 +44,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\postJson;
+use function Pest\Laravel\withHeader;
 
 beforeEach(function () {
     $settings = app(PortalSettings::class);
@@ -101,6 +102,57 @@ test('it registers a new portal contact for matching organization domain', funct
         ->and($contact?->organization_id)->toBe($organization->id);
 
     expect($response->json('token'))->not->toBeEmpty();
+});
+
+test('it does not rotate the csrf token shared with the admin panel', function () {
+    ContactType::factory()->create([
+        'is_default' => true,
+    ]);
+
+    Organization::factory()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    $plainCode = 123456;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make($plainCode),
+        'created_at' => now(),
+    ]);
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.register.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    $host = parse_url(route('api.portal.define'), PHP_URL_HOST);
+
+    config(['sanctum.stateful' => [$host]]);
+
+    session()->start();
+
+    $token = session()->token();
+
+    expect($token)->not->toBeEmpty();
+
+    withHeader('Referer', 'https://' . $host)
+        ->postJson($url, [
+            'email' => 'new.contact@example.com',
+            'first_name' => 'New',
+            'last_name' => 'Contact',
+            'mobile' => '+15550001111',
+            'sms_opt_out' => false,
+            'code' => $plainCode,
+        ])
+        ->assertOk();
+
+    expect(session()->token())->toBe($token)
+        ->and(auth('contact')->check())->toBeTrue();
 });
 
 test('it returns expired flag when portal authentication is expired', function () {

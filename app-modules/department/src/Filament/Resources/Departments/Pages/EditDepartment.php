@@ -37,14 +37,11 @@
 namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
-use AidingApp\Division\Models\Division;
 use Filament\Actions\DeleteAction;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
-use Illuminate\Database\Eloquent\Builder;
 
 class EditDepartment extends EditRecord
 {
@@ -62,11 +59,6 @@ class EditDepartment extends EditRecord
                 Textarea::make('description')
                     ->required()
                     ->string(),
-                Select::make('division_id')
-                    ->relationship('division', 'name', modifyQueryUsing: fn (Builder $query) => $query->orderBy('is_default', 'desc'))
-                    ->searchable()
-                    ->preload()
-                    ->default(fn () => Division::query()->where('is_default', true)->first()?->getKey()),
             ]);
     }
 

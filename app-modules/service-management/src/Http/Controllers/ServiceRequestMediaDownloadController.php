@@ -48,7 +48,7 @@ class ServiceRequestMediaDownloadController extends Controller
         return redirect(
             $media->getTemporaryUrl(
                 expiration: now()->addMinute(),
-                options: ['ResponseContentDisposition' => 'attachment; filename="' . $media->file_name . '"']
+                options: ['ResponseContentDisposition' => $media->attachmentContentDisposition()]
             )
         );
     }
