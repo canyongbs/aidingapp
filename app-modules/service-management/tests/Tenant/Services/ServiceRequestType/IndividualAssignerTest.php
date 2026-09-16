@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
@@ -144,6 +145,35 @@ test('individual assigner assigns to configured user via direct manager', functi
     expect($assignment->user_id)->toBe($user->getKey());
     expect($assignment->assigned_by_id)->toBeNull();
     expect($assignment->assigned_by_type)->toBeNull();
+});
+
+it('assigns to a configured user through manager group membership', function () {
+    asSuperAdmin();
+
+    $manager = User::factory()->create();
+    $group = Group::factory()->create();
+    $group->users()->attach($manager);
+
+    $serviceRequestType = ServiceRequestType::factory()
+        ->hasAttached($group, relationship: 'managerGroups')
+        ->state([
+            'assignment_type' => ServiceRequestTypeAssignmentTypes::Individual,
+            'assignment_type_individual_id' => $manager->getKey(),
+        ])
+        ->create();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    app(IndividualAssigner::class)->execute($serviceRequest);
+
+    expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
 test('individual assigner does not assign when no individual is configured', function () {

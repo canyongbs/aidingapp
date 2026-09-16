@@ -36,41 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
-class ManagesServiceRequestType
+class ManagedServiceRequests
 {
     public function __construct(
-        protected string $serviceRequestTypeId,
+        protected User $user,
     ) {}
 
-    /**
-     * @param Builder<User> $query
-     */
+    /** @param Builder<ServiceRequest> $query */
     public function __invoke(Builder $query): void
     {
-        $query->where(function (Builder $query): void {
-            $query
-                ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                })
-                ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                });
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
-                    $query->whereIn(
-                        'groups.id',
-                        ServiceRequestTypeManagerGroup::query()
-                            ->select('group_id')
-                            ->where('service_request_type_id', $this->serviceRequestTypeId),
-                    );
-                });
-            }
-        });
+        $query->whereHas(
+            'priority.type',
+            fn (Builder $query) => $query->tap(new ManagedServiceRequestTypes($this->user)),
+        );
     }
 }

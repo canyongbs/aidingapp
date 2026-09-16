@@ -34,43 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models\Scopes;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-class ManagesServiceRequestType
+/** @extends Factory<ServiceRequestTypeManagerGroup> */
+class ServiceRequestTypeManagerGroupFactory extends Factory
 {
-    public function __construct(
-        protected string $serviceRequestTypeId,
-    ) {}
-
-    /**
-     * @param Builder<User> $query
-     */
-    public function __invoke(Builder $query): void
+    /** @return array<string, mixed> */
+    public function definition(): array
     {
-        $query->where(function (Builder $query): void {
-            $query
-                ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                })
-                ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                });
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
-                    $query->whereIn(
-                        'groups.id',
-                        ServiceRequestTypeManagerGroup::query()
-                            ->select('group_id')
-                            ->where('service_request_type_id', $this->serviceRequestTypeId),
-                    );
-                });
-            }
-        });
+        return [
+            'service_request_type_id' => ServiceRequestType::factory(),
+            'group_id' => Group::factory(),
+        ];
     }
 }

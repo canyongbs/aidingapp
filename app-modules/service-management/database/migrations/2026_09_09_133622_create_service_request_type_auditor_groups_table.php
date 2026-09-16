@@ -34,43 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models\Scopes;
-
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
 use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-class ManagesServiceRequestType
-{
-    public function __construct(
-        protected string $serviceRequestTypeId,
-    ) {}
-
-    /**
-     * @param Builder<User> $query
-     */
-    public function __invoke(Builder $query): void
+return new class () extends Migration {
+    public function up(): void
     {
-        $query->where(function (Builder $query): void {
-            $query
-                ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                })
-                ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                });
+        DB::transaction(function () {
+            Schema::create('service_request_type_auditor_groups', function (Blueprint $table) {
+                $table->uuid('id')->primary();
+                $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
+                $table->foreignUuid('group_id')->constrained('groups')->cascadeOnDelete();
+                $table->timestamps();
 
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
-                    $query->whereIn(
-                        'groups.id',
-                        ServiceRequestTypeManagerGroup::query()
-                            ->select('group_id')
-                            ->where('service_request_type_id', $this->serviceRequestTypeId),
-                    );
-                });
-            }
+                $table->uniqueIndex(['service_request_type_id', 'group_id']);
+            });
+
+            ServiceRequestTypeGroupAssignmentsFeature::activate();
         });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestTypeGroupAssignmentsFeature::deactivate();
+
+            Schema::dropIfExists('service_request_type_auditor_groups');
+        });
+    }
+};

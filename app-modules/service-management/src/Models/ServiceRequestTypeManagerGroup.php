@@ -34,43 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models\Scopes;
+namespace AidingApp\ServiceManagement\Models;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Database\Factories\ServiceRequestTypeManagerGroupFactory;
+use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class ManagesServiceRequestType
+/**
+ * @mixin IdeHelperServiceRequestTypeManagerGroup
+ */
+class ServiceRequestTypeManagerGroup extends Pivot
 {
-    public function __construct(
-        protected string $serviceRequestTypeId,
-    ) {}
+    /** @use HasFactory<ServiceRequestTypeManagerGroupFactory> */
+    use HasFactory;
 
-    /**
-     * @param Builder<User> $query
-     */
-    public function __invoke(Builder $query): void
+    use HasUuids;
+
+    protected $table = 'service_request_type_manager_groups';
+
+    /** @return BelongsTo<ServiceRequestType, $this> */
+    public function serviceRequestType(): BelongsTo
     {
-        $query->where(function (Builder $query): void {
-            $query
-                ->whereHas('department.manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                })
-                ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
-                    $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                });
+        return $this->belongsTo(ServiceRequestType::class);
+    }
 
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
-                    $query->whereIn(
-                        'groups.id',
-                        ServiceRequestTypeManagerGroup::query()
-                            ->select('group_id')
-                            ->where('service_request_type_id', $this->serviceRequestTypeId),
-                    );
-                });
-            }
-        });
+    /** @return BelongsTo<Group, $this> */
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(Group::class);
     }
 }
