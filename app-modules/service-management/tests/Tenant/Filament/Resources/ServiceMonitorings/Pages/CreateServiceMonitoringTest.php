@@ -37,10 +37,12 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -128,13 +130,6 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->without('frequency'),
             ['frequency' => 'required'],
-        ],
-        'report frequency required when reporting is active' => [
-            ServiceMonitoringTargetRequestFactory::new()->state([
-                'is_reporting_active' => true,
-                'report_frequency' => null,
-            ]),
-            ['report_frequency' => 'required'],
         ],
         'should contain does not have opening quote without closing quote' => [
             ServiceMonitoringTargetRequestFactory::new()->state([
@@ -263,6 +258,22 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
+// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
+test('report frequency is required when reporting is active and the feature is inactive', function () {
+    ServiceMonitoringReportConfigurationsFeature::deactivate();
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state([
+        'is_reporting_active' => true,
+        'report_frequency' => null,
+    ])->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['report_frequency' => 'required']);
+});
+
 test('CreateServiceMonitor with notification group User or Department', function () {
     asSuperAdmin();
 
@@ -361,6 +372,46 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
         });
 });
 
+// report_configurations.daily.report_users UserSelect admin-filtering tests
+
+test('daily report_users UserSelect does not show admin users in options by default on CreateServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.create');
+    actingAs($actor);
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($regularUser->getKey(), $options)
+                && ! array_key_exists($adminUser->getKey(), $options);
+        });
+});
+
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.create');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
 test('creating a confidential service monitor persists the granted users, departments, and contacts', function () {
     asSuperAdmin();
 
@@ -420,6 +471,198 @@ test('a confidential service monitor cannot be created while a notification reci
         ->assertHasFormErrors(['is_confidential']);
 
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('creating a service monitor persists report configurations for multiple frequencies', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+    $weeklyDepartment = Department::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => ['email'],
+                ],
+                'weekly' => [
+                    'is_active' => true,
+                    'report_departments' => [$weeklyDepartment->getKey()],
+                    'report_channels' => ['database'],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::query()->where('name', $request['name'])->firstOrFail();
+
+    $daily = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Daily);
+    expect($daily->is_active)->toBeTrue()
+        ->and($daily->is_reported_via_email)->toBeTrue()
+        ->and($daily->is_reported_via_database)->toBeFalse()
+        ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$dailyUser->getKey()]);
+
+    $weekly = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Weekly);
+    expect($weekly->is_active)->toBeTrue()
+        ->and($weekly->is_reported_via_database)->toBeTrue()
+        ->and($weekly->reportDepartments()->pluck('departments.id')->all())->toBe([$weeklyDepartment->getKey()]);
+
+    $monthly = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Monthly);
+    expect($monthly->is_active)->toBeFalse();
+});
+
+test('the Recipients section for a frequency is only visible while that frequency is active', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertDontSee('report_configurations.daily.report_channels', escape: false)
+        ->fillForm(['report_configurations' => ['daily' => ['is_active' => true]]])
+        ->assertSee('report_configurations.daily.report_channels', escape: false)
+        ->fillForm(['report_configurations' => ['daily' => ['is_active' => false]]])
+        ->assertDontSee('report_configurations.daily.report_channels', escape: false);
+});
+
+test('a service monitor cannot be created with an active reporting frequency and no channel selected', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => [],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['report_configurations.daily.report_channels' => 'required']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a service monitor can be created with an active reporting frequency once a channel is selected', function () {
+    asSuperAdmin();
+
+    $dailyUser = User::factory()->create();
+    $request = ServiceMonitoringTargetRequestFactory::new()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...$request,
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$dailyUser->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->where('name', $request['name'])->exists())->toBeTrue();
+});
+
+test('a confidential service monitor cannot be created while a report recipient has no confidential access', function () {
+    asSuperAdmin();
+
+    $reportUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$reportUser->getKey()],
+                ],
+            ],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a confidential service monitor can be created when a report recipient has confidential access', function () {
+    asSuperAdmin();
+
+    $reportUser = User::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$reportUser->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+            'is_confidential' => true,
+            'confidentialUsers' => [$reportUser->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
+});
+
+test('a confidential service monitor cannot be created while a report contact has no confidential access', function () {
+    asSuperAdmin();
+
+    $reportContact = Contact::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_contacts' => [$reportContact->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+            'is_confidential' => true,
+        ])
+        ->call('create')
+        ->assertHasFormErrors(['is_confidential']);
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
+});
+
+test('a confidential service monitor can be created when a report contact has confidential access', function () {
+    asSuperAdmin();
+
+    $reportContact = Contact::factory()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            ...ServiceMonitoringTargetRequestFactory::new()->create(),
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_contacts' => [$reportContact->getKey()],
+                    'report_channels' => ['email'],
+                ],
+            ],
+            'is_confidential' => true,
+            'confidentialContacts' => [$reportContact->getKey()],
+        ])
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
 });
 
 test('a service monitor saves keyword match values arrays', function () {

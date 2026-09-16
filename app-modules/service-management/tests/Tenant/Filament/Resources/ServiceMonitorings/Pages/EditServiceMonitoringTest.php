@@ -37,10 +37,13 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -148,13 +151,6 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
         'frequency required' => [
             ServiceMonitoringTargetRequestFactory::new()->state(['frequency' => null]),
             ['frequency' => 'required'],
-        ],
-        'report frequency required when reporting is active' => [
-            ServiceMonitoringTargetRequestFactory::new()->state([
-                'is_reporting_active' => true,
-                'report_frequency' => null,
-            ]),
-            ['report_frequency' => 'required'],
         ],
         'should contain does not have opening quote without closing quote' => [
             ServiceMonitoringTargetRequestFactory::new()->state([
@@ -269,6 +265,26 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
+// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
+test('report frequency is required when reporting is active and the feature is inactive', function () {
+    ServiceMonitoringReportConfigurationsFeature::deactivate();
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state([
+        'is_reporting_active' => true,
+        'report_frequency' => null,
+    ])->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors(['report_frequency' => 'required']);
+});
+
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
     asSuperAdmin();
 
@@ -345,6 +361,46 @@ test('EditServiceMonitoring appends new keyword values to existing lists', funct
 });
 
 test('EditServiceMonitoring hydrates report channels from persisted flags', function (array $attributes, array $expectedChannels) {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_active' => true,
+            ...$attributes,
+        ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaStateSet([
+            'report_configurations.daily.report_channels' => $expectedChannels,
+        ]);
+})->with([
+    'email only' => [
+        ['is_reported_via_email' => true, 'is_reported_via_database' => false],
+        ['email'],
+    ],
+    'application only' => [
+        ['is_reported_via_email' => false, 'is_reported_via_database' => true],
+        ['database'],
+    ],
+    'both channels' => [
+        ['is_reported_via_email' => true, 'is_reported_via_database' => true],
+        ['email', 'database'],
+    ],
+    'no channels' => [
+        ['is_reported_via_email' => false, 'is_reported_via_database' => false],
+        [],
+    ],
+]);
+
+// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
+test('EditServiceMonitoring hydrates legacy report channels from persisted flags when the feature is inactive', function (array $attributes, array $expectedChannels) {
+    ServiceMonitoringReportConfigurationsFeature::deactivate();
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -515,6 +571,163 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
         });
+});
+
+// report_configurations.daily.report_users UserSelect admin-filtering tests
+
+test('daily report_users UserSelect does not show admin users in options by default on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $regularUser = User::factory()->create();
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($regularUser, $adminUser): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($regularUser->getKey(), $options)
+                && ! array_key_exists($adminUser->getKey(), $options);
+        });
+});
+
+test('daily report_users UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function () {
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_active' => true,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($adminUser->getKey());
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function () {
+    Config::set('app.filter_admins_from_selection', false);
+
+    $actor = User::factory()->create();
+    $actor->givePermissionTo('service_monitoring.view-any');
+    $actor->givePermissionTo('service_monitoring.*.update');
+    actingAs($actor);
+
+    $adminUser = User::factory()->create();
+    $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
+            return array_key_exists($adminUser->getKey(), $field->getOptions());
+        });
+});
+
+test('a daily report user who is an admin is still saved when editing', function () {
+    asSuperAdmin();
+
+    $adminReportUser = User::factory()->create();
+    $adminReportUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_active' => true,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($adminReportUser->getKey());
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($configuration->refresh()->reportUsers()->pluck('users.id')->all())->toBe([$adminReportUser->getKey()]);
+});
+
+test('EditServiceMonitoring updates report configurations for multiple frequencies', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+    $originalUser = User::factory()->create();
+
+    ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->active()
+        ->create(['frequency' => ServiceMonitoringReportFrequency::Daily])
+        ->reportUsers()->attach($originalUser->getKey());
+
+    $newUser = User::factory()->create();
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => true,
+                    'report_users' => [$newUser->getKey()],
+                    'report_channels' => ['email', 'database'],
+                ],
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $daily = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Daily);
+    expect($daily->is_reported_via_email)->toBeTrue()
+        ->and($daily->is_reported_via_database)->toBeTrue()
+        ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$newUser->getKey()]);
+});
+
+test('EditServiceMonitoring keeps a deactivated frequency\'s recipients instead of clearing them', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+    $reportUser = User::factory()->create();
+
+    ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->active()
+        ->create(['frequency' => ServiceMonitoringReportFrequency::Daily])
+        ->reportUsers()->attach($reportUser->getKey());
+
+    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->fillForm([
+            'report_configurations' => [
+                'daily' => [
+                    'is_active' => false,
+                    'report_users' => [$reportUser->getKey()],
+                ],
+            ],
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $daily = $serviceMonitoringTarget->reportConfigurationFor(ServiceMonitoringReportFrequency::Daily);
+    expect($daily->is_active)->toBeFalse()
+        ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$reportUser->getKey()]);
 });
 
 test('turning off confidentiality clears previously granted users, departments, and contacts', function () {

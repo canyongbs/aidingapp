@@ -34,40 +34,29 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Rules;
+namespace AidingApp\ServiceManagement\Notifications\Concerns;
 
-use Illuminate\Support\Collection;
+use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Database\Eloquent\Builder;
 
-/**
- * A confidential service monitor only notifies recipients who are allowed to see it, so a
- * recipient without confidential access would silently never be alerted. This rejects that
- * combination at the form instead of letting the outage alert disappear at delivery time.
- */
-class ServiceMonitorNotificationRecipientsMustHaveConfidentialAccess extends RecipientsMustHaveConfidentialAccess
+trait ChecksServiceMonitoringTargetVisibility
 {
-    /**
-     * @param list<string> $notifiedUserIds
-     * @param list<string> $notifiedDepartmentIds
-     * @param list<string> $confidentialUserIds
-     * @param list<string> $confidentialDepartmentIds
-     */
-    public function __construct(
-        array $notifiedUserIds,
-        array $notifiedDepartmentIds,
-        array $confidentialUserIds,
-        array $confidentialDepartmentIds,
-        ?string $creatorId,
-    ) {
-        parent::__construct($notifiedUserIds, $notifiedDepartmentIds, $confidentialUserIds, $confidentialDepartmentIds, $creatorId);
-    }
-
-    /**
-     * @param Collection<string, Collection<int, string>> $unreachable
-     */
-    protected function failureMessage(Collection $unreachable): string
+    // Notifications are queued and run without an authenticated user, so confidentiality must be re-checked per recipient
+    protected function targetIsVisibleTo(?ServiceMonitoringTarget $target, object $notifiable): bool
     {
-        return 'These notification recipients would not be able to see this service monitor, so they would never be alerted: '
-            . $this->formatUnreachableGroups($unreachable)
-            . ' Grant them confidential access below, or remove them from the notification settings.';
+        if (! $target?->is_confidential) {
+            return true;
+        }
+
+        return ServiceMonitoringTarget::query()
+            ->withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->whereKey($target->getKey())
+            ->tap(fn (Builder $query) => (new ServiceMonitoringTargetVisibilityScope())->constrainFor(
+                $query,
+                $notifiable instanceof Authenticatable ? $notifiable : null,
+            ))
+            ->exists();
     }
 }

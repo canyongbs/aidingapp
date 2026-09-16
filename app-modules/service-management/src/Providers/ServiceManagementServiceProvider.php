@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -104,6 +105,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'advisory_status' => AdvisoryStatus::class,
             'advisory_update' => AdvisoryUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
+            'service_monitoring_report_configuration' => ServiceMonitoringReportConfiguration::class,
             'service_request_notification_automation_email_template' => ServiceRequestNotificationAutomationEmailTemplate::class,
         ]);
 

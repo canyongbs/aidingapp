@@ -37,7 +37,9 @@
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportNotifyJob;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
@@ -50,16 +52,15 @@ beforeEach(function () {
 it('successfully dispatches ServiceMonitoringReportNotifyJob', function (ServiceMonitoringReportFrequency $frequency) {
     Queue::fake();
 
-    $numTargets = rand(1, 10);
+    $numConfigurations = rand(1, 10);
 
-    ServiceMonitoringTarget::factory()->count($numTargets)->create([
-        'report_frequency' => $frequency,
-        'is_reporting_active' => true,
+    ServiceMonitoringReportConfiguration::factory()->count($numConfigurations)->active()->create([
+        'frequency' => $frequency,
     ]);
 
     (new ServiceMonitoringReportJob($frequency))->handle();
 
-    Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, $numTargets);
+    Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, $numConfigurations);
 })
     ->with(
         [
@@ -76,9 +77,8 @@ it('does not dispatch when serviceMonitoring addon is disabled', function (Servi
     $settings->data->addons->serviceMonitoring = false;
     $settings->save();
 
-    ServiceMonitoringTarget::factory()->count(3)->create([
-        'report_frequency' => $frequency,
-        'is_reporting_active' => true,
+    ServiceMonitoringReportConfiguration::factory()->count(3)->active()->create([
+        'frequency' => $frequency,
     ]);
 
     (new ServiceMonitoringReportJob($frequency))->handle();
@@ -93,13 +93,12 @@ it('does not dispatch when serviceMonitoring addon is disabled', function (Servi
         ]
     );
 
-it('only dispatches for targets matching the specified report frequency', function (ServiceMonitoringReportFrequency $frequency) {
+it('only dispatches for configurations matching the specified report frequency', function (ServiceMonitoringReportFrequency $frequency) {
     Queue::fake();
 
     foreach (ServiceMonitoringReportFrequency::cases() as $case) {
-        ServiceMonitoringTarget::factory()->create([
-            'report_frequency' => $case,
-            'is_reporting_active' => true,
+        ServiceMonitoringReportConfiguration::factory()->active()->create([
+            'frequency' => $case,
         ]);
     }
 
@@ -115,12 +114,11 @@ it('only dispatches for targets matching the specified report frequency', functi
         ]
     );
 
-it('does not dispatch for targets with inactive reporting', function (ServiceMonitoringReportFrequency $frequency) {
+it('does not dispatch for configurations that are inactive', function (ServiceMonitoringReportFrequency $frequency) {
     Queue::fake();
 
-    ServiceMonitoringTarget::factory()->count(3)->create([
-        'report_frequency' => $frequency,
-        'is_reporting_active' => false,
+    ServiceMonitoringReportConfiguration::factory()->count(3)->inactive()->create([
+        'frequency' => $frequency,
     ]);
 
     (new ServiceMonitoringReportJob($frequency))->handle();
@@ -134,3 +132,70 @@ it('does not dispatch for targets with inactive reporting', function (ServiceMon
             fn () => ServiceMonitoringReportFrequency::Monthly,
         ]
     );
+
+it('still dispatches for confidential targets, since delivery suppression happens per recipient', function () {
+    Queue::fake();
+
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    ServiceMonitoringReportConfiguration::factory()->active()->for($target, 'serviceMonitoringTarget')->create([
+        'frequency' => ServiceMonitoringReportFrequency::Daily,
+    ]);
+
+    (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
+
+    Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, 1);
+});
+
+it('does not dispatch a configuration whose target has been soft-deleted', function () {
+    Queue::fake();
+
+    $target = ServiceMonitoringTarget::factory()->create();
+    ServiceMonitoringReportConfiguration::factory()->active()->for($target, 'serviceMonitoringTarget')->create([
+        'frequency' => ServiceMonitoringReportFrequency::Daily,
+    ]);
+
+    $target->delete();
+
+    (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
+
+    Queue::assertNotPushed(ServiceMonitoringReportNotifyJob::class);
+});
+
+describe('the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up', function () {
+    it('falls back to legacy targets when the feature is inactive', function (ServiceMonitoringReportFrequency $frequency) {
+        ServiceMonitoringReportConfigurationsFeature::deactivate();
+        Queue::fake();
+
+        $numTargets = rand(1, 10);
+
+        ServiceMonitoringTarget::factory()->count($numTargets)->create([
+            'report_frequency' => $frequency,
+            'is_reporting_active' => true,
+        ]);
+
+        (new ServiceMonitoringReportJob($frequency))->handle();
+
+        Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, $numTargets);
+    })
+        ->with(
+            [
+                fn () => ServiceMonitoringReportFrequency::Daily,
+                fn () => ServiceMonitoringReportFrequency::Weekly,
+                fn () => ServiceMonitoringReportFrequency::Monthly,
+            ]
+        );
+
+    it('does not dispatch for legacy targets with inactive reporting when the feature is inactive', function () {
+        ServiceMonitoringReportConfigurationsFeature::deactivate();
+        Queue::fake();
+
+        ServiceMonitoringTarget::factory()->count(3)->create([
+            'report_frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_reporting_active' => false,
+        ]);
+
+        (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
+
+        Queue::assertNotPushed(ServiceMonitoringReportNotifyJob::class);
+    });
+});
