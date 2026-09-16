@@ -55,7 +55,7 @@ use AidingApp\Timeline\Livewire\TimelineList;
 use App\Enums\Feature;
 use App\Filament\Concerns\FiltersManagersFromGroups;
 use App\Settings\DisplaySettings;
-use Filament\Actions\EditAction;
+use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -123,11 +123,7 @@ class ViewServiceRequest extends ViewRecord
                             ->schema([
                                 Livewire::make(TimelineList::class, fn (ServiceRequest $record): array => [
                                     'record' => $record,
-                                    'modelsToTimeline' => [
-                                        ServiceRequestUpdate::class,
-                                        ServiceRequestAssignment::class,
-                                        ServiceRequestHistory::class,
-                                    ],
+                                    'modelsToTimeline' => $this->timelineModels($record),
                                     'emptyStateMessage' => 'There is no timeline available for this Service Request.',
                                     'noMoreRecordsMessage' => "You have reached the end of this service request's timeline.",
                                 ])->key(TimelineList::class),
@@ -139,10 +135,10 @@ class ViewServiceRequest extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
-            EditAction::make(),
             ReclassifyServiceRequestAction::make('reclassify')
                 ->record($this->getRecord())
                 ->slideOver(),
+            DeleteAction::make(),
         ];
     }
 
@@ -205,6 +201,24 @@ class ViewServiceRequest extends ViewRecord
     private function canViewTimeline(): bool
     {
         return auth()->user()->can(['engagement.view-any', 'engagement.*.view']);
+    }
+
+    /**
+     * @return array<class-string>
+     */
+    private function timelineModels(ServiceRequest $record): array
+    {
+        $models = [
+            ServiceRequestUpdate::class,
+            ServiceRequestAssignment::class,
+            ServiceRequestHistory::class,
+        ];
+
+        if ($this->canViewFeedback($record)) {
+            $models[] = ServiceRequestFeedback::class;
+        }
+
+        return $models;
     }
 
     private function buildFeedbackNoticeMessage(ServiceRequest $serviceRequest): string

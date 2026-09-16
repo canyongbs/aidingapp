@@ -36,28 +36,30 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use Filament\Forms\Components\ToggleButtons;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Exists;
 
-class ServiceRequestStatusToggleButtons
+class ServiceRequestPriorityToggleButtons
 {
-    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
+    public static function make(string $typeId, string $name = 'priority_id', ?string $selectedId = null): ToggleButtons
     {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        // Trashed statuses are excluded, except the currently-selected one, so a request left
-        // pointing at a soft-deleted status can still show and keep that value.
-        $statuses = ServiceRequestStatus::query()
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
-
         return ToggleButtons::make($name)
-            ->label('Status')
+            ->label('Priority')
             ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+            ->options(filled($typeId)
+                ? ServiceRequestPriority::query()
+                    ->withTrashed()
+                    ->where('type_id', $typeId)
+                    ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
+                    ->orderBy('order')
+                    ->pluck('name', 'id')
+                : collect())
+            ->exists(
+                table: (new ServiceRequestPriority())->getTable(),
+                column: 'id',
+                modifyRuleUsing: fn (Exists $rule): Exists => $rule->where('type_id', $typeId),
+            );
     }
 }

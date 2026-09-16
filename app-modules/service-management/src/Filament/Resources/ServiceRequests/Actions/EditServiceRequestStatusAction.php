@@ -34,30 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusToggleButtons;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification;
+use Filament\Support\Icons\Heroicon;
 
-class ServiceRequestStatusToggleButtons
+class EditServiceRequestStatusAction
 {
-    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
+    public static function make(ServiceRequest $serviceRequest): Action
     {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        // Trashed statuses are excluded, except the currently-selected one, so a request left
-        // pointing at a soft-deleted status can still show and keep that value.
-        $statuses = ServiceRequestStatus::query()
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
+        return Action::make('editStatus')
+            ->label('Edit status')
+            ->icon(Heroicon::Pencil)
+            ->iconButton()
+            ->authorize('update', $serviceRequest)
+            ->slideOver()
+            ->modalHeading('Edit Status')
+            ->modalSubmitActionLabel('Save')
+            ->fillForm([
+                'status_id' => $serviceRequest->status_id,
+            ])
+            ->schema([
+                ServiceRequestStatusToggleButtons::make(selectedId: $serviceRequest->status_id)
+                    ->required(),
+            ])
+            ->action(function (array $data) use ($serviceRequest): void {
+                $serviceRequest->status_id = $data['status_id'];
+                $serviceRequest->save();
 
-        return ToggleButtons::make($name)
-            ->label('Status')
-            ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+                Notification::make()
+                    ->title('Status updated.')
+                    ->success()
+                    ->send();
+            });
     }
 }

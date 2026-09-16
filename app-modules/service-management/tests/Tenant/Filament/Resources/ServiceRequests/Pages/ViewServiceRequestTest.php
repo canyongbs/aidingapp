@@ -66,6 +66,7 @@ use AidingApp\Timeline\Livewire\TimelineList;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Carbon\CarbonImmutable;
+use Filament\Actions\Testing\TestAction;
 use Filament\Infolists\Components\TextEntry;
 use Illuminate\Encryption\Encrypter;
 use Illuminate\Support\Facades\Crypt;
@@ -144,6 +145,49 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->close_details,
             ]
         );
+});
+
+test('the status, priority, and type still display and remain editable when soft-deleted', function () {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $status = ServiceRequestStatus::factory()->create([
+        'classification' => SystemServiceRequestClassification::Open,
+    ]);
+
+    $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();
+
+    $serviceRequest = ServiceRequest::factory()->create([
+        'status_id' => $status->getKey(),
+        'priority_id' => $priority->getKey(),
+    ]);
+
+    $status->delete();
+    $priority->delete();
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('view', [
+                'record' => $serviceRequest,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeTextInOrder(
+            [
+                'Type',
+                $serviceRequestType->name,
+                'Status',
+                $status->name,
+                'Priority',
+                $priority->name,
+            ]
+        );
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertActionVisible(TestAction::make('editStatus')->schemaComponent('status.name'))
+        ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('The Description entry has Markdown rendering enabled on the underlying component', function () {
@@ -538,6 +582,83 @@ describe('tabs', function () {
             ->assertDontSeeHtml('Customer Update Sent</a>')
             ->assertDontSeeHtml('Service Request Assigned</a>')
             ->assertDontSeeHtml('Service Request Reassigned</a>');
+    });
+
+    it('shows a new assignment on the timeline', function () {
+        $manager = User::factory()->create([
+            'name' => 'Jane Doe',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($manager);
+
+        asSuperAdmin();
+
+        ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($manager, 'user')
+            ->create();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Service Request Assigned')
+            ->assertSeeText('Jane Doe');
+    });
+
+    it('shows submitted feedback on the timeline', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $contact = Contact::factory()->create([
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
+            'full_name' => 'Alice Smith',
+        ]);
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create([
+                'csat_answer' => 4,
+                'nps_answer' => 8,
+            ]);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Feedback Submitted')
+            ->assertSeeText('Alice Smith')
+            ->assertSeeText('4')
+            ->assertSeeText('8');
+    });
+
+    it('hides submitted feedback from the timeline when the `FeedbackManagement` feature is disabled', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $contact = Contact::factory()->create([
+            'first_name' => 'Alice',
+            'last_name' => 'Smith',
+            'full_name' => 'Alice Smith',
+        ]);
+
+        ServiceRequestFeedback::factory()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($contact, 'contact')
+            ->create([
+                'csat_answer' => 4,
+                'nps_answer' => 8,
+            ]);
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->feedbackManagement = false;
+        $settings->save();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertDontSeeText('Feedback Submitted')
+            ->assertDontSeeText('Alice Smith');
     });
 
     it('renders the media table for the files tab', function () {

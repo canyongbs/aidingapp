@@ -243,6 +243,26 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     }
 
     /**
+     * The `status` relationship excludes soft-deleted statuses. Delete policies prevent
+     * removing a status still referenced by a request, but this covers records left over
+     * from before that constraint existed.
+     */
+    public function statusIncludingTrashed(): ?ServiceRequestStatus
+    {
+        return $this->status ?? $this->status()->withTrashed()->first();
+    }
+
+    /**
+     * The `priority` relationship excludes soft-deleted priorities. Delete policies prevent
+     * removing a priority still referenced by a request, but this covers records left over
+     * from before that constraint existed.
+     */
+    public function priorityIncludingTrashed(): ?ServiceRequestPriority
+    {
+        return $this->priority ?? $this->priority()->withTrashed()->first();
+    }
+
+    /**
      * @return BelongsTo<ServiceRequestFormSubmission, $this>
      */
     public function serviceRequestFormSubmission(): BelongsTo

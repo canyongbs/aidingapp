@@ -34,30 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
+use Illuminate\Support\Facades\Event;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Database\Eloquent\Builder;
+it('dispatches TimelineableRecordDeleted when a service request feedback is deleted', function () {
+    $serviceRequestFeedback = ServiceRequestFeedback::factory()->create();
 
-class ServiceRequestStatusToggleButtons
-{
-    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
-    {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        // Trashed statuses are excluded, except the currently-selected one, so a request left
-        // pointing at a soft-deleted status can still show and keep that value.
-        $statuses = ServiceRequestStatus::query()
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
+    Event::fake([TimelineableRecordDeleted::class]);
 
-        return ToggleButtons::make($name)
-            ->label('Status')
-            ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
-    }
-}
+    $serviceRequestFeedback->delete();
+
+    Event::assertDispatched(
+        TimelineableRecordDeleted::class,
+        fn (TimelineableRecordDeleted $event): bool => $event->entity->is($serviceRequestFeedback->serviceRequest)
+            && $event->timelineableModel->is($serviceRequestFeedback)
+    );
+});

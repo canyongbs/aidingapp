@@ -34,22 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Events\TimelineableRecordDeleted;
 
-class EditServiceRequestRequestFactory extends RequestFactory
+class ServiceRequestFeedbackObserver
 {
-    public function definition(): array
+    public function created(ServiceRequestFeedback $serviceRequestFeedback): void
     {
-        return [
-            'division_id' => Division::factory()->create()->id,
-            'status_id' => ServiceRequestStatus::factory()->create()->id,
-            'close_details' => $this->faker->sentence,
-            'category' => fake()->randomElement(ServiceRequestCategory::cases()),
-        ];
+        TimelineableRecordCreated::dispatch($serviceRequestFeedback->serviceRequest, $serviceRequestFeedback);
+    }
+
+    public function deleted(ServiceRequestFeedback $serviceRequestFeedback): void
+    {
+        TimelineableRecordDeleted::dispatch($serviceRequestFeedback->serviceRequest, $serviceRequestFeedback);
     }
 }

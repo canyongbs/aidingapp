@@ -34,30 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Database\Eloquent\Builder;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Illuminate\Database\Eloquent\Model;
 
-class ServiceRequestStatusToggleButtons
+class RecordServiceRequestFileDeletionHistory
 {
-    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
+    public function __invoke(Model $record, string $fileName): void
     {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        // Trashed statuses are excluded, except the currently-selected one, so a request left
-        // pointing at a soft-deleted status can still show and keep that value.
-        $statuses = ServiceRequestStatus::query()
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
+        $serviceRequest = match (true) {
+            $record instanceof ServiceRequest => $record,
+            default => null,
+        };
 
-        return ToggleButtons::make($name)
-            ->label('Status')
-            ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+        if (! $serviceRequest) {
+            return;
+        }
+
+        $actor = auth()->user();
+
+        $serviceRequest->histories()->create([
+            'original_values' => ['deleted_file' => $fileName],
+            'new_values' => ['deleted_file' => null],
+            'actor_type' => $actor?->getMorphClass(),
+            'actor_id' => $actor?->getKey(),
+        ]);
     }
 }

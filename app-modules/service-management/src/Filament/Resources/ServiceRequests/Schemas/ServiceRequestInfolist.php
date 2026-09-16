@@ -41,11 +41,19 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestCategoryAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestContactAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestDescriptionAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestDivisionAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestPriorityAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestStatusAction;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\EditServiceRequestTitleAction;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\Feature;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
+use Filament\Actions\Action;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Infolists\Components\ViewEntry;
 use Filament\Schemas\Components\Grid;
@@ -79,13 +87,14 @@ class ServiceRequestInfolist
                 view('filament.infolists.components.service-request-heading', [
                     'serviceRequestNumber' => $record->service_request_number,
                     'category' => $record->category,
-                    'type' => $record->priority?->type()->first()?->name,
+                    'type' => $record->priorityIncludingTrashed()?->type()->first()?->name,
                 ])->render()
             ))
             ->schema([
                 TextEntry::make('division.name')
                     ->visible(fn (ServiceRequest $record): bool => Division::count() > 1 && filled($record->division))
-                    ->label('Division'),
+                    ->label('Division')
+                    ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestDivisionAction::make($record)),
                 Grid::make(3)
                     ->schema([
                         TextEntry::make('respondent')
@@ -104,7 +113,8 @@ class ServiceRequestInfolist
                                 $respondent = $record->respondent;
 
                                 return ContactResource::getUrl('view', ['record' => $respondent->id]);
-                            }),
+                            })
+                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestContactAction::make($record)),
                         TextEntry::make('created_at')
                             ->label('Created')
                             ->dateTime()
@@ -116,12 +126,20 @@ class ServiceRequestInfolist
                     ])->columns(3),
                 Grid::make(3)
                     ->schema([
+                        TextEntry::make('category')
+                            ->label('Category')
+                            ->badge()
+                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestCategoryAction::make($record)),
                         TextEntry::make('status.name')
                             ->label('Status')
                             ->badge()
-                            ->color(fn (ServiceRequest $record): string => $record->status->color->value),
+                            ->state(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->name)
+                            ->color(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->color->value)
+                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestStatusAction::make($record)),
                         TextEntry::make('priority.name')
-                            ->label('Priority'),
+                            ->label('Priority')
+                            ->state(fn (ServiceRequest $record): ?string => $record->priorityIncludingTrashed()?->name)
+                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestPriorityAction::make($record)),
                     ])->columns(3),
             ])
             ->columns();
@@ -143,6 +161,7 @@ class ServiceRequestInfolist
     public static function titleSection(): Section
     {
         return Section::make('Title')
+            ->afterHeader(fn (ServiceRequest $record): Action => EditServiceRequestTitleAction::make($record))
             ->schema([
                 TextEntry::make('title')
                     ->hiddenLabel(),
@@ -152,6 +171,7 @@ class ServiceRequestInfolist
     public static function descriptionSection(): Section
     {
         return Section::make('Description')
+            ->afterHeader(fn (ServiceRequest $record): Action => EditServiceRequestDescriptionAction::make($record))
             ->schema([
                 TextEntry::make('close_details')
                     ->hiddenLabel()

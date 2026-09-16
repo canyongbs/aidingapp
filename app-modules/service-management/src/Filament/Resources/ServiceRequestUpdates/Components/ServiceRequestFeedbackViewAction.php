@@ -34,30 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use Filament\Forms\Components\ToggleButtons;
-use Illuminate\Database\Eloquent\Builder;
+use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\TextEntry;
 
-class ServiceRequestStatusToggleButtons
+class ServiceRequestFeedbackViewAction extends ViewAction
 {
-    public static function make(string $name = 'status_id', ?string $selectedId = null): ToggleButtons
+    protected function setUp(): void
     {
-        // Fetched once so options() and colors() derive from the same result instead of querying twice.
-        // Trashed statuses are excluded, except the currently-selected one, so a request left
-        // pointing at a soft-deleted status can still show and keep that value.
-        $statuses = ServiceRequestStatus::query()
-            ->withTrashed()
-            ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
-            ->orderBy('sort')
-            ->get(['id', 'name', 'color']);
+        parent::setUp();
 
-        return ToggleButtons::make($name)
-            ->label('Status')
-            ->inline()
-            ->options($statuses->pluck('name', 'id'))
-            ->colors($statuses->mapWithKeys(fn (ServiceRequestStatus $status): array => [$status->getKey() => $status->color->value]))
-            ->exists((new ServiceRequestStatus())->getTable(), 'id');
+        $this->schema([
+            TextEntry::make('contact.full_name')
+                ->label('Submitted By')
+                ->default('Unknown'),
+            TextEntry::make('csat_answer')
+                ->label('CSAT')
+                ->default('N/A'),
+            TextEntry::make('nps_answer')
+                ->label('NPS')
+                ->default('N/A'),
+            TextEntry::make('created_at')
+                ->label('Submitted At')
+                ->dateTime(),
+        ]);
     }
 }
