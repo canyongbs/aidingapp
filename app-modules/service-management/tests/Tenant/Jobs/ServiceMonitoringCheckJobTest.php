@@ -43,8 +43,10 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
@@ -818,4 +820,64 @@ it('does not send a notification for a confidential service monitor to a subscri
 
     Notification::assertSentTo($grantedUser, ServiceMonitoringNotification::class);
     Notification::assertNotSentTo($ungrantedUser, ServiceMonitoringNotification::class);
+});
+
+it('applies basic auth to the availability check request when configured', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->basicAuth()
+        ->create(['monitor_type' => MonitorType::Availability]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(function (Request $request) use ($serviceMonitorTarget) {
+        return $request->hasHeader('Authorization')
+            && str_starts_with($request->header('Authorization')[0], 'Basic ')
+            && base64_decode(substr($request->header('Authorization')[0], 6)) === "{$serviceMonitorTarget->auth_username}:{$serviceMonitorTarget->auth_password}";
+    });
+});
+
+it('applies basic auth to the keyword match check request when configured', function () {
+    Http::fake(fn () => Http::response('Test 1', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->basicAuth()
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['Test 1'],
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(function (Request $request) use ($serviceMonitorTarget) {
+        return $request->hasHeader('Authorization')
+            && str_starts_with($request->header('Authorization')[0], 'Basic ')
+            && base64_decode(substr($request->header('Authorization')[0], 6)) === "{$serviceMonitorTarget->auth_username}:{$serviceMonitorTarget->auth_password}";
+    });
+});
+
+it('does not apply basic auth when the auth type is none', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->create(['monitor_type' => MonitorType::Availability]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => ! $request->hasHeader('Authorization'));
+});
+
+it('does not apply basic auth when the feature is inactive', function () {
+    ServiceMonitoringAuthTypeFeature::deactivate();
+
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->basicAuth()
+        ->create(['monitor_type' => MonitorType::Availability]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => ! $request->hasHeader('Authorization'));
 });
