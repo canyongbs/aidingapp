@@ -160,7 +160,9 @@ class ViewAdvisory extends ViewRecord
                 Livewire::make(AdvisoryUpdatesRelationManager::class, fn (Advisory $record): array => [
                     'ownerRecord' => $record,
                     'pageClass' => static::class,
-                ])->key(AdvisoryUpdatesRelationManager::class),
+                ])
+                    ->key(AdvisoryUpdatesRelationManager::class)
+                    ->columnSpanFull(),
             ]);
     }
 
