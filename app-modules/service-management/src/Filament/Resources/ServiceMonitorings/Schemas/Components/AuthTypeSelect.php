@@ -52,6 +52,6 @@ class AuthTypeSelect
             ->live()
             ->required()
             ->visible(ServiceMonitoringAuthTypeFeature::active())
-            ->columnSpan(1);
+            ->columnSpanFull();
     }
 }
