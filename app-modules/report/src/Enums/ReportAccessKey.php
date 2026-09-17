@@ -50,6 +50,7 @@ use AidingApp\Report\Filament\Pages\RequestCommunications;
 use AidingApp\Report\Filament\Pages\ServiceMonitoring;
 use AidingApp\Report\Filament\Pages\ServiceRequestFeedback;
 use AidingApp\Report\Filament\Pages\ServiceRequests;
+use AidingApp\Report\Filament\Pages\Sla;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Enums\Feature;
@@ -60,6 +61,7 @@ use Illuminate\Support\Facades\Gate;
 enum ReportAccessKey: string
 {
     case ServiceRequests = 'service-requests';
+    case Sla = 'sla';
     case ServiceRequestFeedback = 'service-request-feedback';
     case Projects = 'projects';
     case KnowledgeBase = 'knowledge-base';
@@ -81,6 +83,7 @@ enum ReportAccessKey: string
     {
         return match ($this) {
             self::ServiceRequests => ServiceRequests::class,
+            self::Sla => Sla::class,
             self::ServiceRequestFeedback => ServiceRequestFeedback::class,
             self::Projects => Projects::class,
             self::KnowledgeBase => KnowledgeBase::class,
@@ -101,6 +104,7 @@ enum ReportAccessKey: string
     {
         return match ($this) {
             self::ServiceRequests => 'Service Requests',
+            self::Sla => 'SLA',
             self::ServiceRequestFeedback => 'Service Request Feedback',
             self::Projects => 'Projects',
             self::KnowledgeBase => 'Knowledge Base',
@@ -122,6 +126,7 @@ enum ReportAccessKey: string
         return match ($this) {
             self::RequestCommunications,
             self::ServiceRequests,
+            self::Sla,
             self::ServiceRequestFeedback,
             self::KnowledgeBase,
             self::AssetManagement,
@@ -143,6 +148,7 @@ enum ReportAccessKey: string
     {
         return match ($this) {
             self::RequestCommunications,
+            self::Sla,
             self::ServiceRequests => Gate::check(Feature::ServiceManagement->getGateName()),
 
             self::ServiceRequestFeedback => Gate::check(Feature::ServiceManagement->getGateName())

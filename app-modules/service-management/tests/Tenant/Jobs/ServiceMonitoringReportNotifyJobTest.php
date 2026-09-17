@@ -38,7 +38,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportNotifyJob;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringReportNotification;
 use App\Models\User;
@@ -199,4 +201,88 @@ it('sends to all recipient types simultaneously', function () {
     Notification::assertSentTo($user, ServiceMonitoringReportNotification::class);
     Notification::assertSentTo($contact, ServiceMonitoringReportNotification::class);
     Notification::assertSentTo($departmentUser, ServiceMonitoringReportNotification::class);
+});
+
+// The following tests cover dispatching with a ServiceMonitoringReportConfiguration (the per-frequency path)
+it('sends notification for a configuration-backed reportable with its own recipients, channel, and frequency', function () {
+    Notification::fake();
+
+    $user = User::factory()->create();
+    $contact = Contact::factory()->create();
+    $department = Department::factory()->create();
+    $departmentUser = User::factory()->for($department, 'department')->create();
+
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
+        ->for($target, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Weekly,
+            'is_reported_via_email' => true,
+            'is_reported_via_database' => true,
+        ]);
+    $configuration->reportUsers()->attach($user->getKey());
+    $configuration->reportContacts()->attach($contact->getKey());
+    $configuration->reportDepartments()->attach($department->getKey());
+
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringReportNotification::class, fn (ServiceMonitoringReportNotification $notification) => $notification->channel === 'both' && $notification->frequency === ServiceMonitoringReportFrequency::Weekly);
+    Notification::assertSentTo($contact, ServiceMonitoringReportNotification::class);
+    Notification::assertSentTo($departmentUser, ServiceMonitoringReportNotification::class);
+});
+
+it('suppresses delivery for a configuration-backed reportable whose target is confidential', function () {
+    Notification::fake();
+
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $user = User::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
+        ->for($target, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($user->getKey());
+
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
+
+    Notification::assertNotSentTo($user, ServiceMonitoringReportNotification::class);
+});
+
+it('delivers for a configuration-backed reportable whose target is confidential once access is granted', function () {
+    Notification::fake();
+
+    $target = ServiceMonitoringTarget::factory()->confidential()->create();
+    $user = User::factory()->create();
+    $target->confidentialUsers()->attach($user->getKey());
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
+        ->for($target, 'serviceMonitoringTarget')
+        ->create([
+            'frequency' => ServiceMonitoringReportFrequency::Daily,
+            'is_reported_via_email' => true,
+        ]);
+    $configuration->reportUsers()->attach($user->getKey());
+
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
+
+    Notification::assertSentTo($user, ServiceMonitoringReportNotification::class);
+});
+
+it('restores a job serialized under the previous serviceMonitoringTarget property name', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $values = (new ServiceMonitoringReportNotifyJob($target))->__serialize();
+    $values['serviceMonitoringTarget'] = $values['reportable'];
+    unset($values['reportable']);
+
+    $restored = new ServiceMonitoringReportNotifyJob($target);
+    $restored->__unserialize($values);
+
+    expect($restored->reportable->is($target))->toBeTrue();
 });

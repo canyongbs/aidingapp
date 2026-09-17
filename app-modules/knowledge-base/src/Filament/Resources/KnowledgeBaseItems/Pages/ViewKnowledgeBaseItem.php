@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Actions\CreateConcernAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
@@ -102,15 +101,12 @@ class ViewKnowledgeBaseItem extends ViewRecord
                             ]),
                         'properties' => Tab::make('Properties')
                             ->schema([
-                                Grid::make(Division::count() > 1 ? 4 : 3)
+                                Grid::make(3)
                                     ->schema([
                                         TextEntry::make('status.name')
                                             ->label('Status'),
                                         TextEntry::make('category.name')
                                             ->label('Category'),
-                                        TextEntry::make('division.name')
-                                            ->visible(fn (): bool => Division::count() > 1)
-                                            ->label('Division'),
                                         TextEntry::make('managers')
                                             ->label('Managers')
                                             ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),

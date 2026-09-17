@@ -49,8 +49,10 @@ class AdvisoryUpdateFactory extends Factory
     {
         return [
             'advisory_id' => Advisory::factory(),
+            'title' => $this->faker->sentence(),
             'update' => $this->faker->sentence(),
             'internal' => $this->faker->boolean(),
+            'date' => $this->faker->dateTime(),
         ];
     }
 }

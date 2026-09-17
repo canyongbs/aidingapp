@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
@@ -116,16 +115,6 @@ class CreateKnowledgeBaseItem extends CreateRecord
                             ->enableBranchNode()
                             ->searchable()
                             ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
-                        Select::make('division')
-                            ->label('Division')
-                            ->multiple()
-                            ->relationship('division', 'name')
-                            ->searchable(['name', 'code'])
-                            ->preload()
-                            ->default(fn () => [Division::count() === 1 ? Division::query()->first()?->getKey() : null])
-                            ->visible(fn (): bool => Division::count() > 1)
-                            ->saveRelationshipsWhenHidden()
-                            ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                         UserSelect::make('manager_ids')
                             ->label('Managers')
                             ->relationship('managers')

@@ -42,7 +42,7 @@
     </x-slot:header>
 
 {{-- Body --}}
-Your {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
+Your {{ strtolower($frequency->value) }} service monitor report for {{ $serviceMonitoringTarget->name }} is ready.
 
 ## Service Monitor
 {{ $serviceMonitoringTarget->name }}<br>
@@ -64,7 +64,7 @@ Total Downtime: {{ $totalDowntime }}
 
 Last Checked: {{ is_null($serviceMonitoringTarget->latestHistory) ? 'N/A' : $serviceMonitoringTarget->latestHistory->created_at->timezone($timezone)->format('M j, Y g:i a (T)') }}
 
-You are receiving this email because you are subscribed to {{ strtolower($serviceMonitoringTarget->report_frequency?->value ?? 'monthly') }} reports for this service monitor.
+You are receiving this email because you are subscribed to {{ strtolower($frequency->value) }} reports for this service monitor.
 
     {{-- Footer --}}
     <x-slot:footer>

@@ -37,10 +37,10 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests;
 
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\EditServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewLiveChatTranscript;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\NavigationGroup;
 use App\Models\User;
@@ -68,9 +68,6 @@ class ServiceRequestResource extends Resource
         return ['service_request_number', 'title'];
     }
 
-    /**
-     * @return Builder<Model>
-     */
     public static function getGlobalSearchEloquentQuery(): Builder
     {
         $user = auth()->user();
@@ -79,23 +76,8 @@ class ServiceRequestResource extends Resource
         return parent::getGlobalSearchEloquentQuery()
             ->with(['status', 'priority.type', 'respondent'])
             ->when(! $user->isSuperAdmin(), function (Builder $query) use ($user) {
-                $userDepartmentId = $user->department?->getKey();
-
-                return $query->where(function (Builder $query) use ($userDepartmentId, $user) {
-                    $query->whereHas('priority.type.managerUsers', function (Builder $query) use ($user) {
-                        $query->where('users.id', $user->getKey());
-                    })->orWhereHas('priority.type.auditorUsers', function (Builder $query) use ($user) {
-                        $query->where('users.id', $user->getKey());
-                    });
-
-                    if ($userDepartmentId) {
-                        $query->orWhereHas('priority.type.managerDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where('departments.id', $userDepartmentId);
-                        })->orWhereHas('priority.type.auditorDepartments', function (Builder $query) use ($userDepartmentId) {
-                            $query->where('departments.id', $userDepartmentId);
-                        });
-                    }
-                });
+                // @phpstan-ignore argument.type (The resource base class does not specify generics, so the builder type is not covariant.)
+                return $query->tap(new AccessibleServiceRequests($user));
             });
     }
 
@@ -123,7 +105,6 @@ class ServiceRequestResource extends Resource
             'index' => ListServiceRequests::route('/'),
             'create' => CreateServiceRequest::route('/create'),
             'view' => ViewServiceRequest::route('/{record}'),
-            'edit' => EditServiceRequest::route('/{record}/edit'),
             'view-live-chat-transcript' => ViewLiveChatTranscript::route('/{record}/live-chats/{conversation}'),
         ];
     }

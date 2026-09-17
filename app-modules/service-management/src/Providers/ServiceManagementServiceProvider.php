@@ -44,9 +44,11 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestResponse;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormAuthentication;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -85,6 +87,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'change_request_type' => ChangeRequestType::class,
             'change_request' => ChangeRequest::class,
             'service_request_assignment' => ServiceRequestAssignment::class,
+            'service_request_feedback' => ServiceRequestFeedback::class,
             'service_request_form_authentication' => ServiceRequestFormAuthentication::class,
             'service_request_form_field' => ServiceRequestFormField::class,
             'service_request_form_step' => ServiceRequestFormStep::class,
@@ -104,6 +107,7 @@ class ServiceManagementServiceProvider extends ServiceProvider
             'advisory_status' => AdvisoryStatus::class,
             'advisory_update' => AdvisoryUpdate::class,
             'service_monitoring_target' => ServiceMonitoringTarget::class,
+            'service_monitoring_report_configuration' => ServiceMonitoringReportConfiguration::class,
             'service_request_notification_automation_email_template' => ServiceRequestNotificationAutomationEmailTemplate::class,
         ]);
 

@@ -55,12 +55,15 @@ class AdvisoryUpdate extends BaseModel implements Auditable
 
     protected $fillable = [
         'advisory_id',
+        'title',
         'update',
         'internal',
+        'date',
     ];
 
     protected $casts = [
         'internal' => 'boolean',
+        'date' => 'datetime',
     ];
 
     protected $table = 'advisory_updates';

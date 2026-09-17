@@ -36,7 +36,6 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages;
 
-use AidingApp\Division\Models\Division;
 use AidingApp\KnowledgeBase\Filament\Resources\Actions\DraftKnowledgeBaseItemWithAiAction;
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseItemResource;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
@@ -60,7 +59,6 @@ use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Illuminate\Database\Eloquent\Builder;
 use Livewire\Attributes\Url;
@@ -143,7 +141,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                             }),
                                     )
                                     ->columnSpanFull(),
-                                Grid::make(Division::count() > 1 ? 4 : 3)
+                                Grid::make(3)
                                     ->schema([
                                         Select::make('status_id')
                                             ->label('Status')
@@ -164,20 +162,6 @@ class EditKnowledgeBaseItem extends EditRecord
                                             ->enableBranchNode()
                                             ->searchable()
                                             ->exists((new KnowledgeBaseCategory())->getTable(), (new KnowledgeBaseCategory())->getKeyName()),
-                                        Select::make('division')
-                                            ->label('Division')
-                                            ->multiple()
-                                            ->relationship('division', 'name')
-                                            ->searchable(['name', 'code'])
-                                            ->preload()
-                                            ->afterStateHydrated(function (array $state, Set $set) {
-                                                if (empty($state)) {
-                                                    $set('division', [Division::count() === 1 ? Division::query()->first()?->getKey() : null]);
-                                                }
-                                            })
-                                            ->visible(fn (): bool => Division::count() > 1)
-                                            ->saveRelationshipsWhenHidden()
-                                            ->exists((new Division())->getTable(), (new Division())->getKeyName()),
                                         UserSelect::make('manager_ids')
                                             ->label('Managers')
                                             ->relationship('managers')

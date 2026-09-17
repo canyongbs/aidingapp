@@ -37,14 +37,23 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\NotificationSettingsFeature;
+use App\Models\NotificationSetting;
+use App\Models\User;
+use App\Settings\NotificationSettings;
+use CanyonGBS\Common\Enums\Color;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 if (! function_exists('recordServiceRequestHistory')) {
@@ -243,6 +252,73 @@ describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', functi
     });
 });
 
+describe('2026_09_08_090400_tmp_backfill_service_monitoring_report_configurations', function () {
+    $migrationName = '2026_09_08_090400_tmp_backfill_service_monitoring_report_configurations';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    it('backfills a configuration for a currently disabled legacy target without losing its recipients', function () use ($migrationName, $migrationPath) {
+        isolatedMigration($migrationName, function () use ($migrationPath) {
+            $user = User::factory()->create();
+
+            $target = ServiceMonitoringTarget::factory()->create([
+                'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
+                'is_reporting_active' => false,
+                'is_reported_via_email' => true,
+                'is_reported_via_database' => false,
+            ]);
+            $target->reportUsers()->attach($user->getKey());
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            $configuration = DB::table('service_monitoring_report_configurations')
+                ->where('service_monitoring_target_id', $target->getKey())
+                ->first();
+
+            expect($configuration)->not->toBeNull()
+                ->and($configuration->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly->value)
+                ->and((bool) $configuration->is_active)->toBeFalse()
+                ->and((bool) $configuration->is_reported_via_email)->toBeTrue();
+
+            $recipients = DB::table('service_monitoring_report_configuration_user')
+                ->where('service_monitoring_report_configuration_id', $configuration->id)
+                ->pluck('user_id');
+
+            expect($recipients->all())->toBe([$user->getKey()]);
+        });
+    });
+
+    it('backfills an active legacy target as active', function () use ($migrationName, $migrationPath) {
+        isolatedMigration($migrationName, function () use ($migrationPath) {
+            $target = ServiceMonitoringTarget::factory()->create([
+                'report_frequency' => ServiceMonitoringReportFrequency::Daily,
+                'is_reporting_active' => true,
+            ]);
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            $configuration = DB::table('service_monitoring_report_configurations')
+                ->where('service_monitoring_target_id', $target->getKey())
+                ->first();
+
+            expect($configuration)->not->toBeNull()
+                ->and((bool) $configuration->is_active)->toBeTrue();
+        });
+    });
+
+    it('does not backfill a target with no report frequency configured', function () use ($migrationName, $migrationPath) {
+        isolatedMigration($migrationName, function () use ($migrationPath) {
+            $target = ServiceMonitoringTarget::factory()->create([
+                'report_frequency' => null,
+                'is_reporting_active' => false,
+            ]);
+
+            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_monitoring_report_configurations')->where('service_monitoring_target_id', $target->getKey())->exists())->toBeFalse();
+        });
+    });
+});
+
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
 //        isolatedMigration(
@@ -260,3 +336,64 @@ describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', functi
 //        );
 //    });
 //});
+
+// TODO: Cleanup Task NotificationSettingsFeature - delete this describe and the test within
+describe('2026_09_09_064247_tmp_seed_notification_settings', function () {
+    it('migrates the oldest notification settings and its logo', function () {
+        isolatedMigration(
+            '2026_09_09_064247_tmp_seed_notification_settings',
+            function () {
+                // Setup data before migration
+                Storage::fake('s3');
+                Storage::fake('s3-public');
+
+                expect(Artisan::call('migrate', [
+                    '--path' => 'database/migrations/Legacy/2023_11_08_155057_create_notification_settings_table.php',
+                ]))->toBe(Command::SUCCESS);
+
+                expect(Artisan::call('migrate', [
+                    '--path' => 'database/migrations/Legacy/2024_06_03_173514_add_from_column_to_notification_settings_table.php',
+                ]))->toBe(Command::SUCCESS);
+
+                expect(Artisan::call('migrate', [
+                    '--path' => 'database/migrations/2026_09_09_062022_create_notification_settings.php',
+                ]))->toBe(Command::SUCCESS);
+
+                $first = NotificationSetting::create([
+                    'name' => 'First Setting',
+                    'from_name' => 'First From Name',
+                    'primary_color' => Color::Red->value,
+                    'created_at' => now()->subMinute(),
+                ]);
+                $first->addMedia(UploadedFile::fake()->image('first-logo.png'))
+                    ->toMediaCollection('logo');
+
+                $second = NotificationSetting::create([
+                    'name' => 'Second Setting',
+                    'from_name' => 'Second From Name',
+                    'primary_color' => Color::Blue->value,
+                ]);
+                $second->addMedia(UploadedFile::fake()->image('second-logo.png'))
+                    ->toMediaCollection('logo');
+
+                $firstLogo = $first->getFirstMedia('logo');
+
+                // Run the migration
+                $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_09_09_064247_tmp_seed_notification_settings.php']);
+                // Confirm migration ran successfully
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                // Add any assertions to verify the migration's effects
+                $settings = app(NotificationSettings::class);
+                $settingsLogo = NotificationSettings::getSettingsPropertyModel('notifications.logo')
+                    ->getFirstMedia('logo');
+
+                expect(NotificationSettingsFeature::active())->toBeTrue()
+                    ->and($settings->from_name)->toBe('First From Name')
+                    ->and($settings->primary_color)->toBe(Color::Red)
+                    ->and($settingsLogo)->not->toBeNull()
+                    ->and($settingsLogo->file_name)->toBe($firstLogo->file_name);
+            }
+        );
+    });
+});

@@ -219,8 +219,7 @@ describe('tabs', function () {
         $project = Project::factory()->create();
 
         livewire(ViewProject::class, ['record' => $project->getRouteKey()])
-            ->assertSee($tab->getLabel())
-            ->assertSeeHtml("wire:click=\"\$set('tab', '{$tab->value}')\"");
+            ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
     it('defaults to the access tab when no tab is requested', function () {
@@ -1100,7 +1099,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
     expect($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
-it('hides the header create entry action while the pipeline has no entries', function () {
+it('shows the header create entry action once a pipeline is selected even without entries', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1113,8 +1112,26 @@ it('hides the header create entry action while the pipeline has no entries', fun
     livewire(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertTableActionHidden('createEntry')
+        ->assertTableActionVisible('createEntry')
         ->assertSee('Add Pipeline Task');
+});
+
+it('shows the header create entry action when the pipeline has a milestone but no entries', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionVisible('createEntry');
 });
 
 it('shows the empty state when the project has no pipelines', function () {

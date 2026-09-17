@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Filament\Widgets\Concerns;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use Carbon\Carbon;
 use Filament\Widgets\Concerns\InteractsWithPageFilters as InteractsWithPageFiltersBase;
 
@@ -65,5 +66,22 @@ trait InteractsWithPageFilters
         $types = $this->pageFilters['serviceRequestTypes'] ?? null;
 
         return filled($types) ? array_values((array) $types) : null;
+    }
+
+    public function getClassification(): ?ServiceRequestCategory
+    {
+        $classification = $this->pageFilters['classification'] ?? null;
+
+        return filled($classification) ? ServiceRequestCategory::tryFrom($classification) : null;
+    }
+
+    /**
+     * @return array<int, string>|null
+     */
+    public function getAssignedAgents(): ?array
+    {
+        $agents = $this->pageFilters['assignedAgents'] ?? null;
+
+        return filled($agents) ? array_values((array) $agents) : null;
     }
 }

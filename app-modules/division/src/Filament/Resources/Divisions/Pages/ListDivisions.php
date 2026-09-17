@@ -74,8 +74,6 @@ class ListDivisions extends ListRecords
                     ->label('Updated At')
                     ->dateTime()
                     ->sortable(),
-                TextColumn::make('notificationSetting.setting.name')
-                    ->label('Notification Setting'),
             ])
             ->recordActions([
                 ViewAction::make(),

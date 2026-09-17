@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -83,13 +84,12 @@ class AssignedToRelationManager extends RelationManager
                         $user = auth()->user();
                         $type = $this->getOwnerRecord()->priority?->type;
 
+                        assert($user instanceof User);
+
                         return $type !== null
                             && $user->can('update', $this->getOwnerRecord())
                             && is_null($this->getOwnerRecord()->assignedTo)
-                            && (
-                                $type->managerUsers->contains('id', $user?->getKey()) ||
-                                $type->managerDepartments->contains('id', $user?->department?->getKey())
-                            );
+                            && $type->isManagedBy($user);
                     })
                     ->label('Assign To Me')
                     ->color('gray'),

@@ -269,7 +269,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->modalHeading('Create Pipeline Task')
                     ->icon('heroicon-m-plus')
                     ->slideOver()
-                    ->visible(fn (): bool => (bool) $pipeline?->entries()->exists())
+                    ->visible(fn (): bool => $pipeline !== null)
                     ->model(PipelineEntry::class)
                     ->schema($this->entryFormSchema($pipeline))
                     ->authorize(fn (): bool => auth()->user()->can('update', $this->record))

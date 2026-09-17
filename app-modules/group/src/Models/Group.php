@@ -50,6 +50,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
+/**
+ * @mixin IdeHelperGroup
+ */
 #[ObservedBy([GroupObserver::class])]
 class Group extends Model implements Auditable
 {

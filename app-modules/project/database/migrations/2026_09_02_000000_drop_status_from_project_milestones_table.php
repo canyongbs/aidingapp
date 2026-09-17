@@ -71,7 +71,7 @@ return new class () extends Migration {
             });
 
             Schema::table('project_milestones', function (Blueprint $table) {
-                $table->uuid('status_id')->nullable();
+                $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
             });
         });
     }
