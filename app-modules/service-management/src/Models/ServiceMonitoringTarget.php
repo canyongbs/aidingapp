@@ -109,6 +109,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'auth_password' => 'encrypted',
     ];
 
+    protected $hidden = [
+        'auth_username',
+        'auth_password',
+    ];
+
+    /** @var list<string> */
+    protected $auditExclude = [
+        'auth_username',
+        'auth_password',
+    ];
+
     /**
      * @return HasMany<HistoricalServiceMonitoring, $this>
      */
