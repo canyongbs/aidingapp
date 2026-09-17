@@ -285,6 +285,13 @@ class Kernel extends ConsoleKernel
                     report($throw);
                 }
             });
+
+        // Registered last so it only records once a full schedule run has been dispatched.
+        $schedule->call(fn () => touch(storage_path('framework/schedule-heartbeat')))
+            ->everyMinute()
+            ->name('Schedule Liveness Beacon')
+            // @phpstan-ignore method.notFound (sentryMonitor is a macro registered by sentry/sentry-laravel)
+            ->sentryMonitor(monitorSlug: 'aidingapp-scheduler-liveness', checkInMargin: 5, failureIssueThreshold: 5);
     }
 
     /**

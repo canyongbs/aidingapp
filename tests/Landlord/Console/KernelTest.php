@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use App\Enums\SubscriptionStatus;
 use App\Models\Tenant;
 use App\Settings\LicenseSettings;
+use Illuminate\Console\Scheduling\Event;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Queue;
 
@@ -158,5 +159,23 @@ describe('schedule', function () {
         // Prevents the shared test tenant teardown from resolving one of these non-migratable tenants via Tenant::firstOrFail().
         $activeTenant->delete();
         $expiredTenant->delete();
+    });
+
+    it('records the schedule heartbeat via the liveness beacon', function () {
+        $path = storage_path('framework/schedule-heartbeat');
+
+        @unlink($path);
+        expect(file_exists($path))->toBeFalse();
+
+        $beacon = collect(app(Kernel::class)->resolveConsoleSchedule()->events())
+            ->firstWhere('description', 'Schedule Liveness Beacon');
+
+        assert($beacon instanceof Event);
+
+        $beacon->run(app());
+
+        expect(file_exists($path))->toBeTrue();
+
+        @unlink($path);
     });
 });
