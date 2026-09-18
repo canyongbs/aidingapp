@@ -39,6 +39,7 @@ use Spatie\Health\Checks\Check;
 use Spatie\Health\Checks\Checks\QueueCheck;
 use Spatie\Health\Checks\Checks\ScheduleCheck;
 use Spatie\Health\Facades\Health;
+use Spatie\Health\Jobs\HealthQueueJob;
 
 it('wires the schedule and queue heartbeats to the shared health cache store', function () {
     $checks = Health::registeredChecks();
@@ -64,4 +65,26 @@ it('keeps the health cache store shared across tenant context', function () {
     expect($valueInTenantContext)->toBe('value');
 
     cache()->store('health')->forget('probe');
+});
+
+it('processes the queue heartbeat job at the landlord level and writes the shared heartbeat', function () {
+    // The scheduler dispatches `health:queue-check-heartbeat` with no current tenant, so the job
+    // must be treated as not-tenant-aware; otherwise the worker deletes it before it can run.
+    Tenant::forgetCurrent();
+
+    $queueCheck = Health::registeredChecks()->first(fn (Check $check) => $check instanceof QueueCheck);
+
+    assert($queueCheck instanceof QueueCheck);
+
+    $store = cache()->store($queueCheck->getCacheStoreName());
+    $store->forget($queueCheck->getHeartbeatCacheKey('default'));
+
+    $job = new HealthQueueJob($queueCheck);
+    $job->onQueue('default');
+
+    dispatch_sync($job);
+
+    expect($store->get($queueCheck->getHeartbeatCacheKey('default')))->not->toBeNull();
+
+    $store->forget($queueCheck->getHeartbeatCacheKey('default'));
 });
