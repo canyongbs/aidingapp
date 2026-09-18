@@ -112,17 +112,43 @@ it('does not dispatch when the job for a tenant resolves to null', function () {
     Queue::assertNothingPushed();
 });
 
-it('reports and continues when dispatching for a tenant fails', function () {
+it('reports the failure and continues dispatching for the remaining tenants', function () {
+    $secondEligibleTenant = Tenant::factory()->create([
+        'domain' => 'second-eligible.aidingapp.local',
+        'setup_complete' => true,
+        'subscription_status' => SubscriptionStatus::Active,
+    ]);
+
     $dispatcher = new class () extends DispatchForEachTenant {
-        protected function jobForTenant(Tenant $tenant): ?object
+        private bool $hasThrown = false;
+
+        protected function jobForTenant(Tenant $tenant): object
         {
-            throw new RuntimeException('Boom');
+            // Fail the first tenant so a dispatched job for a later tenant proves the loop continued.
+            if (! $this->hasThrown) {
+                $this->hasThrown = true;
+
+                throw new RuntimeException('Boom');
+            }
+
+            return new class () implements ShouldQueue {
+                use Queueable;
+
+                public function handle(): void {}
+            };
         }
     };
 
     Exceptions::fake();
+    Queue::fake();
 
     $dispatcher->handle();
 
-    Exceptions::assertReported(fn (RuntimeException $throw) => true);
+    Exceptions::assertReported(fn (RuntimeException $throw) => $throw->getMessage() === 'Boom');
+
+    // The first tenant threw; the single push proves the loop moved on and dispatched for the other tenant.
+    Queue::assertCount(1);
+
+    // Prevents the shared test tenant teardown from resolving this non-migratable tenant via Tenant::firstOrFail().
+    $secondEligibleTenant->delete();
 });

@@ -37,6 +37,7 @@
 use AidingApp\Audit\Models\Audit;
 use AidingApp\ServiceManagement\Models\Secret;
 use App\Jobs\PruneModels;
+use Illuminate\Support\Facades\Exceptions;
 
 it('prunes stale records and keeps recent ones', function () {
     $stale = Audit::factory()->create();
@@ -59,4 +60,30 @@ it('prunes stale secrets', function () {
     (new PruneModels())->handle();
 
     expect(Secret::query()->whereKey($secret->getKey())->exists())->toBeFalse();
+});
+
+it('reports a failing model and still prunes the rest', function () {
+    Exceptions::fake();
+
+    $job = new class () extends PruneModels {
+        public bool $laterPrunerRan = false;
+
+        protected function pruners(): array
+        {
+            return [
+                fn (): int => throw new RuntimeException('prune failed'),
+                function (): int {
+                    $this->laterPrunerRan = true;
+
+                    return 0;
+                },
+            ];
+        }
+    };
+
+    $job->handle();
+
+    expect($job->laterPrunerRan)->toBeTrue();
+
+    Exceptions::assertReported(fn (RuntimeException $throw) => $throw->getMessage() === 'prune failed');
 });

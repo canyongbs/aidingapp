@@ -46,6 +46,7 @@ use Filament\Actions\Imports\Models\FailedImportRow;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Throwable;
 
 class PruneModels implements ShouldQueue, ShouldBeUnique
 {
@@ -55,12 +56,29 @@ class PruneModels implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        (new Audit())->pruneAll();
-        (new EngagementFile())->pruneAll();
-        (new FailedImportRow())->pruneAll();
-        (new HealthCheckResultHistoryItem())->pruneAll();
-        (new ProjectFile())->pruneAll();
-        (new OtpLoginCode())->pruneAll();
-        (new Secret())->pruneAll();
+        // Isolate each model so one model's pruning failure is reported without skipping the rest.
+        foreach ($this->pruners() as $prune) {
+            try {
+                $prune();
+            } catch (Throwable $throw) {
+                report($throw);
+            }
+        }
+    }
+
+    /**
+     * @return array<int, callable(): int>
+     */
+    protected function pruners(): array
+    {
+        return [
+            fn (): int => (new Audit())->pruneAll(),
+            fn (): int => (new EngagementFile())->pruneAll(),
+            fn (): int => (new FailedImportRow())->pruneAll(),
+            fn (): int => (new HealthCheckResultHistoryItem())->pruneAll(),
+            fn (): int => (new ProjectFile())->pruneAll(),
+            fn (): int => (new OtpLoginCode())->pruneAll(),
+            fn (): int => (new Secret())->pruneAll(),
+        ];
     }
 }
