@@ -49,7 +49,6 @@ use AidingApp\ServiceManagement\Exceptions\ServiceRequestNumberExceededReRollsEx
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Observers\ServiceRequestObserver;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
-use App\Features\SlaWaitingExclusionFeature;
 use App\Models\BaseModel;
 use App\Models\Media;
 use App\Models\User;
@@ -416,12 +415,10 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
         $seconds = (int) round($this->created_at->diffInSeconds($end));
 
-        if (SlaWaitingExclusionFeature::active()) {
-            $seconds -= $this->getExcludedSecondsBetween($this->created_at, $end, [
-                SystemServiceRequestClassification::Waiting,
-                SystemServiceRequestClassification::Closed,
-            ]);
-        }
+        $seconds -= $this->getExcludedSecondsBetween($this->created_at, $end, [
+            SystemServiceRequestClassification::Waiting,
+            SystemServiceRequestClassification::Closed,
+        ]);
 
         return max(0, $seconds);
     }
@@ -511,10 +508,6 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function getResolvedAt(): CarbonInterface
     {
         $legacyResolvedAt = $this->status_updated_at ?? $this->updated_at ?? $this->created_at;
-
-        if (! SlaWaitingExclusionFeature::active()) {
-            return $legacyResolvedAt;
-        }
 
         $periods = $this->statusPeriods
             ->sortBy([
@@ -629,11 +622,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     {
         $seconds = (int) round($start->diffInSeconds($end));
 
-        if (SlaWaitingExclusionFeature::active()) {
-            $seconds -= $this->getExcludedSecondsBetween($start, $end, [
-                SystemServiceRequestClassification::Waiting,
-            ]);
-        }
+        $seconds -= $this->getExcludedSecondsBetween($start, $end, [
+            SystemServiceRequestClassification::Waiting,
+        ]);
 
         return max(0, $seconds);
     }
