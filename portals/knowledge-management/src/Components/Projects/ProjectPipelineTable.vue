@@ -34,6 +34,7 @@
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
     import { ChartPieIcon } from '@heroicons/vue/20/solid';
+    import { ClipboardDocumentIcon, InboxIcon } from '@heroicons/vue/24/outline';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
@@ -83,14 +84,24 @@
                 </tr>
 
                 <BaseTableRow v-if="group.entries.length === 0">
-                    <BaseTableCell class="text-gray-400">No tasks yet</BaseTableCell>
+                    <BaseTableCell>
+                        <div class="flex items-center gap-2 pl-6 text-gray-400">
+                            <InboxIcon class="size-4 shrink-0" aria-hidden="true" />
+                            <span>No tasks yet</span>
+                        </div>
+                    </BaseTableCell>
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                     <BaseTableCell class="text-gray-400">N/A</BaseTableCell>
                 </BaseTableRow>
 
                 <BaseTableRow v-for="entry in group.entries" :key="entry.id">
-                    <BaseTableCell class="text-sm text-gray-900">{{ entry.name }}</BaseTableCell>
+                    <BaseTableCell>
+                        <div class="flex items-center gap-2 pl-6">
+                            <ClipboardDocumentIcon class="size-4 shrink-0 text-gray-400" aria-hidden="true" />
+                            <span class="text-sm text-gray-900">{{ entry.name }}</span>
+                        </div>
+                    </BaseTableCell>
                     <BaseTableCell>
                         <BaseBadge color="gray">{{ entry.stage ?? 'N/A' }}</BaseBadge>
                     </BaseTableCell>
