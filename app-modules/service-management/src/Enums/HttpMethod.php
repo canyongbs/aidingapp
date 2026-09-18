@@ -38,20 +38,40 @@ namespace AidingApp\ServiceManagement\Enums;
 
 use Filament\Support\Contracts\HasLabel;
 
-enum MonitorType: string implements HasLabel
+enum HttpMethod: string implements HasLabel
 {
-    case Availability = 'availability';
+    case Head = 'HEAD';
 
-    case KeywordMatch = 'keyword_match';
+    case Get = 'GET';
 
-    case ApiEndpoint = 'api_endpoint';
+    case Post = 'POST';
+
+    case Put = 'PUT';
+
+    case Patch = 'PATCH';
+
+    case Delete = 'DELETE';
+
+    case Options = 'OPTIONS';
+
+    case Query = 'QUERY';
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::Availability => 'Availability',
-            self::KeywordMatch => 'Keyword Match',
-            self::ApiEndpoint => 'API Endpoint',
+            self::Head => 'HEAD',
+            self::Get => 'GET',
+            self::Post => 'POST',
+            self::Put => 'PUT',
+            self::Patch => 'PATCH',
+            self::Delete => 'DELETE',
+            self::Options => 'OPTIONS',
+            self::Query => 'QUERY',
         };
+    }
+
+    public function supportsRequestBody(): bool
+    {
+        return ! in_array($this, [self::Head, self::Get], true);
     }
 }

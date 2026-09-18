@@ -34,24 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace App\Features;
 
-use Filament\Support\Contracts\HasLabel;
+use App\Support\AbstractFeatureFlag;
 
-enum MonitorType: string implements HasLabel
+class ServiceMonitoringApiEndpointFeature extends AbstractFeatureFlag
 {
-    case Availability = 'availability';
-
-    case KeywordMatch = 'keyword_match';
-
-    case ApiEndpoint = 'api_endpoint';
-
-    public function getLabel(): string
+    public function resolve(mixed $scope): mixed
     {
-        return match ($this) {
-            self::Availability => 'Availability',
-            self::KeywordMatch => 'Keyword Match',
-            self::ApiEndpoint => 'API Endpoint',
-        };
+        return false;
     }
 }
