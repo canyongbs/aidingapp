@@ -36,37 +36,24 @@
 
 namespace App\Console;
 
-use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
-use AidingApp\Audit\Models\Audit;
-use AidingApp\Authorization\Models\OtpLoginCode;
-use AidingApp\Engagement\Jobs\DeliverEngagements;
+use AidingApp\Ai\Jobs\DispatchPrepareKnowledgeBaseVectorStoreForEachTenant;
+use AidingApp\Engagement\Jobs\DispatchDeliverEngagementsForEachTenant;
+use AidingApp\Engagement\Jobs\DispatchUnmatchedInboundCommunicationsForEachTenant;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
-use AidingApp\Engagement\Jobs\UnmatchedInboundCommunicationsJob;
-use AidingApp\Engagement\Models\EngagementFile;
-use AidingApp\InAppCommunication\Jobs\PruneEphemeralMessages;
-use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
-use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use AidingApp\Project\Models\ProjectFile;
+use AidingApp\InAppCommunication\Jobs\DispatchPruneEphemeralMessagesForEachTenant;
+use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecksForEachTenant;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
-use AidingApp\ServiceManagement\Jobs\AutoSubmitStaleDraftServiceRequests;
-use AidingApp\ServiceManagement\Jobs\EndServiceRequestConversations;
-use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
-use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
-use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
-use AidingApp\ServiceManagement\Models\Secret;
-use App\Features\PasswordFormFieldFeature;
-use App\Models\HealthCheckResultHistoryItem;
-use App\Models\Scopes\ExcludeExpiredSubscriptions;
-use App\Models\Scopes\SetupIsComplete;
-use App\Models\Tenant;
-use App\Settings\LicenseSettings;
-use Filament\Actions\Imports\Models\FailedImportRow;
+use AidingApp\ServiceManagement\Jobs\DispatchClosedServiceRequestFeedbackRemindersForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchEndServiceRequestConversationsForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchServiceMonitoringForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchServiceMonitoringReportForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant;
+use App\Jobs\DispatchHealthChecksForEachTenant;
+use App\Jobs\DispatchModelPruningForEachTenant;
+use App\Jobs\DispatchStaleCacheTagPruningForEachTenant;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
-use Illuminate\Support\Facades\Log;
-use Throwable;
 
 class Kernel extends ConsoleKernel
 {
@@ -80,211 +67,98 @@ class Kernel extends ConsoleKernel
             ->name('Gather and Dispatch SES S3 Inbound Emails')
             ->onOneServer();
 
-        Tenant::query()
-            ->tap(new SetupIsComplete())
-            ->tap(new ExcludeExpiredSubscriptions())
-            ->cursor()
-            ->each(function (Tenant $tenant) use ($schedule) {
-                try {
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(app(DeliverEngagements::class));
-                        });
-                    })
-                        ->everyMinute()
-                        ->name("Dispatch DeliverEngagements | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(15);
+        $schedule->job(new DispatchDeliverEngagementsForEachTenant())
+            ->everyMinute()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new UnmatchedInboundCommunicationsJob());
-                        });
-                    })
-                        ->daily()
-                        ->name("Process Unmatched Inbound Communications | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(720);
+        $schedule->job(new DispatchEndServiceRequestConversationsForEachTenant())
+            ->everyMinute()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FiveMinutes));
-                            }
-                        });
-                    })
-                        ->everyFiveMinutes();
+        $schedule->job(new DispatchPruneEphemeralMessagesForEachTenant())
+            ->everyMinute()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::FifteenMinutes));
-                            }
-                        });
-                    })
-                        ->everyFifteenMinutes();
+        $schedule->job(new DispatchHealthChecksForEachTenant())
+            ->everyMinute()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::ThirtyMinutes));
-                            }
-                        });
-                    })
-                        ->everyThirtyMinutes();
+        $schedule->job(new DispatchPrepareKnowledgeBaseVectorStoreForEachTenant())
+            ->everyFiveMinutes()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::OneHour));
-                            }
-                        });
-                    })
-                        ->hourly();
+        $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::FiveMinutes))
+            ->everyFiveMinutes()
+            ->name('Dispatch Service Monitoring For Each Tenant (Five Minutes)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringJob(ServiceMonitoringFrequency::TwentyFourHours));
-                            }
-                        });
-                    })
-                        ->daily();
+        $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::FifteenMinutes))
+            ->everyFifteenMinutes()
+            ->name('Dispatch Service Monitoring For Each Tenant (Fifteen Minutes)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily));
-                            }
-                        });
-                    })
-                        ->daily();
+        $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::ThirtyMinutes))
+            ->everyThirtyMinutes()
+            ->name('Dispatch Service Monitoring For Each Tenant (Thirty Minutes)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Weekly));
-                            }
-                        });
-                    })
-                        ->weekly()
-                        ->mondays();
+        $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::OneHour))
+            ->hourly()
+            ->name('Dispatch Service Monitoring For Each Tenant (One Hour)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            if (app(LicenseSettings::class)->data?->addons?->serviceMonitoring) {
-                                dispatch(new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Monthly));
-                            }
-                        });
-                    })
-                        ->monthly();
+        $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::TwentyFourHours))
+            ->daily()
+            ->name('Dispatch Service Monitoring For Each Tenant (Twenty Four Hours)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new SendClosedServiceRequestFeedbackReminders());
-                        });
-                    })
-                        ->hourly();
+        $schedule->job(new DispatchClosedServiceRequestFeedbackRemindersForEachTenant())
+            ->hourly()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new AutoSubmitStaleDraftServiceRequests());
-                        });
-                    })
-                        ->hourly();
+        $schedule->job(new DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant())
+            ->hourly()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new EndServiceRequestConversations());
-                        });
-                    })
-                        ->everyMinute()
-                        ->name("End Service Request Conversations | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(5);
+        $schedule->job(new DispatchStaleCacheTagPruningForEachTenant())
+            ->hourly()
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new PruneEphemeralMessages());
-                        });
-                    })
-                        ->everyMinute()
-                        ->name("Prune Ephemeral Messages | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(5);
+        $schedule->job(new DispatchServiceMonitoringReportForEachTenant(ServiceMonitoringReportFrequency::Daily))
+            ->daily()
+            ->name('Dispatch Service Monitoring Report For Each Tenant (Daily)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            dispatch(new PrepareKnowledgeBaseVectorStore());
-                        });
-                    })
-                        ->everyFiveMinutes()
-                        ->name("Prepare Knowledge Base Vector Store | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(5);
+        $schedule->job(new DispatchServiceMonitoringReportForEachTenant(ServiceMonitoringReportFrequency::Weekly))
+            ->weekly()
+            ->mondays()
+            ->name('Dispatch Service Monitoring Report For Each Tenant (Weekly)')
+            ->onOneServer();
 
-                    $schedule->call(function () use ($tenant) {
-                        $tenant->execute(function () {
-                            KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
-                                CheckKnowledgeBaseArticleLinksJob::dispatch($article);
-                                CheckKnowledgeBaseArticleImagesJob::dispatch($article);
-                            });
-                        });
-                    })
-                        ->daily()
-                        ->name("Check Knowledge Base Article Links and Images | Tenant {$tenant->domain}")
-                        ->onOneServer()
-                        ->withoutOverlapping(720);
+        $schedule->job(new DispatchServiceMonitoringReportForEachTenant(ServiceMonitoringReportFrequency::Monthly))
+            ->monthly()
+            ->name('Dispatch Service Monitoring Report For Each Tenant (Monthly)')
+            ->onOneServer();
 
-                    $schedule->command("tenants:artisan \"cache:prune-stale-tags\" --tenant={$tenant->id}")
-                        ->hourly()
-                        ->onOneServer()
-                        ->withoutOverlapping(15);
+        $schedule->job(new DispatchUnmatchedInboundCommunicationsForEachTenant())
+            ->daily()
+            ->onOneServer();
 
-                    $schedule->command("tenants:artisan \"health:check\" --tenant={$tenant->id}")
-                        ->everyMinute()
-                        ->onOneServer()
-                        ->withoutOverlapping(15);
+        $schedule->job(new DispatchKnowledgeBaseArticleChecksForEachTenant())
+            ->daily()
+            ->onOneServer();
 
-                    $schedule->command("tenants:artisan \"health:queue-check-heartbeat\" --tenant={$tenant->id}")
-                        ->everyMinute()
-                        ->onOneServer()
-                        ->withoutOverlapping(15);
+        $schedule->job(new DispatchModelPruningForEachTenant())
+            ->daily()
+            ->onOneServer();
 
-                    collect([
-                        Audit::class,
-                        EngagementFile::class,
-                        FailedImportRow::class,
-                        HealthCheckResultHistoryItem::class,
-                        ProjectFile::class,
-                        OtpLoginCode::class,
-                    ])
-                        ->each(
-                            fn ($model) => $schedule->command("tenants:artisan \"model:prune --model={$model}\" --tenant={$tenant->id}")
-                                ->daily()
-                                ->onOneServer()
-                                ->withoutOverlapping(720)
-                        );
+        $schedule->command('health:queue-check-heartbeat')
+            ->everyMinute()
+            ->onOneServer();
 
-                    $schedule->command('tenants:artisan "model:prune --model=' . Secret::class . "\" --tenant={$tenant->id}")
-                        ->daily()
-                        ->onOneServer()
-                        ->withoutOverlapping(720)
-                        ->when(fn (): bool => $tenant->execute(fn (): bool => PasswordFormFieldFeature::active()));
-
-                    $schedule->command("tenants:artisan \"health:schedule-check-heartbeat\" --tenant={$tenant->id}")
-                        ->name("health:schedule-check-heartbeat-{$tenant->id}")
-                        ->everyMinute()
-                        ->onOneServer();
-                } catch (Throwable $throw) {
-                    Log::error('Error scheduling tenant commands.', [
-                        'tenant' => $tenant->id,
-                        'exception' => $throw,
-                    ]);
-
-                    report($throw);
-                }
-            });
+        $schedule->command('health:schedule-check-heartbeat')
+            ->everyMinute()
+            ->onOneServer();
 
         // Registered last so it only records once a full schedule run has been dispatched.
         $schedule->call(fn () => touch(storage_path('framework/schedule-heartbeat')))
