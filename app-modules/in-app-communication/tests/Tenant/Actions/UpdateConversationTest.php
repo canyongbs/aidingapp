@@ -37,7 +37,6 @@
 use AidingApp\InAppCommunication\Actions\UpdateConversation;
 use AidingApp\InAppCommunication\Events\ConversationUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
-use App\Features\ConfidentialChannelsFeature;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(fn () => Event::fake());
@@ -168,17 +167,4 @@ it('still renames a confidential channel', function () {
 
     expect($result->name)->toBe('New Name')
         ->and($conversation->fresh()->is_confidential)->toBeTrue();
-});
-
-it('lets a confidential channel be made public when the feature is inactive', function () {
-    $conversation = Conversation::factory()->confidential()->create();
-
-    ConfidentialChannelsFeature::deactivate();
-
-    $result = app(UpdateConversation::class)(
-        conversation: $conversation,
-        isPrivate: false,
-    );
-
-    expect($result->is_private)->toBeFalse();
 });
