@@ -34,47 +34,19 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Jobs\PruneModels;
-use Illuminate\Database\Console\PruneCommand;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
+use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
+use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecks;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Support\Facades\Queue;
 
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertModelMissing;
+it('dispatches a links check and an images check for each article', function () {
+    $articles = KnowledgeBaseItem::factory()->count(2)->create();
 
-it('hides its value from serialization', function () {
-    $secret = Secret::factory()->create();
+    Queue::fake();
 
-    expect($secret->toArray())->not->toHaveKey('value');
-});
+    (new DispatchKnowledgeBaseArticleChecks())->handle();
 
-it('prunes only unattached secrets older than one day', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-    $recentSecret = Secret::factory()->create();
-    $attachedSecret = Secret::factory()
-        ->for(ServiceRequest::factory(), 'related')
-        ->create([
-            'updated_at' => now()->subDays(2),
-        ]);
-
-    artisan(PruneCommand::class, [
-        '--model' => Secret::class,
-    ])->assertSuccessful();
-
-    assertModelMissing($expiredSecret);
-    assertModelExists($recentSecret);
-    assertModelExists($attachedSecret);
-});
-
-it('prunes unattached stale secrets when the model pruning job runs', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-
-    (new PruneModels())->handle();
-
-    assertModelMissing($expiredSecret);
+    Queue::assertPushed(CheckKnowledgeBaseArticleLinksJob::class, $articles->count());
+    Queue::assertPushed(CheckKnowledgeBaseArticleImagesJob::class, $articles->count());
 });

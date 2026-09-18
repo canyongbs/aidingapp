@@ -34,47 +34,51 @@
 </COPYRIGHT>
 */
 
+namespace App\Jobs;
+
+use AidingApp\Audit\Models\Audit;
+use AidingApp\Authorization\Models\OtpLoginCode;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\Project\Models\ProjectFile;
 use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Jobs\PruneModels;
-use Illuminate\Database\Console\PruneCommand;
+use App\Models\HealthCheckResultHistoryItem;
+use Filament\Actions\Imports\Models\FailedImportRow;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Queue\Queueable;
+use Throwable;
 
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertModelMissing;
+class PruneModels implements ShouldQueue, ShouldBeUnique
+{
+    use Queueable;
 
-it('hides its value from serialization', function () {
-    $secret = Secret::factory()->create();
+    public int $uniqueFor = 3600;
 
-    expect($secret->toArray())->not->toHaveKey('value');
-});
+    public function handle(): void
+    {
+        // Isolate each model so one model's pruning failure is reported without skipping the rest.
+        foreach ($this->pruners() as $prune) {
+            try {
+                $prune();
+            } catch (Throwable $throw) {
+                report($throw);
+            }
+        }
+    }
 
-it('prunes only unattached secrets older than one day', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-    $recentSecret = Secret::factory()->create();
-    $attachedSecret = Secret::factory()
-        ->for(ServiceRequest::factory(), 'related')
-        ->create([
-            'updated_at' => now()->subDays(2),
-        ]);
-
-    artisan(PruneCommand::class, [
-        '--model' => Secret::class,
-    ])->assertSuccessful();
-
-    assertModelMissing($expiredSecret);
-    assertModelExists($recentSecret);
-    assertModelExists($attachedSecret);
-});
-
-it('prunes unattached stale secrets when the model pruning job runs', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-
-    (new PruneModels())->handle();
-
-    assertModelMissing($expiredSecret);
-});
+    /**
+     * @return array<int, callable(): int>
+     */
+    protected function pruners(): array
+    {
+        return [
+            fn (): int => (new Audit())->pruneAll(),
+            fn (): int => (new EngagementFile())->pruneAll(),
+            fn (): int => (new FailedImportRow())->pruneAll(),
+            fn (): int => (new HealthCheckResultHistoryItem())->pruneAll(),
+            fn (): int => (new ProjectFile())->pruneAll(),
+            fn (): int => (new OtpLoginCode())->pruneAll(),
+            fn (): int => (new Secret())->pruneAll(),
+        ];
+    }
+}
