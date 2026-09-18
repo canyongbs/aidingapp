@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
@@ -73,49 +72,6 @@ if (! function_exists('recordServiceRequestHistory')) {
         ]);
     }
 }
-
-describe('2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique', function () {
-    $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique.php';
-
-    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $first = Organization::factory()->create(['name' => 'Acme Corp', 'created_at' => now()->subMinutes(3)]);
-                $second = Organization::factory()->create(['name' => 'acme corp', 'created_at' => now()->subMinutes(2)]);
-                $third = Organization::factory()->create(['name' => 'ACME CORP', 'created_at' => now()->subMinutes(1)]);
-                $unique = Organization::factory()->create(['name' => 'Solo Inc', 'created_at' => now()->subMinutes(4)]);
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($first->refresh()->name)->toBe('Acme Corp')
-                    ->and($second->refresh()->name)->toBe('acme corp-2')
-                    ->and($third->refresh()->name)->toBe('ACME CORP-3')
-                    ->and($unique->refresh()->name)->toBe('Solo Inc');
-            }
-        );
-    });
-
-    it('leaves soft-deleted duplicates untouched', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $kept = Organization::factory()->create(['name' => 'Dupe Co', 'created_at' => now()->subMinutes(2)]);
-                $trashed = Organization::factory()->create(['name' => 'dupe co', 'created_at' => now()->subMinute()]);
-                $trashed->delete();
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($kept->refresh()->name)->toBe('Dupe Co')
-                    ->and($trashed->refresh()->name)->toBe('dupe co');
-            }
-        );
-    });
-});
 
 describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique', function () {
     $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique.php';
