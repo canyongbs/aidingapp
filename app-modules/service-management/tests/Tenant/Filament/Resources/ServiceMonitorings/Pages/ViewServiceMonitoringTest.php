@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
@@ -234,6 +235,56 @@ test('keyword match values with punctuation retain clear boundaries', function (
             'test 3, "test 4"',
             '"test 5, test 6"',
         ]);
+});
+
+test('API endpoint fields are displayed only for API endpoint monitors', function () {
+    $apiEndpointMonitor = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'follow_redirection' => false,
+            'successful_status_codes' => [200, 201],
+            'is_max_latency_enabled' => true,
+            'max_latency_ms' => 2000,
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'is_request_body_json' => true,
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $apiEndpointMonitor]))
+        ->assertSuccessful()
+        ->assertSee('Follow Redirection')
+        ->assertSee('200 OK, 201 Created')
+        ->assertSee('Maximum Latency Enforced')
+        ->assertSee('2000')
+        ->assertSee('POST')
+        ->assertSee('{"key":"value"}')
+        ->assertSee('Sent as JSON')
+        ->assertSee('X-Custom-Header')
+        ->assertSee('custom-value');
+
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $apiEndpointMonitor->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSchemaStateSet([
+            'successful_status_codes' => '200 OK, 201 Created',
+        ]);
+
+    $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::Availability,
+    ]);
+
+    asSuperAdmin()
+        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $availabilityMonitor]))
+        ->assertSuccessful()
+        ->assertDontSee('Follow Redirection')
+        ->assertDontSee('Successful HTTP Status Codes')
+        ->assertDontSee('Maximum Latency Enforced')
+        ->assertDontSee('Request Headers');
 });
 
 test('Reset Monitoring button resets monitoring', function () {

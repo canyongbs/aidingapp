@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use Worksome\RequestFactories\RequestFactory;
@@ -61,6 +62,18 @@ class ServiceMonitoringTargetRequestFactory extends RequestFactory
             'auth_type' => AuthType::Basic,
             'auth_username' => fake()->userName(),
             'auth_password' => fake()->password(),
+        ]);
+    }
+
+    public function apiEndpoint(): static
+    {
+        return $this->state([
+            'monitor_type' => MonitorType::ApiEndpoint,
+            'follow_redirection' => true,
+            'successful_status_codes' => [200],
+            'is_max_latency_enabled' => false,
+            'http_method' => HttpMethod::Get,
+            'request_headers' => [],
         ]);
     }
 }

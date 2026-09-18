@@ -37,12 +37,14 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -273,6 +275,33 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['auth_password'],
         ],
+        'successful status codes required for api endpoint monitors' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => null,
+            ]),
+            ['successful_status_codes' => 'required'],
+        ],
+        'successful status codes must be valid HTTP status codes' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => [999],
+            ]),
+            ['successful_status_codes'],
+        ],
+        'max latency required when maximum latency is enabled' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'is_max_latency_enabled' => true,
+                'max_latency_ms' => null,
+            ]),
+            ['max_latency_ms' => 'required'],
+        ],
+        'request body must be valid JSON when sending as JSON' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'http_method' => HttpMethod::Post,
+                'is_request_body_json' => true,
+                'request_body' => 'not valid json',
+            ]),
+            ['request_body' => 'json'],
+        ],
     ]
 );
 
@@ -319,6 +348,94 @@ test('CreateServiceMonitor hides auth fields when the feature is inactive', func
         ->assertFormFieldHidden('auth_type')
         ->assertFormFieldHidden('auth_username')
         ->assertFormFieldHidden('auth_password');
+});
+
+test('CreateServiceMonitor hides API endpoint fields until the API endpoint monitor type is selected', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertFormFieldHidden('follow_redirection')
+        ->assertFormFieldHidden('successful_status_codes')
+        ->assertFormFieldHidden('is_max_latency_enabled')
+        ->assertFormFieldHidden('http_method')
+        ->assertFormFieldHidden('request_headers')
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertFormFieldVisible('follow_redirection')
+        ->assertFormFieldVisible('successful_status_codes')
+        ->assertFormFieldVisible('is_max_latency_enabled')
+        ->assertFormFieldVisible('http_method')
+        ->assertFormFieldVisible('request_headers');
+});
+
+test('CreateServiceMonitor hides the max latency input until the maximum latency toggle is enabled', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertFormFieldHidden('max_latency_ms')
+        ->fillForm(['is_max_latency_enabled' => true])
+        ->assertFormFieldVisible('max_latency_ms');
+});
+
+test('CreateServiceMonitor hides the request body fields when the HTTP method does not support a body', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm([
+            'monitor_type' => MonitorType::ApiEndpoint,
+            'http_method' => HttpMethod::Get,
+        ])
+        ->assertFormFieldHidden('request_body')
+        ->assertFormFieldHidden('is_request_body_json')
+        ->fillForm(['http_method' => HttpMethod::Post])
+        ->assertFormFieldVisible('request_body')
+        ->assertFormFieldVisible('is_request_body_json');
+});
+
+test('CreateServiceMonitor hides the API endpoint monitor type option when the feature is inactive', function () {
+    ServiceMonitoringApiEndpointFeature::deactivate();
+
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['monitor_type' => MonitorType::ApiEndpoint])->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['monitor_type']);
+});
+
+test('CreateServiceMonitor can create a service monitor with an API endpoint monitor', function () {
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()
+        ->apiEndpoint()
+        ->state([
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'is_request_body_json' => true,
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ])
+        ->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::first();
+
+    expect($serviceMonitoringTarget->monitor_type)->toBe(MonitorType::ApiEndpoint)
+        ->and($serviceMonitoringTarget->follow_redirection)->toBeTrue()
+        ->and($serviceMonitoringTarget->successful_status_codes)->toBe([200])
+        ->and($serviceMonitoringTarget->http_method)->toBe(HttpMethod::Post)
+        ->and($serviceMonitoringTarget->request_body)->toBe('{"key":"value"}')
+        ->and($serviceMonitoringTarget->is_request_body_json)->toBeTrue()
+        ->and($serviceMonitoringTarget->request_headers)->toBe([
+            ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+        ]);
 });
 
 test('CreateServiceMonitor with notification group User or Department', function () {

@@ -37,6 +37,7 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
@@ -880,4 +881,180 @@ it('does not apply basic auth when the feature is inactive', function () {
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Http::assertSent(fn (Request $request) => ! $request->hasHeader('Authorization'));
+});
+
+it('passes when the response status code is in the successful status codes list', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['successful_status_codes' => [200, 201]]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
+it('fails when the response status code is not in the successful status codes list', function () {
+    Http::fake(fn () => Http::response('Test', 404));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['successful_status_codes' => [200]]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 404,
+        'succeeded' => false,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+
+    $history = HistoricalServiceMonitoring::first();
+
+    expect($history->keyword_match_failures)->toBe(['Unexpected status code: 404']);
+});
+
+it('does not follow redirects when follow redirection is disabled', function () {
+    Http::fake(fn () => Http::response('', 302, ['Location' => 'https://example.com/redirected']));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'follow_redirection' => false,
+            'successful_status_codes' => [302],
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 302,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
+it('fails when the response exceeds the configured maximum latency', function () {
+    Http::fake(function () {
+        usleep(1000);
+
+        return Http::response('Test', 200);
+    });
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'is_max_latency_enabled' => true,
+            'max_latency_ms' => -1,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => false,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+
+    $history = HistoricalServiceMonitoring::first();
+
+    expect($history->keyword_match_failures)->toBe(['Response exceeded maximum allowed latency of -1ms']);
+});
+
+it('does not fail for latency when the maximum latency check is disabled', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['is_max_latency_enabled' => false]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
+it('sends the configured request headers', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('X-Custom-Header', 'custom-value'));
+});
+
+it('sends the request body as JSON when configured', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'is_request_body_json' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => $request->hasHeader('Content-Type', 'application/json')
+        && $request->data() === ['key' => 'value']);
+});
+
+it('sends the request body as form-encoded when JSON is not enabled', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'http_method' => HttpMethod::Post,
+            'request_body' => 'key=value',
+            'is_request_body_json' => false,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => str_contains($request->header('Content-Type')[0] ?? '', 'application/x-www-form-urlencoded')
+        && $request->body() === 'key=value');
+});
+
+it('does not send a request body when the HTTP method does not support one', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'http_method' => HttpMethod::Get,
+            'request_body' => 'ignored',
+            'is_request_body_json' => false,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => blank($request->body()));
+});
+
+it('sends the request using the configured HTTP method', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['http_method' => HttpMethod::Query]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => $request->method() === 'QUERY');
 });
