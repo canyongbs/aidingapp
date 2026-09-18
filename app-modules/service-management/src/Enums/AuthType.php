@@ -34,33 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+use Filament\Support\Contracts\HasLabel;
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
+enum AuthType: string implements HasLabel
 {
-    public function definition(): array
-    {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
+    case None = 'none';
 
-    public function basicAuth(): static
+    // Stored as "basic" so the value matches the HTTP auth scheme it applies (Illuminate\Http\Client\PendingRequest::withBasicAuth()).
+    case Basic = 'basic';
+
+    public function getLabel(): string
     {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
+        return match ($this) {
+            self::None => 'None',
+            self::Basic => 'Local',
+        };
     }
 }

@@ -34,33 +34,17 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+it('excludes its basic auth credentials from serialization and audits', function () {
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
-{
-    public function definition(): array
-    {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
+    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
 
-    public function basicAuth(): static
-    {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
-    }
-}
+    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
+        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
+        ->and($audit->new_values)->not->toHaveKey('auth_username')
+        ->and($audit->new_values)->not->toHaveKey('auth_password')
+        ->and($audit->old_values)->not->toHaveKey('auth_username')
+        ->and($audit->old_values)->not->toHaveKey('auth_password');
+});

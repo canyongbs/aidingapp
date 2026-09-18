@@ -36,12 +36,14 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\CreateServiceMonitoring;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -51,6 +53,7 @@ use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
@@ -255,6 +258,22 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['should_contain', 'should_not_contain'],
         ],
+        'auth username required when auth type is basic' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'auth_type' => AuthType::Basic,
+                'auth_username' => null,
+                'auth_password' => 'secret',
+            ]),
+            ['auth_username'],
+        ],
+        'auth password required when auth type is basic' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'auth_type' => AuthType::Basic,
+                'auth_username' => 'admin',
+                'auth_password' => null,
+            ]),
+            ['auth_password'],
+        ],
     ]
 );
 
@@ -272,6 +291,51 @@ test('report frequency is required when reporting is active and the feature is i
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors(['report_frequency' => 'required']);
+});
+
+test('CreateServiceMonitor can create a service monitor with basic auth', function () {
+    asSuperAdmin();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->basicAuth()->create();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::first();
+
+    expect($serviceMonitoringTarget->auth_type)->toBe(AuthType::Basic)
+        ->and($serviceMonitoringTarget->auth_username)->toBe($request['auth_username'])
+        ->and($serviceMonitoringTarget->auth_password)->toBe($request['auth_password']);
+
+    assertDatabaseMissing(ServiceMonitoringTarget::class, [
+        'auth_username' => $request['auth_username'],
+        'auth_password' => $request['auth_password'],
+    ]);
+});
+
+test('CreateServiceMonitor hides auth username and password fields until basic auth type is selected', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertFormFieldExists('auth_type')
+        ->assertFormFieldHidden('auth_username')
+        ->assertFormFieldHidden('auth_password')
+        ->fillForm(['auth_type' => AuthType::Basic])
+        ->assertFormFieldVisible('auth_username')
+        ->assertFormFieldVisible('auth_password');
+});
+
+test('CreateServiceMonitor hides auth fields when the feature is inactive', function () {
+    ServiceMonitoringAuthTypeFeature::deactivate();
+
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->assertFormFieldHidden('auth_type')
+        ->assertFormFieldHidden('auth_username')
+        ->assertFormFieldHidden('auth_password');
 });
 
 test('CreateServiceMonitor with notification group User or Department', function () {

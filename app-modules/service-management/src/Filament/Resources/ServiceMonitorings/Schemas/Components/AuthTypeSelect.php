@@ -34,33 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Filament\Forms\Components\Select;
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
+class AuthTypeSelect
 {
-    public function definition(): array
+    public static function make(): Select
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
-
-    public function basicAuth(): static
-    {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
+        return Select::make('auth_type')
+            ->label('Auth Type')
+            ->options(AuthType::class)
+            ->enum(AuthType::class)
+            ->default(AuthType::None)
+            ->live()
+            ->required()
+            ->visible(ServiceMonitoringAuthTypeFeature::active())
+            ->columnSpanFull();
     }
 }

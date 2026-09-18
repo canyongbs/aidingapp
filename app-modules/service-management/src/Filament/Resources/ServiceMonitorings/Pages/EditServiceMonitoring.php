@@ -41,6 +41,9 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Components\AutomatedReportingSection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthPasswordInput;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthTypeSelect;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthUsernameInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -140,6 +143,9 @@ class EditServiceMonitoring extends EditRecord
                             ])
                             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
+                        AuthTypeSelect::make(),
+                        AuthUsernameInput::make(),
+                        AuthPasswordInput::make(),
                     ])
                     ->columns(2),
                 Section::make('Notification Settings')

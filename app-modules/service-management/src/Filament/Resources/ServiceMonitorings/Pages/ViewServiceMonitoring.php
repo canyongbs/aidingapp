@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Features\MonitorTypeFeature;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -99,6 +100,9 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Should Not Contain')
                                     ->listWithLineBreaks()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                TextEntry::make('auth_type')
+                                    ->label('Auth Type')
+                                    ->visible(ServiceMonitoringAuthTypeFeature::active()),
                             ])
                             ->columns(2),
                         Section::make('Notification Settings')

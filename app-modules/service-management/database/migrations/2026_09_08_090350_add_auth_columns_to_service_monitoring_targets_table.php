@@ -34,33 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
-
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
-{
-    public function definition(): array
+/*
+ * TODO: Cleanup Task (service-monitoring-report-configurations-feature): this migration is
+ * timestamped to run before 2026_09_08_090400_tmp_backfill_service_monitoring_report_configurations
+ * (not by actual authoring date) so the isolatedMigration() test targeting that migration in
+ * tests/TenantMigrationTests.php still sees these columns present when it rolls the schema back.
+ * Rename this file to a real current-date timestamp once that tmp migration and its test are deleted.
+ */
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
+        DB::transaction(function () {
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->string('auth_type')->initial('none');
+                $table->text('auth_username')->nullable();
+                $table->text('auth_password')->nullable();
+            });
+
+            ServiceMonitoringAuthTypeFeature::activate();
+        });
     }
 
-    public function basicAuth(): static
+    public function down(): void
     {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
+        DB::transaction(function () {
+            ServiceMonitoringAuthTypeFeature::deactivate();
+
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->dropColumn(['auth_type', 'auth_username', 'auth_password']);
+            });
+        });
     }
-}
+};
