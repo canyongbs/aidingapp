@@ -93,6 +93,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         match ($this->serviceMonitoringTarget->monitor_type) {
             MonitorType::Availability => $this->handleAvailability(),
             MonitorType::KeywordMatch => $this->handleKeywordMatch(),
+            MonitorType::ApiEndpoint => $this->handleApiEndpoint(),
         };
     }
 
@@ -144,9 +145,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
      * Build the base HTTP client for this monitor's requests, applying auth so every
      * request verb (current and future) inherits it without repeating the logic.
      */
-    protected function buildRequest(): PendingRequest
+    protected function buildRequest(bool $followRedirects = true): PendingRequest
     {
-        $request = Http::maxRedirects(15);
+        $request = $followRedirects ? Http::maxRedirects(15) : Http::withoutRedirecting();
 
         if (ServiceMonitoringAuthTypeFeature::active() && $this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
             $request = $request->withBasicAuth(
@@ -231,6 +232,58 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             $success = $response->status() === 200 && $keywordMatchFailures === [];
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $success, $keywordMatchFailures);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        }
+    }
+
+    protected function handleApiEndpoint(): void
+    {
+        try {
+            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection);
+
+            $headers = collect($this->serviceMonitoringTarget->request_headers ?? [])
+                ->filter(fn (array $header): bool => filled($header['name'] ?? null))
+                ->mapWithKeys(fn (array $header): array => [$header['name'] => $header['value'] ?? ''])
+                ->all();
+
+            if ($headers !== []) {
+                $request = $request->withHeaders($headers);
+            }
+
+            $httpMethod = $this->serviceMonitoringTarget->http_method;
+
+            $options = [];
+
+            if ($httpMethod->supportsRequestBody() && filled($this->serviceMonitoringTarget->request_body)) {
+                $options = $this->serviceMonitoringTarget->is_request_body_json
+                    ? ['json' => json_decode($this->serviceMonitoringTarget->request_body, true)]
+                    : [
+                        'body' => $this->serviceMonitoringTarget->request_body,
+                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+                    ];
+            }
+
+            $response = $request->send($httpMethod->value, $this->serviceMonitoringTarget->domain, $options);
+
+            $responseTime = $response->transferStats->getTransferTime() ?? 0;
+
+            $failures = [];
+
+            $successfulStatusCodes = array_map('intval', $this->serviceMonitoringTarget->successful_status_codes ?? []);
+
+            if (! in_array($response->status(), $successfulStatusCodes, true)) {
+                $failures[] = "Unexpected status code: {$response->status()}";
+            }
+
+            if ($this->serviceMonitoringTarget->is_max_latency_enabled && $responseTime > $this->serviceMonitoringTarget->max_latency_ms) {
+                $failures[] = "Response exceeded maximum allowed latency of {$this->serviceMonitoringTarget->max_latency_ms}ms";
+            }
+
+            $this->handleResponses($response->status(), $responseTime, $failures === [], $failures);
         } catch (ConnectionException $exception) {
             if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
                 report($exception);
