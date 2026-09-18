@@ -37,7 +37,6 @@
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
@@ -121,7 +120,6 @@ function serviceRequestWithFeedbackCollection(
 }
 
 test('The correct details are displayed on the ViewServiceRequest page', function () {
-    Division::factory()->count(2)->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
     asSuperAdmin()
@@ -135,8 +133,6 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
             [
                 'Type',
                 $serviceRequest->priority->type->name,
-                'Division',
-                $serviceRequest->division->name,
                 'Status',
                 $serviceRequest->status->name,
                 'Priority',
@@ -788,53 +784,6 @@ describe('tabs', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('request.serviceRequestFormSubmission');
-    });
-});
-
-describe('division', function () {
-    it('shows the division when the tenant has more than one', function () {
-        asSuperAdmin();
-
-        Division::factory()->count(2)->create();
-
-        $serviceRequest = ServiceRequest::factory()->create();
-
-        expect($serviceRequest->division)->not->toBeNull();
-
-        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSuccessful()
-            ->assertSchemaComponentVisible('division.name')
-            ->assertSchemaComponentStateSet('division.name', $serviceRequest->division->name);
-    });
-
-    it('hides the division when the tenant only has one', function () {
-        asSuperAdmin();
-
-        $serviceRequest = ServiceRequest::factory()->create();
-
-        Division::query()->whereKeyNot($serviceRequest->division_id)->delete();
-
-        expect(Division::count())->toBe(1);
-
-        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSuccessful()
-            ->assertSchemaComponentHidden('division.name');
-    });
-
-    it('hides the division when the service request has none', function () {
-        asSuperAdmin();
-
-        Division::factory()->count(2)->create();
-
-        $serviceRequest = ServiceRequest::factory()->create();
-        $serviceRequest->division()->disassociate()->saveQuietly();
-
-        expect(Division::count())->toBeGreaterThan(1)
-            ->and($serviceRequest->fresh()->division)->toBeNull();
-
-        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSuccessful()
-            ->assertSchemaComponentHidden('division.name');
     });
 });
 
