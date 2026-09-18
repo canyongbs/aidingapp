@@ -13,7 +13,7 @@ The scheduler runs **once at the landlord level**. It does **not** loop over ten
 
 ## The model
 
-- `app/Console/Kernel.php` holds a **flat** list of `$schedule->job(...)`, `$schedule->command(...)`, and `$schedule->call(...)` entries. Every entry is `->onOneServer()`.
+- `app/Console/Kernel.php` holds a **flat** list of `$schedule->job(...)`, `$schedule->command(...)`, and `$schedule->call(...)` entries. Almost every entry is `->onOneServer()` so cluster-wide work runs once — the **one deliberate exception** is the schedule liveness beacon (see trap 3).
 - Per-tenant work is expressed as an **orchestrator** — a job extending `App\Jobs\DispatchForEachTenant` — scheduled once. The orchestrator fans out to per-tenant child jobs; it never contains the business logic itself.
 - Landlord-level commands (e.g. the health heartbeats) run **once**, not per tenant.
 
@@ -73,7 +73,7 @@ public function uniqueId(): string
 }
 ```
 
-## Two traps (both cost real debugging time)
+## Three traps (each costs real debugging time)
 
 ### 1. `onOneServer` mutex-name collision on same-class entries
 
@@ -93,6 +93,10 @@ This app sets `multitenancy.queues_are_tenant_aware_by_default = true`. Any queu
 - **Orchestrators are safe** — `DispatchForEachTenant` implements `NotTenantAware`.
 - **Child jobs are safe** — they're dispatched inside `$tenant->execute()`, so they carry a tenant.
 - **A vendor/queued job you schedule directly at the landlord level is NOT safe.** Register it in `config/multitenancy.php` under `not_tenant_aware_jobs` (this is how `Spatie\Health\Jobs\HealthQueueJob`, dispatched by `health:queue-check-heartbeat`, is made to run at the landlord level and write the shared `health` cache store).
+
+### 3. The schedule liveness beacon must **not** use `onOneServer`
+
+The final entry — `$schedule->call(fn () => touch(storage_path('framework/schedule-heartbeat')))->name('Schedule Liveness Beacon')` — is deliberately **not** `->onOneServer()`, and this is the one exception to the rule above. Each running scheduler task's container healthcheck reads **its own** heartbeat file, so every scheduler node must touch it every minute. `onOneServer` restricts an entry to a single node cluster-wide, which would leave the other nodes' heartbeat files stale and fail their healthchecks (potentially cycling those tasks) if more than one scheduler ever runs. `onOneServer` is for work that must happen **once across the cluster**; the beacon is intentionally **per-node** liveness. Do not "fix" a review flag by adding `onOneServer` here.
 
 ## Verifying
 
