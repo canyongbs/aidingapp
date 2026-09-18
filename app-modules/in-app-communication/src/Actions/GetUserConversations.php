@@ -38,7 +38,6 @@ namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\Scopes\WithCurrentParticipant;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Contracts\Pagination\CursorPaginator;
 use Illuminate\Database\Eloquent\Builder;
@@ -80,7 +79,7 @@ class GetUserConversations
             ->when($participantType === 'user', function (Builder $query) {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when(ConfidentialChannelsFeature::active() && $confidential !== null, function (Builder $query) use ($confidential) {
+            ->when($confidential !== null, function (Builder $query) use ($confidential) {
                 $query->where('conversations.is_confidential', $confidential);
             })
             ->tap(new WithCurrentParticipant($user))
@@ -116,7 +115,7 @@ class GetUserConversations
             ->when($participantType === 'user', function (Builder $query) {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when(ConfidentialChannelsFeature::active() && $confidential !== null, function (Builder $query) use ($confidential) {
+            ->when($confidential !== null, function (Builder $query) use ($confidential) {
                 $query->where('conversations.is_confidential', $confidential);
             })
             ->tap(new WithCurrentParticipant($user))
