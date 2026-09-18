@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
-use App\Features\SlaWaitingExclusionFeature;
 use App\Models\User;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\UploadedFile;
@@ -154,32 +153,6 @@ describe('SLA waiting exclusion', function () {
 
         // Total window is 180s; the 50s waiting span is excluded, the closed span is zero-length.
         expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(130);
-    });
-
-    it('includes waiting and closed time in the resolution seconds when the feature is inactive', function () {
-        Notification::fake();
-        SlaWaitingExclusionFeature::deactivate();
-
-        $open = ServiceRequestStatus::factory()->open()->create();
-        $waiting = ServiceRequestStatus::factory()->waiting()->create();
-        $inProgress = ServiceRequestStatus::factory()->inProgress()->create();
-        $closed = ServiceRequestStatus::factory()->closed()->create();
-
-        $start = CarbonImmutable::parse('2026-01-01 00:00:00');
-
-        $this->travelTo($start);
-        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
-
-        $this->travelTo($start->addSeconds(100));
-        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
-
-        $this->travelTo($start->addSeconds(150));
-        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
-
-        $this->travelTo($start->addSeconds(180));
-        ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
-
-        expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(180);
     });
 
     it('excludes waiting time from the latest response seconds when the feature is active', function () {
