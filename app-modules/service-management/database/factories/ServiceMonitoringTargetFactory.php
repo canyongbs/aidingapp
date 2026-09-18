@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -80,6 +81,21 @@ class ServiceMonitoringTargetFactory extends Factory
             'auth_type' => AuthType::Basic,
             'auth_username' => $this->faker->userName(),
             'auth_password' => $this->faker->password(),
+        ]);
+    }
+
+    public function apiEndpoint(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'monitor_type' => MonitorType::ApiEndpoint,
+            'follow_redirection' => true,
+            'successful_status_codes' => [200],
+            'is_max_latency_enabled' => false,
+            'max_latency_ms' => null,
+            'http_method' => HttpMethod::Get,
+            'request_body' => null,
+            'is_request_body_json' => false,
+            'request_headers' => [],
         ]);
     }
 }

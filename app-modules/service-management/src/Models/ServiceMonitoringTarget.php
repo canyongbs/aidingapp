@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
 use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
@@ -86,6 +87,14 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'auth_type',
         'auth_username',
         'auth_password',
+        'follow_redirection',
+        'successful_status_codes',
+        'is_max_latency_enabled',
+        'max_latency_ms',
+        'http_method',
+        'request_body',
+        'is_request_body_json',
+        'request_headers',
     ];
 
     protected $casts = [
@@ -99,6 +108,13 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'auth_type' => AuthType::class,
         'auth_username' => 'encrypted',
         'auth_password' => 'encrypted',
+        'follow_redirection' => 'boolean',
+        'successful_status_codes' => 'array',
+        'is_max_latency_enabled' => 'boolean',
+        'max_latency_ms' => 'integer',
+        'http_method' => HttpMethod::class,
+        'is_request_body_json' => 'boolean',
+        'request_headers' => 'array',
     ];
 
     protected $hidden = [
