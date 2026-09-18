@@ -36,10 +36,8 @@
 
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Illuminate\Console\Scheduling\Event;
-use Illuminate\Console\Scheduling\Schedule;
+use App\Jobs\PruneModels;
 use Illuminate\Database\Console\PruneCommand;
-use Illuminate\Support\Collection;
 
 use function Pest\Laravel\artisan;
 use function Pest\Laravel\assertModelExists;
@@ -71,15 +69,12 @@ it('prunes only unattached secrets older than one day', function () {
     assertModelExists($attachedSecret);
 });
 
-it('is scheduled for daily pruning', function () {
-    $schedule = app()->make(Schedule::class);
+it('prunes unattached stale secrets when the model pruning job runs', function () {
+    $expiredSecret = Secret::factory()->create([
+        'updated_at' => now()->subDays(2),
+    ]);
 
-    $events = (new Collection($schedule->events()))->filter(function (Event $event) {
-        $secretClass = Secret::class;
+    (new PruneModels())->handle();
 
-        return str_contains($event->command, "model:prune --model={$secretClass}")
-            && $event->expression === '0 0 * * *';
-    });
-
-    expect($events)->toHaveCount(1);
+    assertModelMissing($expiredSecret);
 });
