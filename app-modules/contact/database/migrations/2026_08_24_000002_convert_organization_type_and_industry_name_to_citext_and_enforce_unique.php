@@ -35,7 +35,6 @@
 */
 
 use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -43,15 +42,7 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
-    private string $table = '';
-
     private string $column = 'name';
-
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
 
     /**
      * @var array<string>
@@ -65,10 +56,6 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             foreach ($this->tables as $table) {
-                $this->table = $table;
-
-                $this->fixDuplicates();
-
                 DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE citext");
 
                 Schema::table($table, function (Blueprint $blueprint) use ($table) {
@@ -87,13 +74,9 @@ return new class () extends Migration {
             OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
             foreach ($this->tables as $table) {
-                $this->table = $table;
-
                 DB::statement("DROP INDEX IF EXISTS {$table}_name_unique");
 
                 DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-                $this->revertDuplicates();
             }
         });
     }
