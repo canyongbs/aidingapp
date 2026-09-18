@@ -54,7 +54,6 @@
         userName: { type: String, required: true },
         userAvatar: { type: String, default: null },
         serviceManagementEnabled: { type: Boolean, default: false },
-        confidentialChannelsEnabled: { type: Boolean, default: false },
     });
 
     const store = useChatStore();
@@ -144,11 +143,7 @@
 
     const initialUrlParams = new URLSearchParams(window.location.search);
     const requestedTab = initialUrlParams.get('tab');
-    const enabledTabs = [
-        'users',
-        ...(props.serviceManagementEnabled ? ['contacts'] : []),
-        ...(props.confidentialChannelsEnabled ? ['confidential'] : []),
-    ];
+    const enabledTabs = ['users', 'confidential', ...(props.serviceManagementEnabled ? ['contacts'] : [])];
     const initialTab = enabledTabs.includes(requestedTab) ? requestedTab : 'users';
     const activeTab = ref(initialTab);
 
@@ -163,7 +158,7 @@
 
         return {
             participantType: 'user',
-            confidential: props.confidentialChannelsEnabled ? false : null,
+            confidential: false,
         };
     });
 
@@ -438,7 +433,6 @@
                 :contacts-unread-count="contactsUnreadCount"
                 :confidential-unread-count="confidentialUnreadCount"
                 :service-management-enabled="serviceManagementEnabled"
-                :confidential-channels-enabled="confidentialChannelsEnabled"
                 @select="handleSelectConversation"
                 @new-conversation="handleNewConversation"
                 @find-channels="handleFindChannels"
@@ -567,7 +561,6 @@
         <NewConversationModal
             :is-open="showNewConversationModal"
             :current-user-id="userId"
-            :confidential-channels-enabled="confidentialChannelsEnabled"
             @close="showNewConversationModal = false"
             @created="handleConversationCreated"
         />

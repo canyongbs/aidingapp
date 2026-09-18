@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
             userName: chatContainer.dataset.userName,
             userAvatar: chatContainer.dataset.userAvatar || null,
             serviceManagementEnabled: chatContainer.hasAttribute('data-service-management-enabled'),
-            confidentialChannelsEnabled: chatContainer.hasAttribute('data-confidential-channels-enabled'),
         });
         app.use(createPinia());
         app.mount(chatContainer);

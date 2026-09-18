@@ -55,7 +55,6 @@ use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
@@ -178,7 +177,6 @@ return [
     OrganizationType::class,
     Contract::class,
     ContractType::class,
-    Division::class,
     EmailTemplate::class,
     Engagement::class,
     EngagementBatch::class,

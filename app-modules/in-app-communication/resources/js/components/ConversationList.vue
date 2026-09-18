@@ -60,7 +60,6 @@
         contactsUnreadCount: { type: Number, default: 0 },
         confidentialUnreadCount: { type: Number, default: 0 },
         serviceManagementEnabled: { type: Boolean, default: false },
-        confidentialChannelsEnabled: { type: Boolean, default: false },
     });
 
     const emit = defineEmits([
@@ -83,7 +82,7 @@
 
     const availableTabs = computed(() =>
         TAB_DEFINITIONS.filter((tab) => {
-            if (tab.key === 'confidential') return props.confidentialChannelsEnabled;
+            if (tab.key === 'confidential') return true;
             if (tab.key === 'contacts') return props.serviceManagementEnabled;
             return true;
         }),
