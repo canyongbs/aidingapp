@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\MonitorTypeFeature;
 use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -89,16 +88,15 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->columnSpan(1),
                                 TextEntry::make('monitor_type')
                                     ->label('Monitor Type')
-                                    ->visible(MonitorTypeFeature::active())
                                     ->columnSpanFull(),
                                 TextEntry::make('should_contain')
                                     ->label('Should Contain')
                                     ->listWithLineBreaks()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
                                 TextEntry::make('should_not_contain')
                                     ->label('Should Not Contain')
                                     ->listWithLineBreaks()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
                             ])
                             ->columns(2),
                         Section::make('Notification Settings')
