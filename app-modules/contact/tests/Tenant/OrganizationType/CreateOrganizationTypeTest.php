@@ -39,9 +39,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages\CreateOr
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Tests\Tenant\OrganizationType\RequestFactories\CreateOrganizationTypeRequestFactory;
-use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -126,24 +124,4 @@ test('the organization type name uniqueness check is case-insensitive', function
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
-});
-
-test('does not apply the unique form rule when the feature is disabled', function () {
-    OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.create');
-
-    OrganizationType::factory()->create(['name' => 'Vendor']);
-
-    $request = collect(CreateOrganizationTypeRequestFactory::new()->state(['name' => 'Vendor'])->create());
-
-    actingAs($user);
-
-    expect(fn () => livewire(CreateOrganizationType::class)
-        ->fillForm($request->toArray())
-        ->call('create'))
-        ->toThrow(UniqueConstraintViolationException::class);
 });

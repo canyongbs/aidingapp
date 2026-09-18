@@ -39,9 +39,7 @@ use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages\Edit
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Tests\Tenant\OrganizationIndustry\RequestFactories\EditOrganizationIndustryRequestFactory;
-use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -134,25 +132,4 @@ test('an organization industry can keep its own name when editing', function () 
         ->fillForm(['name' => 'Technology'])
         ->call('save')
         ->assertHasNoFormErrors();
-});
-
-test('does not apply the unique form rule when the feature is disabled', function () {
-    OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('settings.view-any');
-    $user->givePermissionTo('settings.*.update');
-
-    OrganizationIndustry::factory()->create(['name' => 'Technology']);
-    $organizationIndustry = OrganizationIndustry::factory()->create(['name' => 'Finance']);
-
-    actingAs($user);
-
-    expect(fn () => livewire(EditOrganizationIndustry::class, [
-        'record' => $organizationIndustry->getRouteKey(),
-    ])
-        ->fillForm(['name' => 'Technology'])
-        ->call('save'))
-        ->toThrow(UniqueConstraintViolationException::class);
 });

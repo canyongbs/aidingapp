@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -65,10 +64,7 @@ class EditOrganizationType extends EditRecord
                             ->maxLength(255)
                             ->required()
                             ->string()
-                            ->when(
-                                OrganizationTypeAndIndustryNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            ),
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
 
                         Toggle::make('is_default')
                             ->label('Default')

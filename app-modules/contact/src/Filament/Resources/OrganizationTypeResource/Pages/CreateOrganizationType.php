@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\OrganizationTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\OrganizationTypeResource;
 use AidingApp\Contact\Models\OrganizationType;
-use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
@@ -63,10 +62,7 @@ class CreateOrganizationType extends CreateRecord
                             ->maxLength(255)
                             ->required()
                             ->string()
-                            ->when(
-                                OrganizationTypeAndIndustryNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            ),
+                            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
 
                         Toggle::make('is_default')
                             ->label('Default')
