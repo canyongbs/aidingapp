@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -58,7 +57,6 @@ class ServiceRequestFactory extends Factory
             'service_request_number' => app(ServiceRequestNumberGenerator::class)->generate(),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'close_details' => $this->faker->sentence(),
-            'division_id' => Division::factory(),
             'status_id' => ServiceRequestStatus::factory(),
             'priority_id' => ServiceRequestPriority::factory(),
             'category' => $this->faker->randomElement(ServiceRequestCategory::cases()),

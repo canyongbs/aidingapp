@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
 use AidingApp\Contact\Models\Organization;
-use AidingApp\Division\Models\Division;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -125,12 +124,6 @@ class ListServiceRequests extends ListRecords
                                 $direction
                             );
                     })
-                    ->toggleable(),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->sortable()
-                    ->visible(fn (): bool => Division::count() > 1)
                     ->toggleable(),
                 TextColumn::make('status.name')
                     ->label('Status')

@@ -52,10 +52,6 @@ class DepartmentsTable
                     ->label('Name')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('division.name')
-                    ->label('Division')
-                    ->searchable()
-                    ->sortable(),
             ])
             ->defaultSort('name')
             ->paginationPageOptions([5]);

@@ -34,45 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Division\Models\Division;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use Filament\Actions\Action;
-use Filament\Forms\Components\Select;
-use Filament\Notifications\Notification;
-use Filament\Support\Icons\Heroicon;
-
-class EditServiceRequestDivisionAction
-{
-    public static function make(ServiceRequest $serviceRequest): Action
+return new class () extends Migration {
+    public function up(): void
     {
-        return Action::make('editDivision')
-            ->label('Edit division')
-            ->icon(Heroicon::Pencil)
-            ->iconButton()
-            ->authorize('update', $serviceRequest)
-            ->slideOver()
-            ->modalHeading('Edit Division')
-            ->modalSubmitActionLabel('Save')
-            ->fillForm([
-                'division_id' => $serviceRequest->division_id,
-            ])
-            ->schema([
-                Select::make('division_id')
-                    ->label('Division')
-                    ->relationship('division', 'name')
-                    ->required()
-                    ->exists((new Division())->getTable(), 'id'),
-            ])
-            ->action(function (array $data) use ($serviceRequest): void {
-                $serviceRequest->division_id = $data['division_id'];
-                $serviceRequest->save();
-
-                Notification::make()
-                    ->title('Division updated.')
-                    ->success()
-                    ->send();
-            });
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->dropConstrainedForeignId('division_id');
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_requests', function (Blueprint $table) {
+            $table->foreignUuid('division_id')->nullable()->constrained('divisions');
+        });
+    }
+};

@@ -38,7 +38,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
@@ -262,47 +261,6 @@ test('Priority select is populated based on selected type', function () {
         ->assertSuccessful();
 });
 
-test('Division field is visible when multiple divisions exist', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
-
-    Division::factory()->count(2)->create();
-
-    $contact = Contact::factory()->create();
-
-    livewire(ServiceRequestsRelationManager::class, [
-        'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
-    ])
-        ->mountTableAction('create')
-        ->assertFormFieldExists('division_id', 'mountedActionSchema0')
-        ->assertSuccessful();
-});
-
-test('Division field is hidden when only one division exists', function () {
-    asSuperAdmin();
-
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
-
-    Division::query()->delete();
-    Division::factory()->create();
-
-    $contact = Contact::factory()->create();
-
-    livewire(ServiceRequestsRelationManager::class, [
-        'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
-    ])
-        ->mountTableAction('create')
-        ->assertFormFieldIsHidden('division_id', 'mountedActionSchema0')
-        ->assertSuccessful();
-});
-
 test('Can create a service request for a contact', function () {
     asSuperAdmin();
 
@@ -314,14 +272,12 @@ test('Can create a service request for a contact', function () {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->getKey()])->create();
     $status = ServiceRequestStatus::factory()->create();
-    $division = Division::factory()->create();
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ContactServiceManagement::class,
     ])
         ->callTableAction('create', data: [
-            'division_id' => $division->getKey(),
             'status_id' => $status->getKey(),
             'type_id' => $type->getKey(),
             'priority_id' => $priority->getKey(),

@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
@@ -88,7 +87,6 @@ test('A successful action on the CreateServiceRequest page', function () {
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
                 'respondent_id',
@@ -99,9 +97,7 @@ test('A successful action on the CreateServiceRequest page', function () {
 
     $serviceRequest = ServiceRequest::first();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'))
@@ -201,15 +197,9 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
         ->call('create')
         ->assertHasFormErrors($errors);
 
-    assertDatabaseMissing(ServiceRequest::class, $request->except(['division_id', 'status_id', 'priority_id', 'type_id'])->toArray());
+    assertDatabaseMissing(ServiceRequest::class, $request->except(['status_id', 'priority_id', 'type_id'])->toArray());
 })->with(
     [
-        'division_id missing' => [CreateServiceRequestRequestFactory::new()->without('division_id'), ['division_id' => 'required'], fn () => Division::factory()->count(2)->create()],
-        'division_id does not exist' => [
-            CreateServiceRequestRequestFactory::new()->state(['division_id' => fake()->uuid()]),
-            ['division_id' => 'in'],
-            fn () => Division::factory()->count(2)->create(),
-        ],
         'status_id missing' => [CreateServiceRequestRequestFactory::new()->without('status_id'), ['status_id' => 'required']],
         'status_id does not exist' => [
             CreateServiceRequestRequestFactory::new()->state(['status_id' => fake()->uuid()]),
@@ -293,7 +283,6 @@ test('CreateServiceRequest is gated with proper access control', function () {
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
                 'respondent_id',
@@ -304,9 +293,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
 
     $serviceRequest = ServiceRequest::first();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
@@ -357,7 +344,6 @@ test('CreateServiceRequest is gated with proper access control via direct user m
         ServiceRequest::class,
         $request->except(
             [
-                'division_id',
                 'status_id',
                 'priority_id',
                 'respondent_id',
@@ -368,9 +354,7 @@ test('CreateServiceRequest is gated with proper access control via direct user m
 
     $serviceRequest = ServiceRequest::first();
 
-    expect($serviceRequest->division->id)
-        ->toEqual($request->get('division_id'))
-        ->and($serviceRequest->status->id)
+    expect($serviceRequest->status->id)
         ->toEqual($request->get('status_id'))
         ->and($serviceRequest->priority->id)
         ->toEqual($request->get('priority_id'));
@@ -431,11 +415,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
 
     assertCount(1, ServiceRequest::all());
 
-    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
-
-    $serviceRequest = ServiceRequest::first();
-
-    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+    assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
 test('CreateServiceRequest is gated with proper feature access control via direct user manager', function () {
@@ -487,11 +467,7 @@ test('CreateServiceRequest is gated with proper feature access control via direc
 
     assertCount(1, ServiceRequest::all());
 
-    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
-
-    $serviceRequest = ServiceRequest::first();
-
-    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+    assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
 test('cannot create service requests if user is manager of any service request type', function () {
@@ -664,11 +640,7 @@ test('create service requests if user is manager of any service request type', f
 
     assertCount(1, ServiceRequest::all());
 
-    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
-
-    $serviceRequest = ServiceRequest::first();
-
-    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+    assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
 test('create service requests if user is direct manager of any service request type', function () {
@@ -707,11 +679,7 @@ test('create service requests if user is direct manager of any service request t
 
     assertCount(1, ServiceRequest::all());
 
-    assertDatabaseHas(ServiceRequest::class, $request->except(['division_id', 'respondent_id', 'type_id'])->toArray());
-
-    $serviceRequest = ServiceRequest::first();
-
-    expect($serviceRequest->division->id)->toEqual($request['division_id']);
+    assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
 test('validate service requests type if user is manager of any service request type', function () {
