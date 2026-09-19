@@ -50,7 +50,7 @@ class HttpMethodToggleButtons
             ->label('HTTP Method')
             ->options(HttpMethod::class)
             ->enum(HttpMethod::class)
-            ->default(HttpMethod::Get)
+            ->default(HttpMethod::Head)
             ->live()
             ->inline()
             ->required()

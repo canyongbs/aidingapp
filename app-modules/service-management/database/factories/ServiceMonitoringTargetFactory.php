@@ -92,7 +92,7 @@ class ServiceMonitoringTargetFactory extends Factory
             'successful_status_codes' => [200],
             'is_max_latency_enabled' => false,
             'max_latency_ms' => null,
-            'http_method' => HttpMethod::Get,
+            'http_method' => HttpMethod::Head,
             'request_body' => null,
             'is_request_body_json' => false,
             'request_headers' => [],

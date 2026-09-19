@@ -72,7 +72,7 @@ class ServiceMonitoringTargetRequestFactory extends RequestFactory
             'follow_redirection' => true,
             'successful_status_codes' => [200],
             'is_max_latency_enabled' => false,
-            'http_method' => HttpMethod::Get,
+            'http_method' => HttpMethod::Head,
             'request_headers' => [],
         ]);
     }
