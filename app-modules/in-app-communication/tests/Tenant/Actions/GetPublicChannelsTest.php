@@ -36,7 +36,6 @@
 
 use AidingApp\InAppCommunication\Actions\GetPublicChannels;
 use AidingApp\InAppCommunication\Models\Conversation;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 
 it('never lists a confidential channel', function () {
@@ -49,18 +48,4 @@ it('never lists a confidential channel', function () {
     $results = app(GetPublicChannels::class)(excludeUser: $user);
 
     expect($results->pluck('id')->all())->not->toContain($confidential->getKey());
-});
-
-it('does not exclude confidential channels when the feature is inactive', function () {
-    $user = User::factory()->create();
-
-    $confidential = Conversation::factory()->confidential()->create([
-        'is_private' => false,
-    ]);
-
-    ConfidentialChannelsFeature::deactivate();
-
-    $results = app(GetPublicChannels::class)(excludeUser: $user);
-
-    expect($results->pluck('id')->all())->toContain($confidential->getKey());
 });

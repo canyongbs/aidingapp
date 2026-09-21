@@ -44,8 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
-use App\Features\MonitorTypeFeature;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Radio;
@@ -103,12 +101,11 @@ class CreateServiceMonitoring extends CreateRecord
                             ->default(MonitorType::Availability)
                             ->live()
                             ->inline()
-                            ->visible(MonitorTypeFeature::active())
                             ->columnSpanFull(),
                         TextEntry::make('helperText')
                             ->hiddenLabel()
                             ->state('Spaces may be used within a string. Use quotes when a string contains a comma or double quotes.')
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->columnSpanFull(),
                         TextInput::make('should_contain')
                             ->label('Should Contain')
@@ -116,7 +113,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_not_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more required strings separated by commas. Every string must appear in the response. Matching is case-insensitive.'),
                         TextInput::make('should_not_contain')
                             ->label('Should Not Contain')
@@ -124,7 +121,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch && MonitorTypeFeature::active())
+                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
                     ])
                     ->columns(2),
@@ -166,20 +163,14 @@ class CreateServiceMonitoring extends CreateRecord
             }
         }
 
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            $this->reportConfigurationsData = $data['report_configurations'] ?? [];
-            unset($data['report_configurations']);
-        }
+        $this->reportConfigurationsData = $data['report_configurations'] ?? [];
+        unset($data['report_configurations']);
 
         return $data;
     }
 
     protected function afterCreate(): void
     {
-        if (! ServiceMonitoringReportConfigurationsFeature::active()) {
-            return;
-        }
-
         $record = $this->getRecord();
         assert($record instanceof ServiceMonitoringTarget);
 

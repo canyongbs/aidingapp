@@ -34,16 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Features\NotificationSettingsFeature;
 use App\Models\NotificationSetting;
-use App\Models\User;
 use App\Settings\NotificationSettings;
 use CanyonGBS\Common\Enums\Color;
 use Carbon\CarbonImmutable;
@@ -72,6 +70,49 @@ if (! function_exists('recordServiceRequestHistory')) {
         ]);
     }
 }
+
+describe('2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique', function () {
+    $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique.php';
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $first = Organization::factory()->create(['name' => 'Acme Corp', 'created_at' => now()->subMinutes(3)]);
+                $second = Organization::factory()->create(['name' => 'acme corp', 'created_at' => now()->subMinutes(2)]);
+                $third = Organization::factory()->create(['name' => 'ACME CORP', 'created_at' => now()->subMinutes(1)]);
+                $unique = Organization::factory()->create(['name' => 'Solo Inc', 'created_at' => now()->subMinutes(4)]);
+
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($first->refresh()->name)->toBe('Acme Corp')
+                    ->and($second->refresh()->name)->toBe('acme corp-2')
+                    ->and($third->refresh()->name)->toBe('ACME CORP-3')
+                    ->and($unique->refresh()->name)->toBe('Solo Inc');
+            }
+        );
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationPath) {
+        isolatedMigration(
+            '2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_unique',
+            function () use ($migrationPath) {
+                $kept = Organization::factory()->create(['name' => 'Dupe Co', 'created_at' => now()->subMinutes(2)]);
+                $trashed = Organization::factory()->create(['name' => 'dupe co', 'created_at' => now()->subMinute()]);
+                $trashed->delete();
+
+                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+
+                expect($migrate)->toBe(Command::SUCCESS);
+
+                expect($kept->refresh()->name)->toBe('Dupe Co')
+                    ->and($trashed->refresh()->name)->toBe('dupe co');
+            }
+        );
+    });
+});
 
 describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique', function () {
     $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique.php';
@@ -204,73 +245,6 @@ describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', functi
                 ->and($periods[0]->classification)->toBe(SystemServiceRequestClassification::Open->value)
                 ->and($periods[1]->service_request_status_id)->toBeNull()
                 ->and($periods[1]->classification)->toBeNull();
-        });
-    });
-});
-
-describe('2026_09_08_090400_tmp_backfill_service_monitoring_report_configurations', function () {
-    $migrationName = '2026_09_08_090400_tmp_backfill_service_monitoring_report_configurations';
-    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
-
-    it('backfills a configuration for a currently disabled legacy target without losing its recipients', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $user = User::factory()->create();
-
-            $target = ServiceMonitoringTarget::factory()->create([
-                'report_frequency' => ServiceMonitoringReportFrequency::Weekly,
-                'is_reporting_active' => false,
-                'is_reported_via_email' => true,
-                'is_reported_via_database' => false,
-            ]);
-            $target->reportUsers()->attach($user->getKey());
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            $configuration = DB::table('service_monitoring_report_configurations')
-                ->where('service_monitoring_target_id', $target->getKey())
-                ->first();
-
-            expect($configuration)->not->toBeNull()
-                ->and($configuration->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly->value)
-                ->and((bool) $configuration->is_active)->toBeFalse()
-                ->and((bool) $configuration->is_reported_via_email)->toBeTrue();
-
-            $recipients = DB::table('service_monitoring_report_configuration_user')
-                ->where('service_monitoring_report_configuration_id', $configuration->id)
-                ->pluck('user_id');
-
-            expect($recipients->all())->toBe([$user->getKey()]);
-        });
-    });
-
-    it('backfills an active legacy target as active', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $target = ServiceMonitoringTarget::factory()->create([
-                'report_frequency' => ServiceMonitoringReportFrequency::Daily,
-                'is_reporting_active' => true,
-            ]);
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            $configuration = DB::table('service_monitoring_report_configurations')
-                ->where('service_monitoring_target_id', $target->getKey())
-                ->first();
-
-            expect($configuration)->not->toBeNull()
-                ->and((bool) $configuration->is_active)->toBeTrue();
-        });
-    });
-
-    it('does not backfill a target with no report frequency configured', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $target = ServiceMonitoringTarget::factory()->create([
-                'report_frequency' => null,
-                'is_reporting_active' => false,
-            ]);
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            expect(DB::table('service_monitoring_report_configurations')->where('service_monitoring_target_id', $target->getKey())->exists())->toBeFalse();
         });
     });
 });

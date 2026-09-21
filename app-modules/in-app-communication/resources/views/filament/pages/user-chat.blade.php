@@ -33,7 +33,6 @@
 --}}
 @php
     use App\Enums\Feature;
-    use App\Features\ConfidentialChannelsFeature;
     use Illuminate\Support\Facades\Gate;
 @endphp
 
@@ -48,9 +47,6 @@
         data-user-avatar="{{ auth()->user()->avatar_url ?? "" }}"
         @if (Gate::check(Feature::ServiceManagement->getGateName()))
             data-service-management-enabled
-        @endif
-        @if (ConfidentialChannelsFeature::active())
-            data-confidential-channels-enabled
         @endif
         wire:ignore
     ></div>

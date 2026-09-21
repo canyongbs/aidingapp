@@ -46,7 +46,6 @@
     const props = defineProps({
         isOpen: { type: Boolean, default: false },
         currentUserId: { type: String, required: true },
-        confidentialChannelsEnabled: { type: Boolean, default: false },
     });
 
     const emit = defineEmits(['close', 'created']);
@@ -79,9 +78,7 @@
     const isCreating = ref(false);
     const error = ref('');
 
-    const showConfidentialFields = computed(
-        () => props.confidentialChannelsEnabled && conversationType.value === 'channel',
-    );
+    const showConfidentialFields = computed(() => conversationType.value === 'channel');
 
     const canCreate = computed(() => {
         if (conversationType.value === 'direct') {

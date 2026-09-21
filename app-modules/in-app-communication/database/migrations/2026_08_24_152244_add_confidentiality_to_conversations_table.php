@@ -34,36 +34,26 @@
 </COPYRIGHT>
 */
 
-use App\Features\ConfidentialChannelsFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('conversations', function (Blueprint $table) {
-                $table->boolean('is_confidential')->default(false);
-                $table->string('ephemeral_period')->nullable();
+        Schema::table('conversations', function (Blueprint $table) {
+            $table->boolean('is_confidential')->default(false);
+            $table->string('ephemeral_period')->nullable();
 
-                $table->index(['is_confidential', 'ephemeral_period'], 'conversations_ephemeral_lookup_index');
-            });
-
-            ConfidentialChannelsFeature::activate();
+            $table->index(['is_confidential', 'ephemeral_period'], 'conversations_ephemeral_lookup_index');
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ConfidentialChannelsFeature::deactivate();
-
-            Schema::table('conversations', function (Blueprint $table) {
-                $table->dropIndex('conversations_ephemeral_lookup_index');
-                $table->dropColumn(['is_confidential', 'ephemeral_period']);
-            });
+        Schema::table('conversations', function (Blueprint $table) {
+            $table->dropIndex('conversations_ephemeral_lookup_index');
+            $table->dropColumn(['is_confidential', 'ephemeral_period']);
         });
     }
 };

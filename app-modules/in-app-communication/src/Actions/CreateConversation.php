@@ -41,7 +41,6 @@ use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Events\ConversationCreated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\DB;
@@ -61,8 +60,7 @@ class CreateConversation
         ?ConversationEphemeralPeriod $ephemeralPeriod = null,
     ): Conversation {
         $isConfidential = $isConfidential
-            && $type === ConversationType::Channel
-            && ConfidentialChannelsFeature::active();
+            && $type === ConversationType::Channel;
 
         if ($isConfidential) {
             $isPrivate = true;
@@ -85,10 +83,8 @@ class CreateConversation
             $conversation->is_private = $isPrivate;
             $conversation->created_by = $creator->getKey();
 
-            if (ConfidentialChannelsFeature::active()) {
-                $conversation->is_confidential = $isConfidential;
-                $conversation->ephemeral_period = $ephemeralPeriod;
-            }
+            $conversation->is_confidential = $isConfidential;
+            $conversation->ephemeral_period = $ephemeralPeriod;
 
             $conversation->save();
 

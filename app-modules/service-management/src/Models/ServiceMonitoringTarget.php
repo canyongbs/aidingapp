@@ -78,10 +78,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'frequency',
         'is_notified_via_database',
         'is_notified_via_email',
-        'is_reporting_active',
-        'report_frequency',
-        'is_reported_via_database',
-        'is_reported_via_email',
         'is_confidential',
         'monitor_type',
         'should_contain',
@@ -92,10 +88,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'frequency' => ServiceMonitoringFrequency::class,
         'is_notified_via_database' => 'boolean',
         'is_notified_via_email' => 'boolean',
-        'is_reporting_active' => 'boolean',
-        'report_frequency' => ServiceMonitoringReportFrequency::class,
-        'is_reported_via_database' => 'boolean',
-        'is_reported_via_email' => 'boolean',
         'is_confidential' => 'boolean',
         'monitor_type' => MonitorType::class,
         'should_contain' => 'array',
@@ -141,51 +133,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         return $this
             ->belongsToMany(User::class)
             ->using(ServiceMonitoringTargetUser::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<User, $this, covariant ServiceMonitoringTargetReportUser>
-     */
-    public function reportUsers(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            User::class,
-            'service_monitoring_target_report_user',
-            'service_monitoring_target_id',
-            'user_id',
-        )
-            ->using(ServiceMonitoringTargetReportUser::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<Department, $this, covariant ServiceMonitoringTargetReportDepartment>
-     */
-    public function reportDepartments(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Department::class,
-            'service_monitoring_target_report_department',
-            'service_monitoring_target_id',
-            'department_id',
-        )
-            ->using(ServiceMonitoringTargetReportDepartment::class)
-            ->withTimestamps();
-    }
-
-    /**
-     * @return BelongsToMany<Contact, $this, covariant ServiceMonitoringTargetReportContact>
-     */
-    public function reportContacts(): BelongsToMany
-    {
-        return $this->belongsToMany(
-            Contact::class,
-            'service_monitoring_target_report_contact',
-            'service_monitoring_target_id',
-            'contact_id',
-        )
-            ->using(ServiceMonitoringTargetReportContact::class)
             ->withTimestamps();
     }
 

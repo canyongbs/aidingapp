@@ -42,7 +42,6 @@ use AidingApp\InAppCommunication\Events\UnreadCountUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
-use App\Features\ConfidentialChannelsFeature;
 use Carbon\CarbonInterface;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -65,10 +64,6 @@ class PruneEphemeralMessages implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (! ConfidentialChannelsFeature::active()) {
-            return;
-        }
-
         foreach (ConversationEphemeralPeriod::cases() as $period) {
             $cutoff = $period->subtractFrom(now());
 

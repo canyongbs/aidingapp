@@ -39,7 +39,6 @@ use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Enums\ConversationType;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 use Illuminate\Support\Facades\Event;
 
@@ -300,22 +299,4 @@ it('does not make a direct message confidential', function () {
     expect($conversation)
         ->is_confidential->toBeFalse()
         ->ephemeral_period->toBeNull();
-});
-
-it('does not store confidentiality when the feature is inactive', function () {
-    ConfidentialChannelsFeature::deactivate();
-
-    $creator = User::factory()->create();
-
-    $conversation = app(CreateConversation::class)(
-        creator: $creator,
-        type: ConversationType::Channel,
-        participantIds: [],
-        name: 'Legal Review',
-        isConfidential: true,
-        ephemeralPeriod: ConversationEphemeralPeriod::OneHour,
-    );
-
-    expect($conversation->is_confidential)->toBeFalsy()
-        ->and($conversation->ephemeral_period)->toBeNull();
 });
