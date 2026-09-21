@@ -307,7 +307,14 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
             $failures = [];
 
-            $successfulStatusCodes = array_map('intval', $this->serviceMonitoringTarget->successful_status_codes ?? []);
+            // ValidHttpStatusCodes deliberately normalizes a scalar into an array at the
+            // validation layer (see its docblock), but doesn't guarantee the persisted value
+            // is one -- guard here too so a stored scalar can't crash the queued check. PHPStan
+            // trusts the model cast's declared array type, but that's exactly what a value
+            // written outside Eloquent (e.g. direct database access) can violate.
+            $storedStatusCodes = $this->serviceMonitoringTarget->successful_status_codes ?? [];
+            // @phpstan-ignore function.alreadyNarrowedType
+            $successfulStatusCodes = array_map('intval', is_array($storedStatusCodes) ? $storedStatusCodes : [$storedStatusCodes]);
 
             if (! in_array($response->status(), $successfulStatusCodes, true)) {
                 $failures[] = "Unexpected status code: {$response->status()}";

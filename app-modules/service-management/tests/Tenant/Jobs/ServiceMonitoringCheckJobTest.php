@@ -1072,6 +1072,26 @@ it('treats a null follow_redirection as true instead of crashing', function () {
     expect($history->succeeded)->toBeTrue();
 });
 
+it('does not crash when a stored successful_status_codes value is a scalar instead of an array', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    // ValidHttpStatusCodes normalizes a scalar for validation, but a tampered payload could
+    // still persist one -- the job's own array_map() must not assume it's already an array.
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create();
+    DB::table('service_monitoring_targets')->where('id', $serviceMonitorTarget->getKey())->update(['successful_status_codes' => json_encode(200)]);
+    $serviceMonitorTarget->refresh();
+
+    expect($serviceMonitorTarget->successful_status_codes)->toBe(200);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    expect($history->succeeded)->toBeTrue();
+});
+
 it('records a failed check instead of crashing when a stored header name is not valid to send', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
