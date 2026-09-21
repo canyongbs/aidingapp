@@ -54,7 +54,7 @@ class SuccessfulStatusCodesSelect
             ->default([200])
             ->required()
             ->rules([new ValidHttpStatusCodes()])
-            ->hintIcon('heroicon-m-question-mark-circle', 'The response is considered successful when its final HTTP status code (after following any redirects, if enabled) matches one of the selected codes.')
+            ->helperText('The response is considered successful when its final HTTP status code (after following any redirects, if enabled) matches one of the selected codes.')
             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
             ->columnSpanFull();
     }

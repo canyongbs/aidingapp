@@ -49,6 +49,7 @@ class FollowRedirectionToggle
             ->label('Follow Redirection')
             ->helperText('If disabled, the check will use the redirection HTTP status code (3xx) returned by the server rather than following it.')
             ->default(true)
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active());
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
     }
 }

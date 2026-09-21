@@ -46,11 +46,12 @@ class MaxLatencyInput
     public static function make(): TextInput
     {
         return TextInput::make('max_latency_ms')
-            ->label('Maximum Latency (ms)')
+            ->label('Maximum Latency')
             ->numeric()
+            ->suffix('ms')
             ->minValue(1)
             ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
             ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
-            ->hintIcon('heroicon-m-question-mark-circle', 'The check fails if the response takes longer than this to arrive.');
+            ->helperText('The check fails if the response takes longer than this to arrive.');
     }
 }
