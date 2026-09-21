@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Rules\UniqueRequestHeaderNames;
 use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
@@ -52,15 +53,26 @@ class RequestHeadersRepeater
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    // RFC 7230 token grammar: header field names can't contain spaces, colons, or
+                    // other characters an HTTP client rejects when actually sending the request.
+                    ->regex('/^[!#$%&\'*+\-.^_`|~0-9A-Za-z]+$/')
+                    ->validationMessages([
+                        'regex' => 'The header name may only contain letters, digits, and the characters !#$%&\'*+-.^_`|~.',
+                    ]),
                 TextInput::make('value')
                     ->label('Value')
                     ->required()
-                    ->maxLength(65535),
+                    ->maxLength(65535)
+                    ->regex('/^[^\r\n]*$/')
+                    ->validationMessages([
+                        'regex' => 'The header value may not contain line breaks.',
+                    ]),
             ])
             ->columns(2)
             ->addActionLabel('Add Header')
             ->defaultItems(0)
+            ->rules([new UniqueRequestHeaderNames()])
             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
             ->columnSpanFull();
     }

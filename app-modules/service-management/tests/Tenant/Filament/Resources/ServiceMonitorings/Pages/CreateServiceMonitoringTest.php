@@ -302,6 +302,31 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['request_body' => 'json'],
         ],
+        'request header name must be a valid HTTP header name' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'request_headers' => [
+                    ['name' => 'Invalid Header', 'value' => 'value'],
+                ],
+            ]),
+            ['request_headers.0.name' => 'regex'],
+        ],
+        'request header value cannot contain line breaks' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'request_headers' => [
+                    ['name' => 'X-Test', 'value' => "line1\nline2"],
+                ],
+            ]),
+            ['request_headers.0.value' => 'regex'],
+        ],
+        'request header names must be unique regardless of casing' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'request_headers' => [
+                    ['name' => 'X-Test', 'value' => 'one'],
+                    ['name' => 'x-test', 'value' => 'two'],
+                ],
+            ]),
+            ['request_headers'],
+        ],
     ]
 );
 

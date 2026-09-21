@@ -57,6 +57,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 {
@@ -291,6 +292,12 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 report($exception);
             }
             $this->handleResponses(523, 0, false);
+        } catch (InvalidArgumentException $exception) {
+            // Thrown by the HTTP client when a configured header name/value isn't valid to send over
+            // the wire. Form validation prevents saving one this way going forward, but the record's
+            // headers could still end up invalid some other way (e.g. direct database access), so
+            // record it as a failed check rather than letting the job itself fail/retry.
+            $this->handleResponses(0, 0, false, ["Invalid request configuration: {$exception->getMessage()}"]);
         }
     }
 

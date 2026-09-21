@@ -1020,6 +1020,28 @@ it('sends the configured request headers', function () {
     Http::assertSent(fn (Request $request) => $request->hasHeader('X-Custom-Header', 'custom-value'));
 });
 
+it('records a failed check instead of crashing when a stored header name is not valid to send', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    // Bypasses the form's regex validation via the factory to simulate a record whose headers
+    // ended up invalid some other way (e.g. direct database access), since the form itself now
+    // rejects an invalid header name like this before it can be saved.
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'request_headers' => [
+                ['name' => 'Invalid Header Name', 'value' => 'value'],
+            ],
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    expect($history->succeeded)->toBeFalse()
+        ->and($history->keyword_match_failures[0])->toContain('Invalid request configuration');
+});
+
 it('sends the request body as JSON when configured', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
