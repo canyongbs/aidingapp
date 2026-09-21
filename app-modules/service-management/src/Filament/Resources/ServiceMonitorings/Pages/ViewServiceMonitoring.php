@@ -98,9 +98,6 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Should Not Contain')
                                     ->listWithLineBreaks()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
-                                TextEntry::make('auth_type')
-                                    ->label('Auth Type')
-                                    ->visible(ServiceMonitoringAuthTypeFeature::active()),
                                 IconEntry::make('follow_redirection')
                                     ->label('Follow Redirection')
                                     ->boolean()
@@ -119,6 +116,9 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Maximum Latency')
                                     ->suffix('ms')
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled && ServiceMonitoringApiEndpointFeature::active()),
+                                TextEntry::make('auth_type')
+                                    ->label('Auth Type')
+                                    ->visible(ServiceMonitoringAuthTypeFeature::active()),
                                 TextEntry::make('http_method')
                                     ->label('HTTP Method')
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),

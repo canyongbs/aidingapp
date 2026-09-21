@@ -52,6 +52,7 @@ class MaxLatencyInput
             ->minValue(1)
             ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
             ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
-            ->helperText('The check fails if the response takes longer than this to arrive.');
+            ->helperText('The check fails if the response takes longer than this to arrive.')
+            ->columnSpanFull();
     }
 }

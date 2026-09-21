@@ -142,13 +142,13 @@ class EditServiceMonitoring extends EditRecord
                             ])
                             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
-                        AuthTypeSelect::make(),
-                        AuthUsernameInput::make(),
-                        AuthPasswordInput::make(),
                         FollowRedirectionToggle::make(),
                         SuccessfulStatusCodesSelect::make(),
                         MaxLatencyToggle::make(),
                         MaxLatencyInput::make(),
+                        AuthTypeSelect::make(),
+                        AuthUsernameInput::make(),
+                        AuthPasswordInput::make(),
                         HttpMethodToggleButtons::make(),
                         RequestBodyTextarea::make(),
                         SendAsJsonToggle::make(),

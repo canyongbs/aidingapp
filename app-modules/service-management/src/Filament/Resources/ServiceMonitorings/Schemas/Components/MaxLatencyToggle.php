@@ -48,6 +48,7 @@ class MaxLatencyToggle
         return Toggle::make('is_max_latency_enabled')
             ->label('Maximum Latency')
             ->live()
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active());
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
     }
 }
