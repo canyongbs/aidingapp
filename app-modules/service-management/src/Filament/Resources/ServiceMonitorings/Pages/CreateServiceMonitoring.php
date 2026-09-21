@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Radio;
@@ -164,20 +163,14 @@ class CreateServiceMonitoring extends CreateRecord
             }
         }
 
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            $this->reportConfigurationsData = $data['report_configurations'] ?? [];
-            unset($data['report_configurations']);
-        }
+        $this->reportConfigurationsData = $data['report_configurations'] ?? [];
+        unset($data['report_configurations']);
 
         return $data;
     }
 
     protected function afterCreate(): void
     {
-        if (! ServiceMonitoringReportConfigurationsFeature::active()) {
-            return;
-        }
-
         $record = $this->getRecord();
         assert($record instanceof ServiceMonitoringTarget);
 

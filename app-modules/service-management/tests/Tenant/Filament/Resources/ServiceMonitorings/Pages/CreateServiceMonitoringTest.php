@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -257,22 +256,6 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
         ],
     ]
 );
-
-// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
-test('report frequency is required when reporting is active and the feature is inactive', function () {
-    ServiceMonitoringReportConfigurationsFeature::deactivate();
-    asSuperAdmin();
-
-    $request = ServiceMonitoringTargetRequestFactory::new()->state([
-        'is_reporting_active' => true,
-        'report_frequency' => null,
-    ])->create();
-
-    livewire(CreateServiceMonitoring::class)
-        ->fillForm($request)
-        ->call('create')
-        ->assertHasFormErrors(['report_frequency' => 'required']);
-});
 
 test('CreateServiceMonitor with notification group User or Department', function () {
     asSuperAdmin();
