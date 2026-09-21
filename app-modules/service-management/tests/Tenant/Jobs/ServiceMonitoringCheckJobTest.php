@@ -939,33 +939,6 @@ it('does not follow redirects when follow redirection is disabled', function () 
     ]);
 });
 
-it('fails when the response exceeds the configured maximum latency', function () {
-    Http::fake(function () {
-        usleep(1000);
-
-        return Http::response('Test', 200);
-    });
-
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
-        ->apiEndpoint()
-        ->create([
-            'is_max_latency_enabled' => true,
-            'max_latency_ms' => -1,
-        ]);
-
-    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
-
-    assertDatabaseHas(HistoricalServiceMonitoring::class, [
-        'response' => 200,
-        'succeeded' => false,
-        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
-    ]);
-
-    $history = HistoricalServiceMonitoring::first();
-
-    expect($history->keyword_match_failures)->toBe(['Response exceeded maximum allowed latency of -1ms']);
-});
-
 it('does not fail for latency when the maximum latency check is disabled', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
@@ -982,6 +955,11 @@ it('does not fail for latency when the maximum latency check is disabled', funct
     ]);
 });
 
+// There's deliberately no end-to-end "fails when latency is exceeded" test alongside this one:
+// Http::fake() never populates transferStats, so the response time is always exactly 0 here,
+// and no positive max_latency_ms threshold can ever be exceeded by it. Any such test would need
+// a degenerate negative threshold to pass, which doesn't actually exercise the real comparison --
+// see exceedsMaxLatency()'s direct unit test below instead.
 it('converts the response time from seconds to milliseconds before comparing against max_latency_ms', function () {
     // transferStats reports response time in seconds; max_latency_ms is milliseconds. Http::fake()
     // never produces real transfer timings, so this exercises the unit conversion directly rather
