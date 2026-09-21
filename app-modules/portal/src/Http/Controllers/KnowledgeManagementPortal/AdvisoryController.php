@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -51,6 +52,35 @@ class AdvisoryController
             'status',
         ])->orderBy('created_at', 'desc')->paginate($perPage);
 
-        return response()->json(['data' => $advisories]);
+        return response()->json(['data' => $advisories->through(
+            fn (Advisory $advisory): array => [
+                ...$advisory->toArray(),
+                ...$this->serializeTimestamps($advisory),
+                'advisory_updates' => $advisory->advisoryUpdates
+                    ->map(fn (AdvisoryUpdate $advisoryUpdate): array => [
+                        ...$advisoryUpdate->toArray(),
+                        ...$this->serializeTimestamps($advisoryUpdate),
+                        'date' => $advisoryUpdate->date->toIso8601String(),
+                    ])
+                    ->all(),
+            ]
+        )]);
+    }
+
+    /**
+     * Re-serialize the timestamps as ISO-8601 instants.
+     *
+     * `BaseModel::serializeDate()` emits `Y-m-d H:i:s`, which carries no offset. JavaScript reads an
+     * offset-less string as local time, so the portal would render the stored UTC clock time without
+     * converting it. Every other portal controller sends `toIso8601String()` for the same reason.
+     *
+     * @return array{created_at: string|null, updated_at: string|null}
+     */
+    private function serializeTimestamps(Advisory | AdvisoryUpdate $record): array
+    {
+        return [
+            'created_at' => $record->created_at?->toIso8601String(),
+            'updated_at' => $record->updated_at?->toIso8601String(),
+        ];
     }
 }

@@ -44,6 +44,32 @@ function resolveTimezone() {
 }
 
 /**
+ * Parse an incoming value into an absolute instant.
+ *
+ * The API sends datetimes in two shapes: ISO-8601 carrying an offset, from controllers that call
+ * `toIso8601String()` and from Data objects, and the offset-less `Y-m-d H:i:s` that
+ * `BaseModel::serializeDate()` produces for any endpoint returning raw models. The second is always
+ * UTC, but JavaScript reads an offset-less string as *local* time, so it must be pinned to UTC here
+ * or the conversion below silently shifts an already-correct instant.
+ *
+ * @param {string|Date} value
+ * @returns {Date}
+ */
+function parseDateTime(value) {
+    if (value instanceof Date) {
+        return value;
+    }
+
+    const zoneless = /^(\d{4}-\d{2}-\d{2})(?:[ T](\d{2}:\d{2}(?::\d{2})?(?:\.\d+)?))?$/.exec(value);
+
+    if (zoneless) {
+        return new Date(`${zoneless[1]}T${zoneless[2] ?? '00:00:00'}Z`);
+    }
+
+    return new Date(value);
+}
+
+/**
  * portal's established style, e.g. "Jul 22, 2026 1:48 pm (EDT)".
  *
  * @param {string|Date|null} value
@@ -62,7 +88,7 @@ export default function formatDateTime(
         return null;
     }
 
-    const date = value instanceof Date ? value : new Date(value);
+    const date = parseDateTime(value);
 
     if (isNaN(date.getTime())) {
         return null;
