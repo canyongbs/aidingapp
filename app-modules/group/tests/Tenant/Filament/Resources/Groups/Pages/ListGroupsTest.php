@@ -63,6 +63,16 @@ it('can list groups with their descriptions and member counts', function () {
         ->assertSee('Peer mentoring cohort');
 });
 
+it('can render groups with a null description', function () {
+    asSuperAdmin();
+
+    $group = Group::factory()->create(['description' => null]);
+
+    livewire(ListGroups::class)
+        ->assertCanSeeTableRecords([$group])
+        ->assertSuccessful();
+});
+
 it('can search and sort groups by name', function () {
     asSuperAdmin();
 
