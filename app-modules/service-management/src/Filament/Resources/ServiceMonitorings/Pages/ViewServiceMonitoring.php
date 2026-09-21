@@ -116,7 +116,8 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->boolean()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
                                 TextEntry::make('max_latency_ms')
-                                    ->label('Maximum Latency (ms)')
+                                    ->label('Maximum Latency')
+                                    ->suffix('ms')
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled && ServiceMonitoringApiEndpointFeature::active()),
                                 TextEntry::make('http_method')
                                     ->label('HTTP Method')
