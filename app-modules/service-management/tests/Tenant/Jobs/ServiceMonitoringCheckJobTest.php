@@ -1217,6 +1217,25 @@ it('sends the request body as JSON when configured', function () {
         && $request->data() === ['key' => 'value']);
 });
 
+it('sends the configured JSON body exactly as entered instead of re-encoding it', function () {
+    // json_decode()-ing then letting Guzzle's 'json' option re-encode would turn '{}' into '[]',
+    // since PHP has no empty-object/empty-array distinction. Sending the raw validated string
+    // must preserve it exactly.
+    Http::fake(fn () => Http::response('Test', 200));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{}',
+            'is_request_body_json' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    Http::assertSent(fn (Request $request) => $request->body() === '{}');
+});
+
 it('sends the request body as form-encoded when JSON is not enabled', function () {
     Http::fake(fn () => Http::response('Test', 200));
 

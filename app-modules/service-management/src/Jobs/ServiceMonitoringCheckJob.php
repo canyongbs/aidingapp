@@ -286,8 +286,15 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             $options = [];
 
             if ($httpMethod->supportsRequestBody() && filled($this->serviceMonitoringTarget->request_body)) {
+                // Send the already-validated JSON string as the raw body rather than
+                // json_decode()-ing then letting Guzzle's 'json' option re-encode it: that
+                // round trip can change a valid payload (e.g. '{}' becomes '[]' since PHP has no
+                // empty-object/empty-array distinction, and large integers can lose precision).
                 $options = $this->serviceMonitoringTarget->is_request_body_json
-                    ? ['json' => json_decode($this->serviceMonitoringTarget->request_body, true)]
+                    ? [
+                        'body' => $this->serviceMonitoringTarget->request_body,
+                        'headers' => ['Content-Type' => 'application/json'],
+                    ]
                     : [
                         'body' => $this->serviceMonitoringTarget->request_body,
                         'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
