@@ -135,7 +135,8 @@ class ViewServiceMonitoring extends ViewRecord
                                         TextEntry::make('value'),
                                     ])
                                     ->columns(2)
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_headers) && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_headers) && ServiceMonitoringApiEndpointFeature::active())
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
                         Section::make('Notification Settings')
