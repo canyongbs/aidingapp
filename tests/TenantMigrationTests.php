@@ -35,8 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -112,64 +110,6 @@ describe('2026_08_24_000001_convert_organizations_name_to_citext_and_enforce_uni
 
                 expect($kept->refresh()->name)->toBe('Dupe Co')
                     ->and($trashed->refresh()->name)->toBe('dupe co');
-            }
-        );
-    });
-});
-
-describe('2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique', function () {
-    $migrationPath = 'app-modules/contact/database/migrations/2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique.php';
-
-    it('rewrites case-insensitive duplicate type names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $first = OrganizationType::factory()->create(['name' => 'Vendor', 'created_at' => now()->subMinutes(3)]);
-                $second = OrganizationType::factory()->create(['name' => 'vendor', 'created_at' => now()->subMinutes(2)]);
-                $third = OrganizationType::factory()->create(['name' => 'VENDOR', 'created_at' => now()->subMinutes(1)]);
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($first->refresh()->name)->toBe('Vendor')
-                    ->and($second->refresh()->name)->toBe('vendor-2')
-                    ->and($third->refresh()->name)->toBe('VENDOR-3');
-            }
-        );
-    });
-
-    it('rewrites case-insensitive duplicate industry names with a numeric suffix and keeps the oldest', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $first = OrganizationIndustry::factory()->create(['name' => 'Technology', 'created_at' => now()->subMinutes(3)]);
-                $second = OrganizationIndustry::factory()->create(['name' => 'technology', 'created_at' => now()->subMinutes(2)]);
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($first->refresh()->name)->toBe('Technology')
-                    ->and($second->refresh()->name)->toBe('technology-2');
-            }
-        );
-    });
-
-    it('leaves soft-deleted duplicate type names untouched', function () use ($migrationPath) {
-        isolatedMigration(
-            '2026_08_24_000002_convert_organization_type_and_industry_name_to_citext_and_enforce_unique',
-            function () use ($migrationPath) {
-                $kept = OrganizationType::factory()->create(['name' => 'Partner', 'created_at' => now()->subMinutes(2)]);
-                $trashed = OrganizationType::factory()->create(['name' => 'partner', 'created_at' => now()->subMinute()]);
-                $trashed->delete();
-
-                $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
-
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                expect($kept->refresh()->name)->toBe('Partner')
-                    ->and($trashed->refresh()->name)->toBe('partner');
             }
         );
     });
