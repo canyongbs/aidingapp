@@ -1069,6 +1069,85 @@ it('includes the API endpoint failure reason in the email notification body', fu
         ->not->toContain('The monitored service did not respond to a health check');
 });
 
+it('includes the max latency failure reason in the email notification body', function () {
+    // transferStats is never populated under Http::fake() (confirmed while fixing the
+    // seconds/milliseconds unit bug), so a real latency failure can't be produced through the
+    // full HTTP round trip in a test. The history record is built directly instead, to test
+    // only that the mail template renders whatever failure reason the job recorded.
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'is_max_latency_enabled' => true,
+            'max_latency_ms' => 1000,
+            'is_notified_via_email' => true,
+        ]);
+
+    $history = $serviceMonitorTarget->histories()->create([
+        'response' => 200,
+        'response_time' => 3.4,
+        'succeeded' => false,
+        'keyword_match_failures' => ['Response exceeded maximum allowed latency of 1000ms'],
+    ]);
+
+    $notification = new ServiceMonitoringNotification($history, MailChannel::class);
+
+    $body = (string) $notification->toMail($user)->render();
+
+    expect($body)->toContain('Response exceeded maximum allowed latency of 1000ms')
+        ->not->toContain('The monitored service did not respond to a health check');
+});
+
+it('includes the keyword match failure reason in the email notification body', function () {
+    Http::fake(fn () => Http::response('the page does not mention it', 200, ['Content-Type' => 'text/plain']));
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['expected phrase'],
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    $notification = new ServiceMonitoringNotification($history, MailChannel::class);
+
+    $body = (string) $notification->toMail($user)->render();
+
+    expect($body)->toContain('Required string not found: expected phrase')
+        ->not->toContain('The monitored service did not respond to a health check');
+});
+
+it('falls back to the generic failure message in the email for an Availability monitor', function () {
+    // Availability never populates keyword_match_failures, so removing the monitor_type gate
+    // from the mail template must not change its behavior: it should still fall back to the
+    // generic message, since filled() alone already distinguishes the two cases.
+    Http::fake(fn () => Http::response('Test', 500));
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->create([
+            'monitor_type' => MonitorType::Availability,
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    $notification = new ServiceMonitoringNotification($history, MailChannel::class);
+
+    $body = (string) $notification->toMail($user)->render();
+
+    expect($body)->toContain('The monitored service did not respond to a health check');
+});
+
 it('sends the request body as JSON when configured', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
