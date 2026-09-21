@@ -339,6 +339,33 @@ test('EditServiceMonitoring hides auth fields when the feature is inactive', fun
         ->assertFormFieldHidden('auth_password');
 });
 
+test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'auth_type' => AuthType::Basic,
+        'auth_username' => 'existing-username',
+        'auth_password' => 'existing-password',
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertFormSet([
+            'auth_username' => 'existing-username',
+            'auth_password' => 'existing-password',
+        ])
+        ->fillForm(['name' => 'Updated name'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget->refresh();
+
+    expect($serviceMonitoringTarget->name)->toBe('Updated name')
+        ->and($serviceMonitoringTarget->auth_username)->toBe('existing-username')
+        ->and($serviceMonitoringTarget->auth_password)->toBe('existing-password');
+});
+
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
     asSuperAdmin();
 
