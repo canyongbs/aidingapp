@@ -42,18 +42,12 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\NotificationSettingsFeature;
-use App\Models\NotificationSetting;
 use App\Models\User;
-use App\Settings\NotificationSettings;
-use CanyonGBS\Common\Enums\Color;
 use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 if (! function_exists('recordServiceRequestHistory')) {
@@ -336,67 +330,6 @@ describe('2026_09_08_090400_tmp_backfill_service_monitoring_report_configuration
 //        );
 //    });
 //});
-
-// TODO: Cleanup Task NotificationSettingsFeature - delete this describe and the test within
-describe('2026_09_09_064247_tmp_seed_notification_settings', function () {
-    it('migrates the oldest notification settings and its logo', function () {
-        isolatedMigration(
-            '2026_09_09_064247_tmp_seed_notification_settings',
-            function () {
-                // Setup data before migration
-                Storage::fake('s3');
-                Storage::fake('s3-public');
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/Legacy/2023_11_08_155057_create_notification_settings_table.php',
-                ]))->toBe(Command::SUCCESS);
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/Legacy/2024_06_03_173514_add_from_column_to_notification_settings_table.php',
-                ]))->toBe(Command::SUCCESS);
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/2026_09_09_062022_create_notification_settings.php',
-                ]))->toBe(Command::SUCCESS);
-
-                $first = NotificationSetting::create([
-                    'name' => 'First Setting',
-                    'from_name' => 'First From Name',
-                    'primary_color' => Color::Red->value,
-                    'created_at' => now()->subMinute(),
-                ]);
-                $first->addMedia(UploadedFile::fake()->image('first-logo.png'))
-                    ->toMediaCollection('logo');
-
-                $second = NotificationSetting::create([
-                    'name' => 'Second Setting',
-                    'from_name' => 'Second From Name',
-                    'primary_color' => Color::Blue->value,
-                ]);
-                $second->addMedia(UploadedFile::fake()->image('second-logo.png'))
-                    ->toMediaCollection('logo');
-
-                $firstLogo = $first->getFirstMedia('logo');
-
-                // Run the migration
-                $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_09_09_064247_tmp_seed_notification_settings.php']);
-                // Confirm migration ran successfully
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                // Add any assertions to verify the migration's effects
-                $settings = app(NotificationSettings::class);
-                $settingsLogo = NotificationSettings::getSettingsPropertyModel('notifications.logo')
-                    ->getFirstMedia('logo');
-
-                expect(NotificationSettingsFeature::active())->toBeTrue()
-                    ->and($settings->from_name)->toBe('First From Name')
-                    ->and($settings->primary_color)->toBe(Color::Red)
-                    ->and($settingsLogo)->not->toBeNull()
-                    ->and($settingsLogo->file_name)->toBe($firstLogo->file_name);
-            }
-        );
-    });
-});
 
 // TODO: Cleanup Task Service Request Division Decoupling - delete this describe and the test within
 describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
