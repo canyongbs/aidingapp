@@ -981,6 +981,29 @@ it('does not fail for latency when the maximum latency check is disabled', funct
     ]);
 });
 
+it('converts the response time from seconds to milliseconds before comparing against max_latency_ms', function () {
+    // transferStats reports response time in seconds; max_latency_ms is milliseconds. Http::fake()
+    // never produces real transfer timings, so this exercises the unit conversion directly rather
+    // than through a faked HTTP round trip.
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'is_max_latency_enabled' => true,
+            'max_latency_ms' => 1000,
+        ]);
+
+    $job = new ServiceMonitoringCheckJob($serviceMonitorTarget);
+
+    $exceedsMaxLatency = (new ReflectionClass($job))->getMethod('exceedsMaxLatency');
+    $exceedsMaxLatency->setAccessible(true);
+
+    // 3.33s response against a 1000ms threshold: 3330ms > 1000ms, so this must exceed.
+    expect($exceedsMaxLatency->invoke($job, 3.33))->toBeTrue();
+
+    // 0.05s (50ms) response against the same 1000ms threshold must not exceed.
+    expect($exceedsMaxLatency->invoke($job, 0.05))->toBeFalse();
+});
+
 it('sends the configured request headers', function () {
     Http::fake(fn () => Http::response('Test', 200));
 

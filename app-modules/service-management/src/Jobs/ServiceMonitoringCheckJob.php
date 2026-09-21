@@ -279,7 +279,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
                 $failures[] = "Unexpected status code: {$response->status()}";
             }
 
-            if ($this->serviceMonitoringTarget->is_max_latency_enabled && $responseTime > $this->serviceMonitoringTarget->max_latency_ms) {
+            // $responseTime is in seconds (Guzzle's TransferStats convention, matching how response_time
+            // is stored and reported everywhere else); max_latency_ms is milliseconds, so convert before comparing.
+            if ($this->serviceMonitoringTarget->is_max_latency_enabled && $this->exceedsMaxLatency($responseTime)) {
                 $failures[] = "Response exceeded maximum allowed latency of {$this->serviceMonitoringTarget->max_latency_ms}ms";
             }
 
@@ -290,6 +292,15 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             }
             $this->handleResponses(523, 0, false);
         }
+    }
+
+    /**
+     * Extracted so the millisecond/second unit conversion can be tested in isolation:
+     * transferStats reports response time in seconds, while max_latency_ms is milliseconds.
+     */
+    protected function exceedsMaxLatency(float $responseTimeInSeconds): bool
+    {
+        return ($responseTimeInSeconds * 1000) > $this->serviceMonitoringTarget->max_latency_ms;
     }
 
     protected function hasReadableContentType(?string $contentType): bool
