@@ -306,6 +306,13 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['max_latency_ms' => 'required'],
         ],
+        'max latency must be an integer, not a decimal' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'is_max_latency_enabled' => true,
+                'max_latency_ms' => 1.5,
+            ]),
+            ['max_latency_ms' => 'integer'],
+        ],
         'request body must be valid JSON when sending as JSON' => [
             ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
                 'http_method' => HttpMethod::Post,

@@ -47,9 +47,10 @@ class MaxLatencyInput
     {
         return TextInput::make('max_latency_ms')
             ->label('Maximum Latency')
-            ->numeric()
+            ->integer()
             ->suffix('ms')
             ->minValue(1)
+            ->step(1)
             ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
             ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
             ->helperText('The check fails if the response takes longer than this to arrive.')
