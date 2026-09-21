@@ -36,7 +36,6 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
-use App\Features\PasswordFormFieldFeature;
 use Illuminate\Support\Collection;
 
 class FormFieldBlockRegistry
@@ -62,7 +61,7 @@ class FormFieldBlockRegistry
             PhoneFormFieldBlock::class,
             UrlFormFieldBlock::class,
             UploadFormFieldBlock::class,
-            ...(PasswordFormFieldFeature::active() ? [PasswordFormFieldBlock::class] : []),
+            PasswordFormFieldBlock::class,
         ])->when(
             ! $internal,
             fn (Collection $blocks) => $blocks->filter(fn (string $block) => ! $block::$internal)

@@ -56,7 +56,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
-use App\Features\PasswordFormFieldFeature;
 use App\Http\Controllers\Controller;
 use Carbon\CarbonImmutable;
 use Illuminate\Http\JsonResponse;
@@ -189,29 +188,27 @@ class StoreServiceRequestController extends Controller
         assert($contact instanceof Contact);
 
         $validator->after(function (ValidatorInstance $validator) use ($contact, $form, $request): void {
-            if (PasswordFormFieldFeature::active()) {
-                foreach ($form->steps as $step) {
-                    foreach ($step->fields as $field) {
-                        if ($field->type !== PasswordFormFieldBlock::type()) {
-                            continue;
-                        }
+            foreach ($form->steps as $step) {
+                foreach ($step->fields as $field) {
+                    if ($field->type !== PasswordFormFieldBlock::type()) {
+                        continue;
+                    }
 
-                        $secretId = $request->input("{$step->label}.{$field->getKey()}");
+                    $secretId = $request->input("{$step->label}.{$field->getKey()}");
 
-                        if (blank($secretId)) {
-                            continue;
-                        }
+                    if (blank($secretId)) {
+                        continue;
+                    }
 
-                        $isOwnedUnrelatedSecret = Secret::query()
-                            ->whereKey($secretId)
-                            ->whereNull('related_id')
-                            ->where('author_type', $contact->getMorphClass())
-                            ->where('author_id', $contact->getKey())
-                            ->exists();
+                    $isOwnedUnrelatedSecret = Secret::query()
+                        ->whereKey($secretId)
+                        ->whereNull('related_id')
+                        ->where('author_type', $contact->getMorphClass())
+                        ->where('author_id', $contact->getKey())
+                        ->exists();
 
-                        if (! $isOwnedUnrelatedSecret) {
-                            $validator->errors()->add("{$step->label}.{$field->getKey()}", 'The selected password is invalid.');
-                        }
+                    if (! $isOwnedUnrelatedSecret) {
+                        $validator->errors()->add("{$step->label}.{$field->getKey()}", 'The selected password is invalid.');
                     }
                 }
             }
@@ -549,9 +546,7 @@ class StoreServiceRequestController extends Controller
 
         $serviceRequest->save();
 
-        if (PasswordFormFieldFeature::active()) {
-            app(AttachServiceRequestSecrets::class)($serviceRequest, $secretIds, $contact);
-        }
+        app(AttachServiceRequestSecrets::class)($serviceRequest, $secretIds, $contact);
 
         return true;
     }
