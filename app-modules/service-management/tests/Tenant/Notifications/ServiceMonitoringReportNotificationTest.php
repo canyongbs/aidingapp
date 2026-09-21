@@ -49,7 +49,7 @@ it('routes notifications to the expected channels', function (string $channel, a
 
     $notification = new ServiceMonitoringReportNotification(
         $target,
-        $target->report_frequency,
+        ServiceMonitoringReportFrequency::Daily,
         $channel,
     );
 
@@ -65,7 +65,7 @@ it('throws an error for an unsupported channel', function () {
 
     $notification = new ServiceMonitoringReportNotification(
         $target,
-        $target->report_frequency,
+        ServiceMonitoringReportFrequency::Daily,
         'unsupported-channel',
     );
 
@@ -75,11 +75,12 @@ it('throws an error for an unsupported channel', function () {
 
 it('returns N/A statistics when no checks exist in the reporting period', function () {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
+    $frequency = ServiceMonitoringReportFrequency::Daily;
 
-    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, DatabaseChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $frequency, DatabaseChannel::class);
     $databaseMessage = $notification->toDatabase(User::factory()->create());
 
-    expect($databaseMessage['title'])->toContain('Your ' . $target->report_frequency->value . ' service monitor report for Payment API is ready.')
+    expect($databaseMessage['title'])->toContain('Your ' . $frequency->value . ' service monitor report for Payment API is ready.')
         ->and($databaseMessage['body'])->toContain('Uptime: N/A')
         ->and($databaseMessage['body'])->toContain('Successful checks: 0')
         ->and($databaseMessage['body'])->toContain('Failed checks: 0')
@@ -88,12 +89,13 @@ it('returns N/A statistics when no checks exist in the reporting period', functi
 
 it('returns N/A statistics when no checks exist in the reporting period for mail notification', function () {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
+    $frequency = ServiceMonitoringReportFrequency::Daily;
 
-    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
-    expect($mailMessage['subject'])->toBe($target->report_frequency->getLabel() . ' Service Monitor Report: Payment API')
+    expect($mailMessage['subject'])->toBe($frequency->getLabel() . ' Service Monitor Report: Payment API')
         ->and($viewData['uptimePercentage'])->toBe('N/A')
         ->and($viewData['successfulChecks'])->toBe(0)
         ->and($viewData['failedChecks'])->toBe(0)
@@ -104,8 +106,9 @@ it('returns N/A statistics when no checks exist in the reporting period for mail
 
 it('builds expected report statistics and incident summary in the mail payload', function () {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'External Status API']);
+    $frequency = ServiceMonitoringReportFrequency::Daily;
 
-    [$localStart, $localEnd] = match ($target->report_frequency) {
+    [$localStart, $localEnd] = match ($frequency) {
         ServiceMonitoringReportFrequency::Daily => [
             now()->copy()->subDay()->startOfDay(),
             now()->copy()->subDay()->endOfDay(),
@@ -124,11 +127,11 @@ it('builds expected report statistics and incident summary in the mail payload',
     createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
     createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
 
-    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
-    expect($mailMessage['subject'])->toBe($target->report_frequency->getLabel() . ' Service Monitor Report: External Status API')
+    expect($mailMessage['subject'])->toBe($frequency->getLabel() . ' Service Monitor Report: External Status API')
         ->and($viewData['uptimePercentage'])->toBe('66.67%')
         ->and($viewData['successfulChecks'])->toBe(2)
         ->and($viewData['failedChecks'])->toBe(1)
@@ -142,10 +145,11 @@ it('uses tenant display timezone boundaries for daily reports', function () {
     app(DisplaySettings::class)->save();
 
     $target = ServiceMonitoringTarget::factory()->create();
+    $frequency = ServiceMonitoringReportFrequency::Daily;
 
     $localNow = now()->setTimezone('America/New_York');
 
-    [$localStart, $localEnd] = match ($target->report_frequency) {
+    [$localStart, $localEnd] = match ($frequency) {
         ServiceMonitoringReportFrequency::Daily => [
             $localNow->copy()->subDay()->startOfDay(),
             $localNow->copy()->subDay()->endOfDay(),
@@ -165,7 +169,7 @@ it('uses tenant display timezone boundaries for daily reports', function () {
     createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
     createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
 
-    $notification = new ServiceMonitoringReportNotification($target, $target->report_frequency, MailChannel::class);
+    $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
     $viewData = $mailMessage['viewData'];
 
@@ -214,33 +218,6 @@ it('delivers to a contact granted confidential access to a confidential target',
     $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Daily, MailChannel::class);
 
     expect($notification->via($contact))->toBe(['mail']);
-});
-
-it('restores a notification serialized under the previous payload shape with no frequency property, falling back to the target\'s legacy frequency', function () {
-    $target = ServiceMonitoringTarget::factory()->create(['report_frequency' => ServiceMonitoringReportFrequency::Weekly]);
-
-    $values = (new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class))->__serialize();
-    unset($values['frequency']);
-
-    // A real unserialize() never runs the constructor, so `frequency` starts genuinely uninitialized
-    $restored = (new ReflectionClass(ServiceMonitoringReportNotification::class))->newInstanceWithoutConstructor();
-    $restored->__unserialize($values);
-
-    expect($restored->serviceMonitoringTarget->is($target))->toBeTrue()
-        ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly)
-        ->and($restored->channel)->toBe(MailChannel::class);
-});
-
-it('restores a notification serialized under the previous payload shape with no frequency property, defaulting to Monthly when the target has no legacy frequency either', function () {
-    $target = ServiceMonitoringTarget::factory()->create(['report_frequency' => null]);
-
-    $values = (new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class))->__serialize();
-    unset($values['frequency']);
-
-    $restored = (new ReflectionClass(ServiceMonitoringReportNotification::class))->newInstanceWithoutConstructor();
-    $restored->__unserialize($values);
-
-    expect($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Monthly);
 });
 
 it('restores a notification through a real serialize/unserialize round trip', function () {

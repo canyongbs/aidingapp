@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -265,26 +264,6 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
-// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
-test('report frequency is required when reporting is active and the feature is inactive', function () {
-    ServiceMonitoringReportConfigurationsFeature::deactivate();
-    asSuperAdmin();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
-
-    $request = ServiceMonitoringTargetRequestFactory::new()->state([
-        'is_reporting_active' => true,
-        'report_frequency' => null,
-    ])->create();
-
-    livewire(EditServiceMonitoring::class, [
-        'record' => $serviceMonitoringTarget->getRouteKey(),
-    ])
-        ->fillForm($request)
-        ->call('save')
-        ->assertHasFormErrors(['report_frequency' => 'required']);
-});
-
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
     asSuperAdmin();
 
@@ -391,41 +370,6 @@ test('EditServiceMonitoring hydrates report channels from persisted flags', func
     'both channels' => [
         ['is_reported_via_email' => true, 'is_reported_via_database' => true],
         ['email', 'database'],
-    ],
-    'no channels' => [
-        ['is_reported_via_email' => false, 'is_reported_via_database' => false],
-        [],
-    ],
-]);
-
-// The following test covers the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up
-test('EditServiceMonitoring hydrates legacy report channels from persisted flags when the feature is inactive', function (array $attributes, array $expectedChannels) {
-    ServiceMonitoringReportConfigurationsFeature::deactivate();
-    asSuperAdmin();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
-        'is_reporting_active' => true,
-        ...$attributes,
-    ]);
-
-    livewire(EditServiceMonitoring::class, [
-        'record' => $serviceMonitoringTarget->getRouteKey(),
-    ])
-        ->assertSchemaStateSet([
-            'report_channels' => $expectedChannels,
-        ]);
-})->with([
-    'email only' => [
-        ['is_reported_via_email' => true, 'is_reported_via_database' => false],
-        ['is_reported_via_email'],
-    ],
-    'application only' => [
-        ['is_reported_via_email' => false, 'is_reported_via_database' => true],
-        ['is_reported_via_database'],
-    ],
-    'both channels' => [
-        ['is_reported_via_email' => true, 'is_reported_via_database' => true],
-        ['is_reported_via_email', 'is_reported_via_database'],
     ],
     'no channels' => [
         ['is_reported_via_email' => false, 'is_reported_via_database' => false],

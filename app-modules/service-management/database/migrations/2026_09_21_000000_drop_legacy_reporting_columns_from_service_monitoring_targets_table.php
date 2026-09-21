@@ -34,14 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use App\Support\AbstractFeatureFlag;
-
-class ServiceMonitoringReportConfigurationsFeature extends AbstractFeatureFlag
-{
-    public function resolve(mixed $scope): mixed
+return new class () extends Migration {
+    public function up(): void
     {
-        return false;
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->dropColumn(['is_reporting_active', 'report_frequency', 'is_reported_via_database', 'is_reported_via_email']);
+        });
     }
-}
+
+    public function down(): void
+    {
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->boolean('is_reporting_active')->default(false);
+            $table->string('report_frequency')->nullable();
+            $table->boolean('is_reported_via_database')->default(false);
+            $table->boolean('is_reported_via_email')->default(false);
+        });
+    }
+};

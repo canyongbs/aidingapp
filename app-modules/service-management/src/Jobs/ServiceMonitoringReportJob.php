@@ -39,8 +39,6 @@ namespace AidingApp\ServiceManagement\Jobs;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -79,13 +77,7 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            $this->dispatchForConfigurations();
-
-            return;
-        }
-
-        $this->dispatchForLegacyTargets();
+        $this->dispatchForConfigurations();
     }
 
     private function dispatchForConfigurations(): void
@@ -98,18 +90,6 @@ class ServiceMonitoringReportJob implements ShouldQueue, ShouldBeUnique
             ->chunkById(100, function (Collection $configurations) {
                 foreach ($configurations as $configuration) {
                     dispatch(new ServiceMonitoringReportNotifyJob($configuration));
-                }
-            });
-    }
-
-    private function dispatchForLegacyTargets(): void
-    {
-        ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
-            ->where('report_frequency', $this->frequency)
-            ->where('is_reporting_active', true)
-            ->chunkById(100, function (Collection $serviceMonitoringTargets) {
-                foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
-                    dispatch(new ServiceMonitoringReportNotifyJob($serviceMonitoringTarget));
                 }
             });
     }
