@@ -496,6 +496,28 @@ test('EditServiceMonitoring hides the API endpoint monitor type option when the 
         ->assertHasFormErrors(['monitor_type']);
 });
 
+test('EditServiceMonitoring can still save an existing API endpoint monitor while the feature is inactive', function () {
+    // Filtering the API Endpoint radio option by the feature flag must not also invalidate an
+    // existing record that's already using it — otherwise deactivating the flag makes every
+    // API Endpoint monitor uneditable, since monitor_type itself would fail validation.
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create();
+
+    ServiceMonitoringApiEndpointFeature::deactivate();
+
+    asSuperAdmin();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'renamed while the feature is inactive'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->name)->toBe('renamed while the feature is inactive');
+});
+
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
     asSuperAdmin();
 
