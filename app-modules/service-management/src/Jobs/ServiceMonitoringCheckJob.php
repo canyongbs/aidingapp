@@ -148,7 +148,9 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
      */
     protected function buildRequest(bool $followRedirects = true): PendingRequest
     {
-        $request = $followRedirects ? Http::maxRedirects(15) : Http::withoutRedirecting();
+        $request = ($followRedirects ? Http::maxRedirects(15) : Http::withoutRedirecting())
+            ->connectTimeout(10)
+            ->timeout($this->requestTimeoutInSeconds());
 
         if (ServiceMonitoringAuthTypeFeature::active() && $this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
             $request = $request->withBasicAuth(
@@ -158,6 +160,25 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
 
         return $request;
+    }
+
+    /**
+     * A fixed timeout would either cut off a request before a generous configured
+     * max_latency_ms could ever be evaluated, or leave a queue worker blocked far longer than
+     * intended for a monitor with no latency threshold set. Scale the request timeout to the
+     * configured threshold (plus a buffer for the max_latency_ms check itself to run) when one
+     * exists, and fall back to a fixed default otherwise (matching the timeout other
+     * external-URL check jobs in this app use, e.g. CheckKnowledgeBaseArticleLinksJob).
+     */
+    protected function requestTimeoutInSeconds(): int
+    {
+        if ($this->serviceMonitoringTarget->monitor_type === MonitorType::ApiEndpoint
+            && $this->serviceMonitoringTarget->is_max_latency_enabled
+            && $this->serviceMonitoringTarget->max_latency_ms) {
+            return (int) ceil($this->serviceMonitoringTarget->max_latency_ms / 1000) + 5;
+        }
+
+        return 15;
     }
 
     protected function handleAvailability(): void

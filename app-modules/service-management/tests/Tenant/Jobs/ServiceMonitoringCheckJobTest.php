@@ -1004,6 +1004,37 @@ it('converts the response time from seconds to milliseconds before comparing aga
     expect($exceedsMaxLatency->invoke($job, 0.05))->toBeFalse();
 });
 
+it('scales the request timeout to the configured max latency threshold', function () {
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'is_max_latency_enabled' => true,
+            'max_latency_ms' => 20000,
+        ]);
+
+    $job = new ServiceMonitoringCheckJob($serviceMonitorTarget);
+
+    $requestTimeoutInSeconds = (new ReflectionClass($job))->getMethod('requestTimeoutInSeconds');
+    $requestTimeoutInSeconds->setAccessible(true);
+
+    // 20000ms threshold + a 5s buffer, so the request is allowed to run at least as long as the
+    // threshold itself before the max_latency_ms check would even get a chance to evaluate it.
+    expect($requestTimeoutInSeconds->invoke($job))->toBe(25);
+});
+
+it('falls back to a fixed request timeout when max latency is not configured', function () {
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['is_max_latency_enabled' => false]);
+
+    $job = new ServiceMonitoringCheckJob($serviceMonitorTarget);
+
+    $requestTimeoutInSeconds = (new ReflectionClass($job))->getMethod('requestTimeoutInSeconds');
+    $requestTimeoutInSeconds->setAccessible(true);
+
+    expect($requestTimeoutInSeconds->invoke($job))->toBe(15);
+});
+
 it('sends the configured request headers', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
