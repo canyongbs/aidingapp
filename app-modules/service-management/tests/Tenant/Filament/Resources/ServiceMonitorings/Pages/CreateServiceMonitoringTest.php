@@ -369,11 +369,11 @@ test('CreateServiceMonitor hides auth username and password fields until basic a
 
     livewire(CreateServiceMonitoring::class)
         ->assertFormFieldExists('auth_type')
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password')
         ->fillForm(['auth_type' => AuthType::Basic])
-        ->assertFormFieldVisible('auth_username')
-        ->assertFormFieldVisible('auth_password');
+        ->assertSchemaComponentVisible('auth_username')
+        ->assertSchemaComponentVisible('auth_password');
 });
 
 test('CreateServiceMonitor hides auth fields when the feature is inactive', function () {
@@ -382,26 +382,26 @@ test('CreateServiceMonitor hides auth fields when the feature is inactive', func
     asSuperAdmin();
 
     livewire(CreateServiceMonitoring::class)
-        ->assertFormFieldHidden('auth_type')
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password');
+        ->assertSchemaComponentHidden('auth_type')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password');
 });
 
 test('CreateServiceMonitor hides API endpoint fields until the API endpoint monitor type is selected', function () {
     asSuperAdmin();
 
     livewire(CreateServiceMonitoring::class)
-        ->assertFormFieldHidden('follow_redirection')
-        ->assertFormFieldHidden('successful_status_codes')
-        ->assertFormFieldHidden('is_max_latency_enabled')
-        ->assertFormFieldHidden('http_method')
-        ->assertFormFieldHidden('request_headers')
+        ->assertSchemaComponentHidden('follow_redirection')
+        ->assertSchemaComponentHidden('successful_status_codes')
+        ->assertSchemaComponentHidden('is_max_latency_enabled')
+        ->assertSchemaComponentHidden('http_method')
+        ->assertSchemaComponentHidden('request_headers')
         ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
-        ->assertFormFieldVisible('follow_redirection')
-        ->assertFormFieldVisible('successful_status_codes')
-        ->assertFormFieldVisible('is_max_latency_enabled')
-        ->assertFormFieldVisible('http_method')
-        ->assertFormFieldVisible('request_headers');
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentVisible('successful_status_codes')
+        ->assertSchemaComponentVisible('is_max_latency_enabled')
+        ->assertSchemaComponentVisible('http_method')
+        ->assertSchemaComponentVisible('request_headers');
 });
 
 test('CreateServiceMonitor hides the max latency input until the maximum latency toggle is enabled', function () {
@@ -409,9 +409,9 @@ test('CreateServiceMonitor hides the max latency input until the maximum latency
 
     livewire(CreateServiceMonitoring::class)
         ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
-        ->assertFormFieldHidden('max_latency_ms')
+        ->assertSchemaComponentHidden('max_latency_ms')
         ->fillForm(['is_max_latency_enabled' => true])
-        ->assertFormFieldVisible('max_latency_ms');
+        ->assertSchemaComponentVisible('max_latency_ms');
 });
 
 test('CreateServiceMonitor hides the request body fields when the HTTP method does not support a body', function () {
@@ -422,11 +422,11 @@ test('CreateServiceMonitor hides the request body fields when the HTTP method do
             'monitor_type' => MonitorType::ApiEndpoint,
             'http_method' => HttpMethod::Get,
         ])
-        ->assertFormFieldHidden('request_body')
-        ->assertFormFieldHidden('is_request_body_json')
+        ->assertSchemaComponentHidden('request_body')
+        ->assertSchemaComponentHidden('is_request_body_json')
         ->fillForm(['http_method' => HttpMethod::Post])
-        ->assertFormFieldVisible('request_body')
-        ->assertFormFieldVisible('is_request_body_json');
+        ->assertSchemaComponentVisible('request_body')
+        ->assertSchemaComponentVisible('is_request_body_json');
 });
 
 test('CreateServiceMonitor hides the API endpoint monitor type option when the feature is inactive', function () {

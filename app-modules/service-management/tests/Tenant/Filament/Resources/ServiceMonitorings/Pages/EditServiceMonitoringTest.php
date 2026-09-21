@@ -346,11 +346,11 @@ test('EditServiceMonitoring hides auth username and password fields until basic 
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password')
         ->fillForm(['auth_type' => AuthType::Basic])
-        ->assertFormFieldVisible('auth_username')
-        ->assertFormFieldVisible('auth_password');
+        ->assertSchemaComponentVisible('auth_username')
+        ->assertSchemaComponentVisible('auth_password');
 });
 
 test('EditServiceMonitoring hides auth fields when the feature is inactive', function () {
@@ -363,9 +363,9 @@ test('EditServiceMonitoring hides auth fields when the feature is inactive', fun
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('auth_type')
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password');
+        ->assertSchemaComponentHidden('auth_type')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password');
 });
 
 test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function () {
@@ -380,7 +380,7 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormSet([
+        ->assertSchemaStateSet([
             'auth_username' => 'existing-username',
             'auth_password' => 'existing-password',
         ])
@@ -403,17 +403,17 @@ test('EditServiceMonitoring hides API endpoint fields until the API endpoint mon
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('follow_redirection')
-        ->assertFormFieldHidden('successful_status_codes')
-        ->assertFormFieldHidden('is_max_latency_enabled')
-        ->assertFormFieldHidden('http_method')
-        ->assertFormFieldHidden('request_headers')
+        ->assertSchemaComponentHidden('follow_redirection')
+        ->assertSchemaComponentHidden('successful_status_codes')
+        ->assertSchemaComponentHidden('is_max_latency_enabled')
+        ->assertSchemaComponentHidden('http_method')
+        ->assertSchemaComponentHidden('request_headers')
         ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
-        ->assertFormFieldVisible('follow_redirection')
-        ->assertFormFieldVisible('successful_status_codes')
-        ->assertFormFieldVisible('is_max_latency_enabled')
-        ->assertFormFieldVisible('http_method')
-        ->assertFormFieldVisible('request_headers');
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentVisible('successful_status_codes')
+        ->assertSchemaComponentVisible('is_max_latency_enabled')
+        ->assertSchemaComponentVisible('http_method')
+        ->assertSchemaComponentVisible('request_headers');
 });
 
 test('EditServiceMonitoring hides the max latency input until the maximum latency toggle is enabled', function () {
@@ -424,9 +424,9 @@ test('EditServiceMonitoring hides the max latency input until the maximum latenc
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('max_latency_ms')
+        ->assertSchemaComponentHidden('max_latency_ms')
         ->fillForm(['is_max_latency_enabled' => true])
-        ->assertFormFieldVisible('max_latency_ms');
+        ->assertSchemaComponentVisible('max_latency_ms');
 });
 
 test('EditServiceMonitoring hides the request body fields when the HTTP method does not support a body', function () {
@@ -437,11 +437,11 @@ test('EditServiceMonitoring hides the request body fields when the HTTP method d
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('request_body')
-        ->assertFormFieldHidden('is_request_body_json')
+        ->assertSchemaComponentHidden('request_body')
+        ->assertSchemaComponentHidden('is_request_body_json')
         ->fillForm(['http_method' => HttpMethod::Post])
-        ->assertFormFieldVisible('request_body')
-        ->assertFormFieldVisible('is_request_body_json');
+        ->assertSchemaComponentVisible('request_body')
+        ->assertSchemaComponentVisible('is_request_body_json');
 });
 
 test('EditServiceMonitoring can update a service monitor with an API endpoint monitor', function () {
