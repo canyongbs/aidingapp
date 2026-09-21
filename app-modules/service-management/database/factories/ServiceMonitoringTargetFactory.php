@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Database\Factories;
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -61,10 +60,6 @@ class ServiceMonitoringTargetFactory extends Factory
             'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
             'is_notified_via_database' => $this->faker->boolean(),
             'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
             'is_confidential' => false,
             'monitor_type' => MonitorType::Availability,
         ];

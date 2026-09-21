@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -56,25 +55,9 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
     use Dispatchable;
     use InteractsWithQueue;
     use Queueable;
-    use SerializesModels {
-        SerializesModels::__unserialize as private unserializeModels;
-    }
+    use SerializesModels;
 
-    public function __construct(public ServiceMonitoringTarget|ServiceMonitoringReportConfiguration $reportable) {}
-
-    /**
-     * Restore jobs queued by the previous release under the old `serviceMonitoringTarget` property name
-     *
-     * @param array<string, mixed> $values
-     */
-    public function __unserialize(array $values): void
-    {
-        if (! array_key_exists('reportable', $values) && array_key_exists('serviceMonitoringTarget', $values)) {
-            $values['reportable'] = $values['serviceMonitoringTarget'];
-        }
-
-        $this->unserializeModels($values);
-    }
+    public function __construct(public ServiceMonitoringReportConfiguration $reportable) {}
 
     public function uniqueId(): string
     {
@@ -95,10 +78,8 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
     {
         // The queue restores this relation under the target's default scopes, dropping confidential
         // targets when unserialized without an authenticated user, so it must be reloaded explicitly
-        $serviceMonitoringTarget = $this->reportable instanceof ServiceMonitoringReportConfiguration
-            ? ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
-                ->find($this->reportable->service_monitoring_target_id)
-            : $this->reportable;
+        $serviceMonitoringTarget = ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
+            ->find($this->reportable->service_monitoring_target_id);
 
         if (! $serviceMonitoringTarget) {
             return;
@@ -127,10 +108,6 @@ class ServiceMonitoringReportNotifyJob implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        $frequency = $this->reportable instanceof ServiceMonitoringReportConfiguration
-            ? $this->reportable->frequency
-            : $this->reportable->report_frequency;
-
-        Notification::send($reportRecipients, new ServiceMonitoringReportNotification($serviceMonitoringTarget, $frequency ?? ServiceMonitoringReportFrequency::Monthly, $channel));
+        Notification::send($reportRecipients, new ServiceMonitoringReportNotification($serviceMonitoringTarget, $this->reportable->frequency, $channel));
     }
 }

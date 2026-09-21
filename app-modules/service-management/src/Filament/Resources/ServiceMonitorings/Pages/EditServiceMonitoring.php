@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Actions\DeleteAction;
@@ -201,10 +200,8 @@ class EditServiceMonitoring extends EditRecord
             }
         }
 
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            $this->reportConfigurationsData = $data['report_configurations'] ?? [];
-            unset($data['report_configurations']);
-        }
+        $this->reportConfigurationsData = $data['report_configurations'] ?? [];
+        unset($data['report_configurations']);
 
         return $data;
     }
@@ -216,10 +213,6 @@ class EditServiceMonitoring extends EditRecord
      */
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (! ServiceMonitoringReportConfigurationsFeature::active()) {
-            return $data;
-        }
-
         $record = $this->getRecord();
         assert($record instanceof ServiceMonitoringTarget);
 
@@ -244,9 +237,7 @@ class EditServiceMonitoring extends EditRecord
         /** @var ServiceMonitoringTarget $record */
         $record = $this->getRecord();
 
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            app(SaveServiceMonitoringReportConfigurationsAction::class)($record, $this->reportConfigurationsData);
-        }
+        app(SaveServiceMonitoringReportConfigurationsAction::class)($record, $this->reportConfigurationsData);
 
         if (! $record->wasChanged('is_confidential') || $record->is_confidential) {
             return;
