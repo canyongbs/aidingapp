@@ -34,47 +34,19 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Jobs\PruneModels;
-use Illuminate\Database\Console\PruneCommand;
+namespace App\Exceptions;
 
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertModelMissing;
+use RuntimeException;
 
-it('hides its value from serialization', function () {
-    $secret = Secret::factory()->create();
-
-    expect($secret->toArray())->not->toHaveKey('value');
-});
-
-it('prunes only unattached secrets older than one day', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-    $recentSecret = Secret::factory()->create();
-    $attachedSecret = Secret::factory()
-        ->for(ServiceRequest::factory(), 'related')
-        ->create([
-            'updated_at' => now()->subDays(2),
-        ]);
-
-    artisan(PruneCommand::class, [
-        '--model' => Secret::class,
-    ])->assertSuccessful();
-
-    assertModelMissing($expiredSecret);
-    assertModelExists($recentSecret);
-    assertModelExists($attachedSecret);
-});
-
-it('prunes unattached stale secrets when the model pruning job runs', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-
-    (new PruneModels())->handle();
-
-    assertModelMissing($expiredSecret);
-});
+class ArtisanCommandFailedException extends RuntimeException
+{
+    public function __construct(
+        public readonly string $command,
+        public readonly int $exitCode,
+        public readonly string $commandOutput,
+    ) {
+        parent::__construct(
+            "Artisan command [{$command}] failed with exit code {$exitCode}." . PHP_EOL . 'Output:' . PHP_EOL . $commandOutput,
+        );
+    }
+}

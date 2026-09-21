@@ -34,129 +34,185 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Jobs\ServiceMonitoringJob;
-use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
-use App\Enums\SubscriptionStatus;
-use App\Models\Tenant;
-use App\Settings\LicenseSettings;
+use AidingApp\Ai\Jobs\DispatchPrepareKnowledgeBaseVectorStoreForEachTenant;
+use AidingApp\Engagement\Jobs\DispatchDeliverEngagementsForEachTenant;
+use AidingApp\Engagement\Jobs\DispatchUnmatchedInboundCommunicationsForEachTenant;
+use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
+use AidingApp\InAppCommunication\Jobs\DispatchPruneEphemeralMessagesForEachTenant;
+use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecksForEachTenant;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Jobs\DispatchClosedServiceRequestFeedbackRemindersForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchEndServiceRequestConversationsForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchServiceMonitoringForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchServiceMonitoringReportForEachTenant;
+use AidingApp\ServiceManagement\Jobs\DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant;
+use App\Jobs\DispatchHealthChecksForEachTenant;
+use App\Jobs\DispatchModelPruningForEachTenant;
+use App\Jobs\DispatchStaleCacheTagPruningForEachTenant;
+use Illuminate\Console\Scheduling\Event;
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Support\Facades\Queue;
 
 use function Pest\Laravel\artisan;
 use function Pest\Laravel\travelTo;
 
-describe('ServiceMonitoringJob scheduling', function () {
-    it('dispatches ServiceMonitoringJob for each frequency when serviceMonitoring addon is enabled', function () {
+use Spatie\Health\Checks\Check;
+use Spatie\Health\Checks\Checks\ScheduleCheck;
+use Spatie\Health\Facades\Health;
+
+describe('schedule', function () {
+    it('dispatches the tenant fan-out orchestrators on a daily run', function () {
         Queue::fake();
 
         travelTo(now()->startOfDay());
 
         artisan('schedule:run');
 
-        Queue::assertPushed(ServiceMonitoringJob::class, 5);
+        Queue::assertPushed(DispatchDeliverEngagementsForEachTenant::class);
+        Queue::assertPushed(DispatchEndServiceRequestConversationsForEachTenant::class);
+        Queue::assertPushed(DispatchPruneEphemeralMessagesForEachTenant::class);
+        Queue::assertPushed(DispatchHealthChecksForEachTenant::class);
+        Queue::assertPushed(DispatchPrepareKnowledgeBaseVectorStoreForEachTenant::class);
+        Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 5);
+        Queue::assertPushed(DispatchClosedServiceRequestFeedbackRemindersForEachTenant::class);
+        Queue::assertPushed(DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant::class);
+        Queue::assertPushed(DispatchStaleCacheTagPruningForEachTenant::class);
+        Queue::assertPushed(DispatchUnmatchedInboundCommunicationsForEachTenant::class);
+        Queue::assertPushed(DispatchKnowledgeBaseArticleChecksForEachTenant::class);
+        Queue::assertPushed(DispatchModelPruningForEachTenant::class);
+        Queue::assertPushed(
+            DispatchServiceMonitoringReportForEachTenant::class,
+            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Daily,
+        );
     });
 
-    it('does not dispatch ServiceMonitoringJob when serviceMonitoring addon is disabled', function () {
+    it('dispatches the weekly service monitoring report orchestrator on Mondays', function () {
         Queue::fake();
 
-        $tenant = Tenant::query()->first();
-
-        $tenant->execute(function () {
-            $settings = app(LicenseSettings::class);
-            $settings->data->addons->serviceMonitoring = false;
-            $settings->save();
-        });
-
-        travelTo(now()->startOfDay());
+        travelTo(now()->startOfDay()->next(1));
 
         artisan('schedule:run');
 
-        Queue::assertNotPushed(ServiceMonitoringJob::class);
-    });
-});
-
-describe('ServiceMonitoringReportJob scheduling', function () {
-    beforeEach(function () {
-        $tenant = Tenant::query()->first();
-
-        $tenant->execute(function () {
-            $settings = app(LicenseSettings::class);
-            $settings->data->addons->serviceMonitoring = true;
-            $settings->save();
-        });
+        Queue::assertPushed(
+            DispatchServiceMonitoringReportForEachTenant::class,
+            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Weekly,
+        );
     });
 
-    it('dispatches ServiceMonitoringReportJob daily when serviceMonitoring addon is enabled', function () {
-        Queue::fake();
-
-        travelTo(now()->startOfDay());
-
-        artisan('schedule:run');
-
-        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'daily');
-    });
-
-    it('dispatches ServiceMonitoringReportJob weekly on Mondays when serviceMonitoring addon is enabled', function () {
-        Queue::fake();
-
-        travelTo(now()->startOfDay()->next(1)); // Travel to next Monday
-
-        artisan('schedule:run');
-
-        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'weekly');
-    });
-
-    it('dispatches ServiceMonitoringReportJob monthly on the first of month when serviceMonitoring addon is enabled', function () {
+    it('dispatches the monthly service monitoring report orchestrator on the first of the month', function () {
         Queue::fake();
 
         travelTo(now()->startOfMonth());
 
         artisan('schedule:run');
 
-        Queue::assertPushed(ServiceMonitoringReportJob::class, fn (ServiceMonitoringReportJob $job) => $job->frequency->value === 'monthly');
+        Queue::assertPushed(
+            DispatchServiceMonitoringReportForEachTenant::class,
+            fn (DispatchServiceMonitoringReportForEachTenant $job) => $job->frequency === ServiceMonitoringReportFrequency::Monthly,
+        );
     });
 
-    it('does not dispatch ServiceMonitoringReportJob when serviceMonitoring addon is disabled', function () {
+    it('dispatches only the per-minute tasks on an off-cadence minute', function () {
         Queue::fake();
 
-        $tenant = Tenant::query()->first();
+        travelTo(now()->startOfDay()->setTime(10, 7));
 
-        $tenant->execute(function () {
-            $settings = app(LicenseSettings::class);
-            $settings->data->addons->serviceMonitoring = false;
-            $settings->save();
-        });
+        artisan('schedule:run');
+
+        Queue::assertPushed(GatherAndDispatchSesS3InboundEmails::class);
+        Queue::assertPushed(DispatchDeliverEngagementsForEachTenant::class);
+        Queue::assertPushed(DispatchEndServiceRequestConversationsForEachTenant::class);
+        Queue::assertPushed(DispatchPruneEphemeralMessagesForEachTenant::class);
+        Queue::assertPushed(DispatchHealthChecksForEachTenant::class);
+
+        Queue::assertNotPushed(DispatchServiceMonitoringForEachTenant::class);
+        Queue::assertNotPushed(DispatchPrepareKnowledgeBaseVectorStoreForEachTenant::class);
+        Queue::assertNotPushed(DispatchClosedServiceRequestFeedbackRemindersForEachTenant::class);
+        Queue::assertNotPushed(DispatchStaleDraftServiceRequestAutoSubmissionForEachTenant::class);
+        Queue::assertNotPushed(DispatchStaleCacheTagPruningForEachTenant::class);
+        Queue::assertNotPushed(DispatchServiceMonitoringReportForEachTenant::class);
+        Queue::assertNotPushed(DispatchUnmatchedInboundCommunicationsForEachTenant::class);
+        Queue::assertNotPushed(DispatchKnowledgeBaseArticleChecksForEachTenant::class);
+        Queue::assertNotPushed(DispatchModelPruningForEachTenant::class);
+    });
+
+    it('dispatches the five-minute service monitoring orchestrator on a five-minute boundary', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay()->setTime(10, 5));
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(DispatchPrepareKnowledgeBaseVectorStoreForEachTenant::class);
+        Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 1);
+        Queue::assertPushed(
+            DispatchServiceMonitoringForEachTenant::class,
+            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::FiveMinutes,
+        );
+    });
+
+    it('dispatches the fifteen-minute service monitoring orchestrator on a fifteen-minute boundary', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay()->setTime(10, 15));
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 2);
+        Queue::assertPushed(
+            DispatchServiceMonitoringForEachTenant::class,
+            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::FifteenMinutes,
+        );
+    });
+
+    it('dispatches the thirty-minute service monitoring orchestrator on a thirty-minute boundary', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay()->setTime(10, 30));
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 3);
+        Queue::assertPushed(
+            DispatchServiceMonitoringForEachTenant::class,
+            fn (DispatchServiceMonitoringForEachTenant $job) => $job->frequency === ServiceMonitoringFrequency::ThirtyMinutes,
+        );
+    });
+
+    it('writes the schedule heartbeat to the shared store on each run', function () {
+        Queue::fake();
+
+        $check = Health::registeredChecks()->first(fn (Check $registeredCheck) => $registeredCheck instanceof ScheduleCheck);
+
+        assert($check instanceof ScheduleCheck);
+
+        cache()->store('health')->forget($check->getCacheKey());
 
         travelTo(now()->startOfDay());
 
         artisan('schedule:run');
 
-        Queue::assertNotPushed(ServiceMonitoringReportJob::class);
+        expect(cache()->store('health')->has($check->getCacheKey()))->toBeTrue();
+
+        cache()->store('health')->forget($check->getCacheKey());
     });
-});
 
-describe('schedule', function () {
-    it('does not schedule tenant tasks for tenants with an expired subscription', function () {
-        $activeTenant = Tenant::factory()->create([
-            'domain' => 'active-subscription.aidingapp.local',
-            'setup_complete' => true,
-            'subscription_status' => SubscriptionStatus::Active,
-        ]);
+    it('records the schedule heartbeat via the liveness beacon', function () {
+        $path = storage_path('framework/schedule-heartbeat');
 
-        $expiredTenant = Tenant::factory()->create([
-            'domain' => 'expired-subscription.aidingapp.local',
-            'setup_complete' => true,
-            'subscription_status' => SubscriptionStatus::Expired,
-        ]);
+        @unlink($path);
+        expect(file_exists($path))->toBeFalse();
 
-        $summaries = collect(app(Kernel::class)->resolveConsoleSchedule()->events())
-            ->map(fn ($event) => $event->getSummaryForDisplay());
+        $beacon = collect(app(Kernel::class)->resolveConsoleSchedule()->events())
+            ->firstWhere('description', 'Schedule Liveness Beacon');
 
-        expect($summaries->contains(fn (string $summary) => str_contains($summary, $activeTenant->domain)))->toBeTrue()
-            ->and($summaries->contains(fn (string $summary) => str_contains($summary, $expiredTenant->domain)))->toBeFalse();
+        assert($beacon instanceof Event);
 
-        // Prevents the shared test tenant teardown from resolving one of these non-migratable tenants via Tenant::firstOrFail().
-        $activeTenant->delete();
-        $expiredTenant->delete();
+        $beacon->run(app());
+
+        expect(file_exists($path))->toBeTrue();
+
+        @unlink($path);
     });
 });

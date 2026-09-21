@@ -34,47 +34,30 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Jobs\PruneModels;
-use Illuminate\Database\Console\PruneCommand;
+namespace AidingApp\KnowledgeBase\Jobs;
 
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertModelMissing;
+use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Queue\SerializesModels;
 
-it('hides its value from serialization', function () {
-    $secret = Secret::factory()->create();
+class DispatchKnowledgeBaseArticleChecks implements ShouldQueue, ShouldBeUnique
+{
+    use Dispatchable;
+    use InteractsWithQueue;
+    use Queueable;
+    use SerializesModels;
 
-    expect($secret->toArray())->not->toHaveKey('value');
-});
+    public int $uniqueFor = 3600;
 
-it('prunes only unattached secrets older than one day', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-    $recentSecret = Secret::factory()->create();
-    $attachedSecret = Secret::factory()
-        ->for(ServiceRequest::factory(), 'related')
-        ->create([
-            'updated_at' => now()->subDays(2),
-        ]);
-
-    artisan(PruneCommand::class, [
-        '--model' => Secret::class,
-    ])->assertSuccessful();
-
-    assertModelMissing($expiredSecret);
-    assertModelExists($recentSecret);
-    assertModelExists($attachedSecret);
-});
-
-it('prunes unattached stale secrets when the model pruning job runs', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-
-    (new PruneModels())->handle();
-
-    assertModelMissing($expiredSecret);
-});
+    public function handle(): void
+    {
+        KnowledgeBaseItem::each(function (KnowledgeBaseItem $article) {
+            CheckKnowledgeBaseArticleLinksJob::dispatch($article);
+            CheckKnowledgeBaseArticleImagesJob::dispatch($article);
+        });
+    }
+}

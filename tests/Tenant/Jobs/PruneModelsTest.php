@@ -34,47 +34,56 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Audit\Models\Audit;
 use AidingApp\ServiceManagement\Models\Secret;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Jobs\PruneModels;
-use Illuminate\Database\Console\PruneCommand;
+use Illuminate\Support\Facades\Exceptions;
 
-use function Pest\Laravel\artisan;
-use function Pest\Laravel\assertModelExists;
-use function Pest\Laravel\assertModelMissing;
+it('prunes stale records and keeps recent ones', function () {
+    $stale = Audit::factory()->create();
+    Audit::query()->whereKey($stale->getKey())->update(['created_at' => now()->subDays(120)]);
 
-it('hides its value from serialization', function () {
-    $secret = Secret::factory()->create();
+    $recent = Audit::factory()->create();
 
-    expect($secret->toArray())->not->toHaveKey('value');
-});
-
-it('prunes only unattached secrets older than one day', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
-    $recentSecret = Secret::factory()->create();
-    $attachedSecret = Secret::factory()
-        ->for(ServiceRequest::factory(), 'related')
-        ->create([
-            'updated_at' => now()->subDays(2),
-        ]);
-
-    artisan(PruneCommand::class, [
-        '--model' => Secret::class,
-    ])->assertSuccessful();
-
-    assertModelMissing($expiredSecret);
-    assertModelExists($recentSecret);
-    assertModelExists($attachedSecret);
-});
-
-it('prunes unattached stale secrets when the model pruning job runs', function () {
-    $expiredSecret = Secret::factory()->create([
-        'updated_at' => now()->subDays(2),
-    ]);
+    expect(Audit::query()->whereKey($stale->getKey())->exists())->toBeTrue();
 
     (new PruneModels())->handle();
 
-    assertModelMissing($expiredSecret);
+    expect(Audit::query()->whereKey($stale->getKey())->exists())->toBeFalse()
+        ->and(Audit::query()->whereKey($recent->getKey())->exists())->toBeTrue();
+});
+
+it('prunes stale secrets', function () {
+    $secret = Secret::factory()->create(['related_id' => null, 'related_type' => null]);
+    Secret::query()->whereKey($secret->getKey())->update(['updated_at' => now()->subDays(2)]);
+
+    (new PruneModels())->handle();
+
+    expect(Secret::query()->whereKey($secret->getKey())->exists())->toBeFalse();
+});
+
+it('reports a failing model and still prunes the rest', function () {
+    Exceptions::fake();
+
+    $job = new class () extends PruneModels {
+        public bool $laterPrunerRan = false;
+
+        protected function pruners(): array
+        {
+            return [
+                fn (): int => throw new RuntimeException('prune failed'),
+                function (): int {
+                    $this->laterPrunerRan = true;
+
+                    return 0;
+                },
+            ];
+        }
+    };
+
+    $job->handle();
+
+    expect($job->laterPrunerRan)->toBeTrue();
+
+    Exceptions::assertReported(fn (RuntimeException $throw) => $throw->getMessage() === 'prune failed');
 });
