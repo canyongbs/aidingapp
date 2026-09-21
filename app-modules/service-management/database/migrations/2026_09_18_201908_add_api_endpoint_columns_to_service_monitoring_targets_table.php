@@ -45,7 +45,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('service_monitoring_targets', function (Blueprint $table) {
-                $table->boolean('follow_redirection')->nullable();
+                $table->boolean('follow_redirection')->nullable()->initial(true);
                 $table->jsonb('successful_status_codes')->nullable();
                 $table->boolean('is_max_latency_enabled')->nullable();
                 $table->unsignedInteger('max_latency_ms')->nullable();
