@@ -48,6 +48,7 @@ use Illuminate\Events\CallQueuedListener;
 use Illuminate\Mail\SendQueuedMailable;
 use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Queue\CallQueuedClosure;
+use Spatie\Health\Jobs\HealthQueueJob;
 use Spatie\Multitenancy\Actions\ForgetCurrentTenantAction;
 use Spatie\Multitenancy\Actions\MakeQueueTenantAwareAction;
 use Spatie\Multitenancy\Actions\MakeTenantCurrentAction;
@@ -159,6 +160,8 @@ return [
      * Jobs not tenant aware even if these don't implement the NotTenantAware interface.
      */
     'not_tenant_aware_jobs' => [
-        // ...
+        // Dispatched by the landlord-level `health:queue-check-heartbeat` command with no current
+        // tenant; it writes to the fixed-prefix `health` cache store shared across all tenants.
+        HealthQueueJob::class,
     ],
 ];

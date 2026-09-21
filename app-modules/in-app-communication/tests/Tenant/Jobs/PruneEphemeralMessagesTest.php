@@ -41,7 +41,6 @@ use AidingApp\InAppCommunication\Jobs\PruneEphemeralMessages;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use AidingApp\InAppCommunication\Models\Message;
-use App\Features\ConfidentialChannelsFeature;
 use Illuminate\Broadcasting\BroadcastEvent;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Queue;
@@ -241,23 +240,4 @@ it('leaves an unread count alone when the remaining messages still support it', 
     (new PruneEphemeralMessages())->handle();
 
     expect($participant->refresh()->unread_count)->toBe(1);
-});
-
-it('does nothing when the confidential channels feature is inactive', function () {
-    $conversation = Conversation::factory()
-        ->confidential(ConversationEphemeralPeriod::OneMinute)
-        ->create();
-
-    $message = Message::factory()->for($conversation)->create([
-        'created_at' => now()->subYears(2),
-    ]);
-
-    ConfidentialChannelsFeature::deactivate();
-
-    Event::fake();
-
-    (new PruneEphemeralMessages())->handle();
-
-    assertModelExists($message);
-    Event::assertNotDispatched(MessagesPruned::class);
 });

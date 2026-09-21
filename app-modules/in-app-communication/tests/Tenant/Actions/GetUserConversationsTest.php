@@ -37,7 +37,6 @@
 use AidingApp\InAppCommunication\Actions\GetUserConversations;
 use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
-use App\Features\ConfidentialChannelsFeature;
 use App\Models\User;
 
 it('returns only confidential conversations when asked for them', function () {
@@ -102,22 +101,4 @@ it('applies the confidentiality filter to pinned conversations', function () {
     expect($pinned->pluck('id')->all())
         ->toContain($confidential->getKey())
         ->not->toContain($ordinary->getKey());
-});
-
-it('ignores the confidentiality filter when the feature is inactive', function () {
-    $user = User::factory()->create();
-
-    $confidential = Conversation::factory()->confidential()->create();
-    $ordinary = Conversation::factory()->channel()->create();
-
-    ConversationParticipant::factory()->for($confidential)->for($user, 'participant')->create();
-    ConversationParticipant::factory()->for($ordinary)->for($user, 'participant')->create();
-
-    ConfidentialChannelsFeature::deactivate();
-
-    $results = app(GetUserConversations::class)(user: $user, confidential: false);
-
-    expect($results->pluck('id')->all())
-        ->toContain($confidential->getKey())
-        ->toContain($ordinary->getKey());
 });

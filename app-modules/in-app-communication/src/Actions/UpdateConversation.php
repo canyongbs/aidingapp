@@ -38,7 +38,6 @@ namespace AidingApp\InAppCommunication\Actions;
 
 use AidingApp\InAppCommunication\Events\ConversationUpdated;
 use AidingApp\InAppCommunication\Models\Conversation;
-use App\Features\ConfidentialChannelsFeature;
 use InvalidArgumentException;
 
 class UpdateConversation
@@ -48,7 +47,7 @@ class UpdateConversation
         ?string $name = null,
         ?bool $isPrivate = null,
     ): Conversation {
-        if ($isPrivate === false && ConfidentialChannelsFeature::active() && $conversation->is_confidential) {
+        if ($isPrivate === false && $conversation->is_confidential) {
             throw new InvalidArgumentException('Confidential channels cannot be made public.');
         }
 

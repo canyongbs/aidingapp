@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
-use App\Features\MonitorTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -88,14 +87,10 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        if (MonitorTypeFeature::active()) {
-            match ($this->serviceMonitoringTarget->monitor_type) {
-                MonitorType::Availability => $this->handleAvailability(),
-                MonitorType::KeywordMatch => $this->handleKeywordMatch(),
-            };
-        } else {
-            $this->handleAvailability();
-        }
+        match ($this->serviceMonitoringTarget->monitor_type) {
+            MonitorType::Availability => $this->handleAvailability(),
+            MonitorType::KeywordMatch => $this->handleKeywordMatch(),
+        };
     }
 
     /**

@@ -462,12 +462,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/contract-management/src/Enums/ContractStatus.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\Division\\\\Database\\\\Factories\\\\DivisionFactory\\:\\:default\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Factories\\\\Factory does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/division/database/factories/DivisionFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\Engagement\\\\Actions\\\\CreateEngagement" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
     'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
     'count' => 1,
@@ -1945,12 +1939,6 @@ $ignoreErrors[] = [
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter name "close_details" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.parameterNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter name "division_id" is not in camelCase\\.$#',
     'identifier' => 'MeliorStan.parameterNameNotCamelCase',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
