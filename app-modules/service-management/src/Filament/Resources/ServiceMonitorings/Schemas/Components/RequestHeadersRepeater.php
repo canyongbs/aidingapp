@@ -56,7 +56,9 @@ class RequestHeadersRepeater
                     ->maxLength(255)
                     // RFC 7230 token grammar: header field names can't contain spaces, colons, or
                     // other characters an HTTP client rejects when actually sending the request.
-                    ->regex('/^[!#$%&\'*+\-.^_`|~0-9A-Za-z]+$/')
+                    // \A/\z (not ^/$) so a trailing newline can't sneak past — PCRE's $ also
+                    // matches immediately before a final \n.
+                    ->regex('/\A[!#$%&\'*+\-.^_`|~0-9A-Za-z]+\z/')
                     ->validationMessages([
                         'regex' => 'The header name may only contain letters, digits, and the characters !#$%&\'*+-.^_`|~.',
                     ]),
@@ -64,7 +66,7 @@ class RequestHeadersRepeater
                     ->label('Value')
                     ->required()
                     ->maxLength(65535)
-                    ->regex('/^[^\r\n]*$/')
+                    ->regex('/\A[^\r\n]*\z/')
                     ->validationMessages([
                         'regex' => 'The header value may not contain line breaks.',
                     ]),

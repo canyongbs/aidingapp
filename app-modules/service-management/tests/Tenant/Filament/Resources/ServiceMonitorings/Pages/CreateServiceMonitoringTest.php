@@ -337,6 +337,24 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['request_headers.0.value' => 'regex'],
         ],
+        'request header value cannot end with a trailing newline' => [
+            // PCRE's $ (unlike \z) also matches immediately before a final \n, so this
+            // regression-tests the fix rather than just the general line-break case above.
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'request_headers' => [
+                    ['name' => 'X-Test', 'value' => "value\n"],
+                ],
+            ]),
+            ['request_headers.0.value' => 'regex'],
+        ],
+        'request header name cannot end with a trailing newline' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'request_headers' => [
+                    ['name' => "X-Test\n", 'value' => 'value'],
+                ],
+            ]),
+            ['request_headers.0.name' => 'regex'],
+        ],
         'request header names must be unique regardless of casing' => [
             ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
                 'request_headers' => [
