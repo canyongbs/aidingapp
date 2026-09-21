@@ -1042,6 +1042,33 @@ it('records a failed check instead of crashing when a stored header name is not 
         ->and($history->keyword_match_failures[0])->toContain('Invalid request configuration');
 });
 
+it('includes the API endpoint failure reason in the email notification body', function () {
+    // The mail template used to only show detailed failure reasons for Keyword Match monitors,
+    // falling back to a generic "did not respond" message for every other monitor type — which
+    // silently dropped the specific reason (e.g. the max latency message) for API Endpoint checks.
+    Http::fake(fn () => Http::response('Test', 500));
+
+    $user = User::factory()->create();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'successful_status_codes' => [200],
+            'is_notified_via_email' => true,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    $notification = new ServiceMonitoringNotification($history, MailChannel::class);
+
+    $body = (string) $notification->toMail($user)->render();
+
+    expect($body)->toContain('Unexpected status code: 500')
+        ->not->toContain('The monitored service did not respond to a health check');
+});
+
 it('sends the request body as JSON when configured', function () {
     Http::fake(fn () => Http::response('Test', 200));
 

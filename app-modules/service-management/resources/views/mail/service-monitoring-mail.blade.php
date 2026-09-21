@@ -31,9 +31,6 @@
     
     </COPYRIGHT>
 --}}
-@php
-    use AidingApp\ServiceManagement\Enums\MonitorType;
-@endphp
 @props(['settings' => null])
 <x-mail::layout :settings="$settings">
     {{-- Header --}}
@@ -57,7 +54,7 @@ Aiding App has detected a failure in a monitored service.
 - Most recent failed check: {{ $historicalServiceMonitoring->created_at }}
 
 ## Details
-@if ($historicalServiceMonitoring->serviceMonitoringTarget->monitor_type === MonitorType::KeywordMatch && filled($historicalServiceMonitoring->keyword_match_failures))
+@if (filled($historicalServiceMonitoring->keyword_match_failures))
 @foreach ($historicalServiceMonitoring->keyword_match_failures as $failure)
 - {{ $failure }}
 @endforeach
