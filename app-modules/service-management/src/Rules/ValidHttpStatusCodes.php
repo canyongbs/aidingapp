@@ -44,11 +44,32 @@ class ValidHttpStatusCodes implements ValidationRule
 {
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $invalid = collect((array) $value)
-            ->reject(fn (mixed $code): bool => array_key_exists((int) $code, SuccessfulStatusCodesSelect::options()));
+        // Normalize a scalar into a single-element array rather than relying on (array) casting,
+        // matching the pattern used elsewhere for array-typed rules (see RolesExist).
+        $codes = is_array($value) ? $value : [$value];
+
+        $invalid = collect($codes)->reject(fn (mixed $code): bool => $this->isValidCode($code));
 
         if ($invalid->isNotEmpty()) {
             $fail('Each status code must be a valid HTTP status code.');
         }
+    }
+
+    /**
+     * Requires the value to already be an int, or a string whose canonical int form doesn't
+     * lose information (e.g. rejects '200junk' and '200.9', which (int) casting would silently
+     * accept as 200).
+     */
+    protected function isValidCode(mixed $code): bool
+    {
+        if (is_int($code)) {
+            return array_key_exists($code, SuccessfulStatusCodesSelect::options());
+        }
+
+        if (is_string($code) && ctype_digit($code)) {
+            return array_key_exists((int) $code, SuccessfulStatusCodesSelect::options());
+        }
+
+        return false;
     }
 }

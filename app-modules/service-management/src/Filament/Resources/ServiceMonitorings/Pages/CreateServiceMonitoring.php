@@ -178,7 +178,7 @@ class CreateServiceMonitoring extends CreateRecord
             }
         }
 
-        if (filled($data['successful_status_codes'] ?? null)) {
+        if (is_array($data['successful_status_codes'] ?? null) && filled($data['successful_status_codes'])) {
             $data['successful_status_codes'] = array_map('intval', $data['successful_status_codes']);
         }
 

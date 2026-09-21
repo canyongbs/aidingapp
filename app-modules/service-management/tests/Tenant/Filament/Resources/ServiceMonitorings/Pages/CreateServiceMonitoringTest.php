@@ -287,6 +287,18 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['successful_status_codes'],
         ],
+        'successful status codes must not be a non-numeric string masquerading as a code' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => ['200junk'],
+            ]),
+            ['successful_status_codes'],
+        ],
+        'successful status codes must not be a float that would be truncated' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => [200.9],
+            ]),
+            ['successful_status_codes'],
+        ],
         'max latency required when maximum latency is enabled' => [
             ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
                 'is_max_latency_enabled' => true,
