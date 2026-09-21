@@ -265,7 +265,12 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
     protected function handleApiEndpoint(): void
     {
         try {
-            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection);
+            // The column is nullable with no DB default (matching the other API-Endpoint-only
+            // columns), so a record whose value was never set some other way than the form
+            // (e.g. direct database access) could reach here as null. buildRequest() requires a
+            // real bool, so treat null as the documented true default rather than letting a
+            // TypeError crash the job.
+            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection ?? true);
 
             $headers = collect($this->serviceMonitoringTarget->request_headers ?? [])
                 ->filter(fn (array $header): bool => filled($header['name'] ?? null))

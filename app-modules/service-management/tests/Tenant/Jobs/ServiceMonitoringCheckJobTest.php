@@ -48,6 +48,7 @@ use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 
@@ -1049,6 +1050,26 @@ it('sends the configured request headers', function () {
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Http::assertSent(fn (Request $request) => $request->hasHeader('X-Custom-Header', 'custom-value'));
+});
+
+it('treats a null follow_redirection as true instead of crashing', function () {
+    Http::fake(fn () => Http::response('Test', 200));
+
+    // follow_redirection is nullable with no DB default, so a record could reach this point
+    // with a genuinely null value some other way than the form (e.g. direct database access).
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create();
+    DB::table('service_monitoring_targets')->where('id', $serviceMonitorTarget->getKey())->update(['follow_redirection' => null]);
+    $serviceMonitorTarget->refresh();
+
+    expect($serviceMonitorTarget->follow_redirection)->toBeNull();
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    $history = HistoricalServiceMonitoring::first();
+
+    expect($history->succeeded)->toBeTrue();
 });
 
 it('records a failed check instead of crashing when a stored header name is not valid to send', function () {
