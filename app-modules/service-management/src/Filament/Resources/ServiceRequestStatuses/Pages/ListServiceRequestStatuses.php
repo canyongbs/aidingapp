@@ -36,22 +36,22 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
+use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\QueryException;
-use Illuminate\Support\Collection;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListServiceRequestStatuses extends ListRecords
 {
@@ -59,11 +59,16 @@ class ListServiceRequestStatuses extends ListRecords
 
     public function table(Table $table): Table
     {
-        $table = $table
+        $isArchivingActive = ServiceRequestStatusArchivingFeature::active();
+
+        return $table
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
+                    ->formatStateUsing(fn (ServiceRequestStatus $record, string $state): string => $record->isArchived()
+                        ? "{$state} (Archived)"
+                        : $state)
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('classification')
@@ -82,68 +87,38 @@ class ListServiceRequestStatuses extends ListRecords
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('sort')
-            ->reorderable('sort', function () {
-                $trashedFilterValue = $this->getTableFilterState('trashed');
-                $filterValue = $trashedFilterValue['value'] ?? null;
+            ->reorderable('sort', function (): bool {
+                $trashedFilterValue = $this->getTableFilterState('trashed')['value'] ?? null;
+                $archivedFilterValue = $this->getTableFilterState('archived')['value'] ?? null;
 
-                return is_null($filterValue);
-            });
-
-        return $table
+                return is_null($trashedFilterValue) && is_null($archivedFilterValue);
+            })
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
+                UnarchiveServiceRequestStatusAction::make(),
             ])
-            ->toolbarActions([
+            ->toolbarActions($isArchivingActive ? [
                 BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete')
-                        ->action(function (DeleteBulkAction $component): void {
-                            $total = 0;
-                            $totalDeleted = 0;
-
-                            $component->process(static function (Collection $records) use (&$total, &$totalDeleted) {
-                                $total = $records->count();
-
-                                $records->each(function (Model $record) use (&$totalDeleted) {
-                                    try {
-                                        $record->delete();
-
-                                        $totalDeleted++;
-                                    } catch (QueryException $exception) {
-                                        if (str_contains($exception->getMessage(), 'Cannot modify system protected rows')) {
-                                            Notification::make()
-                                                ->title('Cannot Delete System Protected record')
-                                                ->body('A system protected record cannot be deleted.')
-                                                ->danger()
-                                                ->send();
-                                        }
-                                    }
-                                });
-                            });
-
-                            $notification = Notification::make()
-                                ->title('Service Request Statuses Deleted')
-                                ->body("{$totalDeleted} of {$total} selected service request statuses have been deleted.");
-
-                            if ($totalDeleted > 0) {
-                                $notification->success();
-                            } else {
-                                $notification->danger();
-                            }
-
-                            $notification->send();
-
-                            if ($totalDeleted > 0) {
-                                $component->dispatchSuccessRedirect();
-                            } else {
-                                $component->dispatchFailureRedirect();
-                            }
-                        }),
+                    ArchiveBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
                 ]),
-            ])
+            ] : [])
             ->filters([
                 TrashedFilter::make(),
+                ...($isArchivingActive ? [
+                    TernaryFilter::make('archived')
+                        ->label('Archived')
+                        ->placeholder('Without archived records')
+                        ->trueLabel('With archived records')
+                        ->falseLabel('Only archived records')
+                        ->queries(
+                            true: fn (Builder $query): Builder => $query,
+                            false: $this->onlyArchived(...),
+                            blank: $this->withoutArchived(...),
+                        )
+                        ->excludeWhenResolvingRecord(),
+                ] : []),
             ]);
     }
 
@@ -152,5 +127,25 @@ class ListServiceRequestStatuses extends ListRecords
         return [
             CreateAction::make(),
         ];
+    }
+
+    /**
+     * @param Builder<ServiceRequestStatus> $query
+     *
+     * @return Builder<ServiceRequestStatus>
+     */
+    protected function onlyArchived(Builder $query): Builder
+    {
+        return $query->onlyArchived();
+    }
+
+    /**
+     * @param Builder<ServiceRequestStatus> $query
+     *
+     * @return Builder<ServiceRequestStatus>
+     */
+    protected function withoutArchived(Builder $query): Builder
+    {
+        return $query->withoutArchived();
     }
 }

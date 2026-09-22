@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Observers\ServiceRequestStatusObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -55,6 +56,7 @@ use OwenIt\Auditing\Contracts\Auditable;
 #[ObservedBy([ServiceRequestStatusObserver::class])]
 class ServiceRequestStatus extends BaseModel implements Auditable
 {
+    use CanBeArchived;
     use SoftDeletes;
     use AuditableTrait;
 
@@ -75,6 +77,38 @@ class ServiceRequestStatus extends BaseModel implements Auditable
     public function serviceRequests(): HasMany
     {
         return $this->hasMany(ServiceRequest::class, 'status_id');
+    }
+
+    /**
+     * @return HasMany<ServiceRequestType, $this>
+     */
+    public function serviceRequestTypes(): HasMany
+    {
+        return $this->hasMany(ServiceRequestType::class, 'automated_status_id');
+    }
+
+    /**
+     * @return HasMany<ServiceRequestAssignment, $this>
+     */
+    public function serviceRequestAssignments(): HasMany
+    {
+        return $this->hasMany(ServiceRequestAssignment::class, 'service_request_status_id');
+    }
+
+    /**
+     * @return HasMany<ServiceRequestStatusPeriod, $this>
+     */
+    public function statusPeriods(): HasMany
+    {
+        return $this->hasMany(ServiceRequestStatusPeriod::class, 'service_request_status_id');
+    }
+
+    public function isInUse(): bool
+    {
+        return $this->serviceRequests()->withoutGlobalScopes()->exists()
+            || $this->serviceRequestTypes()->withoutGlobalScopes()->exists()
+            || $this->serviceRequestAssignments()->withoutGlobalScopes()->exists()
+            || $this->statusPeriods()->withoutGlobalScopes()->exists();
     }
 
     /**

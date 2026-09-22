@@ -37,11 +37,13 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusArchivingFeature;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
@@ -75,19 +77,21 @@ class EditServiceRequestStatus extends EditRecord
                         ColorSelect::make()
                             ->required(),
                     ]),
-            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed());
+            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed() || $record->isArchived());
     }
 
     protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
-            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed());
+            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed() || $record->isArchived());
     }
 
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            ArchiveAction::make()
+                ->visible(fn (): bool => ServiceRequestStatusArchivingFeature::active()),
+            UnarchiveServiceRequestStatusAction::make(),
             RestoreAction::make(),
             ForceDeleteAction::make(),
         ];
