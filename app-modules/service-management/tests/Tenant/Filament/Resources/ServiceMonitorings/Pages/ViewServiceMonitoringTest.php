@@ -243,7 +243,6 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
         ->create([
             'follow_redirection' => false,
             'successful_status_codes' => [200, 201],
-            'is_max_latency_enabled' => true,
             'max_latency_ms' => 2000,
             'http_method' => HttpMethod::Post,
             'request_body' => '{"key":"value"}',

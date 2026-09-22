@@ -53,6 +53,11 @@ class MaxLatencyInput
             ->step(1)
             ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
             ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            // Toggling max latency off hides this field, and a hidden field doesn't dehydrate by
+            // default -- but is_max_latency_enabled is computed purely from whether this column
+            // has a value, so the clear-to-null on toggle-off must actually reach the save, or
+            // the stored value (and therefore the computed "enabled" state) never changes.
+            ->dehydratedWhenHidden()
             ->helperText('The check fails if the response takes longer than this to arrive.')
             ->columnSpanFull();
     }

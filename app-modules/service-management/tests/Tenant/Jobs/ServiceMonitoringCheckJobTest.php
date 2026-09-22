@@ -982,7 +982,7 @@ it('does not fail for latency when the maximum latency check is disabled', funct
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
-        ->create(['is_max_latency_enabled' => false]);
+        ->create();
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
@@ -1005,7 +1005,6 @@ it('converts the response time from seconds to milliseconds before comparing aga
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create([
-            'is_max_latency_enabled' => true,
             'max_latency_ms' => 1000,
         ]);
 
@@ -1025,7 +1024,6 @@ it('scales the request timeout to the configured max latency threshold', functio
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create([
-            'is_max_latency_enabled' => true,
             'max_latency_ms' => 20000,
         ]);
 
@@ -1042,7 +1040,7 @@ it('scales the request timeout to the configured max latency threshold', functio
 it('falls back to a fixed request timeout when max latency is not configured', function () {
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
-        ->create(['is_max_latency_enabled' => false]);
+        ->create();
 
     $job = new ServiceMonitoringCheckJob($serviceMonitorTarget);
 
@@ -1147,7 +1145,6 @@ it('includes the max latency failure reason in the email notification body', fun
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create([
-            'is_max_latency_enabled' => true,
             'max_latency_ms' => 1000,
             'is_notified_via_email' => true,
         ]);

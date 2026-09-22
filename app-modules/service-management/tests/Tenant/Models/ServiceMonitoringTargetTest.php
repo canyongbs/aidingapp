@@ -48,3 +48,11 @@ it('excludes its basic auth credentials from serialization and audits', function
         ->and($audit->old_values)->not->toHaveKey('auth_username')
         ->and($audit->old_values)->not->toHaveKey('auth_password');
 });
+
+it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
+    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
+    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+
+    expect($enabled->is_max_latency_enabled)->toBeTrue()
+        ->and($disabled->is_max_latency_enabled)->toBeFalse();
+});

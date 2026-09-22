@@ -395,6 +395,47 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
         ->and($serviceMonitoringTarget->auth_password)->toBe('existing-password');
 });
 
+test('EditServiceMonitoring computes the max latency toggle from whether max_latency_ms is set', function () {
+    // is_max_latency_enabled isn't a real column -- it's derived from max_latency_ms, so this
+    // proves the toggle correctly reflects that on hydration in both directions.
+    asSuperAdmin();
+
+    $enabledTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => 2000]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $enabledTarget->getRouteKey(),
+    ])->assertSchemaStateSet(['is_max_latency_enabled' => true]);
+
+    $disabledTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => null]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $disabledTarget->getRouteKey(),
+    ])->assertSchemaStateSet(['is_max_latency_enabled' => false]);
+});
+
+test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is turned off', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => 2000]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaStateSet(['is_max_latency_enabled' => true])
+        ->set('data.is_max_latency_enabled', false)
+        ->assertSchemaStateSet(['max_latency_ms' => null])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->max_latency_ms)->toBeNull();
+});
+
 test('EditServiceMonitoring hides API endpoint fields until the API endpoint monitor type is selected', function () {
     asSuperAdmin();
 

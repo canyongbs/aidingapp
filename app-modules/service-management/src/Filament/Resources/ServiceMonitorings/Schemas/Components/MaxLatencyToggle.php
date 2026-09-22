@@ -37,9 +37,11 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 class MaxLatencyToggle
 {
@@ -48,6 +50,13 @@ class MaxLatencyToggle
         return Toggle::make('is_max_latency_enabled')
             ->label('Maximum Latency')
             ->live()
+            // There's no is_max_latency_enabled column -- it's computed from whether
+            // max_latency_ms has a value (see the model accessor), so this toggle never
+            // persists its own state. It only exists to drive max_latency_ms's visibility
+            // and to clear that field when turned off.
+            ->dehydrated(false)
+            ->afterStateHydrated(fn (Set $set, ?ServiceMonitoringTarget $record) => $set('is_max_latency_enabled', filled($record?->max_latency_ms)))
+            ->afterStateUpdated(fn (Set $set, bool $state) => $state ?: $set('max_latency_ms', null))
             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
             ->columnSpanFull();
     }

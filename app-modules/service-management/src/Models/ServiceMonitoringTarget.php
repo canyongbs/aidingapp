@@ -51,6 +51,7 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -89,7 +90,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'auth_password',
         'follow_redirection',
         'successful_status_codes',
-        'is_max_latency_enabled',
         'max_latency_ms',
         'http_method',
         'request_body',
@@ -110,7 +110,6 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'auth_password' => 'encrypted',
         'follow_redirection' => 'boolean',
         'successful_status_codes' => 'array',
-        'is_max_latency_enabled' => 'boolean',
         'max_latency_ms' => 'integer',
         'http_method' => HttpMethod::class,
         'is_request_body_json' => 'boolean',
@@ -249,5 +248,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * Whether the API Endpoint check should enforce a maximum latency. There's no separate
+     * column for this -- it's implied entirely by whether max_latency_ms has a value, so the
+     * two can never disagree with each other the way a separately-stored flag could.
+     *
+     * @return Attribute<bool, never>
+     */
+    protected function isMaxLatencyEnabled(): Attribute
+    {
+        return Attribute::make(get: fn (): bool => filled($this->max_latency_ms));
     }
 }

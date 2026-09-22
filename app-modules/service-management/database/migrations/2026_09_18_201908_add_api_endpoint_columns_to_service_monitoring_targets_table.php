@@ -47,7 +47,6 @@ return new class () extends Migration {
             Schema::table('service_monitoring_targets', function (Blueprint $table) {
                 $table->boolean('follow_redirection')->initial(true);
                 $table->jsonb('successful_status_codes')->nullable();
-                $table->boolean('is_max_latency_enabled')->nullable();
                 $table->unsignedInteger('max_latency_ms')->nullable();
                 $table->string('http_method')->nullable();
                 $table->text('request_body')->nullable();
@@ -68,7 +67,6 @@ return new class () extends Migration {
                 $table->dropColumn([
                     'follow_redirection',
                     'successful_status_codes',
-                    'is_max_latency_enabled',
                     'max_latency_ms',
                     'http_method',
                     'request_body',
