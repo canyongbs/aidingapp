@@ -51,7 +51,7 @@ return new class () extends Migration {
                 $table->unsignedInteger('max_latency_ms')->nullable();
                 $table->string('http_method')->nullable();
                 $table->text('request_body')->nullable();
-                $table->boolean('is_request_body_json')->nullable();
+                $table->boolean('is_request_body_json')->default(false);
                 $table->jsonb('request_headers')->nullable();
             });
 
