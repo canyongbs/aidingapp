@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
+use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
@@ -893,6 +894,34 @@ it('does not follow redirects for a keyword match check when follow redirection 
 
     assertDatabaseHas(HistoricalServiceMonitoring::class, [
         'response' => 302,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
+it('does not crash an availability check when follow_redirection does not exist yet on this tenant', function () {
+    // follow_redirection only exists once this tenant's migration has run (the same one that
+    // activates the flag). Availability monitors can predate this feature entirely, so a tenant
+    // that hasn't picked up the migration yet must not have this column read at all -- simulate
+    // that by selecting without it, matching what a genuinely un-migrated tenant's table produces
+    // (confirmed live: Eloquent returns null for an attribute the underlying table doesn't have).
+    Http::fake(fn () => Http::response('Test', 200));
+
+    ServiceMonitoringApiEndpointFeature::deactivate();
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()->create(['monitor_type' => MonitorType::Availability]);
+
+    $preMigrationRecord = ServiceMonitoringTarget::query()
+        ->select(['id', 'name', 'domain', 'frequency', 'monitor_type', 'auth_type', 'is_notified_via_database', 'is_notified_via_email', 'is_confidential'])
+        ->whereKey($serviceMonitorTarget->getKey())
+        ->first();
+
+    expect($preMigrationRecord->follow_redirection)->toBeNull();
+
+    (new ServiceMonitoringCheckJob($preMigrationRecord))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 200,
+        'succeeded' => true,
         'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
     ]);
 });

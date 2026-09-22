@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
+use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -181,10 +182,30 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         return 15;
     }
 
+    /**
+     * follow_redirection only exists once this tenant's migration has run (the same one that
+     * activates ServiceMonitoringApiEndpointFeature) -- but Availability and Keyword Match checks
+     * can run against records far older than this feature, on a tenant that hasn't picked up that
+     * migration yet. Reading the column before then would silently return null (Eloquent returns
+     * null for an attribute the underlying table doesn't have), crashing buildRequest()'s
+     * non-nullable parameter. Fall back to the same unconditional "always follow redirects"
+     * behavior these two checks always had until the flag confirms the column is there.
+     *
+     * API Endpoint checks don't need this guard: a record can only ever have
+     * monitor_type === ApiEndpoint if that tenant's migration has already run, since that's the
+     * only way the value could get set in the first place.
+     */
+    protected function followRedirectsForPreExistingMonitorTypes(): bool
+    {
+        return ServiceMonitoringApiEndpointFeature::active()
+            ? $this->serviceMonitoringTarget->follow_redirection
+            : true;
+    }
+
     protected function handleAvailability(): void
     {
         try {
-            $response = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection)
+            $response = $this->buildRequest($this->followRedirectsForPreExistingMonitorTypes())
                 ->head($this->serviceMonitoringTarget->domain);
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
@@ -205,7 +226,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
 
         try {
-            $response = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection)
+            $response = $this->buildRequest($this->followRedirectsForPreExistingMonitorTypes())
                 ->get($this->serviceMonitoringTarget->domain);
 
             if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
