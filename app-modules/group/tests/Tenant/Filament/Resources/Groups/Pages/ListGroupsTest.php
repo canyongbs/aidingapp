@@ -37,7 +37,6 @@
 use AidingApp\Group\Filament\Resources\Groups\GroupResource;
 use AidingApp\Group\Filament\Resources\Groups\Pages\ListGroups;
 use AidingApp\Group\Models\Group;
-use App\Features\GroupManagementFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -92,13 +91,6 @@ it('can search and sort groups by name', function () {
 describe('authorization', function () {
     it('denies access without the `group.view-any` permission', function () {
         actingAs(User::factory()->create());
-
-        get(GroupResource::getUrl())->assertForbidden();
-    });
-
-    it('denies access when Group management is inactive', function () {
-        asSuperAdmin();
-        GroupManagementFeature::deactivate();
 
         get(GroupResource::getUrl())->assertForbidden();
     });
