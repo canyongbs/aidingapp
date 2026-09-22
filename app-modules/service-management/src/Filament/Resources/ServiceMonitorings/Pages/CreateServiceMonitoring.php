@@ -106,6 +106,7 @@ class CreateServiceMonitoring extends CreateRecord
                             ->required()
                             ->columnSpan(1),
                         MonitorTypeRadio::make(),
+                        FollowRedirectionToggle::make(),
                         TextEntry::make('helperText')
                             ->hiddenLabel()
                             ->state('Spaces may be used within a string. Use quotes when a string contains a comma or double quotes.')
@@ -127,7 +128,6 @@ class CreateServiceMonitoring extends CreateRecord
                             ])
                             ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
-                        FollowRedirectionToggle::make(),
                         SuccessfulStatusCodesSelect::make(),
                         MaxLatencyToggle::make(),
                         MaxLatencyInput::make(),

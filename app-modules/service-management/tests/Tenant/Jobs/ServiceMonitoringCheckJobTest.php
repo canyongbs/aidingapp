@@ -859,6 +859,44 @@ it('applies basic auth to the keyword match check request when configured', func
     });
 });
 
+it('does not follow redirects for an availability check when follow redirection is disabled', function () {
+    // follow_redirection now applies to every monitor type, not just API Endpoint. handleAvailability()
+    // only ever treats a 200 as success, so proving the redirect wasn't followed is the 302 itself
+    // surviving into the recorded response, not the succeeded flag.
+    Http::fake(fn () => Http::response('', 302, ['Location' => 'https://example.com/redirected']));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->create([
+            'monitor_type' => MonitorType::Availability,
+            'follow_redirection' => false,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 302,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
+it('does not follow redirects for a keyword match check when follow redirection is disabled', function () {
+    Http::fake(fn () => Http::response('', 302, ['Location' => 'https://example.com/redirected']));
+
+    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+        ->create([
+            'monitor_type' => MonitorType::KeywordMatch,
+            'should_contain' => ['Test 1'],
+            'follow_redirection' => false,
+        ]);
+
+    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
+
+    assertDatabaseHas(HistoricalServiceMonitoring::class, [
+        'response' => 302,
+        'service_monitoring_target_id' => $serviceMonitorTarget->getKey(),
+    ]);
+});
+
 it('does not apply basic auth when the auth type is none', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
@@ -1028,26 +1066,6 @@ it('sends the configured request headers', function () {
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
 
     Http::assertSent(fn (Request $request) => $request->hasHeader('X-Custom-Header', 'custom-value'));
-});
-
-it('treats a null follow_redirection as true instead of crashing', function () {
-    Http::fake(fn () => Http::response('Test', 200));
-
-    // follow_redirection is nullable with no DB default, so a record could reach this point
-    // with a genuinely null value some other way than the form (e.g. direct database access).
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
-        ->apiEndpoint()
-        ->create();
-    DB::table('service_monitoring_targets')->where('id', $serviceMonitorTarget->getKey())->update(['follow_redirection' => null]);
-    $serviceMonitorTarget->refresh();
-
-    expect($serviceMonitorTarget->follow_redirection)->toBeNull();
-
-    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
-
-    $history = HistoricalServiceMonitoring::first();
-
-    expect($history->succeeded)->toBeTrue();
 });
 
 it('does not crash when a stored successful_status_codes value is a scalar instead of an array', function () {

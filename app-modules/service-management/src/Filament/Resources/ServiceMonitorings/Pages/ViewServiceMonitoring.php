@@ -90,6 +90,10 @@ class ViewServiceMonitoring extends ViewRecord
                                 TextEntry::make('monitor_type')
                                     ->label('Monitor Type')
                                     ->columnSpanFull(),
+                                IconEntry::make('follow_redirection')
+                                    ->label('Follow Redirection')
+                                    ->boolean()
+                                    ->visible(ServiceMonitoringApiEndpointFeature::active()),
                                 TextEntry::make('should_contain')
                                     ->label('Should Contain')
                                     ->listWithLineBreaks()
@@ -98,10 +102,6 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->label('Should Not Contain')
                                     ->listWithLineBreaks()
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
-                                IconEntry::make('follow_redirection')
-                                    ->label('Follow Redirection')
-                                    ->boolean()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
                                 TextEntry::make('successful_status_codes')
                                     ->label('Successful HTTP Status Codes')
                                     ->state(fn (ServiceMonitoringTarget $record): string => collect($record->successful_status_codes ?? [])

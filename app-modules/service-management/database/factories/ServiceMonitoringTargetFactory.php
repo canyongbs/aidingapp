@@ -65,6 +65,7 @@ class ServiceMonitoringTargetFactory extends Factory
             'is_confidential' => false,
             'monitor_type' => MonitorType::Availability,
             'auth_type' => AuthType::None,
+            'follow_redirection' => $this->faker->boolean(),
         ];
     }
 

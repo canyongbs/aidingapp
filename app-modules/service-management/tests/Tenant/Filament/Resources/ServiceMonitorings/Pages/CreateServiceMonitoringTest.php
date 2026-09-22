@@ -416,7 +416,7 @@ test('CreateServiceMonitor hides API endpoint fields until the API endpoint moni
     asSuperAdmin();
 
     livewire(CreateServiceMonitoring::class)
-        ->assertSchemaComponentHidden('follow_redirection')
+        ->assertSchemaComponentVisible('follow_redirection')
         ->assertSchemaComponentHidden('successful_status_codes')
         ->assertSchemaComponentHidden('is_max_latency_enabled')
         ->assertSchemaComponentHidden('http_method')
@@ -427,6 +427,18 @@ test('CreateServiceMonitor hides API endpoint fields until the API endpoint moni
         ->assertSchemaComponentVisible('is_max_latency_enabled')
         ->assertSchemaComponentVisible('http_method')
         ->assertSchemaComponentVisible('request_headers');
+});
+
+test('CreateServiceMonitor shows follow_redirection for every monitor type', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm(['monitor_type' => MonitorType::Availability])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->fillForm(['monitor_type' => MonitorType::KeywordMatch])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertSchemaComponentVisible('follow_redirection');
 });
 
 test('CreateServiceMonitor hides the max latency input until the maximum latency toggle is enabled', function () {

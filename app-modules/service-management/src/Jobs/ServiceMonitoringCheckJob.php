@@ -184,7 +184,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
     protected function handleAvailability(): void
     {
         try {
-            $response = $this->buildRequest()
+            $response = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection)
                 ->head($this->serviceMonitoringTarget->domain);
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
@@ -205,7 +205,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
 
         try {
-            $response = $this->buildRequest()
+            $response = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection)
                 ->get($this->serviceMonitoringTarget->domain);
 
             if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
@@ -265,12 +265,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
     protected function handleApiEndpoint(): void
     {
         try {
-            // The column is nullable with no DB default (matching the other API-Endpoint-only
-            // columns), so a record whose value was never set some other way than the form
-            // (e.g. direct database access) could reach here as null. buildRequest() requires a
-            // real bool, so treat null as the documented true default rather than letting a
-            // TypeError crash the job.
-            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection ?? true);
+            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection);
 
             $headers = collect($this->serviceMonitoringTarget->request_headers ?? [])
                 ->filter(fn (array $header): bool => filled($header['name'] ?? null))

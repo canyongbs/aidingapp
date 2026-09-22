@@ -281,7 +281,7 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
     asSuperAdmin()
         ->get(ServiceMonitoringResource::getUrl('view', ['record' => $availabilityMonitor]))
         ->assertSuccessful()
-        ->assertDontSee('Follow Redirection')
+        ->assertSee('Follow Redirection')
         ->assertDontSee('Successful HTTP Status Codes')
         ->assertDontSee('Maximum Latency Enforced')
         ->assertDontSee('Request Headers');

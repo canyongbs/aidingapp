@@ -36,10 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-use AidingApp\ServiceManagement\Enums\MonitorType;
 use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Toggle;
-use Filament\Schemas\Components\Utilities\Get;
 
 class FollowRedirectionToggle
 {
@@ -49,7 +47,7 @@ class FollowRedirectionToggle
             ->label('Follow Redirection')
             ->helperText('If disabled, the check will use the redirection HTTP status code (3xx) returned by the server rather than following it.')
             ->default(true)
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->visible(ServiceMonitoringApiEndpointFeature::active())
             ->columnSpanFull();
     }
 }
