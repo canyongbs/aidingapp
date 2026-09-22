@@ -44,7 +44,6 @@ use AidingApp\Group\Filament\Resources\Groups\RelationManagers\UsersRelationMana
 use AidingApp\Group\Filament\Resources\Groups\Schemas\GroupForm;
 use AidingApp\Group\Models\Group;
 use App\Enums\NavigationGroup;
-use App\Features\GroupManagementFeature;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use UnitEnum;
@@ -60,11 +59,6 @@ class GroupResource extends Resource
     public static function form(Schema $schema): Schema
     {
         return GroupForm::configure($schema);
-    }
-
-    public static function canAccess(): bool
-    {
-        return GroupManagementFeature::active() && parent::canAccess();
     }
 
     public static function getRelations(): array
