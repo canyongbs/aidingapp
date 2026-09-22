@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditorGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -58,12 +57,12 @@ class AuditsServiceRequestType
                 ->orWhereHas('auditableServiceRequestTypes', function (Builder $query): void {
                     $query->where('service_request_type_id', $this->serviceRequestTypeId);
                 })
-                ->when(ServiceRequestTypeGroupAssignmentsFeature::active(), fn (Builder $query) => $query->orWhereHas('groups', fn (Builder $query) => $query->whereIn(
+                ->orWhereHas('groups', fn (Builder $query) => $query->whereIn(
                     'groups.id',
                     ServiceRequestTypeAuditorGroup::query()
                         ->select('group_id')
                         ->where('service_request_type_id', $this->serviceRequestTypeId),
-                )));
+                ));
         });
     }
 }

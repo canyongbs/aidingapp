@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Http\Controllers;
 use AidingApp\ServiceManagement\Actions\StoreServiceRequestSecret;
 use AidingApp\ServiceManagement\Http\Requests\StoreServiceRequestSecretRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PasswordFormFieldFeature;
 use App\Models\Authenticatable;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Gate;
@@ -52,8 +51,6 @@ class StoreServiceRequestSecretController
         #[SensitiveParameter] StoreServiceRequestSecretRequest $request,
         StoreServiceRequestSecret $storeServiceRequestSecret,
     ): JsonResponse {
-        abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
-
         $author = $request->user();
 
         abort_unless($author instanceof Authenticatable, Response::HTTP_UNAUTHORIZED);

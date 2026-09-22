@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -48,9 +47,7 @@ class AdvisoryController
         $perPage = $request->get('per_page', 15);
         $advisories = Advisory::with([
             'severity',
-            'advisoryUpdates' => fn ($query) => $query->orderByDesc(
-                AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at'
-            ),
+            'advisoryUpdates' => fn ($query) => $query->orderByDesc('date'),
             'status',
         ])->orderBy('created_at', 'desc')->paginate($perPage);
 
