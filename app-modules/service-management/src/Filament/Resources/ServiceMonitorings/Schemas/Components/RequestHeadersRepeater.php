@@ -75,6 +75,7 @@ class RequestHeadersRepeater
             ->addActionLabel('Add Header')
             ->defaultItems(0)
             ->rules([new UniqueRequestHeaderNames()])
+            ->helperText('These are stored in plain text and shown as entered. Do not put sensitive values (API keys, tokens, passwords) in them.')
             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
             ->columnSpanFull();
     }
