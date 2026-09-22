@@ -68,7 +68,6 @@ class ProjectMilestone extends Model implements Auditable
     protected $fillable = [
         'title',
         'description',
-        'status_id',
         'target_date',
     ];
 
@@ -82,14 +81,6 @@ class ProjectMilestone extends Model implements Auditable
     public function createdBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by_id');
-    }
-
-    /**
-     * @return BelongsTo<ProjectMilestoneStatus, $this>
-     */
-    public function status(): BelongsTo
-    {
-        return $this->belongsTo(ProjectMilestoneStatus::class, 'status_id');
     }
 
     /**
