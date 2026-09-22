@@ -194,6 +194,10 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
      * API Endpoint checks don't need this guard: a record can only ever have
      * monitor_type === ApiEndpoint if that tenant's migration has already run, since that's the
      * only way the value could get set in the first place.
+     *
+     * TODO: Cleanup Task (service-monitoring-api-endpoint-feature): once the flag is removed
+     * (meaning every tenant has run the migration), replace this whole method with a direct
+     * $this->serviceMonitoringTarget->follow_redirection read in both call sites below.
      */
     protected function followRedirectsForPreExistingMonitorTypes(): bool
     {
