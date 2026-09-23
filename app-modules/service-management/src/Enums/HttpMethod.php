@@ -34,25 +34,44 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Enums;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use Filament\Support\Contracts\HasLabel;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+enum HttpMethod: string implements HasLabel
+{
+    case Head = 'HEAD';
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
+    case Get = 'GET';
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+    case Post = 'POST';
 
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+    case Put = 'PUT';
+
+    case Patch = 'PATCH';
+
+    case Delete = 'DELETE';
+
+    case Options = 'OPTIONS';
+
+    case Query = 'QUERY';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Head => 'HEAD',
+            self::Get => 'GET',
+            self::Post => 'POST',
+            self::Put => 'PUT',
+            self::Patch => 'PATCH',
+            self::Delete => 'DELETE',
+            self::Options => 'OPTIONS',
+            self::Query => 'QUERY',
+        };
+    }
+
+    public function supportsRequestBody(): bool
+    {
+        return ! in_array($this, [self::Head, self::Get], true);
+    }
+}

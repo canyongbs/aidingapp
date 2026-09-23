@@ -34,25 +34,42 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Rules;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\SuccessfulStatusCodesSelect;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+class ValidHttpStatusCodes implements ValidationRule
+{
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        // Normalize a scalar into a single-element array rather than relying on (array) casting,
+        // matching the pattern used elsewhere for array-typed rules (see RolesExist).
+        $codes = is_array($value) ? $value : [$value];
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
+        $invalid = collect($codes)->reject(fn (mixed $code): bool => $this->isValidCode($code));
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+        if ($invalid->isNotEmpty()) {
+            $fail('Each status code must be a valid HTTP status code.');
+        }
+    }
 
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+    /**
+     * Requires the value to already be an int, or a string whose canonical int form doesn't
+     * lose information (e.g. rejects '200junk' and '200.9', which (int) casting would silently
+     * accept as 200).
+     */
+    protected function isValidCode(mixed $code): bool
+    {
+        if (is_int($code)) {
+            return array_key_exists($code, SuccessfulStatusCodesSelect::options());
+        }
+
+        if (is_string($code) && ctype_digit($code)) {
+            return array_key_exists((int) $code, SuccessfulStatusCodesSelect::options());
+        }
+
+        return false;
+    }
+}

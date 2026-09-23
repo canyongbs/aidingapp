@@ -34,25 +34,31 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
-
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+class MaxLatencyInput
+{
+    public static function make(): TextInput
+    {
+        return TextInput::make('max_latency_ms')
+            ->label('Maximum Latency')
+            ->integer()
+            ->suffix('ms')
+            ->minValue(1)
+            ->step(1)
+            ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
+            ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            // Toggling max latency off hides this field, and a hidden field doesn't dehydrate by
+            // default -- but is_max_latency_enabled is computed purely from whether this column
+            // has a value, so the clear-to-null on toggle-off must actually reach the save, or
+            // the stored value (and therefore the computed "enabled" state) never changes.
+            ->dehydratedWhenHidden()
+            ->helperText('The check fails if the response takes longer than this to arrive.')
+            ->columnSpanFull();
+    }
+}

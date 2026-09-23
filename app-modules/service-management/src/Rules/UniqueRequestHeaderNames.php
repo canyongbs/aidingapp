@@ -34,25 +34,27 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Rules;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+/**
+ * HTTP header names are case-insensitive, so "Authorization" and "authorization" are the
+ * same header. Applied to the whole request_headers repeater's array value (not a single
+ * row), since duplicate detection only makes sense across all configured headers at once.
+ */
+class UniqueRequestHeaderNames implements ValidationRule
+{
+    public function validate(string $attribute, mixed $value, Closure $fail): void
+    {
+        $names = collect((array) $value)
+            ->map(fn (mixed $header): mixed => is_array($header) ? ($header['name'] ?? null) : null)
+            ->filter(fn (mixed $name): bool => filled($name))
+            ->map(fn (string $name): string => mb_strtolower($name));
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+        if ($names->count() !== $names->unique()->count()) {
+            $fail('Header names must be unique (case-insensitive).');
+        }
+    }
+}

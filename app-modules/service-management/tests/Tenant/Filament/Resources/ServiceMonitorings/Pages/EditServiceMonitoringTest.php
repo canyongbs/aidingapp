@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
@@ -44,6 +45,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -280,6 +282,33 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['auth_password'],
         ],
+        'successful status codes required for api endpoint monitors' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => null,
+            ]),
+            ['successful_status_codes' => 'required'],
+        ],
+        'successful status codes must be valid HTTP status codes' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'successful_status_codes' => [999],
+            ]),
+            ['successful_status_codes'],
+        ],
+        'max latency required when maximum latency is enabled' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'is_max_latency_enabled' => true,
+                'max_latency_ms' => null,
+            ]),
+            ['max_latency_ms' => 'required'],
+        ],
+        'request body must be valid JSON when sending as JSON' => [
+            ServiceMonitoringTargetRequestFactory::new()->apiEndpoint()->state([
+                'http_method' => HttpMethod::Post,
+                'is_request_body_json' => true,
+                'request_body' => 'not valid json',
+            ]),
+            ['request_body' => 'json'],
+        ],
     ]
 );
 
@@ -317,11 +346,11 @@ test('EditServiceMonitoring hides auth username and password fields until basic 
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password')
         ->fillForm(['auth_type' => AuthType::Basic])
-        ->assertFormFieldVisible('auth_username')
-        ->assertFormFieldVisible('auth_password');
+        ->assertSchemaComponentVisible('auth_username')
+        ->assertSchemaComponentVisible('auth_password');
 });
 
 test('EditServiceMonitoring hides auth fields when the feature is inactive', function () {
@@ -334,9 +363,9 @@ test('EditServiceMonitoring hides auth fields when the feature is inactive', fun
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormFieldHidden('auth_type')
-        ->assertFormFieldHidden('auth_username')
-        ->assertFormFieldHidden('auth_password');
+        ->assertSchemaComponentHidden('auth_type')
+        ->assertSchemaComponentHidden('auth_username')
+        ->assertSchemaComponentHidden('auth_password');
 });
 
 test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function () {
@@ -351,7 +380,7 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
     livewire(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
-        ->assertFormSet([
+        ->assertSchemaStateSet([
             'auth_username' => 'existing-username',
             'auth_password' => 'existing-password',
         ])
@@ -364,6 +393,186 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
     expect($serviceMonitoringTarget->name)->toBe('Updated name')
         ->and($serviceMonitoringTarget->auth_username)->toBe('existing-username')
         ->and($serviceMonitoringTarget->auth_password)->toBe('existing-password');
+});
+
+test('EditServiceMonitoring computes the max latency toggle from whether max_latency_ms is set', function () {
+    // is_max_latency_enabled isn't a real column -- it's derived from max_latency_ms, so this
+    // proves the toggle correctly reflects that on hydration in both directions.
+    asSuperAdmin();
+
+    $enabledTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => 2000]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $enabledTarget->getRouteKey(),
+    ])->assertSchemaStateSet(['is_max_latency_enabled' => true]);
+
+    $disabledTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => null]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $disabledTarget->getRouteKey(),
+    ])->assertSchemaStateSet(['is_max_latency_enabled' => false]);
+});
+
+test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is turned off', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create(['max_latency_ms' => 2000]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaStateSet(['is_max_latency_enabled' => true])
+        ->set('data.is_max_latency_enabled', false)
+        ->assertSchemaStateSet(['max_latency_ms' => null])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->max_latency_ms)->toBeNull();
+});
+
+test('EditServiceMonitoring hides API endpoint fields until the API endpoint monitor type is selected', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentHidden('successful_status_codes')
+        ->assertSchemaComponentHidden('is_max_latency_enabled')
+        ->assertSchemaComponentHidden('http_method')
+        ->assertSchemaComponentHidden('request_headers')
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentVisible('successful_status_codes')
+        ->assertSchemaComponentVisible('is_max_latency_enabled')
+        ->assertSchemaComponentVisible('http_method')
+        ->assertSchemaComponentVisible('request_headers');
+});
+
+test('EditServiceMonitoring shows follow_redirection for every monitor type', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['monitor_type' => MonitorType::Availability])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->fillForm(['monitor_type' => MonitorType::KeywordMatch])
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertSchemaComponentVisible('follow_redirection');
+});
+
+test('EditServiceMonitoring hides the max latency input until the maximum latency toggle is enabled', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaComponentHidden('max_latency_ms')
+        ->fillForm(['is_max_latency_enabled' => true])
+        ->assertSchemaComponentVisible('max_latency_ms');
+});
+
+test('EditServiceMonitoring hides the request body fields when the HTTP method does not support a body', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['http_method' => HttpMethod::Get]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertSchemaComponentHidden('request_body')
+        ->assertSchemaComponentHidden('is_request_body_json')
+        ->fillForm(['http_method' => HttpMethod::Post])
+        ->assertSchemaComponentVisible('request_body')
+        ->assertSchemaComponentVisible('is_request_body_json');
+});
+
+test('EditServiceMonitoring can update a service monitor with an API endpoint monitor', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()
+        ->apiEndpoint()
+        ->state([
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'is_request_body_json' => true,
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ])
+        ->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget->refresh();
+
+    expect($serviceMonitoringTarget->monitor_type)->toBe(MonitorType::ApiEndpoint)
+        ->and($serviceMonitoringTarget->http_method)->toBe(HttpMethod::Post)
+        ->and($serviceMonitoringTarget->request_body)->toBe('{"key":"value"}')
+        ->and($serviceMonitoringTarget->is_request_body_json)->toBeTrue()
+        ->and($serviceMonitoringTarget->request_headers)->toBe([
+            ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+        ]);
+});
+
+test('EditServiceMonitoring hides the API endpoint monitor type option when the feature is inactive', function () {
+    ServiceMonitoringApiEndpointFeature::deactivate();
+
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['monitor_type' => MonitorType::ApiEndpoint])->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasFormErrors(['monitor_type']);
+});
+
+test('EditServiceMonitoring can still save an existing API endpoint monitor while the feature is inactive', function () {
+    // Filtering the API Endpoint radio option by the feature flag must not also invalidate an
+    // existing record that's already using it — otherwise deactivating the flag makes every
+    // API Endpoint monitor uneditable, since monitor_type itself would fail validation.
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create();
+
+    ServiceMonitoringApiEndpointFeature::deactivate();
+
+    asSuperAdmin();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'renamed while the feature is inactive'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->name)->toBe('renamed while the feature is inactive');
 });
 
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {

@@ -34,46 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Radio;
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
+class MonitorTypeRadio
 {
-    public function definition(): array
+    public static function make(): Radio
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
-
-    public function basicAuth(): static
-    {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
-    }
-
-    public function apiEndpoint(): static
-    {
-        return $this->state([
-            'monitor_type' => MonitorType::ApiEndpoint,
-            'follow_redirection' => true,
-            'successful_status_codes' => [200],
-            'is_max_latency_enabled' => false,
-            'http_method' => HttpMethod::Head,
-            'request_headers' => [],
-        ]);
+        return Radio::make('monitor_type')
+            ->label('Monitor Type')
+            // TODO: Cleanup Task (service-monitoring-api-endpoint-feature): once the flag
+            // is removed, pass MonitorType::class directly to ->options() again instead of
+            // filtering the case list.
+            ->options(fn (?ServiceMonitoringTarget $record): array => collect(MonitorType::cases())
+                // Keep API Endpoint selectable for a record that's already using it, even if the
+                // flag is currently off — otherwise an existing API Endpoint monitor fails
+                // validation ("the selected monitor type is invalid") the moment you try to save
+                // any other change to it while the flag is deactivated.
+                ->filter(fn (MonitorType $monitorType): bool => $monitorType !== MonitorType::ApiEndpoint
+                    || ServiceMonitoringApiEndpointFeature::active()
+                    || $record?->monitor_type === MonitorType::ApiEndpoint)
+                ->mapWithKeys(fn (MonitorType $monitorType): array => [$monitorType->value => $monitorType->getLabel()])
+                ->all())
+            ->enum(MonitorType::class)
+            ->default(MonitorType::Availability)
+            ->live()
+            ->inline()
+            ->columnSpanFull();
     }
 }

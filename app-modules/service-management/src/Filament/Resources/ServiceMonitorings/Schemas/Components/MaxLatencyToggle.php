@@ -34,25 +34,30 @@
 </COPYRIGHT>
 */
 
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
+
+use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
-
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
-
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+class MaxLatencyToggle
+{
+    public static function make(): Toggle
+    {
+        return Toggle::make('is_max_latency_enabled')
+            ->label('Maximum Latency')
+            ->live()
+            // There's no is_max_latency_enabled column -- it's computed from whether
+            // max_latency_ms has a value (see the model accessor), so this toggle never
+            // persists its own state. It only exists to drive max_latency_ms's visibility
+            // and to clear that field when turned off.
+            ->dehydrated(false)
+            ->afterStateHydrated(fn (Set $set, ?ServiceMonitoringTarget $record) => $set('is_max_latency_enabled', filled($record?->max_latency_ms)))
+            ->afterStateUpdated(fn (Set $set, bool $state) => $state ?: $set('max_latency_ms', null))
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
+    }
+}

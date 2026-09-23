@@ -44,12 +44,20 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthTypeSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthUsernameInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\FollowRedirectionToggle;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\HttpMethodToggleButtons;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\MaxLatencyInput;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\MaxLatencyToggle;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\MonitorTypeRadio;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\RequestBodyTextarea;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\RequestHeadersRepeater;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\SendAsJsonToggle;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\SuccessfulStatusCodesSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -97,14 +105,8 @@ class CreateServiceMonitoring extends CreateRecord
                             ->enum(ServiceMonitoringFrequency::class)
                             ->required()
                             ->columnSpan(1),
-                        Radio::make('monitor_type')
-                            ->label('Monitor Type')
-                            ->options(MonitorType::class)
-                            ->enum(MonitorType::class)
-                            ->default(MonitorType::Availability)
-                            ->live()
-                            ->inline()
-                            ->columnSpanFull(),
+                        MonitorTypeRadio::make(),
+                        FollowRedirectionToggle::make(),
                         TextEntry::make('helperText')
                             ->hiddenLabel()
                             ->state('Spaces may be used within a string. Use quotes when a string contains a comma or double quotes.')
@@ -126,9 +128,16 @@ class CreateServiceMonitoring extends CreateRecord
                             ])
                             ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
+                        SuccessfulStatusCodesSelect::make(),
+                        MaxLatencyToggle::make(),
+                        MaxLatencyInput::make(),
                         AuthTypeSelect::make(),
                         AuthUsernameInput::make(),
                         AuthPasswordInput::make(),
+                        HttpMethodToggleButtons::make(),
+                        RequestBodyTextarea::make(),
+                        SendAsJsonToggle::make(),
+                        RequestHeadersRepeater::make(),
                     ])
                     ->columns(2),
                 Section::make('Notification Settings')
@@ -167,6 +176,10 @@ class CreateServiceMonitoring extends CreateRecord
                 $values = array_map('trim', str_getcsv($data[$field]));
                 $data[$field] = ValidServiceMonitoringKeywordValues::parseValues($data[$field]);
             }
+        }
+
+        if (is_array($data['successful_status_codes'] ?? null) && filled($data['successful_status_codes'])) {
+            $data['successful_status_codes'] = array_map('intval', $data['successful_status_codes']);
         }
 
         $this->reportConfigurationsData = $data['report_configurations'] ?? [];

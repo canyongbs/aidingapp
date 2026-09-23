@@ -34,25 +34,38 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use AidingApp\ServiceManagement\Enums\HttpMethod;
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Utilities\Get;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+class RequestBodyTextarea
+{
+    public static function make(): Textarea
+    {
+        return Textarea::make('request_body')
+            ->label('Request Body')
+            ->rows(4)
+            ->rules(fn (Get $get): array => $get('is_request_body_json') ? ['json'] : [])
+            ->visible(fn (Get $get): bool => self::monitorSupportsRequestBody($get))
+            ->columnSpanFull();
+    }
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
+    public static function monitorSupportsRequestBody(Get $get): bool
+    {
+        if ($get('monitor_type') !== MonitorType::ApiEndpoint || ! ServiceMonitoringApiEndpointFeature::active()) {
+            return false;
+        }
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+        $httpMethod = $get('http_method');
 
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+        if (! $httpMethod instanceof HttpMethod) {
+            $httpMethod = HttpMethod::tryFrom((string) $httpMethod);
+        }
+
+        return $httpMethod?->supportsRequestBody() ?? true;
+    }
+}

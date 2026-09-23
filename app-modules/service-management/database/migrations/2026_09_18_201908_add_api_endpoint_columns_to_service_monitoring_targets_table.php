@@ -34,46 +34,46 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\HttpMethod;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
-
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
-{
-    public function definition(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
+        DB::transaction(function () {
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->boolean('follow_redirection')->initial(true);
+                $table->jsonb('successful_status_codes')->nullable();
+                $table->unsignedInteger('max_latency_ms')->nullable();
+                $table->string('http_method')->nullable();
+                $table->text('request_body')->nullable();
+                $table->boolean('is_request_body_json')->default(false);
+                $table->jsonb('request_headers')->nullable();
+            });
+
+            ServiceMonitoringApiEndpointFeature::activate();
+        });
     }
 
-    public function basicAuth(): static
+    public function down(): void
     {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
-    }
+        DB::transaction(function () {
+            ServiceMonitoringApiEndpointFeature::deactivate();
 
-    public function apiEndpoint(): static
-    {
-        return $this->state([
-            'monitor_type' => MonitorType::ApiEndpoint,
-            'follow_redirection' => true,
-            'successful_status_codes' => [200],
-            'is_max_latency_enabled' => false,
-            'http_method' => HttpMethod::Head,
-            'request_headers' => [],
-        ]);
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->dropColumn([
+                    'follow_redirection',
+                    'successful_status_codes',
+                    'max_latency_ms',
+                    'http_method',
+                    'request_body',
+                    'is_request_body_json',
+                    'request_headers',
+                ]);
+            });
+        });
     }
-}
+};
