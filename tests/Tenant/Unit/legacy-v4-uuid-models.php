@@ -98,7 +98,6 @@ use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectManagerDepartment;
 use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
@@ -215,7 +214,6 @@ return [
     ProjectManagerDepartment::class,
     ProjectManagerUser::class,
     ProjectMilestone::class,
-    ProjectMilestoneStatus::class,
     ChangeRequest::class,
     ChangeRequestResponse::class,
     ChangeRequestStatus::class,
