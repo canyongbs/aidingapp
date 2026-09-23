@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -61,7 +62,10 @@ class ChangeServiceRequestStatusBulkAction
                 Select::make('statusId')
                     ->label('New status')
                     ->options(
-                        ServiceRequestStatus::query()->orderBy('sort')->pluck('name', 'id')
+                        ServiceRequestStatus::query()
+                            ->tap(new SelectableServiceRequestStatuses())
+                            ->orderBy('sort')
+                            ->pluck('name', 'id')
                     )
                     ->exists(ServiceRequestStatus::class, 'id')
                     ->required(),

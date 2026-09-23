@@ -40,13 +40,16 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
+use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
+use Filament\Actions\Testing\TestAction;
 use Illuminate\Validation\Rules\Enum;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
@@ -285,4 +288,96 @@ test('EditServiceRequestStatus allows saving a status without changing its name'
         ->fillForm(['name' => 'Draft'])
         ->call('save')
         ->assertHasNoFormErrors();
+});
+
+describe('archiving', function () {
+    it('can archive a service request status', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
+
+        expect($serviceRequestStatus->isArchived())->toBeFalse();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->callAction(TestAction::make('archive'))
+            ->assertNotified();
+
+        expect($serviceRequestStatus->refresh()->isArchived())->toBeTrue()
+            ->and($serviceRequestStatus->trashed())->toBeFalse();
+    });
+
+    it('can unarchive an archived service request status', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->archived()->create();
+
+        expect($serviceRequestStatus->isArchived())->toBeTrue();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->callAction(TestAction::make('unarchive'))
+            ->assertNotified();
+
+        expect($serviceRequestStatus->refresh()->isArchived())->toBeFalse();
+    });
+
+    it('cannot reach the edit page for a system protected service request status', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->systemProtected()->create();
+
+        get(ServiceRequestStatusResource::getUrl('edit', [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ]))
+            ->assertForbidden();
+    });
+
+    it('hides the archive action for an already archived service request status', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->archived()->create();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->assertActionHidden(TestAction::make('archive'));
+    });
+
+    it('hides the unarchive action for a service request status that is not archived', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->assertActionHidden(TestAction::make('unarchive'));
+    });
+
+    it('does not offer the delete action', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->assertActionDoesNotExist(TestAction::make('delete'));
+    });
+
+    it('hides the archive action when `ServiceRequestStatusArchivingFeature` is inactive', function () {
+        ServiceRequestStatusArchivingFeature::deactivate();
+
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
+
+        livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])
+            ->assertActionHidden(TestAction::make('archive'));
+    });
 });

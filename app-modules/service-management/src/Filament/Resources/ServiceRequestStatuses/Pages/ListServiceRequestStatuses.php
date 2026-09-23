@@ -117,6 +117,8 @@ class ListServiceRequestStatuses extends ListRecords
                             false: $this->onlyArchived(...),
                             blank: $this->withoutArchived(...),
                         )
+                        // Without this the default `withoutArchived()` would hide the very record
+                        // the unarchive action needs to resolve.
                         ->excludeWhenResolvingRecord(),
                 ] : []),
             ]);
