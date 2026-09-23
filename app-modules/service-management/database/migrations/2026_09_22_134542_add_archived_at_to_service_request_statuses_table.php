@@ -40,6 +40,13 @@ use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
+/*
+ * TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): this migration is permanent — do not
+ * delete it. Keep the `archived_at` schema changes and remove only the flag activation: the
+ * activate() and deactivate() calls and their import. Both DB::transaction() wrappers then have
+ * a single statement left, so unwrap them back to a plain Schema::table() call and drop the
+ * Illuminate\Support\Facades\DB import.
+ */
 return new class () extends Migration {
     public function up(): void
     {

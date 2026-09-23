@@ -180,6 +180,27 @@ class ServiceRequestStatusPolicy
             );
         }
 
+        if ($serviceRequestStatus->isArchived()) {
+            return DenyResponse::make(
+                'already_archived',
+                message: function (int $failureCount, int $totalCount): string {
+                    if ($failureCount === 1 && $totalCount === 1) {
+                        return 'This service request status is already archived.';
+                    }
+
+                    if ($failureCount === $totalCount) {
+                        return 'All of the selected service request statuses are already archived.';
+                    }
+
+                    if ($failureCount === 1) {
+                        return 'One of the selected service request statuses was already archived.';
+                    }
+
+                    return "{$failureCount} of the selected service request statuses were already archived.";
+                },
+            );
+        }
+
         return $authenticatable->canOrElse(
             abilities: 'settings.*.delete',
             denyResponse: 'You do not have permissions to archive this service request status.'

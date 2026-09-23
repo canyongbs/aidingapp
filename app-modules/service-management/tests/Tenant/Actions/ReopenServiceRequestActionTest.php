@@ -95,3 +95,51 @@ it('reports an error and leaves the status unchanged when no open status exists'
 
     Exceptions::assertReported(NoOpenServiceRequestStatusFoundException::class);
 });
+
+describe('archiving', function () {
+    it('does not reopen into an archived open status', function () {
+        $archivedOpenStatus = ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+            'sort' => -2,
+        ]);
+
+        $expectedOpenStatus = ServiceRequestStatus::factory()->open()->create(['sort' => -1]);
+
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()->for($closedStatus, 'status')->create();
+
+        app(ReopenServiceRequestAction::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($expectedOpenStatus->getKey())
+            ->and($serviceRequest->fresh()->status_id)->not->toBe($archivedOpenStatus->getKey());
+    });
+
+    it('reports an error and leaves the status unchanged when every open status is archived', function () {
+        Exceptions::fake();
+
+        // The seeded "New" status is system protected, so bypass row-protection triggers to clear all statuses.
+        $connection = (new ServiceRequestStatus())->getConnection();
+        $connection->statement('SET session_replication_role = replica');
+
+        try {
+            ServiceRequestStatus::query()->forceDelete();
+        } finally {
+            $connection->statement('SET session_replication_role = DEFAULT');
+        }
+
+        ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ]);
+
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()->for($closedStatus, 'status')->create();
+
+        app(ReopenServiceRequestAction::class)->execute($serviceRequest);
+
+        expect($serviceRequest->fresh()->status_id)->toBe($closedStatus->getKey());
+
+        Exceptions::assertReported(NoOpenServiceRequestStatusFoundException::class);
+    });
+});

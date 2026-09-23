@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -86,6 +87,7 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->label('Status')
                     ->allowHtml()
                     ->options(fn () => ServiceRequestStatus::query()
+                        ->tap(new SelectableServiceRequestStatuses())
                         ->orderBy('classification')
                         ->orderBy('name')
                         ->get(['id', 'name', 'classification', 'color'])

@@ -520,3 +520,33 @@ describe('feedback visibility', function () {
             ->assertSchemaComponentHidden('feedback.csat_answer', 'mountedActionSchema0');
     });
 });
+
+describe('archiving', function () {
+    test('the status select does not offer archived statuses', function () {
+        asSuperAdmin();
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+
+        $activeStatus = ServiceRequestStatus::factory()->create();
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $contact = Contact::factory()->create();
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->mountTableAction('create')
+            ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($activeStatus, $archivedStatus): bool {
+                $optionIds = collect($select->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($activeStatus->getKey(), $optionIds, true)
+                    && ! in_array($archivedStatus->getKey(), $optionIds, true);
+            })
+            ->assertSuccessful();
+    });
+});

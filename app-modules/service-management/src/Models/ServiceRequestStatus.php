@@ -103,6 +103,12 @@ class ServiceRequestStatus extends BaseModel implements Auditable
         return $this->hasMany(ServiceRequestStatusPeriod::class, 'service_request_status_id');
     }
 
+    /**
+     * Whether this status is still referenced by any row in the database.
+     *
+     * Global scopes are dropped because a soft deleted or draft record still holds the foreign
+     * key, so it still constrains deletion even though it is hidden from ordinary queries.
+     */
     public function isInUse(): bool
     {
         return $this->serviceRequests()->withoutGlobalScopes()->exists()

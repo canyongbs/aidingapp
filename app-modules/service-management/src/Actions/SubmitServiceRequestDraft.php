@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
@@ -79,6 +80,7 @@ class SubmitServiceRequestDraft
     protected function findStatus(SystemServiceRequestClassification $classification): ?ServiceRequestStatus
     {
         return ServiceRequestStatus::query()
+            ->tap(new SelectableServiceRequestStatuses())
             ->where('classification', $classification)
             ->first();
     }

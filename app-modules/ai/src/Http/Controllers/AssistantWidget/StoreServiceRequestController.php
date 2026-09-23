@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceR
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -482,6 +483,7 @@ class StoreServiceRequestController extends Controller
             TimelineableRecordCreated::dispatch($serviceRequest, $userConfirmationUpdate);
 
             $closedStatus = ServiceRequestStatus::query()
+                ->tap(new SelectableServiceRequestStatuses())
                 ->where('classification', SystemServiceRequestClassification::Closed)
                 ->first();
 
