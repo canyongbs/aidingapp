@@ -45,7 +45,7 @@ class SendAsJsonToggle
     {
         return Toggle::make('is_request_body_json')
             ->label('Send as JSON (application/json)')
-            ->helperText('Data will be sent as a standard POST (application/x-www-form-urlencoded) unless this is enabled.')
+            ->helperText('Data will be sent as application/x-www-form-urlencoded unless this is enabled.')
             ->visible(fn (Get $get): bool => RequestBodyTextarea::monitorSupportsRequestBody($get))
             ->columnSpanFull();
     }
