@@ -37,10 +37,14 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages;
 
 use AidingApp\ServiceManagement\Actions\SaveServiceMonitoringReportConfigurationsAction;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Components\AutomatedReportingSection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthPasswordInput;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthTypeSelect;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\AuthUsernameInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ConfidentialitySection;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
@@ -137,6 +141,9 @@ class EditServiceMonitoring extends EditRecord
                             ])
                             ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
+                        AuthTypeSelect::make(),
+                        AuthUsernameInput::make(),
+                        AuthPasswordInput::make(),
                     ])
                     ->columns(2),
                 Section::make('Notification Settings')
@@ -215,6 +222,15 @@ class EditServiceMonitoring extends EditRecord
     {
         $record = $this->getRecord();
         assert($record instanceof ServiceMonitoringTarget);
+
+        // auth_username and auth_password are $hidden on the model (to keep them out of
+        // serialization and audits), which also strips them from the array Filament uses
+        // to hydrate this form. Re-populate them here so an existing Basic Auth monitor
+        // doesn't load with blank, effectively-required credential fields.
+        if ($record->auth_type === AuthType::Basic) {
+            $data['auth_username'] = $record->auth_username;
+            $data['auth_password'] = $record->auth_password;
+        }
 
         foreach ($record->reportConfigurations()->with(['reportUsers', 'reportDepartments', 'reportContacts'])->get() as $configuration) {
             $data['report_configurations'][$configuration->frequency->value] = [

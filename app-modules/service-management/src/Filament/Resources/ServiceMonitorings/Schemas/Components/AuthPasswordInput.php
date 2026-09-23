@@ -34,33 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
+class AuthPasswordInput
 {
-    public function definition(): array
+    public static function make(): TextInput
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
-
-    public function basicAuth(): static
-    {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
+        return TextInput::make('auth_password')
+            ->label('Password')
+            ->string()
+            ->maxLength(255)
+            ->password()
+            ->revealable()
+            ->required(fn (Get $get): bool => $get('auth_type') === AuthType::Basic)
+            ->visible(fn (Get $get): bool => $get('auth_type') === AuthType::Basic && ServiceMonitoringAuthTypeFeature::active())
+            ->columnSpan(1);
     }
 }

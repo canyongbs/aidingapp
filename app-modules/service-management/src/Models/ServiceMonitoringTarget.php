@@ -40,6 +40,7 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
@@ -82,6 +83,9 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'monitor_type',
         'should_contain',
         'should_not_contain',
+        'auth_type',
+        'auth_username',
+        'auth_password',
     ];
 
     protected $casts = [
@@ -92,6 +96,20 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'monitor_type' => MonitorType::class,
         'should_contain' => 'array',
         'should_not_contain' => 'array',
+        'auth_type' => AuthType::class,
+        'auth_username' => 'encrypted',
+        'auth_password' => 'encrypted',
+    ];
+
+    protected $hidden = [
+        'auth_username',
+        'auth_password',
+    ];
+
+    /** @var list<string> */
+    protected $auditExclude = [
+        'auth_username',
+        'auth_password',
     ];
 
     /**

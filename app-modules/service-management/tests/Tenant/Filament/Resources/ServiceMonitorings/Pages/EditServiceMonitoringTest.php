@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\EditServiceMonitoring;
@@ -43,6 +44,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -51,6 +53,7 @@ use Filament\Actions\DeleteAction;
 use Illuminate\Support\Facades\Config;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -261,8 +264,107 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
             ]),
             ['should_contain', 'should_not_contain'],
         ],
+        'auth username required when auth type is basic' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'auth_type' => AuthType::Basic,
+                'auth_username' => null,
+                'auth_password' => 'secret',
+            ]),
+            ['auth_username'],
+        ],
+        'auth password required when auth type is basic' => [
+            ServiceMonitoringTargetRequestFactory::new()->state([
+                'auth_type' => AuthType::Basic,
+                'auth_username' => 'admin',
+                'auth_password' => null,
+            ]),
+            ['auth_password'],
+        ],
     ]
 );
+
+test('EditServiceMonitoring can update a service monitor with basic auth', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->basicAuth()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm($request)
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget->refresh();
+
+    expect($serviceMonitoringTarget->auth_type)->toBe(AuthType::Basic)
+        ->and($serviceMonitoringTarget->auth_username)->toBe($request['auth_username'])
+        ->and($serviceMonitoringTarget->auth_password)->toBe($request['auth_password']);
+
+    assertDatabaseMissing(ServiceMonitoringTarget::class, [
+        'auth_username' => $request['auth_username'],
+        'auth_password' => $request['auth_password'],
+    ]);
+});
+
+test('EditServiceMonitoring hides auth username and password fields until basic auth type is selected', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertFormFieldHidden('auth_username')
+        ->assertFormFieldHidden('auth_password')
+        ->fillForm(['auth_type' => AuthType::Basic])
+        ->assertFormFieldVisible('auth_username')
+        ->assertFormFieldVisible('auth_password');
+});
+
+test('EditServiceMonitoring hides auth fields when the feature is inactive', function () {
+    ServiceMonitoringAuthTypeFeature::deactivate();
+
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertFormFieldHidden('auth_type')
+        ->assertFormFieldHidden('auth_username')
+        ->assertFormFieldHidden('auth_password');
+});
+
+test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'auth_type' => AuthType::Basic,
+        'auth_username' => 'existing-username',
+        'auth_password' => 'existing-password',
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->assertFormSet([
+            'auth_username' => 'existing-username',
+            'auth_password' => 'existing-password',
+        ])
+        ->fillForm(['name' => 'Updated name'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $serviceMonitoringTarget->refresh();
+
+    expect($serviceMonitoringTarget->name)->toBe('Updated name')
+        ->and($serviceMonitoringTarget->auth_username)->toBe('existing-username')
+        ->and($serviceMonitoringTarget->auth_password)->toBe('existing-password');
+});
 
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
     asSuperAdmin();

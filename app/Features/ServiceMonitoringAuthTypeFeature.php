@@ -34,33 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Tests\Tenant\RequestFactories;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\AuthType;
-use AidingApp\ServiceManagement\Enums\MonitorType;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use Worksome\RequestFactories\RequestFactory;
+use App\Support\AbstractFeatureFlag;
 
-class ServiceMonitoringTargetRequestFactory extends RequestFactory
+class ServiceMonitoringAuthTypeFeature extends AbstractFeatureFlag
 {
-    public function definition(): array
+    public function resolve(mixed $scope): mixed
     {
-        return [
-            'name' => fake()->word(10),
-            'description' => fake()->paragraph(),
-            'domain' => fake()->url(),
-            'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),
-            'monitor_type' => MonitorType::Availability,
-            'auth_type' => AuthType::None,
-        ];
-    }
-
-    public function basicAuth(): static
-    {
-        return $this->state([
-            'auth_type' => AuthType::Basic,
-            'auth_username' => fake()->userName(),
-            'auth_password' => fake()->password(),
-        ]);
+        return false;
     }
 }
