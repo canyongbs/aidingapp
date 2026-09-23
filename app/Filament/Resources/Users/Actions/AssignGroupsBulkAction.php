@@ -62,7 +62,8 @@ class AssignGroupsBulkAction extends BulkAction
                 Select::make('groups')
                     ->label('Groups')
                     ->options(Group::pluck('name', 'id'))
-                    ->multiple(),
+                    ->multiple()
+                    ->exists('groups', 'id'),
             ])
             ->action(function (array $data, Collection $records) {
                 /** @var Collection<int, User> $records */
