@@ -41,7 +41,6 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use App\Features\OrganizationNameUniquenessFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
@@ -82,10 +81,7 @@ class EditOrganization extends EditRecord
                             ->maxLength(255)
                             ->required()
                             ->string()
-                            ->when(
-                                OrganizationNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            ),
+                            ->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         TextInput::make('email')
                             ->label('Organization Email')
                             ->maxLength(255)
