@@ -115,7 +115,7 @@ class ListUsers extends ListRecords
                     AssignRolesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
                     AssignGroupsBulkAction::make()
-                        ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
+                        ->authorize(fn (): bool => auth()->user()->can('user.*.update', User::class)),
                 ]),
             ]);
     }
