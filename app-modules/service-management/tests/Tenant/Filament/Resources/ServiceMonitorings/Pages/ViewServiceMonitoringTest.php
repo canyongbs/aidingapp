@@ -252,38 +252,42 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
             ],
         ]);
 
-    asSuperAdmin()
-        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $apiEndpointMonitor]))
-        ->assertSuccessful()
-        ->assertSee('Follow Redirection')
-        ->assertSee('200 OK, 201 Created')
-        ->assertSee('Maximum Latency Enforced')
-        ->assertSee('2000')
-        ->assertSee('POST')
-        ->assertSee('{"key":"value"}')
-        ->assertSee('Sent as JSON')
-        ->assertSee('X-Custom-Header')
-        ->assertSee('custom-value');
+    asSuperAdmin();
 
     livewire(ViewServiceMonitoring::class, [
         'record' => $apiEndpointMonitor->getRouteKey(),
     ])
         ->assertSuccessful()
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentVisible('successful_status_codes')
+        ->assertSchemaComponentVisible('is_max_latency_enabled')
+        ->assertSchemaComponentVisible('max_latency_ms')
+        ->assertSchemaComponentVisible('http_method')
+        ->assertSchemaComponentVisible('request_body')
+        ->assertSchemaComponentVisible('is_request_body_json')
+        ->assertSchemaComponentVisible('request_headers')
         ->assertSchemaStateSet([
             'successful_status_codes' => '200 OK, 201 Created',
+            'max_latency_ms' => 2000,
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
         ]);
 
     $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
         'monitor_type' => MonitorType::Availability,
     ]);
 
-    asSuperAdmin()
-        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $availabilityMonitor]))
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $availabilityMonitor->getRouteKey(),
+    ])
         ->assertSuccessful()
-        ->assertSee('Follow Redirection')
-        ->assertDontSee('Successful HTTP Status Codes')
-        ->assertDontSee('Maximum Latency Enforced')
-        ->assertDontSee('Request Headers');
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentHidden('successful_status_codes')
+        ->assertSchemaComponentHidden('is_max_latency_enabled')
+        ->assertSchemaComponentHidden('request_headers');
 });
 
 test('Reset Monitoring button resets monitoring', function () {
