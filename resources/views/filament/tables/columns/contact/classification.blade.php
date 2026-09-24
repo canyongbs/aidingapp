@@ -45,11 +45,7 @@
     </div>
 
     @if (filled($organizationName))
-        <div class="flex items-center gap-x-1.5 text-gray-500 dark:text-gray-400">
-            <x-filament::icon
-                icon="heroicon-m-building-office"
-                class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-            />
+        <div class="text-gray-500 dark:text-gray-400">
             <span>{{ $organizationName }}</span>
         </div>
     @endif
