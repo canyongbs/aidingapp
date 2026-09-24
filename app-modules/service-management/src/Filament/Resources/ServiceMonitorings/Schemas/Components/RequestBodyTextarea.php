@@ -34,24 +34,38 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\HttpMethod;
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Textarea;
+use Filament\Schemas\Components\Utilities\Get;
+
+class RequestBodyTextarea
+{
+    public static function make(): Textarea
     {
-        Schema::create('assistant_chats', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->string('name');
-
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignUuid('assistant_chat_folder_id')->nullable()->constrained('assistant_chat_folders')->cascadeOnDelete();
-
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        return Textarea::make('request_body')
+            ->label('Request Body')
+            ->rows(4)
+            ->rules(fn (Get $get): array => $get('is_request_body_json') ? ['json'] : [])
+            ->visible(fn (Get $get): bool => self::monitorSupportsRequestBody($get))
+            ->columnSpanFull();
     }
-};
+
+    public static function monitorSupportsRequestBody(Get $get): bool
+    {
+        if ($get('monitor_type') !== MonitorType::ApiEndpoint || ! ServiceMonitoringApiEndpointFeature::active()) {
+            return false;
+        }
+
+        $httpMethod = $get('http_method');
+
+        if (! $httpMethod instanceof HttpMethod) {
+            $httpMethod = HttpMethod::tryFrom((string) $httpMethod);
+        }
+
+        return $httpMethod?->supportsRequestBody() ?? true;
+    }
+}

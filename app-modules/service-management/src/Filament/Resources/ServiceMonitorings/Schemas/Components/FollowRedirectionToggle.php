@@ -34,14 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace App\Features;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-use App\Support\AbstractFeatureFlag;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Toggle;
 
-class OrganizationNameUniquenessFeature extends AbstractFeatureFlag
+class FollowRedirectionToggle
 {
-    public function resolve(mixed $scope): mixed
+    public static function make(): Toggle
     {
-        return false;
+        return Toggle::make('follow_redirection')
+            ->label('Follow Redirection')
+            ->helperText('If disabled, the check will use the redirection HTTP status code (3xx) returned by the server rather than following it.')
+            ->default(true)
+            ->visible(ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
     }
 }

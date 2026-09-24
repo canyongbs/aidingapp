@@ -35,24 +35,38 @@
 */
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
 return new class () extends Migration {
+    /**
+     * The `interaction` app module was removed without ever dropping its
+     * tables, leaving `interactions` (and the tables it references) behind
+     * with a foreign key to `divisions`. This blocks the `divisions` table
+     * from being dropped, so these orphaned tables must be removed first.
+     */
     public function up(): void
     {
-        Schema::create('prompt_types', function (Blueprint $table) {
-            $table->uuid('id')->primary();
+        DB::transaction(function (): void {
+            DB::table('audits')->whereIn('auditable_type', [
+                'interaction',
+                'interaction_campaign',
+                'interaction_driver',
+                'interaction_outcome',
+                'interaction_relation',
+                'interaction_status',
+                'interaction_type',
+            ])->delete();
 
-            $table->string('title');
-            $table->longText('description')->nullable();
-
-            $table->timestamps();
-            $table->softDeletes();
-
-            $table->uniqueIndex(['title'])->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
+            Schema::dropIfExists('interactions');
+            Schema::dropIfExists('interaction_campaigns');
+            Schema::dropIfExists('interaction_drivers');
+            Schema::dropIfExists('interaction_outcomes');
+            Schema::dropIfExists('interaction_relations');
+            Schema::dropIfExists('interaction_statuses');
+            Schema::dropIfExists('interaction_types');
         });
     }
+
+    public function down(): void {}
 };

@@ -34,39 +34,27 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Models;
+namespace AidingApp\ServiceManagement\Rules;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Project\Database\Factories\ProjectMilestoneStatusFactory;
-use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
 /**
- * @mixin IdeHelperProjectMilestoneStatus
+ * HTTP header names are case-insensitive, so "Authorization" and "authorization" are the
+ * same header. Applied to the whole request_headers repeater's array value (not a single
+ * row), since duplicate detection only makes sense across all configured headers at once.
  */
-class ProjectMilestoneStatus extends Model implements Auditable
+class UniqueRequestHeaderNames implements ValidationRule
 {
-    /** @use HasFactory<ProjectMilestoneStatusFactory> */
-    use HasFactory;
-
-    use HasUuids;
-    use SoftDeletes;
-    use AuditableTrait;
-
-    protected $fillable = [
-        'name',
-        'description',
-    ];
-
-    /**
-     * @return HasMany<ProjectMilestone, $this>
-     */
-    public function milestones(): HasMany
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return $this->hasMany(ProjectMilestone::class, 'status_id');
+        $names = collect((array) $value)
+            ->map(fn (mixed $header): mixed => is_array($header) ? ($header['name'] ?? null) : null)
+            ->filter(fn (mixed $name): bool => filled($name))
+            ->map(fn (string $name): string => mb_strtolower($name));
+
+        if ($names->count() !== $names->unique()->count()) {
+            $fail('Header names must be unique (case-insensitive).');
+        }
     }
 }

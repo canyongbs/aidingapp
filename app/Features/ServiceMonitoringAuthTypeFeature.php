@@ -34,40 +34,14 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace App\Features;
 
-return new class () extends Migration {
-    public function up(): void
+use App\Support\AbstractFeatureFlag;
+
+class ServiceMonitoringAuthTypeFeature extends AbstractFeatureFlag
+{
+    public function resolve(mixed $scope): mixed
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('status_id');
-            });
-
-            Schema::dropIfExists('project_milestone_statuses');
-        });
+        return false;
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->string('description')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
-
-                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-            });
-
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
-            });
-        });
-    }
-};
+}

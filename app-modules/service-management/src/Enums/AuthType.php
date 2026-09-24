@@ -34,23 +34,22 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Enums;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use Filament\Support\Contracts\HasLabel;
+
+enum AuthType: string implements HasLabel
+{
+    case None = 'none';
+
+    // Stored as "basic" so the value matches the HTTP auth scheme it applies (Illuminate\Http\Client\PendingRequest::withBasicAuth()).
+    case Basic = 'basic';
+
+    public function getLabel(): string
     {
-        Schema::create('user_consent_agreements', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->foreignUuid('user_id')->constrained('users');
-            $table->foreignUuid('consent_agreement_id')->constrained('consent_agreements');
-            $table->longText('ip_address');
-
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        return match ($this) {
+            self::None => 'None',
+            self::Basic => 'Local',
+        };
     }
-};
+}

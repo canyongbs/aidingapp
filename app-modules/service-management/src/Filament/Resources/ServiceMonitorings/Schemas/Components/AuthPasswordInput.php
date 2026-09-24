@@ -34,22 +34,25 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
-use App\Features\ProjectMilestoneStatusRemovedFeature;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// Checked directly against the schema array since the status table is already dropped by the time tests run.
-function createProjectMilestoneActionHasStatusField(): bool
+use AidingApp\ServiceManagement\Enums\AuthType;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+
+class AuthPasswordInput
 {
-    return collect(CreateProjectMilestoneAction::formSchema())
-        ->contains(fn ($component) => $component->getStatePath(isAbsolute: false) === 'status_id');
+    public static function make(): TextInput
+    {
+        return TextInput::make('auth_password')
+            ->label('Password')
+            ->string()
+            ->maxLength(255)
+            ->password()
+            ->revealable()
+            ->required(fn (Get $get): bool => $get('auth_type') === AuthType::Basic)
+            ->visible(fn (Get $get): bool => $get('auth_type') === AuthType::Basic && ServiceMonitoringAuthTypeFeature::active())
+            ->columnSpan(1);
+    }
 }
-
-it('excludes the status field by default', function () {
-    expect(createProjectMilestoneActionHasStatusField())->toBeFalse();
-});
-
-it('includes a required status field when the flag is inactive', function () {
-    ProjectMilestoneStatusRemovedFeature::deactivate();
-
-    expect(createProjectMilestoneActionHasStatusField())->toBeTrue();
-});

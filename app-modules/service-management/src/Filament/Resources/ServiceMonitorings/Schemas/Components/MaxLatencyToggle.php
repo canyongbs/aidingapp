@@ -34,28 +34,30 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+
+class MaxLatencyToggle
+{
+    public static function make(): Toggle
     {
-        Schema::create('prompts', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->string('title');
-            $table->longText('description')->nullable();
-            $table->longText('prompt');
-
-            $table->foreignUuid('type_id')->constrained('prompt_types')->cascadeOnDelete();
-
-            $table->timestamps();
-            $table->softDeletes();
-
-            $table->uniqueIndex(['title'])->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-        });
+        return Toggle::make('is_max_latency_enabled')
+            ->label('Maximum Latency')
+            ->live()
+            // There's no is_max_latency_enabled column -- it's computed from whether
+            // max_latency_ms has a value (see the model accessor), so this toggle never
+            // persists its own state. It only exists to drive max_latency_ms's visibility
+            // and to clear that field when turned off.
+            ->dehydrated(false)
+            ->afterStateHydrated(fn (Set $set, ?ServiceMonitoringTarget $record) => $set('is_max_latency_enabled', filled($record?->max_latency_ms)))
+            ->afterStateUpdated(fn (Set $set, bool $state) => $state ?: $set('max_latency_ms', null))
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
     }
-};
+}

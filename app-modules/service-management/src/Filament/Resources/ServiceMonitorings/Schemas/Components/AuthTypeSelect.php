@@ -34,40 +34,24 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\AuthType;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Filament\Forms\Components\Select;
+
+class AuthTypeSelect
+{
+    public static function make(): Select
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('status_id');
-            });
-
-            Schema::dropIfExists('project_milestone_statuses');
-        });
+        return Select::make('auth_type')
+            ->label('Auth Type')
+            ->options(AuthType::class)
+            ->enum(AuthType::class)
+            ->default(AuthType::None)
+            ->live()
+            ->required()
+            ->visible(ServiceMonitoringAuthTypeFeature::active())
+            ->columnSpanFull();
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->string('description')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
-
-                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-            });
-
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
-            });
-        });
-    }
-};
+}

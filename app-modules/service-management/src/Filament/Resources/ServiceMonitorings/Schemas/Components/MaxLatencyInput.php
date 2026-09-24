@@ -34,24 +34,31 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+
+class MaxLatencyInput
+{
+    public static function make(): TextInput
     {
-        Schema::create('consent_agreements', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->string('type');
-            $table->string('title');
-            $table->longText('description');
-            $table->longText('body');
-
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        return TextInput::make('max_latency_ms')
+            ->label('Maximum Latency')
+            ->integer()
+            ->suffix('ms')
+            ->minValue(1)
+            ->step(1)
+            ->required(fn (Get $get): bool => $get('is_max_latency_enabled'))
+            ->visible(fn (Get $get): bool => $get('is_max_latency_enabled') && $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            // Toggling max latency off hides this field, and a hidden field doesn't dehydrate by
+            // default -- but is_max_latency_enabled is computed purely from whether this column
+            // has a value, so the clear-to-null on toggle-off must actually reach the save, or
+            // the stored value (and therefore the computed "enabled" state) never changes.
+            ->dehydratedWhenHidden()
+            ->helperText('The check fails if the response takes longer than this to arrive.')
+            ->columnSpanFull();
     }
-};
+}

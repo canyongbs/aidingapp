@@ -40,21 +40,22 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\Get;
 
-test('Can fetch all advisories with updates', function () {
+beforeEach(function () {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
-    $contact = Contact::factory()->create();
+    actingAs(Contact::factory()->create());
+});
 
-    actingAs($contact);
-
+test('Can fetch all advisories with updates', function () {
     $advisoryStatus = AdvisoryStatus::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();
@@ -74,15 +75,6 @@ test('Can fetch all advisories with updates', function () {
 });
 
 test('advisory updates are ordered by date', function () {
-    $settings = app(PortalSettings::class);
-
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
-    $contact = Contact::factory()->create();
-
-    actingAs($contact);
-
     $advisory = Advisory::factory()
         ->for(AdvisoryStatus::factory(), 'status')
         ->for(AdvisorySeverity::factory(), 'severity')
@@ -106,4 +98,58 @@ test('advisory updates are ordered by date', function () {
     $updateIds = collect($response->json('data.data.0.advisory_updates'))->pluck('id');
 
     expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
+});
+
+it('serializes advisory datetimes as UTC ISO-8601 instants', function () {
+    $instant = Carbon::parse('2026-09-16 23:30:00', 'UTC');
+
+    $advisory = Advisory::factory()
+        ->for(AdvisoryStatus::factory(), 'status')
+        ->for(AdvisorySeverity::factory(), 'severity')
+        ->create(['created_at' => $instant]);
+
+    AdvisoryUpdate::factory()
+        ->for($advisory, 'advisory')
+        ->create(['created_at' => $instant, 'date' => $instant]);
+
+    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
+    $response = get($url);
+
+    $response->assertSuccessful();
+
+    expect($response->json('data.data.0.created_at'))->toBe('2026-09-16T23:30:00+00:00')
+        ->and($response->json('data.data.0.advisory_updates.0.created_at'))->toBe('2026-09-16T23:30:00+00:00')
+        ->and($response->json('data.data.0.advisory_updates.0.date'))->toBe('2026-09-16T23:30:00+00:00');
+});
+
+it('preserves the advisory payload the portal renders', function () {
+    $advisoryStatus = AdvisoryStatus::factory()->create();
+
+    $advisorySeverity = AdvisorySeverity::factory()->create();
+
+    $advisory = Advisory::factory()
+        ->for($advisoryStatus, 'status')
+        ->for($advisorySeverity, 'severity')
+        ->create();
+
+    $advisoryUpdate = AdvisoryUpdate::factory()
+        ->for($advisory, 'advisory')
+        ->create();
+
+    $url = URL::signedRoute(name: 'api.portal.advisories', absolute: false);
+    $response = get($url);
+
+    $response->assertSuccessful();
+
+    expect($response->json('data.current_page'))->toBe(1)
+        ->and($response->json('data.data.0.id'))->toBe($advisory->getKey())
+        ->and($response->json('data.data.0.title'))->toBe($advisory->title)
+        ->and($response->json('data.data.0.description'))->toBe($advisory->description)
+        ->and($response->json('data.data.0.severity.name'))->toBe($advisorySeverity->name)
+        ->and($response->json('data.data.0.severity.color'))->toBe($advisorySeverity->color->value)
+        ->and($response->json('data.data.0.status.name'))->toBe($advisoryStatus->name)
+        ->and($response->json('data.data.0.status.classification'))->toBe($advisoryStatus->classification->value)
+        ->and($response->json('data.data.0.advisory_updates.0.id'))->toBe($advisoryUpdate->getKey())
+        ->and($response->json('data.data.0.advisory_updates.0.title'))->toBe($advisoryUpdate->title)
+        ->and($response->json('data.data.0.advisory_updates.0.update'))->toBe($advisoryUpdate->update);
 });

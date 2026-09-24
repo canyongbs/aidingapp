@@ -34,24 +34,27 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\HttpMethod;
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Utilities\Get;
+
+class HttpMethodToggleButtons
+{
+    public static function make(): ToggleButtons
     {
-        Schema::create('assistant_chat_message_logs', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->longText('message');
-            $table->longText('metadata');
-            $table->foreignUuid('user_id')->constrained()->cascadeOnDelete();
-            $table->longText('request');
-            $table->timestamp('sent_at');
-
-            $table->timestamps();
-        });
+        return ToggleButtons::make('http_method')
+            ->label('HTTP Method')
+            ->options(HttpMethod::class)
+            ->enum(HttpMethod::class)
+            ->default(HttpMethod::Head)
+            ->live()
+            ->inline()
+            ->required()
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->columnSpanFull();
     }
-};
+}

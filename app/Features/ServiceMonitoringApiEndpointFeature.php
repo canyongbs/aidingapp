@@ -38,7 +38,7 @@ namespace App\Features;
 
 use App\Support\AbstractFeatureFlag;
 
-class ProjectMilestoneStatusRemovedFeature extends AbstractFeatureFlag
+class ServiceMonitoringApiEndpointFeature extends AbstractFeatureFlag
 {
     public function resolve(mixed $scope): mixed
     {

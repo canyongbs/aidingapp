@@ -34,25 +34,23 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use AidingApp\ServiceManagement\Enums\AuthType;
+use App\Features\ServiceMonitoringAuthTypeFeature;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Utilities\Get;
+
+class AuthUsernameInput
+{
+    public static function make(): TextInput
     {
-        Schema::create('assistant_chat_folders', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->string('name');
-
-            $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
-
-            $table->timestamps();
-            $table->softDeletes();
-
-            $table->unique(['name', 'user_id']);
-        });
+        return TextInput::make('auth_username')
+            ->label('Username')
+            ->string()
+            ->maxLength(255)
+            ->required(fn (Get $get): bool => $get('auth_type') === AuthType::Basic)
+            ->visible(fn (Get $get): bool => $get('auth_type') === AuthType::Basic && ServiceMonitoringAuthTypeFeature::active())
+            ->columnSpan(1);
     }
-};
+}

@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\ViewServiceMonitoring;
@@ -234,6 +235,59 @@ test('keyword match values with punctuation retain clear boundaries', function (
             'test 3, "test 4"',
             '"test 5, test 6"',
         ]);
+});
+
+test('API endpoint fields are displayed only for API endpoint monitors', function () {
+    $apiEndpointMonitor = ServiceMonitoringTarget::factory()
+        ->apiEndpoint()
+        ->create([
+            'follow_redirection' => false,
+            'successful_status_codes' => [200, 201],
+            'max_latency_ms' => 2000,
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'is_request_body_json' => true,
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ]);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $apiEndpointMonitor->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentVisible('successful_status_codes')
+        ->assertSchemaComponentVisible('is_max_latency_enabled')
+        ->assertSchemaComponentVisible('max_latency_ms')
+        ->assertSchemaComponentVisible('http_method')
+        ->assertSchemaComponentVisible('request_body')
+        ->assertSchemaComponentVisible('is_request_body_json')
+        ->assertSchemaComponentVisible('request_headers')
+        ->assertSchemaStateSet([
+            'successful_status_codes' => '200 OK, 201 Created',
+            'max_latency_ms' => 2000,
+            'http_method' => HttpMethod::Post,
+            'request_body' => '{"key":"value"}',
+            'request_headers' => [
+                ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
+            ],
+        ]);
+
+    $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
+        'monitor_type' => MonitorType::Availability,
+    ]);
+
+    livewire(ViewServiceMonitoring::class, [
+        'record' => $availabilityMonitor->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSchemaComponentVisible('follow_redirection')
+        ->assertSchemaComponentHidden('successful_status_codes')
+        ->assertSchemaComponentHidden('is_max_latency_enabled')
+        ->assertSchemaComponentHidden('request_headers');
 });
 
 test('Reset Monitoring button resets monitoring', function () {

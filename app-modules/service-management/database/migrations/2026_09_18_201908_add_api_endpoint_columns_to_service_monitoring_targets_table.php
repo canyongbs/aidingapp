@@ -34,8 +34,8 @@
 </COPYRIGHT>
 */
 
+use App\Features\ServiceMonitoringApiEndpointFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
@@ -44,29 +44,35 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('status_id');
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->boolean('follow_redirection')->initial(true);
+                $table->jsonb('successful_status_codes')->nullable();
+                $table->unsignedInteger('max_latency_ms')->nullable();
+                $table->string('http_method')->nullable();
+                $table->text('request_body')->nullable();
+                $table->boolean('is_request_body_json')->default(false);
+                $table->jsonb('request_headers')->nullable();
             });
 
-            Schema::dropIfExists('project_milestone_statuses');
+            ServiceMonitoringApiEndpointFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->string('description')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
+            ServiceMonitoringApiEndpointFeature::deactivate();
 
-                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-            });
-
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
+            Schema::table('service_monitoring_targets', function (Blueprint $table) {
+                $table->dropColumn([
+                    'follow_redirection',
+                    'successful_status_codes',
+                    'max_latency_ms',
+                    'http_method',
+                    'request_body',
+                    'is_request_body_json',
+                    'request_headers',
+                ]);
             });
         });
     }

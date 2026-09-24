@@ -34,40 +34,19 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Support\Facades\DB;
-use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
-use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
-return new class () extends Migration {
-    public function up(): void
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Utilities\Get;
+
+class SendAsJsonToggle
+{
+    public static function make(): Toggle
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->dropConstrainedForeignId('status_id');
-            });
-
-            Schema::dropIfExists('project_milestone_statuses');
-        });
+        return Toggle::make('is_request_body_json')
+            ->label('Send as JSON (application/json)')
+            ->helperText('Data will be sent as application/x-www-form-urlencoded unless this is enabled.')
+            ->visible(fn (Get $get): bool => RequestBodyTextarea::monitorSupportsRequestBody($get))
+            ->columnSpanFull();
     }
-
-    public function down(): void
-    {
-        DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
-                $table->uuid('id')->primary();
-                $table->string('name');
-                $table->string('description')->nullable();
-                $table->timestamps();
-                $table->softDeletes();
-
-                $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
-            });
-
-            Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
-            });
-        });
-    }
-};
+}

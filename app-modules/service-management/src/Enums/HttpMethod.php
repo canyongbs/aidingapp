@@ -34,25 +34,44 @@
 </COPYRIGHT>
 */
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+namespace AidingApp\ServiceManagement\Enums;
 
-// @phpstan-ignore Common.migrationMissingDownMethod
-return new class () extends Migration {
-    public function up(): void
+use Filament\Support\Contracts\HasLabel;
+
+enum HttpMethod: string implements HasLabel
+{
+    case Head = 'HEAD';
+
+    case Get = 'GET';
+
+    case Post = 'POST';
+
+    case Put = 'PUT';
+
+    case Patch = 'PATCH';
+
+    case Delete = 'DELETE';
+
+    case Options = 'OPTIONS';
+
+    case Query = 'QUERY';
+
+    public function getLabel(): string
     {
-        Schema::create('assistant_chat_messages', function (Blueprint $table) {
-            $table->uuid('id')->primary();
-
-            $table->foreignUuid('assistant_chat_id')->constrained('assistant_chats')->onDelete('cascade');
-            $table->string('from');
-            $table->longText('message')->nullable();
-            $table->string('name')->nullable();
-            $table->json('function_call')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration
-
-            $table->timestamps();
-            $table->softDeletes();
-        });
+        return match ($this) {
+            self::Head => 'HEAD',
+            self::Get => 'GET',
+            self::Post => 'POST',
+            self::Put => 'PUT',
+            self::Patch => 'PATCH',
+            self::Delete => 'DELETE',
+            self::Options => 'OPTIONS',
+            self::Query => 'QUERY',
+        };
     }
-};
+
+    public function supportsRequestBody(): bool
+    {
+        return ! in_array($this, [self::Head, self::Get], true);
+    }
+}

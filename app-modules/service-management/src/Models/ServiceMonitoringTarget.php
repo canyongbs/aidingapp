@@ -40,6 +40,8 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Database\Factories\ServiceMonitoringTargetFactory;
+use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
@@ -49,6 +51,7 @@ use App\Models\BaseModel;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -82,6 +85,16 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'monitor_type',
         'should_contain',
         'should_not_contain',
+        'auth_type',
+        'auth_username',
+        'auth_password',
+        'follow_redirection',
+        'successful_status_codes',
+        'max_latency_ms',
+        'http_method',
+        'request_body',
+        'is_request_body_json',
+        'request_headers',
     ];
 
     protected $casts = [
@@ -92,6 +105,26 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         'monitor_type' => MonitorType::class,
         'should_contain' => 'array',
         'should_not_contain' => 'array',
+        'auth_type' => AuthType::class,
+        'auth_username' => 'encrypted',
+        'auth_password' => 'encrypted',
+        'follow_redirection' => 'boolean',
+        'successful_status_codes' => 'array',
+        'max_latency_ms' => 'integer',
+        'http_method' => HttpMethod::class,
+        'is_request_body_json' => 'boolean',
+        'request_headers' => 'array',
+    ];
+
+    protected $hidden = [
+        'auth_username',
+        'auth_password',
+    ];
+
+    /** @var list<string> */
+    protected $auditExclude = [
+        'auth_username',
+        'auth_password',
     ];
 
     /**
@@ -215,5 +248,17 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * Whether the API Endpoint check should enforce a maximum latency. There's no separate
+     * column for this -- it's implied entirely by whether max_latency_ms has a value, so the
+     * two can never disagree with each other the way a separately-stored flag could.
+     *
+     * @return Attribute<bool, never>
+     */
+    protected function isMaxLatencyEnabled(): Attribute
+    {
+        return Attribute::make(get: fn (): bool => filled($this->max_latency_ms));
     }
 }
