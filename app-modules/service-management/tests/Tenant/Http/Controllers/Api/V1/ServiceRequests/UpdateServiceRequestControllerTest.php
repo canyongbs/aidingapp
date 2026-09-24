@@ -372,3 +372,42 @@ it('does not modify fields that are not included in the request', function () {
     expect($response['data']['category'])->toBe($originalCategory);
     expect($response['data']['close_details'])->toBe($originalCloseDetails);
 });
+
+describe('archiving', function () {
+    it('rejects assigning an archived status', function () {
+        $user = SystemUser::factory()->create();
+        $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+        Sanctum::actingAs($user, ['api']);
+
+        $openStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::Open]);
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $openStatus->getKey()]);
+
+        patchJson(
+            route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false),
+            ['status_id' => $archivedStatus->getKey()],
+        )->assertUnprocessable()->assertJsonValidationErrors('status_id');
+
+        expect($serviceRequest->fresh()->status_id)->toBe($openStatus->getKey());
+    });
+
+    it('accepts the status a service request is already on even when archived', function () {
+        $user = SystemUser::factory()->create();
+        $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
+        Sanctum::actingAs($user, ['api']);
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ]);
+
+        $serviceRequest = ServiceRequest::factory()->create(['status_id' => $archivedStatus->getKey()]);
+
+        patchJson(
+            route('api.v1.service-requests.update', ['serviceRequest' => $serviceRequest], false),
+            ['status_id' => $archivedStatus->getKey()],
+        )->assertOk();
+
+        expect($serviceRequest->fresh()->status_id)->toBe($archivedStatus->getKey());
+    });
+});

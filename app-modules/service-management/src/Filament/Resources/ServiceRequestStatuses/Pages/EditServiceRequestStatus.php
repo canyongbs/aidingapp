@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
+use AidingApp\ServiceManagement\Actions\DescribeAutomatedStatusUsage;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
@@ -90,7 +91,10 @@ class EditServiceRequestStatus extends EditRecord
     {
         return [
             ArchiveAction::make()
-                ->visible(fn (): bool => ServiceRequestStatusArchivingFeature::active()),
+                ->visible(fn (): bool => ServiceRequestStatusArchivingFeature::active())
+                ->modalDescription(fn (ServiceRequestStatus $record): ?string => app(DescribeAutomatedStatusUsage::class)(
+                    ServiceRequestStatus::query()->whereKey($record->getKey()),
+                )),
             UnarchiveServiceRequestStatusAction::make(),
             RestoreAction::make(),
             ForceDeleteAction::make(),
