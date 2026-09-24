@@ -55,7 +55,6 @@ use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\ContractManagement\Models\Contract;
 use AidingApp\ContractManagement\Models\ContractType;
 use AidingApp\Department\Models\Department;
-use AidingApp\Division\Models\Division;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
@@ -99,7 +98,6 @@ use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectManagerDepartment;
 use AidingApp\Project\Models\ProjectManagerUser;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
@@ -178,7 +176,6 @@ return [
     OrganizationType::class,
     Contract::class,
     ContractType::class,
-    Division::class,
     EmailTemplate::class,
     Engagement::class,
     EngagementBatch::class,
@@ -217,7 +214,6 @@ return [
     ProjectManagerDepartment::class,
     ProjectManagerUser::class,
     ProjectMilestone::class,
-    ProjectMilestoneStatus::class,
     ChangeRequest::class,
     ChangeRequestResponse::class,
     ChangeRequestStatus::class,

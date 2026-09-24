@@ -38,71 +38,18 @@ namespace AidingApp\ServiceManagement\Filament\Components;
 
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ReportFrequencySection;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
-use App\Filament\Forms\Components\UserSelect;
-use Filament\Forms\Components\Hidden;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
 
 class AutomatedReportingSection
 {
     public static function make(): Section
     {
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            return Section::make('Automated Reporting')
-                ->schema([
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Daily),
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Weekly),
-                    ReportFrequencySection::make(ServiceMonitoringReportFrequency::Monthly),
-                ])
-                ->columns(1);
-        }
-
-        // Legacy single-frequency schema, kept until ServiceMonitoringReportConfigurationsFeature is cleaned up
         return Section::make('Automated Reporting')
             ->schema([
-                Toggle::make('is_reporting_active')
-                    ->label('Activate Reporting')
-                    ->default(false)
-                    ->live()
-                    ->columnSpanFull(),
-                Radio::make('report_frequency')
-                    ->label('Frequency')
-                    ->options(ServiceMonitoringReportFrequency::class)
-                    ->enum(ServiceMonitoringReportFrequency::class)
-                    ->required(fn (Get $get) => $get('is_reporting_active'))
-                    ->visible(fn (Get $get) => $get('is_reporting_active')),
-                Hidden::make('is_reported_via_email')
-                    ->default(false),
-                Hidden::make('is_reported_via_database')
-                    ->default(false),
-                ReportChannelCheckboxList::make(),
-                Section::make('Recipients')
-                    ->schema([
-                        UserSelect::make('report_users')
-                            ->relationship('reportUsers')
-                            ->label('Users')
-                            ->multiple()
-                            ->preload(),
-                        Select::make('report_departments')
-                            ->relationship('reportDepartments', 'name')
-                            ->label('Departments')
-                            ->multiple()
-                            ->preload()
-                            ->searchable(),
-                        Select::make('report_contacts')
-                            ->relationship('reportContacts', 'full_name')
-                            ->label('Contacts')
-                            ->multiple()
-                            ->preload()
-                            ->searchable(),
-                    ])
-                    ->columns(3)
-                    ->visible(fn (Get $get) => $get('is_reporting_active')),
+                ReportFrequencySection::make(ServiceMonitoringReportFrequency::Daily),
+                ReportFrequencySection::make(ServiceMonitoringReportFrequency::Weekly),
+                ReportFrequencySection::make(ServiceMonitoringReportFrequency::Monthly),
             ])
-            ->columns(2);
+            ->columns(1);
     }
 }

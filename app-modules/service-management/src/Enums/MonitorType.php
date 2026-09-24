@@ -44,11 +44,14 @@ enum MonitorType: string implements HasLabel
 
     case KeywordMatch = 'keyword_match';
 
+    case ApiEndpoint = 'api_endpoint';
+
     public function getLabel(): string
     {
         return match ($this) {
             self::Availability => 'Availability',
             self::KeywordMatch => 'Keyword Match',
+            self::ApiEndpoint => 'API Endpoint',
         };
     }
 }

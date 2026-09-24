@@ -56,7 +56,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
-use App\Features\PasswordFormFieldFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -204,10 +203,6 @@ class ServiceRequestObserver
 
     public function forceDeleted(ServiceRequest $serviceRequest): void
     {
-        if (! PasswordFormFieldFeature::active()) {
-            return;
-        }
-
         $serviceRequest->secrets()->delete();
     }
 

@@ -38,7 +38,6 @@ namespace App\Providers;
 
 use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Notification\Enums\NotificationChannel;
-use App\Features\DesktopNotificationsFeature;
 use App\Models\Media;
 use App\Models\SystemUser;
 use App\Models\Tenant;
@@ -84,7 +83,7 @@ class AppServiceProvider extends ServiceProvider
         PluginRegistry::register(ModularLivewirePlugin::class);
 
         app(BrowserNotificationsManager::class)
-            ->availableUsing(fn (): bool => DesktopNotificationsFeature::active())
+            ->availableUsing(fn (): bool => true)
             ->iconUsing(fn (): string => asset('/images/default-favicon.png'));
 
         $this->app->scoped(GeoPlacesClient::class, fn (): GeoPlacesClient => new GeoPlacesClient([
@@ -118,6 +117,8 @@ class AppServiceProvider extends ServiceProvider
                 ->allowAttribute('src', allowedElements: ['img', 'video', 'source', 'iframe'])
                 ->allowAttribute('type', allowedElements: 'source'),
         );
+
+        $this->loadMigrationsFrom(database_path('migrations/Legacy'));
     }
 
     /**

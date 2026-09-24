@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\DesktopNotificationsFeature;
 use App\Models\User;
 use CanyonGBS\Common\BrowserNotifications\BrowserNotificationsManager;
 use CanyonGBS\Common\BrowserNotifications\Filament\BrowserNotificationsPlugin;
@@ -61,18 +60,6 @@ it('uses the Aiding App favicon for desktop notifications', function () {
 });
 
 it('does not show the browser notification prompt', function () {
-    actingAs(User::factory()->create());
-
-    Filament::setCurrentPanel('admin');
-    Filament::bootCurrentPanel();
-
-    expect(FilamentView::renderHook(PanelsRenderHook::BODY_END)->toHtml())
-        ->not->toContain('x-data="browserNotificationsPrompt"');
-});
-
-it('does not show the browser notification prompt before the tenant migration activates the feature', function () {
-    DesktopNotificationsFeature::deactivate();
-
     actingAs(User::factory()->create());
 
     Filament::setCurrentPanel('admin');

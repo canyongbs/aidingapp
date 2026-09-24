@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
 use AidingApp\Contact\Rules\UniqueOrganizationDomain;
-use App\Features\OrganizationNameUniquenessFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Repeater\TableColumn;
@@ -72,10 +71,7 @@ class CreateOrganization extends CreateRecord
                             ->maxLength(255)
                             ->required()
                             ->string()
-                            ->when(
-                                OrganizationNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                            ),
+                            ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                         TextInput::make('email')
                             ->label('Organization Email')
                             ->maxLength(255)

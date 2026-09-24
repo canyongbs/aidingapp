@@ -88,7 +88,8 @@ class HealthServiceProvider extends ServiceProvider
                 ->timeout(5)
                 ->unless($local),
             QueueCheck::new()
-                ->failAfterMinutes(3),
+                ->failAfterMinutes(3)
+                ->useCacheStore('health'),
             RedisCheck::new(),
             AzureCredentialsExpiringCheck::new()
                 ->if(function () {
@@ -109,8 +110,9 @@ class HealthServiceProvider extends ServiceProvider
             // OpcacheCachedFilesCheck::new()
             //     ->if(fn () => app(OpcacheStatusService::class)->getStatus() !== false)
             //     ->label('OPcache Cached Files'),
-            // ScheduleCheck::new()
-            //     ->heartbeatMaxAgeInMinutes(2),
+            ScheduleCheck::new()
+                ->heartbeatMaxAgeInMinutes(2)
+                ->useCacheStore('health'),
         ]);
     }
 }

@@ -40,13 +40,15 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Filament\Actions\ResetAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\ReportFrequencyInfolistSection;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components\SuccessfulStatusCodesSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\MonitorTypeFeature;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -61,13 +63,11 @@ class ViewServiceMonitoring extends ViewRecord
 
     public function infolist(Schema $schema): Schema
     {
-        if (ServiceMonitoringReportConfigurationsFeature::active()) {
-            $this->getRecord()->loadMissing([
-                'reportConfigurations.reportUsers',
-                'reportConfigurations.reportDepartments',
-                'reportConfigurations.reportContacts',
-            ]);
-        }
+        $this->getRecord()->loadMissing([
+            'reportConfigurations.reportUsers',
+            'reportConfigurations.reportDepartments',
+            'reportConfigurations.reportContacts',
+        ]);
 
         return $schema
             ->schema([
@@ -89,16 +89,55 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->columnSpan(1),
                                 TextEntry::make('monitor_type')
                                     ->label('Monitor Type')
-                                    ->visible(MonitorTypeFeature::active())
                                     ->columnSpanFull(),
+                                IconEntry::make('follow_redirection')
+                                    ->label('Follow Redirection')
+                                    ->boolean()
+                                    ->visible(ServiceMonitoringApiEndpointFeature::active()),
                                 TextEntry::make('should_contain')
                                     ->label('Should Contain')
                                     ->listWithLineBreaks()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
                                 TextEntry::make('should_not_contain')
                                     ->label('Should Not Contain')
                                     ->listWithLineBreaks()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch && MonitorTypeFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::KeywordMatch),
+                                TextEntry::make('successful_status_codes')
+                                    ->label('Successful HTTP Status Codes')
+                                    ->state(fn (ServiceMonitoringTarget $record): string => collect($record->successful_status_codes ?? [])
+                                        ->map(fn (int | string $code): string => SuccessfulStatusCodesSelect::options()[(int) $code] ?? (string) $code)
+                                        ->implode(', '))
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                IconEntry::make('is_max_latency_enabled')
+                                    ->label('Maximum Latency Enforced')
+                                    ->boolean()
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                TextEntry::make('max_latency_ms')
+                                    ->label('Maximum Latency')
+                                    ->suffix('ms')
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled && ServiceMonitoringApiEndpointFeature::active()),
+                                TextEntry::make('auth_type')
+                                    ->label('Auth Type')
+                                    ->visible(ServiceMonitoringAuthTypeFeature::active()),
+                                TextEntry::make('http_method')
+                                    ->label('HTTP Method')
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                TextEntry::make('request_body')
+                                    ->label('Request Body')
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody() && ServiceMonitoringApiEndpointFeature::active()),
+                                IconEntry::make('is_request_body_json')
+                                    ->label('Sent as JSON')
+                                    ->boolean()
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody() && ServiceMonitoringApiEndpointFeature::active()),
+                                RepeatableEntry::make('request_headers')
+                                    ->label('Request Headers')
+                                    ->schema([
+                                        TextEntry::make('name'),
+                                        TextEntry::make('value'),
+                                    ])
+                                    ->columns(2)
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_headers) && ServiceMonitoringApiEndpointFeature::active())
+                                    ->columnSpanFull(),
                             ])
                             ->columns(2),
                         Section::make('Notification Settings')
@@ -124,49 +163,14 @@ class ViewServiceMonitoring extends ViewRecord
                             ])
                             ->visible(fn (ServiceMonitoringTarget $record): bool => $record->departments()->count() || $record->users()->count())
                             ->columns(),
-                        ...(ServiceMonitoringReportConfigurationsFeature::active() ? [
-                            Section::make('Automated Reporting')
-                                ->schema([
-                                    ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Daily),
-                                    ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Weekly),
-                                    ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Monthly),
-                                ])
-                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->reportConfigurations->contains('is_active', true))
-                                ->columns(1),
-                        ] : [
-                            // Legacy single-frequency section, kept until ServiceMonitoringReportConfigurationsFeature is cleaned up
-                            Section::make('Automated Reporting')
-                                ->schema([
-                                    TextEntry::make('report_frequency')
-                                        ->label('Frequency'),
-                                    IconEntry::make('is_reported_via_email')
-                                        ->label('Email')
-                                        ->boolean(),
-                                    IconEntry::make('is_reported_via_database')
-                                        ->label('Application')
-                                        ->boolean(),
-                                    TextEntry::make('reportUsers.name')
-                                        ->label('Users')
-                                        ->listWithLineBreaks()
-                                        ->limitList(3)
-                                        ->expandableLimitedList()
-                                        ->visible(fn (ServiceMonitoringTarget $record) => $record->reportUsers()->count()),
-                                    TextEntry::make('reportDepartments.name')
-                                        ->label('Departments')
-                                        ->listWithLineBreaks()
-                                        ->limitList(3)
-                                        ->expandableLimitedList()
-                                        ->visible(fn (ServiceMonitoringTarget $record) => $record->reportDepartments()->count()),
-                                    TextEntry::make('reportContacts.full_name')
-                                        ->label('Contacts')
-                                        ->listWithLineBreaks()
-                                        ->limitList(3)
-                                        ->expandableLimitedList()
-                                        ->visible(fn (ServiceMonitoringTarget $record) => $record->reportContacts()->count()),
-                                ])
-                                ->visible(fn (ServiceMonitoringTarget $record): bool => $record->is_reporting_active)
-                                ->columns(3),
-                        ]),
+                        Section::make('Automated Reporting')
+                            ->schema([
+                                ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Daily),
+                                ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Weekly),
+                                ReportFrequencyInfolistSection::make(ServiceMonitoringReportFrequency::Monthly),
+                            ])
+                            ->visible(fn (ServiceMonitoringTarget $record): bool => $record->reportConfigurations->contains('is_active', true))
+                            ->columns(1),
                         Section::make('Confidentiality')
                             ->schema([
                                 IconEntry::make('is_confidential')

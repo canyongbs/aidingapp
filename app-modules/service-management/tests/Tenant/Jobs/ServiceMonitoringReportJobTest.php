@@ -39,7 +39,6 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportJob;
 use AidingApp\ServiceManagement\Jobs\ServiceMonitoringReportNotifyJob;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringReportConfigurationsFeature;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
@@ -159,43 +158,4 @@ it('does not dispatch a configuration whose target has been soft-deleted', funct
     (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
 
     Queue::assertNotPushed(ServiceMonitoringReportNotifyJob::class);
-});
-
-describe('the pre-migration path, kept only until ServiceMonitoringReportConfigurationsFeature is cleaned up', function () {
-    it('falls back to legacy targets when the feature is inactive', function (ServiceMonitoringReportFrequency $frequency) {
-        ServiceMonitoringReportConfigurationsFeature::deactivate();
-        Queue::fake();
-
-        $numTargets = rand(1, 10);
-
-        ServiceMonitoringTarget::factory()->count($numTargets)->create([
-            'report_frequency' => $frequency,
-            'is_reporting_active' => true,
-        ]);
-
-        (new ServiceMonitoringReportJob($frequency))->handle();
-
-        Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, $numTargets);
-    })
-        ->with(
-            [
-                fn () => ServiceMonitoringReportFrequency::Daily,
-                fn () => ServiceMonitoringReportFrequency::Weekly,
-                fn () => ServiceMonitoringReportFrequency::Monthly,
-            ]
-        );
-
-    it('does not dispatch for legacy targets with inactive reporting when the feature is inactive', function () {
-        ServiceMonitoringReportConfigurationsFeature::deactivate();
-        Queue::fake();
-
-        ServiceMonitoringTarget::factory()->count(3)->create([
-            'report_frequency' => ServiceMonitoringReportFrequency::Daily,
-            'is_reporting_active' => false,
-        ]);
-
-        (new ServiceMonitoringReportJob(ServiceMonitoringReportFrequency::Daily))->handle();
-
-        Queue::assertNotPushed(ServiceMonitoringReportNotifyJob::class);
-    });
 });

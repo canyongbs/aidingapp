@@ -36,9 +36,10 @@
 
 namespace AidingApp\ServiceManagement\Database\Factories;
 
+use AidingApp\ServiceManagement\Enums\AuthType;
+use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -61,12 +62,10 @@ class ServiceMonitoringTargetFactory extends Factory
             'frequency' => $this->faker->randomElement(ServiceMonitoringFrequency::cases()),
             'is_notified_via_database' => $this->faker->boolean(),
             'is_notified_via_email' => $this->faker->boolean(),
-            'is_reporting_active' => $this->faker->boolean(),
-            'report_frequency' => $this->faker->randomElement(ServiceMonitoringReportFrequency::cases()),
-            'is_reported_via_database' => $this->faker->boolean(),
-            'is_reported_via_email' => $this->faker->boolean(),
             'is_confidential' => false,
             'monitor_type' => MonitorType::Availability,
+            'auth_type' => AuthType::None,
+            'follow_redirection' => $this->faker->boolean(),
         ];
     }
 
@@ -74,6 +73,29 @@ class ServiceMonitoringTargetFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'is_confidential' => true,
+        ]);
+    }
+
+    public function basicAuth(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'auth_type' => AuthType::Basic,
+            'auth_username' => $this->faker->userName(),
+            'auth_password' => $this->faker->password(),
+        ]);
+    }
+
+    public function apiEndpoint(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'monitor_type' => MonitorType::ApiEndpoint,
+            'follow_redirection' => true,
+            'successful_status_codes' => [200],
+            'max_latency_ms' => null,
+            'http_method' => HttpMethod::Head,
+            'request_body' => null,
+            'is_request_body_json' => false,
+            'request_headers' => [],
         ]);
     }
 }

@@ -113,9 +113,9 @@ class ListContacts extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    BulkEngagementAction::make(context: 'contacts'),
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
+                    BulkEngagementAction::make(context: 'contacts'),
                     BulkUpdateContactsAction::make(),
                 ]),
             ]);

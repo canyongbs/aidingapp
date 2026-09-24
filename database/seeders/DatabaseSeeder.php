@@ -42,7 +42,6 @@ use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationIndustrySeeder;
 use AidingApp\Contact\Database\Seeders\OrganizationTypeSeeder;
 use AidingApp\Department\Database\Seeders\DepartmentSeeder;
-use AidingApp\Division\Database\Seeders\DivisionSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\AssetSeeder;
 use AidingApp\InventoryManagement\Database\Seeders\MaintenanceProviderSeeder;
 use AidingApp\KnowledgeBase\Database\Seeders\KnowledgeBaseCategorySeeder;
@@ -67,7 +66,6 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SampleSuperAdminUserSeeder::class,
             LocalDevelopmentSeeder::class,
-            DivisionSeeder::class,
             ServiceRequestStatusSeeder::class,
             ServiceRequestTypeSeeder::class,
             ContactTypeSeeder::class,

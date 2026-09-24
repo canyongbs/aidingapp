@@ -37,13 +37,11 @@
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageFiles;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
+use App\Jobs\PruneModels;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Illuminate\Console\Scheduling\Event;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\actingAs;
@@ -255,15 +253,15 @@ it('correctly prunes ProjectFiles based on retention_date', function () {
     assertModelExists($futureRetentionDateFile);
 });
 
-it('is scheduled to prune ProjectFiles daily during scheduler run', function () {
-    $schedule = app()->make(Schedule::class);
+it('prunes expired ProjectFiles when the model pruning job runs', function () {
+    $project = Project::factory()->create();
 
-    $events = (new Collection($schedule->events()))->filter(function (Event $event) {
-        $fileClass = preg_quote(ProjectFile::class);
+    $expiredFile = ProjectFile::factory()->create([
+        'project_id' => $project->id,
+        'retention_date' => now()->subDay(),
+    ]);
 
-        return preg_match("/model:prune\s--model=.*{$fileClass}.*/", $event->command)
-            && $event->expression === '0 0 * * *';
-    });
+    (new PruneModels())->handle();
 
-    expect($events)->toHaveCount(1);
+    assertModelMissing($expiredFile);
 });
