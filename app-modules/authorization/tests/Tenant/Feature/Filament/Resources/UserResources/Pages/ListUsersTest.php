@@ -40,6 +40,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
@@ -295,6 +296,26 @@ it('only shows the bulk assign groups action to a user with the user.*.update pe
 
     livewire(ListUsers::class)
         ->assertActionVisible(TestAction::make('assign_groups')->table()->bulk());
+});
+
+it('excludes archived groups from the bulk assign groups selection', function () {
+    asSuperAdmin();
+
+    $activeGroup = Group::factory()->create();
+    $archivedGroup = Group::factory()->create(['archived_at' => now()]);
+
+    $users = User::factory()->count(2)->create();
+
+    $component = livewire(ListUsers::class);
+
+    $component->mountTableBulkAction('assign_groups', $users->modelKeys());
+
+    $groupsSelect = $component->instance()->getMountedTableBulkActionForm()?->getComponent('groups');
+
+    assert($groupsSelect instanceof Select);
+
+    expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
+    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
 });
 
 it('can search users by name', function () {

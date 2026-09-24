@@ -44,6 +44,8 @@ use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
 use Filament\Support\Enums\Width;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
+use Throwable;
 
 class AssignGroupsBulkAction extends BulkAction
 {
@@ -61,19 +63,32 @@ class AssignGroupsBulkAction extends BulkAction
                     ->label('Replace existing groups?'),
                 Select::make('groups')
                     ->label('Groups')
-                    ->options(Group::pluck('name', 'id'))
+                    ->options(Group::query()->withoutArchived()->pluck('name', 'id'))
                     ->multiple()
                     ->exists('groups', 'id'),
             ])
             ->action(function (array $data, Collection $records) {
-                /** @var Collection<int, User> $records */
-                $records->each(function (User $record) use ($data) {
-                    if ($data['replace']) {
-                        $record->groups()->sync($data['groups']);
-                    } else {
-                        $record->groups()->syncWithoutDetaching($data['groups']);
-                    }
-                });
+                try {
+                    DB::transaction(function () use ($data, $records) {
+                        /** @var Collection<int, User> $records */
+                        $records->each(function (User $record) use ($data) {
+                            if ($data['replace']) {
+                                $record->groups()->sync($data['groups']);
+                            } else {
+                                $record->groups()->syncWithoutDetaching($data['groups']);
+                            }
+                        });
+                    });
+                } catch (Throwable $exception) {
+                    report($exception);
+
+                    Notification::make()
+                        ->title('Failed to assign groups')
+                        ->danger()
+                        ->send();
+
+                    return;
+                }
 
                 Notification::make()
                     ->title('Assigned Groups')
