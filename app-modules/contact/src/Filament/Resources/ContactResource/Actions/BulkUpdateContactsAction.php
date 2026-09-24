@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Actions;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use Filament\Actions\BulkAction;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Utilities\Get;
@@ -56,8 +55,6 @@ class BulkUpdateContactsAction
                 Select::make('field')
                     ->options([
                         'description' => 'Description',
-                        'email_bounce' => 'Email Bounce',
-                        'sms_opt_out' => 'SMS Opt Out',
                         ('type_id') => 'Type',
                     ])
                     ->required()
@@ -66,16 +63,6 @@ class BulkUpdateContactsAction
                     ->string()
                     ->required()
                     ->visible(fn (Get $get) => $get('field') === 'description'),
-                Radio::make('email_bounce')
-                    ->label('Email Bounce')
-                    ->boolean()
-                    ->required()
-                    ->visible(fn (Get $get) => $get('field') === 'email_bounce'),
-                Radio::make('sms_opt_out')
-                    ->label('SMS Opt Out')
-                    ->boolean()
-                    ->required()
-                    ->visible(fn (Get $get) => $get('field') === 'sms_opt_out'),
                 Select::make('type_id')
                     ->label('Type')
                     ->relationship('type', 'name')

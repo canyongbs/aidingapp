@@ -85,7 +85,6 @@ test('it registers a new portal contact for matching organization domain', funct
         'preferred' => 'Preferred Name',
         'mobile' => '+15550001111',
         'phone' => '+15550002222',
-        'sms_opt_out' => false,
         'code' => $plainCode,
     ]);
 
@@ -146,7 +145,6 @@ test('it does not rotate the csrf token shared with the admin panel', function (
             'first_name' => 'New',
             'last_name' => 'Contact',
             'mobile' => '+15550001111',
-            'sms_opt_out' => false,
             'code' => $plainCode,
         ])
         ->assertOk();
@@ -182,7 +180,6 @@ test('it returns expired flag when portal authentication is expired', function (
         'first_name' => 'Expired',
         'last_name' => 'User',
         'mobile' => '+15550003333',
-        'sms_opt_out' => true,
         'code' => $plainCode,
     ]);
 
@@ -220,7 +217,6 @@ test('it forbids registration when email domain does not match an enabled organi
         'first_name' => 'No',
         'last_name' => 'Match',
         'mobile' => '+15550004444',
-        'sms_opt_out' => false,
         'code' => $plainCode,
     ]);
 
@@ -258,7 +254,6 @@ test('it normalizes stored www domain and allows only base-domain email registra
         'first_name' => 'My',
         'last_name' => 'Email',
         'mobile' => '+15550006666',
-        'sms_opt_out' => false,
         'code' => $allowedCode,
     ]);
 
@@ -286,7 +281,6 @@ test('it normalizes stored www domain and allows only base-domain email registra
         'first_name' => 'My',
         'last_name' => 'Email',
         'mobile' => '+15550007777',
-        'sms_opt_out' => false,
         'code' => $blockedCode,
     ]);
 
@@ -318,7 +312,6 @@ test('it returns validation error when code is invalid', function () {
         'first_name' => 'New',
         'last_name' => 'User',
         'mobile' => '+15550005555',
-        'sms_opt_out' => false,
         'code' => 111111,
     ]);
 

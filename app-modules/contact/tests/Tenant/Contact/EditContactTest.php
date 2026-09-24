@@ -94,11 +94,21 @@ test('EditContact is gated with proper access control', function () {
         ->and($contact->fresh()->description)->toEqual($request->get('description'))
         ->and($contact->fresh()->email)->toEqual($request->get('email'))
         ->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))
-        ->and($contact->fresh()->sms_opt_out)->toEqual($request->get('sms_opt_out'))
-        ->and($contact->fresh()->email_bounce)->toEqual($request->get('email_bounce'))
         ->and($contact->fresh()->phone)->toEqual($request->get('phone'))
+        ->and($contact->fresh()->job_title)->toEqual($request->get('job_title'))
+        ->and($contact->fresh()->employee_id)->toEqual($request->get('employee_id'))
+        ->and($contact->fresh()->work_number)->toEqual($request->get('work_number'))
+        ->and($contact->fresh()->work_extension)->toEqual($request->get('work_extension'))
+        ->and($contact->fresh()->student_id)->toEqual($request->get('student_id'))
+        ->and($contact->fresh()->school)->toEqual($request->get('school'))
+        ->and($contact->fresh()->academic_department)->toEqual($request->get('academic_department'))
+        ->and($contact->fresh()->program)->toEqual($request->get('program'))
         ->and($contact->fresh()->address)->toEqual($request->get('address'))
-        ->and($contact->fresh()->address_2)->toEqual($request->get('address_2'));
+        ->and($contact->fresh()->address_2)->toEqual($request->get('address_2'))
+        ->and($contact->fresh()->city)->toEqual($request->get('city'))
+        ->and($contact->fresh()->state)->toEqual($request->get('state'))
+        ->and($contact->fresh()->postal)->toEqual($request->get('postal'))
+        ->and($contact->fresh()->country)->toEqual($request->get('country'));
 });
 
 test('EditContact keeps its own email but rejects another contact\'s email case-insensitively', function () {

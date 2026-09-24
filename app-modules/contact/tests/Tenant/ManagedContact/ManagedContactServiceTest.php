@@ -54,7 +54,6 @@ it('creates a managed contact synchronized from the user', function () {
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
     expect($contact->user_id)->toBe($user->getKey())
-        ->and($contact->title)->toBeNull()
         ->and($contact->first_name)->toBe('Jane')
         ->and($contact->last_name)->toBe('Doe')
         ->and($contact->full_name)->toBe('Jane Doe')
@@ -66,15 +65,14 @@ it('creates a managed contact synchronized from the user', function () {
         ->and($contact->isManaged())->toBeTrue();
 });
 
-it('parses the salutation from the user name into the contact title', function () {
+it('parses the first and last name from a user name that includes a salutation', function () {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create(['name' => 'Dr. Jane Doe']);
 
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
-    expect($contact->title)->toBe('Dr.')
-        ->and($contact->first_name)->toBe('Jane')
+    expect($contact->first_name)->toBe('Jane')
         ->and($contact->last_name)->toBe('Doe')
         ->and($contact->full_name)->toBe('Dr. Jane Doe');
 });
@@ -109,7 +107,6 @@ it('synchronizes the managed contact when the user is updated', function () {
     $contact = $user->managedContact()->first();
 
     expect($contact->full_name)->toBe('Prof. New Name')
-        ->and($contact->title)->toBe('Prof.')
         ->and($contact->first_name)->toBe('New')
         ->and($contact->last_name)->toBe('Name')
         ->and($contact->job_title)->toBe('Senior')

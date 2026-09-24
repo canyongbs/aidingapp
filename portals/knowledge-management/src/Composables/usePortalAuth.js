@@ -106,7 +106,6 @@ export function usePortalAuth() {
                 preferred: formData.preferred,
                 mobile: formData.mobile,
                 phone: formData.phone,
-                sms_opt_out: formData.sms_opt_out,
             };
         }
 

@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Imports;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Models\User;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
@@ -96,21 +97,48 @@ class ContactImporter extends Importer
                 ->example('johnsmith@gmail.com'),
             ImportColumn::make('mobile')
                 ->example('+1 (555) 555-5555'),
-            ImportColumn::make('sms_opt_out')
-                ->label('SMS opt out')
-                ->boolean()
-                ->rules(['boolean'])
-                ->example('no'),
-            ImportColumn::make('email_bounce')
-                ->boolean()
-                ->rules(['boolean'])
-                ->example('yes'),
             ImportColumn::make('phone')
                 ->example('+1 (555) 555-5555'),
+            ImportColumn::make('job_title')
+                ->label('Job title')
+                ->example('Software Engineer'),
+            // TODO: Cleanup Task (enhance-contacts-data-model): unwrap these columns once the flag is removed.
+            ...(EnhanceContactsTableDataModelFeature::active() ? [
+                ImportColumn::make('employee_id')
+                    ->label('Employee ID')
+                    ->example('E-12345'),
+                ImportColumn::make('work_number')
+                    ->label('Work number')
+                    ->example('+1 (555) 555-5555'),
+                ImportColumn::make('work_extension')
+                    ->label('Work extension')
+                    ->example('1234'),
+                ImportColumn::make('student_id')
+                    ->label('Student ID')
+                    ->example('S-12345'),
+                ImportColumn::make('school')
+                    ->example('School of Engineering'),
+                ImportColumn::make('academic_department')
+                    ->label('Academic department')
+                    ->example('Computer Science'),
+                ImportColumn::make('program')
+                    ->example('Bachelor of Science'),
+            ] : []),
             ImportColumn::make('address')
                 ->example('123 Main St.'),
             ImportColumn::make('address_2')
                 ->example('Apt. 1'),
+            ImportColumn::make('city')
+                ->example('New York'),
+            ImportColumn::make('state')
+                ->example('NY'),
+            ImportColumn::make('postal')
+                ->example('10001'),
+            // TODO: Cleanup Task (enhance-contacts-data-model): unwrap this column once the flag is removed.
+            ...(EnhanceContactsTableDataModelFeature::active() ? [
+                ImportColumn::make('country')
+                    ->example('United States'),
+            ] : []),
         ];
     }
 
