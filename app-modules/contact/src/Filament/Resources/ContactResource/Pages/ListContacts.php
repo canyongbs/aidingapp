@@ -41,6 +41,8 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Actions\BulkUpdateConta
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -52,6 +54,7 @@ use Filament\Resources\Pages\ListRecords;
 use Filament\Support\Enums\IconPosition;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,6 +64,56 @@ class ListContacts extends ListRecords
     protected static string $resource = ContactResource::class;
 
     public function table(Table $table): Table
+    {
+        if (! EnhanceContactsTableDataModelFeature::active()) {
+            return $this->legacyTable($table);
+        }
+
+        return $table
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withCount([
+                'serviceRequests',
+                'serviceRequests as open_service_requests_count' => fn (Builder $query): Builder => $query->whereRelation(
+                    'status',
+                    'classification',
+                    SystemServiceRequestClassification::Open,
+                ),
+            ]))
+            ->columns([
+                ViewColumn::make('contact')
+                    ->label('Contact')
+                    ->view('filament.tables.columns.contact.contact')
+                    ->searchable(['full_name', 'email']),
+                ViewColumn::make('classification')
+                    ->label('Classification')
+                    ->view('filament.tables.columns.contact.classification'),
+                ViewColumn::make('identifiers')
+                    ->label('Identifiers')
+                    ->view('filament.tables.columns.contact.identifiers'),
+                ViewColumn::make('history')
+                    ->label('History')
+                    ->view('filament.tables.columns.contact.history'),
+            ])
+            ->filters([
+                SelectFilter::make('type_id')
+                    ->label('Type')
+                    ->relationship('type', 'name')
+                    ->multiple()
+                    ->preload(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make()
+                        ->authorizeIndividualRecords('delete'),
+                    BulkEngagementAction::make(context: 'contacts'),
+                    BulkUpdateContactsAction::make(),
+                ]),
+            ]);
+    }
+
+    /**
+     * TODO: Cleanup Task (enhance-contacts-data-model): remove this legacy table and the feature-flag branch in table() when the flag is removed.
+     */
+    protected function legacyTable(Table $table): Table
     {
         return $table
             ->columns([
