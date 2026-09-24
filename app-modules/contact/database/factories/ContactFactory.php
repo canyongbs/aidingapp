@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -62,19 +63,22 @@ class ContactFactory extends Factory
             'mobile' => $this->faker->e164PhoneNumber(),
             'phone' => $this->faker->e164PhoneNumber(),
             'job_title' => $this->faker->jobTitle(),
-            'employee_id' => (string) $this->faker->unique()->numberBetween(10000, 99999),
-            'work_number' => $this->faker->e164PhoneNumber(),
-            'work_extension' => (string) $this->faker->numberBetween(100, 9999),
-            'student_id' => (string) $this->faker->unique()->numberBetween(100000, 999999),
-            'school' => $this->faker->company(),
-            'academic_department' => $this->faker->word(),
-            'program' => $this->faker->word(),
+            // TODO: Cleanup Task (enhance-contacts-data-model): unwrap these attributes once the flag is removed.
+            ...(EnhanceContactsTableDataModelFeature::active() ? [
+                'employee_id' => (string) $this->faker->unique()->numberBetween(10000, 99999),
+                'work_number' => $this->faker->e164PhoneNumber(),
+                'work_extension' => (string) $this->faker->numberBetween(100, 9999),
+                'student_id' => (string) $this->faker->unique()->numberBetween(100000, 999999),
+                'school' => $this->faker->company(),
+                'academic_department' => $this->faker->word(),
+                'program' => $this->faker->word(),
+                'country' => $this->faker->country(),
+            ] : []),
             'address' => $this->faker->streetAddress(),
             'address_2' => $this->faker->secondaryAddress(),
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(),
             'postal' => str($this->faker->postcode())->before('-')->toString(),
-            'country' => $this->faker->country(),
             'created_by_id' => User::factory(),
         ];
     }
