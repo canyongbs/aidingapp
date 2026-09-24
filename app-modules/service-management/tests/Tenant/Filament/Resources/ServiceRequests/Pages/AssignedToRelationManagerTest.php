@@ -48,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Forms\Components\ToggleButtons;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -1016,4 +1017,34 @@ test('submitting Manage Assignment without a status fails validation and does no
         ->assertHasTableActionErrors(['status_id' => ['required']]);
 
     expect($serviceRequest->assignments()->where('user_id', $manager->getKey())->exists())->toBeFalse();
+});
+
+describe('archiving', function () {
+    test('Manage Assignment still offers the current status when it has been archived', function () {
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+
+        asSuperAdmin();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ]);
+
+        $serviceRequestType = ServiceRequestType::factory()->create();
+
+        $serviceRequest = ServiceRequest::factory()->state([
+            'status_id' => $archivedStatus->getKey(),
+            'priority_id' => ServiceRequestPriority::factory()->create([
+                'type_id' => $serviceRequestType->getKey(),
+            ])->getKey(),
+        ])->create();
+
+        livewire(AssignedToRelationManager::class, [
+            'ownerRecord' => $serviceRequest,
+            'pageClass' => ViewServiceRequest::class,
+        ])
+            ->mountTableAction('manageAssignment')
+            ->assertFormFieldExists('status_id', 'mountedActionSchema0', fn (ToggleButtons $field): bool => array_key_exists($archivedStatus->getKey(), $field->getOptions()));
+    });
 });

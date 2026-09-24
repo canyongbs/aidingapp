@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\EditServiceRequestStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
 use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
@@ -355,6 +356,34 @@ describe('archiving', function () {
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->assertActionHidden(TestAction::make('unarchive'));
+    });
+
+    it('warns that archiving will not stop a service request type automation', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->create();
+
+        ServiceRequestType::factory()->for($serviceRequestStatus, 'automatedStatus')->create(['name' => 'VPN Access Request']);
+
+        $component = livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])->mountAction(TestAction::make('archive'));
+
+        expect($component->instance()->getMountedAction()->getModalDescription())
+            ->toBe('This status is used for automatic status changes by 1 service request type: VPN Access Request. Archiving will not stop that automation.');
+    });
+
+    it('does not warn when no service request type automates the status', function () {
+        asSuperAdmin();
+
+        $serviceRequestStatus = ServiceRequestStatus::factory()->create();
+
+        $component = livewire(EditServiceRequestStatus::class, [
+            'record' => $serviceRequestStatus->getRouteKey(),
+        ])->mountAction(TestAction::make('archive'));
+
+        expect($component->instance()->getMountedAction()->getModalDescription())
+            ->not->toContain('automatic status changes');
     });
 
     it('does not offer the delete action', function () {
