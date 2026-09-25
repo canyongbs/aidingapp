@@ -105,26 +105,25 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'description',
         'email',
         'mobile',
-        'sms_opt_out',
-        'email_bounce',
         'status_id',
         'type_id',
         'phone',
         'address',
         'address_2',
-        'address_3',
         'city',
         'state',
         'postal',
+        'country',
         'created_by_id',
-        'title',
         'job_title',
+        'employee_id',
+        'work_number',
+        'work_extension',
+        'student_id',
+        'school',
+        'academic_department',
+        'program',
         'user_id',
-    ];
-
-    protected $casts = [
-        'sms_opt_out' => 'boolean',
-        'email_bounce' => 'boolean',
     ];
 
     public function isSuperAdmin(): bool

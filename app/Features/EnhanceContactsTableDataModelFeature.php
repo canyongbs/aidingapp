@@ -34,39 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Requests;
+namespace App\Features;
 
-use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
-use AidingApp\Portal\Models\PortalAuthentication;
-use App\Rules\ValidAuthenticationCode;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
+use App\Support\AbstractFeatureFlag;
 
-class KnowledgeManagementPortalRegisterRequest extends FormRequest
+class EnhanceContactsTableDataModelFeature extends AbstractFeatureFlag
 {
-    public function authorize(): bool
+    public function resolve(mixed $scope): mixed
     {
-        return app(FindOrganizationByEmailDomain::class)((string) $this->input('email')) !== null;
-    }
-
-    /**
-     * @return ValidationRules
-     */
-    public function rules(): array
-    {
-        $authentication = $this->route('authentication');
-
-        assert($authentication instanceof PortalAuthentication);
-
-        return [
-            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('users', 'email')->where(fn (Builder $query) => $query->whereNotNull('deleted_at'))],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'preferred' => ['nullable', 'string', 'max:255'],
-            'mobile' => ['required', 'string', 'max:255'],
-            'phone' => ['nullable', 'string', 'max:255'],
-            'code' => ['required', 'integer', 'digits:6', new ValidAuthenticationCode($authentication)],
-        ];
+        return false;
     }
 }

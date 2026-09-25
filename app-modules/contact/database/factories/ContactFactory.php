@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Database\Factories;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -50,7 +51,6 @@ class ContactFactory extends Factory
     {
         $firstName = $this->faker->firstName();
         $lastName = $this->faker->lastName();
-        $address3 = $this->faker->optional()->words(asText: true);
 
         return [
             'type_id' => ContactType::factory(),
@@ -61,12 +61,21 @@ class ContactFactory extends Factory
             'description' => $this->faker->paragraph(),
             'email' => $this->faker->unique()->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
-            'sms_opt_out' => $this->faker->boolean(),
-            'email_bounce' => $this->faker->boolean(),
             'phone' => $this->faker->e164PhoneNumber(),
+            'job_title' => $this->faker->jobTitle(),
+            // TODO: Cleanup Task (enhance-contacts-data-model): unwrap these attributes once the flag is removed.
+            ...(EnhanceContactsTableDataModelFeature::active() ? [
+                'employee_id' => (string) $this->faker->unique()->numberBetween(10000, 99999),
+                'work_number' => $this->faker->e164PhoneNumber(),
+                'work_extension' => (string) $this->faker->numberBetween(100, 9999),
+                'student_id' => (string) $this->faker->unique()->numberBetween(100000, 999999),
+                'school' => $this->faker->company(),
+                'academic_department' => $this->faker->word(),
+                'program' => $this->faker->word(),
+                'country' => $this->faker->country(),
+            ] : []),
             'address' => $this->faker->streetAddress(),
             'address_2' => $this->faker->secondaryAddress(),
-            'address_3' => $address3 ? str($address3)->headline()->toString() : null,
             'city' => $this->faker->city(),
             'state' => $this->faker->stateAbbr(),
             'postal' => str($this->faker->postcode())->before('-')->toString(),

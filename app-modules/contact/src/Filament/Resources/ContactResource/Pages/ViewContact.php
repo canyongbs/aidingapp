@@ -37,10 +37,10 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Models\Contact;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -54,67 +54,20 @@ class ViewContact extends ViewRecord
     // TODO: Automatically set from Filament
     protected static ?string $navigationLabel = 'View';
 
-    public function infolist(Schema $schema): Schema
+    public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
-                Section::make('Demographics')
+            ->disabled()
+            ->components([
+                ...ContactFormSchema::make(),
+                Section::make('System Information')
                     ->schema([
-                        TextEntry::make('title'),
-                        TextEntry::make('first_name')
-                            ->label('First Name'),
-                        TextEntry::make('last_name')
-                            ->label('Last Name'),
-                        TextEntry::make(Contact::displayNameKey())
-                            ->label('Full Name'),
-                        TextEntry::make('preferred')
-                            ->label('Preferred Name'),
-                        TextEntry::make('job_title')
-                            ->label('Job Title'),
-                    ])
-                    ->columns(3)
-                    ->columnSpanFull(),
-                Section::make('Contact Information')
-                    ->schema([
-                        TextEntry::make('email')
-                            ->label('Email'),
-                        TextEntry::make('mobile')
-                            ->label('Mobile'),
-                        TextEntry::make('phone')
-                            ->label('Phone'),
-                        TextEntry::make('address')
-                            ->label('Address'),
-                        TextEntry::make('address_2')
-                            ->label('Address 2'),
-                        TextEntry::make('address_3')
-                            ->label('Address 3'),
-                        TextEntry::make('city')
-                            ->label('City'),
-                        TextEntry::make('state')
-                            ->label('State'),
-                        TextEntry::make('postal')
-                            ->label('Postal'),
-                    ])
-                    ->columns(2),
-                Section::make('Classification')
-                    ->schema([
-                        TextEntry::make('type.name')
-                            ->label('Type'),
-                        TextEntry::make('organization.name')
-                            ->label('Organization'),
-                        TextEntry::make('description')
-                            ->label('Description')
-                            ->columnSpanFull(),
-                    ])
-                    ->columns(2),
-                Section::make('Engagement Restrictions')
-                    ->schema([
-                        IconEntry::make('sms_opt_out')
-                            ->label('SMS Opt Out')
-                            ->boolean(),
-                        IconEntry::make('email_bounce')
-                            ->label('Email Bounce')
-                            ->boolean(),
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime(),
+                        TextEntry::make('updated_at')
+                            ->label('Updated At')
+                            ->dateTime(),
                     ])
                     ->columns(2),
             ]);
