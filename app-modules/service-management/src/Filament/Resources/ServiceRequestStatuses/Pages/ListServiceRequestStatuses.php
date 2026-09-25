@@ -45,6 +45,7 @@ use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
+use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -99,15 +100,18 @@ class ListServiceRequestStatuses extends ListRecords
                 EditAction::make(),
                 UnarchiveServiceRequestStatusAction::make(),
             ])
-            ->toolbarActions($isArchivingActive ? [
+            ->toolbarActions([
                 BulkActionGroup::make([
-                    ArchiveBulkAction::make()
-                        ->authorizeIndividualRecords('delete')
-                        ->modalDescription(fn (ArchiveBulkAction $action): ?string => app(DescribeAutomatedStatusUsage::class)(
-                            $action->getSelectedRecordsQuery(),
-                        )),
+                    $isArchivingActive
+                        ? ArchiveBulkAction::make()
+                            ->authorizeIndividualRecords('delete')
+                            ->modalDescription(fn (ArchiveBulkAction $action): ?string => app(DescribeAutomatedStatusUsage::class)(
+                                $action->getSelectedRecordsQuery(),
+                            ))
+                        : DeleteBulkAction::make()
+                            ->authorizeIndividualRecords('delete'),
                 ]),
-            ] : [])
+            ])
             ->filters([
                 TrashedFilter::make(),
                 ...($isArchivingActive ? [

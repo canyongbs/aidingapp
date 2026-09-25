@@ -14,6 +14,3 @@ created: 2026-09-22
 - Search for `ServiceRequestStatusArchivingFeature` to find every usage, and
   `TODO: Cleanup Task (ServiceRequestStatusArchivingFeature)` for the sites that need
   more than the usage removed.
-
-- Delete the test that covers the inactive (pre-migration) branch, since that branch no longer exists:
-    - `EditServiceRequestStatusTest` — ``it('hides the archive action when `ServiceRequestStatusArchivingFeature` is inactive')``.

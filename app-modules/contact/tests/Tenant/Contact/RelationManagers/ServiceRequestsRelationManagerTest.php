@@ -522,6 +522,35 @@ describe('feedback visibility', function () {
 });
 
 describe('archiving', function () {
+    test('the status select still offers the archived status a service request is already on', function () {
+        asSuperAdmin();
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $contact = Contact::factory()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($contact, 'respondent')
+            ->create(['status_id' => $archivedStatus->getKey()]);
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->mountTableAction('edit', $serviceRequest)
+            ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($archivedStatus): bool {
+                $optionIds = collect($select->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($archivedStatus->getKey(), $optionIds, true);
+            });
+    });
+
     test('the status select does not offer archived statuses', function () {
         asSuperAdmin();
 

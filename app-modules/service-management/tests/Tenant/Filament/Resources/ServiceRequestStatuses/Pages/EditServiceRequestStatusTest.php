@@ -397,7 +397,9 @@ describe('archiving', function () {
             ->assertActionDoesNotExist(TestAction::make('delete'));
     });
 
-    it('hides the archive action when `ServiceRequestStatusArchivingFeature` is inactive', function () {
+    // TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): delete this test — it covers the
+    // inactive branch, which no longer exists once the flag is removed.
+    it('offers the `DeleteAction` instead of the `ArchiveAction` when `ServiceRequestStatusArchivingFeature` is inactive', function () {
         ServiceRequestStatusArchivingFeature::deactivate();
 
         asSuperAdmin();
@@ -407,6 +409,7 @@ describe('archiving', function () {
         livewire(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
-            ->assertActionHidden(TestAction::make('archive'));
+            ->assertActionDoesNotExist(TestAction::make('archive'))
+            ->assertActionVisible(TestAction::make('delete'));
     });
 });
