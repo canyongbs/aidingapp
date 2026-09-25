@@ -1017,3 +1017,39 @@ test('submitting Manage Assignment without a status fails validation and does no
 
     expect($serviceRequest->assignments()->where('user_id', $manager->getKey())->exists())->toBeFalse();
 });
+
+test('the assigned to table only displays the Name column and not a toggleable ID column', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->serviceManagement = true;
+
+    $settings->save();
+
+    asSuperAdmin();
+
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    $manager = User::factory()->create();
+
+    $serviceRequestType->managerUsers()->attach($manager);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    ServiceRequestAssignment::factory()->state([
+        'service_request_id' => $serviceRequest->getKey(),
+        'user_id' => $manager->getKey(),
+    ])->create();
+
+    $component = livewire(AssignedToRelationManager::class, [
+        'ownerRecord' => $serviceRequest,
+        'pageClass' => ViewServiceRequest::class,
+    ])
+        ->assertTableColumnExists('user.name');
+
+    expect(array_keys($component->instance()->getTable()->getColumns()))
+        ->not->toContain('id');
+});

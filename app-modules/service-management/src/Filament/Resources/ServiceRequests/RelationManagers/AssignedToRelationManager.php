@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Actions\Manag
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Filament\Resources\Users\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -69,7 +68,6 @@ class AssignedToRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('user.name')
                     ->label('Name'),
             ])
