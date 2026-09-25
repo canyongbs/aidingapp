@@ -35,13 +35,17 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
@@ -217,6 +221,101 @@ it('only shows the bulk delete action to a user with the user.delete permission'
 
     livewire(ListUsers::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('can assign groups to multiple users via the bulk action', function () {
+    asSuperAdmin();
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    $users = User::factory()->count(3)->create();
+    $users->first()->groups()->attach($existingGroup);
+
+    livewire(ListUsers::class)
+        ->assertTableBulkActionExists('assign_groups')
+        ->callTableBulkAction('assign_groups', $users, [
+            'replace' => false,
+            'groups' => [$newGroup->getKey()],
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    $users->each(function (User $user) use ($newGroup) {
+        assertDatabaseHas('group_user', [
+            'user_id' => $user->getKey(),
+            'group_id' => $newGroup->getKey(),
+        ]);
+    });
+
+    assertDatabaseHas('group_user', [
+        'user_id' => $users->first()->getKey(),
+        'group_id' => $existingGroup->getKey(),
+    ]);
+});
+
+it('replaces existing group assignments when replace is enabled on the bulk action', function () {
+    asSuperAdmin();
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    $user = User::factory()->create();
+    $user->groups()->attach($existingGroup);
+
+    livewire(ListUsers::class)
+        ->callTableBulkAction('assign_groups', [$user], [
+            'replace' => true,
+            'groups' => [$newGroup->getKey()],
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    assertDatabaseMissing('group_user', [
+        'user_id' => $user->getKey(),
+        'group_id' => $existingGroup->getKey(),
+    ]);
+
+    assertDatabaseHas('group_user', [
+        'user_id' => $user->getKey(),
+        'group_id' => $newGroup->getKey(),
+    ]);
+});
+
+it('only shows the bulk assign groups action to a user with the user.*.update permission', function () {
+    User::factory(5)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view');
+
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertActionHidden(TestAction::make('assign_groups')->table()->bulk());
+
+    $user->givePermissionTo('user.*.update');
+
+    livewire(ListUsers::class)
+        ->assertActionVisible(TestAction::make('assign_groups')->table()->bulk());
+});
+
+it('excludes archived groups from the bulk assign groups selection', function () {
+    asSuperAdmin();
+
+    $activeGroup = Group::factory()->create();
+    $archivedGroup = Group::factory()->create(['archived_at' => now()]);
+
+    $users = User::factory()->count(2)->create();
+
+    $component = livewire(ListUsers::class);
+
+    $component->mountTableBulkAction('assign_groups', $users->modelKeys());
+
+    $groupsSelect = $component->instance()->getMountedTableBulkActionForm()?->getComponent('groups');
+
+    assert($groupsSelect instanceof Select);
+
+    expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
+    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
 });
 
 it('can search users by name', function () {

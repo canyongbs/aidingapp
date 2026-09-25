@@ -39,6 +39,7 @@ namespace App\Filament\Resources\Users\Pages;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
+use App\Filament\Resources\Users\Actions\AssignGroupsBulkAction;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\UserResource;
 use App\Filament\Tables\Columns\IdColumn;
@@ -113,6 +114,8 @@ class ListUsers extends ListRecords
                         }),
                     AssignRolesBulkAction::make()
                         ->visible(fn () => auth()->user()->can('user.*.update', User::class)),
+                    AssignGroupsBulkAction::make()
+                        ->authorize(fn (): bool => auth()->user()->can('user.*.update', User::class)),
                 ]),
             ]);
     }
