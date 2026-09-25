@@ -116,8 +116,9 @@ class EditUser extends EditRecord
                             ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
                         TextInput::make('name')
                             ->label('Full Name')
+                            ->required(fn (): bool => ! FullNameFeature::active())
                             ->maxLength(255)
-                            ->disabled()
+                            ->disabled(fn (User $record): bool => FullNameFeature::active() || $record->isAdmin())
                             ->dehydrated(),
                         TextInput::make('preferred_name')
                             ->string()
