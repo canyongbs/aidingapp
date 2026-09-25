@@ -64,6 +64,11 @@ class ServiceRequestStatusFactory extends Factory
         return $this->state(fn (): array => ['is_system_protected' => true]);
     }
 
+    public function archived(): self
+    {
+        return $this->state(fn (): array => ['archived_at' => now()]);
+    }
+
     /**
      * @return Factory<ServiceRequestStatus>
      */

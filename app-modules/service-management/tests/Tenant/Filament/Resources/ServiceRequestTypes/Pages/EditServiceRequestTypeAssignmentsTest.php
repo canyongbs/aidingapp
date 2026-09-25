@@ -377,3 +377,43 @@ test('saving with the automated status change toggle off nulls the automated_sta
 
     expect($serviceRequestType->fresh()->automated_status_id)->toBeNull();
 });
+
+describe('archiving', function () {
+    test('the status picker does not offer archived statuses', function () {
+        asSuperAdmin();
+
+        $activeStatus = ServiceRequestStatus::factory()->create();
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $serviceRequestType = ServiceRequestType::factory()->create();
+
+        livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+            ->assertFormFieldExists('automated_status_id', function (Select $field) use ($activeStatus, $archivedStatus): bool {
+                $optionIds = collect($field->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($activeStatus->getKey(), $optionIds, true)
+                    && ! in_array($archivedStatus->getKey(), $optionIds, true);
+            });
+    });
+
+    test('the status picker still offers the saved automated status when it is archived', function () {
+        asSuperAdmin();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $serviceRequestType = ServiceRequestType::factory()
+            ->for($archivedStatus, 'automatedStatus')
+            ->create();
+
+        livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+            ->assertFormFieldExists('automated_status_id', function (Select $field) use ($archivedStatus): bool {
+                $optionIds = collect($field->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($archivedStatus->getKey(), $optionIds, true);
+            });
+    });
+});

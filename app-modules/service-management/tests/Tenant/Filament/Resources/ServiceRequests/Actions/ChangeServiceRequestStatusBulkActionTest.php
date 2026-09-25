@@ -286,3 +286,29 @@ test('it cannot change status of service requests without required permissions',
         expect($serviceRequest->refresh()->status_id)->toBe($originalStatus->getKey());
     });
 });
+
+describe('archiving', function () {
+    test('it cannot change status of service requests to an archived status', function () {
+        asSuperAdmin();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+
+        $serviceRequests = ServiceRequest::factory()
+            ->state(['status_id' => $openStatus->getKey()])
+            ->count(2)
+            ->create();
+
+        livewire(ListServiceRequests::class)
+            ->assertSuccessful()
+            ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
+                'statusId' => $archivedStatus->getKey(),
+            ])
+            ->assertHasTableBulkActionErrors(['statusId']);
+
+        $serviceRequests->each(
+            fn (ServiceRequest $serviceRequest) => expect($serviceRequest->fresh()->status_id)->toBe($openStatus->getKey())
+        );
+    });
+});

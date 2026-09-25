@@ -36,18 +36,26 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 class ServiceRequestStatusSelect
 {
-    public static function make(string $name = 'status_id'): Select
+    public static function make(string $name = 'status_id', ?string $selectedId = null): Select
     {
         return Select::make($name)
             ->label('Status')
             ->allowHtml()
-            ->options(fn () => ServiceRequestStatus::orderBy('sort')
+            // Trashed and archived statuses are excluded, except the currently-selected one, so a
+            // record left pointing at one can still show and keep that value.
+            ->options(fn () => ServiceRequestStatus::query()
+                ->withTrashed()
+                ->where(fn (Builder $query) => $query->whereNull('deleted_at')->orWhereKey($selectedId))
+                ->tap(new SelectableServiceRequestStatuses($selectedId))
+                ->orderBy('sort')
                 ->get(['id', 'name', 'classification', 'color'])
                 ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getLabel())
                 ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

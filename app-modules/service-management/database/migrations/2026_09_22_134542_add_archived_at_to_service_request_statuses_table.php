@@ -34,37 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+use App\Features\ServiceRequestStatusArchivingFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
-use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-
-class ReopenServiceRequestAction
-{
-    public function execute(ServiceRequest $serviceRequest): void
+/*
+ * TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): this migration is permanent — do not
+ * delete it. Keep the `archived_at` schema changes and remove only the flag activation: the
+ * activate() and deactivate() calls and their import. Both DB::transaction() wrappers then have
+ * a single statement left, so unwrap them back to a plain Schema::table() call and drop the
+ * Illuminate\Support\Facades\DB import.
+ */
+return new class () extends Migration {
+    public function up(): void
     {
-        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
-            return;
-        }
+        DB::transaction(function () {
+            Schema::table('service_request_statuses', function (Blueprint $table) {
+                $table->timestamp('archived_at')->nullable();
+            });
 
-        $openStatus = ServiceRequestStatus::query()
-            ->tap(new SelectableServiceRequestStatuses())
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->orderBy('sort')
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->first();
-
-        if (! $openStatus) {
-            report(new NoOpenServiceRequestStatusFoundException($serviceRequest->getKey()));
-
-            return;
-        }
-
-        $serviceRequest->status()->associate($openStatus);
-        $serviceRequest->save();
+            ServiceRequestStatusArchivingFeature::activate();
+        });
     }
-}
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ServiceRequestStatusArchivingFeature::deactivate();
+
+            Schema::table('service_request_statuses', function (Blueprint $table) {
+                $table->dropColumn('archived_at');
+            });
+        });
+    }
+};
