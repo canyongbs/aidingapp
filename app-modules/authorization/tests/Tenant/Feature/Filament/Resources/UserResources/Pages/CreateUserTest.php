@@ -211,7 +211,7 @@ test('CreateUser validates the inputs', function ($data, $errors) {
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);
-})->only()->with(
+})->with(
     [
         'first name required' => [
             ['first_name' => null],

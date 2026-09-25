@@ -56,8 +56,7 @@ class UserExporter extends Exporter
                 ->label('Last Name')
                 ->visible(fn (): bool => FullNameFeature::active()),
             ExportColumn::make('name')
-                ->label('Full Name')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Full Name'),
             ExportColumn::make('preferred_name')
                 ->label('Preferred Name')
                 ->visible(fn (): bool => FullNameFeature::active()),
