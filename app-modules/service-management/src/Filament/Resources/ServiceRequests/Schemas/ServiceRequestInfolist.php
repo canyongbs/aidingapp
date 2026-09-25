@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Actions\ViewContactAction;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -102,15 +102,8 @@ class ServiceRequestInfolist
 
                                 return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
                             })
-                            ->url(function (ServiceRequest $record) {
-                                /** @var Contact $respondent */
-                                $respondent = $record->respondent;
-
-                                return ContactResource::getUrl('view', ['record' => $respondent->id]);
-                            })
-                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
-                                EditServiceRequestContactAction::make($record),
-                            ])),
+                            ->suffixAction(fn (ServiceRequest $record): Action => ViewContactAction::make($record->respondent))
+                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestContactAction::make($record)),
                         TextEntry::make('created_at')
                             ->label('Created')
                             ->dateTime()
