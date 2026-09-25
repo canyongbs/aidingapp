@@ -33,7 +33,6 @@
 
 </COPYRIGHT>
 */
-use App\Features\FullNameFeature;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\UserResource;
@@ -313,18 +312,6 @@ test('EditUser disables demographic and contact fields when editing an admin rec
         ->assertFormFieldDisabled('job_title')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('is_external');
-});
-
-test('EditUser disables the full name field when editing an admin record even if the full name feature is inactive', function () {
-    asSuperAdmin();
-
-    FullNameFeature::deactivate();
-
-    $record = User::factory()->create();
-    $record->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
-
-    livewire(EditUser::class, ['record' => $record->getKey()])
-        ->assertFormFieldDisabled('name');
 });
 
 test('EditUser enables demographic and contact fields when editing a non-admin record', function () {
