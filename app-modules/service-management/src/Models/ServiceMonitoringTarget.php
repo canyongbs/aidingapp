@@ -237,17 +237,73 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
 
     public function getUptimePercentage(int $days): string
     {
+        return static::formatUptimePercentage($this->getUptimePercentageValue($days));
+    }
+
+    public static function formatUptimePercentage(int|float|null $percentage): string
+    {
+        if ($percentage === null) {
+            return 'N/A';
+        }
+
+        return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * Returns the raw uptime percentage for the given period, or `null` when there is not
+     * enough history to calculate it (mirrors the "N/A" case of getUptimePercentage()).
+     */
+    public function getUptimePercentageValue(int $days): int|float|null
+    {
         $serviceChecks = $this->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
 
         if (now()->subDays($days)->diffInDays($serviceChecks->first()?->created_at) > 1) {
-            return 'N/A';
+            return null;
         }
 
         $successes = $serviceChecks->where('succeeded', true);
 
-        $percentage = ($successes->count() / $serviceChecks->count()) * 100;
+        return ($successes->count() / $serviceChecks->count()) * 100;
+    }
 
-        return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    /**
+     * Returns a day-by-day status summary for the trailing $days days (oldest first),
+     * derived from the existing pass/fail history so it works without any new data:
+     * - 'operational' when every check that day succeeded
+     * - 'outage' when every check that day failed
+     * - 'degraded' when some checks succeeded and some failed
+     * - null when there were no checks that day (no data yet)
+     *
+     * @return array<int, array{date: string, status: string|null}>
+     */
+    public function getDailyStatusHistory(int $days): array
+    {
+        $start = now()->subDays($days - 1)->startOfDay();
+
+        $checksByDay = $this->histories()
+            ->where('created_at', '>=', $start)
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy(fn (HistoricalServiceMonitoring $history) => $history->created_at->toDateString());
+
+        return collect(range(0, $days - 1))
+            ->map(function (int $offset) use ($start, $checksByDay) {
+                $date = $start->copy()->addDays($offset);
+                $checks = $checksByDay->get($date->toDateString());
+
+                if (blank($checks)) {
+                    return ['date' => $date->toDateString(), 'status' => null];
+                }
+
+                $status = match (true) {
+                    $checks->every(fn (HistoricalServiceMonitoring $history) => $history->succeeded) => 'operational',
+                    $checks->every(fn (HistoricalServiceMonitoring $history) => ! $history->succeeded) => 'outage',
+                    default => 'degraded',
+                };
+
+                return ['date' => $date->toDateString(), 'status' => $status];
+            })
+            ->all();
     }
 
     /**

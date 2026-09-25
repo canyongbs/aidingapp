@@ -101,3 +101,70 @@ test('excludes confidential service monitoring targets unless the contact is gra
     $response = get($url);
     expect($response->json('data'))->toHaveCount(2);
 });
+
+test('search filters service monitoring targets by name', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
+    ServiceMonitoringTarget::factory()->create(['name' => 'Facebook']);
+
+    $url = URL::route(name: 'api.portal.status', absolute: false, parameters: ['search' => 'goog']);
+
+    $response = get($url);
+
+    expect($response->status())->toBe(200)
+        ->and($response->json('data'))->toHaveCount(1)
+        ->and($response->json('data.0.name'))->toBe('Google');
+});
+
+test('sorts service monitoring targets by name', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
+    ServiceMonitoringTarget::factory()->create(['name' => 'Facebook']);
+
+    $url = URL::route(name: 'api.portal.status', absolute: false, parameters: ['sort' => 'name', 'direction' => 'desc']);
+
+    $response = get($url);
+
+    expect($response->json('data.0.name'))->toBe('Google')
+        ->and($response->json('data.1.name'))->toBe('Facebook');
+});
+
+test('returns enriched status fields for each service monitoring target', function () {
+    $settings = app(PortalSettings::class);
+
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    actingAs($contact);
+
+    $target = ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
+
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+
+    $url = URL::route(name: 'api.portal.status', absolute: false);
+
+    $response = get($url);
+
+    $response->assertJsonPath('summary.status', 'operational');
+    $response->assertJsonPath('data.0.status', 'operational');
+    $response->assertJsonPath('data.0.monitor_type_label', 'Availability');
+    $response->assertJsonCount(30, 'data.0.history');
+});

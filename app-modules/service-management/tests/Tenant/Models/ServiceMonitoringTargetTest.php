@@ -56,3 +56,50 @@ it('computes is_max_latency_enabled from whether max_latency_ms is set', functio
     expect($enabled->is_max_latency_enabled)->toBeTrue()
         ->and($disabled->is_max_latency_enabled)->toBeFalse();
 });
+
+it('returns null uptime percentage when history does not cover the full requested period', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+
+    expect($target->getUptimePercentageValue(30))->toBeNull()
+        ->and($target->getUptimePercentage(30))->toBe('N/A');
+});
+
+it('computes the uptime percentage from the succeeded checks in the period', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $this->travelTo(now()->subDays(30));
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+    $this->travelBack();
+
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+    $target->histories()->create(['response' => 500, 'response_time' => 0.1, 'succeeded' => false]);
+
+    expect($target->getUptimePercentageValue(30))->toBe((2 / 3) * 100)
+        ->and($target->getUptimePercentage(30))->toBe('66.7%');
+});
+
+it('buckets daily status history into operational, degraded, outage, and no-data days', function () {
+    $target = ServiceMonitoringTarget::factory()->create();
+
+    $this->travelTo(now()->subDays(3)->startOfDay()->addHours(9));
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+
+    $this->travelTo(now()->addDay());
+    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+    $target->histories()->create(['response' => 500, 'response_time' => 0.1, 'succeeded' => false]);
+
+    $this->travelTo(now()->addDay());
+    $target->histories()->create(['response' => 500, 'response_time' => 0.1, 'succeeded' => false]);
+    $this->travelBack();
+
+    $history = $target->getDailyStatusHistory(4);
+
+    expect($history)->toHaveCount(4)
+        ->and($history[0]['status'])->toBe('operational')
+        ->and($history[1]['status'])->toBe('degraded')
+        ->and($history[2]['status'])->toBe('outage')
+        ->and($history[3]['status'])->toBeNull();
+});
