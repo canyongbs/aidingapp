@@ -40,7 +40,7 @@
     $name = $record->{Contact::displayNameKey()};
     $email = $record->email;
     $canView = ContactResource::canView($record);
-    $viewUrl = $canView ? ContactResource::getUrl('view', ['record' => $record]) : null;
+    $viewUrl = $canView ? ContactResource::getUrl("view", ["record" => $record]) : null;
     $isManaged = $record->isManaged();
     $managedTooltip = 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.';
 @endphp
@@ -90,11 +90,11 @@
             <span>{{ $email }}</span>
 
             @include(
-                'filament.tables.columns.contact.partials.copy-button',
+                "filament.tables.columns.contact.partials.copy-button",
                 [
-                    'value' => $email,
-                    'label' => 'Copy email address',
-                    'message' => 'Email address copied',
+                    "value" => $email,
+                    "label" => "Copy email address",
+                    "message" => "Email address copied",
                 ]
             )
         </div>

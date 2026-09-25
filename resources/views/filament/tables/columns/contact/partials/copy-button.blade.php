@@ -42,7 +42,8 @@
     aria-label="{{ $copyLabel }}"
     title="{{ $copyLabel }}"
     x-on:click.prevent.stop="
-        window.navigator.clipboard.writeText(@js((string) $value))
+        window.navigator.clipboard
+            .writeText(@js((string) $value))
             .then(() => {
                 $tooltip(@js($copyMessage), { theme: $store.theme, timeout: 1500 })
             })
