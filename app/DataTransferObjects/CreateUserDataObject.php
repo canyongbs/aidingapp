@@ -48,7 +48,9 @@ class CreateUserDataObject extends Data
      * @param array<int, string>|Optional $roles
      */
     public function __construct(
-        public string $name,
+        public string | Optional $name,
+        public string | Optional $firstName,
+        public string | Optional $lastName,
         public string $email,
         public bool $isExternal,
         public string | Optional $jobTitle,
@@ -66,7 +68,9 @@ class CreateUserDataObject extends Data
     public static function fromData(array $data): self
     {
         return new self(
-            name: $data['name'],
+            name: $data['name'] ?? Optional::create(),
+            firstName: $data['first_name'] ?? Optional::create(),
+            lastName: $data['last_name'] ?? Optional::create(),
             email: $data['email'],
             isExternal: $data['is_external'],
             jobTitle: $data['job_title'] ?? Optional::create(),
