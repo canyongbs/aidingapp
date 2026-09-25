@@ -34,43 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Actions;
+namespace App\Features;
 
-use App\DataTransferObjects\CreateUserDataObject;
-use App\Features\FullNameFeature;
-use App\Models\User;
-use App\Notifications\SetPasswordNotification;
-use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\DB;
-use Spatie\LaravelData\Optional;
+use App\Support\AbstractFeatureFlag;
 
-class CreateUserAction
+class FullNameFeature extends AbstractFeatureFlag
 {
-    public function execute(CreateUserDataObject $data): User
+    public function resolve(mixed $scope): mixed
     {
-        $user = DB::transaction(function () use ($data) {
-            $userData = Arr::except($data->toArray(), ['roles']);
-
-            if (FullNameFeature::active()) {
-                assert(! ($data->firstName instanceof Optional));
-                assert(! ($data->lastName instanceof Optional));
-
-                $userData['name'] = trim("{$data->firstName} {$data->lastName}");
-            }
-
-            $user = User::create($userData);
-
-            if (! ($data->roles instanceof Optional)) {
-                $user->syncRoles($data->roles);
-            }
-
-            return $user;
-        });
-
-        if (! $user->is_external) {
-            $user->notify(new SetPasswordNotification());
-        }
-
-        return $user;
+        return false;
     }
 }

@@ -38,6 +38,7 @@ namespace App\Filament\Imports;
 
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
+use App\Features\FullNameFeature;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use App\Rules\DepartmentExists;
@@ -53,13 +54,24 @@ class UserImporter extends Importer
 
     public static function getColumns(): array
     {
-        return [
-            ImportColumn::make('name')
-                ->label('Name')
-                ->exampleHeader('Name')
-                ->rules(['required', 'max:255'])
+        $columns = [
+            ImportColumn::make('first_name')
+                ->label('First Name')
+                ->exampleHeader('First Name')
+                ->rules(['required', 'string', 'max:255'])
                 ->requiredMapping()
-                ->example('Jonathan Smith'),
+                ->example('Jonathan'),
+            ImportColumn::make('last_name')
+                ->label('Last Name')
+                ->exampleHeader('Last Name')
+                ->rules(['required', 'string', 'max:255'])
+                ->requiredMapping()
+                ->example('Smith'),
+            ImportColumn::make('preferred_name')
+                ->label('Preferred Name')
+                ->exampleHeader('Preferred Name')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Jon'),
             ImportColumn::make('email')
                 ->label('Email address')
                 ->exampleHeader('Email address')
@@ -78,6 +90,11 @@ class UserImporter extends Importer
                 ->boolean()
                 ->rules(['boolean'])
                 ->example('true'),
+            ImportColumn::make('employee_id')
+                ->label('Employee ID')
+                ->exampleHeader('Employee ID')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('EMP-1001'),
             ImportColumn::make('work_number')
                 ->label('Work Number')
                 ->exampleHeader('Work Number')
@@ -89,11 +106,61 @@ class UserImporter extends Importer
                 ->integer()
                 ->rules(['nullable', 'integer', 'min:0'])
                 ->example('123'),
+            ImportColumn::make('student_id')
+                ->label('Student ID')
+                ->exampleHeader('Student ID')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('STU-1001'),
+            ImportColumn::make('school')
+                ->label('School')
+                ->exampleHeader('School')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('College of Engineering'),
+            ImportColumn::make('academic_department')
+                ->label('Academic Department')
+                ->exampleHeader('Academic Department')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Computer Science'),
+            ImportColumn::make('program')
+                ->label('Program')
+                ->exampleHeader('Program')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Bachelor of Science'),
             ImportColumn::make('mobile')
                 ->label('Mobile number')
                 ->exampleHeader('Mobile number')
                 ->rules(['nullable', 'string', 'max:255'])
                 ->example('+1 555 987 6543'),
+            ImportColumn::make('address')
+                ->label('Address')
+                ->exampleHeader('Address')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('123 Main St'),
+            ImportColumn::make('address_2')
+                ->label('Address 2')
+                ->exampleHeader('Address 2')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Suite 100'),
+            ImportColumn::make('city')
+                ->label('City')
+                ->exampleHeader('City')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('Springfield'),
+            ImportColumn::make('state')
+                ->label('State')
+                ->exampleHeader('State')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('IL'),
+            ImportColumn::make('postal_code')
+                ->label('Postal')
+                ->exampleHeader('Postal')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('62701'),
+            ImportColumn::make('country')
+                ->label('Country')
+                ->exampleHeader('Country')
+                ->rules(['nullable', 'string', 'max:255'])
+                ->example('United States'),
             ImportColumn::make('department')
                 ->label('Department')
                 ->exampleHeader('Department')
@@ -122,6 +189,23 @@ class UserImporter extends Importer
                 ->rules([new RolesExist()])
                 ->example('Authorization Admin|Super Admin'),
         ];
+
+        if (FullNameFeature::active()) {
+            return $columns;
+        }
+
+        return [
+            ImportColumn::make('name')
+                ->label('Name')
+                ->exampleHeader('Name')
+                ->rules(['required', 'string', 'max:255'])
+                ->requiredMapping()
+                ->example('Jonathan Smith'),
+            ...array_values(array_filter(
+                $columns,
+                fn (ImportColumn $column): bool => ! in_array($column->getName(), static::newDemographicColumnNames(), true),
+            )),
+        ];
     }
 
     public function resolveRecord(): ?User
@@ -144,11 +228,38 @@ class UserImporter extends Importer
         return $body;
     }
 
+    /**
+     * @return array<string>
+     */
+    protected static function newDemographicColumnNames(): array
+    {
+        return [
+            'first_name',
+            'last_name',
+            'preferred_name',
+            'employee_id',
+            'student_id',
+            'school',
+            'academic_department',
+            'program',
+            'address',
+            'address_2',
+            'city',
+            'state',
+            'postal_code',
+            'country',
+        ];
+    }
+
     protected function afterFill(): void
     {
         /** @var User $record */
         $record = $this->record;
         $record->is_external ??= true;
+
+        if (FullNameFeature::active()) {
+            $record->name = trim("{$record->first_name} {$record->last_name}");
+        }
     }
 
     protected function afterSave(): void
