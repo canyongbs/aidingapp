@@ -36,6 +36,7 @@
 
 namespace App\Http\Resources\Api\V1;
 
+use App\Features\FullNameFeature;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
@@ -53,6 +54,22 @@ class UserResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'name' => $this->resource->name,
+            ...(FullNameFeature::active() ? [
+                'first_name' => $this->resource->first_name,
+                'last_name' => $this->resource->last_name,
+                'preferred_name' => $this->resource->preferred_name,
+                'employee_id' => $this->resource->employee_id,
+                'student_id' => $this->resource->student_id,
+                'school' => $this->resource->school,
+                'academic_department' => $this->resource->academic_department,
+                'program' => $this->resource->program,
+                'address' => $this->resource->address,
+                'address_2' => $this->resource->address_2,
+                'city' => $this->resource->city,
+                'state' => $this->resource->state,
+                'postal_code' => $this->resource->postal_code,
+                'country' => $this->resource->country,
+            ] : []),
             'email' => $this->resource->email,
             'roles' => $this->resource->roles->pluck('name'),
             'department' => $this->resource->department ? [

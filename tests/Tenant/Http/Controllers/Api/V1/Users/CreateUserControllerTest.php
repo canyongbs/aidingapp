@@ -40,6 +40,7 @@ use App\Models\Authenticatable;
 use App\Models\SystemUser;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
@@ -131,6 +132,76 @@ it('creates a user with all optional fields', function () {
     expect($created->mobile)->toBe('555-9999');
     expect($created->department_id)->toBe($department->id);
     expect($created->hasRole($role))->toBeTrue();
+});
+
+it('creates a user with all newly added demographic and address fields', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.create');
+    Sanctum::actingAs($user, ['api']);
+
+    $payload = [
+        'first_name' => 'Demographic',
+        'last_name' => 'Fields',
+        'email' => 'demographic.fields@example.com',
+        'is_external' => false,
+        'preferred_name' => 'Demo',
+        'employee_id' => 'EMP-1001',
+        'student_id' => 'STU-1001',
+        'school' => 'College of Engineering',
+        'academic_department' => 'Computer Science',
+        'program' => 'Bachelor of Science',
+        'address' => '123 Main St',
+        'address_2' => 'Suite 100',
+        'city' => 'Springfield',
+        'state' => 'IL',
+        'postal_code' => '62701',
+        'country' => 'United States',
+    ];
+
+    $response = postJson(route('api.v1.users.store', absolute: false), $payload);
+
+    $response->assertCreated();
+    $response->assertJsonStructure(['data' => [
+        'id',
+        'name',
+        'first_name',
+        'last_name',
+        'preferred_name',
+        'employee_id',
+        'student_id',
+        'school',
+        'academic_department',
+        'program',
+        'address',
+        'address_2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'email',
+        'roles',
+        'department',
+        'permissions',
+    ]]);
+
+    foreach (Arr::except($payload, ['email', 'is_external']) as $key => $value) {
+        expect($response['data'][$key])->toBe($value);
+    }
+
+    $created = User::where('email', 'demographic.fields@example.com')->firstOrFail();
+
+    expect($created->preferred_name)->toBe('Demo');
+    expect($created->employee_id)->toBe('EMP-1001');
+    expect($created->student_id)->toBe('STU-1001');
+    expect($created->school)->toBe('College of Engineering');
+    expect($created->academic_department)->toBe('Computer Science');
+    expect($created->program)->toBe('Bachelor of Science');
+    expect($created->address)->toBe('123 Main St');
+    expect($created->address_2)->toBe('Suite 100');
+    expect($created->city)->toBe('Springfield');
+    expect($created->state)->toBe('IL');
+    expect($created->postal_code)->toBe('62701');
+    expect($created->country)->toBe('United States');
 });
 
 it('sends SetPasswordNotification only to non-external users', function (bool $isExternal, bool $shouldSend) {

@@ -103,9 +103,11 @@ class CreateUser extends CreateRecord
                             ->visible(fn (): bool => FullNameFeature::active()),
                         TextInput::make('name')
                             ->label('Full Name')
+                            ->required(fn (): bool => ! FullNameFeature::active())
                             ->maxLength(255)
-                            ->disabled()
+                            ->disabled(fn (): bool => FullNameFeature::active())
                             ->dehydrated(),
+
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255)

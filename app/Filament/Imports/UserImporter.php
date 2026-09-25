@@ -194,10 +194,18 @@ class UserImporter extends Importer
             return $columns;
         }
 
-        return array_values(array_filter(
-            $columns,
-            fn (ImportColumn $column): bool => ! in_array($column->getName(), static::newDemographicColumnNames(), true),
-        ));
+        return [
+            ImportColumn::make('name')
+                ->label('Name')
+                ->exampleHeader('Name')
+                ->rules(['required', 'string', 'max:255'])
+                ->requiredMapping()
+                ->example('Jonathan Smith'),
+            ...array_values(array_filter(
+                $columns,
+                fn (ImportColumn $column): bool => ! in_array($column->getName(), static::newDemographicColumnNames(), true),
+            )),
+        ];
     }
 
     public function resolveRecord(): ?User

@@ -78,6 +78,18 @@ class CreateUserRequest extends FormRequest
                 ? [
                     'first_name' => ['required', 'string', 'max:255'],
                     'last_name' => ['required', 'string', 'max:255'],
+                    'preferred_name' => ['nullable', 'string', 'max:255'],
+                    'employee_id' => ['nullable', 'string', 'max:255'],
+                    'student_id' => ['nullable', 'string', 'max:255'],
+                    'school' => ['nullable', 'string', 'max:255'],
+                    'academic_department' => ['nullable', 'string', 'max:255'],
+                    'program' => ['nullable', 'string', 'max:255'],
+                    'address' => ['nullable', 'string', 'max:255'],
+                    'address_2' => ['nullable', 'string', 'max:255'],
+                    'city' => ['nullable', 'string', 'max:255'],
+                    'state' => ['nullable', 'string', 'max:255'],
+                    'postal_code' => ['nullable', 'string', 'max:255'],
+                    'country' => ['nullable', 'string', 'max:255'],
                 ]
                 : [
                     'name' => ['required', 'string', 'max:255'],
