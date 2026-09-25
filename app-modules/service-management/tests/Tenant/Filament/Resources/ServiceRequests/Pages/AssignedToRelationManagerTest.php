@@ -1044,12 +1044,10 @@ test('the assigned to table only displays the Name column and not a toggleable I
         'user_id' => $manager->getKey(),
     ])->create();
 
-    $component = livewire(AssignedToRelationManager::class, [
+    livewire(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
-        ->assertTableColumnExists('user.name');
-
-    expect(array_keys($component->instance()->getTable()->getColumns()))
-        ->not->toContain('id');
+        ->assertSee($manager->name)
+        ->assertDontSee(__('filament-tables::table.actions.column_manager.label'));
 });
