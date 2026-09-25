@@ -84,6 +84,18 @@ it('caps the named types and counts the remainder', function () {
     );
 });
 
+it('uses the singular form when exactly one type is unnamed', function () {
+    $status = ServiceRequestStatus::factory()->create();
+
+    foreach (['A Type', 'B Type', 'C Type', 'D Type'] as $name) {
+        ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => $name]);
+    }
+
+    expect(describeUsageOf($status))->toBe(
+        'This status is used for automatic status changes by 4 service request types: A Type, B Type, C Type and 1 other. Archiving will not stop that automation.'
+    );
+});
+
 it('counts how many of several statuses are automated', function () {
     $automated = ServiceRequestStatus::factory()->create();
     $alsoAutomated = ServiceRequestStatus::factory()->create();
@@ -94,6 +106,17 @@ it('counts how many of several statuses are automated', function () {
 
     expect(describeUsageOf($automated, $alsoAutomated, $notAutomated))->toBe(
         '2 of the selected statuses are used for automatic status changes by 2 service request types: Password Reset, VPN Access Request. Archiving will not stop that automation.'
+    );
+});
+
+it('uses the singular verb when only one of several statuses is automated', function () {
+    $automated = ServiceRequestStatus::factory()->create();
+    $notAutomated = ServiceRequestStatus::factory()->create();
+
+    ServiceRequestType::factory()->for($automated, 'automatedStatus')->create(['name' => 'Password Reset']);
+
+    expect(describeUsageOf($automated, $notAutomated))->toBe(
+        '1 of the selected statuses is used for automatic status changes by 1 service request type: Password Reset. Archiving will not stop that automation.'
     );
 });
 

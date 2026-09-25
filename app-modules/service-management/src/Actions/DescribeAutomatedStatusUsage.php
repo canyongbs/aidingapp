@@ -74,21 +74,32 @@ class DescribeAutomatedStatusUsage
             return null;
         }
 
-        $automatedStatusCount = ServiceRequestStatus::query()
+        $statusPhrase = $this->describeStatuses($statusIds);
+
+        $typePhrase = $typeNames->count() === 1
+            ? '1 service request type'
+            : "{$typeNames->count()} service request types";
+
+        return "{$statusPhrase} used for automatic status changes by {$typePhrase}: {$this->listTypeNames($typeNames)}. Archiving will not stop that automation.";
+    }
+
+    /**
+     * @param Collection<int, string> $statusIds
+     */
+    private function describeStatuses(Collection $statusIds): string
+    {
+        if ($statusIds->count() === 1) {
+            return 'This status is';
+        }
+
+        $automatedCount = ServiceRequestStatus::query()
             ->whereKey($statusIds)
             ->whereHas('serviceRequestTypes')
             ->count();
 
-        return sprintf(
-            '%s used for automatic status changes by %s: %s. Archiving will not stop that automation.',
-            $statusIds->count() === 1
-                ? 'This status is'
-                : "{$automatedStatusCount} of the selected statuses are",
-            $typeNames->count() === 1
-                ? '1 service request type'
-                : "{$typeNames->count()} service request types",
-            $this->listTypeNames($typeNames),
-        );
+        return $automatedCount === 1
+            ? '1 of the selected statuses is'
+            : "{$automatedCount} of the selected statuses are";
     }
 
     /**
@@ -100,8 +111,12 @@ class DescribeAutomatedStatusUsage
 
         $remaining = $typeNames->count() - $named->count();
 
-        return $remaining > 0
-            ? $named->implode(', ') . " and {$remaining} others"
-            : $named->implode(', ');
+        if ($remaining === 0) {
+            return $named->implode(', ');
+        }
+
+        return $named->implode(', ') . ($remaining === 1
+            ? ' and 1 other'
+            : " and {$remaining} others");
     }
 }

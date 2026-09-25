@@ -39,6 +39,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages\
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -259,6 +260,37 @@ describe('archiving', function () {
             ->callAction(TestAction::make('archive')->table()->bulk());
 
         expect($archived->refresh()->archived_at->toDateTimeString())->toBe($originalArchivedAt->toDateTimeString());
+    });
+
+    it('warns that bulk archiving will not stop service request type automations', function () {
+        asSuperAdmin();
+
+        $automated = ServiceRequestStatus::factory()->create();
+        $alsoAutomated = ServiceRequestStatus::factory()->create();
+        $notAutomated = ServiceRequestStatus::factory()->create();
+
+        ServiceRequestType::factory()->for($automated, 'automatedStatus')->create(['name' => 'Password Reset']);
+        ServiceRequestType::factory()->for($alsoAutomated, 'automatedStatus')->create(['name' => 'VPN Access Request']);
+
+        $component = livewire(ListServiceRequestStatuses::class)
+            ->selectTableRecords([$automated->getKey(), $alsoAutomated->getKey(), $notAutomated->getKey()])
+            ->mountAction(TestAction::make('archive')->table()->bulk());
+
+        expect($component->instance()->getMountedAction()->getModalDescription())
+            ->toBe('2 of the selected statuses are used for automatic status changes by 2 service request types: Password Reset, VPN Access Request. Archiving will not stop that automation.');
+    });
+
+    it('does not warn when no selected status is automated by a service request type', function () {
+        asSuperAdmin();
+
+        $statuses = ServiceRequestStatus::factory()->count(2)->create();
+
+        $component = livewire(ListServiceRequestStatuses::class)
+            ->selectTableRecords($statuses->modelKeys())
+            ->mountAction(TestAction::make('archive')->table()->bulk());
+
+        expect($component->instance()->getMountedAction()->getModalDescription())
+            ->not->toContain('automatic status changes');
     });
 
     it('does not offer the bulk delete action', function () {

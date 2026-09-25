@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Pages;
 
+use AidingApp\ServiceManagement\Actions\DescribeAutomatedStatusUsage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -101,7 +102,10 @@ class ListServiceRequestStatuses extends ListRecords
             ->toolbarActions($isArchivingActive ? [
                 BulkActionGroup::make([
                     ArchiveBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
+                        ->authorizeIndividualRecords('delete')
+                        ->modalDescription(fn (ArchiveBulkAction $action): ?string => app(DescribeAutomatedStatusUsage::class)(
+                            $action->getSelectedRecordsQuery(),
+                        )),
                 ]),
             ] : [])
             ->filters([
