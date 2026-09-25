@@ -57,7 +57,7 @@ function makeManagedContact(): Contact
     return app(ManagedContactService::class)->enable($managedUser, $type->getKey());
 }
 
-it('hides the edit action for a managed contact in the list', function () {
+it('does not render standalone view or edit actions in the list', function () {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -67,8 +67,10 @@ it('hides the edit action for a managed contact in the list', function () {
     $unmanaged = Contact::factory()->create();
 
     livewire(ListContacts::class)
-        ->assertActionHidden(TestAction::make('edit')->table($managed))
-        ->assertActionVisible(TestAction::make('edit')->table($unmanaged));
+        ->assertActionDoesNotExist(TestAction::make('view')->table($managed))
+        ->assertActionDoesNotExist(TestAction::make('edit')->table($managed))
+        ->assertActionDoesNotExist(TestAction::make('view')->table($unmanaged))
+        ->assertActionDoesNotExist(TestAction::make('edit')->table($unmanaged));
 });
 
 it('shows a lock action instead of edit on the view page of a managed contact', function () {
