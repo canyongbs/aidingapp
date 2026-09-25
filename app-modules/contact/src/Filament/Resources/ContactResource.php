@@ -42,7 +42,6 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactAlerts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
@@ -76,7 +75,6 @@ class ContactResource extends Resource
             AssetManagement::class,
             ManageContactFiles::class,
             ManageContactEngagement::class,
-            ManageContactAlerts::class,
             ContactEngagementTimeline::class,
         ]);
     }
@@ -101,7 +99,6 @@ class ContactResource extends Resource
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
             'edit' => EditContact::route('/{record}/edit'),
-            'manage-alerts' => ManageContactAlerts::route('/{record}/concerns'),
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
             'view' => ViewContact::route('/{record}'),

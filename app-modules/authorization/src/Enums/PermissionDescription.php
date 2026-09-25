@@ -38,7 +38,6 @@ namespace AidingApp\Authorization\Enums;
 
 enum PermissionDescription: string
 {
-    case Alert = 'This permission group enables the display and management of the Alert feature in the tertiary navigation group View Contact. Permission options include create, view, update, and delete alerts.';
     case Asset = 'This permission group enables the display and management of the Asset feature in the primary navigation group Service Management. Permission options include create, view, update, and delete assets.';
     case AssetCheckIn = 'This permission group enables the display and management of the Asset Check in feature, a primary navigation group. Permission options include view asset check ins. Note: Users cannot access this feature.';
     case AssetCheckOut = 'This permission group enables the display and management of the Asset Check out feature, a primary navigation group. Permission options include view asset check outs. Note: Users cannot access this feature.';
