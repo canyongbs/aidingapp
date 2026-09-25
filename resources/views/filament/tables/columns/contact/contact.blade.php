@@ -39,26 +39,51 @@
 
     $name = $record->{Contact::displayNameKey()};
     $email = $record->email;
-    $viewUrl = ContactResource::getUrl('view', ['record' => $record]);
+    $canView = ContactResource::canView($record);
+    $viewUrl = $canView ? ContactResource::getUrl('view', ['record' => $record]) : null;
     $isManaged = $record->isManaged();
     $managedTooltip = 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.';
 @endphp
 
 <div class="fi-ta-text grid w-full gap-y-1 text-sm">
-    <a
-        href="{{ $viewUrl }}"
-        class="flex items-center gap-x-1.5 font-semibold text-gray-950 hover:text-primary-600 hover:underline dark:text-white dark:hover:text-primary-400"
-    >
-        @if ($isManaged)
-            <x-filament::icon
-                icon="heroicon-m-lock-closed"
-                class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+    @if ($canView)
+        <a
+            href="{{ $viewUrl }}"
+            @if ($isManaged)
                 x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
-            />
-        @endif
+            @endif
+            class="flex items-center gap-x-1.5 font-semibold text-gray-950 hover:text-primary-600 hover:underline dark:text-white dark:hover:text-primary-400"
+        >
+            @if ($isManaged)
+                <x-filament::icon
+                    icon="heroicon-m-lock-closed"
+                    class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+                />
 
-        <span>{{ $name }}</span>
-    </a>
+                <span class="fi-sr-only">{{ $managedTooltip }}</span>
+            @endif
+
+            <span>{{ $name }}</span>
+        </a>
+    @else
+        <div
+            @if ($isManaged)
+                x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
+            @endif
+            class="flex items-center gap-x-1.5 font-semibold text-gray-950 dark:text-white"
+        >
+            @if ($isManaged)
+                <x-filament::icon
+                    icon="heroicon-m-lock-closed"
+                    class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+                />
+
+                <span class="fi-sr-only">{{ $managedTooltip }}</span>
+            @endif
+
+            <span>{{ $name }}</span>
+        </div>
+    @endif
 
     @if (filled($email))
         <div class="flex items-center gap-x-1.5 text-gray-500 dark:text-gray-400">
@@ -68,6 +93,7 @@
                 'filament.tables.columns.contact.partials.copy-button',
                 [
                     'value' => $email,
+                    'label' => 'Copy email address',
                     'message' => 'Email address copied',
                 ]
             )

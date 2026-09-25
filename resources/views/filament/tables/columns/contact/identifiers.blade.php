@@ -50,6 +50,7 @@
                 'filament.tables.columns.contact.partials.copy-button',
                 [
                     'value' => $employeeId,
+                    'label' => 'Copy employee ID',
                     'message' => 'Employee ID copied',
                 ]
             )
@@ -67,6 +68,7 @@
                 'filament.tables.columns.contact.partials.copy-button',
                 [
                     'value' => $studentId,
+                    'label' => 'Copy student ID',
                     'message' => 'Student ID copied',
                 ]
             )
