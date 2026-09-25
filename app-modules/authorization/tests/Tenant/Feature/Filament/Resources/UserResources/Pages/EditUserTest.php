@@ -373,13 +373,49 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['first_name' => null],
             ['first_name' => 'required'],
         ],
+        'first_name max' => [
+            ['first_name' => str()->random(256)],
+            ['first_name' => 'max'],
+        ],
         'last name required' => [
             ['last_name' => null],
             ['last_name' => 'required'],
         ],
-        'name max' => [
-            ['name' => str()->random(256)],
-            ['name' => 'max'],
+        'last_name max' => [
+            ['last_name' => str()->random(256)],
+            ['last_name' => 'max'],
+        ],
+        'preferred_name max' => [
+            ['preferred_name' => str()->random(256)],
+            ['preferred_name' => 'max'],
+        ],
+        'employee_id max' => [
+            ['employee_id' => str()->random(256)],
+            ['employee_id' => 'max'],
+        ],
+        'job_title max' => [
+            ['job_title' => str()->random(256)],
+            ['job_title' => 'max'],
+        ],
+        'work_extension numeric' => [
+            ['work_extension' => 'invalid'],
+            ['work_extension' => 'numeric'],
+        ],
+        'student_id max' => [
+            ['student_id' => str()->random(256)],
+            ['student_id' => 'max'],
+        ],
+        'school max' => [
+            ['school' => str()->random(256)],
+            ['school' => 'max'],
+        ],
+        'academic_department max' => [
+            ['academic_department' => str()->random(256)],
+            ['academic_department' => 'max'],
+        ],
+        'program max' => [
+            ['program' => str()->random(256)],
+            ['program' => 'max'],
         ],
         'email required' => [
             ['email' => null],
@@ -393,13 +429,33 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['email' => 'invalidEmail'],
             ['email' => 'email'],
         ],
-        'work_extension numeric' => [
-            ['work_extension' => 'invalid'],
-            ['work_extension' => 'numeric'],
+        'address max' => [
+            ['address' => str()->random(256)],
+            ['address' => 'max'],
         ],
-        'job_title max' => [
-            ['job_title' => str()->random(256)],
-            ['job_title' => 'max'],
+        'address_2 max' => [
+            ['address_2' => str()->random(256)],
+            ['address_2' => 'max'],
+        ],
+        'city max' => [
+            ['city' => str()->random(256)],
+            ['city' => 'max'],
+        ],
+        'state max' => [
+            ['state' => str()->random(256)],
+            ['state' => 'max'],
+        ],
+        'postal_code max' => [
+            ['postal_code' => str()->random(256)],
+            ['postal_code' => 'max'],
+        ],
+        'country max' => [
+            ['country' => str()->random(256)],
+            ['country' => 'max'],
+        ],
+        'managed_contact_type_id required when managed contact enabled' => [
+            ['is_managed_contact' => true, 'managed_contact_type_id' => null],
+            ['managed_contact_type_id' => 'required'],
         ],
     ]
 );
