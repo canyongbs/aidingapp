@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Models;
 
-use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactFactory;
 use AidingApp\Contact\Filament\Resources\ContactResource;
@@ -205,14 +204,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         )
             ->using(EngagementFileEntities::class)
             ->withTimestamps();
-    }
-
-    /**
-     * @return HasMany<Alert, $this>
-     */
-    public function alerts(): HasMany
-    {
-        return $this->hasMany(Alert::class, 'concern_id');
     }
 
     public static function displayNameKey(): string

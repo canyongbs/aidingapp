@@ -42,7 +42,6 @@ use AidingApp\Ai\Models\AiThread;
 use AidingApp\Ai\Models\LegacyAiMessageLog;
 use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Audit;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
@@ -164,7 +163,6 @@ return [
     LegacyAiMessageLog::class,
     PortalAssistantMessage::class,
     PortalAssistantThread::class,
-    Alert::class,
     Audit::class,
     Permission::class,
     PermissionGroup::class,

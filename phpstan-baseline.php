@@ -90,12 +90,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/ai/src/Http/Controllers/AssistantWidget/SendMessageController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeStatus" method on "AidingApp\\\\Alert\\\\Models\\\\Alert" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/alert/src/Models/Alert.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\Audit\\\\Actions\\\\Finders\\\\AuditableModels" defines disallowed public method "all"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
     'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
     'count' => 1,
