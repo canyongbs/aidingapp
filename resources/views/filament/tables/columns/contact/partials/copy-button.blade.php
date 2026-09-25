@@ -32,15 +32,23 @@
     </COPYRIGHT>
 --}}
 @php
+    $copyLabel = $label ?? 'Copy';
     $copyMessage = $message ?? 'Copied';
+    $copyFailedMessage = $failureMessage ?? 'Failed to copy';
 @endphp
 
 <button
     type="button"
-    title="Copy"
+    aria-label="{{ $copyLabel }}"
+    title="{{ $copyLabel }}"
     x-on:click.prevent.stop="
         window.navigator.clipboard.writeText(@js((string) $value))
-        $tooltip(@js($copyMessage), { theme: $store.theme, timeout: 1500 })
+            .then(() => {
+                $tooltip(@js($copyMessage), { theme: $store.theme, timeout: 1500 })
+            })
+            .catch(() => {
+                $tooltip(@js($copyFailedMessage), { theme: $store.theme, timeout: 1500 })
+            })
     "
     class="fi-copyable shrink-0 text-gray-400 transition hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
 >

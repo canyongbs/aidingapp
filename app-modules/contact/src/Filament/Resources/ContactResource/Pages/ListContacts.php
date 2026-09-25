@@ -70,14 +70,16 @@ class ListContacts extends ListRecords
         }
 
         return $table
-            ->modifyQueryUsing(fn (Builder $query): Builder => $query->withCount([
-                'serviceRequests',
-                'serviceRequests as open_service_requests_count' => fn (Builder $query): Builder => $query->whereRelation(
-                    'status',
-                    'classification',
-                    SystemServiceRequestClassification::Open,
-                ),
-            ]))
+            ->modifyQueryUsing(fn (Builder $query): Builder => $query
+                ->with(['type', 'organization'])
+                ->withCount([
+                    'serviceRequests',
+                    'serviceRequests as open_service_requests_count' => fn (Builder $query): Builder => $query->whereRelation(
+                        'status',
+                        'classification',
+                        SystemServiceRequestClassification::Open,
+                    ),
+                ]))
             ->columns([
                 ViewColumn::make('contact')
                     ->label('Contact')
