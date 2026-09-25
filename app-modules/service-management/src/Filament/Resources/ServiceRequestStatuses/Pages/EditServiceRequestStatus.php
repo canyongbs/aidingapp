@@ -45,6 +45,7 @@ use App\Features\ServiceRequestStatusArchivingFeature;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
 use Filament\Actions\RestoreAction;
 use Filament\Forms\Components\Select;
@@ -90,11 +91,12 @@ class EditServiceRequestStatus extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            ArchiveAction::make()
-                ->visible(fn (): bool => ServiceRequestStatusArchivingFeature::active())
-                ->modalDescription(fn (ServiceRequestStatus $record): ?string => app(DescribeAutomatedStatusUsage::class)(
-                    ServiceRequestStatus::query()->whereKey($record->getKey()),
-                )),
+            ServiceRequestStatusArchivingFeature::active()
+                ? ArchiveAction::make()
+                    ->modalDescription(fn (ServiceRequestStatus $record): ?string => app(DescribeAutomatedStatusUsage::class)(
+                        ServiceRequestStatus::query()->whereKey($record->getKey()),
+                    ))
+                : DeleteAction::make(),
             UnarchiveServiceRequestStatusAction::make(),
             RestoreAction::make(),
             ForceDeleteAction::make(),

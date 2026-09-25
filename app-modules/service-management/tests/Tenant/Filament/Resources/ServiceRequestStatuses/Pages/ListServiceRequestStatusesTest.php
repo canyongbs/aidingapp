@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Servic
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
@@ -300,5 +301,19 @@ describe('archiving', function () {
 
         livewire(ListServiceRequestStatuses::class)
             ->assertActionDoesNotExist(TestAction::make('delete')->table()->bulk());
+    });
+
+    // TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): delete this test — it covers the
+    // inactive branch, which no longer exists once the flag is removed.
+    it('offers the bulk delete action instead when `ServiceRequestStatusArchivingFeature` is inactive', function () {
+        ServiceRequestStatusArchivingFeature::deactivate();
+
+        asSuperAdmin();
+
+        ServiceRequestStatus::factory()->create();
+
+        livewire(ListServiceRequestStatuses::class)
+            ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk())
+            ->assertActionVisible(TestAction::make('delete')->table()->bulk());
     });
 });
