@@ -57,6 +57,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagemen
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowPortalProjectController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestSecretController;
@@ -174,6 +175,9 @@ Route::prefix('api')
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');
+                Route::get('/status/{serviceMonitoringTarget}', ShowServiceMonitorStatusController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->name('status.show');
                 Route::get('/assets', AssetManagementPortalController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('assets.index');
