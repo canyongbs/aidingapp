@@ -36,12 +36,12 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
 use App\Filament\Resources\Users\Actions\AssignRolesBulkAction;
 use App\Filament\Resources\Users\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -51,14 +51,30 @@ use Filament\Actions\ExportAction;
 use Filament\Actions\ImportAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
+use Filament\Support\Enums\FontWeight;
+use Filament\Support\Enums\VerticalAlignment;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
 use STS\FilamentImpersonate\Actions\Impersonate;
 
 class ListUsers extends ListRecords
 {
+    /**
+     * A non-blank, invisible marker used as a column's state when its primary value is
+     * empty but its description (badge/groups) is not, so Filament renders the
+     * description instead of short-circuiting to the placeholder. Formatted away to an
+     * empty string before display.
+     */
+    private const string BLANK_DESCRIPTION_STATE = "\u{200B}";
+
     protected static string $resource = UserResource::class;
 
     protected ?string $heading = 'Users';
@@ -66,26 +82,100 @@ class ListUsers extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(fn (Builder $query) => $query->with([
+                'department',
+                'groups',
+                'managedContact.type',
+                'manageableServiceRequestTypes',
+                'auditableServiceRequestTypes',
+            ]))
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
+                    ->label('User')
+                    ->weight(FontWeight::Bold)
+                    ->searchable(['name', 'email'])
+                    ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                    ->iconColor(fn (User $record): string => $record->presenceStatus()->getColor())
+                    ->tooltip(fn (User $record): string => 'Presence: ' . $record->presenceStatus()->getLabel())
+                    ->extraAttributes(fn (User $record): array => [
+                        'aria-label' => "{$record->name} (Presence: {$record->presenceStatus()->getLabel()})",
+                    ])
+                    ->description(fn (User $record): View => view('filament.tables.columns.copyable-description', [
+                        'text' => $record->email,
+                        'tooltip' => 'Copy Email Address',
+                        'copyMessage' => 'Email address copied to clipboard',
+                    ])),
+                TextColumn::make('job_title')
+                    ->label('Service Details')
+                    ->state(fn (User $record): ?string => filled($record->job_title)
+                        ? $record->job_title
+                        : (filled(self::serviceDetailsBadgeLabel($record)) ? self::BLANK_DESCRIPTION_STATE : null))
+                    ->formatStateUsing(fn (?string $state): string => $state === self::BLANK_DESCRIPTION_STATE ? '' : (string) $state)
                     ->searchable()
-                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
-                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
-                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
-                TextColumn::make('email')
-                    ->label('Email address')
-                    ->searchable(),
-                TextColumn::make('job_title'),
-                TextColumn::make('created_at')
-                    ->label('Created At')
+                    ->placeholder('—')
+                    ->verticallyAlignCenter(fn (User $record): bool => blank($record->job_title) && filled(self::serviceDetailsBadgeLabel($record)))
+                    ->description(fn (User $record): ?View => filled($label = self::serviceDetailsBadgeLabel($record))
+                        ? view('filament.tables.columns.badge-description', [
+                            'label' => $label,
+                            'tooltip' => self::serviceDetailsTooltip($record),
+                        ])
+                        : null),
+                TextColumn::make('department.name')
+                    ->label('Associations')
+                    ->icon(fn (User $record): ?string => filled($record->department?->name) ? 'heroicon-o-building-office-2' : null)
+                    ->state(fn (User $record): ?string => filled($record->department?->name)
+                        ? $record->department->name
+                        : (filled(self::groupsLabel($record)) ? self::BLANK_DESCRIPTION_STATE : null))
+                    ->formatStateUsing(fn (?string $state): string => $state === self::BLANK_DESCRIPTION_STATE ? '' : (string) $state)
+                    ->placeholder('—')
+                    ->verticallyAlignCenter(fn (User $record): bool => filled($record->department?->name) && blank(self::groupsLabel($record)))
+                    ->tooltip(fn (User $record): ?string => filled($record->department?->name)
+                        ? "Department(s): {$record->department->name}"
+                        : null)
+                    ->description(fn (User $record): ?View => filled($label = self::groupsLabel($record))
+                        ? view('filament.tables.columns.icon-text-description', [
+                            'icon' => 'heroicon-o-user-group',
+                            'label' => $label,
+                            'tooltip' => $record->groups->isNotEmpty()
+                                ? 'Group(s): ' . $record->groups->pluck('name')->implode(', ')
+                                : null,
+                        ])
+                        : null),
+                IconColumn::make('managed_contact')
+                    ->label('Managed Contact')
+                    ->state(fn (User $record): bool => $record->managedContact !== null)
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->verticalAlignment(VerticalAlignment::Center)
+                    ->tooltip(fn (User $record): ?string => $record->managedContact
+                        ? 'Contact Type: ' . ($record->managedContact->type->name ?? '—')
+                        : null),
+                TextColumn::make('last_activity_at')
+                    ->label('Last Login')
                     ->dateTime()
-                    ->sortable(),
-                TextColumn::make('updated_at')
-                    ->label('Updated At')
-                    ->dateTime()
-                    ->sortable(),
+                    ->placeholder('Never'),
+                TextColumn::make('preferred_name')
+                    ->hidden(),
+                TextColumn::make('employee_id')
+                    ->hidden(),
+                TextColumn::make('work_number')
+                    ->hidden(),
+                TextColumn::make('work_extension')
+                    ->hidden(),
+                TextColumn::make('mobile')
+                    ->hidden(),
+                TextColumn::make('student_id')
+                    ->hidden(),
+            ])
+            ->searchable([
+                'preferred_name',
+                'employee_id',
+                'work_number',
+                fn (Builder $query, string $search): Builder => $query
+                    ->whereRaw('CAST(work_extension AS TEXT) ILIKE ?', ["%{$search}%"]),
+                'mobile',
+                'student_id',
             ])
             ->filters([
                 SelectFilter::make('department')
@@ -141,5 +231,58 @@ class ListUsers extends ListRecords
                 ->authorize('import', User::class),
             CreateAction::make(),
         ];
+    }
+
+    private static function serviceDetailsBadgeLabel(User $record): ?string
+    {
+        $count = self::serviceRequestTypes($record)->count();
+
+        if ($count === 0) {
+            return null;
+        }
+
+        return "{$count} " . Str::plural('Service Area', $count);
+    }
+
+    private static function serviceDetailsTooltip(User $record): ?Htmlable
+    {
+        $groups = [];
+
+        if ($record->manageableServiceRequestTypes->isNotEmpty()) {
+            $groups[] = 'Manager (Agent): ' . e($record->manageableServiceRequestTypes->pluck('name')->implode(', '));
+        }
+
+        if ($record->auditableServiceRequestTypes->isNotEmpty()) {
+            $groups[] = 'Auditor: ' . e($record->auditableServiceRequestTypes->pluck('name')->implode(', '));
+        }
+
+        if ($groups === []) {
+            return null;
+        }
+
+        return new HtmlString(implode('<br />', $groups));
+    }
+
+    /**
+     * @return Collection<int, ServiceRequestType>
+     */
+    private static function serviceRequestTypes(User $record): Collection
+    {
+        return $record->manageableServiceRequestTypes
+            ->merge($record->auditableServiceRequestTypes)
+            ->unique('id');
+    }
+
+    private static function groupsLabel(User $record): ?string
+    {
+        if ($record->groups->isEmpty()) {
+            return null;
+        }
+
+        $remaining = $record->groups->count() - 1;
+
+        $label = $record->groups->first()->name;
+
+        return $remaining > 0 ? "{$label} +{$remaining}" : $label;
     }
 }
