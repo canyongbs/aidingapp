@@ -55,8 +55,9 @@
             theme: $store.theme,
         }"
         x-on:click.prevent.stop="
-            window.navigator.clipboard.writeText(@js($text))
-            $tooltip(@js($copyMessage), { timeout: 1500 })
+            window.navigator.clipboard.writeText(@js($text)).then(() => {
+                $tooltip(@js($copyMessage), { timeout: 1500 })
+            })
         "
     >
         @svg('heroicon-o-clipboard-document', 'h-4 w-4')

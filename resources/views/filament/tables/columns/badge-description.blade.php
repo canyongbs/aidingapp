@@ -37,9 +37,16 @@
     
     Note: `<x-filament::badge>` already renders a `span` root element, which
     keeps this safe to embed inside Filament's `<p class="fi-ta-text-description">`
-    wrapper (phrasing content only).
+    wrapper (phrasing content only). Since a plain `span` is not natively
+    focusable, it is given `tabindex="0"` whenever a tooltip is present so
+    keyboard users can Tab to it and trigger the tooltip via focus, not just
+    mouse hover.
 --}}
 
-<x-filament::badge :color="$color ?? 'primary'" :tooltip="$tooltip ?? null">
+@php
+    $hasTooltip = filled($tooltip ?? null);
+@endphp
+
+<x-filament::badge :color="$color ?? 'primary'" :tooltip="$tooltip ?? null" :tabindex="$hasTooltip ? '0' : null">
     {{ $label }}
 </x-filament::badge>

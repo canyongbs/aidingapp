@@ -430,10 +430,10 @@ describe('service details column', function () {
 
         $user = User::factory()->create(['job_title' => null]);
 
-        $managedType = ServiceRequestType::factory()->create();
+        $managedType = ServiceRequestType::factory()->create(['name' => 'Manager <script>alert("xss")</script> & "Sons"']);
         $managedType->managerUsers()->attach($user);
 
-        $auditedType = ServiceRequestType::factory()->create();
+        $auditedType = ServiceRequestType::factory()->create(['name' => 'Auditor <b>Team</b> & "Co"']);
         $auditedType->auditorUsers()->attach($user);
 
         $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
@@ -442,7 +442,9 @@ describe('service details column', function () {
         $tooltip = $column->getDescriptionBelow()->getData()['tooltip'];
 
         expect($tooltip)->toBeInstanceOf(Htmlable::class)
-            ->and($tooltip->toHtml())->toBe("Manager (Agent): {$managedType->name}<br />Auditor: {$auditedType->name}");
+            ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
+            ->and($tooltip->toHtml())->not->toContain('<script>')
+            ->and($tooltip->toHtml())->not->toContain('<b>');
     });
 });
 

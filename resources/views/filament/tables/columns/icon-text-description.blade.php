@@ -40,7 +40,9 @@
     Note: this partial's root element must remain phrasing content (e.g. `span`,
     `svg`) because Filament always wraps a text column's description in a
     `<p class="fi-ta-text-description">`, which per the HTML content model only
-    accepts phrasing content.
+    accepts phrasing content. Since a plain `span` is not natively focusable, it
+    is given `tabindex="0"` whenever a tooltip is present so keyboard users can
+    Tab to it and trigger the tooltip via focus, not just mouse hover.
 --}}
 
 @php
@@ -52,6 +54,7 @@
 <span
     class="inline-flex items-center gap-1"
     @if ($hasTooltip)
+        tabindex="0"
         x-tooltip="{
             content: @js($tooltip),
             theme: $store.theme,
