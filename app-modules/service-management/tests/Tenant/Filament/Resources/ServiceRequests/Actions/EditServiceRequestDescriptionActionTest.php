@@ -49,7 +49,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-
 test('editDescription action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 

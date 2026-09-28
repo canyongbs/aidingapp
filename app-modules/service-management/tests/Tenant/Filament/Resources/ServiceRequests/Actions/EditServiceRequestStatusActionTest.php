@@ -56,7 +56,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-
 test('editStatus action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -284,7 +283,6 @@ test('editStatus action is gated with proper feature access control for direct u
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-
 test('editStatus requires status_id', function () {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -302,7 +300,6 @@ test('editStatus requires status_id', function () {
         ])
         ->assertHasFormErrors(['status_id' => 'required']);
 });
-
 
 test('can update the service request status', function () {
     $serviceRequest = ServiceRequest::factory()->state([
