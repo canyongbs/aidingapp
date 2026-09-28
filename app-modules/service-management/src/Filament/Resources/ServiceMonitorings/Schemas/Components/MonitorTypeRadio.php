@@ -40,6 +40,8 @@ use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Radio;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 
 class MonitorTypeRadio
 {
@@ -63,6 +65,13 @@ class MonitorTypeRadio
             ->enum(MonitorType::class)
             ->default(MonitorType::Availability)
             ->live()
+            ->afterStateUpdated(function (?MonitorType $state, Set $set, Get $get): void {
+                if ($state !== MonitorType::ApiEndpoint || filled($get('successful_status_codes'))) {
+                    return;
+                }
+
+                $set('successful_status_codes', [200]);
+            })
             ->inline()
             ->columnSpanFull();
     }
