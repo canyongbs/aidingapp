@@ -46,8 +46,8 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Livewire;
-use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\Width;
@@ -88,7 +88,7 @@ class ViewContactAction
                                     || AssetCheckInRelationManager::canViewForRecord($contact, ViewContact::class)
                             )
                             ->schema([
-                                Section::make('Checked Out Assets')
+                                Group::make()
                                     ->visible(fn (): bool => AssetCheckOutRelationManager::canViewForRecord($contact, ViewContact::class))
                                     ->schema([
                                         Livewire::make(AssetCheckOutRelationManager::class, [
@@ -97,7 +97,7 @@ class ViewContactAction
                                         ])
                                             ->key(AssetCheckOutRelationManager::class),
                                     ]),
-                                Section::make('Returned Assets')
+                                Group::make()
                                     ->visible(fn (): bool => AssetCheckInRelationManager::canViewForRecord($contact, ViewContact::class))
                                     ->schema([
                                         Livewire::make(AssetCheckInRelationManager::class, [
