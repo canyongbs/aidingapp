@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
@@ -106,12 +105,11 @@ test('editTitle action is hidden for user without update permission', function (
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editTitle')->schemaComponent('request.title::section')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editTitle')->schemaComponent('request.title::section'));
 });
 
 test('editTitle requires title', function () {

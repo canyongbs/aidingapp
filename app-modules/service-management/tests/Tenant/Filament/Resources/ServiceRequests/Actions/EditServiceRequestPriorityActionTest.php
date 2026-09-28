@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
@@ -106,12 +105,11 @@ test('editPriority action is hidden for user without update permission', functio
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('editPriority action is hidden when the service request has no priority', function () {
@@ -124,12 +122,11 @@ test('editPriority action is hidden when the service request has no priority', f
 
     asSuperAdmin();
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('editPriority action is visible when the service request priority is soft-deleted', function () {

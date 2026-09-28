@@ -43,7 +43,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
@@ -107,12 +106,11 @@ test('editCategory action is hidden for user without update permission', functio
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editCategory')->schemaComponent('category')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editCategory')->schemaComponent('category'));
 });
 
 test('editCategory requires category', function () {

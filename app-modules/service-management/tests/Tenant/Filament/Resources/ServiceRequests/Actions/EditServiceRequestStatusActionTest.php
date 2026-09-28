@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use App\Models\User;
 use App\Settings\LicenseSettings;
-use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Notification;
 
@@ -113,12 +112,11 @@ test('editStatus action is hidden for user without update permission', function 
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is hidden for a department auditor who is not a manager of the service request type', function () {
@@ -146,12 +144,11 @@ test('editStatus action is hidden for a department auditor who is not a manager 
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is hidden for a direct auditor user who is not a manager of the service request type', function () {
@@ -175,12 +172,11 @@ test('editStatus action is hidden for a direct auditor user who is not a manager
 
     actingAs($user);
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is gated with proper feature access control', function () {

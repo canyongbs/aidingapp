@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
-use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
@@ -106,12 +105,11 @@ test('editDescription action is hidden for user without update permission', func
 
     actingAs($user->refresh());
 
-    $component = livewire(ViewServiceRequest::class, [
+    livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])->assertSuccessful();
-
-    expect(fn () => $component->assertActionHidden(TestAction::make('editDescription')->schemaComponent('request.description::section')))
-        ->toThrow(ActionNotResolvableException::class);
+    ])
+        ->assertSuccessful()
+        ->assertActionDoesNotExist(TestAction::make('editDescription')->schemaComponent('request.description::section'));
 });
 
 test('editDescription requires close_details to be a string', function () {
