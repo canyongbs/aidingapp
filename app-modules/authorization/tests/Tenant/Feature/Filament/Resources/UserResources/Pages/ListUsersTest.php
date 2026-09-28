@@ -38,6 +38,7 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Resources\Users\Pages\ListUsers;
+use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -478,7 +479,7 @@ describe('associations column', function () {
             ->and($column->getTooltip())->toBe("Department(s): {$department->name}");
     });
 
-    it('renders the groups badge and does not center the column when there is no department but groups exist', function () {
+    it('renders the groups badge and centers the column when there is no department but groups exist', function () {
         asSuperAdmin();
 
         $group = Group::factory()->create(['name' => 'VIP']);
@@ -489,7 +490,7 @@ describe('associations column', function () {
         $column->record($user);
 
         expect($column->formatState($column->getState()))->toBe('')
-            ->and($column->getVerticalAlignment())->toBeNull()
+            ->and($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
             ->and($column->getIcon($column->getState()))->toBeNull();
 
         $description = $column->getDescriptionBelow();
@@ -510,6 +511,37 @@ describe('associations column', function () {
         $column->record($user);
 
         expect($column->getVerticalAlignment())->toBeNull();
+    });
+});
+
+describe('last login column', function () {
+    it('shows Never as the placeholder when the user has never logged in', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_activity_at' => null]);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('last_activity_at', null, $user)
+            ->assertTableColumnHasDescription('last_activity_at', null, $user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_activity_at');
+        $column->record($user);
+
+        expect($column->getPlaceholder())->toBe('Never');
+    });
+
+    it('shows the date as the state and the time as the description', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_activity_at' => now()]);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_activity_at');
+        $column->record($user);
+
+        $timezone = $column->getTimezone();
+
+        expect($column->formatState($column->getState()))->toBe($user->last_activity_at->clone()->timezone($timezone)->format('M j, Y'))
+            ->and($column->getDescriptionBelow())->toBe($user->last_activity_at->clone()->timezone($timezone)->format('g:i a'));
     });
 });
 

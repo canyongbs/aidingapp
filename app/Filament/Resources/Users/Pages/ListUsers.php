@@ -129,7 +129,7 @@ class ListUsers extends ListRecords
                         : (filled(self::groupsLabel($record)) ? self::BLANK_DESCRIPTION_STATE : null))
                     ->formatStateUsing(fn (?string $state): string => $state === self::BLANK_DESCRIPTION_STATE ? '' : (string) $state)
                     ->placeholder('—')
-                    ->verticallyAlignCenter(fn (User $record): bool => filled($record->department?->name) && blank(self::groupsLabel($record)))
+                    ->verticallyAlignCenter(fn (User $record): bool => filled($record->department?->name) !== filled(self::groupsLabel($record)))
                     ->tooltip(fn (User $record): ?string => filled($record->department?->name)
                         ? "Department(s): {$record->department->name}"
                         : null)
@@ -154,8 +154,12 @@ class ListUsers extends ListRecords
                         : null),
                 TextColumn::make('last_activity_at')
                     ->label('Last Login')
-                    ->dateTime()
-                    ->placeholder('Never'),
+                    ->date()
+                    ->placeholder('Never')
+                    ->description(fn (TextColumn $column, User $record): ?string => $record->last_activity_at
+                        ?->clone()
+                        ->timezone($column->getTimezone())
+                        ->format('g:i a')),
                 TextColumn::make('preferred_name')
                     ->hidden(),
                 TextColumn::make('employee_id')
