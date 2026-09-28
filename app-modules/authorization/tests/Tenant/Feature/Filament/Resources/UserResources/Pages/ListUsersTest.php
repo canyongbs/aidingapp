@@ -36,11 +36,13 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
-use Filament\Forms\Components\Select;
+use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Contracts\Support\Htmlable;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
@@ -340,4 +342,197 @@ it('can search users by email', function () {
         ->searchTable('searchable@example.com')
         ->assertCanSeeTableRecords([$matchingUser])
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+});
+
+describe('name column', function () {
+    it('shows the Online presence label in the tooltip and aria-label for an active user', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_activity_at' => now()]);
+
+        $component = livewire(ListUsers::class)
+            ->assertTableColumnHasExtraAttributes('name', [
+                'aria-label' => "{$user->name} (Presence: Online)",
+            ], $user);
+
+        $column = $component->instance()->getTable()->getColumn('name');
+        $column->record($user);
+
+        expect($column->getTooltip())->toBe('Presence: Online');
+    });
+
+    it('shows the copy email tooltip and message on the email description', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create();
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('name');
+        $column->record($user);
+
+        expect($column->getDescriptionBelow()->getData())->toMatchArray([
+            'text' => $user->email,
+            'tooltip' => 'Copy Email Address',
+            'copyMessage' => 'Email address copied to clipboard',
+        ]);
+    });
+});
+
+describe('service details column', function () {
+    it('shows the job title as the state when it is set', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => 'Software Engineer']);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('job_title', 'Software Engineer', $user)
+            ->assertTableColumnFormattedStateSet('job_title', 'Software Engineer', $user)
+            ->assertTableColumnHasDescription('job_title', null, $user);
+    });
+
+    it('shows the placeholder and does not center the column when the job title and service areas are both blank', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('job_title', null, $user)
+            ->assertTableColumnHasDescription('job_title', null, $user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        expect($column->getPlaceholder())->toBe('—')
+            ->and($column->getVerticalAlignment())->toBeNull();
+    });
+
+    it('renders the service details badge and centers the column when the job title is blank but service areas exist', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        $managedType = ServiceRequestType::factory()->create();
+        $managedType->managerUsers()->attach($user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        expect($column->formatState($column->getState()))->toBe('')
+            ->and($column->getVerticalAlignment())->toBe(VerticalAlignment::Center);
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description)->not->toBeNull()
+            ->and($description->getData()['label'])->toBe('1 Service Area');
+    });
+
+    it('renders the service details tooltip as HTML listing manager and auditor service areas', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        $managedType = ServiceRequestType::factory()->create();
+        $managedType->managerUsers()->attach($user);
+
+        $auditedType = ServiceRequestType::factory()->create();
+        $auditedType->auditorUsers()->attach($user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        $tooltip = $column->getDescriptionBelow()->getData()['tooltip'];
+
+        expect($tooltip)->toBeInstanceOf(Htmlable::class)
+            ->and($tooltip->toHtml())->toBe("Manager (Agent): {$managedType->name}<br />Auditor: {$auditedType->name}");
+    });
+});
+
+describe('associations column', function () {
+    it('shows the building icon only when the user has a department', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $userWithDepartment = User::factory()->for($department)->create();
+        $userWithoutDepartment = User::factory()->create(['department_id' => null]);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+
+        $column->record($userWithDepartment);
+        expect($column->getIcon($column->getState()))->toBe('heroicon-o-building-office-2');
+
+        $column->record($userWithoutDepartment);
+        expect($column->getIcon($column->getState()))->toBeNull();
+    });
+
+    it('centers the column and shows the department tooltip when only the department is populated', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $user = User::factory()->for($department)->create();
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
+            ->and($column->getTooltip())->toBe("Department(s): {$department->name}");
+    });
+
+    it('renders the groups badge and does not center the column when there is no department but groups exist', function () {
+        asSuperAdmin();
+
+        $group = Group::factory()->create(['name' => 'VIP']);
+        $user = User::factory()->create(['department_id' => null]);
+        $user->groups()->attach($group);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->formatState($column->getState()))->toBe('')
+            ->and($column->getVerticalAlignment())->toBeNull()
+            ->and($column->getIcon($column->getState()))->toBeNull();
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description)->not->toBeNull()
+            ->and($description->getData()['label'])->toBe('VIP');
+    });
+
+    it('does not center the column when both the department and groups are populated', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $group = Group::factory()->create();
+        $user = User::factory()->for($department)->create();
+        $user->groups()->attach($group);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->getVerticalAlignment())->toBeNull();
+    });
+});
+
+describe('hidden column search', function () {
+    it('can search users by preferred name', function () {
+        asSuperAdmin();
+
+        $matchingUser = User::factory()->create(['preferred_name' => 'Ace']);
+        $nonMatchingUser = User::factory()->create(['preferred_name' => 'Bee']);
+
+        livewire(ListUsers::class)
+            ->searchTable('Ace')
+            ->assertCanSeeTableRecords([$matchingUser])
+            ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+    });
+
+    it('can search users by work extension', function () {
+        asSuperAdmin();
+
+        $matchingUser = User::factory()->create(['work_extension' => 12345]);
+        $nonMatchingUser = User::factory()->create(['work_extension' => 98765]);
+
+        livewire(ListUsers::class)
+            ->searchTable('12345')
+            ->assertCanSeeTableRecords([$matchingUser])
+            ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+    });
 });
