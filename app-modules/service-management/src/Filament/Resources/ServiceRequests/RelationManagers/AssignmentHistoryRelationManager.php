@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Models\SystemUser;
 use App\Models\User;
 use App\Settings\DisplaySettings;
+use Carbon\CarbonInterface;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -84,6 +85,10 @@ class AssignmentHistoryRelationManager extends RelationManager
             return null;
         };
 
+        $localAssignedAt = fn (ServiceRequestAssignment $record): CarbonInterface => $record->assigned_at
+            ->copy()
+            ->setTimezone($timezone);
+
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->with(['user.department', 'serviceRequestStatus'])
@@ -119,14 +124,8 @@ class AssignmentHistoryRelationManager extends RelationManager
                     ->placeholder('—'),
                 TextColumn::make('assigned_at')
                     ->label('Date')
-                    ->state(fn (ServiceRequestAssignment $record): string => $record->assigned_at
-                        ->copy()
-                        ->setTimezone($timezone)
-                        ->format('M j, Y'))
-                    ->description(fn (ServiceRequestAssignment $record): string => $record->assigned_at
-                        ->copy()
-                        ->setTimezone($timezone)
-                        ->format('g:i a (T)')),
+                    ->state(fn (ServiceRequestAssignment $record): string => $localAssignedAt($record)->format('M j, Y'))
+                    ->description(fn (ServiceRequestAssignment $record): string => $localAssignedAt($record)->format('g:i a (T)')),
             ]);
     }
 }
