@@ -38,7 +38,6 @@ use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Resources\Users\Pages\ListUsers;
-use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
