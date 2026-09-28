@@ -172,3 +172,19 @@ test('ViewUser shows the Department section for non-admin records', function () 
     livewire(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldIsVisible('department_id');
 });
+
+test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function () {
+    $actingUser = User::factory()->create(['timezone' => 'America/New_York']);
+    asSuperAdmin($actingUser);
+
+    $record = User::factory()->create();
+    $record->timestamps = false;
+    $record->created_at = '2026-01-15 12:00:00';
+    $record->save();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful()
+        ->assertSee('Jan 15, 2026')
+        ->assertSee('7:00 am (EST)')
+        ->assertSee('fi-datetime-description', false);
+});
