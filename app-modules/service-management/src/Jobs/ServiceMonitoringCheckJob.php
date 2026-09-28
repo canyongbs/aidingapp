@@ -38,22 +38,27 @@ namespace AidingApp\ServiceManagement\Jobs;
 
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\Notification\Notifications\Channels\MailChannel;
+use AidingApp\ServiceManagement\Enums\AuthType;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
+use App\Features\ServiceMonitoringApiEndpointFeature;
+use App\Features\ServiceMonitoringAuthTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Http\Client\ConnectionException;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
+use InvalidArgumentException;
 
 class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
 {
@@ -90,6 +95,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         match ($this->serviceMonitoringTarget->monitor_type) {
             MonitorType::Availability => $this->handleAvailability(),
             MonitorType::KeywordMatch => $this->handleKeywordMatch(),
+            MonitorType::ApiEndpoint => $this->handleApiEndpoint(),
         };
     }
 
@@ -137,10 +143,73 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
     }
 
+    /**
+     * Build the base HTTP client for this monitor's requests, applying auth so every
+     * request verb (current and future) inherits it without repeating the logic.
+     */
+    protected function buildRequest(bool $followRedirects = true): PendingRequest
+    {
+        $request = ($followRedirects ? Http::maxRedirects(15) : Http::withoutRedirecting())
+            ->connectTimeout(10)
+            ->timeout($this->requestTimeoutInSeconds());
+
+        if (ServiceMonitoringAuthTypeFeature::active() && $this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
+            $request = $request->withBasicAuth(
+                $this->serviceMonitoringTarget->auth_username ?? '',
+                $this->serviceMonitoringTarget->auth_password ?? '',
+            );
+        }
+
+        return $request;
+    }
+
+    /**
+     * A fixed timeout would either cut off a request before a generous configured
+     * max_latency_ms could ever be evaluated, or leave a queue worker blocked far longer than
+     * intended for a monitor with no latency threshold set. Scale the request timeout to the
+     * configured threshold (plus a buffer for the max_latency_ms check itself to run) when one
+     * exists, and fall back to a fixed default otherwise (matching the timeout other
+     * external-URL check jobs in this app use, e.g. CheckKnowledgeBaseArticleLinksJob).
+     */
+    protected function requestTimeoutInSeconds(): int
+    {
+        if ($this->serviceMonitoringTarget->monitor_type === MonitorType::ApiEndpoint
+            && $this->serviceMonitoringTarget->is_max_latency_enabled
+            && $this->serviceMonitoringTarget->max_latency_ms) {
+            return (int) ceil($this->serviceMonitoringTarget->max_latency_ms / 1000) + 5;
+        }
+
+        return 15;
+    }
+
+    /**
+     * follow_redirection only exists once this tenant's migration has run (the same one that
+     * activates ServiceMonitoringApiEndpointFeature) -- but Availability and Keyword Match checks
+     * can run against records far older than this feature, on a tenant that hasn't picked up that
+     * migration yet. Reading the column before then would silently return null (Eloquent returns
+     * null for an attribute the underlying table doesn't have), crashing buildRequest()'s
+     * non-nullable parameter. Fall back to the same unconditional "always follow redirects"
+     * behavior these two checks always had until the flag confirms the column is there.
+     *
+     * API Endpoint checks don't need this guard: a record can only ever have
+     * monitor_type === ApiEndpoint if that tenant's migration has already run, since that's the
+     * only way the value could get set in the first place.
+     *
+     * TODO: Cleanup Task (service-monitoring-api-endpoint-feature): once the flag is removed
+     * (meaning every tenant has run the migration), replace this whole method with a direct
+     * $this->serviceMonitoringTarget->follow_redirection read in both call sites below.
+     */
+    protected function followRedirectsForPreExistingMonitorTypes(): bool
+    {
+        return ServiceMonitoringApiEndpointFeature::active()
+            ? $this->serviceMonitoringTarget->follow_redirection
+            : true;
+    }
+
     protected function handleAvailability(): void
     {
         try {
-            $response = Http::maxRedirects(15)
+            $response = $this->buildRequest($this->followRedirectsForPreExistingMonitorTypes())
                 ->head($this->serviceMonitoringTarget->domain);
 
             $this->handleResponses($response->status(), $response->transferStats->getTransferTime() ?? 0, $response->status() === 200);
@@ -161,7 +230,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
         }
 
         try {
-            $response = Http::maxRedirects(15)
+            $response = $this->buildRequest($this->followRedirectsForPreExistingMonitorTypes())
                 ->get($this->serviceMonitoringTarget->domain);
 
             if (filled($challengePageFailure = (new ChallengePageDetector())->detect($response->headers(), $response->body()))) {
@@ -216,6 +285,89 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             }
             $this->handleResponses(523, 0, false);
         }
+    }
+
+    protected function handleApiEndpoint(): void
+    {
+        try {
+            $request = $this->buildRequest($this->serviceMonitoringTarget->follow_redirection);
+
+            $headers = collect($this->serviceMonitoringTarget->request_headers ?? [])
+                ->filter(fn (array $header): bool => filled($header['name'] ?? null))
+                ->mapWithKeys(fn (array $header): array => [$header['name'] => $header['value'] ?? ''])
+                ->all();
+
+            if ($headers !== []) {
+                $request = $request->withHeaders($headers);
+            }
+
+            $httpMethod = $this->serviceMonitoringTarget->http_method;
+
+            $options = [];
+
+            if ($httpMethod->supportsRequestBody() && filled($this->serviceMonitoringTarget->request_body)) {
+                // Send the already-validated JSON string as the raw body rather than
+                // json_decode()-ing then letting Guzzle's 'json' option re-encode it: that
+                // round trip can change a valid payload (e.g. '{}' becomes '[]' since PHP has no
+                // empty-object/empty-array distinction, and large integers can lose precision).
+                $options = $this->serviceMonitoringTarget->is_request_body_json
+                    ? [
+                        'body' => $this->serviceMonitoringTarget->request_body,
+                        'headers' => ['Content-Type' => 'application/json'],
+                    ]
+                    : [
+                        'body' => $this->serviceMonitoringTarget->request_body,
+                        'headers' => ['Content-Type' => 'application/x-www-form-urlencoded'],
+                    ];
+            }
+
+            $response = $request->send($httpMethod->value, $this->serviceMonitoringTarget->domain, $options);
+
+            $responseTime = $response->transferStats->getTransferTime() ?? 0;
+
+            $failures = [];
+
+            // ValidHttpStatusCodes deliberately normalizes a scalar into an array at the
+            // validation layer (see its docblock), but doesn't guarantee the persisted value
+            // is one -- guard here too so a stored scalar can't crash the queued check. PHPStan
+            // trusts the model cast's declared array type, but that's exactly what a value
+            // written outside Eloquent (e.g. direct database access) can violate.
+            $storedStatusCodes = $this->serviceMonitoringTarget->successful_status_codes ?? [];
+            // @phpstan-ignore function.alreadyNarrowedType
+            $successfulStatusCodes = array_map('intval', is_array($storedStatusCodes) ? $storedStatusCodes : [$storedStatusCodes]);
+
+            if (! in_array($response->status(), $successfulStatusCodes, true)) {
+                $failures[] = "Unexpected status code: {$response->status()}";
+            }
+
+            // $responseTime is in seconds (Guzzle's TransferStats convention, matching how response_time
+            // is stored and reported everywhere else); max_latency_ms is milliseconds, so convert before comparing.
+            if ($this->serviceMonitoringTarget->is_max_latency_enabled && $this->exceedsMaxLatency($responseTime)) {
+                $failures[] = "Response exceeded maximum allowed latency of {$this->serviceMonitoringTarget->max_latency_ms}ms";
+            }
+
+            $this->handleResponses($response->status(), $responseTime, $failures === [], $failures);
+        } catch (ConnectionException $exception) {
+            if (Str::doesntContain($exception->getMessage(), 'Could not resolve host')) {
+                report($exception);
+            }
+            $this->handleResponses(523, 0, false);
+        } catch (InvalidArgumentException $exception) {
+            // Thrown by the HTTP client when a configured header name/value isn't valid to send over
+            // the wire. Form validation prevents saving one this way going forward, but the record's
+            // headers could still end up invalid some other way (e.g. direct database access), so
+            // record it as a failed check rather than letting the job itself fail/retry.
+            $this->handleResponses(0, 0, false, ["Invalid request configuration: {$exception->getMessage()}"]);
+        }
+    }
+
+    /**
+     * Extracted so the millisecond/second unit conversion can be tested in isolation:
+     * transferStats reports response time in seconds, while max_latency_ms is milliseconds.
+     */
+    protected function exceedsMaxLatency(float $responseTimeInSeconds): bool
+    {
+        return ($responseTimeInSeconds * 1000) > $this->serviceMonitoringTarget->max_latency_ms;
     }
 
     protected function hasReadableContentType(?string $contentType): bool

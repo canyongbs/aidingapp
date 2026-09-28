@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\PasswordFormFieldFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Encryption\Encrypter;
@@ -128,18 +127,6 @@ it('does not reveal an unattached secret', function () {
     $manager = user(permissions: ['service_request.*.update']);
     $secret = Secret::factory()->for($manager, 'author')->create();
 
-    actingAs($manager);
-
-    postJson(route('service-request.reveal-secret'), [
-        'secret_id' => $secret->getKey(),
-    ])->assertNotFound();
-});
-
-it('does not reveal secrets when the feature is inactive', function () {
-    $manager = user(permissions: ['service_request.*.update']);
-    $secret = revealableSecretFor($manager);
-
-    PasswordFormFieldFeature::deactivate();
     actingAs($manager);
 
     postJson(route('service-request.reveal-secret'), [

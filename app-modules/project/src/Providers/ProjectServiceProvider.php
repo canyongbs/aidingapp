@@ -43,7 +43,6 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
 use AidingApp\Project\ProjectPlugin;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -66,7 +65,6 @@ class ProjectServiceProvider extends ServiceProvider
             'project' => Project::class,
             'project_file' => ProjectFile::class,
             'project_milestone' => ProjectMilestone::class,
-            'project_milestone_status' => ProjectMilestoneStatus::class,
         ]);
 
         Livewire::component('project::livewire.pipeline-entry-kanban', PipelineEntryKanban::class);

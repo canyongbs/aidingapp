@@ -56,8 +56,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestClosed;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestStatusChanged;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use App\Enums\Feature;
-use App\Features\PasswordFormFieldFeature;
-use App\Features\SlaWaitingExclusionFeature;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Model;
@@ -115,7 +113,7 @@ class ServiceRequestObserver
             $serviceRequest->unsetRelation('status');
 
             if ($serviceRequest->status->classification === SystemServiceRequestClassification::Closed) {
-                if (SlaWaitingExclusionFeature::active() && $serviceRequest->exists) {
+                if ($serviceRequest->exists) {
                     $end = $serviceRequest->status_updated_at;
 
                     $seconds = (int) round($serviceRequest->created_at->diffInSeconds($end));
@@ -205,10 +203,6 @@ class ServiceRequestObserver
 
     public function forceDeleted(ServiceRequest $serviceRequest): void
     {
-        if (! PasswordFormFieldFeature::active()) {
-            return;
-        }
-
         $serviceRequest->secrets()->delete();
     }
 

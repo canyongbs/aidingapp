@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -88,37 +87,20 @@ class AdvisoryUpdatesRelationManager extends RelationManager
         return $table
             ->columns([
                 IdColumn::make(),
-                ...(AdvisoryUpdateTitleAndDateFeature::active()
-                    ? [
-                        TextColumn::make('title')
-                            ->label('Title')
-                            ->description(fn (AdvisoryUpdate $record): string => $record->update)
-                            ->searchable()
-                            ->color('primary')
-                            ->action($this->getViewOrEditAdvisoryUpdateAction()),
-                    ]
-                    : [
-                        TextColumn::make('update')
-                            ->label('Update')
-                            ->words(6),
-                    ]),
+                TextColumn::make('title')
+                    ->label('Title')
+                    ->description(fn (AdvisoryUpdate $record): string => $record->update)
+                    ->searchable()
+                    ->color('primary')
+                    ->action($this->getViewOrEditAdvisoryUpdateAction()),
                 IconColumn::make('internal')
                     ->boolean(),
-                ...(AdvisoryUpdateTitleAndDateFeature::active()
-                    ? [
-                        TextColumn::make('date')
-                            ->label('Date')
-                            ->dateTime()
-                            ->sortable(),
-                    ]
-                    : [
-                        TextColumn::make('created_at')
-                            ->sortable(),
-                        TextColumn::make('updated_at')
-                            ->sortable(),
-                    ]),
+                TextColumn::make('date')
+                    ->label('Date')
+                    ->dateTime()
+                    ->sortable(),
             ])
-            ->defaultSort(AdvisoryUpdateTitleAndDateFeature::active() ? 'date' : 'created_at', 'desc')
+            ->defaultSort('date', 'desc')
             ->headerActions([
                 CreateAction::make()
                     ->visible(fn (): bool => $this->getOwnerRecord()->status->classification !== SystemAdvisoryStatusClassification::Resolved)
@@ -181,7 +163,6 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->required()
                     ->maxLength(255)
                     ->string()
-                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
                     ->columnSpanFull(),
                 Textarea::make('update')
                     ->label('Description')
@@ -197,7 +178,6 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->label('Date')
                     ->required()
                     ->default(now())
-                    ->visible(AdvisoryUpdateTitleAndDateFeature::active())
                     ->columnSpanFull(),
             ]);
     }

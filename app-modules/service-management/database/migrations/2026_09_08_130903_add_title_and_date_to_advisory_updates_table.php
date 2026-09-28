@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AdvisoryUpdateTitleAndDateFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -52,16 +51,12 @@ return new class () extends Migration {
                 $table->timestamp('date');
                 $table->index(['advisory_id', 'date']);
             });
-
-            AdvisoryUpdateTitleAndDateFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            AdvisoryUpdateTitleAndDateFeature::deactivate();
-
             Schema::table('advisory_updates', function (Blueprint $table) {
                 $table->dropIndex(['advisory_id', 'date']);
                 $table->dropColumn(['title', 'date']);

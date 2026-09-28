@@ -37,7 +37,6 @@
 use AidingApp\Group\Filament\Resources\Groups\GroupResource;
 use AidingApp\Group\Filament\Resources\Groups\Pages\ListGroups;
 use AidingApp\Group\Models\Group;
-use App\Features\GroupManagementFeature;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -63,6 +62,16 @@ it('can list groups with their descriptions and member counts', function () {
         ->assertSee('Peer mentoring cohort');
 });
 
+it('can render groups with a null description', function () {
+    asSuperAdmin();
+
+    $group = Group::factory()->create(['description' => null]);
+
+    livewire(ListGroups::class)
+        ->assertCanSeeTableRecords([$group])
+        ->assertSuccessful();
+});
+
 it('can search and sort groups by name', function () {
     asSuperAdmin();
 
@@ -82,13 +91,6 @@ it('can search and sort groups by name', function () {
 describe('authorization', function () {
     it('denies access without the `group.view-any` permission', function () {
         actingAs(User::factory()->create());
-
-        get(GroupResource::getUrl())->assertForbidden();
-    });
-
-    it('denies access when Group management is inactive', function () {
-        asSuperAdmin();
-        GroupManagementFeature::deactivate();
 
         get(GroupResource::getUrl())->assertForbidden();
     });

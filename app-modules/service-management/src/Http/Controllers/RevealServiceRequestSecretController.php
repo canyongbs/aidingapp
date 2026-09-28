@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Http\Controllers;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PasswordFormFieldFeature;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
@@ -49,8 +48,6 @@ class RevealServiceRequestSecretController
 {
     public function __invoke(Request $request): JsonResponse
     {
-        abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
-
         $data = $request->validate([
             'secret_id' => ['required', 'uuid'],
         ]);

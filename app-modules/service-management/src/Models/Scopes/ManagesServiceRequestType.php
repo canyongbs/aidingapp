@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
-use App\Features\ServiceRequestTypeGroupAssignmentsFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -59,10 +58,8 @@ class ManagesServiceRequestType
                 })
                 ->orWhereHas('manageableServiceRequestTypes', function (Builder $query): void {
                     $query->where('service_request_type_id', $this->serviceRequestTypeId);
-                });
-
-            if (ServiceRequestTypeGroupAssignmentsFeature::active()) {
-                $query->orWhereHas('groups', function (Builder $query): void {
+                })
+                ->orWhereHas('groups', function (Builder $query): void {
                     $query->whereIn(
                         'groups.id',
                         ServiceRequestTypeManagerGroup::query()
@@ -70,7 +67,6 @@ class ManagesServiceRequestType
                             ->where('service_request_type_id', $this->serviceRequestTypeId),
                     );
                 });
-            }
         });
     }
 }

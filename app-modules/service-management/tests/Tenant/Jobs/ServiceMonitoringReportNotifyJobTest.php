@@ -50,11 +50,12 @@ it('sends notification to direct report users', function () {
     Notification::fake();
 
     $user = User::factory()->create();
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($user, [], 'reportUsers')
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo(
         $user,
@@ -66,11 +67,12 @@ it('sends notification to direct report contacts', function () {
     Notification::fake();
 
     $contact = Contact::factory()->create();
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($contact, [], 'reportContacts')
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo(
         $contact,
@@ -84,11 +86,12 @@ it('sends notification to users from report departments', function () {
     $department = Department::factory()->create();
     $user = User::factory()->for($department, 'department')->create();
 
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($department, [], 'reportDepartments')
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo(
         $user,
@@ -103,12 +106,13 @@ it('merges users from direct users and departments without duplicates', function
     $user1 = User::factory()->for($department, 'department')->create();
     $user2 = User::factory()->for($department, 'department')->create();
 
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($user1, [], 'reportUsers')
         ->hasAttached($department, [], 'reportDepartments')
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo($user1, ServiceMonitoringReportNotification::class);
     Notification::assertSentTo($user2, ServiceMonitoringReportNotification::class);
@@ -122,7 +126,8 @@ it('sends notifications based on configured channels', function (bool $emailEnab
     $user = User::factory()->create();
     $contact = Contact::factory()->create();
 
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($user, [], 'reportUsers')
         ->hasAttached($contact, [], 'reportContacts')
         ->create([
@@ -130,7 +135,7 @@ it('sends notifications based on configured channels', function (bool $emailEnab
             'is_reported_via_database' => $databaseEnabled,
         ]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     if ($expectedChannel === null) {
         Notification::assertNothingSent();
@@ -174,10 +179,11 @@ it('sends notifications based on configured channels', function (bool $emailEnab
 it('does not send notification when no recipients are configured', function () {
     Notification::fake();
 
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertNothingSent();
 });
@@ -190,13 +196,14 @@ it('sends to all recipient types simultaneously', function () {
     $department = Department::factory()->create();
     $departmentUser = User::factory()->for($department, 'department')->create();
 
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->active()
         ->hasAttached($user, [], 'reportUsers')
         ->hasAttached($contact, [], 'reportContacts')
         ->hasAttached($department, [], 'reportDepartments')
         ->create(['is_reported_via_email' => true]);
 
-    (new ServiceMonitoringReportNotifyJob($serviceMonitorTarget))->handle();
+    (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo($user, ServiceMonitoringReportNotification::class);
     Notification::assertSentTo($contact, ServiceMonitoringReportNotification::class);
@@ -272,17 +279,4 @@ it('delivers for a configuration-backed reportable whose target is confidential 
     (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
     Notification::assertSentTo($user, ServiceMonitoringReportNotification::class);
-});
-
-it('restores a job serialized under the previous serviceMonitoringTarget property name', function () {
-    $target = ServiceMonitoringTarget::factory()->create();
-
-    $values = (new ServiceMonitoringReportNotifyJob($target))->__serialize();
-    $values['serviceMonitoringTarget'] = $values['reportable'];
-    unset($values['reportable']);
-
-    $restored = new ServiceMonitoringReportNotifyJob($target);
-    $restored->__unserialize($values);
-
-    expect($restored->reportable->is($target))->toBeTrue();
 });

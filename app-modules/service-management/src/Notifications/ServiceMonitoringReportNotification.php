@@ -58,9 +58,7 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
 {
     use ChecksServiceMonitoringTargetVisibility;
     use Queueable;
-    use SerializesModels {
-        SerializesModels::__unserialize as private unserializeModels;
-    }
+    use SerializesModels;
 
     /**
      * @var array<CarbonInterface>
@@ -73,24 +71,6 @@ class ServiceMonitoringReportNotification extends BaseNotification implements Sh
     private ?array $statistics = null;
 
     public function __construct(public ServiceMonitoringTarget $serviceMonitoringTarget, public ServiceMonitoringReportFrequency $frequency, public string $channel) {}
-
-    /**
-     * TODO: Cleanup Task (service-monitoring-report-configurations-feature): delete this override
-     * entirely once `ServiceMonitoringTarget::$report_frequency` is dropped.
-     *
-     * Restore notifications queued by the previous release, which had no `frequency` property.
-     *
-     * @param array<string, mixed> $values
-     */
-    public function __unserialize(array $values): void
-    {
-        $this->unserializeModels($values);
-
-        if (! isset($this->frequency)) {
-            $this->frequency = $this->serviceMonitoringTarget->report_frequency
-                ?? ServiceMonitoringReportFrequency::Monthly;
-        }
-    }
 
     /**
      * @return array<int, string>

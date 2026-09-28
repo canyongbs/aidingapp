@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\OrganizationNameUniquenessFeature;
-use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -43,42 +41,28 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    use FixesDuplicateNames;
-
     private string $table = 'organizations';
 
     private string $column = 'name';
 
-    private int $chunkSize = 500;
-
-    private bool $usesSoftDeletes = true;
-
     public function up(): void
     {
         DB::transaction(function () {
-            $this->fixDuplicates();
-
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
 
             Schema::table($this->table, function (Blueprint $table) {
                 $table->uniqueIndex($this->column, 'organizations_name_unique')
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
-
-            OrganizationNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            OrganizationNameUniquenessFeature::deactivate();
-
             DB::statement('DROP INDEX IF EXISTS organizations_name_unique');
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
     }
 };

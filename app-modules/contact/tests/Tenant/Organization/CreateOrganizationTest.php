@@ -39,10 +39,8 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrgani
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
-use App\Features\OrganizationNameUniquenessFeature;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
-use Illuminate\Database\UniqueConstraintViolationException;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -293,32 +291,6 @@ test('the organization name of a soft-deleted organization can be reused', funct
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
-
-    $undoRepeaterFake();
-});
-
-test('does not apply the unique form rule when the feature is disabled', function () {
-    OrganizationNameUniquenessFeature::deactivate();
-
-    $undoRepeaterFake = Repeater::fake();
-
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('organization.view-any');
-    $user->givePermissionTo('organization.create');
-
-    Organization::factory()->create(['name' => 'Acme Corporation']);
-
-    $request = collect(CreateOrganizationRequestFactory::new()->state([
-        'name' => 'Acme Corporation',
-    ])->create());
-
-    actingAs($user);
-
-    expect(fn () => livewire(CreateOrganization::class)
-        ->fillForm($request->toArray())
-        ->call('create'))
-        ->toThrow(UniqueConstraintViolationException::class);
 
     $undoRepeaterFake();
 });

@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\StoreServiceRequestSecret;
 use AidingApp\ServiceManagement\Http\Requests\StoreServiceRequestSecretRequest;
-use App\Features\PasswordFormFieldFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use SensitiveParameter;
@@ -51,8 +50,6 @@ class StoreServiceRequestSecretController extends Controller
         #[SensitiveParameter] StoreServiceRequestSecretRequest $request,
         StoreServiceRequestSecret $storeServiceRequestSecret,
     ): JsonResponse {
-        abort_unless(PasswordFormFieldFeature::active(), Response::HTTP_NOT_FOUND);
-
         $contact = auth('contact')->user();
 
         if (! $contact instanceof Contact) {

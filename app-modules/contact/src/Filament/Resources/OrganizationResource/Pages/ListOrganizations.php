@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Exports\OrganizationExporter;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
-use App\Features\OrganizationNameUniquenessFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -97,13 +96,11 @@ class ListOrganizations extends ListRecords
         return [
             ImportAction::make()
                 ->importer(OrganizationImporter::class)
-                ->authorize('import', Organization::class)
-                ->visible(fn (): bool => OrganizationNameUniquenessFeature::active()),
+                ->authorize('import', Organization::class),
             ExportAction::make()
                 ->label('Export')
                 ->exporter(OrganizationExporter::class)
-                ->authorize('import', Organization::class)
-                ->visible(fn (): bool => OrganizationNameUniquenessFeature::active()),
+                ->authorize('import', Organization::class),
             CreateAction::make(),
         ];
     }

@@ -38,7 +38,6 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\PasswordFormFieldFeature;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
@@ -191,19 +190,6 @@ it('does not replace a secret that is already attached', function () {
 
     expect($secret->fresh())->not->toBeNull()
         ->and(Secret::query()->count())->toBe(1);
-});
-
-it('does not store secrets when the feature is inactive', function () {
-    PasswordFormFieldFeature::deactivate();
-
-    $contact = Contact::factory()->create();
-
-    actingAs($contact, 'contact')->postJson(
-        route('api.portal.service-request.store-secret'),
-        ['value' => 'service-request-password'],
-    )->assertNotFound();
-
-    expect(Secret::query()->exists())->toBeFalse();
 });
 
 it('rate limits secret storage per contact', function () {

@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\ProjectMilestoneStatusRemovedFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
@@ -50,16 +49,12 @@ return new class () extends Migration {
             });
 
             Schema::dropIfExists('project_milestone_statuses');
-
-            ProjectMilestoneStatusRemovedFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            ProjectMilestoneStatusRemovedFeature::deactivate();
-
             Schema::create('project_milestone_statuses', function (Blueprint $table) {
                 $table->uuid('id')->primary();
                 $table->string('name');

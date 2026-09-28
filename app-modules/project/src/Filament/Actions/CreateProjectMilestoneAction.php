@@ -38,11 +38,8 @@ namespace AidingApp\Project\Filament\Actions;
 
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\ProjectMilestoneStatus;
-use App\Features\ProjectMilestoneStatusRemovedFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
-use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Notifications\Notification;
@@ -85,17 +82,6 @@ class CreateProjectMilestoneAction
             Textarea::make('description')
                 ->required()
                 ->maxLength(65535),
-            // TODO: Cleanup Task (project-milestone-status-removed): delete this field once the flag is removed.
-            ...(ProjectMilestoneStatusRemovedFeature::active() ? [] : [
-                Select::make('status_id')
-                    ->label('Status')
-                    ->searchable()
-                    ->required()
-                    ->options(fn (): array => ProjectMilestoneStatus::query()
-                        ->orderBy('name')
-                        ->pluck('name', 'id')
-                        ->all()),
-            ]),
             DatePicker::make('target_date'),
         ];
     }

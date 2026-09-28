@@ -123,9 +123,13 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->label('Task Name')
                     ->state(fn (PipelineEntry $record): string => $this->isPlaceholderRecord($record) ? 'No tasks yet' : $record->name)
                     ->color(fn (PipelineEntry $record): ?string => $this->isPlaceholderRecord($record) ? 'gray' : null)
+                    ->icon(fn (PipelineEntry $record): string => $this->isPlaceholderRecord($record) ? 'heroicon-o-inbox' : 'heroicon-o-clipboard-document')
+                    ->iconColor('gray')
                     ->searchable(['pipeline_entries.name'])
                     ->sortable()
-                    ->extraAttributes(fn (PipelineEntry $record): array => $this->isPlaceholderRecord($record) ? [] : ['class' => 'underline'])
+                    ->extraAttributes(fn (PipelineEntry $record): array => [
+                        'class' => trim('ps-6 ' . ($this->isPlaceholderRecord($record) ? '' : 'underline')),
+                    ])
                     ->disabledClick(fn (PipelineEntry $record): bool => $this->isPlaceholderRecord($record))
                     ->action(fn (PipelineEntry $record) => $this->openPipelineEntry($record)),
 
