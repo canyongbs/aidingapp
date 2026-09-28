@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources;
 
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\AssetManagement;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactEngagementTimeline;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
@@ -75,7 +74,6 @@ class ContactResource extends Resource
             AssetManagement::class,
             ManageContactFiles::class,
             ManageContactEngagement::class,
-            ContactEngagementTimeline::class,
         ]);
     }
 
@@ -102,7 +100,6 @@ class ContactResource extends Resource
             'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
             'manage-files' => ManageContactFiles::route('/{record}/files'),
             'view' => ViewContact::route('/{record}'),
-            'timeline' => ContactEngagementTimeline::route('/{record}/timeline'),
             'service-management' => ContactServiceManagement::route('/{record}/service-management'),
             'asset-management' => AssetManagement::route('/{record}/asset-management'),
         ];
