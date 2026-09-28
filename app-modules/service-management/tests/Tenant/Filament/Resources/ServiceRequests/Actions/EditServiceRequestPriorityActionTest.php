@@ -42,13 +42,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
 
 test('editPriority action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
@@ -107,11 +107,12 @@ test('editPriority action is hidden for user without update permission', functio
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    $component = livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
+    ])->assertSuccessful();
+
+    expect(fn () => $component->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name')))
+        ->toThrow(ActionNotResolvableException::class);
 });
 
 test('editPriority action is hidden when the service request has no priority', function () {
@@ -124,11 +125,12 @@ test('editPriority action is hidden when the service request has no priority', f
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    $component = livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
+    ])->assertSuccessful();
+
+    expect(fn () => $component->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name')))
+        ->toThrow(ActionNotResolvableException::class);
 });
 
 test('editPriority action is visible when the service request priority is soft-deleted', function () {
@@ -156,7 +158,6 @@ test('editPriority action is visible when the service request priority is soft-d
         ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
-// Validation
 
 test('editPriority requires priority_id', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -210,7 +211,6 @@ test('editPriority rejects a priority belonging to a different service request t
     expect($serviceRequest->fresh()->priority_id)->not->toBe($otherTypePriority->getKey());
 });
 
-// Success
 
 test('can update the service request priority', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();

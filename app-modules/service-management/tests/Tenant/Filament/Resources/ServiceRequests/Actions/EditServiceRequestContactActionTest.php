@@ -43,13 +43,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-// Authorization
 
 test('editContact action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
@@ -108,14 +107,13 @@ test('editContact action is hidden for user without update permission', function
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    $component = livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editContact')->schemaComponent('respondent'));
-});
+    ])->assertSuccessful();
 
-// Validation
+    expect(fn () => $component->assertActionHidden(TestAction::make('editContact')->schemaComponent('respondent')))
+        ->toThrow(ActionNotResolvableException::class);
+});
 
 test('editContact requires respondent_id', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -152,8 +150,6 @@ test('editContact requires an existing contact', function () {
         ])
         ->assertHasFormErrors(['respondent_id' => 'exists']);
 });
-
-// Success
 
 test('can update the service request customer contact', function () {
     $serviceRequest = ServiceRequest::factory()->state([

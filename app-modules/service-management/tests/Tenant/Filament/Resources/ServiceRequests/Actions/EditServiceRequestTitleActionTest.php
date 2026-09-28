@@ -49,8 +49,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
 test('editTitle action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -112,14 +110,9 @@ test('editTitle action is hidden for user without update permission', function (
         'record' => $serviceRequest->getRouteKey(),
     ])->assertSuccessful();
 
-    // The editTitle action is registered via Section::afterHeader(), so once it is
-    // hidden it is filtered out of the schema entirely (unlike a suffixAction, which
-    // remains resolvable even when hidden), making it unresolvable in tests.
     expect(fn () => $component->assertActionHidden(TestAction::make('editTitle')->schemaComponent('request.title::section')))
         ->toThrow(ActionNotResolvableException::class);
 });
-
-// Validation
 
 test('editTitle requires title', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -156,8 +149,6 @@ test('editTitle limits title to 255 characters', function () {
         ])
         ->assertHasFormErrors(['title' => 'max']);
 });
-
-// Success
 
 test('can update the service request title', function () {
     $serviceRequest = ServiceRequest::factory()->state([

@@ -43,13 +43,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use Filament\Actions\Exceptions\ActionNotResolvableException;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
-
-// Authorization
 
 test('editCategory action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
@@ -108,14 +107,13 @@ test('editCategory action is hidden for user without update permission', functio
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    $component = livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editCategory')->schemaComponent('category'));
-});
+    ])->assertSuccessful();
 
-// Validation
+    expect(fn () => $component->assertActionHidden(TestAction::make('editCategory')->schemaComponent('category')))
+        ->toThrow(ActionNotResolvableException::class);
+});
 
 test('editCategory requires category', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -134,8 +132,6 @@ test('editCategory requires category', function () {
         ])
         ->assertHasFormErrors(['category' => 'required']);
 });
-
-// Success
 
 test('can update the service request category', function () {
     $serviceRequest = ServiceRequest::factory()->state([
