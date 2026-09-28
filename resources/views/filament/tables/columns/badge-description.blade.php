@@ -34,7 +34,7 @@
 
 {{--
     Renders a `TextColumn::description()` value as a Filament badge pill.
-
+    
     Note: `<x-filament::badge>` already renders a `span` root element, which
     keeps this safe to embed inside Filament's `<p class="fi-ta-text-description">`
     wrapper (phrasing content only).
