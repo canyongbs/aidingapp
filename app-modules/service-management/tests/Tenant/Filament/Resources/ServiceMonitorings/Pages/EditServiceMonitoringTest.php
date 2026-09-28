@@ -469,6 +469,21 @@ test('EditServiceMonitoring defaults successful_status_codes to 200 when changin
         ->assertFormSet(['successful_status_codes' => [200]]);
 });
 
+test('EditServiceMonitoring preserves successful_status_codes when reselecting the API endpoint monitor type', function () {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create([
+        'successful_status_codes' => [201, 204],
+    ]);
+
+    livewire(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['monitor_type' => MonitorType::Availability])
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertFormSet(['successful_status_codes' => [201, 204]]);
+});
+
 test('EditServiceMonitoring shows follow_redirection for every monitor type', function () {
     asSuperAdmin();
 
