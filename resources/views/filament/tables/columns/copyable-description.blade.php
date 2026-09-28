@@ -36,7 +36,7 @@
     Renders a `TextColumn::description()` value consisting of a text value
     followed by a "copy to clipboard" button, mirroring the existing
     copy-to-clipboard convention used in `service-request-heading.blade.php`.
-
+    
     Note: this partial's root element must remain phrasing content (e.g. `span`,
     `button`, `svg`) because Filament always wraps a text column's description
     in a `<p class="fi-ta-text-description">`, which per the HTML content model

@@ -36,7 +36,7 @@
     Renders a `TextColumn::description()` value consisting of an icon
     followed by a text label, with an optional hover tooltip mirroring the
     Alpine `x-tooltip` binding used by `<x-filament::badge>`.
-
+    
     Note: this partial's root element must remain phrasing content (e.g. `span`,
     `svg`) because Filament always wraps a text column's description in a
     `<p class="fi-ta-text-description">`, which per the HTML content model only
@@ -59,6 +59,6 @@
         }"
     @endif
 >
-    @svg($icon, 'h-4 w-4 text-gray-400')
+    @svg($icon, "h-4 w-4 text-gray-400")
     {{ $label }}
 </span>
