@@ -80,8 +80,7 @@ class ViewContactAction
                                     'ownerRecord' => $contact,
                                     'pageClass' => ViewContact::class,
                                 ])
-                                    ->key(ServiceRequestsRelationManager::class)
-                                    ->lazy(),
+                                    ->key(ServiceRequestsRelationManager::class),
                             ]),
                         Tab::make('Assets')
                             ->visible(
@@ -96,8 +95,7 @@ class ViewContactAction
                                             'ownerRecord' => $contact,
                                             'pageClass' => ViewContact::class,
                                         ])
-                                            ->key(AssetCheckOutRelationManager::class)
-                                            ->lazy(),
+                                            ->key(AssetCheckOutRelationManager::class),
                                     ]),
                                 Section::make('Returned Assets')
                                     ->visible(fn (): bool => AssetCheckInRelationManager::canViewForRecord($contact, ViewContact::class))
@@ -106,8 +104,7 @@ class ViewContactAction
                                             'ownerRecord' => $contact,
                                             'pageClass' => ViewContact::class,
                                         ])
-                                            ->key(AssetCheckInRelationManager::class)
-                                            ->lazy(),
+                                            ->key(AssetCheckInRelationManager::class),
                                     ]),
                             ]),
                         Tab::make('Files')
@@ -117,8 +114,7 @@ class ViewContactAction
                                     'ownerRecord' => $contact,
                                     'pageClass' => ViewContact::class,
                                 ])
-                                    ->key(EngagementFilesRelationManager::class)
-                                    ->lazy(),
+                                    ->key(EngagementFilesRelationManager::class),
                             ]),
                         Tab::make('Emails')
                             ->visible(fn (): bool => EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))
@@ -127,8 +123,7 @@ class ViewContactAction
                                     'ownerRecord' => $contact,
                                     'pageClass' => ViewContact::class,
                                 ])
-                                    ->key(EngagementsRelationManager::class)
-                                    ->lazy(),
+                                    ->key(EngagementsRelationManager::class),
                             ]),
                     ]),
             ])

@@ -36,6 +36,11 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementFile;
+use AidingApp\InventoryManagement\Models\Asset;
+use AidingApp\InventoryManagement\Models\AssetCheckIn;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -49,9 +54,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
-test('viewContact action is visible for a user with permission to view contacts', function () {
+// A user who can reach the ViewServiceRequest page must always have `service_request.view-any`,
+// which is also the exact ability that gates the Service Requests tab - so give tests full
+// control over every OTHER tab's permission while keeping page access constant.
+function actingAsServiceRequestViewer(string ...$extraPermissions): ServiceRequest
+{
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -70,11 +77,26 @@ test('viewContact action is visible for a user with permission to view contacts'
         ])->getKey(),
     ])->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
-    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('service_request.view-any', 'service_request.*.view', 'contact.*.view', ...$extraPermissions);
 
     actingAs($user->refresh());
+
+    return $serviceRequest;
+}
+
+function mountViewContact(ServiceRequest $serviceRequest)
+{
+    return livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->mountAction(TestAction::make('viewContact')->schemaComponent('respondent'))
+        ->assertActionMounted(TestAction::make('viewContact')->schemaComponent('respondent'));
+}
+
+// Authorization - viewContact action itself
+
+test('viewContact action is visible for a user with permission to view contacts', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
 
     livewire(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -102,8 +124,7 @@ test('viewContact action is hidden for a user without permission to view contact
         ])->getKey(),
     ])->create();
 
-    $user->givePermissionTo('service_request.view-any');
-    $user->givePermissionTo('service_request.*.view');
+    $user->givePermissionTo('service_request.view-any', 'service_request.*.view');
 
     actingAs($user->refresh());
 
@@ -114,7 +135,148 @@ test('viewContact action is hidden for a user without permission to view contact
         ->assertActionHidden(TestAction::make('viewContact')->schemaComponent('respondent'));
 });
 
-// Success
+// Service Requests tab (always visible to anyone who can reach this page - see actingAsServiceRequestViewer())
+
+test('viewContact shows scoped service request records on the Service Requests tab', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $otherServiceRequest = ServiceRequest::factory()->create([
+        'respondent_id' => $serviceRequest->respondent_id,
+        'priority_id' => $serviceRequest->priority_id,
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalSee('Service Requests')
+        ->assertMountedActionModalSee($otherServiceRequest->service_request_number);
+});
+
+// Assets tab - Checked Out Assets
+
+test('viewContact shows scoped checked out assets when the user has permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer('asset_check_out.view-any');
+
+    $asset = Asset::factory()->create(['name' => 'Checked Out Test Laptop']);
+    AssetCheckOut::factory()->create([
+        'asset_id' => $asset->getKey(),
+        'checked_out_to_id' => $serviceRequest->respondent_id,
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalSee('Checked Out Assets')
+        ->assertMountedActionModalSee('Checked Out Test Laptop');
+});
+
+test('viewContact hides the Checked Out Assets section for a user without permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $asset = Asset::factory()->create(['name' => 'Checked Out Test Laptop']);
+    AssetCheckOut::factory()->create([
+        'asset_id' => $asset->getKey(),
+        'checked_out_to_id' => $serviceRequest->respondent_id,
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalDontSee('Checked Out Assets')
+        ->assertMountedActionModalDontSee('Checked Out Test Laptop');
+});
+
+// Assets tab - Returned Assets
+
+test('viewContact shows scoped returned assets when the user has permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer('asset_check_in.view-any');
+
+    $asset = Asset::factory()->create(['name' => 'Returned Test Monitor']);
+    AssetCheckOut::factory()->create(['asset_id' => $asset->getKey()]);
+    AssetCheckIn::factory()->create([
+        'asset_id' => $asset->getKey(),
+        'checked_in_from_id' => $serviceRequest->respondent_id,
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalSee('Returned Assets')
+        ->assertMountedActionModalSee('Returned Test Monitor');
+});
+
+test('viewContact hides the Returned Assets section for a user without permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $asset = Asset::factory()->create(['name' => 'Returned Test Monitor']);
+    AssetCheckOut::factory()->create(['asset_id' => $asset->getKey()]);
+    AssetCheckIn::factory()->create([
+        'asset_id' => $asset->getKey(),
+        'checked_in_from_id' => $serviceRequest->respondent_id,
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalDontSee('Returned Assets')
+        ->assertMountedActionModalDontSee('Returned Test Monitor');
+});
+
+// Files tab
+
+test('viewContact shows scoped engagement files when the user has permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer('engagement_file.view-any');
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+
+    $engagementFile = EngagementFile::factory()->create(['description' => 'Scoped Test File Description']);
+    $contact->engagementFiles()->attach($engagementFile);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalSee('Files')
+        ->assertMountedActionModalSee('Scoped Test File Description');
+});
+
+test('viewContact hides the Files tab for a user without permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+
+    $engagementFile = EngagementFile::factory()->create(['description' => 'Scoped Test File Description']);
+    $contact->engagementFiles()->attach($engagementFile);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalDontSee('Files')
+        ->assertMountedActionModalDontSee('Scoped Test File Description');
+});
+
+// Emails tab
+
+test('viewContact shows scoped engagement timeline entries when the user has permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer('engagement.view-any');
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+
+    Engagement::factory()->create([
+        'recipient_type' => $contact->getMorphClass(),
+        'recipient_id' => $contact->getKey(),
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalSee('Emails')
+        ->assertMountedActionModalSee('Outbound');
+});
+
+test('viewContact hides the Emails tab for a user without permission', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+
+    Engagement::factory()->create([
+        'recipient_type' => $contact->getMorphClass(),
+        'recipient_id' => $contact->getKey(),
+    ]);
+
+    mountViewContact($serviceRequest)
+        ->assertMountedActionModalDontSee('Emails')
+        ->assertMountedActionModalDontSee('Outbound');
+});
+
+// Success - full contact details
 
 test('viewContact shows the full contact details for the service request respondent', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -129,17 +291,9 @@ test('viewContact shows the full contact details for the service request respond
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
-        'record' => $serviceRequest->getRouteKey(),
-    ])
-        ->mountAction(TestAction::make('viewContact')->schemaComponent('respondent'))
-        ->assertActionMounted(TestAction::make('viewContact')->schemaComponent('respondent'))
+    mountViewContact($serviceRequest)
         ->assertMountedActionModalSee($contact->{Contact::displayNameKey()})
         ->assertMountedActionModalSee($contact->email)
         ->assertMountedActionModalSee('Demographics')
-        ->assertMountedActionModalSee('Service Requests')
-        ->assertMountedActionModalSee('Assets')
-        ->assertMountedActionModalSee('Files')
-        ->assertMountedActionModalSee('Emails')
         ->assertMountedActionModalSee('Go to Contact');
 });
