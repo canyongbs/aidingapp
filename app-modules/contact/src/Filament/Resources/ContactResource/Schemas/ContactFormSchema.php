@@ -161,10 +161,9 @@ class ContactFormSchema
                         ->label('Employee ID')
                         ->string()
                         ->maxLength(255),
-                    TextInput::make('work_number')
+                    PhoneInput::make('work_number')
                         ->label('Work Number')
-                        ->string()
-                        ->maxLength(255),
+                        ->string(),
                     TextInput::make('work_extension')
                         ->label('Work Extension')
                         ->string()
