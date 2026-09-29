@@ -61,7 +61,6 @@ class ServiceRequestContactsTable
                     ->sortable(),
                 TextColumn::make('organization.name')
                     ->label('Organization')
-                    ->placeholder('Unaffiliated')
                     ->sortable(),
                 TextColumn::make('type.name')
                     ->label('Type')
