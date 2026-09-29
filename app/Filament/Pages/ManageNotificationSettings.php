@@ -37,7 +37,6 @@
 namespace App\Filament\Pages;
 
 use App\Enums\CommunicationNavigationGroup;
-use App\Features\NotificationSettingsFeature;
 use App\Filament\Clusters\Communication;
 use App\Models\User;
 use App\Settings\NotificationSettings;
@@ -67,7 +66,7 @@ class ManageNotificationSettings extends SettingsPage
         $user = auth()->user();
         assert($user instanceof User);
 
-        return NotificationSettingsFeature::active() && $user->can('settings.view-any') && parent::canAccess();
+        return $user->can('settings.view-any') && parent::canAccess();
     }
 
     public function form(Schema $schema): Schema
