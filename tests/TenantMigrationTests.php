@@ -34,20 +34,11 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\NotificationSettingsFeature;
-use App\Models\NotificationSetting;
-use App\Settings\NotificationSettings;
-use CanyonGBS\Common\Enums\Color;
-use Carbon\CarbonImmutable;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
-use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 if (! function_exists('recordServiceRequestHistory')) {
@@ -68,83 +59,6 @@ if (! function_exists('recordServiceRequestHistory')) {
     }
 }
 
-// Example migration test, leave commented out for future use as a template/example
-describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', function () {
-    $migrationName = '2026_08_12_163559_tmp_backfill_service_request_status_periods';
-    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
-
-    it('backfills a status period ledger from the service request history', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $start = CarbonImmutable::parse('2026-01-01 00:00:00');
-
-            $open = ServiceRequestStatus::factory()->open()->create();
-            $waiting = ServiceRequestStatus::factory()->waiting()->create();
-            $closed = ServiceRequestStatus::factory()->closed()->create();
-
-            $serviceRequest = ServiceRequest::factory()->create([
-                'status_id' => $closed->getKey(),
-                'created_at' => $start,
-            ]);
-
-            // Start from a clean slate: drop any ledger and history the observers recorded on create.
-            DB::table('service_request_status_periods')->delete();
-            DB::table('service_request_histories')->delete();
-
-            recordServiceRequestHistory($serviceRequest, [], ['status_id' => $open->getKey()], $start);
-            recordServiceRequestHistory($serviceRequest, ['status_id' => $open->getKey()], ['status_id' => $waiting->getKey()], $start->addSeconds(100));
-            recordServiceRequestHistory($serviceRequest, ['status_id' => $waiting->getKey()], ['status_id' => $closed->getKey()], $start->addSeconds(200));
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            $periods = DB::table('service_request_status_periods')
-                ->where('service_request_id', $serviceRequest->getKey())
-                ->orderBy('started_at')
-                ->get();
-
-            expect($periods)->toHaveCount(3)
-                ->and($periods[0]->service_request_status_id)->toBe($open->getKey())
-                ->and($periods[0]->classification)->toBe(SystemServiceRequestClassification::Open->value)
-                ->and($periods[1]->service_request_status_id)->toBe($waiting->getKey())
-                ->and($periods[1]->classification)->toBe(SystemServiceRequestClassification::Waiting->value)
-                ->and($periods[2]->service_request_status_id)->toBe($closed->getKey())
-                ->and($periods[2]->classification)->toBe(SystemServiceRequestClassification::Closed->value);
-        });
-    });
-
-    it('records a null classification period when a historical status was hard-deleted', function () use ($migrationName, $migrationPath) {
-        isolatedMigration($migrationName, function () use ($migrationPath) {
-            $start = CarbonImmutable::parse('2026-01-01 00:00:00');
-
-            $open = ServiceRequestStatus::factory()->open()->create();
-            $deletedStatusId = (string) Str::uuid();
-
-            $serviceRequest = ServiceRequest::factory()->create([
-                'status_id' => $open->getKey(),
-                'created_at' => $start,
-            ]);
-
-            DB::table('service_request_status_periods')->delete();
-            DB::table('service_request_histories')->delete();
-
-            recordServiceRequestHistory($serviceRequest, [], ['status_id' => $open->getKey()], $start);
-            recordServiceRequestHistory($serviceRequest, ['status_id' => $open->getKey()], ['status_id' => $deletedStatusId], $start->addSeconds(100));
-
-            expect(Artisan::call('migrate', ['--path' => $migrationPath]))->toBe(Command::SUCCESS);
-
-            $periods = DB::table('service_request_status_periods')
-                ->where('service_request_id', $serviceRequest->getKey())
-                ->orderBy('started_at')
-                ->get();
-
-            expect($periods)->toHaveCount(2)
-                ->and($periods[0]->service_request_status_id)->toBe($open->getKey())
-                ->and($periods[0]->classification)->toBe(SystemServiceRequestClassification::Open->value)
-                ->and($periods[1]->service_request_status_id)->toBeNull()
-                ->and($periods[1]->classification)->toBeNull();
-        });
-    });
-});
-
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
 //        isolatedMigration(
@@ -162,67 +76,6 @@ describe('2026_08_12_163559_tmp_backfill_service_request_status_periods', functi
 //        );
 //    });
 //});
-
-// TODO: Cleanup Task NotificationSettingsFeature - delete this describe and the test within
-describe('2026_09_09_064247_tmp_seed_notification_settings', function () {
-    it('migrates the oldest notification settings and its logo', function () {
-        isolatedMigration(
-            '2026_09_09_064247_tmp_seed_notification_settings',
-            function () {
-                // Setup data before migration
-                Storage::fake('s3');
-                Storage::fake('s3-public');
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/Legacy/2023_11_08_155057_create_notification_settings_table.php',
-                ]))->toBe(Command::SUCCESS);
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/Legacy/2024_06_03_173514_add_from_column_to_notification_settings_table.php',
-                ]))->toBe(Command::SUCCESS);
-
-                expect(Artisan::call('migrate', [
-                    '--path' => 'database/migrations/2026_09_09_062022_create_notification_settings.php',
-                ]))->toBe(Command::SUCCESS);
-
-                $first = NotificationSetting::create([
-                    'name' => 'First Setting',
-                    'from_name' => 'First From Name',
-                    'primary_color' => Color::Red->value,
-                    'created_at' => now()->subMinute(),
-                ]);
-                $first->addMedia(UploadedFile::fake()->image('first-logo.png'))
-                    ->toMediaCollection('logo');
-
-                $second = NotificationSetting::create([
-                    'name' => 'Second Setting',
-                    'from_name' => 'Second From Name',
-                    'primary_color' => Color::Blue->value,
-                ]);
-                $second->addMedia(UploadedFile::fake()->image('second-logo.png'))
-                    ->toMediaCollection('logo');
-
-                $firstLogo = $first->getFirstMedia('logo');
-
-                // Run the migration
-                $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_09_09_064247_tmp_seed_notification_settings.php']);
-                // Confirm migration ran successfully
-                expect($migrate)->toBe(Command::SUCCESS);
-
-                // Add any assertions to verify the migration's effects
-                $settings = app(NotificationSettings::class);
-                $settingsLogo = NotificationSettings::getSettingsPropertyModel('notifications.logo')
-                    ->getFirstMedia('logo');
-
-                expect(NotificationSettingsFeature::active())->toBeTrue()
-                    ->and($settings->from_name)->toBe('First From Name')
-                    ->and($settings->primary_color)->toBe(Color::Red)
-                    ->and($settingsLogo)->not->toBeNull()
-                    ->and($settingsLogo->file_name)->toBe($firstLogo->file_name);
-            }
-        );
-    });
-});
 
 // TODO: Cleanup Task Service Request Division Decoupling - delete this describe and the test within
 describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {

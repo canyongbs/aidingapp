@@ -127,7 +127,6 @@ class ManagedContactService
         $name = (new Parser())->parse(trim($user->name));
 
         return [
-            'title' => $name->getSalutation() ?: null,
             'first_name' => $name->getFirstname(),
             'last_name' => $name->getLastname(),
             'full_name' => trim($user->name),
