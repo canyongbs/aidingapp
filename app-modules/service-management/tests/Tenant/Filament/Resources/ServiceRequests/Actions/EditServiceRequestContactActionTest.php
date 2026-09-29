@@ -35,15 +35,18 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -171,4 +174,19 @@ test('can update the service request customer contact', function () {
 
     expect($serviceRequest->fresh()->respondent_id)->toBe($newContact->getKey())
         ->and($serviceRequest->fresh()->respondent->is($newContact))->toBeTrue();
+});
+
+test('the customer contact selector table omits the unaffiliated placeholder and shows the organization when present', function () {
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create(['name' => 'Acme University']);
+    $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
+    $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
+
+    livewire(TableSelectLivewireComponent::class, [
+        'tableConfiguration' => base64_encode(ServiceRequestContactsTable::class),
+    ])
+        ->assertCanSeeTableRecords([$contactWithOrganization, $contactWithoutOrganization])
+        ->assertSee('Acme University')
+        ->assertDontSee('Unaffiliated');
 });
