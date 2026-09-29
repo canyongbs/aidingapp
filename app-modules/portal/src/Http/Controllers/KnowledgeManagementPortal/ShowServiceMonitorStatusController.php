@@ -36,83 +36,75 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
+use AidingApp\Portal\DataTransferObjects\ServiceMonitorDetailData;
+use AidingApp\ServiceManagement\Actions\GetServiceMonitoringStatusHistory;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringHistoryPeriod;
+use AidingApp\ServiceManagement\Models\Scopes\WithCurrentStatus;
+use AidingApp\ServiceManagement\Models\Scopes\WithUptimePercentages;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
 class ShowServiceMonitorStatusController extends Controller
 {
     /**
-     * Days shown per bar in the "history" sparkline.
-     */
-    private const int HISTORY_DAYS = 30;
-
-    /**
-     * Uptime periods (in days) shown on the detail page, keyed by their display label.
+     * The number of days in each uptime period, from the shortest to the longest.
      *
      * @var array<string, int>
      */
-    private const array UPTIME_PERIODS = [
-        'twenty_four_hour' => 1,
-        'seven_day' => 7,
-        'thirty_day' => 30,
-        'ninety_day' => 90,
-        'twelve_month' => 365,
+    protected const array UPTIME_PERIODS = [
+        'twenty_four_hours' => 1,
+        'seven_days' => 7,
+        'thirty_days' => 30,
+        'ninety_days' => 90,
+        'twelve_months' => 365,
     ];
 
-    /**
-     * Handle the incoming request. Visibility of confidential monitors is enforced by the
-     * model's global ServiceMonitoringTargetVisibilityScope, applied on route-model binding.
-     */
-    public function __invoke(ServiceMonitoringTarget $serviceMonitoringTarget): JsonResponse
+    public function __invoke(Request $request, string $serviceMonitoringTarget, GetServiceMonitoringStatusHistory $getStatusHistory): JsonResponse
     {
-        $latestHistory = $serviceMonitoringTarget->latestHistory;
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->serviceMonitoring, Response::HTTP_FORBIDDEN);
 
-        if ($latestHistory) {
-            $statusMessage = match ($latestHistory->succeeded) {
-                true => 'No known issues at this time.',
-                false => "Unable to reach service, status code: {$latestHistory->response}",
-            };
+        $validated = $request->validate([
+            'period' => ['nullable', Rule::enum(ServiceMonitoringHistoryPeriod::class)],
+            // Not validated as a strict IANA identifier: browsers can report legacy aliases PHP doesn't
+            // recognize by name (e.g. `Asia/Calcutta`), and `GetServiceMonitoringStatusHistory` resolves those
+            // gracefully rather than rejecting the request over a display preference.
+            'timezone' => ['nullable', 'string', 'max:255'],
+        ]);
 
-            $latestHistoryArray = [
-                ...$latestHistory->toArray(),
-                'status_message' => $statusMessage,
-            ];
-        } else {
-            $latestHistoryArray = null;
-        }
+        $period = ServiceMonitoringHistoryPeriod::tryFrom($validated['period'] ?? '') ?? ServiceMonitoringHistoryPeriod::PastMonth;
+        $timezone = $validated['timezone'] ?? app(ResolvePortalDisplayTimezone::class)() ?? config('app.timezone');
 
-        $uptime = collect(self::UPTIME_PERIODS)
-            ->mapWithKeys(function (int $days, string $key) use ($serviceMonitoringTarget) {
-                $value = $serviceMonitoringTarget->getUptimePercentageValue($days);
+        $target = ServiceMonitoringTarget::query()
+            ->tap(new WithCurrentStatus())
+            ->tap(new WithUptimePercentages(self::UPTIME_PERIODS))
+            ->findOrFail($serviceMonitoringTarget);
 
-                return [
-                    $key => [
-                        'value' => $value,
-                        'label' => ServiceMonitoringTarget::formatUptimePercentage($value),
-                    ],
-                ];
-            });
+        $history = $getStatusHistory([$target->getKey()], $period, $timezone);
 
         return response()->json([
-            'data' => [
-                'id' => $serviceMonitoringTarget->id,
-                'name' => $serviceMonitoringTarget->name,
-                'domain' => $serviceMonitoringTarget->domain,
-                'monitor_type' => $serviceMonitoringTarget->monitor_type,
-                'monitor_type_label' => $serviceMonitoringTarget->monitor_type->getLabel(),
-                'frequency' => $serviceMonitoringTarget->frequency,
-                'frequency_label' => $serviceMonitoringTarget->frequency->getLabel(),
-                'status' => match ($latestHistory?->succeeded) {
-                    true => 'operational',
-                    false => 'outage',
-                    default => 'unknown',
-                },
-                'latest_history' => $latestHistoryArray,
-                'last_checked_at' => $latestHistory?->created_at,
-                'uptime' => $uptime,
-                'history' => $serviceMonitoringTarget->getDailyStatusHistory(self::HISTORY_DAYS),
-            ],
+            'data' => new ServiceMonitorDetailData(
+                id: $target->getKey(),
+                name: $target->name,
+                description: $target->description,
+                domain: $target->domain,
+                monitorType: $target->monitor_type,
+                monitorTypeLabel: $target->monitor_type->getLabel(),
+                frequencyLabel: $target->frequency->getLabel(),
+                status: $target->getCurrentStatus(),
+                statusLabel: $target->getCurrentStatus()->getLabel(),
+                lastCheckedAt: $target->getLastCheckedAt()?->toIso8601String(),
+                uptimePercentages: collect(self::UPTIME_PERIODS)
+                    ->map(fn (int $days, string $alias): ?float => $target->getSelectedUptimePercentage($alias))
+                    ->all(),
+                historyPeriod: $period,
+                history: $history[$target->getKey()],
+            ),
         ]);
     }
 }

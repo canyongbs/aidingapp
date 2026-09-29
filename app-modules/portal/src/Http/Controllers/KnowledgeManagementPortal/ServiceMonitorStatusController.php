@@ -36,200 +36,122 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
-use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
+use AidingApp\Portal\DataTransferObjects\ServiceMonitorData;
+use AidingApp\Portal\DataTransferObjects\ServiceMonitorSummaryData;
+use AidingApp\Portal\Enums\ServiceMonitorStatusSort;
+use AidingApp\ServiceManagement\Actions\GetServiceMonitoringStatusHistory;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringHistoryPeriod;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
+use AidingApp\ServiceManagement\Models\Scopes\WithCurrentStatus;
+use AidingApp\ServiceManagement\Models\Scopes\WithUptimePercentages;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
+use Carbon\CarbonInterface;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Pagination\LengthAwarePaginator;
-use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
 class ServiceMonitorStatusController extends Controller
 {
-    /**
-     * Days shown per bar in the "history" sparkline included with each monitor.
-     */
-    private const int HISTORY_DAYS = 30;
-
-    /**
-     * @var array<string, int>
-     */
-    private const array FREQUENCY_MINUTES = [
-        '5_minutes' => 5,
-        '15_minutes' => 15,
-        '30_minutes' => 30,
-        '1_hour' => 60,
-        '24_hours' => 1440,
-    ];
-
-    /**
-     * @var array<string, int>
-     */
-    private const array STATUS_RANK = [
-        'operational' => 0,
-        'degraded' => 1,
-        'outage' => 2,
-        'unknown' => 3,
-    ];
-
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, GetServiceMonitoringStatusHistory $getStatusHistory): JsonResponse
     {
-        $search = trim((string) $request->get('search', ''));
-        $sort = (string) $request->get('sort', 'name');
-        $direction = $request->get('direction') === 'desc' ? 'desc' : 'asc';
-        $perPage = (int) $request->get('per_page', 15);
-        $page = (int) $request->get('page', 1);
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->serviceMonitoring, Response::HTTP_FORBIDDEN);
+
+        $validated = $request->validate([
+            'search' => ['nullable', 'string', 'max:255'],
+            'sort' => ['nullable', Rule::enum(ServiceMonitorStatusSort::class)],
+            'direction' => ['nullable', Rule::in(['asc', 'desc'])],
+            // Not validated as a strict IANA identifier: browsers can report legacy aliases PHP doesn't
+            // recognize by name (e.g. `Asia/Calcutta`), and `GetServiceMonitoringStatusHistory` resolves those
+            // gracefully rather than rejecting the request over a display preference.
+            'timezone' => ['nullable', 'string', 'max:255'],
+        ]);
+
+        $search = $validated['search'] ?? null;
+        $sort = ServiceMonitorStatusSort::tryFrom($validated['sort'] ?? '') ?? ServiceMonitorStatusSort::Name;
+        $timezone = $validated['timezone'] ?? app(ResolvePortalDisplayTimezone::class)() ?? config('app.timezone');
 
         $targets = ServiceMonitoringTarget::query()
-            ->with('latestHistory')
-            ->orderBy('name')
-            ->get();
+            ->tap(new WithCurrentStatus())
+            ->tap(new WithUptimePercentages([
+                ServiceMonitorStatusSort::ThirtyDayUptime->value => 30,
+                ServiceMonitorStatusSort::TwelveMonthUptime->value => 365,
+            ]))
+            ->when(filled($search), function (Builder $query) use ($search): void {
+                $pattern = '%' . addcslashes($search, '%_\\') . '%';
 
-        $summary = $this->summarize($targets);
+                $query->where(fn (Builder $query): Builder => $query
+                    ->where('service_monitoring_targets.name', 'ilike', $pattern)
+                    ->orWhere('service_monitoring_targets.description', 'ilike', $pattern));
+            })
+            ->tap(fn (Builder $query) => $sort->apply($query, $validated['direction'] ?? 'asc'))
+            ->paginate(10);
 
-        $rows = $targets
-            ->when(
-                $search !== '',
-                fn (Collection $targets) => $targets->filter(
-                    fn (ServiceMonitoringTarget $target) => str_contains(Str::lower($target->name), Str::lower($search)),
-                ),
-            )
-            ->map($this->present(...))
-            ->values();
-
-        $sorted = $this->sortRows($rows, $sort, $direction);
-
-        $paginator = new LengthAwarePaginator(
-            $sorted->forPage($page, $perPage)->values(),
-            $sorted->count(),
-            $perPage,
-            $page,
-            ['path' => $request->url(), 'query' => $request->query()],
+        $history = $getStatusHistory(
+            collect($targets->items())->map(fn (ServiceMonitoringTarget $target): string => $target->getKey())->all(),
+            ServiceMonitoringHistoryPeriod::PastMonth,
+            $timezone,
         );
 
+        $targets->through(fn (ServiceMonitoringTarget $target): ServiceMonitorData => new ServiceMonitorData(
+            id: $target->getKey(),
+            name: $target->name,
+            description: $target->description,
+            monitorType: $target->monitor_type,
+            monitorTypeLabel: $target->monitor_type->getLabel(),
+            frequencyLabel: $target->frequency->getLabel(),
+            status: $target->getCurrentStatus(),
+            statusLabel: $target->getCurrentStatus()->getLabel(),
+            lastCheckedAt: $target->getLastCheckedAt()?->toIso8601String(),
+            thirtyDayUptimePercentage: $target->getSelectedUptimePercentage(ServiceMonitorStatusSort::ThirtyDayUptime->value),
+            twelveMonthUptimePercentage: $target->getSelectedUptimePercentage(ServiceMonitorStatusSort::TwelveMonthUptime->value),
+            history: $history[$target->getKey()] ?? [],
+        ));
+
         return response()->json([
-            'summary' => $summary,
-            'data' => $paginator->items(),
+            'summary' => $this->summarize(),
+            'data' => $targets->items(),
             'meta' => [
-                'current_page' => $paginator->currentPage(),
-                'from' => $paginator->firstItem(),
-                'last_page' => $paginator->lastPage(),
-                'path' => $paginator->path(),
-                'per_page' => $paginator->perPage(),
-                'to' => $paginator->lastItem(),
-                'total' => $paginator->total(),
-                'first_page_url' => $paginator->url(1),
-                'last_page_url' => $paginator->url($paginator->lastPage()),
-                'next_page_url' => $paginator->nextPageUrl(),
-                'prev_page_url' => $paginator->previousPageUrl(),
-                'links' => $paginator->linkCollection(),
+                'current_page' => $targets->currentPage(),
+                'last_page' => $targets->lastPage(),
+                'from' => $targets->firstItem() ?? 0,
+                'to' => $targets->lastItem() ?? 0,
+                'total' => $targets->total(),
+                'per_page' => $targets->perPage(),
             ],
         ]);
     }
 
     /**
-     * @param Collection<int, ServiceMonitoringTarget> $targets
-     *
-     * @return array{status: string, total: int, operational: int, degraded: int, outage: int, unknown: int}
+     * Summarizes every monitor the contact can see, regardless of any search.
      */
-    private function summarize(Collection $targets): array
+    protected function summarize(): ServiceMonitorSummaryData
     {
-        $counts = $targets
-            ->map(fn (ServiceMonitoringTarget $target) => $this->status($target))
-            ->countBy()
-            ->all();
+        $targets = ServiceMonitoringTarget::query()
+            ->select('service_monitoring_targets.id')
+            ->tap(new WithCurrentStatus())
+            ->get();
 
-        $counts = [
-            'operational' => $counts['operational'] ?? 0,
-            'degraded' => $counts['degraded'] ?? 0,
-            'outage' => $counts['outage'] ?? 0,
-            'unknown' => $counts['unknown'] ?? 0,
+        $statusCounts = [
+            ...collect(ServiceMonitoringStatus::cases())->mapWithKeys(fn (ServiceMonitoringStatus $status): array => [$status->value => 0]),
+            ...$targets->countBy(fn (ServiceMonitoringTarget $target): string => $target->getCurrentStatus()->value),
         ];
 
-        return [
-            'status' => ($counts['outage'] > 0 || $counts['degraded'] > 0) ? 'degraded' : 'operational',
-            'total' => $targets->count(),
-            ...$counts,
-        ];
-    }
+        $lastCheckedAt = $targets->map(fn (ServiceMonitoringTarget $target): ?CarbonInterface => $target->getLastCheckedAt())->max();
 
-    /**
-     * @return array<string, mixed>
-     */
-    private function present(ServiceMonitoringTarget $target): array
-    {
-        $latestHistory = $target->latestHistory;
-
-        if ($latestHistory) {
-            $statusMessage = match ($latestHistory->succeeded) {
-                true => 'No known issues at this time.',
-                false => "Unable to reach service, status code: {$latestHistory->response}",
-            };
-
-            $latestHistoryArray = [
-                ...$latestHistory->toArray(),
-                'status_message' => $statusMessage,
-            ];
-        } else {
-            $latestHistoryArray = null;
-        }
-
-        $thirtyDay = $target->getUptimePercentageValue(30);
-        $twelveMonth = $target->getUptimePercentageValue(365);
-
-        return [
-            'id' => $target->id,
-            'name' => $target->name,
-            'domain' => $target->domain,
-            'monitor_type' => $target->monitor_type,
-            'frequency' => $target->frequency,
-            'monitor_type_label' => $target->monitor_type->getLabel(),
-            'frequency_label' => $target->frequency->getLabel(),
-            'status' => $this->status($target),
-            'latest_history' => $latestHistoryArray,
-            'last_checked_at' => $latestHistory?->created_at,
-            'last_checked_at_timestamp' => $latestHistory?->created_at->timestamp ?? -1,
-            'uptime' => [
-                'thirty_day' => ServiceMonitoringTarget::formatUptimePercentage($thirtyDay),
-                'thirty_day_value' => $thirtyDay,
-                'twelve_month' => ServiceMonitoringTarget::formatUptimePercentage($twelveMonth),
-                'twelve_month_value' => $twelveMonth,
-            ],
-            'history' => $target->getDailyStatusHistory(self::HISTORY_DAYS),
-        ];
-    }
-
-    private function status(ServiceMonitoringTarget $target): string
-    {
-        return match ($target->latestHistory?->succeeded) {
-            true => 'operational',
-            false => 'outage',
-            default => 'unknown',
-        };
-    }
-
-    /**
-     * @param Collection<int, array<string, mixed>> $rows
-     *
-     * @return Collection<int, array<string, mixed>>
-     */
-    private function sortRows(Collection $rows, string $sort, string $direction): Collection
-    {
-        $sorted = match ($sort) {
-            'status' => $rows->sortBy(fn (array $row) => self::STATUS_RANK[$row['status']] ?? 99),
-            'frequency' => $rows->sortBy(
-                fn (array $row) => self::FREQUENCY_MINUTES[$row['frequency'] instanceof ServiceMonitoringFrequency ? $row['frequency']->value : $row['frequency']] ?? 0,
-            ),
-            'last_checked' => $rows->sortBy(fn (array $row) => $row['last_checked_at_timestamp']),
-            'uptime_30_day' => $rows->sortBy(fn (array $row) => $row['uptime']['thirty_day_value'] ?? -1),
-            'uptime_12_month' => $rows->sortBy(fn (array $row) => $row['uptime']['twelve_month_value'] ?? -1),
-            default => $rows->sortBy(fn (array $row) => Str::lower($row['name'])),
-        };
-
-        return $direction === 'desc' ? $sorted->reverse()->values() : $sorted->values();
+        return new ServiceMonitorSummaryData(
+            status: match (true) {
+                ($statusCounts[ServiceMonitoringStatus::Outage->value] + $statusCounts[ServiceMonitoringStatus::Degraded->value]) > 0 => ServiceMonitoringStatus::Degraded,
+                $statusCounts[ServiceMonitoringStatus::Operational->value] > 0 => ServiceMonitoringStatus::Operational,
+                default => ServiceMonitoringStatus::Unknown,
+            },
+            totalCount: $targets->count(),
+            statusCounts: $statusCounts,
+            lastCheckedAt: $lastCheckedAt instanceof CarbonInterface ? $lastCheckedAt->toIso8601String() : null,
+        );
     }
 }

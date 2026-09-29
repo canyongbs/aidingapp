@@ -54,6 +54,7 @@ import {
     useProjectData,
     useProjectsData,
     useServiceMonitorData,
+    useServiceMonitorDetailData,
     useServiceRequestData,
     useServiceRequestsData,
     useServiceRequestTypesData,
@@ -179,6 +180,15 @@ customElements.define(
                         meta: {
                             requiresAuth: true,
                             loaders: [useServiceMonitorData],
+                        },
+                    },
+                    {
+                        path: baseUrl + '/status/:serviceMonitorId',
+                        name: 'view-service-monitor',
+                        component: () => import('./Pages/ViewServiceMonitorStatus.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useServiceMonitorDetailData],
                         },
                     },
                     {

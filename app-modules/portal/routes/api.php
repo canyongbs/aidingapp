@@ -177,6 +177,7 @@ Route::prefix('api')
                     ->name('status');
                 Route::get('/status/{serviceMonitoringTarget}', ShowServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
+                    ->whereUuid('serviceMonitoringTarget')
                     ->name('status.show');
                 Route::get('/assets', AssetManagementPortalController::class)
                     ->middleware(['auth:sanctum'])

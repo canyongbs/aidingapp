@@ -36,11 +36,17 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
+use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\get;
+use function Pest\Laravel\getJson;
 
 test('returns all service monitoring targets with latest history when portal is enabled', function () {
     $settings = app(PortalSettings::class);
@@ -102,69 +108,154 @@ test('excludes confidential service monitoring targets unless the contact is gra
     expect($response->json('data'))->toHaveCount(2);
 });
 
-test('search filters service monitoring targets by name', function () {
+/**
+ * @param array<string, mixed> $query
+ */
+function getServiceMonitorStatuses(array $query = []): TestResponse
+{
     $settings = app(PortalSettings::class);
-
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
-    $contact = Contact::factory()->create();
+    actingAs(Contact::factory()->create());
 
-    actingAs($contact);
+    return getJson(URL::route('api.portal.status', $query, absolute: false));
+}
 
-    ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
-    ServiceMonitoringTarget::factory()->create(['name' => 'Facebook']);
+it('lists service monitors with their status, uptime, and daily history', function () {
+    freezeTime();
 
-    $url = URL::route(name: 'api.portal.status', absolute: false, parameters: ['search' => 'goog']);
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
+        'name' => 'Customer Website',
+        'description' => 'Monitors the public website via HTTPS',
+        'frequency' => ServiceMonitoringFrequency::FiveMinutes,
+    ]);
 
-    $response = get($url);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()->subDays(40)]);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subDays(29)->subHours(12)]);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subMinutes(2)]);
 
-    expect($response->status())->toBe(200)
-        ->and($response->json('data'))->toHaveCount(1)
-        ->and($response->json('data.0.name'))->toBe('Google');
+    getServiceMonitorStatuses()
+        ->assertOk()
+        ->assertJsonPath('data.0.id', $serviceMonitoringTarget->getKey())
+        ->assertJsonPath('data.0.name', 'Customer Website')
+        ->assertJsonPath('data.0.description', 'Monitors the public website via HTTPS')
+        ->assertJsonPath('data.0.monitor_type', 'availability')
+        ->assertJsonPath('data.0.monitor_type_label', 'Availability')
+        ->assertJsonPath('data.0.frequency_label', '5 minutes')
+        ->assertJsonPath('data.0.status', 'operational')
+        ->assertJsonPath('data.0.status_label', 'Operational')
+        ->assertJsonPath('data.0.last_checked_at', now()->subMinutes(2)->toIso8601String())
+        ->assertJsonPath('data.0.thirty_day_uptime_percentage', 100)
+        ->assertJsonPath('data.0.twelve_month_uptime_percentage', null)
+        ->assertJsonCount(30, 'data.0.history')
+        ->assertJsonPath('data.0.history.29.status', 'operational')
+        ->assertJsonPath('data.0.history.29.checks_count', 1)
+        ->assertJsonPath('meta.total', 1);
 });
 
-test('sorts service monitoring targets by name', function () {
-    $settings = app(PortalSettings::class);
+it('summarizes every service monitor the contact can see, regardless of the search', function () {
+    freezeTime();
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    $operationalTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Operational Monitor']);
+    HistoricalServiceMonitoring::factory()->for($operationalTarget)->create(['created_at' => now()->subMinutes(10)]);
 
-    $contact = Contact::factory()->create();
+    $outageTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Outage Monitor']);
+    HistoricalServiceMonitoring::factory()->for($outageTarget)->failed()->create(['created_at' => now()->subMinutes(5)]);
 
-    actingAs($contact);
+    ServiceMonitoringTarget::factory()->create(['name' => 'Unchecked Monitor']);
+    ServiceMonitoringTarget::factory()->confidential()->create(['name' => 'Confidential Monitor']);
 
-    ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
-    ServiceMonitoringTarget::factory()->create(['name' => 'Facebook']);
-
-    $url = URL::route(name: 'api.portal.status', absolute: false, parameters: ['sort' => 'name', 'direction' => 'desc']);
-
-    $response = get($url);
-
-    expect($response->json('data.0.name'))->toBe('Google')
-        ->and($response->json('data.1.name'))->toBe('Facebook');
+    getServiceMonitorStatuses(['search' => 'Operational'])
+        ->assertOk()
+        ->assertJsonCount(1, 'data')
+        ->assertJsonPath('summary.status', 'degraded')
+        ->assertJsonPath('summary.total_count', 3)
+        ->assertJsonPath('summary.status_counts', [
+            'operational' => 1,
+            'degraded' => 0,
+            'outage' => 1,
+            'unknown' => 1,
+        ])
+        ->assertJsonPath('summary.last_checked_at', now()->subMinutes(5)->toIso8601String());
 });
 
-test('returns enriched status fields for each service monitoring target', function () {
-    $settings = app(PortalSettings::class);
+it('summarizes the service monitors as operational when none have issues', function () {
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create();
 
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
+    ServiceMonitoringTarget::factory()->create();
 
-    $contact = Contact::factory()->create();
+    getServiceMonitorStatuses()
+        ->assertOk()
+        ->assertJsonPath('summary.status', 'operational');
+});
 
-    actingAs($contact);
+it('can search by name and description', function () {
+    $matchingNameTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Student Portal', 'description' => null]);
+    $matchingDescriptionTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Website', 'description' => 'The public portal']);
+    $otherTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Email', 'description' => 'Outbound mail']);
 
-    $target = ServiceMonitoringTarget::factory()->create(['name' => 'Google']);
+    getServiceMonitorStatuses(['search' => 'PORTAL'])
+        ->assertOk()
+        ->assertJsonCount(2, 'data')
+        ->assertJsonFragment(['id' => $matchingNameTarget->getKey()])
+        ->assertJsonFragment(['id' => $matchingDescriptionTarget->getKey()])
+        ->assertJsonMissing(['id' => $otherTarget->getKey()]);
+});
 
-    $target->histories()->create(['response' => 200, 'response_time' => 0.1, 'succeeded' => true]);
+it('can sort by column', function (string $sort, string $direction, array $expectedOrder) {
+    $targets = collect([
+        'Alpha' => ['frequency' => ServiceMonitoringFrequency::OneHour, 'checks' => [700 => true, 1 => true]],
+        'Bravo' => ['frequency' => ServiceMonitoringFrequency::FiveMinutes, 'checks' => [700 => true, 3 => false, 1 => true]],
+        'Charlie' => ['frequency' => ServiceMonitoringFrequency::TwentyFourHours, 'checks' => [700 => true, 2 => false]],
+        'Delta' => ['frequency' => ServiceMonitoringFrequency::FifteenMinutes, 'checks' => []],
+    ])->map(function (array $attributes, string $name): ServiceMonitoringTarget {
+        $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => $name, 'frequency' => $attributes['frequency']]);
 
-    $url = URL::route(name: 'api.portal.status', absolute: false);
+        foreach ($attributes['checks'] as $hoursAgo => $succeeded) {
+            HistoricalServiceMonitoring::factory()
+                ->for($serviceMonitoringTarget)
+                ->state(['succeeded' => $succeeded, 'created_at' => now()->subHours($hoursAgo)])
+                ->create();
+        }
 
-    $response = get($url);
+        return $serviceMonitoringTarget;
+    });
 
-    $response->assertJsonPath('summary.status', 'operational');
-    $response->assertJsonPath('data.0.status', 'operational');
-    $response->assertJsonPath('data.0.monitor_type_label', 'Availability');
-    $response->assertJsonCount(30, 'data.0.history');
+    $response = getServiceMonitorStatuses(['sort' => $sort, 'direction' => $direction])->assertOk();
+
+    expect(collect($response->json('data'))->pluck('name')->all())->toBe($expectedOrder);
+})->with([
+    'name descending' => ['name', 'desc', ['Delta', 'Charlie', 'Bravo', 'Alpha']],
+    'status ascending' => ['status', 'asc', ['Delta', 'Alpha', 'Bravo', 'Charlie']],
+    'status descending' => ['status', 'desc', ['Charlie', 'Bravo', 'Alpha', 'Delta']],
+    '30-day uptime ascending' => ['thirty_day_uptime', 'asc', ['Charlie', 'Bravo', 'Alpha', 'Delta']],
+    '30-day uptime descending' => ['thirty_day_uptime', 'desc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
+    'last checked ascending' => ['last_checked_at', 'asc', ['Charlie', 'Alpha', 'Bravo', 'Delta']],
+    'frequency ascending' => ['frequency', 'asc', ['Bravo', 'Delta', 'Alpha', 'Charlie']],
+]);
+
+it('validates the inputs', function (array $query, string $error) {
+    getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
+})->with([
+    'sort enum' => [['sort' => 'domain'], 'sort'],
+    'direction in' => [['direction' => 'sideways'], 'direction'],
+    'timezone max' => [['timezone' => str_repeat('a', 256)], 'timezone'],
+]);
+
+it('does not reject a timezone the date extension cannot resolve by name', function () {
+    // Browsers can report a legacy IANA alias (e.g. `Asia/Calcutta`) PHP's tzdata does not recognize, and
+    // `GetServiceMonitoringStatusHistory` resolves those gracefully rather than the request being rejected.
+    getServiceMonitorStatuses(['timezone' => 'Asia/Calcutta'])->assertOk();
+});
+
+describe('authorization', function () {
+    it('denies access without the service monitoring add-on', function () {
+        $licenseSettings = app(LicenseSettings::class);
+        $licenseSettings->data->addons->serviceMonitoring = false;
+        $licenseSettings->save();
+
+        getServiceMonitorStatuses()->assertForbidden();
+    });
 });
