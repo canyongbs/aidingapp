@@ -90,7 +90,7 @@ class ServiceRequestInfolist
             ))
             ->schema([
                 Grid::make(3)
-                    ->schema([
+                    ->schema(fn (ServiceRequest $record): array => [
                         TextEntry::make('respondent')
                             ->label('Customer Contact')
                             ->html()
@@ -101,8 +101,9 @@ class ServiceRequestInfolist
 
                                 return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
                             })
-                            ->suffixAction(fn (ServiceRequest $record): Action => ViewContactAction::make($record->respondent))
-                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestContactAction::make($record)),
+                            ->color('primary')
+                            ->action(ViewContactAction::make($record->respondent))
+                            ->afterContent(EditServiceRequestContactAction::make($record)),
                         TextEntry::make('created_at')
                             ->label('Created')
                             ->dateTime()
