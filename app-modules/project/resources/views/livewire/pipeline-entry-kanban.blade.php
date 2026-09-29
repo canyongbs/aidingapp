@@ -37,8 +37,12 @@
             <div class="inline-block min-w-full align-middle">
                 <div class="overflow-hidden shadow">
                     <div
-                        class="mb-6 flex items-start justify-start space-x-4 px-4"
-                        x-data="kanban($wire, @js($canUpdatePipeline))"
+                        @class([
+                            'mb-6 flex items-start justify-start space-x-4 px-4',
+                            'cursor-move' => $canUpdatePipelineTask,
+                            'cursor-default' => ! $canUpdatePipelineTask,
+                        ])
+                        x-data="kanban($wire, @js($canUpdatePipelineTask))"
                     >
                         @foreach ($stages as $stageKey => $stage)
                             <div class="min-w-kanban">

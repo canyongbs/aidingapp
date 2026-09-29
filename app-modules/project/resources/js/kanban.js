@@ -32,7 +32,7 @@
 </COPYRIGHT>
 */
 document.addEventListener('alpine:init', () => {
-    Alpine.data('kanban', ($wire, canUpdate = false) => ({
+    Alpine.data('kanban', ($wire, canUpdatePipelineTask = false) => ({
         init() {
             const kanbanLists = document.querySelectorAll('[id^="kanban-list-"]');
 
@@ -41,7 +41,7 @@ document.addEventListener('alpine:init', () => {
                     group: 'kanban',
                     animation: 100,
                     draggable: '[data-pipeline]',
-                    disabled: !canUpdate,
+                    disabled: !canUpdatePipelineTask,
                     forceFallback: true,
                     dragClass: 'drag-card',
                     ghostClass: 'ghost-card',
