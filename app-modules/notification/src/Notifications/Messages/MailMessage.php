@@ -36,8 +36,6 @@
 
 namespace AidingApp\Notification\Notifications\Messages;
 
-use App\Features\NotificationSettingsFeature;
-use App\Models\NotificationSetting;
 use App\Settings\NotificationSettings;
 use Illuminate\Notifications\Messages\MailMessage as BaseMailMessage;
 
@@ -45,23 +43,6 @@ class MailMessage extends BaseMailMessage
 {
     public function __construct(?NotificationSettings $settings = null)
     {
-        if (! NotificationSettingsFeature::active()) {
-            $setting = NotificationSetting::query()->oldest()->first();
-
-            if (! empty($setting->from_name)) {
-                $this->from(
-                    address: config('mail.from.address'),
-                    name: $setting->from_name,
-                );
-            }
-
-            $this->viewData = array_merge($this->viewData, [
-                'settings' => $setting,
-            ]);
-
-            return;
-        }
-
         $this->settings($settings ?? app(NotificationSettings::class));
     }
 

@@ -37,21 +37,9 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use App\Filament\Forms\Components\AddressInput;
-use Filament\Forms\Components\Radio;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Components\Section;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
-use Illuminate\Validation\Rules\Unique;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class CreateContact extends CreateRecord
 {
@@ -59,144 +47,7 @@ class CreateContact extends CreateRecord
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set) {
-            $title = $get('title') ?? '';
-
-            $firstName = trim($get('first_name'));
-
-            if (blank($firstName)) {
-                return;
-            }
-
-            $lastName = trim($get('last_name'));
-
-            if (blank($lastName)) {
-                return;
-            }
-
-            $set(Contact::displayNameKey(), "{$title} {$firstName} {$lastName}");
-        };
-
         return $schema
-            ->components([
-                Section::make('Demographics')->schema([
-                    Select::make('title')
-                        ->label('Title')
-                        ->options([
-                            'Dr.' => 'Dr.',
-                            'Professor' => 'Professor',
-                            'Mr.' => 'Mr.',
-                            'Ms.' => 'Ms.',
-                            'Mrs.' => 'Mrs.',
-                        ])
-                        ->in(['Dr.', 'Professor', 'Mr.', 'Ms.', 'Mrs.'])
-                        ->nullable()
-                        ->placeholder('No Title')
-                        ->live(onBlur: true)
-                        ->afterStateUpdated($generateFullName)
-                        ->string()
-                        ->searchable(),
-                    TextInput::make('first_name')
-                        ->label('First Name')
-                        ->required()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated($generateFullName)
-                        ->string(),
-
-                    TextInput::make('last_name')
-                        ->label('Last Name')
-                        ->required()
-                        ->live(onBlur: true)
-                        ->afterStateUpdated($generateFullName)
-                        ->string(),
-
-                    TextInput::make(Contact::displayNameKey())
-                        ->label('Full Name')
-                        ->required()
-                        ->disabled()
-                        ->dehydrated()
-                        ->string(),
-                    TextInput::make('preferred')
-                        ->label('Preferred Name')
-                        ->string(),
-                    TextInput::make('job_title')
-                        ->maxLength(255)
-                        ->nullable()
-                        ->string(),
-                ])->columns(3)->columnSpanFull(),
-
-                Section::make('Contact Information')->schema([
-                    TextInput::make('email')
-                        ->label('Primary Email')
-                        ->email()
-                        ->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
-                    PhoneInput::make('mobile')
-                        ->label('Mobile')
-                        ->string(),
-                    PhoneInput::make('phone')
-                        ->label('Other Phone')
-                        ->string(),
-                    AddressInput::make([
-                        'address' => 'address',
-                        'city' => 'city',
-                        'state' => 'state',
-                        'postal' => 'postalCode',
-                    ]),
-                    TextInput::make('address_2')
-                        ->label('Address 2')
-                        ->string(),
-                    TextInput::make('address_3')
-                        ->label('Address 3')
-                        ->string()
-                        ->maxLength(255),
-                    TextInput::make('city')
-                        ->label('City')
-                        ->string()
-                        ->maxLength(255),
-                    TextInput::make('state')
-                        ->label('State')
-                        ->string()
-                        ->maxLength(255),
-                    TextInput::make('postal')
-                        ->label('Postal')
-                        ->string()
-                        ->maxLength(255),
-                ])->columns(2),
-
-                Section::make('Classification')->schema([
-                    Select::make('type_id')
-                        ->label('Type')
-                        ->required()
-                        ->relationship('type', 'name')
-                        ->default(fn () => ContactType::resolveDefault()?->getKey())
-                        ->exists(
-                            table: (new ContactType())->getTable(),
-                            column: (new ContactType())->getKeyName()
-                        ),
-                    Select::make('organization_id')
-                        ->label('Organization')
-                        ->relationship('organization', 'name')
-                        ->exists(
-                            table: (new Organization())->getTable(),
-                            column: (new Organization())->getKeyName()
-                        ),
-                    Textarea::make('description')
-                        ->label('Description')
-                        ->string()->columnSpanFull(),
-                ])->columns(2),
-
-                Section::make('Engagement Restrictions')->schema([
-                    Radio::make('sms_opt_out')
-                        ->label('SMS Opt Out')
-                        ->default(false)
-                        ->boolean(),
-                    Radio::make('email_bounce')
-                        ->label('Email Bounce')
-                        ->default(false)
-                        ->boolean(),
-                ])->columns(2),
-
-                // TODO: Display this based on system configurable data format
-            ]);
+            ->components(ContactFormSchema::make());
     }
 }
