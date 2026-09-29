@@ -48,7 +48,7 @@ class EditServiceRequestTitleAction
     {
         return Action::make('editTitle')
             ->label('Edit title')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->slideOver()
