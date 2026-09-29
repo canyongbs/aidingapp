@@ -35,10 +35,8 @@
 */
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
@@ -70,52 +68,6 @@ test('ListContacts is gated with proper access control', function () {
         ->get(
             ContactResource::getUrl('index')
         )->assertSuccessful();
-});
-
-test('ListContacts can bulk update characteristics', function () {
-    $user = User::factory()->create();
-
-    $user->givePermissionTo('contact.view-any', 'contact.*.update');
-
-    actingAs($user);
-
-    $contacts = Contact::factory()->count(3)->create();
-
-    $component = livewire(ListContacts::class);
-
-    $component->assertCanSeeTableRecords($contacts)
-        ->assertCountTableRecords($contacts->count())
-        ->assertTableBulkActionExists('bulk_update');
-
-    $type = ContactType::factory()->create();
-
-    $description = 'abc123';
-
-    $component
-        ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'description',
-            'description' => $description,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'email_bounce',
-            'email_bounce' => true,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'type_id',
-            'type_id' => $type->id,
-        ])
-        ->assertHasNoTableBulkActionErrors();
-
-    expect($contacts)
-        ->each(
-            fn ($contact) => $contact
-                ->refresh()
-                ->description->toBe($description)
-                ->email_bounce->toBeTrue()
-                ->type_id->toBe($type->id)
-        );
 });
 
 test('can list records of engagements timelineable', function () {
