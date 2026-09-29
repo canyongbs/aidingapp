@@ -61,6 +61,7 @@ class ContactFactory extends Factory
             'description' => $this->faker->paragraph(),
             'email' => $this->faker->unique()->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
+            'email_bounce' => $this->faker->boolean(),
             'phone' => $this->faker->e164PhoneNumber(),
             'job_title' => $this->faker->jobTitle(),
             // TODO: Cleanup Task (enhance-contacts-data-model): unwrap these attributes once the flag is removed.

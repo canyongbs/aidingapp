@@ -94,6 +94,7 @@ test('EditContact is gated with proper access control', function () {
         ->and($contact->fresh()->description)->toEqual($request->get('description'))
         ->and($contact->fresh()->email)->toEqual($request->get('email'))
         ->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))
+        ->and($contact->fresh()->email_bounce)->toEqual($request->get('email_bounce'))
         ->and($contact->fresh()->phone)->toEqual($request->get('phone'))
         ->and($contact->fresh()->job_title)->toEqual($request->get('job_title'))
         ->and($contact->fresh()->employee_id)->toEqual($request->get('employee_id'))

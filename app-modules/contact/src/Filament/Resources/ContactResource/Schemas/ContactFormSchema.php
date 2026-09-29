@@ -41,6 +41,7 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Filament\Forms\Components\AddressInput;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -65,6 +66,7 @@ class ContactFormSchema
             ...(EnhanceContactsTableDataModelFeature::active() ? [self::academicInformation()] : []),
             self::addressInformation(),
             self::customerInformation(),
+            self::engagementRestrictions(),
         ];
     }
 
@@ -250,6 +252,18 @@ class ContactFormSchema
                     ->label('Description')
                     ->string()
                     ->columnSpanFull(),
+            ])
+            ->columns(2);
+    }
+
+    protected static function engagementRestrictions(): Section
+    {
+        return Section::make('Engagement Restrictions')
+            ->schema([
+                Radio::make('email_bounce')
+                    ->label('Email Bounce')
+                    ->default(false)
+                    ->boolean(),
             ])
             ->columns(2);
     }

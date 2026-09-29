@@ -54,7 +54,7 @@ return new class () extends Migration {
                 $table->string('program')->nullable();
                 $table->string('country')->nullable();
 
-                $table->dropColumn(['title', 'address_3', 'sms_opt_out', 'email_bounce']);
+                $table->dropColumn(['title', 'address_3', 'sms_opt_out']);
             });
 
             // TODO: Cleanup Task (enhance-contacts-data-model): remove this activation and the DB::transaction/feature-flag import when the flag is removed.
@@ -83,7 +83,6 @@ return new class () extends Migration {
                 $table->string('title')->nullable();
                 $table->string('address_3')->nullable();
                 $table->boolean('sms_opt_out')->default(false);
-                $table->boolean('email_bounce')->default(false);
             });
         });
     }

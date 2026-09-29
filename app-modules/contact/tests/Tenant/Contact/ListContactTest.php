@@ -98,6 +98,11 @@ test('ListContacts can bulk update characteristics', function () {
         ])
         ->assertHasNoTableBulkActionErrors()
         ->callTableBulkAction('bulk_update', $contacts, [
+            'field' => 'email_bounce',
+            'email_bounce' => true,
+        ])
+        ->assertHasNoTableBulkActionErrors()
+        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'type_id',
             'type_id' => $type->id,
         ])
@@ -108,6 +113,7 @@ test('ListContacts can bulk update characteristics', function () {
             fn ($contact) => $contact
                 ->refresh()
                 ->description->toBe($description)
+                ->email_bounce->toBeTrue()
                 ->type_id->toBe($type->id)
         );
 });

@@ -105,6 +105,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'description',
         'email',
         'mobile',
+        'email_bounce',
         'status_id',
         'type_id',
         'phone',
@@ -124,6 +125,10 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'academic_department',
         'program',
         'user_id',
+    ];
+
+    protected $casts = [
+        'email_bounce' => 'boolean',
     ];
 
     public function isSuperAdmin(): bool

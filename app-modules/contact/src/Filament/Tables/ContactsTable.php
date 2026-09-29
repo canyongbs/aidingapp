@@ -42,6 +42,7 @@ use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\QueryBuilder;
+use Filament\Tables\Filters\QueryBuilder\Constraints\BooleanConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\DateConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint;
 use Filament\Tables\Filters\QueryBuilder\Constraints\RelationshipConstraint\Operators\IsRelatedToOperator;
@@ -108,6 +109,8 @@ class ContactsTable
                             ->icon('heroicon-m-map-pin'),
                         TextConstraint::make('address_2')
                             ->icon('heroicon-m-map-pin'),
+                        BooleanConstraint::make('email_bounce')
+                            ->icon('heroicon-m-arrow-uturn-left'),
                         RelationshipConstraint::make('status')
                             ->icon('heroicon-m-flag')
                             ->selectable(

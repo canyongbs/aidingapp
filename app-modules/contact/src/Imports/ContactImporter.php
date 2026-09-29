@@ -97,6 +97,10 @@ class ContactImporter extends Importer
                 ->example('johnsmith@gmail.com'),
             ImportColumn::make('mobile')
                 ->example('+1 (555) 555-5555'),
+            ImportColumn::make('email_bounce')
+                ->boolean()
+                ->rules(['boolean'])
+                ->example('yes'),
             ImportColumn::make('phone')
                 ->example('+1 (555) 555-5555'),
             ImportColumn::make('job_title')
