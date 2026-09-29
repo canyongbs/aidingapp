@@ -36,6 +36,8 @@
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
@@ -141,6 +143,41 @@ test('The correct details are displayed on the ViewServiceRequest page', functio
                 $serviceRequest->close_details,
             ]
         );
+});
+
+test('the customer contact organization is displayed when the contact has an organization', function () {
+    $organization = Organization::factory()->create(['name' => 'Acme University']);
+    $contactType = ContactType::factory()->create(['name' => 'Employee']);
+    $contact = Contact::factory()->create([
+        'organization_id' => $organization->getKey(),
+        'type_id' => $contactType->getKey(),
+    ]);
+    $serviceRequest = ServiceRequest::factory()->create(['respondent_id' => $contact->getKey()]);
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('view', [
+                'record' => $serviceRequest,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertSeeText('Acme University')
+        ->assertSeeText('Employee')
+        ->assertDontSeeText('(Employee)');
+});
+
+test('the customer contact organization is withheld when the contact has no organization', function () {
+    $contact = Contact::factory()->create(['organization_id' => null]);
+    $serviceRequest = ServiceRequest::factory()->create(['respondent_id' => $contact->getKey()]);
+
+    asSuperAdmin()
+        ->get(
+            ServiceRequestResource::getUrl('view', [
+                'record' => $serviceRequest,
+            ])
+        )
+        ->assertSuccessful()
+        ->assertDontSeeText('Unaffiliated');
 });
 
 test('the status, priority, and type still display and remain editable when soft-deleted', function () {
