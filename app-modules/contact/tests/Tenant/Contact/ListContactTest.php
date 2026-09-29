@@ -103,11 +103,6 @@ test('ListContacts can bulk update characteristics', function () {
         ])
         ->assertHasNoTableBulkActionErrors()
         ->callTableBulkAction('bulk_update', $contacts, [
-            'field' => 'sms_opt_out',
-            'sms_opt_out' => true,
-        ])
-        ->assertHasNoTableBulkActionErrors()
-        ->callTableBulkAction('bulk_update', $contacts, [
             'field' => 'type_id',
             'type_id' => $type->id,
         ])
@@ -119,7 +114,6 @@ test('ListContacts can bulk update characteristics', function () {
                 ->refresh()
                 ->description->toBe($description)
                 ->email_bounce->toBeTrue()
-                ->sms_opt_out->toBeTrue()
                 ->type_id->toBe($type->id)
         );
 });

@@ -133,23 +133,6 @@
                 },
             ],
         },
-        {
-            $el: 'div',
-            attrs: { class: '-mb-4' },
-            children: [
-                {
-                    $formkit: 'select',
-                    label: 'SMS Opt Out',
-                    name: 'sms_opt_out',
-                    value: 0,
-                    options: [
-                        { value: false, label: 'No' },
-                        { value: true, label: 'Yes' },
-                    ],
-                    validationVisibility: 'submit',
-                },
-            ],
-        },
     ];
 </script>
 

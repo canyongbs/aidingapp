@@ -75,7 +75,6 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 'preferred' => $data['preferred'] ?? null,
                 'mobile' => $data['mobile'],
                 'phone' => $data['phone'] ?? null,
-                'sms_opt_out' => $data['sms_opt_out'],
             ]);
         $type = ContactType::resolveDefault();
 

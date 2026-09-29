@@ -57,7 +57,6 @@ class BulkUpdateContactsAction
                     ->options([
                         'description' => 'Description',
                         'email_bounce' => 'Email Bounce',
-                        'sms_opt_out' => 'SMS Opt Out',
                         ('type_id') => 'Type',
                     ])
                     ->required()
@@ -71,11 +70,6 @@ class BulkUpdateContactsAction
                     ->boolean()
                     ->required()
                     ->visible(fn (Get $get) => $get('field') === 'email_bounce'),
-                Radio::make('sms_opt_out')
-                    ->label('SMS Opt Out')
-                    ->boolean()
-                    ->required()
-                    ->visible(fn (Get $get) => $get('field') === 'sms_opt_out'),
                 Select::make('type_id')
                     ->label('Type')
                     ->relationship('type', 'name')
