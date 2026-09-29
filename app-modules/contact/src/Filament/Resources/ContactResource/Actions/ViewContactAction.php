@@ -46,10 +46,12 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use Filament\Actions\Action;
+use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
+use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 
@@ -69,6 +71,11 @@ class ViewContactAction
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Close')
             ->schema([
+                Actions::make([
+                    Action::make('goToContact')
+                        ->label('Go to Contact')
+                        ->url(ContactResource::getUrl('view', ['record' => $contact])),
+                ])->alignment(Alignment::End),
                 ...ContactInfolist::sections(),
                 Tabs::make()
                     ->columnSpanFull()
@@ -126,11 +133,6 @@ class ViewContactAction
                                     ->key(EngagementsRelationManager::class),
                             ]),
                     ]),
-            ])
-            ->extraModalFooterActions([
-                Action::make('goToContact')
-                    ->label('Go to Contact')
-                    ->url(ContactResource::getUrl('view', ['record' => $contact])),
             ]);
     }
 }
