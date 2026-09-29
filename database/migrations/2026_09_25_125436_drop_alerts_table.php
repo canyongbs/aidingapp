@@ -36,10 +36,10 @@
 
 use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     use CanModifyPermissions;
@@ -67,7 +67,7 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             collect($this->guards)
                 ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
 
@@ -79,9 +79,9 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             collect($this->guards)
-                ->each(function (string $guard) {
+                ->each(function (string $guard): void {
                     $permissions = Arr::except($this->permissions, keys: DB::table('permissions')
                         ->where('guard_name', $guard)
                         ->pluck('name')
@@ -90,7 +90,7 @@ return new class () extends Migration {
                     $this->createPermissions($permissions, $guard);
                 });
 
-            Schema::create('alerts', function (Blueprint $table) {
+            Schema::create('alerts', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
 
                 $table->foreignUuid('concern_id')->constrained('contacts');
