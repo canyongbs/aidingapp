@@ -45,10 +45,12 @@ use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Observers\ServiceMonitoringTargetObserver;
 use App\Models\BaseModel;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -237,73 +239,57 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
 
     public function getUptimePercentage(int $days): string
     {
-        return static::formatUptimePercentage($this->getUptimePercentageValue($days));
-    }
+        $serviceChecks = $this->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
 
-    public static function formatUptimePercentage(int|float|null $percentage): string
-    {
-        if ($percentage === null) {
+        if (now()->subDays($days)->diffInDays($serviceChecks->first()?->created_at) > 1) {
             return 'N/A';
         }
+
+        $successes = $serviceChecks->where('succeeded', true);
+
+        $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
     }
 
     /**
-     * Returns the raw uptime percentage for the given period, or `null` when there is not
-     * enough history to calculate it (mirrors the "N/A" case of getUptimePercentage()).
+     * Requires the `WithCurrentStatus` scope to have been applied to the query.
      */
-    public function getUptimePercentageValue(int $days): int|float|null
+    public function getCurrentStatus(): ServiceMonitoringStatus
     {
-        $serviceChecks = $this->histories()->where('created_at', '>=', now()->subDays($days))->orderBy('created_at')->get();
+        $status = $this->getAttribute('current_status');
 
-        if (now()->subDays($days)->diffInDays($serviceChecks->first()?->created_at) > 1) {
-            return null;
-        }
+        assert($status instanceof ServiceMonitoringStatus, 'The `WithCurrentStatus` scope must be applied to the query.');
 
-        $successes = $serviceChecks->where('succeeded', true);
-
-        return ($successes->count() / $serviceChecks->count()) * 100;
+        return $status;
     }
 
     /**
-     * Returns a day-by-day status summary for the trailing $days days (oldest first),
-     * derived from the existing pass/fail history so it works without any new data:
-     * - 'operational' when every check that day succeeded
-     * - 'outage' when every check that day failed
-     * - 'degraded' when some checks succeeded and some failed
-     * - null when there were no checks that day (no data yet)
-     *
-     * @return array<int, array{date: string, status: string|null}>
+     * Requires the `WithCurrentStatus` scope to have been applied to the query.
      */
-    public function getDailyStatusHistory(int $days): array
+    public function getLastCheckedAt(): ?CarbonInterface
     {
-        $start = now()->subDays($days - 1)->startOfDay();
+        assert(array_key_exists('last_checked_at', $this->getAttributes()), 'The `WithCurrentStatus` scope must be applied to the query.');
 
-        $checksByDay = $this->histories()
-            ->where('created_at', '>=', $start)
-            ->orderBy('created_at')
-            ->get()
-            ->groupBy(fn (HistoricalServiceMonitoring $history) => $history->created_at->toDateString());
+        $lastCheckedAt = $this->getAttribute('last_checked_at');
 
-        return collect(range(0, $days - 1))
-            ->map(function (int $offset) use ($start, $checksByDay) {
-                $date = $start->copy()->addDays($offset);
-                $checks = $checksByDay->get($date->toDateString());
+        assert(($lastCheckedAt === null) || ($lastCheckedAt instanceof CarbonInterface));
 
-                if (blank($checks)) {
-                    return ['date' => $date->toDateString(), 'status' => null];
-                }
+        return $lastCheckedAt;
+    }
 
-                $status = match (true) {
-                    $checks->every(fn (HistoricalServiceMonitoring $history) => $history->succeeded) => 'operational',
-                    $checks->every(fn (HistoricalServiceMonitoring $history) => ! $history->succeeded) => 'outage',
-                    default => 'degraded',
-                };
+    /**
+     * Requires the `WithUptimePercentages` scope to have been applied to the query, selecting the given alias.
+     */
+    public function getSelectedUptimePercentage(string $alias): ?float
+    {
+        assert(array_key_exists($alias, $this->getAttributes()), "The `WithUptimePercentages` scope must be applied to the query to select `{$alias}`.");
 
-                return ['date' => $date->toDateString(), 'status' => $status];
-            })
-            ->all();
+        $percentage = $this->getAttribute($alias);
+
+        assert(($percentage === null) || is_float($percentage));
+
+        return $percentage;
     }
 
     /**

@@ -34,25 +34,53 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Enums;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use Filament\Support\Contracts\HasLabel;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+enum ServiceMonitoringStatus: string implements HasLabel
+{
+    case Operational = 'operational';
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
+    case Degraded = 'degraded';
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+    case Outage = 'outage';
 
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+    case Unknown = 'unknown';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Operational => 'Operational',
+            self::Degraded => 'Degraded',
+            self::Outage => 'Outage',
+            self::Unknown => 'No data',
+        };
+    }
+
+    /**
+     * The status of a group of checks, such as those in one bar of a status history chart.
+     */
+    public static function fromCheckCounts(int $checksCount, int $successfulChecksCount): self
+    {
+        return match (true) {
+            $checksCount === 0 => self::Unknown,
+            $successfulChecksCount === $checksCount => self::Operational,
+            $successfulChecksCount === 0 => self::Outage,
+            default => self::Degraded,
+        };
+    }
+
+    /**
+     * The position of the status when sorting in ascending order, from no data through to the most severe.
+     */
+    public function getSortRank(): int
+    {
+        return match ($this) {
+            self::Unknown => 0,
+            self::Operational => 1,
+            self::Degraded => 2,
+            self::Outage => 3,
+        };
+    }
+}

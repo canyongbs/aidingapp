@@ -34,25 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\Portal\DataTransferObjects;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use AidingApp\ServiceManagement\DataTransferObjects\ServiceMonitoringHistoryBucketData;
+use AidingApp\ServiceManagement\Enums\MonitorType;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringHistoryPeriod;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
-
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+#[MapOutputName(SnakeCaseMapper::class)]
+class ServiceMonitorDetailData extends Data
+{
+    /**
+     * @param array<string, ?float> $uptimePercentages Keyed by period, from the shortest to the longest.
+     * @param array<int, ServiceMonitoringHistoryBucketData> $history
+     */
+    public function __construct(
+        public string $id,
+        public string $name,
+        public ?string $description,
+        public string $domain,
+        public MonitorType $monitorType,
+        public string $monitorTypeLabel,
+        public string $frequencyLabel,
+        public ServiceMonitoringStatus $status,
+        public string $statusLabel,
+        public ?string $lastCheckedAt,
+        public array $uptimePercentages,
+        public ServiceMonitoringHistoryPeriod $historyPeriod,
+        public array $history,
+    ) {}
+}

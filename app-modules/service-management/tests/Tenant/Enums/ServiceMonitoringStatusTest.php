@@ -34,25 +34,13 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
-
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
-
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+it('resolves the status of a group of checks', function (int $checksCount, int $successfulChecksCount, ServiceMonitoringStatus $status) {
+    expect(ServiceMonitoringStatus::fromCheckCounts($checksCount, $successfulChecksCount))->toBe($status);
+})->with([
+    'no checks' => [0, 0, ServiceMonitoringStatus::Unknown],
+    'every check succeeded' => [3, 3, ServiceMonitoringStatus::Operational],
+    'every check failed' => [3, 0, ServiceMonitoringStatus::Outage],
+    'some checks failed' => [3, 2, ServiceMonitoringStatus::Degraded],
+]);

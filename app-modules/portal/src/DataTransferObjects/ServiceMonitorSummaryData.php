@@ -34,25 +34,23 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\Portal\DataTransferObjects;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
-
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
-
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
-
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+#[MapOutputName(SnakeCaseMapper::class)]
+class ServiceMonitorSummaryData extends Data
+{
+    /**
+     * @param array<string, int> $statusCounts The number of monitors in each status, keyed by status.
+     */
+    public function __construct(
+        public ServiceMonitoringStatus $status,
+        public int $totalCount,
+        public array $statusCounts,
+        public ?string $lastCheckedAt,
+    ) {}
+}

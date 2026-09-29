@@ -34,25 +34,56 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+namespace AidingApp\ServiceManagement\Enums;
 
-it('excludes its basic auth credentials from serialization and audits', function () {
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->basicAuth()->create();
+use Carbon\CarbonImmutable;
+use Filament\Support\Contracts\HasLabel;
 
-    $audit = $serviceMonitoringTarget->audits()->latest()->firstOrFail();
+enum ServiceMonitoringHistoryPeriod: string implements HasLabel
+{
+    case PastHour = 'past_hour';
 
-    expect($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_username')
-        ->and($serviceMonitoringTarget->toArray())->not->toHaveKey('auth_password')
-        ->and($audit->new_values)->not->toHaveKey('auth_username')
-        ->and($audit->new_values)->not->toHaveKey('auth_password')
-        ->and($audit->old_values)->not->toHaveKey('auth_username')
-        ->and($audit->old_values)->not->toHaveKey('auth_password');
-});
+    case PastDay = 'past_day';
 
-it('computes is_max_latency_enabled from whether max_latency_ms is set', function () {
-    $enabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => 500]);
-    $disabled = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['max_latency_ms' => null]);
+    case PastMonth = 'past_month';
 
-    expect($enabled->is_max_latency_enabled)->toBeTrue()
-        ->and($disabled->is_max_latency_enabled)->toBeFalse();
-});
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::PastHour => 'Past hour',
+            self::PastDay => 'Past 24 hours',
+            self::PastMonth => 'Past 30 days',
+        };
+    }
+
+    /**
+     * The unit of time covered by each bucket, as understood by both Carbon and PostgreSQL's `date_trunc()`.
+     */
+    public function getBucketUnit(): string
+    {
+        return match ($this) {
+            self::PastHour => 'minute',
+            self::PastDay => 'hour',
+            self::PastMonth => 'day',
+        };
+    }
+
+    public function getBucketCount(): int
+    {
+        return match ($this) {
+            self::PastHour => 60,
+            self::PastDay => 24,
+            self::PastMonth => 30,
+        };
+    }
+
+    /**
+     * The start of the oldest bucket, such that the newest bucket is the one containing `$now`.
+     */
+    public function getFirstBucketStartsAt(CarbonImmutable $now): CarbonImmutable
+    {
+        return $now
+            ->startOf($this->getBucketUnit())
+            ->subUnit($this->getBucketUnit(), $this->getBucketCount() - 1);
+    }
+}

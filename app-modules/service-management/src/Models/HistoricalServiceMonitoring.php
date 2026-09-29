@@ -36,7 +36,9 @@
 
 namespace AidingApp\ServiceManagement\Models;
 
+use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
 use App\Models\BaseModel;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -45,6 +47,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class HistoricalServiceMonitoring extends BaseModel
 {
+    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
+    use HasFactory;
+
     use SoftDeletes;
 
     protected $fillable = [
