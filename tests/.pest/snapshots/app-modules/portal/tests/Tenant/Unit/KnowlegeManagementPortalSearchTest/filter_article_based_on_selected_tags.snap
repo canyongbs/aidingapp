@@ -16,7 +16,18 @@
                     ],
                     "vote": null,
                     "featured": false,
-                    "attachments": null
+                    "attachments": null,
+                    "publicId": "<public-id>",
+                    "slug": "gamification-in-education-transforming-classrooms-into-playgrounds",
+                    "category": {
+                        "slug": "tech-driven-education",
+                        "name": "Tech-Driven Education",
+                        "description": "Explore how technology is shaping education, from virtual classrooms to AI-driven learning tools.",
+                        "icon": null,
+                        "parentCategory": null,
+                        "subCategories": null,
+                        "publicId": "<public-id>"
+                    }
                 }
             ],
             "links": [
@@ -60,7 +71,8 @@
                 "description": "Explore how technology is shaping education, from virtual classrooms to AI-driven learning tools.",
                 "icon": null,
                 "parentCategory": null,
-                "subCategories": null
+                "subCategories": null,
+                "publicId": "<public-id>"
             }
         ],
         "featured_articles": {

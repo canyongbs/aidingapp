@@ -41,6 +41,8 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeManagementSearchData;
+use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
+use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use App\Http\Controllers\Controller;
 use App\Models\Scopes\SearchBy;
 use Illuminate\Database\Eloquent\Builder;
@@ -51,6 +53,7 @@ class KnowledgeManagementPortalSearchController extends Controller
 {
     public function get(Request $request): KnowledgeManagementSearchData
     {
+        $stableUrlsActive = KnowledgeBasePortalStableUrlsFeature::active();
         $search = str(json_decode($request->get('search')))
             ->lower()
             ->trim();
@@ -63,10 +66,12 @@ class KnowledgeManagementPortalSearchController extends Controller
                 fn (Stringable $string) => $string->explode(',')
             );
 
-        $mapArticle = function (KnowledgeBaseItem $article) {
+        $mapArticle = function (KnowledgeBaseItem $article) use ($stableUrlsActive) {
+            $category = $article->category;
+
             return [
                 'id' => $article->getKey(),
-                'categorySlug' => $article->category->slug,
+                'categorySlug' => $category->slug,
                 'name' => $article->title,
                 'tags' => $article->tags
                     ->sortBy('name')
@@ -77,13 +82,27 @@ class KnowledgeManagementPortalSearchController extends Controller
                     ->values()
                     ->toArray(),
                 'featured' => $article->is_featured,
+                'publicId' => $stableUrlsActive ? $article->public_id : null,
+                'slug' => $stableUrlsActive ? KnowledgeBasePortalUrl::articleSlug($article) : null,
+                'category' => $stableUrlsActive ? KnowledgeBaseCategoryData::from([
+                    'slug' => $category->slug,
+                    'name' => $category->name,
+                    'description' => $category->description,
+                    'publicId' => $category->public_id,
+                    'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
+                        'slug' => $category->parentCategory->slug,
+                        'name' => $category->parentCategory->name,
+                        'description' => $category->parentCategory->description,
+                        'publicId' => $category->parentCategory->public_id,
+                    ]) : null,
+                ]) : null,
             ];
         };
 
         $articlesFor = function (string $filter) use ($search, $tags, $mapArticle) {
             return KnowledgeBaseArticleData::collect(
                 KnowledgeBaseItem::query()
-                    ->with(['category', 'tags'])
+                    ->with(['category.parentCategory', 'tags'])
                     ->public()
                     ->when(
                         $search->isNotEmpty(),
@@ -112,13 +131,21 @@ class KnowledgeManagementPortalSearchController extends Controller
 
         $categoryData = KnowledgeBaseCategoryData::collect(
             KnowledgeBaseCategory::query()
+                ->with('parentCategory')
                 ->tap(new SearchBy('name', $search))
                 ->get()
-                ->map(function (KnowledgeBaseCategory $category) {
+                ->map(function (KnowledgeBaseCategory $category) use ($stableUrlsActive) {
                     return [
                         'slug' => $category->slug,
                         'name' => $category->name,
                         'description' => $category->description,
+                        'publicId' => $stableUrlsActive ? $category->public_id : null,
+                        'parentCategory' => $stableUrlsActive && $category->parentCategory ? KnowledgeBaseCategoryData::from([
+                            'slug' => $category->parentCategory->slug,
+                            'name' => $category->parentCategory->name,
+                            'description' => $category->parentCategory->description,
+                            'publicId' => $category->parentCategory->public_id,
+                        ]) : null,
                     ];
                 })
                 ->toArray()

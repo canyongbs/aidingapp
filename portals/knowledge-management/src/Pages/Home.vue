@@ -39,6 +39,7 @@
     import SearchResults from '@common/portal/SearchResults.vue';
     import { computed } from 'vue';
     import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
+    import { categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
     import { useCategoriesData, useTagsData } from './loaders.js';
 
     const { data: categories } = useCategoriesData();
@@ -48,7 +49,7 @@
         Object.values(categories.value ?? {}).map((category) => ({
             ...category,
             key: category.slug,
-            to: { name: 'view-category', params: { categorySlug: category.slug } },
+            to: categoryRoute(category),
         })),
     );
 
