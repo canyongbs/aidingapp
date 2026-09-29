@@ -106,7 +106,6 @@ class ListContacts extends ListRecords
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
                     BulkEngagementAction::make(context: 'contacts'),
-                    BulkUpdateContactsAction::make(),
                 ]),
             ]);
     }
