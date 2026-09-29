@@ -34,7 +34,6 @@
 @props(['url' => null,'settings' => null])
 @php
     use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
-    use App\Features\NotificationSettingsFeature;
     use App\Settings\EmailSettings;
     use App\Settings\NotificationSettings;
     use AidingApp\Theme\Settings\ThemeSettings;
@@ -56,7 +55,7 @@
     $headerLogo = $headerLogoModel->getFirstMedia('header_logo')
         ? $headerLogoModel->getFirstMediaUrl('header_logo')
         : null;
-    $settingsLogoUrl = (NotificationSettingsFeature::active() && $settings)
+    $settingsLogoUrl = $settings
         ? NotificationSettings::getSettingsPropertyModel('notifications.logo')->getFirstMediaUrl('logo')
         : null;
 @endphp
@@ -107,9 +106,7 @@
         }
 
         @php
-            $primaryColor = NotificationSettingsFeature::active()
-                ? $settings?->primary_color
-                : Color::tryFrom($settings?->primary_color ?? '');
+            $primaryColor = $settings?->primary_color;
             $buttonColor = FilamentColor::convertToRgb(
                 FilamentColor::all()[$primaryColor?->value ?? Color::Blue->value][600],
             );
