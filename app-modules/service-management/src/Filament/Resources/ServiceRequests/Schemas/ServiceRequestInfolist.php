@@ -93,7 +93,6 @@ class ServiceRequestInfolist
                     ->schema([
                         TextEntry::make('respondent')
                             ->label('Customer Contact')
-                            ->color('primary')
                             ->html()
                             ->state(function (ServiceRequest $record): string {
                                 /** @var Contact $respondent */
