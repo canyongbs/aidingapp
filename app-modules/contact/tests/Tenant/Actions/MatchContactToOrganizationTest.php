@@ -89,3 +89,28 @@ it('preserves a contact organization that was already assigned', function () {
 
     expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
+
+it('preserves an organization assigned after a stale contact was loaded', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [],
+    ]);
+    $otherOrganization = Organization::factory()->create([
+        'domains' => [['domain' => 'other.com']],
+    ]);
+    $contact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $staleContact = Contact::query()->findOrFail($contact->getKey());
+
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    $currentContact = Contact::query()->findOrFail($contact->getKey());
+    $currentContact->organization()->associate($otherOrganization);
+    $currentContact->save();
+
+    app(MatchContactToOrganization::class)($staleContact);
+
+    expect($currentContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
+});
