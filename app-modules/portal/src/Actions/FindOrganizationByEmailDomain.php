@@ -36,79 +36,17 @@
 
 namespace AidingApp\Portal\Actions;
 
+use AidingApp\Contact\Actions\FindOrganizationByEmailDomain as FindContactOrganizationByEmailDomain;
 use AidingApp\Contact\Models\Organization;
-use Illuminate\Database\Eloquent\Builder;
 
 class FindOrganizationByEmailDomain
 {
+    public function __construct(
+        private FindContactOrganizationByEmailDomain $findOrganizationByEmailDomain,
+    ) {}
+
     public function __invoke(string $email): ?Organization
     {
-        $query = $this->query($email);
-
-        if (is_null($query)) {
-            return null;
-        }
-
-        $organization = $query->first();
-
-        if (! $organization instanceof Organization) {
-            return null;
-        }
-
-        return $organization;
-    }
-
-    /**
-     * @return Builder<Organization>|null
-     */
-    protected function query(string $email): ?Builder
-    {
-        $emailDomain = $this->extractEmailDomain($email);
-
-        if (is_null($emailDomain)) {
-            return null;
-        }
-
-        return Organization::query()
-            ->where('is_contact_generation_enabled', true)
-            ->whereRaw(
-                "EXISTS (
-                  SELECT 1
-                  FROM jsonb_array_elements(domains) AS elem
-                    WHERE LOWER(
-                      regexp_replace(
-                        regexp_replace(
-                          regexp_replace(
-                            regexp_replace(
-                              trim(elem->>'domain'),
-                              '^https?://',
-                              '',
-                              'i'
-                            ),
-                            '/.*$',
-                            ''
-                          ),
-                          ':[0-9]+$',
-                          ''
-                        ),
-                        '^www\\.',
-                        '',
-                        'i'
-                      )
-                    ) = ?
-                )",
-                [$emailDomain]
-            );
-    }
-
-    protected function extractEmailDomain(string $email): ?string
-    {
-        $atPosition = strrpos($email, '@');
-
-        if ($atPosition === false || $atPosition === strlen($email) - 1) {
-            return null;
-        }
-
-        return strtolower(substr($email, $atPosition + 1));
+        return ($this->findOrganizationByEmailDomain)($email, requireContactGenerationEnabled: true);
     }
 }
