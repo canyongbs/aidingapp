@@ -34,40 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
-
-use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
-use Filament\Resources\Pages\ManageRelatedRecords;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 
-class ManageContactFiles extends ManageRelatedRecords
-{
-    protected static string $resource = ContactResource::class;
+use function Pest\Laravel\actingAs;
+use function Pest\Livewire\livewire;
 
-    // TODO: Obsolete when there is no table, remove from Filament
-    protected static string $relationship = 'engagementFiles';
+test('only shows the files bulk delete action to a user with the engagement_file delete permission', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('contact.view-any', 'contact.*.view', 'engagement_file.view-any');
 
-    protected static ?string $navigationLabel = 'Files and Documents';
+    actingAs($user);
 
-    protected static ?string $breadcrumb = 'Files';
+    $contact = Contact::factory()->create();
 
-    public static function canAccess(array $arguments = []): bool
-    {
-        return (bool) count(static::managers($arguments['record'] ?? null));
-    }
+    livewire(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
-    public function getRelationManagers(): array
-    {
-        return static::managers($this->getRecord());
-    }
+    $user->givePermissionTo('engagement_file.*.delete');
 
-    private static function managers(?Model $record = null): array
-    {
-        return collect([
-            EngagementFilesRelationManager::class,
-        ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
-            ->toArray();
-    }
-}
+    livewire(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});

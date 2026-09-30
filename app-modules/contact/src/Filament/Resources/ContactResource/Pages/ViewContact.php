@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -38,12 +38,14 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
 use Filament\Actions\Action;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -56,6 +58,10 @@ class ViewContact extends ViewRecord
 
     public function form(Schema $schema): Schema
     {
+        $contact = $this->getRecord();
+
+        assert($contact instanceof Contact);
+
         return $schema
             ->disabled()
             ->components([
@@ -70,6 +76,9 @@ class ViewContact extends ViewRecord
                             ->dateTime(),
                     ])
                     ->columns(2),
+                Tabs::make()
+                    ->columnSpanFull()
+                    ->tabs(ContactInfolist::tabs($contact, static::class)),
             ]);
     }
 

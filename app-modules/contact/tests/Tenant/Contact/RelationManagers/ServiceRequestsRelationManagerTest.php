@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
@@ -69,7 +69,7 @@ test('ServiceRequestsRelationManager can list service requests for a contact', f
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertSuccessful()
         ->assertCanSeeTableRecords([$serviceRequest]);
@@ -99,7 +99,7 @@ test('ServiceRequestsRelationManager filters service requests by priority', func
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->filterTable('priority', $priority1->getKey())
         ->assertCanSeeTableRecords([$serviceRequest1])
@@ -130,7 +130,7 @@ test('ServiceRequestsRelationManager filters service requests by status', functi
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->filterTable('status', $status1->getKey())
         ->assertCanSeeTableRecords([$serviceRequest1])
@@ -159,7 +159,7 @@ test('Only service request types managed by user department are available in typ
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
         ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
@@ -195,7 +195,7 @@ test('Only service request types where user is a direct manager are available in
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
         ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
@@ -225,7 +225,7 @@ test('Super admin can see all service request types', function () {
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
         ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($type1, $type2) {
@@ -251,7 +251,7 @@ test('Priority select is populated based on selected type', function () {
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
         ->setTableActionData([
@@ -275,7 +275,7 @@ test('Can create a service request for a contact', function () {
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->callTableAction('create', data: [
             'status_id' => $status->getKey(),
@@ -305,7 +305,7 @@ test('Can view a service request', function () {
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->callTableAction('view', $serviceRequest)
         ->assertSuccessful();
@@ -329,7 +329,7 @@ test('Can edit a service request', function () {
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->callTableAction('edit', $serviceRequest, data: [
             'status_id' => $newStatus->getKey(),
@@ -382,7 +382,7 @@ test('Non-super admin can only see service requests from managed or audited type
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest])
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
@@ -426,7 +426,7 @@ test('Non-super admin can only see service requests from directly managed or dir
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest])
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
@@ -467,7 +467,7 @@ test('Non-super admin can see service requests from group-managed and group-audi
 
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest]);
 });
 
@@ -488,7 +488,7 @@ describe('feedback visibility', function () {
 
         livewire(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->mountTableAction('view', $serviceRequest)
             ->assertSchemaComponentVisible('feedback.csat_answer', 'mountedActionSchema0');
@@ -514,7 +514,7 @@ describe('feedback visibility', function () {
 
         livewire(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->mountTableAction('view', $serviceRequest)
             ->assertSchemaComponentHidden('feedback.csat_answer', 'mountedActionSchema0');

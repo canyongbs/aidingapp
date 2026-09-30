@@ -34,8 +34,7 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
@@ -582,12 +581,9 @@ test('can list audit member to service request type', function () {
         ->count(3)
         ->create();
 
-    actingAs($user)
-        ->get(
-            ContactResource::getUrl('service-management', [
-                'record' => $contact->getRouteKey(),
-            ])
-        )->assertForbidden();
+    actingAs($user);
+
+    expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
@@ -596,9 +592,11 @@ test('can list audit member to service request type', function () {
 
     actingAs($user);
 
+    expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
+
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords($serviceRequests)
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
@@ -622,12 +620,9 @@ test('can list direct user manager to service request type', function () {
         ->count(3)
         ->create();
 
-    actingAs($user)
-        ->get(
-            ContactResource::getUrl('service-management', [
-                'record' => $contact->getRouteKey(),
-            ])
-        )->assertForbidden();
+    actingAs($user);
+
+    expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
@@ -636,9 +631,11 @@ test('can list direct user manager to service request type', function () {
 
     actingAs($user);
 
+    expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
+
     livewire(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords($serviceRequests)
         ->assertCanNotSeeTableRecords($serviceRequestsWithoutManager);
