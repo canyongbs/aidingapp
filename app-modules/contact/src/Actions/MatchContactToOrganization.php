@@ -20,54 +20,40 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS® and Aiding App® are registered trademarks of
-      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
-      vigorously.
+      same in return. Canyon GBS® and Aiding App® are registered trademarks, and we are
+      committed to enforcing and protecting our trademarks vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
       Software as a Service (SaaS) by Canyon GBS Inc.
-    - Use of this software implies agreement to the license terms and conditions as stated
-      in the Elastic License 2.0.
-
-    For more information or inquiries please visit our website at
-    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+namespace AidingApp\Contact\Actions;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Models\Organization;
 
-class ContactObserver
+class MatchContactToOrganization
 {
     public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
+        private FindOrganizationByEmailDomain $findOrganizationByEmailDomain,
     ) {}
 
-    public function creating(Contact $contact): void
+    public function __invoke(Contact $contact, ?Organization $organization = null): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
+        if ($contact->organization_id !== null || blank($contact->email)) {
+            return;
         }
-    }
 
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
+        assert(is_string($contact->email));
 
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
+        $organization = ($this->findOrganizationByEmailDomain)($contact->email, $organization);
 
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
+        if ($organization === null) {
+            return;
+        }
+
+        $contact->organization()->associate($organization);
+        $contact->save();
     }
 }
