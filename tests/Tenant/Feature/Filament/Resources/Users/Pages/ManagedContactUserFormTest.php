@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Services\ManagedContactService;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
@@ -152,4 +153,59 @@ it('hydrates the managed contact toggle on the edit page', function () {
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
         ]);
+});
+
+it('synchronizes edited user fields to the managed contact from the edit page', function () {
+    asSuperAdmin();
+
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create(['school' => 'Old School']);
+
+    app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    livewire(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm([
+            'first_name' => 'Edited',
+            'last_name' => 'Person',
+            'name' => 'Edited Person',
+            'preferred_name' => 'Eddie',
+            'school' => null,
+            'program' => 'Nursing',
+            'city' => 'Springfield',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    $contact = $user->managedContact()->first();
+
+    expect($contact->full_name)->toBe('Edited Person')
+        ->and($contact->first_name)->toBe('Edited')
+        ->and($contact->last_name)->toBe('Person')
+        ->and($contact->preferred)->toBe('Eddie')
+        ->and($contact->school)->toBeNull()
+        ->and($contact->program)->toBe('Nursing')
+        ->and($contact->city)->toBe('Springfield')
+        ->and($contact->type_id)->toBe($type->getKey());
+});
+
+it('updates the managed contact type from the edit page', function () {
+    asSuperAdmin();
+
+    $type = ContactType::factory()->create();
+    $newType = ContactType::factory()->create();
+
+    $user = User::factory()->create();
+
+    app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    livewire(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm([
+            'is_managed_contact' => true,
+            'managed_contact_type_id' => $newType->getKey(),
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($user->managedContact()->first()->type_id)->toBe($newType->getKey());
 });

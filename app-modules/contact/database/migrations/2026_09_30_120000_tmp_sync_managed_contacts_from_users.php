@@ -34,28 +34,39 @@
 </COPYRIGHT>
 */
 
-namespace App\Observers;
-
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-class UserObserver
-{
-    public function __construct(
-        protected ManagedContactService $managedContactService,
-    ) {}
-
-    public function saved(User $user): void
+return new class () extends Migration {
+    public function up(): void
     {
-        if (! $user->wasChanged(ManagedContactService::SYNCED_USER_ATTRIBUTES)) {
-            return;
-        }
+        DB::transaction(function (): void {
+            $managedContactService = app(ManagedContactService::class);
 
-        $this->managedContactService->sync($user);
+            Contact::query()
+                ->whereNotNull('user_id')
+                ->with('managedByUser')
+                ->chunkById(100, function (Collection $contacts) use ($managedContactService): void {
+                    foreach ($contacts as $contact) {
+                        assert($contact instanceof Contact);
+
+                        $user = $contact->managedByUser;
+
+                        if (is_null($user)) {
+                            continue;
+                        }
+
+                        $managedContactService->syncContact($contact, $user);
+                    }
+                });
+        });
     }
 
-    public function deleted(User $user): void
+    public function down(): void
     {
-        $this->managedContactService->disable($user);
+        // This migration only re-synchronizes data that is derived from users, so the down method is intentionally left blank
     }
-}
+};
