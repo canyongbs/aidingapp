@@ -45,8 +45,6 @@ class MatchContactToOrganization
             return;
         }
 
-        assert(is_string($contact->email));
-
         $organization = ($this->findOrganizationByEmailDomain)($contact->email, $organization);
 
         if ($organization === null) {
