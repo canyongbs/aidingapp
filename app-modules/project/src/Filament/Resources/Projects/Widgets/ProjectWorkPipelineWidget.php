@@ -48,6 +48,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
+use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -447,6 +448,11 @@ class ProjectWorkPipelineWidget extends TableWidget
         $emptyMilestones = PipelineEntry::query()->getConnection()
             ->table('project_milestones')
             ->where('project_milestones.project_id', $pipeline->project_id)
+            // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is removed, always apply this filter.
+            ->when(
+                AssociateMilestoneWithActivePipelineFeature::active(),
+                fn (QueryBuilder $query): QueryBuilder => $query->where('project_milestones.pipeline_id', $pipeline->getKey()),
+            )
             ->whereNull('project_milestones.archived_at')
             ->whereNull('project_milestones.deleted_at')
             ->whereNotExists(function (QueryBuilder $query) use ($pipeline): void {
