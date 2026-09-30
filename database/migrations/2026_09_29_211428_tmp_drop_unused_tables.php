@@ -35,14 +35,130 @@
 */
 
 use App\Models\Media;
+use Database\Migrations\Concerns\CanModifyPermissions;
 use Illuminate\Support\Facades\DB;
 use Spatie\LaravelSettings\Migrations\SettingsMigration;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends SettingsMigration {
+  use CanModifyPermissions;
+
+  /**
+    * @var array<string, string>
+    */
+    private array $permissions = [
+        'care_team.view-any' => 'Care Team',
+        'care_team.create' => 'Care Team',
+        'care_team.*.view' => 'Care Team',
+        'care_team.*.update' => 'Care Team',
+        'care_team.*.delete' => 'Care Team',
+        'care_team.*.restore' => 'Care Team',
+        'care_team.*.force-delete' => 'Care Team',
+
+        'calendar_event.view-any' => 'Calendar Event',
+        'calendar_event.create' => 'Calendar Event',
+        'calendar_event.*.view' => 'Calendar Event',
+        'calendar_event.*.update' => 'Calendar Event',
+        'calendar_event.*.delete' => 'Calendar Event',
+        'calendar_event.*.restore' => 'Calendar Event',
+        'calendar_event.*.force-delete' => 'Calendar Event',
+
+        'event_attendee.view-any' => 'Event Attendee',
+        'event_attendee.create' => 'Event Attendee',
+        'event_attendee.*.view' => 'Event Attendee',
+        'event_attendee.*.update' => 'Event Attendee',
+        'event_attendee.*.delete' => 'Event Attendee',
+        'event_attendee.*.restore' => 'Event Attendee',
+        'event_attendee.*.force-delete' => 'Event Attendee',
+
+        'event.view-any' => 'Event',
+        'event.create' => 'Event',
+        'event.*.view' => 'Event',
+        'event.*.update' => 'Event',
+        'event.*.delete' => 'Event',
+        'event.*.restore' => 'Event',
+        'event.*.force-delete' => 'Event',
+
+        'analytics_resource_category.view-any' => 'Analytics Resource Category',
+        'analytics_resource_category.create' => 'Analytics Resource Category',
+        'analytics_resource_category.*.view' => 'Analytics Resource Category',
+        'analytics_resource_category.*.update' => 'Analytics Resource Category',
+        'analytics_resource_category.*.delete' => 'Analytics Resource Category',
+        'analytics_resource_category.*.restore' => 'Analytics Resource Category',
+        'analytics_resource_category.*.force-delete' => 'Analytics Resource Category',
+
+        'analytics_resource.view-any' => 'Analytics Resource',
+        'analytics_resource.create' => 'Analytics Resource',
+        'analytics_resource.*.view' => 'Analytics Resource',
+        'analytics_resource.*.update' => 'Analytics Resource',
+        'analytics_resource.*.delete' => 'Analytics Resource',
+        'analytics_resource.*.restore' => 'Analytics Resource',
+        'analytics_resource.*.force-delete' => 'Analytics Resource',
+
+        'analytics_resource_source.view-any' => 'Analytics Resource Source',
+        'analytics_resource_source.create' => 'Analytics Resource Source',
+        'analytics_resource_source.*.view' => 'Analytics Resource Source',
+        'analytics_resource_source.*.update' => 'Analytics Resource Source',
+        'analytics_resource_source.*.delete' => 'Analytics Resource Source',
+        'analytics_resource_source.*.restore' => 'Analytics Resource Source',
+        'analytics_resource_source.*.force-delete' => 'Analytics Resource Source',
+        
+        'campaign_action.view-any' => 'Campaign Action',
+        'campaign_action.create' => 'Campaign Action',
+        'campaign_action.*.view' => 'Campaign Action',
+        'campaign_action.*.update' => 'Campaign Action',
+        'campaign_action.*.delete' => 'Campaign Action',
+        'campaign_action.*.restore' => 'Campaign Action',
+        'campaign_action.*.force-delete' => 'Campaign Action',
+        
+        'campaign.view-any' => 'Campaign',
+        'campaign.create' => 'Campaign',
+        'campaign.*.view' => 'Campaign',
+        'campaign.*.update' => 'Campaign',
+        'campaign.*.delete' => 'Campaign',
+        'campaign.*.restore' => 'Campaign',
+        'campaign.*.force-delete' => 'Campaign',
+        
+        'caseload.view-any' => 'Caseload',
+        'caseload.create' => 'Caseload',
+        'caseload.*.view' => 'Caseload',
+        'caseload.*.update' => 'Caseload',
+        'caseload.*.delete' => 'Caseload',
+        'caseload.*.restore' => 'Caseload',
+        'caseload.*.force-delete' => 'Caseload',
+        
+        'application.view-any' => 'Application',
+        'application.create' => 'Application',
+        'application.*.view' => 'Application',
+        'application.*.update' => 'Application',
+        'application.*.delete' => 'Application',
+        'application.*.restore' => 'Application',
+        'application.*.force-delete' => 'Application',
+        
+        'application_submission_state.view-any' => 'Application Submission State',
+        'application_submission_state.create' => 'Application Submission State',
+        'application_submission_state.*.view' => 'Application Submission State',
+        'application_submission_state.*.update' => 'Application Submission State',
+        'application_submission_state.*.delete' => 'Application Submission State',
+        'application_submission_state.*.restore' => 'Application Submission State',
+        'application_submission_state.*.force-delete' => 'Application Submission State',
+    ];
+
+    /**
+    * @var array<string>
+    */
+    private array $guards = [
+        'web',
+        'api',
+    ];
+
     public function up(): void
     {
         DB::transaction(function (): void {
+            // Delete permissions
+            collect($this->guards)
+              ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+
             // Drop tables
             Schema::dropIfExists('care_teams');
 
