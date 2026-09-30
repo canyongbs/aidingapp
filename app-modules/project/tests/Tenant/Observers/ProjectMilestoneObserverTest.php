@@ -36,7 +36,6 @@
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
