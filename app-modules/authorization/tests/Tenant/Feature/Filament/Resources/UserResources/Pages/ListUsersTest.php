@@ -36,6 +36,8 @@
 
 use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\Scopes\AuditedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
@@ -445,6 +447,52 @@ describe('service details column', function () {
             ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
             ->and($tooltip->toHtml())->not->toContain('<script>')
             ->and($tooltip->toHtml())->not->toContain('<b>');
+    });
+
+    it('matches scoped service areas from direct, department, and group assignments without double counting', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $group = Group::factory()->create();
+        $user = User::factory()->for($department)->create(['job_title' => null]);
+        $user->groups()->attach($group);
+
+        $directType = ServiceRequestType::factory()->create(['name' => 'Direct']);
+        $directType->managerUsers()->attach($user);
+
+        $departmentType = ServiceRequestType::factory()->create(['name' => 'Department']);
+        $departmentType->managerDepartments()->attach($department);
+
+        $groupType = ServiceRequestType::factory()->create(['name' => 'Group']);
+        $groupType->auditorGroups()->attach($group);
+
+        $sharedType = ServiceRequestType::factory()->create(['name' => 'Shared']);
+        $sharedType->managerGroups()->attach($group);
+        $sharedType->auditorUsers()->attach($user);
+
+        $managedNames = ServiceRequestType::query()
+            ->tap(new ManagedServiceRequestTypes($user))
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
+        $auditedNames = ServiceRequestType::query()
+            ->tap(new AuditedServiceRequestTypes($user))
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
+
+        expect($managedNames)->toBe(['Department', 'Direct', 'Shared'])
+            ->and($auditedNames)->toBe(['Group', 'Shared']);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description->getData()['label'])->toBe('4 Service Areas')
+            ->and($description->getData()['tooltip']->toHtml())->toBe('Manager (Agent): Direct, Department, Shared<br />Auditor: Shared, Group');
     });
 });
 
