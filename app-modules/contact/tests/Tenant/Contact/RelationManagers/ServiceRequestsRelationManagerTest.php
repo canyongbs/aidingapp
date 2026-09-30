@@ -38,16 +38,22 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceMan
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
+use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -290,6 +296,72 @@ test('Can create a service request for a contact', function () {
     expect($contact->serviceRequests()->count())->toBe(1);
     expect($contact->serviceRequests()->first()->title)->toBe('Test Service Request');
     expect($contact->serviceRequests()->first()->respondent_id)->toBe($contact->getKey());
+});
+
+test('Attaches password secrets to a service request created for a contact', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $author = auth()->user();
+    $contact = Contact::factory()->create();
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->getKey()])->create();
+    $status = ServiceRequestStatus::factory()->create();
+
+    $form = ServiceRequestForm::factory()->for($type, 'type')->create();
+    $field = new ServiceRequestFormField([
+        'label' => 'Private credential',
+        'type' => PasswordFormFieldBlock::type(),
+        'is_required' => true,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->save();
+
+    $form->content = [
+        'type' => 'doc',
+        'content' => [[
+            'type' => 'customBlock',
+            'attrs' => [
+                'id' => PasswordFormFieldBlock::type(),
+                'config' => [
+                    'fieldId' => $field->getKey(),
+                    'label' => $field->label,
+                    'isRequired' => true,
+                ],
+            ],
+        ]],
+    ];
+    $form->save();
+
+    $secret = Secret::factory()
+        ->for($author, 'author')
+        ->create(['value' => Crypt::encryptString('service-request-password')]);
+
+    livewire(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ContactServiceManagement::class,
+    ])
+        ->callTableAction('create', data: [
+            'status_id' => $status->getKey(),
+            'type_id' => $type->getKey(),
+            'priority_id' => $priority->getKey(),
+            'title' => 'Test Service Request',
+            'dynamic_fields' => [
+                $field->getKey() => $secret->getKey(),
+            ],
+        ])
+        ->assertHasNoTableActionErrors();
+
+    $serviceRequest = $contact->serviceRequests()->sole();
+    $secret->refresh();
+
+    expect($secret->related->is($serviceRequest))->toBeTrue()
+        ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
+        ->toBe('service-request-password');
 });
 
 test('Can view a service request', function () {
