@@ -37,6 +37,7 @@
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\KnowledgeBasePortalStableUrlsFeature;
 
 use function Pest\Laravel\getJson;
 
@@ -68,4 +69,34 @@ it('only returns categories that have at least one public article', function () 
     expect($slugs)->toContain($categoryWithPublicArticle->slug)
         ->and($slugs)->not->toContain($categoryWithPrivateArticle->slug)
         ->and($slugs)->not->toContain($categoryWithNoArticles->slug);
+});
+
+it('resolves a category by its public ID locator', function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+
+    $category = KnowledgeBaseCategory::factory()->create(['public_id' => '0OIlBb29']);
+
+    getJson(route('api.portal.category.show', [
+        'category' => "stale-slug-{$category->public_id}",
+    ]))
+        ->assertOk()
+        ->assertJsonPath('category.publicId', $category->public_id)
+        ->assertJsonPath('category.slug', $category->slug);
+});
+
+it('preserves the legacy category API while the feature is inactive', function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    KnowledgeBasePortalStableUrlsFeature::deactivate();
+
+    getJson(route('api.portal.category.show', ['category' => $category->slug]))
+        ->assertOk()
+        ->assertJsonPath('category.slug', $category->slug)
+        ->assertJsonPath('category.publicId', null);
 });

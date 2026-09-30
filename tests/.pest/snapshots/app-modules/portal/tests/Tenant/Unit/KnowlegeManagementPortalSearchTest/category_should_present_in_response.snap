@@ -43,7 +43,8 @@
                 "description": "Explore new methods and tools that are revolutionizing the way we teach and learn.",
                 "icon": null,
                 "parentCategory": null,
-                "subCategories": null
+                "subCategories": null,
+                "publicId": "<public-id>"
             }
         ],
         "featured_articles": {

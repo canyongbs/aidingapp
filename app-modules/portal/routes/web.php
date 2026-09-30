@@ -37,6 +37,7 @@
 use AidingApp\Portal\Http\Controllers\EmployeeSelfServiceController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalAuthenticateController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagementPortalRegisterController;
+use AidingApp\Portal\Http\Middleware\EnsureKnowledgeBasePortalUrlIsCanonical;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
@@ -75,11 +76,17 @@ Route::prefix('portal')
             Route::get('/', RenderKnowledgeManagementPortal::class)
                 ->name('show');
             Route::get('/categories/{category}', RenderKnowledgeManagementPortal::class)
+                ->middleware(EnsureKnowledgeBasePortalUrlIsCanonical::class)
                 ->name('category.show');
             Route::get('/categories/{category}/{subcategory}', RenderKnowledgeManagementPortal::class)
+                ->middleware(EnsureKnowledgeBasePortalUrlIsCanonical::class)
                 ->name('subcategory.show');
             Route::get('/categories/{category}/articles/{article}', RenderKnowledgeManagementPortal::class)
+                ->middleware(EnsureKnowledgeBasePortalUrlIsCanonical::class)
                 ->name('article.show');
+            Route::get('/categories/{category}/{subcategory}/articles/{article}', RenderKnowledgeManagementPortal::class)
+                ->middleware(EnsureKnowledgeBasePortalUrlIsCanonical::class)
+                ->name('subcategory.article.show');
             Route::get('/service-request-type/select/{categoryId?}', RenderKnowledgeManagementPortal::class)
                 ->name('service-request-type.index');
             Route::get('/service-request/create/{type}', RenderKnowledgeManagementPortal::class)

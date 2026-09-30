@@ -130,6 +130,14 @@ customElements.define(
                         },
                     },
                     {
+                        path: baseUrl + '/categories/:parentCategorySlug/:categorySlug/articles/:articleId',
+                        name: 'view-subcategory-article',
+                        component: () => import('./Pages/ViewArticle.vue'),
+                        meta: {
+                            loaders: [useArticleData],
+                        },
+                    },
+                    {
                         path: baseUrl + '/service',
                         name: 'service-parent',
                         redirect: { name: 'service' },

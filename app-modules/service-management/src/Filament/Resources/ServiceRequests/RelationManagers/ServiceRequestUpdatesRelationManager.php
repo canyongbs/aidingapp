@@ -91,7 +91,7 @@ class ServiceRequestUpdatesRelationManager extends RelationManager
                     ->label('Internal')
                     ->rule(['boolean'])
                     ->columnSpan('full'),
-                ServiceRequestStatusSelect::make()
+                ServiceRequestStatusSelect::make(selectedId: $serviceRequest->status_id)
                     ->default($serviceRequest->status_id),
                 Section::make('Uploads')
                     ->schema([

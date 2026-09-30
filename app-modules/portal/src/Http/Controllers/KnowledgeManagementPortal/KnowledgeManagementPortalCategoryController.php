@@ -39,6 +39,8 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
+use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
+use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -47,6 +49,8 @@ class KnowledgeManagementPortalCategoryController extends Controller
 {
     public function index(): JsonResponse
     {
+        $stableUrlsActive = KnowledgeBasePortalStableUrlsFeature::active();
+
         return response()->json(
             KnowledgeBaseCategoryData::collect(
                 KnowledgeBaseCategory::query()
@@ -54,12 +58,13 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->whereHas('knowledgeBaseItems', fn (Builder $query) => $query->public())
                     ->orderBy('sort')
                     ->get()
-                    ->map(function (KnowledgeBaseCategory $category) {
+                    ->map(function (KnowledgeBaseCategory $category) use ($stableUrlsActive) {
                         return [
                             'slug' => $category->slug,
                             'name' => $category->name,
                             'description' => $category->description,
                             'icon' => $category->icon ? svg($category->icon, 'h-6 w-6')->toHtml() : null,
+                            'publicId' => $stableUrlsActive ? $category->public_id : null,
                         ];
                     })
                     ->toArray()
@@ -67,9 +72,15 @@ class KnowledgeManagementPortalCategoryController extends Controller
         );
     }
 
-    public function show(KnowledgeBaseCategory $category): JsonResponse
+    public function show(string $category): JsonResponse
     {
-        $mapArticle = function (KnowledgeBaseItem $article) use ($category) {
+        $category = KnowledgeBasePortalUrl::resolveCategory($category);
+
+        abort_if($category === null, 404);
+
+        $stableUrlsActive = KnowledgeBasePortalStableUrlsFeature::active();
+
+        $mapArticle = function (KnowledgeBaseItem $article) use ($category, $stableUrlsActive): array {
             return [
                 'id' => $article->getKey(),
                 'categorySlug' => $category->slug,
@@ -83,6 +94,9 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     ->values()
                     ->toArray(),
                 'featured' => $article->is_featured,
+                'publicId' => $stableUrlsActive ? $article->public_id : null,
+                'slug' => $stableUrlsActive ? KnowledgeBasePortalUrl::articleSlug($article) : null,
+                'category' => $stableUrlsActive ? $this->categoryData($category, $stableUrlsActive) : null,
             ];
         };
 
@@ -97,7 +111,8 @@ class KnowledgeManagementPortalCategoryController extends Controller
                     $query->where('portal_view_count', '>', 0)->orderBy('portal_view_count', 'desc');
                 })
                 ->paginate(5)
-                ->through($mapArticle);
+                ->through($mapArticle)
+                ->toArray();
         };
 
         if (request()->has('filter')) {
@@ -111,26 +126,46 @@ class KnowledgeManagementPortalCategoryController extends Controller
                 'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
-                'parentCategory' => $category->parentCategory,
+                'parentCategory' => $this->categoryData($category, $stableUrlsActive)->parentCategory,
+                'publicId' => $stableUrlsActive ? $category->public_id : null,
                 'subCategories' => $category
                     ->subCategories()
-                    ->with(['parentCategory:id,name,slug'])
+                    ->with('parentCategory')
                     ->reorder()
                     ->orderBy('sort')
                     ->get()
-                    ->map(function (KnowledgeBaseCategory $subCategory) {
+                    ->map(function (KnowledgeBaseCategory $subCategory) use ($stableUrlsActive) {
                         return KnowledgeBaseCategoryData::from([
                             'slug' => $subCategory->slug,
                             'name' => $subCategory->name,
                             'description' => $subCategory->description,
                             'icon' => $subCategory->icon ? svg($subCategory->icon, 'h-6 w-6')->toHtml() : null,
-                            'parentCategory' => $subCategory->parentCategory,
+                            'parentCategory' => $this->categoryData($subCategory, $stableUrlsActive)->parentCategory,
+                            'publicId' => $stableUrlsActive ? $subCategory->public_id : null,
                         ]);
                     }),
             ]),
             'all_articles' => $articlesFor(''),
             'featured_articles' => $articlesFor('featured'),
             'most_viewed_articles' => $articlesFor('most-viewed'),
+        ]);
+    }
+
+    private function categoryData(KnowledgeBaseCategory $category, bool $stableUrlsActive): KnowledgeBaseCategoryData
+    {
+        $category->loadMissing('parentCategory');
+
+        return KnowledgeBaseCategoryData::from([
+            'slug' => $category->slug,
+            'name' => $category->name,
+            'description' => $category->description,
+            'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
+                'slug' => $category->parentCategory->slug,
+                'name' => $category->parentCategory->name,
+                'description' => $category->parentCategory->description,
+                'publicId' => $stableUrlsActive ? $category->parentCategory->public_id : null,
+            ]) : null,
+            'publicId' => $stableUrlsActive ? $category->public_id : null,
         ]);
     }
 }

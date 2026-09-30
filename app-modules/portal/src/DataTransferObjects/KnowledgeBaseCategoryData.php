@@ -49,5 +49,6 @@ class KnowledgeBaseCategoryData extends Data
         public ?KnowledgeBaseCategoryData $parentCategory,
         /** @var null|Collection<int, KnowledgeBaseCategoryData> */
         public ?Collection $subCategories,
+        public ?string $publicId = null,
     ) {}
 }

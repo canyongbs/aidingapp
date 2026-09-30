@@ -48,7 +48,9 @@ class CreateUserDataObject extends Data
      * @param array<int, string>|Optional $roles
      */
     public function __construct(
-        public string $name,
+        public string | Optional $name,
+        public string | Optional $firstName,
+        public string | Optional $lastName,
         public string $email,
         public bool $isExternal,
         public string | Optional $jobTitle,
@@ -58,6 +60,19 @@ class CreateUserDataObject extends Data
         public string | Optional $mobile,
         public string | Optional $departmentId,
         public array | Optional $roles,
+        public string | Optional $preferredName,
+        public string | Optional $employeeId,
+        public string | Optional $studentId,
+        public string | Optional $school,
+        public string | Optional $academicDepartment,
+        public string | Optional $program,
+        public string | Optional $address,
+        #[MapName('address_2')]
+        public string | Optional $addressLine2,
+        public string | Optional $city,
+        public string | Optional $state,
+        public string | Optional $postalCode,
+        public string | Optional $country,
     ) {}
 
     /**
@@ -66,7 +81,9 @@ class CreateUserDataObject extends Data
     public static function fromData(array $data): self
     {
         return new self(
-            name: $data['name'],
+            name: $data['name'] ?? Optional::create(),
+            firstName: $data['first_name'] ?? Optional::create(),
+            lastName: $data['last_name'] ?? Optional::create(),
             email: $data['email'],
             isExternal: $data['is_external'],
             jobTitle: $data['job_title'] ?? Optional::create(),
@@ -76,6 +93,18 @@ class CreateUserDataObject extends Data
             mobile: $data['mobile'] ?? Optional::create(),
             departmentId: $data['department_id'] ?? Optional::create(),
             roles: $data['roles'] ?? Optional::create(),
+            preferredName: $data['preferred_name'] ?? Optional::create(),
+            employeeId: $data['employee_id'] ?? Optional::create(),
+            studentId: $data['student_id'] ?? Optional::create(),
+            school: $data['school'] ?? Optional::create(),
+            academicDepartment: $data['academic_department'] ?? Optional::create(),
+            program: $data['program'] ?? Optional::create(),
+            address: $data['address'] ?? Optional::create(),
+            addressLine2: $data['address_2'] ?? Optional::create(),
+            city: $data['city'] ?? Optional::create(),
+            state: $data['state'] ?? Optional::create(),
+            postalCode: $data['postal_code'] ?? Optional::create(),
+            country: $data['country'] ?? Optional::create(),
         );
     }
 }

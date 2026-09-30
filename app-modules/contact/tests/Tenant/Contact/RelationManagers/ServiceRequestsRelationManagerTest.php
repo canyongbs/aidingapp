@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Servic
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -518,5 +519,67 @@ describe('feedback visibility', function () {
         ])
             ->mountTableAction('view', $serviceRequest)
             ->assertSchemaComponentHidden('feedback.csat_answer', 'mountedActionSchema0');
+    });
+});
+
+describe('archiving', function () {
+    test('the status select still offers the archived status a service request is already on', function () {
+        asSuperAdmin();
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ]);
+
+        $contact = Contact::factory()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($contact, 'respondent')
+            ->create(['status_id' => $archivedStatus->getKey()]);
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->assertCanSeeTableRecords([$serviceRequest])
+            ->mountTableAction('edit', $serviceRequest)
+            ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($archivedStatus): bool {
+                $optionIds = collect($select->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($archivedStatus->getKey(), $optionIds, true);
+            });
+    });
+
+    test('the status select does not offer archived statuses', function () {
+        asSuperAdmin();
+
+        $settings = app(LicenseSettings::class);
+        $settings->data->addons->serviceManagement = true;
+        $settings->save();
+
+        $activeStatus = ServiceRequestStatus::factory()->create();
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        $contact = Contact::factory()->create();
+
+        livewire(ServiceRequestsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ContactServiceManagement::class,
+        ])
+            ->mountTableAction('create')
+            ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($activeStatus, $archivedStatus): bool {
+                $optionIds = collect($select->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($activeStatus->getKey(), $optionIds, true)
+                    && ! in_array($archivedStatus->getKey(), $optionIds, true);
+            })
+            ->assertSuccessful();
     });
 });

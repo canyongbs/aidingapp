@@ -48,7 +48,7 @@ class EditServiceRequestDescriptionAction
     {
         return Action::make('editDescription')
             ->label('Edit description')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->slideOver()

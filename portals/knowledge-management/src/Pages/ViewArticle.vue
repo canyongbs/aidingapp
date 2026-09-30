@@ -47,6 +47,7 @@
     import { useRoute, useRouter } from 'vue-router';
     import { apiPost } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
+    import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
     import { useArticleData } from './loaders.js';
 
     const route = useRoute();
@@ -68,13 +69,12 @@
             feedback.value = data?.article?.vote ? data.article.vote.is_helpful : null;
             helpfulVotePercentage.value = data?.helpful_vote_percentage ?? 0;
 
-            // The API may resolve to a canonical category slug for the article; keep the
-            // URL in sync without triggering a fresh navigation/loader run.
-            if (data?.category && data.category.slug !== route.params.categorySlug) {
-                router.replace({
-                    name: 'view-article',
-                    params: { categorySlug: data.category.slug, articleId: route.params.articleId },
-                });
+            if (data?.category && data.article) {
+                const canonicalRoute = articleRoute(data.article, data.category);
+
+                if (router.resolve(canonicalRoute).path !== route.path) {
+                    router.replace(canonicalRoute);
+                }
             }
         },
         { immediate: true },
@@ -85,19 +85,21 @@
             const breadcrumbsList = [];
 
             if (parentCategory.value) {
+                const parentRoute = categoryRoute(parentCategory.value);
+
                 breadcrumbsList.push({
                     name: parentCategory.value.name,
-                    route: 'view-category',
-                    params: { categorySlug: parentCategory.value.slug },
+                    route: parentRoute.name,
+                    params: parentRoute.params,
                 });
             }
 
+            const currentCategoryRoute = categoryRoute(category.value);
+
             breadcrumbsList.push({
                 name: category.value.name,
-                route: parentCategory.value ? 'view-subcategory' : 'view-category',
-                params: parentCategory.value
-                    ? { parentCategorySlug: parentCategory.value.slug, categorySlug: category.value.slug }
-                    : { categorySlug: category.value.slug },
+                route: currentCategoryRoute.name,
+                params: currentCategoryRoute.params,
             });
 
             return breadcrumbsList;
@@ -112,7 +114,7 @@
         try {
             const data = await apiPost('/knowledge_base_article_vote/store', {
                 article_vote: feedback.value === type ? null : type,
-                article_id: route.params.articleId,
+                article_id: article.value.id,
             });
 
             if (Object.prototype.hasOwnProperty.call(data, 'is_helpful') && data.is_helpful !== null) {

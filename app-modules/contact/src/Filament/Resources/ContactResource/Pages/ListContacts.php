@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Actions\BulkUpdateContactsAction;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
@@ -107,7 +106,6 @@ class ListContacts extends ListRecords
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
                     BulkEngagementAction::make(context: 'contacts'),
-                    BulkUpdateContactsAction::make(),
                 ]),
             ]);
     }
@@ -171,7 +169,6 @@ class ListContacts extends ListRecords
                     DeleteBulkAction::make()
                         ->authorizeIndividualRecords('delete'),
                     BulkEngagementAction::make(context: 'contacts'),
-                    BulkUpdateContactsAction::make(),
                 ]),
             ]);
     }

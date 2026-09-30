@@ -697,9 +697,12 @@ test('an authorised user can duplicate a knowledge base article', function () {
         ])
         ->assertHasNoTableActionErrors();
 
-    $replicatedKnowledgeBaseItem = KnowledgeBaseItem::latest()->first();
+    $replicatedKnowledgeBaseItem = KnowledgeBaseItem::query()
+        ->whereKeyNot($knowledgeBaseItem->getKey())
+        ->sole();
 
     expect(KnowledgeBaseItem::count())->toBe(2);
+    expect($replicatedKnowledgeBaseItem->public_id)->not->toBe($knowledgeBaseItem->public_id);
     expect($replicatedKnowledgeBaseItem->title)->toBe($knowledgeBaseItem->title);
     expect($replicatedKnowledgeBaseItem->public)->toBe($knowledgeBaseItem->public);
     expect($replicatedKnowledgeBaseItem->notes)->toBe($knowledgeBaseItem->notes);

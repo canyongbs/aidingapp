@@ -429,6 +429,14 @@ test('CreateServiceMonitor hides API endpoint fields until the API endpoint moni
         ->assertSchemaComponentVisible('request_headers');
 });
 
+test('CreateServiceMonitor defaults successful_status_codes to 200 when the API endpoint monitor type is selected', function () {
+    asSuperAdmin();
+
+    livewire(CreateServiceMonitoring::class)
+        ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
+        ->assertFormSet(['successful_status_codes' => [200]]);
+});
+
 test('CreateServiceMonitor shows follow_redirection for every monitor type', function () {
     asSuperAdmin();
 

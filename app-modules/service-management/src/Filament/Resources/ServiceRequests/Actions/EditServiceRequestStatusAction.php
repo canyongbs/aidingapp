@@ -48,7 +48,7 @@ class EditServiceRequestStatusAction
     {
         return Action::make('editStatus')
             ->label('Edit status')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->slideOver()

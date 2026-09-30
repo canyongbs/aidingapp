@@ -31,10 +31,18 @@
     
     </COPYRIGHT>
 --}}
+
+@props([
+    'pipeline',
+    'entry',
+    'canUpdatePipelineTask' => false,
+])
+
 @use('App\Models\User')
 @use('AidingApp\Contact\Models\Contact')
 @use('Illuminate\Database\Eloquent\Relations\Relation')
 @use('Illuminate\Support\Str')
+
 @php
     $assignedModelClass = filled($entry->assigned_to_type) ? Relation::getMorphedModel($entry->assigned_to_type) ?? $entry->assigned_to_type : null;
 
@@ -83,7 +91,11 @@
 
 <div
     role="listitem"
-    class="z-10 flex w-full transform cursor-move flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800"
+    @class([
+        'z-10 flex w-full transform flex-col rounded-lg bg-white p-5 shadow dark:bg-gray-800',
+        'cursor-move' => $canUpdatePipelineTask,
+        'cursor-default' => ! $canUpdatePipelineTask,
+    ])
     data-pipeline="{{ $pipeline->getKey() }}"
     data-entry="{{ $entry->getKey() }}"
     wire:key="pipeline-entry-{{ $entry->getKey() }}"

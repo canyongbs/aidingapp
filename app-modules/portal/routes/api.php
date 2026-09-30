@@ -64,8 +64,6 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequ
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestUpdateController;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
-use AidingApp\Portal\Http\Routing\ArticleShowMissingHandler;
-use AidingApp\Portal\Http\Routing\CategoryShowMissingHandler;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
@@ -115,13 +113,14 @@ Route::prefix('api')
                 Route::get('/categories', [KnowledgeManagementPortalCategoryController::class, 'index'])
                     ->name('category.index');
 
-                Route::get('/categories/{category:slug}', [KnowledgeManagementPortalCategoryController::class, 'show'])
-                    ->name('category.show')
-                    ->missing((new CategoryShowMissingHandler())(...));
+                Route::get('/categories/{category}', [KnowledgeManagementPortalCategoryController::class, 'show'])
+                    ->name('category.show');
 
-                Route::get('/categories/{category:slug}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
-                    ->name('article.show')
-                    ->missing((new ArticleShowMissingHandler())(...));
+                Route::get('/categories/{category}/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'showLegacy'])
+                    ->name('article.show');
+
+                Route::get('/articles/{article}', [KnowledgeManagementPortalArticleController::class, 'show'])
+                    ->name('article.show-canonical');
 
                 Route::get('/service-request-type/select', [ServiceRequestTypesController::class, 'index'])
                     ->name('service-request-type.index');

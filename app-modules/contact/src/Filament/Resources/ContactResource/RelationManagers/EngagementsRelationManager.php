@@ -164,8 +164,8 @@ class EngagementsRelationManager extends RelationManager
         $canAccessEngagementResponses = auth()->user()->can('viewAny', EngagementResponse::class);
 
         return $table
-            ->emptyStateHeading('No email or text messages.')
-            ->emptyStateDescription('Create an email or text message to get started.')
+            ->emptyStateHeading('No emails.')
+            ->emptyStateDescription('Create an email to get started.')
             ->defaultSort('record_sortable_date', 'desc')
             ->modifyQueryUsing(fn (Builder $query) => $query->whereHasMorph('timelineable', [
                 ...($canAccessEngagements ? [Engagement::class] : []),
@@ -226,22 +226,6 @@ class EngagementsRelationManager extends RelationManager
                             ->when($data['value'], fn (Builder $query) => $query->whereHasMorph('timelineable', $data['value']))
                     )
                     ->visible($canAccessEngagements && $canAccessEngagementResponses),
-                SelectFilter::make('type')
-                    ->options(NotificationChannel::class)
-                    ->modifyQueryUsing(
-                        fn (Builder $query, array $data) => $query
-                            ->when(
-                                $data['value'] === NotificationChannel::Email->value,
-                                fn (Builder $query) => $query
-                                    ->whereHasMorph(
-                                        'timelineable',
-                                        [Engagement::class],
-                                        fn (Builder $query, string $type) => match ($type) {
-                                            Engagement::class => $query->where('channel', $data['value']),
-                                        }
-                                    )
-                            )
-                    ),
             ])
             ->poll('5s');
     }

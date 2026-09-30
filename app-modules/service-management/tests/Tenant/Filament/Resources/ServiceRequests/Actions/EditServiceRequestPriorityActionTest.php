@@ -48,8 +48,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
 test('editPriority action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -111,7 +109,7 @@ test('editPriority action is hidden for user without update permission', functio
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
+        ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('editPriority action is hidden when the service request has no priority', function () {
@@ -128,7 +126,7 @@ test('editPriority action is hidden when the service request has no priority', f
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editPriority')->schemaComponent('priority.name'));
+        ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
 test('editPriority action is visible when the service request priority is soft-deleted', function () {
@@ -155,8 +153,6 @@ test('editPriority action is visible when the service request priority is soft-d
         ->assertSuccessful()
         ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
-
-// Validation
 
 test('editPriority requires priority_id', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -209,8 +205,6 @@ test('editPriority rejects a priority belonging to a different service request t
 
     expect($serviceRequest->fresh()->priority_id)->not->toBe($otherTypePriority->getKey());
 });
-
-// Success
 
 test('can update the service request priority', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
