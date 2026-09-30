@@ -68,14 +68,28 @@ return new class () extends Migration {
                 ->whereNull('first_name')
                 ->chunkById(500, function (Collection $users) {
                     foreach ($users as $user) {
-                        $name = (new Parser())->parse(trim($user->name));
+                        $fullName = trim($user->name ?? '');
+
+                        if ($fullName === '') {
+                            DB::table('users')
+                                ->where('id', $user->id)
+                                ->update([
+                                    'first_name' => 'Unknown',
+                                    'last_name' => 'Unknown',
+                                    'name' => 'Unknown',
+                                ]);
+
+                            continue;
+                        }
+
+                        $name = (new Parser())->parse($fullName);
 
                         DB::table('users')
                             ->where('id', $user->id)
                             ->update([
-                                'first_name' => $name->getFirstname() ?: trim($user->name),
+                                'first_name' => $name->getFirstname() ?: $fullName,
                                 'last_name' => $name->getLastname() ?: '',
-                                'name' => trim($user->name),
+                                'name' => $fullName,
                             ]);
                     }
                 });
