@@ -50,7 +50,7 @@ class EditServiceRequestPriorityAction
 
         return Action::make('editPriority')
             ->label('Edit priority')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->visible(fn (): bool => filled($typeId))

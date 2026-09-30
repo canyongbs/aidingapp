@@ -34,62 +34,54 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Alert\Models;
+namespace App\Filament\Resources\Users\RelationManagers;
 
-use AidingApp\Alert\Database\Factories\AlertFactory;
-use AidingApp\Alert\Enums\AlertSeverity;
-use AidingApp\Alert\Enums\AlertStatus;
-use AidingApp\Alert\Observers\AlertObserver;
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Contact\Models\Contact;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use AidingApp\Group\Models\Group;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Actions\AttachAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DetachAction;
+use Filament\Actions\DetachBulkAction;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
 
-/**
- * @property-read Contact $concern
- *
- * @mixin IdeHelperAlert
- */
-#[ObservedBy([AlertObserver::class])]
-class Alert extends BaseModel implements Auditable
+class GroupsRelationManager extends RelationManager
 {
-    use SoftDeletes;
-    use AuditableTrait;
+    protected static string $relationship = 'groups';
 
-    /** @use HasFactory<AlertFactory> */
-    use HasFactory;
+    protected static ?string $recordTitleAttribute = 'name';
 
-    protected $fillable = [
-        'concern_id',
-        'description',
-        'severity',
-        'status',
-        'suggested_intervention',
-    ];
-
-    protected $casts = [
-        'severity' => AlertSeverity::class,
-        'status' => AlertStatus::class,
-    ];
-
-    /**
-     * @return BelongsTo<Contact, $this>
-     */
-    public function concern(): BelongsTo
+    public function table(Table $table): Table
     {
-        return $this->belongsTo(Contact::class, 'concern_id');
-    }
-
-    /**
-     * @param Builder<$this> $query
-     */
-    public function scopeStatus(Builder $query, AlertStatus $status): void
-    {
-        $query->where('status', $status);
+        return $table
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('description')
+                    ->searchable(),
+            ])
+            ->headerActions([
+                AttachAction::make()
+                    ->label('Associate groups')
+                    ->multiple()
+                    ->preloadRecordSelect()
+                    ->recordSelectOptionsQuery(function (Builder $query): Builder {
+                        /** @var Builder<Group> $query */
+                        return $query->withoutArchived();
+                    }),
+            ])
+            ->recordActions([
+                DetachAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DetachBulkAction::make(),
+                ]),
+            ])
+            ->inverseRelationship('users');
     }
 }

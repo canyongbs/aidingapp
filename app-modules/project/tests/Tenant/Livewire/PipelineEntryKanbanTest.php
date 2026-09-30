@@ -311,6 +311,38 @@ it('denies moving a pipeline entry without pipeline update permission', function
     expect($entry->fresh()->pipeline_stage_id)->toBe($fromStage->getKey());
 });
 
+it('disables kanban drag and drop for users without pipeline update permission', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    $user->givePermissionTo('project.view-any');
+    $user->givePermissionTo('project.*.view');
+    $user->givePermissionTo('pipeline.view-any');
+    $user->givePermissionTo('pipeline.*.view');
+    $user->refresh();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee('kanban($wire, false)');
+});
+
+it('enables kanban drag and drop for users with pipeline update permission', function () {
+    asSuperAdmin();
+
+    $pipeline = Pipeline::factory()
+        ->for(Project::factory()->create())
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->assertSee('kanban($wire, true)');
+});
+
 it('rejects moving a pipeline entry into a stage that does not belong to the pipeline', function () {
     asSuperAdmin();
 

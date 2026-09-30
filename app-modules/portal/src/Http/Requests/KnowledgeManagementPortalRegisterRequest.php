@@ -66,7 +66,6 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
             'preferred' => ['nullable', 'string', 'max:255'],
             'mobile' => ['required', 'string', 'max:255'],
             'phone' => ['nullable', 'string', 'max:255'],
-            'sms_opt_out' => ['required', 'boolean'],
             'code' => ['required', 'integer', 'digits:6', new ValidAuthenticationCode($authentication)],
         ];
     }

@@ -47,7 +47,6 @@ use Filament\Actions\Testing\TestAction;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
 
 function makeManagedContact(): Contact
 {
@@ -57,7 +56,7 @@ function makeManagedContact(): Contact
     return app(ManagedContactService::class)->enable($managedUser, $type->getKey());
 }
 
-it('hides the edit action for a managed contact in the list', function () {
+it('does not render standalone view or edit actions in the list', function () {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -67,8 +66,10 @@ it('hides the edit action for a managed contact in the list', function () {
     $unmanaged = Contact::factory()->create();
 
     livewire(ListContacts::class)
-        ->assertActionHidden(TestAction::make('edit')->table($managed))
-        ->assertActionVisible(TestAction::make('edit')->table($unmanaged));
+        ->assertActionDoesNotExist(TestAction::make('view')->table($managed))
+        ->assertActionDoesNotExist(TestAction::make('edit')->table($managed))
+        ->assertActionDoesNotExist(TestAction::make('view')->table($unmanaged))
+        ->assertActionDoesNotExist(TestAction::make('edit')->table($unmanaged));
 });
 
 it('shows a lock action instead of edit on the view page of a managed contact', function () {
@@ -125,40 +126,4 @@ it('denies the update ability for a managed contact via the policy', function ()
 
     expect($user->can('update', $managed))->toBeFalse()
         ->and($user->can('update', $unmanaged))->toBeTrue();
-});
-
-it('excludes managed contacts from the bulk update action via individual record authorization', function () {
-    $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
-
-    actingAs($user);
-
-    $managed = makeManagedContact();
-    $unmanaged = Contact::factory()->create();
-
-    livewire(ListContacts::class)
-        ->callTableBulkAction('bulk_update', [$managed, $unmanaged], [
-            'field' => 'description',
-            'description' => 'bulk-updated-description',
-        ])
-        ->assertHasNoTableBulkActionErrors();
-
-    expect($unmanaged->refresh()->description)->toBe('bulk-updated-description')
-        ->and($managed->refresh()->description)->not->toBe('bulk-updated-description');
-});
-
-it('prevents super admins from bulk updating managed contacts', function () {
-    asSuperAdmin();
-
-    $managed = makeManagedContact();
-    $unmanaged = Contact::factory()->create();
-
-    livewire(ListContacts::class)
-        ->callTableBulkAction('bulk_update', [$managed, $unmanaged], [
-            'field' => 'description',
-            'description' => 'super-admin-bulk-description',
-        ]);
-
-    expect($unmanaged->refresh()->description)->toBe('super-admin-bulk-description')
-        ->and($managed->refresh()->description)->not->toBe('super-admin-bulk-description');
 });

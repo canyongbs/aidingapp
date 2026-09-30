@@ -34,52 +34,56 @@
 </COPYRIGHT>
 */
 
-use App\Features\NotificationSettingsFeature;
-use App\Models\NotificationSetting;
-use App\Settings\NotificationSettings;
-use CanyonGBS\Common\Enums\Color;
+use App\Features\EnhanceContactsTableDataModelFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
-            if (Schema::hasTable('notification_settings')) {
-                $notificationSetting = NotificationSetting::query()->oldest()->first();
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->string('employee_id')->nullable();
+                $table->string('work_number')->nullable();
+                $table->string('work_extension')->nullable();
+                $table->string('student_id')->nullable();
+                $table->string('school')->nullable();
+                $table->string('academic_department')->nullable();
+                $table->string('program')->nullable();
+                $table->string('country')->nullable();
 
-                if ($notificationSetting) {
-                    $settings = app(NotificationSettings::class);
+                $table->dropColumn(['title', 'address_3', 'sms_opt_out']);
+            });
 
-                    $settings->from_name = $notificationSetting->getAttribute('from_name');
-                    $settings->primary_color = Color::tryFrom((string) $notificationSetting->getAttribute('primary_color'));
-
-                    $settings->save();
-
-                    $logo = $notificationSetting->getFirstMedia('logo');
-
-                    $logo?->copy(NotificationSettings::getSettingsPropertyModel('notifications.logo'), 'logo', 's3-public');
-                }
-            }
-
-            NotificationSettingsFeature::activate();
+            // TODO: Cleanup Task (enhance-contacts-data-model): remove this activation and the DB::transaction/feature-flag import when the flag is removed.
+            EnhanceContactsTableDataModelFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            NotificationSettingsFeature::deactivate();
+            // TODO: Cleanup Task (enhance-contacts-data-model): remove this deactivation and the DB::transaction/feature-flag import when the flag is removed.
+            EnhanceContactsTableDataModelFeature::deactivate();
 
-            $settings = app(NotificationSettings::class);
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->dropColumn([
+                    'employee_id',
+                    'work_number',
+                    'work_extension',
+                    'student_id',
+                    'school',
+                    'academic_department',
+                    'program',
+                    'country',
+                ]);
 
-            $settings->from_name = null;
-            $settings->primary_color = null;
-
-            $settings->save();
-
-            NotificationSettings::getSettingsPropertyModel('notifications.logo')->clearMediaCollection('logo');
+                $table->string('title')->nullable();
+                $table->string('address_3')->nullable();
+                $table->boolean('sms_opt_out')->default(false);
+            });
         });
     }
 };

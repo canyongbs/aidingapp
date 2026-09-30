@@ -49,7 +49,7 @@ class EditServiceRequestCategoryAction
     {
         return Action::make('editCategory')
             ->label('Edit category')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->slideOver()

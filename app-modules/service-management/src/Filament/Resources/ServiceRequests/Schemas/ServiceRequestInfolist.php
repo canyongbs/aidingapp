@@ -108,7 +108,9 @@ class ServiceRequestInfolist
 
                                 return ContactResource::getUrl('view', ['record' => $respondent->id]);
                             })
-                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestContactAction::make($record)),
+                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
+                                EditServiceRequestContactAction::make($record),
+                            ])),
                         TextEntry::make('created_at')
                             ->label('Created')
                             ->dateTime()
@@ -123,17 +125,23 @@ class ServiceRequestInfolist
                         TextEntry::make('category')
                             ->label('Category')
                             ->badge()
-                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestCategoryAction::make($record)),
+                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
+                                EditServiceRequestCategoryAction::make($record),
+                            ])),
                         TextEntry::make('status.name')
                             ->label('Status')
                             ->badge()
                             ->state(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->name)
                             ->color(fn (ServiceRequest $record): ?string => $record->statusIncludingTrashed()?->color->value)
-                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestStatusAction::make($record)),
+                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
+                                EditServiceRequestStatusAction::make($record),
+                            ])),
                         TextEntry::make('priority.name')
                             ->label('Priority')
                             ->state(fn (ServiceRequest $record): ?string => $record->priorityIncludingTrashed()?->name)
-                            ->suffixAction(fn (ServiceRequest $record): Action => EditServiceRequestPriorityAction::make($record)),
+                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
+                                EditServiceRequestPriorityAction::make($record),
+                            ])),
                     ])->columns(3),
             ])
             ->columns();

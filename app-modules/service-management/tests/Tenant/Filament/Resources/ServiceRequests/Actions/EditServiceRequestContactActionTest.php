@@ -49,8 +49,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
 test('editContact action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -112,10 +110,8 @@ test('editContact action is hidden for user without update permission', function
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editContact')->schemaComponent('respondent'));
+        ->assertActionDoesNotExist(TestAction::make('editContact')->schemaComponent('respondent'));
 });
-
-// Validation
 
 test('editContact requires respondent_id', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -152,8 +148,6 @@ test('editContact requires an existing contact', function () {
         ])
         ->assertHasFormErrors(['respondent_id' => 'exists']);
 });
-
-// Success
 
 test('can update the service request customer contact', function () {
     $serviceRequest = ServiceRequest::factory()->state([

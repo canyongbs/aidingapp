@@ -67,5 +67,6 @@ it('populates the address fields when a suggestion is selected', function () {
             'city' => 'Austin',
             'state' => 'TX',
             'postal' => '78701',
+            'country' => 'US',
         ]);
 });
