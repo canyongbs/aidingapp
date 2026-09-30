@@ -17,7 +17,7 @@
       in the software, and you may not remove or obscure any functionality in the
       software that is protected by the license key.
     - You may not alter, remove, or obscure any licensing, copyright, or other notices
-      of the licensor in the software. Any use of the licensor’s trademarks is subject
+      of the licensor in the software. Any use of the licensor's trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
       same in return. Canyon GBS® and Aiding App® are registered trademarks of
@@ -36,98 +36,76 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
 use AidingApp\Contact\Models\Contact;
-use Filament\Infolists\Components\IconEntry;
-use Filament\Infolists\Components\TextEntry;
-use Filament\Schemas\Components\Section;
+use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Tabs\Tab;
 
 class ContactInfolist
 {
     /**
-     * @return array<Section>
+     * @return array<Tab>
      */
-    public static function sections(): array
+    public static function tabs(Contact $contact, string $pageClass): array
     {
-        return [
-            static::demographicsSection(),
-            static::contactInformationSection(),
-            static::classificationSection(),
-            static::engagementRestrictionsSection(),
-        ];
-    }
+        // Relation managers enforce their own authorization on mount, and Tabs are not
+        // lazy-loaded, so an inaccessible manager must be omitted here entirely rather
+        // than merely hidden, or it will 403 the whole page instead of just its tab.
+        $tabs = [];
 
-    public static function demographicsSection(): Section
-    {
-        return Section::make('Demographics')
-            ->schema([
-                TextEntry::make('title'),
-                TextEntry::make('first_name')
-                    ->label('First Name'),
-                TextEntry::make('last_name')
-                    ->label('Last Name'),
-                TextEntry::make(Contact::displayNameKey())
-                    ->label('Full Name'),
-                TextEntry::make('preferred')
-                    ->label('Preferred Name'),
-                TextEntry::make('job_title')
-                    ->label('Job Title'),
-            ])
-            ->columns(3)
-            ->columnSpanFull();
-    }
+        if (ServiceRequestsRelationManager::canViewForRecord($contact, $pageClass)) {
+            $tabs[] = Tab::make('Service Requests')
+                ->schema([
+                    Livewire::make(ServiceRequestsRelationManager::class, [
+                        'ownerRecord' => $contact,
+                        'pageClass' => $pageClass,
+                    ])->key(ServiceRequestsRelationManager::class),
+                ]);
+        }
 
-    public static function contactInformationSection(): Section
-    {
-        return Section::make('Contact Information')
-            ->schema([
-                TextEntry::make('email')
-                    ->label('Email'),
-                TextEntry::make('mobile')
-                    ->label('Mobile'),
-                TextEntry::make('phone')
-                    ->label('Phone'),
-                TextEntry::make('address')
-                    ->label('Address'),
-                TextEntry::make('address_2')
-                    ->label('Address 2'),
-                TextEntry::make('address_3')
-                    ->label('Address 3'),
-                TextEntry::make('city')
-                    ->label('City'),
-                TextEntry::make('state')
-                    ->label('State'),
-                TextEntry::make('postal')
-                    ->label('Postal'),
-            ])
-            ->columns(2);
-    }
+        $assetSections = array_filter([
+            AssetCheckOutRelationManager::canViewForRecord($contact, $pageClass)
+                ? Livewire::make(AssetCheckOutRelationManager::class, [
+                    'ownerRecord' => $contact,
+                    'pageClass' => $pageClass,
+                ])->key(AssetCheckOutRelationManager::class)
+                : null,
+            AssetCheckInRelationManager::canViewForRecord($contact, $pageClass)
+                ? Livewire::make(AssetCheckInRelationManager::class, [
+                    'ownerRecord' => $contact,
+                    'pageClass' => $pageClass,
+                ])->key(AssetCheckInRelationManager::class)
+                : null,
+        ]);
 
-    public static function classificationSection(): Section
-    {
-        return Section::make('Classification')
-            ->schema([
-                TextEntry::make('type.name')
-                    ->label('Type'),
-                TextEntry::make('organization.name')
-                    ->label('Organization'),
-                TextEntry::make('description')
-                    ->label('Description')
-                    ->columnSpanFull(),
-            ])
-            ->columns(2);
-    }
+        if (filled($assetSections)) {
+            $tabs[] = Tab::make('Assets')->schema($assetSections);
+        }
 
-    public static function engagementRestrictionsSection(): Section
-    {
-        return Section::make('Engagement Restrictions')
-            ->schema([
-                IconEntry::make('sms_opt_out')
-                    ->label('SMS Opt Out')
-                    ->boolean(),
-                IconEntry::make('email_bounce')
-                    ->label('Email Bounce')
-                    ->boolean(),
-            ])
-            ->columns(2);
+        if (EngagementFilesRelationManager::canViewForRecord($contact, $pageClass)) {
+            $tabs[] = Tab::make('Files')
+                ->schema([
+                    Livewire::make(EngagementFilesRelationManager::class, [
+                        'ownerRecord' => $contact,
+                        'pageClass' => $pageClass,
+                    ])->key(EngagementFilesRelationManager::class),
+                ]);
+        }
+
+        if (EngagementsRelationManager::canViewForRecord($contact, $pageClass)) {
+            $tabs[] = Tab::make('Emails')
+                ->schema([
+                    Livewire::make(EngagementsRelationManager::class, [
+                        'ownerRecord' => $contact,
+                        'pageClass' => $pageClass,
+                    ])->key(EngagementsRelationManager::class),
+                ]);
+        }
+
+        return $tabs;
     }
 }

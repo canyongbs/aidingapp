@@ -38,19 +38,15 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Actions;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckInRelationManager;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\AssetCheckOutRelationManager;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
-use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\ServiceRequestsRelationManager;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use Filament\Actions\Action;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Actions;
 use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Livewire;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
-use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Support\Enums\Alignment;
 use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
@@ -64,6 +60,7 @@ class ViewContactAction
             ->icon(Heroicon::Eye)
             ->iconButton()
             ->record($contact)
+            ->fillForm($contact->attributesToArray())
             ->authorize('view', $contact)
             ->slideOver()
             ->modalWidth(Width::FourExtraLarge)
@@ -76,63 +73,24 @@ class ViewContactAction
                         ->label('Go to Contact')
                         ->url(ContactResource::getUrl('view', ['record' => $contact])),
                 ])->alignment(Alignment::End),
-                ...ContactInfolist::sections(),
+                Group::make()
+                    ->disabled()
+                    ->schema([
+                        ...ContactFormSchema::make(),
+                        Section::make('System Information')
+                            ->schema([
+                                TextEntry::make('created_at')
+                                    ->label('Created At')
+                                    ->dateTime(),
+                                TextEntry::make('updated_at')
+                                    ->label('Updated At')
+                                    ->dateTime(),
+                            ])
+                            ->columns(2),
+                    ]),
                 Tabs::make()
                     ->columnSpanFull()
-                    ->tabs([
-                        Tab::make('Service Requests')
-                            ->visible(fn (): bool => ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))
-                            ->schema([
-                                Livewire::make(ServiceRequestsRelationManager::class, [
-                                    'ownerRecord' => $contact,
-                                    'pageClass' => ViewContact::class,
-                                ])
-                                    ->key(ServiceRequestsRelationManager::class),
-                            ]),
-                        Tab::make('Assets')
-                            ->visible(
-                                fn (): bool => AssetCheckOutRelationManager::canViewForRecord($contact, ViewContact::class)
-                                    || AssetCheckInRelationManager::canViewForRecord($contact, ViewContact::class)
-                            )
-                            ->schema([
-                                Group::make()
-                                    ->visible(fn (): bool => AssetCheckOutRelationManager::canViewForRecord($contact, ViewContact::class))
-                                    ->schema([
-                                        Livewire::make(AssetCheckOutRelationManager::class, [
-                                            'ownerRecord' => $contact,
-                                            'pageClass' => ViewContact::class,
-                                        ])
-                                            ->key(AssetCheckOutRelationManager::class),
-                                    ]),
-                                Group::make()
-                                    ->visible(fn (): bool => AssetCheckInRelationManager::canViewForRecord($contact, ViewContact::class))
-                                    ->schema([
-                                        Livewire::make(AssetCheckInRelationManager::class, [
-                                            'ownerRecord' => $contact,
-                                            'pageClass' => ViewContact::class,
-                                        ])
-                                            ->key(AssetCheckInRelationManager::class),
-                                    ]),
-                            ]),
-                        Tab::make('Files')
-                            ->visible(fn (): bool => EngagementFilesRelationManager::canViewForRecord($contact, ViewContact::class))
-                            ->schema([
-                                Livewire::make(EngagementFilesRelationManager::class, [
-                                    'ownerRecord' => $contact,
-                                    'pageClass' => ViewContact::class,
-                                ])
-                                    ->key(EngagementFilesRelationManager::class),
-                            ]),
-                        Tab::make('Emails')
-                            ->visible(fn (): bool => EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))
-                            ->schema([
-                                Livewire::make(EngagementsRelationManager::class, [
-                                    'ownerRecord' => $contact,
-                                    'pageClass' => ViewContact::class,
-                                ])
-                                    ->key(EngagementsRelationManager::class),
-                            ]),
-                    ]),
+                    ->tabs(ContactInfolist::tabs($contact, ViewContact::class)),
             ]);
     }
 }

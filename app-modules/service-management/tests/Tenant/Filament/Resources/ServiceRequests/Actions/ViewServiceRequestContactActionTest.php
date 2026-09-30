@@ -292,8 +292,12 @@ test('viewContact shows the full contact details for the service request respond
     asSuperAdmin();
 
     mountViewContact($serviceRequest)
+        ->assertActionDataSet([
+            'first_name' => $contact->first_name,
+            'last_name' => $contact->last_name,
+            'email' => $contact->email,
+        ])
         ->assertMountedActionModalSee($contact->{Contact::displayNameKey()})
-        ->assertMountedActionModalSee($contact->email)
-        ->assertMountedActionModalSee('Demographics')
+        ->assertMountedActionModalSee('Demographic Information')
         ->assertMountedActionModalSee('Go to Contact');
 });
