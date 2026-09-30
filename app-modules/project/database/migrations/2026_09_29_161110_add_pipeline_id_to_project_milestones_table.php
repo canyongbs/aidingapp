@@ -69,10 +69,16 @@ return new class () extends Migration {
                         SQL),
                 ]);
 
+            // A milestone now belongs to one pipeline, so unlink tasks in any other pipeline from it.
+            DB::table('pipeline_entries')
+                ->join('pipeline_stages', 'pipeline_stages.id', '=', 'pipeline_entries.pipeline_stage_id')
+                ->join('project_milestones', 'project_milestones.id', '=', 'pipeline_entries.project_milestone_id')
+                ->whereRaw('project_milestones.pipeline_id is distinct from pipeline_stages.pipeline_id')
+                ->update(['project_milestone_id' => null]);
+
             // Any milestone still without a pipeline belongs to a project that has no (non-archived)
             // pipeline to associate it with. Per product decision these milestones are not needed, so
-            // they are removed. They cannot have pipeline entries (entries require a pipeline stage,
-            // which requires a pipeline), so a hard delete is safe and lets the column become NOT NULL.
+            // they are removed.
             DB::table('project_milestones')
                 ->whereNull('pipeline_id')
                 ->delete();
