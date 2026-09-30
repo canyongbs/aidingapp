@@ -48,11 +48,11 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('knowledge_base_categories', function (Blueprint $table) {
-                $table->string('public_id', self::PUBLIC_ID_LENGTH)->nullable();
+                $table->string('public_id')->nullable();
             });
 
             Schema::table('knowledge_base_articles', function (Blueprint $table) {
-                $table->string('public_id', self::PUBLIC_ID_LENGTH)->nullable();
+                $table->string('public_id')->nullable();
             });
 
             // TODO: Cleanup Task (knowledge-base-portal-stable-urls): remove this one-time backfill, its method, and the Str import from the retained migration.
@@ -60,12 +60,12 @@ return new class () extends Migration {
             $this->backfillPublicIds('knowledge_base_articles');
 
             Schema::table('knowledge_base_categories', function (Blueprint $table) {
-                $table->string('public_id', self::PUBLIC_ID_LENGTH)->nullable(false)->change();
+                $table->string('public_id')->nullable(false)->change();
                 $table->uniqueIndex('public_id');
             });
 
             Schema::table('knowledge_base_articles', function (Blueprint $table) {
-                $table->string('public_id', self::PUBLIC_ID_LENGTH)->nullable(false)->change();
+                $table->string('public_id')->nullable(false)->change();
                 $table->uniqueIndex('public_id');
             });
 
