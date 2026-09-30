@@ -64,6 +64,7 @@ use Filament\Tables\Table;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\View;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
 use Illuminate\Support\HtmlString;
 use Illuminate\Support\Str;
@@ -186,7 +187,7 @@ class ListUsers extends ListRecords
                 ] : []),
                 'work_number',
                 fn (Builder $query, string $search): Builder => $query
-                    ->whereRaw('CAST(work_extension AS TEXT) ILIKE ?', ["%{$search}%"]),
+                    ->where(new Expression('lower(CAST(work_extension AS TEXT))'), 'like', '%' . Str::lower($search) . '%'),
                 'mobile',
                 ...(FullNameFeature::active() ? [
                     'student_id',
