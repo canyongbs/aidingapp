@@ -41,11 +41,11 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends SettingsMigration {
-  use CanModifyPermissions;
+    use CanModifyPermissions;
 
-  /**
-    * @var array<string, string>
-    */
+    /**
+      * @var array<string, string>
+      */
     private array $permissions = [
         'care_team.view-any' => 'Care Team',
         'care_team.create' => 'Care Team',
@@ -102,7 +102,7 @@ return new class () extends SettingsMigration {
         'analytics_resource_source.*.delete' => 'Analytics Resource Source',
         'analytics_resource_source.*.restore' => 'Analytics Resource Source',
         'analytics_resource_source.*.force-delete' => 'Analytics Resource Source',
-        
+
         'campaign_action.view-any' => 'Campaign Action',
         'campaign_action.create' => 'Campaign Action',
         'campaign_action.*.view' => 'Campaign Action',
@@ -110,7 +110,7 @@ return new class () extends SettingsMigration {
         'campaign_action.*.delete' => 'Campaign Action',
         'campaign_action.*.restore' => 'Campaign Action',
         'campaign_action.*.force-delete' => 'Campaign Action',
-        
+
         'campaign.view-any' => 'Campaign',
         'campaign.create' => 'Campaign',
         'campaign.*.view' => 'Campaign',
@@ -118,7 +118,7 @@ return new class () extends SettingsMigration {
         'campaign.*.delete' => 'Campaign',
         'campaign.*.restore' => 'Campaign',
         'campaign.*.force-delete' => 'Campaign',
-        
+
         'caseload.view-any' => 'Caseload',
         'caseload.create' => 'Caseload',
         'caseload.*.view' => 'Caseload',
@@ -126,7 +126,7 @@ return new class () extends SettingsMigration {
         'caseload.*.delete' => 'Caseload',
         'caseload.*.restore' => 'Caseload',
         'caseload.*.force-delete' => 'Caseload',
-        
+
         'application.view-any' => 'Application',
         'application.create' => 'Application',
         'application.*.view' => 'Application',
@@ -134,7 +134,7 @@ return new class () extends SettingsMigration {
         'application.*.delete' => 'Application',
         'application.*.restore' => 'Application',
         'application.*.force-delete' => 'Application',
-        
+
         'application_submission_state.view-any' => 'Application Submission State',
         'application_submission_state.create' => 'Application Submission State',
         'application_submission_state.*.view' => 'Application Submission State',
@@ -157,7 +157,7 @@ return new class () extends SettingsMigration {
         DB::transaction(function (): void {
             // Delete permissions
             collect($this->guards)
-              ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
+                ->each(fn (string $guard) => $this->deletePermissions(array_keys($this->permissions), $guard));
 
             // Drop tables
             Schema::dropIfExists('care_teams');
