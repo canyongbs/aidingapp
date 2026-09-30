@@ -33,53 +33,44 @@
 -->
 <script setup>
     import { computed } from 'vue';
+    import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
-        tone: {
-            type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
+        totalCount: {
+            type: Number,
+            required: true,
         },
-        pulse: {
-            type: Boolean,
-            default: false,
+        statusCounts: {
+            type: Object,
+            required: true,
         },
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
+    const counts = computed(() =>
+        STATUS_ORDER.filter((status) => (props.statusCounts[status] ?? 0) > 0).map((status) => ({
+            status,
+            count: props.statusCounts[status],
+            ...getStatus(status),
+        })),
+    );
 </script>
 
 <template>
-    <span
-        :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
-        ]"
-    >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
-            aria-hidden="true"
-        />
-        <slot />
-    </span>
+    <ul class="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Monitors by status">
+        <li
+            class="inline-flex items-center gap-2 rounded-[var(--rounding-md)] bg-[rgba(var(--primary-50),1)] px-3 py-1.5 text-sm font-semibold text-[rgba(var(--primary-700),1)]"
+        >
+            All monitors
+            <span class="tabular-nums">{{ totalCount }}</span>
+        </li>
+        <li
+            v-for="item in counts"
+            :key="item.status"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700"
+        >
+            <span :class="['size-2 rounded-full', item.barClass]" aria-hidden="true" />
+            {{ item.label }}
+            <span class="font-semibold tabular-nums text-gray-900">{{ item.count }}</span>
+        </li>
+    </ul>
 </template>

@@ -32,54 +32,46 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from '@heroicons/vue/16/solid';
     import { computed } from 'vue';
+    import BaseTableHeaderCell from './BaseTableHeaderCell.vue';
 
     const props = defineProps({
-        tone: {
+        column: {
             type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
+            required: true,
         },
-        pulse: {
-            type: Boolean,
-            default: false,
+        sort: {
+            type: String,
+            default: null,
+        },
+        direction: {
+            type: String,
+            default: 'asc',
+            validator: (v) => ['asc', 'desc'].includes(v),
         },
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
+    const emit = defineEmits(['sort']);
 
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
+    const isActive = computed(() => props.sort === props.column);
 </script>
 
 <template>
-    <span
-        :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
-        ]"
-    >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
-            aria-hidden="true"
-        />
-        <slot />
-    </span>
+    <BaseTableHeaderCell :aria-sort="isActive ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'">
+        <button
+            type="button"
+            class="group inline-flex items-center gap-1 whitespace-nowrap rounded-sm text-left hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(var(--primary-500),1)]"
+            @click="emit('sort', column)"
+        >
+            <slot />
+            <ChevronUpIcon v-if="isActive && direction === 'asc'" class="size-4 text-gray-700" aria-hidden="true" />
+            <ChevronDownIcon v-else-if="isActive" class="size-4 text-gray-700" aria-hidden="true" />
+            <ChevronUpDownIcon
+                v-else
+                class="size-4 text-gray-300 transition-colors group-hover:text-gray-500"
+                aria-hidden="true"
+            />
+        </button>
+    </BaseTableHeaderCell>
 </template>

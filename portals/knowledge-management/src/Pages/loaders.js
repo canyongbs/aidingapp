@@ -34,8 +34,10 @@
 
 import { defineColadaLoader } from 'vue-router/experimental/pinia-colada';
 import { apiGet } from '../Services/api.js';
+import { resolveTimezone } from '../Services/FormatDateTime.js';
 
-const fiveMinutes = 1000 * 60 * 5;
+const oneMinute = 1000 * 60;
+const fiveMinutes = oneMinute * 5;
 
 /**
  * Resolves auth-related failures (401/403) and missing records (404) to `null`.
@@ -91,8 +93,15 @@ export const useServiceRequestData = defineColadaLoader({
 
 export const useServiceMonitorData = defineColadaLoader({
     key: () => ['knowledge-management', 'service-monitors'],
-    query: () => tolerant(apiGet('/status', { page: 1 })),
-    staleTime: fiveMinutes,
+    query: () => tolerant(apiGet('/status', { page: 1, timezone: resolveTimezone() })),
+    staleTime: oneMinute,
+});
+
+export const useServiceMonitorDetailData = defineColadaLoader({
+    key: (to) => ['knowledge-management', 'service-monitor', String(to.params.serviceMonitorId)],
+    query: (to) =>
+        tolerant(apiGet(`/status/${to.params.serviceMonitorId}`, { timezone: resolveTimezone() }), { notFound: true }),
+    staleTime: oneMinute,
 });
 
 export const useAdvisoriesData = defineColadaLoader({

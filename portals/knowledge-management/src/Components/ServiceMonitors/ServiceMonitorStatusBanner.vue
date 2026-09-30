@@ -33,53 +33,49 @@
 -->
 <script setup>
     import { computed } from 'vue';
+    import { getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
-        tone: {
+        status: {
             type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
+            required: true,
         },
-        pulse: {
-            type: Boolean,
-            default: false,
+        title: {
+            type: String,
+            required: true,
+        },
+        description: {
+            type: String,
+            required: true,
         },
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
+    const config = computed(() => getStatus(props.status));
 </script>
 
 <template>
-    <span
+    <section
+        role="status"
         :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
+            'flex flex-col gap-4 rounded-[var(--rounding-lg)] border px-5 py-4 shadow-xs md:flex-row md:items-center md:justify-between',
+            config.bannerClass,
         ]"
     >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
-            aria-hidden="true"
-        />
-        <slot />
-    </span>
+        <div class="flex items-center gap-4">
+            <span
+                :class="['flex size-11 shrink-0 items-center justify-center rounded-full', config.iconClass]"
+                aria-hidden="true"
+            >
+                <component :is="config.icon" class="size-6 stroke-2" />
+            </span>
+            <div class="grid gap-0.5">
+                <h2 :class="['text-lg font-semibold', config.bannerTitleClass]">{{ title }}</h2>
+                <p class="text-sm text-pretty text-gray-600">{{ description }}</p>
+            </div>
+        </div>
+
+        <dl v-if="$slots.meta" class="flex flex-wrap gap-x-6 gap-y-3 md:flex-nowrap">
+            <slot name="meta" />
+        </dl>
+    </section>
 </template>

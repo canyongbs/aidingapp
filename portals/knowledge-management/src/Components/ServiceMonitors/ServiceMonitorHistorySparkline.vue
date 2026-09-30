@@ -32,36 +32,34 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
-    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
+    import { computed } from 'vue';
+    import { describeBucket } from './serviceMonitorHistory.js';
+    import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
-        name: {
-            type: String,
-            required: true,
-        },
-        message: {
-            type: String,
-            required: true,
-        },
-        status: {
-            type: Boolean,
+        history: {
+            type: Array,
             required: true,
         },
     });
+
+    const summary = computed(() => {
+        const counts = STATUS_ORDER.map((status) => ({
+            label: getStatus(status).label.toLowerCase(),
+            count: props.history.filter((bucket) => bucket.status === status).length,
+        })).filter(({ count }) => count > 0);
+
+        return `${props.history.length}-day history: ${counts.map(({ label, count }) => `${count} ${label}`).join(', ')}`;
+    });
 </script>
+
 <template>
-    <div class="flex items-start w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
-        <div class="shrink-0 size-6" aria-hidden="true">
-            <CheckCircleIcon v-if="status === true" class="size-6 text-green-700" />
-            <XCircleIcon v-if="status === false" class="size-6 text-red-600" />
-        </div>
-
-        <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-            <span class="text-sm font-medium text-gray-950">{{ name }}</span>
-            <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">{{ message }}</p>
-        </div>
-
-        <InformationCircleIcon class="shrink-0 size-5 self-center text-gray-400" aria-hidden="true" />
+    <div class="flex h-6 items-stretch gap-px" role="img" :aria-label="summary">
+        <span
+            v-for="bucket in history"
+            :key="bucket.starts_at"
+            :class="['w-1 rounded-[1px]', getStatus(bucket.status).barClass]"
+            :title="describeBucket(bucket, 'past_month')"
+        />
     </div>
 </template>

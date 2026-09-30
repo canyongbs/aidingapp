@@ -32,54 +32,33 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/vue/24/solid';
     import { computed } from 'vue';
+    import { getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
-        tone: {
+        status: {
             type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
-        },
-        pulse: {
-            type: Boolean,
-            default: false,
+            required: true,
         },
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
+    const config = computed(() => getStatus(props.status));
 </script>
 
 <template>
-    <span
-        :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
-        ]"
+    <div
+        role="note"
+        :class="['flex items-start gap-3 rounded-[var(--rounding-md)] border px-4 py-3', config.noteClass]"
     >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
+        <component
+            :is="status === 'operational' ? ShieldCheckIcon : ShieldExclamationIcon"
+            :class="['mt-0.5 size-5 shrink-0', config.noteIconClass]"
             aria-hidden="true"
         />
-        <slot />
-    </span>
+        <div class="grid gap-1">
+            <p class="text-sm font-semibold">{{ config.noteTitle }}</p>
+            <p :class="['text-sm text-pretty', config.noteTextClass]">{{ config.noteDescription }}</p>
+        </div>
+    </div>
 </template>

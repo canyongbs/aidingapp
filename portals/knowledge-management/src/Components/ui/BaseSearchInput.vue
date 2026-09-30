@@ -32,54 +32,39 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
+    import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 
-    const props = defineProps({
-        tone: {
+    defineProps({
+        modelValue: {
             type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
+            default: '',
         },
-        pulse: {
-            type: Boolean,
-            default: false,
+        label: {
+            type: String,
+            required: true,
+        },
+        placeholder: {
+            type: String,
+            default: '',
         },
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
+    defineEmits(['update:modelValue']);
 </script>
 
 <template>
-    <span
-        :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
-        ]"
-    >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
+    <div class="relative w-full">
+        <MagnifyingGlassIcon
+            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
             aria-hidden="true"
         />
-        <slot />
-    </span>
+        <input
+            type="search"
+            :value="modelValue"
+            :aria-label="label"
+            :placeholder="placeholder"
+            class="w-full rounded-[var(--rounding-md)] border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
+            @input="$emit('update:modelValue', $event.target.value)"
+        />
+    </div>
 </template>

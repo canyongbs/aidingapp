@@ -1,4 +1,4 @@
-<!--
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,56 +30,24 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { computed } from 'vue';
+*/
+import { onMounted, onUnmounted, ref } from 'vue';
 
-    const props = defineProps({
-        tone: {
-            type: String,
-            default: 'neutral',
-            validator: (v) => ['success', 'warning', 'danger', 'neutral'].includes(v),
-        },
-        pulse: {
-            type: Boolean,
-            default: false,
-        },
+/**
+ * The current time in milliseconds, refreshed on an interval so that relative times ("2 minutes ago") stay current.
+ */
+export function useNow(interval = 30000) {
+    const now = ref(Date.now());
+
+    let timer = null;
+
+    onMounted(() => {
+        timer = setInterval(() => {
+            now.value = Date.now();
+        }, interval);
     });
 
-    const dotClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-500',
-            warning: 'bg-orange-500',
-            danger: 'bg-red-500',
-            neutral: 'bg-gray-500',
-        };
+    onUnmounted(() => clearInterval(timer));
 
-        return classes[props.tone] ?? classes.neutral;
-    });
-
-    const toneClasses = computed(() => {
-        const classes = {
-            success: 'bg-green-100 text-green-800 ring-green-600/20',
-            warning: 'bg-orange-100 text-orange-800 ring-orange-600/20',
-            danger: 'bg-red-100 text-red-800 ring-red-600/20',
-            neutral: 'bg-gray-100 text-gray-700 ring-gray-500/20',
-        };
-
-        return classes[props.tone] ?? classes.neutral;
-    });
-</script>
-
-<template>
-    <span
-        :class="[
-            'inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold ring-1 ring-inset rounded-[var(--rounding-md)]',
-            toneClasses,
-        ]"
-    >
-        <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
-            aria-hidden="true"
-        />
-        <slot />
-    </span>
-</template>
+    return now;
+}
