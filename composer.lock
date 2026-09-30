@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "fb90d2caa1762fc2cbb533acebb964eb",
+    "content-hash": "fb54d74ef3cb7ecc2436b2eaeaa0b503",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -668,41 +668,6 @@
                     "AidingApp\\Ai\\Tests\\": "tests/",
                     "AidingApp\\Ai\\Database\\Factories\\": "database/factories/",
                     "AidingApp\\Ai\\Database\\Seeders\\": "database/seeders/"
-                }
-            },
-            "license": [
-                "proprietary"
-            ],
-            "transport-options": {
-                "symlink": true,
-                "relative": true
-            }
-        },
-        {
-            "name": "canyon-gbs/aiding-app-alert",
-            "version": "1.0",
-            "dist": {
-                "type": "path",
-                "url": "app-modules/alert",
-                "reference": "7a0a55e5baa3d16487dfcdd0cc81aa4be541bce7"
-            },
-            "require": {
-                "filament/filament": "^4.0"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "AidingApp\\Alert\\Providers\\AlertServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "psr-4": {
-                    "AidingApp\\Alert\\": "src/",
-                    "AidingApp\\Alert\\Tests\\": "tests/",
-                    "AidingApp\\Alert\\Database\\Factories\\": "database/factories/",
-                    "AidingApp\\Alert\\Database\\Seeders\\": "database/seeders/"
                 }
             },
             "license": [
