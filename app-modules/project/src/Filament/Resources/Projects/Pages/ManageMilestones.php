@@ -37,7 +37,11 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
+use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -105,7 +109,20 @@ class ManageMilestones extends ManageRelatedRecords
             ->headerActions([
                 CreateAction::make()
                     ->slideOver()
-                    ->authorize('create', $this->getOwnerRecord()),
+                    ->authorize('create', $this->getOwnerRecord())
+                    // A milestone must belong to a pipeline. This page has no pipeline switcher, so
+                    // new milestones default to the project's active (oldest, non-archived) pipeline,
+                    // and the action is hidden when the project has none to assign.
+                    // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is
+                    // removed, always apply the default pipeline and hide when none (drop the guard).
+                    ->visible(fn (): bool => ! AssociateMilestoneWithActivePipelineFeature::active() || filled($this->resolveActivePipelineId()))
+                    ->mutateDataUsing(function (array $data): array {
+                        if (AssociateMilestoneWithActivePipelineFeature::active() && filled($pipelineId = $this->resolveActivePipelineId())) {
+                            $data['pipeline_id'] = $pipelineId;
+                        }
+
+                        return $data;
+                    }),
             ])
             ->recordActions([
                 EditAction::make()
@@ -114,5 +131,18 @@ class ManageMilestones extends ManageRelatedRecords
                 DeleteAction::make()
                     ->authorize('update', $this->getOwnerRecord()),
             ]);
+    }
+
+    protected function resolveActivePipelineId(): ?string
+    {
+        $project = $this->getOwnerRecord();
+
+        assert($project instanceof Project);
+
+        return Pipeline::query()
+            ->where('project_id', $project->getKey())
+            ->withoutArchived()
+            ->tap(new ActivePipelineFirst())
+            ->value('id');
     }
 }

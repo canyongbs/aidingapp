@@ -36,8 +36,10 @@
 
 namespace AidingApp\Project\Filament\Actions;
 
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use Filament\Actions\Action;
 use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\Textarea;
@@ -48,7 +50,7 @@ use Livewire\Component as LivewireComponent;
 
 class CreateProjectMilestoneAction
 {
-    public static function make(Project $project, string $name = 'createProjectMilestone'): Action
+    public static function make(Project $project, ?Pipeline $pipeline = null, string $name = 'createProjectMilestone'): Action
     {
         return Action::make($name)
             ->label('Milestone')
@@ -58,7 +60,15 @@ class CreateProjectMilestoneAction
             ->slideOver()
             ->modalHeading('Create Project Milestone')
             ->schema(static::formSchema())
-            ->action(function (array $data, LivewireComponent $livewire) use ($project): void {
+            ->action(function (array $data, LivewireComponent $livewire) use ($project, $pipeline): void {
+                // A milestone must belong to the pipeline it was created under. The action is only
+                // available when a pipeline is selected, so associate the new milestone with it.
+                // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is
+                // removed, always set pipeline_id (drop this guard and the feature import).
+                if (AssociateMilestoneWithActivePipelineFeature::active() && $pipeline instanceof Pipeline) {
+                    $data['pipeline_id'] = $pipeline->getKey();
+                }
+
                 $project->milestones()->create($data);
 
                 $livewire->dispatch('projectMilestonesUpdated');

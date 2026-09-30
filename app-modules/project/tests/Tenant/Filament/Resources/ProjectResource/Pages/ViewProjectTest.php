@@ -356,7 +356,7 @@ it('can create a milestone through the project milestones widget create action',
     asSuperAdmin();
 
     $project = Project::factory()->create();
-    Pipeline::factory()
+    $pipeline = Pipeline::factory()
         ->for($project)
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
@@ -373,7 +373,21 @@ it('can create a milestone through the project milestones widget create action',
         ])
         ->assertHasNoTableActionErrors();
 
-    expect($project->milestones()->where('title', $milestone->title)->exists())->toBeTrue();
+    $created = $project->milestones()->where('title', $milestone->title)->first();
+
+    expect($created)->not->toBeNull()
+        ->and($created->pipeline_id)->toBe($pipeline->getKey());
+});
+
+it('hides the create milestone action when the project has no pipeline', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    livewire(ProjectWorkPipelineWidget::class, [
+        'record' => $project,
+    ])
+        ->assertTableActionHidden('createMilestone');
 });
 
 it('shows the create milestone action to users who can update the project', function () {

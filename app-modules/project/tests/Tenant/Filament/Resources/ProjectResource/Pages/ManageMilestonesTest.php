@@ -36,6 +36,7 @@
 
 use AidingApp\Project\Database\Factories\ProjectMilestoneFactory;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
@@ -135,6 +136,7 @@ it('can validate create milestone inputs', function ($data, $errors) {
     asSuperAdmin();
 
     $project = Project::factory()->create();
+    Pipeline::factory()->for($project)->create();
     $milestone = ProjectMilestone::factory()->make($data);
 
     livewire(ManageMilestones::class, [
@@ -158,6 +160,7 @@ it('can create milestones', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
     $projectMilestone = ProjectMilestoneFactory::new()->make([
         'project_id' => $project->id,
     ]);
@@ -169,6 +172,8 @@ it('can create milestones', function () {
         ->assertHasNoTableActionErrors();
 
     assertCount(1, ProjectMilestone::all());
+
+    expect(ProjectMilestone::sole()->pipeline_id)->toBe($pipeline->getKey());
 });
 
 it('can edit milestones', function () {

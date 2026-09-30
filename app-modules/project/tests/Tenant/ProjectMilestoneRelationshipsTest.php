@@ -37,6 +37,7 @@
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use Illuminate\Database\QueryException;
 
 use function Tests\asSuperAdmin;
 
@@ -56,18 +57,20 @@ it('belongs to a pipeline', function () {
         ->and($pipeline->milestones->pluck('id')->all())->toContain($milestone->id);
 });
 
-it('can have no pipeline', function () {
+it('requires a pipeline', function () {
     asSuperAdmin();
 
-    $milestone = ProjectMilestone::factory()->create([
-        'pipeline_id' => null,
-    ]);
+    $project = Project::factory()->create();
 
-    expect($milestone->pipeline_id)->toBeNull()
-        ->and($milestone->pipeline)->toBeNull();
+    expect(fn () => ProjectMilestone::query()->forceCreate([
+        'project_id' => $project->id,
+        'pipeline_id' => null,
+        'title' => 'Orphan',
+        'description' => 'No pipeline',
+    ]))->toThrow(QueryException::class);
 });
 
-it('can change and clear its pipeline', function () {
+it('can change its pipeline', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -83,12 +86,9 @@ it('can change and clear its pipeline', function () {
 
     $milestone->update(['pipeline_id' => $pipelines->last()->id]);
     expect($milestone->fresh()->pipeline->is($pipelines->last()))->toBeTrue();
-
-    $milestone->update(['pipeline_id' => null]);
-    expect($milestone->fresh()->pipeline)->toBeNull();
 });
 
-it('clears its pipeline when the pipeline is deleted', function () {
+it('is deleted when its pipeline is deleted', function () {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -102,5 +102,5 @@ it('clears its pipeline when the pipeline is deleted', function () {
 
     $pipeline->delete();
 
-    expect($milestone->fresh()->pipeline_id)->toBeNull();
+    expect(ProjectMilestone::query()->whereKey($milestone->getKey())->exists())->toBeFalse();
 });

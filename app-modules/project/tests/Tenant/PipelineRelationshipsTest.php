@@ -54,9 +54,10 @@ it('has many milestones', function () {
             'pipeline_id' => $pipeline->id,
         ]);
 
+    $otherProject = Project::factory()->create();
     $otherMilestone = ProjectMilestone::factory()->create([
-        'project_id' => Project::factory()->create()->id,
-        'pipeline_id' => null,
+        'project_id' => $otherProject->id,
+        'pipeline_id' => Pipeline::factory()->for($otherProject)->create()->id,
     ]);
 
     expect($pipeline->milestones->pluck('id')->sort()->values()->all())

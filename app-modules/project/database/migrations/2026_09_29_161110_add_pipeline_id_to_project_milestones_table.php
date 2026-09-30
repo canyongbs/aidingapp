@@ -44,8 +44,11 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function () {
+            // A milestone must always belong to a pipeline. The column is added nullable so it can
+            // be back-filled, then tightened to NOT NULL below. Deleting a pipeline deletes its
+            // milestones (cascade), since a milestone cannot exist without one.
             Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('pipeline_id')->nullable()->index()->constrained('pipelines')->nullOnDelete();
+                $table->foreignUuid('pipeline_id')->nullable()->index()->constrained('pipelines')->cascadeOnDelete();
             });
 
             // Associate every existing milestone with its project's active pipeline. There is no
@@ -65,6 +68,20 @@ return new class () extends Migration {
                         )
                         SQL),
                 ]);
+
+            // Any milestone still without a pipeline belongs to a project that has no (non-archived)
+            // pipeline to associate it with. Per product decision these milestones are not needed, so
+            // they are removed. They cannot have pipeline entries (entries require a pipeline stage,
+            // which requires a pipeline), so a hard delete is safe and lets the column become NOT NULL.
+            DB::table('project_milestones')
+                ->whereNull('pipeline_id')
+                ->delete();
+
+            // Now that every remaining milestone has a pipeline, enforce the relationship at the
+            // database level so a milestone can never be persisted without one.
+            Schema::table('project_milestones', function (Blueprint $table) {
+                $table->foreignUuid('pipeline_id')->nullable(false)->change();
+            });
 
             // TODO: Cleanup Task (associate-milestone-with-active-pipeline): this permanent
             // migration cannot be deleted, so when the flag is removed drop these activate()/

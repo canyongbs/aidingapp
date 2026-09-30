@@ -36,60 +36,19 @@
 
 namespace AidingApp\Project\Observers;
 
-use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\ProjectMilestone;
-use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
-use App\Features\AssociateMilestoneWithActivePipelineFeature;
-use InvalidArgumentException;
 
 class ProjectMilestoneObserver
 {
+    /**
+     * A milestone's pipeline is set by the caller (e.g. the create milestone action uses the
+     * currently selected pipeline) before the model is saved. The observer intentionally does not
+     * resolve or default it, so a milestone can only be created once a pipeline has been chosen.
+     */
     public function creating(ProjectMilestone $projectMilestone): void
     {
         if (blank($projectMilestone->created_by_id)) {
             $projectMilestone->created_by_id = auth()->id();
         }
-
-        $this->associateWithActivePipeline($projectMilestone);
-    }
-
-    /**
-     * Ensure every new milestone relates to exactly one pipeline that belongs to its own project.
-     * An explicitly supplied pipeline must belong to the milestone's project; otherwise fall back
-     * to the project's active (oldest, non-archived) pipeline, matching how the application
-     * resolves the default active pipeline elsewhere.
-     */
-    protected function associateWithActivePipeline(ProjectMilestone $projectMilestone): void
-    {
-        // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is
-        // removed, delete this guard (keep the active path below) and the feature import.
-        if (! AssociateMilestoneWithActivePipelineFeature::active()) {
-            return;
-        }
-
-        if (blank($projectMilestone->project_id)) {
-            return;
-        }
-
-        if (filled($projectMilestone->pipeline_id)) {
-            $belongsToProject = Pipeline::query()
-                ->whereKey($projectMilestone->pipeline_id)
-                ->where('project_id', $projectMilestone->project_id)
-                ->exists();
-
-            if (! $belongsToProject) {
-                throw new InvalidArgumentException(
-                    "Pipeline [{$projectMilestone->pipeline_id}] does not belong to project [{$projectMilestone->project_id}].",
-                );
-            }
-
-            return;
-        }
-
-        $projectMilestone->pipeline_id = Pipeline::query()
-            ->where('project_id', $projectMilestone->project_id)
-            ->withoutArchived()
-            ->tap(new ActivePipelineFirst())
-            ->value('id');
     }
 }

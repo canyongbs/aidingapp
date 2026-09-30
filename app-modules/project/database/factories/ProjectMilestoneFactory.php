@@ -36,8 +36,10 @@
 
 namespace AidingApp\Project\Database\Factories;
 
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -59,5 +61,29 @@ class ProjectMilestoneFactory extends Factory
             'description' => $this->faker->sentence(3),
             'created_by_id' => User::factory(),
         ];
+    }
+
+    /**
+     * A milestone must always belong to a pipeline. The observer no longer assigns one, so resolve
+     * the project's active (oldest, non-archived) pipeline here, creating one when the project has
+     * none, and set it explicitly unless a pipeline was already provided.
+     */
+    public function configure(): static
+    {
+        return $this->afterMaking(function (ProjectMilestone $projectMilestone): void {
+            if (filled($projectMilestone->pipeline_id) || blank($projectMilestone->project_id)) {
+                return;
+            }
+
+            $pipelineId = Pipeline::query()
+                ->where('project_id', $projectMilestone->project_id)
+                ->withoutArchived()
+                ->tap(new ActivePipelineFirst())
+                ->value('id');
+
+            $projectMilestone->pipeline_id = $pipelineId ?? Pipeline::factory()->create([
+                'project_id' => $projectMilestone->project_id,
+            ])->getKey();
+        });
     }
 }

@@ -36,76 +36,57 @@
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
-use AidingApp\Project\Models\ProjectMilestone;
 
-use function Tests\asSuperAdmin;
+use App\Models\User;
 
-it('associates a new milestone with the project active pipeline', function () {
-    asSuperAdmin();
+use function Pest\Laravel\actingAs;
+
+it('defaults created_by to the authenticated user when not provided', function () {
+    $user = User::factory()->create();
+
+    actingAs($user);
 
     $project = Project::factory()->create();
-
-    $activePipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDays(2)]);
-    Pipeline::factory()->for($project)->create(['created_at' => now()->subDay()]);
+    $pipeline = Pipeline::factory()->for($project)->create();
 
     $milestone = $project->milestones()->create([
         'title' => 'MVP Ready',
         'description' => 'First release',
+        'pipeline_id' => $pipeline->getKey(),
     ]);
 
-    expect($milestone->pipeline_id)->toBe($activePipeline->getKey());
+    expect($milestone->created_by_id)->toBe($user->getKey());
 });
 
-it('breaks ties by id to match the backfill ordering', function () {
-    asSuperAdmin();
+it('keeps an explicitly provided created_by', function () {
+    $actingUser = User::factory()->create();
+    $authorUser = User::factory()->create();
+
+    actingAs($actingUser);
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    // created_by_id is not mass assignable, so set it directly before saving to exercise the
+    // observer's "leave an explicitly provided created_by untouched" path.
+    $milestone = $project->milestones()->make([
+        'title' => 'MVP Ready',
+        'description' => 'First release',
+        'pipeline_id' => $pipeline->getKey(),
+    ]);
+    $milestone->created_by_id = $authorUser->getKey();
+    $milestone->save();
+
+    expect($milestone->created_by_id)->toBe($authorUser->getKey());
+});
+
+it('does not assign or override the pipeline, leaving it to the caller', function () {
+    actingAs(User::factory()->create());
 
     $project = Project::factory()->create();
 
-    $sameMoment = now()->subDay();
-
-    Pipeline::factory()->for($project)->create(['created_at' => $sameMoment]);
-    Pipeline::factory()->for($project)->create(['created_at' => $sameMoment]);
-
-    // Mirrors the deterministic ordering used to back-fill ProjectMilestone.pipeline_id, so the
-    // observer and the migration always resolve the same active pipeline for same-second rows.
-    $expectedPipelineId = Pipeline::query()
-        ->where('project_id', $project->getKey())
-        ->withoutArchived()
-        ->orderBy('created_at')
-        ->orderBy('id')
-        ->value('id');
-
-    $milestone = $project->milestones()->create([
-        'title' => 'Tie Breaker',
-        'description' => 'Same-second pipelines',
-    ]);
-
-    expect($milestone->pipeline_id)->toBe($expectedPipelineId);
-});
-
-it('ignores archived pipelines when choosing the active pipeline', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $archivedPipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDays(3)]);
-    $archivedPipeline->archive();
-
-    $activePipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDay()]);
-
-    $milestone = $project->milestones()->create([
-        'title' => 'Launch',
-        'description' => 'Go live',
-    ]);
-
-    expect($milestone->pipeline_id)->toBe($activePipeline->getKey());
-});
-
-it('does not override an explicitly provided pipeline', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
+    // The oldest non-archived pipeline is the project's "active" pipeline; the observer must not
+    // swap an explicitly provided pipeline for it.
     Pipeline::factory()->for($project)->create(['created_at' => now()->subDays(2)]);
     $chosenPipeline = Pipeline::factory()->for($project)->create(['created_at' => now()->subDay()]);
 
@@ -116,56 +97,4 @@ it('does not override an explicitly provided pipeline', function () {
     ]);
 
     expect($milestone->pipeline_id)->toBe($chosenPipeline->getKey());
-});
-
-it('leaves the pipeline null when the project has no active pipeline', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $milestone = $project->milestones()->create([
-        'title' => 'Orphan',
-        'description' => 'No pipelines yet',
-    ]);
-
-    expect($milestone->pipeline_id)->toBeNull();
-});
-
-it('rejects an explicit pipeline that belongs to another project', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-    $otherProject = Project::factory()->create();
-
-    $foreignPipeline = Pipeline::factory()->for($otherProject)->create();
-
-    expect(fn () => $project->milestones()->create([
-        'title' => 'Cross Project',
-        'description' => 'Should be rejected',
-        'pipeline_id' => $foreignPipeline->getKey(),
-    ]))->toThrow(InvalidArgumentException::class);
-
-    expect(ProjectMilestone::query()->where('title', 'Cross Project')->exists())->toBeFalse();
-});
-
-it('breaks ties deterministically by id when pipelines share a created_at', function () {
-    asSuperAdmin();
-
-    $project = Project::factory()->create();
-
-    $sharedCreatedAt = now()->subDay();
-
-    $pipelines = collect([
-        Pipeline::factory()->for($project)->create(['created_at' => $sharedCreatedAt]),
-        Pipeline::factory()->for($project)->create(['created_at' => $sharedCreatedAt]),
-    ]);
-
-    $expectedPipelineId = $pipelines->sortBy('id')->first()->getKey();
-
-    $milestone = $project->milestones()->create([
-        'title' => 'Same Second',
-        'description' => 'Tie-breaker check',
-    ]);
-
-    expect($milestone->pipeline_id)->toBe($expectedPipelineId);
 });

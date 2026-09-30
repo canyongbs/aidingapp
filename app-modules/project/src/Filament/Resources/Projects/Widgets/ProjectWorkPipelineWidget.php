@@ -278,7 +278,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $this->resetMilestoneProgressPercentages();
                         $this->dispatch('projectPipelineUpdated');
                     }),
-                CreateProjectMilestoneAction::make($this->record, 'createMilestone'),
+                CreateProjectMilestoneAction::make($this->record, $pipeline, 'createMilestone')
+                    ->visible(fn (): bool => $pipeline !== null),
             ]);
     }
 
