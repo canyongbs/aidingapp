@@ -67,7 +67,7 @@ class ViewContactAction
             ->modalHeading($contact->{Contact::displayNameKey()})
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Close')
-            ->schema([
+            ->schema(fn (): array => [
                 Actions::make([
                     Action::make('goToContact')
                         ->label('Go to Contact')
