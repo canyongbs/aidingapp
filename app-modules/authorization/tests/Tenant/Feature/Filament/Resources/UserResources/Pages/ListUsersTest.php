@@ -538,9 +538,11 @@ describe('last login column', function () {
 
         $loggedInAt = $user->last_logged_in_at->clone()->timezone($column->getTimezone());
 
+        $formattedState = (string) $column->formatState($column->getState());
+
         expect($column->isDateTime())->toBeTrue()
-            ->and($column->formatState($column->getState()))->toContain($loggedInAt->format('M j, Y'))
-            ->and($column->formatState($column->getState()))->toContain($loggedInAt->format('g:i a'));
+            ->and($formattedState)->toContain($loggedInAt->format('M j, Y'))
+            ->and($formattedState)->toContain($loggedInAt->format('g:i a'));
     });
 });
 
