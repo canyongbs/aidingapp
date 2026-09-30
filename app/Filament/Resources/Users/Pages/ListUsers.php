@@ -37,6 +37,7 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\FullNameFeature;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
@@ -160,27 +161,35 @@ class ListUsers extends ListRecords
                         ?->clone()
                         ->timezone($column->getTimezone())
                         ->format('g:i a')),
-                TextColumn::make('preferred_name')
-                    ->hidden(),
-                TextColumn::make('employee_id')
-                    ->hidden(),
+                ...(FullNameFeature::active() ? [
+                    TextColumn::make('preferred_name')
+                        ->hidden(),
+                    TextColumn::make('employee_id')
+                        ->hidden(),
+                ] : []),
                 TextColumn::make('work_number')
                     ->hidden(),
                 TextColumn::make('work_extension')
                     ->hidden(),
                 TextColumn::make('mobile')
                     ->hidden(),
-                TextColumn::make('student_id')
-                    ->hidden(),
+                ...(FullNameFeature::active() ? [
+                    TextColumn::make('student_id')
+                        ->hidden(),
+                ] : []),
             ])
             ->searchable([
-                'preferred_name',
-                'employee_id',
+                ...(FullNameFeature::active() ? [
+                    'preferred_name',
+                    'employee_id',
+                ] : []),
                 'work_number',
                 fn (Builder $query, string $search): Builder => $query
                     ->whereRaw('CAST(work_extension AS TEXT) ILIKE ?', ["%{$search}%"]),
                 'mobile',
-                'student_id',
+                ...(FullNameFeature::active() ? [
+                    'student_id',
+                ] : []),
             ])
             ->filters([
                 SelectFilter::make('department')
