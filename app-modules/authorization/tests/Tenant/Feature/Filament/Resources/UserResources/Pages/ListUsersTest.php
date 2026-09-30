@@ -523,7 +523,7 @@ describe('associations column', function () {
         $column->record($user);
 
         expect($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
-            ->and($column->getTooltip())->toBe("Department(s): {$department->name}");
+            ->and($column->getTooltip())->toBe("Department: {$department->name}");
     });
 
     it('renders the groups badge and centers the column when there is no department but groups exist', function () {

@@ -137,7 +137,7 @@ class ListUsers extends ListRecords
                     ->placeholder('—')
                     ->verticallyAlignCenter(fn (User $record): bool => filled($record->department?->name) !== filled(self::groupsLabel($record)))
                     ->tooltip(fn (User $record): ?string => filled($record->department?->name)
-                        ? "Department(s): {$record->department->name}"
+                        ? "Department: {$record->department->name}"
                         : null)
                     ->description(fn (User $record): ?View => filled($label = self::groupsLabel($record))
                         ? view('filament.tables.columns.icon-text-description', [
