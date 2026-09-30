@@ -34,37 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
-use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use Filament\Actions\Action;
+use Filament\Support\Icons\Heroicon;
 
-class ReopenServiceRequestAction
+/**
+ * The counterpart to `CanyonGBS\Common\Filament\Actions\ArchiveAction`, which Common does
+ * not ship. Archiving is the only way to retire a status now that it cannot be deleted, so
+ * without this the action would be a one way door.
+ */
+class UnarchiveServiceRequestStatusAction
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    public static function make(): Action
     {
-        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
-            return;
-        }
-
-        $openStatus = ServiceRequestStatus::query()
-            ->tap(new SelectableServiceRequestStatuses())
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->orderBy('sort')
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->first();
-
-        if (! $openStatus) {
-            report(new NoOpenServiceRequestStatusFoundException($serviceRequest->getKey()));
-
-            return;
-        }
-
-        $serviceRequest->status()->associate($openStatus);
-        $serviceRequest->save();
+        return Action::make('unarchive')
+            ->label('Unarchive')
+            ->icon(Heroicon::ArchiveBoxArrowDown)
+            ->color('warning')
+            ->requiresConfirmation()
+            ->modalHeading(fn (ServiceRequestStatus $record): string => "Unarchive {$record->name}")
+            ->modalIcon(Heroicon::OutlinedArchiveBoxArrowDown)
+            ->visible(fn (ServiceRequestStatus $record): bool => $record->isArchived())
+            ->authorize(fn (ServiceRequestStatus $record): bool => ServiceRequestStatusResource::can('restore', $record))
+            ->action(fn (ServiceRequestStatus $record) => $record->unarchive())
+            ->successNotificationTitle('Unarchived');
     }
 }

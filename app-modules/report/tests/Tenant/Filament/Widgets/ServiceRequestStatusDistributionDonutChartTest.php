@@ -161,3 +161,34 @@ it('returns correct distribution when no date filters are applied', function () 
     expect($counts[$openIndex])->toBe(5)
         ->and($counts[$closedIndex])->toBe(3);
 });
+
+describe('archiving', function () {
+    it('still reports service requests that belong to an archived status', function () {
+        $type = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
+
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->state([
+            'name' => 'Escalated',
+            'classification' => SystemServiceRequestClassification::InProgress,
+        ])->create();
+
+        ServiceRequest::factory()->count(3)->state([
+            'priority_id' => $priority->id,
+            'status_id' => $archivedStatus->id,
+            'created_at' => now()->subDays(5),
+        ])->create();
+
+        $widget = new ServiceRequestStatusDistributionDonutChart();
+        $widget->cacheTag = 'test-service-request-status-distribution-archived';
+        $widget->pageFilters = [];
+
+        $data = $widget->getData();
+
+        $labels = $data['labels']->toArray();
+        $counts = $data['datasets'][0]['data']->toArray();
+
+        expect($labels)->toContain('Escalated');
+
+        expect($counts[array_search('Escalated', $labels)])->toBe(3);
+    });
+});

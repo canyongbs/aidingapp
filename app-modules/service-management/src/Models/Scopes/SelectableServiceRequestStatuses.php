@@ -34,37 +34,45 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
-use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusArchivingFeature;
+use Illuminate\Database\Eloquent\Builder;
 
-class ReopenServiceRequestAction
+/**
+ * Constrains a status query to the statuses that may be newly assigned.
+ *
+ * Archiving only removes a status from circulation, so this belongs wherever a status is
+ * being chosen, and never where one is being read back, filtered on, or reported on: those
+ * must keep resolving archived statuses for the records that already point at them.
+ */
+class SelectableServiceRequestStatuses
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    /**
+     * @param string|null $keepId A status to keep offering even when archived, so a record
+     *                            already pointing at one keeps its current value instead of
+     *                            being silently blanked.
+     */
+    public function __construct(
+        protected ?string $keepId = null,
+    ) {}
+
+    /**
+     * @param Builder<ServiceRequestStatus> $query
+     */
+    public function __invoke(Builder $query): void
     {
-        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
+        if (! ServiceRequestStatusArchivingFeature::active()) {
             return;
         }
 
-        $openStatus = ServiceRequestStatus::query()
-            ->tap(new SelectableServiceRequestStatuses())
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->orderBy('sort')
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->first();
+        $query->where(function (Builder $query): void {
+            $query->withoutArchived();
 
-        if (! $openStatus) {
-            report(new NoOpenServiceRequestStatusFoundException($serviceRequest->getKey()));
-
-            return;
-        }
-
-        $serviceRequest->status()->associate($openStatus);
-        $serviceRequest->save();
+            if (filled($this->keepId)) {
+                $query->orWhereKey($this->keepId);
+            }
+        });
     }
 }

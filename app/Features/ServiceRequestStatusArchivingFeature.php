@@ -34,37 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Actions;
+namespace App\Features;
 
-use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
-use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
-use AidingApp\ServiceManagement\Models\ServiceRequest;
-use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Support\AbstractFeatureFlag;
 
-class ReopenServiceRequestAction
+class ServiceRequestStatusArchivingFeature extends AbstractFeatureFlag
 {
-    public function execute(ServiceRequest $serviceRequest): void
+    public function resolve(mixed $scope): mixed
     {
-        if ($serviceRequest->status?->classification !== SystemServiceRequestClassification::Closed) {
-            return;
-        }
-
-        $openStatus = ServiceRequestStatus::query()
-            ->tap(new SelectableServiceRequestStatuses())
-            ->where('classification', SystemServiceRequestClassification::Open)
-            ->orderBy('sort')
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->first();
-
-        if (! $openStatus) {
-            report(new NoOpenServiceRequestStatusFoundException($serviceRequest->getKey()));
-
-            return;
-        }
-
-        $serviceRequest->status()->associate($openStatus);
-        $serviceRequest->save();
+        return false;
     }
 }
