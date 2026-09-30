@@ -34,44 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
-
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\AssociateMilestoneWithActivePipelineFeature;
 
-class ProjectMilestoneObserver
-{
-    public function creating(ProjectMilestone $projectMilestone): void
-    {
-        if (blank($projectMilestone->created_by_id)) {
-            $projectMilestone->created_by_id = auth()->id();
-        }
+use function Tests\asSuperAdmin;
 
-        $this->associateWithActivePipeline($projectMilestone);
-    }
+it('has many milestones', function () {
+    asSuperAdmin();
 
-    /**
-     * Ensure every new milestone relates to exactly one pipeline. When no pipeline is set
-     * explicitly, fall back to the project's active (oldest, non-archived) pipeline, matching
-     * how the application resolves the default active pipeline elsewhere.
-     */
-    protected function associateWithActivePipeline(ProjectMilestone $projectMilestone): void
-    {
-        // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is
-        // removed, delete this guard (keep the active path below) and the feature import.
-        if (! AssociateMilestoneWithActivePipelineFeature::active()) {
-            return;
-        }
+    $project = Project::factory()->create();
 
-        if (filled($projectMilestone->pipeline_id) || blank($projectMilestone->project_id)) {
-            return;
-        }
+    $pipeline = Pipeline::factory()->for($project)->create();
 
-        $projectMilestone->pipeline_id = Pipeline::query()
-            ->where('project_id', $projectMilestone->project_id)
-            ->withoutArchived()
-            ->oldest()
-            ->value('id');
-    }
-}
+    $milestones = ProjectMilestone::factory()
+        ->count(2)
+        ->create([
+            'project_id' => $project->id,
+            'pipeline_id' => $pipeline->id,
+        ]);
+
+    $otherMilestone = ProjectMilestone::factory()->create([
+        'project_id' => Project::factory()->create()->id,
+        'pipeline_id' => null,
+    ]);
+
+    expect($pipeline->milestones->pluck('id')->sort()->values()->all())
+        ->toBe($milestones->pluck('id')->sort()->values()->all())
+        ->not->toContain($otherMilestone->id);
+});

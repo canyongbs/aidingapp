@@ -84,6 +84,14 @@ class Pipeline extends BaseModel implements Auditable
     }
 
     /**
+     * @return HasMany<ProjectMilestone, $this>
+     */
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(ProjectMilestone::class, 'pipeline_id');
+    }
+
+    /**
      * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
      */
     public function entries(): HasManyThrough

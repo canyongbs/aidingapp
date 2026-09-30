@@ -34,44 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
+namespace App\Features;
 
-use AidingApp\Project\Models\Pipeline;
-use AidingApp\Project\Models\ProjectMilestone;
-use App\Features\AssociateMilestoneWithActivePipelineFeature;
+use App\Support\AbstractFeatureFlag;
 
-class ProjectMilestoneObserver
+class AssociateMilestoneWithActivePipelineFeature extends AbstractFeatureFlag
 {
-    public function creating(ProjectMilestone $projectMilestone): void
+    public function resolve(mixed $scope): mixed
     {
-        if (blank($projectMilestone->created_by_id)) {
-            $projectMilestone->created_by_id = auth()->id();
-        }
-
-        $this->associateWithActivePipeline($projectMilestone);
-    }
-
-    /**
-     * Ensure every new milestone relates to exactly one pipeline. When no pipeline is set
-     * explicitly, fall back to the project's active (oldest, non-archived) pipeline, matching
-     * how the application resolves the default active pipeline elsewhere.
-     */
-    protected function associateWithActivePipeline(ProjectMilestone $projectMilestone): void
-    {
-        // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is
-        // removed, delete this guard (keep the active path below) and the feature import.
-        if (! AssociateMilestoneWithActivePipelineFeature::active()) {
-            return;
-        }
-
-        if (filled($projectMilestone->pipeline_id) || blank($projectMilestone->project_id)) {
-            return;
-        }
-
-        $projectMilestone->pipeline_id = Pipeline::query()
-            ->where('project_id', $projectMilestone->project_id)
-            ->withoutArchived()
-            ->oldest()
-            ->value('id');
+        return false;
     }
 }

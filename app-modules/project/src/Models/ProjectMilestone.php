@@ -69,6 +69,7 @@ class ProjectMilestone extends Model implements Auditable
         'title',
         'description',
         'target_date',
+        'pipeline_id',
     ];
 
     protected $casts = [
@@ -89,6 +90,14 @@ class ProjectMilestone extends Model implements Auditable
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class);
+    }
+
+    /**
+     * @return BelongsTo<Pipeline, $this>
+     */
+    public function pipeline(): BelongsTo
+    {
+        return $this->belongsTo(Pipeline::class);
     }
 
     /**
