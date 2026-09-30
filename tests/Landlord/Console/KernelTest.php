@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Ai\Jobs\DispatchPrepareKnowledgeBaseVectorStoreForEachTenant;
+use AidingApp\Contact\Jobs\DispatchMatchUnaffiliatedContactsForEachTenant;
 use AidingApp\Engagement\Jobs\DispatchDeliverEngagementsForEachTenant;
 use AidingApp\Engagement\Jobs\DispatchUnmatchedInboundCommunicationsForEachTenant;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
@@ -70,6 +71,7 @@ describe('schedule', function () {
         artisan('schedule:run');
 
         Queue::assertPushed(DispatchDeliverEngagementsForEachTenant::class);
+        Queue::assertPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
         Queue::assertPushed(DispatchEndServiceRequestConversationsForEachTenant::class);
         Queue::assertPushed(DispatchPruneEphemeralMessagesForEachTenant::class);
         Queue::assertPushed(DispatchHealthChecksForEachTenant::class);
@@ -135,6 +137,17 @@ describe('schedule', function () {
         Queue::assertNotPushed(DispatchUnmatchedInboundCommunicationsForEachTenant::class);
         Queue::assertNotPushed(DispatchKnowledgeBaseArticleChecksForEachTenant::class);
         Queue::assertNotPushed(DispatchModelPruningForEachTenant::class);
+        Queue::assertNotPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
+    });
+
+    it('dispatches contact reconciliation on a ten-minute boundary', function () {
+        Queue::fake();
+
+        travelTo(now()->startOfDay()->setTime(10, 20));
+
+        artisan('schedule:run');
+
+        Queue::assertPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
     });
 
     it('dispatches the five-minute service monitoring orchestrator on a five-minute boundary', function () {
