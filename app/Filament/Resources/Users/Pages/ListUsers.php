@@ -36,8 +36,10 @@
 
 namespace App\Filament\Resources\Users\Pages;
 
+use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\FullNameFeature;
+use App\Features\LastLoggedInFeature;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
@@ -85,8 +87,10 @@ class ListUsers extends ListRecords
     {
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with([
-                'department',
-                'groups',
+                'department.manageableServiceRequestTypes',
+                'department.auditableServiceRequestTypes',
+                'groups.manageableServiceRequestTypes',
+                'groups.auditableServiceRequestTypes',
                 'managedContact.type',
                 'manageableServiceRequestTypes',
                 'auditableServiceRequestTypes',
@@ -153,14 +157,11 @@ class ListUsers extends ListRecords
                     ->tooltip(fn (User $record): ?string => $record->managedContact
                         ? 'Contact Type: ' . ($record->managedContact->type->name ?? '—')
                         : null),
-                TextColumn::make('last_activity_at')
+                TextColumn::make('last_logged_in_at')
                     ->label('Last Login')
-                    ->date()
+                    ->dateTime()
                     ->placeholder('Never')
-                    ->description(fn (TextColumn $column, User $record): ?string => $record->last_activity_at
-                        ?->clone()
-                        ->timezone($column->getTimezone())
-                        ->format('g:i a')),
+                    ->visible(LastLoggedInFeature::active()),
                 ...(FullNameFeature::active() ? [
                     TextColumn::make('preferred_name')
                         ->hidden(),
@@ -264,12 +265,15 @@ class ListUsers extends ListRecords
     {
         $groups = [];
 
-        if ($record->manageableServiceRequestTypes->isNotEmpty()) {
-            $groups[] = 'Manager (Agent): ' . e($record->manageableServiceRequestTypes->pluck('name')->implode(', '));
+        $manageable = self::manageableServiceRequestTypes($record);
+        $auditable = self::auditableServiceRequestTypes($record);
+
+        if ($manageable->isNotEmpty()) {
+            $groups[] = 'Manager (Agent): ' . e($manageable->pluck('name')->implode(', '));
         }
 
-        if ($record->auditableServiceRequestTypes->isNotEmpty()) {
-            $groups[] = 'Auditor: ' . e($record->auditableServiceRequestTypes->pluck('name')->implode(', '));
+        if ($auditable->isNotEmpty()) {
+            $groups[] = 'Auditor: ' . e($auditable->pluck('name')->implode(', '));
         }
 
         if ($groups === []) {
@@ -284,9 +288,37 @@ class ListUsers extends ListRecords
      */
     private static function serviceRequestTypes(User $record): Collection
     {
-        return $record->manageableServiceRequestTypes
-            ->merge($record->auditableServiceRequestTypes)
+        return self::manageableServiceRequestTypes($record)
+            ->merge(self::auditableServiceRequestTypes($record))
             ->unique('id');
+    }
+
+    /**
+     * Types the user manages directly, through their department, or through their groups.
+     *
+     * @return Collection<int, ServiceRequestType>
+     */
+    private static function manageableServiceRequestTypes(User $record): Collection
+    {
+        return $record->manageableServiceRequestTypes
+            ->merge($record->department->manageableServiceRequestTypes ?? [])
+            ->merge($record->groups->flatMap(fn (Group $group) => $group->manageableServiceRequestTypes))
+            ->unique('id')
+            ->values();
+    }
+
+    /**
+     * Types the user audits directly, through their department, or through their groups.
+     *
+     * @return Collection<int, ServiceRequestType>
+     */
+    private static function auditableServiceRequestTypes(User $record): Collection
+    {
+        return $record->auditableServiceRequestTypes
+            ->merge($record->department->auditableServiceRequestTypes ?? [])
+            ->merge($record->groups->flatMap(fn (Group $group) => $group->auditableServiceRequestTypes))
+            ->unique('id')
+            ->values();
     }
 
     private static function groupsLabel(User $record): ?string

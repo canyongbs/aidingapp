@@ -125,6 +125,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'is_external' => 'boolean',
         'email_verified_at' => 'datetime',
         'last_activity_at' => 'datetime',
+        'last_logged_in_at' => 'datetime',
     ];
 
     protected $fillable = [
@@ -144,6 +145,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         'work_extension',
         'mobile',
         'last_activity_at',
+        'last_logged_in_at',
         'department_id',
         'first_name',
         'last_name',

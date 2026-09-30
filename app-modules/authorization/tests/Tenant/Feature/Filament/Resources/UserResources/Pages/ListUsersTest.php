@@ -517,30 +517,30 @@ describe('last login column', function () {
     it('shows Never as the placeholder when the user has never logged in', function () {
         asSuperAdmin();
 
-        $user = User::factory()->create(['last_activity_at' => null]);
+        $user = User::factory()->create(['last_logged_in_at' => null]);
 
         livewire(ListUsers::class)
-            ->assertTableColumnStateSet('last_activity_at', null, $user)
-            ->assertTableColumnHasDescription('last_activity_at', null, $user);
+            ->assertTableColumnStateSet('last_logged_in_at', null, $user);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_activity_at');
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
         $column->record($user);
 
         expect($column->getPlaceholder())->toBe('Never');
     });
 
-    it('shows the date as the state and the time as the description', function () {
+    it('shows the last login date and time in the display timezone', function () {
         asSuperAdmin();
 
-        $user = User::factory()->create(['last_activity_at' => now()]);
+        $user = User::factory()->create(['last_logged_in_at' => now()]);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_activity_at');
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
         $column->record($user);
 
-        $timezone = $column->getTimezone();
+        $loggedInAt = $user->last_logged_in_at->clone()->timezone($column->getTimezone());
 
-        expect($column->formatState($column->getState()))->toBe($user->last_activity_at->clone()->timezone($timezone)->format('M j, Y'))
-            ->and($column->getDescriptionBelow())->toBe($user->last_activity_at->clone()->timezone($timezone)->format('g:i a'));
+        expect($column->isDateTime())->toBeTrue()
+            ->and($column->formatState($column->getState()))->toContain($loggedInAt->format('M j, Y'))
+            ->and($column->formatState($column->getState()))->toContain($loggedInAt->format('g:i a'));
     });
 });
 

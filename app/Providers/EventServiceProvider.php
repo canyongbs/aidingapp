@@ -40,6 +40,7 @@ use AidingApp\Audit\Listeners\AuditingListener;
 use App\Listeners\ClearSentryUser;
 use App\Listeners\InformOlympusOfDeploymentEvent;
 use App\Listeners\LoadSettingsDefaults;
+use App\Listeners\RecordUserLastLoggedIn;
 use App\Listeners\SetSentryUser;
 use App\Multitenancy\Events\NewTenantSetupComplete;
 use App\Multitenancy\Events\NewTenantSetupFailure;
@@ -79,6 +80,7 @@ class EventServiceProvider extends ServiceProvider
         ],
         Login::class => [
             SetSentryUser::class,
+            RecordUserLastLoggedIn::class,
         ],
         Authenticated::class => [
             SetSentryUser::class,
