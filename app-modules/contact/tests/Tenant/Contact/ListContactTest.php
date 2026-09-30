@@ -234,3 +234,21 @@ test('can filter engagements timelineable', function () {
         ->assertCanNotSeeTableRecords($engagements->pluck('timelineRecord'))
         ->assertSuccessful();
 });
+
+test('engagements table does not have a type filter', function () {
+    $user = User::factory()->create();
+
+    $contact = Contact::factory()->create();
+
+    $user->givePermissionTo('engagement.view-any');
+    $user->givePermissionTo('engagement_response.view-any');
+
+    actingAs($user);
+
+    $livewire = livewire(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => EditContact::class,
+    ]);
+
+    expect($livewire->instance()->getTable()->getFilter('type'))->toBeNull();
+});
