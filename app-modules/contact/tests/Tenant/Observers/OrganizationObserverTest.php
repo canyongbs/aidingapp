@@ -32,6 +32,20 @@ use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Organization;
 use Illuminate\Support\Facades\Queue;
 
+it('dispatches targeted matching when an organization is created with domains', function () {
+    Queue::fake([MatchUnaffiliatedContactsJob::class]);
+
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    Queue::assertPushed(
+        MatchUnaffiliatedContactsJob::class,
+        fn (MatchUnaffiliatedContactsJob $job): bool => $job->organizationId === $organization->getKey()
+            && $job->afterCommit === true,
+    );
+});
+
 it('dispatches targeted matching when organization domains change', function () {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'old.example']],

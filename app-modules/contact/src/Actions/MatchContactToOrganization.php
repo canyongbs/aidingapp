@@ -32,6 +32,7 @@ namespace AidingApp\Contact\Actions;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use Illuminate\Support\Facades\DB;
 
 class MatchContactToOrganization
 {
@@ -51,7 +52,19 @@ class MatchContactToOrganization
             return;
         }
 
-        $contact->organization()->associate($organization);
-        $contact->save();
+        DB::transaction(function () use ($contact, $organization): void {
+            $contact = Contact::query()
+                ->whereKey($contact->getKey())
+                ->whereNull('organization_id')
+                ->lockForUpdate()
+                ->first();
+
+            if ($contact === null) {
+                return;
+            }
+
+            $contact->organization()->associate($organization);
+            $contact->save();
+        });
     }
 }

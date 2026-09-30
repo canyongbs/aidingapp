@@ -35,12 +35,26 @@ use AidingApp\Contact\Models\Organization;
 
 class OrganizationObserver
 {
-    public function saved(Organization $organization): void
+    public function created(Organization $organization): void
+    {
+        if (blank($organization->domains)) {
+            return;
+        }
+
+        $this->dispatchMatching($organization);
+    }
+
+    public function updated(Organization $organization): void
     {
         if (! $organization->wasChanged('domains')) {
             return;
         }
 
+        $this->dispatchMatching($organization);
+    }
+
+    private function dispatchMatching(Organization $organization): void
+    {
         dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit());
     }
 }
