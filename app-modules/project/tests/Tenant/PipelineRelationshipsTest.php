@@ -34,21 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
-
+use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 
-class ProjectMilestoneObserver
-{
-    /**
-     * A milestone's pipeline is set by the caller (e.g. the create milestone action uses the
-     * currently selected pipeline) before the model is saved. The observer intentionally does not
-     * resolve or default it, so a milestone can only be created once a pipeline has been chosen.
-     */
-    public function creating(ProjectMilestone $projectMilestone): void
-    {
-        if (blank($projectMilestone->created_by_id)) {
-            $projectMilestone->created_by_id = auth()->id();
-        }
-    }
-}
+use function Tests\asSuperAdmin;
+
+it('has many milestones', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $pipeline = Pipeline::factory()->for($project)->create();
+
+    $milestones = ProjectMilestone::factory()
+        ->count(2)
+        ->create([
+            'project_id' => $project->id,
+            'pipeline_id' => $pipeline->id,
+        ]);
+
+    $otherProject = Project::factory()->create();
+    $otherMilestone = ProjectMilestone::factory()->create([
+        'project_id' => $otherProject->id,
+        'pipeline_id' => Pipeline::factory()->for($otherProject)->create()->id,
+    ]);
+
+    expect($pipeline->milestones->pluck('id')->sort()->values()->all())
+        ->toBe($milestones->pluck('id')->sort()->values()->all())
+        ->not->toContain($otherMilestone->id);
+});

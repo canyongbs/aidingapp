@@ -34,21 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
+namespace AidingApp\Project\Models\Scopes;
 
-use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Pipeline;
+use Illuminate\Database\Eloquent\Builder;
 
-class ProjectMilestoneObserver
+/**
+ * Order pipelines so the first row is the project's "active" pipeline. The `id` tie-breaker keeps
+ * the result deterministic for pipelines created in the same second and must stay in sync with the
+ * ordering used to back-fill `ProjectMilestone.pipeline_id`, so existing and newly created
+ * milestones always resolve to the same active pipeline.
+ */
+class ActivePipelineFirst
 {
     /**
-     * A milestone's pipeline is set by the caller (e.g. the create milestone action uses the
-     * currently selected pipeline) before the model is saved. The observer intentionally does not
-     * resolve or default it, so a milestone can only be created once a pipeline has been chosen.
+     * @param Builder<Pipeline> $query
      */
-    public function creating(ProjectMilestone $projectMilestone): void
+    public function __invoke(Builder $query): void
     {
-        if (blank($projectMilestone->created_by_id)) {
-            $projectMilestone->created_by_id = auth()->id();
-        }
+        $query->orderBy('created_at')->orderBy('id');
     }
 }

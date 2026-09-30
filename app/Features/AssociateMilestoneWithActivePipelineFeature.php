@@ -34,21 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Observers;
+namespace App\Features;
 
-use AidingApp\Project\Models\ProjectMilestone;
+use App\Support\AbstractFeatureFlag;
 
-class ProjectMilestoneObserver
+class AssociateMilestoneWithActivePipelineFeature extends AbstractFeatureFlag
 {
-    /**
-     * A milestone's pipeline is set by the caller (e.g. the create milestone action uses the
-     * currently selected pipeline) before the model is saved. The observer intentionally does not
-     * resolve or default it, so a milestone can only be created once a pipeline has been chosen.
-     */
-    public function creating(ProjectMilestone $projectMilestone): void
+    public function resolve(mixed $scope): mixed
     {
-        if (blank($projectMilestone->created_by_id)) {
-            $projectMilestone->created_by_id = auth()->id();
-        }
+        return false;
     }
 }
