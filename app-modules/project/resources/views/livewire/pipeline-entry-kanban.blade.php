@@ -36,7 +36,10 @@
         <div class="overflow-x-auto">
             <div class="inline-block min-w-full align-middle">
                 <div class="overflow-hidden shadow">
-                    <div class="mb-6 flex items-start justify-start space-x-4 px-4" x-data="kanban($wire)">
+                    <div
+                        class="mb-6 flex items-start justify-start space-x-4 px-4"
+                        x-data="kanban($wire, @js($canUpdatePipelineTask))"
+                    >
                         @foreach ($stages as $stageKey => $stage)
                             <div class="min-w-kanban">
                                 <div class="rounded-lg bg-gray-100 px-4 py-2 dark:bg-gray-800">
@@ -72,6 +75,7 @@
                                             <x-project::entry-card
                                                 :pipeline="$pipeline"
                                                 :entry="$entry"
+                                                :can-update-pipeline-task="$canUpdatePipelineTask"
                                             ></x-project::entry-card>
                                         @endforeach
 
