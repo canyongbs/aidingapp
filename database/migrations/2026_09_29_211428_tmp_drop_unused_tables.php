@@ -150,7 +150,7 @@ return new class () extends SettingsMigration {
         'interaction_campaign.*.delete' => 'Interaction Campaign',
         'interaction_campaign.*.restore' => 'Interaction Campaign',
         'interaction_campaign.*.force-delete' => 'Interaction Campaign',
-        
+
         'interaction_driver.view-any' => 'Interaction Driver',
         'interaction_driver.create' => 'Interaction Driver',
         'interaction_driver.*.view' => 'Interaction Driver',
@@ -158,7 +158,7 @@ return new class () extends SettingsMigration {
         'interaction_driver.*.delete' => 'Interaction Driver',
         'interaction_driver.*.restore' => 'Interaction Driver',
         'interaction_driver.*.force-delete' => 'Interaction Driver',
-        
+
         'interaction_outcome.view-any' => 'Interaction Outcome',
         'interaction_outcome.create' => 'Interaction Outcome',
         'interaction_outcome.*.view' => 'Interaction Outcome',
@@ -166,7 +166,7 @@ return new class () extends SettingsMigration {
         'interaction_outcome.*.delete' => 'Interaction Outcome',
         'interaction_outcome.*.restore' => 'Interaction Outcome',
         'interaction_outcome.*.force-delete' => 'Interaction Outcome',
-        
+
         'interaction_relation.view-any' => 'Interaction Relation',
         'interaction_relation.create' => 'Interaction Relation',
         'interaction_relation.*.view' => 'Interaction Relation',
@@ -174,7 +174,7 @@ return new class () extends SettingsMigration {
         'interaction_relation.*.delete' => 'Interaction Relation',
         'interaction_relation.*.restore' => 'Interaction Relation',
         'interaction_relation.*.force-delete' => 'Interaction Relation',
-        
+
         'interaction_status.view-any' => 'Interaction Status',
         'interaction_status.create' => 'Interaction Status',
         'interaction_status.*.view' => 'Interaction Status',
@@ -182,7 +182,7 @@ return new class () extends SettingsMigration {
         'interaction_status.*.delete' => 'Interaction Status',
         'interaction_status.*.restore' => 'Interaction Status',
         'interaction_status.*.force-delete' => 'Interaction Status',
-        
+
         'interaction_type.view-any' => 'Interaction Type',
         'interaction_type.create' => 'Interaction Type',
         'interaction_type.*.view' => 'Interaction Type',
@@ -190,7 +190,7 @@ return new class () extends SettingsMigration {
         'interaction_type.*.delete' => 'Interaction Type',
         'interaction_type.*.restore' => 'Interaction Type',
         'interaction_type.*.force-delete' => 'Interaction Type',
-        
+
         'interaction.view-any' => 'Interaction',
         'interaction.create' => 'Interaction',
         'interaction.*.view' => 'Interaction',
