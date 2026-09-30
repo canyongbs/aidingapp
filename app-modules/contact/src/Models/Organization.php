@@ -38,11 +38,11 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use App\Models\BaseModel;
 use App\Models\Media;
-use AidingApp\Contact\Observers\OrganizationObserver;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;

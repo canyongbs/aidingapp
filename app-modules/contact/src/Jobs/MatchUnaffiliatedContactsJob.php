@@ -33,8 +33,8 @@ namespace AidingApp\Contact\Jobs;
 use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 use Throwable;
 
