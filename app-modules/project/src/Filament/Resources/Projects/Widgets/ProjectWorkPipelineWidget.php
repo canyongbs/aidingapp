@@ -47,6 +47,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -92,7 +93,7 @@ class ProjectWorkPipelineWidget extends TableWidget
         $this->selectedPipelineId = $this->record
             ->pipelines()
             ->withoutArchived()
-            ->oldest()
+            ->tap(new ActivePipelineFirst())
             ->value('id');
     }
 

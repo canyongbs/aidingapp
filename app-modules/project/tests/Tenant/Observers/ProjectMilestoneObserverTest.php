@@ -36,6 +36,7 @@
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Models\ProjectMilestone;
 
 use function Tests\asSuperAdmin;
 
@@ -53,6 +54,33 @@ it('associates a new milestone with the project active pipeline', function () {
     ]);
 
     expect($milestone->pipeline_id)->toBe($activePipeline->getKey());
+});
+
+it('breaks ties by id to match the backfill ordering', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $sameMoment = now()->subDay();
+
+    Pipeline::factory()->for($project)->create(['created_at' => $sameMoment]);
+    Pipeline::factory()->for($project)->create(['created_at' => $sameMoment]);
+
+    // Mirrors the deterministic ordering used to back-fill ProjectMilestone.pipeline_id, so the
+    // observer and the migration always resolve the same active pipeline for same-second rows.
+    $expectedPipelineId = Pipeline::query()
+        ->where('project_id', $project->getKey())
+        ->withoutArchived()
+        ->orderBy('created_at')
+        ->orderBy('id')
+        ->value('id');
+
+    $milestone = $project->milestones()->create([
+        'title' => 'Tie Breaker',
+        'description' => 'Same-second pipelines',
+    ]);
+
+    expect($milestone->pipeline_id)->toBe($expectedPipelineId);
 });
 
 it('ignores archived pipelines when choosing the active pipeline', function () {
@@ -101,4 +129,43 @@ it('leaves the pipeline null when the project has no active pipeline', function 
     ]);
 
     expect($milestone->pipeline_id)->toBeNull();
+});
+
+it('rejects an explicit pipeline that belongs to another project', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $otherProject = Project::factory()->create();
+
+    $foreignPipeline = Pipeline::factory()->for($otherProject)->create();
+
+    expect(fn () => $project->milestones()->create([
+        'title' => 'Cross Project',
+        'description' => 'Should be rejected',
+        'pipeline_id' => $foreignPipeline->getKey(),
+    ]))->toThrow(InvalidArgumentException::class);
+
+    expect(ProjectMilestone::query()->where('title', 'Cross Project')->exists())->toBeFalse();
+});
+
+it('breaks ties deterministically by id when pipelines share a created_at', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $sharedCreatedAt = now()->subDay();
+
+    $pipelines = collect([
+        Pipeline::factory()->for($project)->create(['created_at' => $sharedCreatedAt]),
+        Pipeline::factory()->for($project)->create(['created_at' => $sharedCreatedAt]),
+    ]);
+
+    $expectedPipelineId = $pipelines->sortBy('id')->first()->getKey();
+
+    $milestone = $project->milestones()->create([
+        'title' => 'Same Second',
+        'description' => 'Tie-breaker check',
+    ]);
+
+    expect($milestone->pipeline_id)->toBe($expectedPipelineId);
 });

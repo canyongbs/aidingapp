@@ -38,7 +38,9 @@ namespace AidingApp\Project\Observers;
 
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
 use App\Features\AssociateMilestoneWithActivePipelineFeature;
+use InvalidArgumentException;
 
 class ProjectMilestoneObserver
 {
@@ -52,9 +54,10 @@ class ProjectMilestoneObserver
     }
 
     /**
-     * Ensure every new milestone relates to exactly one pipeline. When no pipeline is set
-     * explicitly, fall back to the project's active (oldest, non-archived) pipeline, matching
-     * how the application resolves the default active pipeline elsewhere.
+     * Ensure every new milestone relates to exactly one pipeline that belongs to its own project.
+     * An explicitly supplied pipeline must belong to the milestone's project; otherwise fall back
+     * to the project's active (oldest, non-archived) pipeline, matching how the application
+     * resolves the default active pipeline elsewhere.
      */
     protected function associateWithActivePipeline(ProjectMilestone $projectMilestone): void
     {
@@ -64,14 +67,29 @@ class ProjectMilestoneObserver
             return;
         }
 
-        if (filled($projectMilestone->pipeline_id) || blank($projectMilestone->project_id)) {
+        if (blank($projectMilestone->project_id)) {
+            return;
+        }
+
+        if (filled($projectMilestone->pipeline_id)) {
+            $belongsToProject = Pipeline::query()
+                ->whereKey($projectMilestone->pipeline_id)
+                ->where('project_id', $projectMilestone->project_id)
+                ->exists();
+
+            if (! $belongsToProject) {
+                throw new InvalidArgumentException(
+                    "Pipeline [{$projectMilestone->pipeline_id}] does not belong to project [{$projectMilestone->project_id}].",
+                );
+            }
+
             return;
         }
 
         $projectMilestone->pipeline_id = Pipeline::query()
             ->where('project_id', $projectMilestone->project_id)
             ->withoutArchived()
-            ->oldest()
+            ->tap(new ActivePipelineFirst())
             ->value('id');
     }
 }

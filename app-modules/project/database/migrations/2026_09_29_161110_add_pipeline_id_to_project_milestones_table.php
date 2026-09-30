@@ -45,7 +45,7 @@ return new class () extends Migration {
     {
         DB::transaction(function () {
             Schema::table('project_milestones', function (Blueprint $table) {
-                $table->foreignUuid('pipeline_id')->nullable()->constrained('pipelines')->nullOnDelete();
+                $table->foreignUuid('pipeline_id')->nullable()->index()->constrained('pipelines')->nullOnDelete();
             });
 
             // Associate every existing milestone with its project's active pipeline. There is no
