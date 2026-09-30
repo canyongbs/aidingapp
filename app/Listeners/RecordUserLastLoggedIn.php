@@ -34,42 +34,26 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace App\Listeners;
 
-enum PresenceStatus: string
+use App\Features\LastLoggedInFeature;
+use App\Models\User;
+use Illuminate\Auth\Events\Login;
+
+class RecordUserLastLoggedIn
 {
-    case Active = 'active';
-    case Idle = 'idle';
-    case Inactive = 'inactive';
-    case Offline = 'offline';
-
-    public function getLabel(): string
+    public function handle(Login $event): void
     {
-        return match ($this) {
-            self::Active => 'Online',
-            self::Idle => 'Idle',
-            self::Inactive => 'Inactive',
-            self::Offline => 'Offline',
-        };
-    }
+        if (! LastLoggedInFeature::active()) {
+            return;
+        }
 
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::Active => 'success',
-            self::Idle => 'warning',
-            self::Inactive => 'gray',
-            self::Offline => 'gray',
-        };
-    }
+        $user = $event->user;
 
-    public function getIcon(): string
-    {
-        return match ($this) {
-            self::Active => 'heroicon-m-check-circle',
-            self::Idle => 'heroicon-m-clock',
-            self::Inactive => 'heroicon-m-minus-circle',
-            self::Offline => 'heroicon-m-x-circle',
-        };
+        if (! $user instanceof User) {
+            return;
+        }
+
+        User::withoutTimestamps(fn () => $user->touchQuietly('last_logged_in_at'));
     }
 }

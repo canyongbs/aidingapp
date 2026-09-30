@@ -34,42 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+use App\Models\User;
+use Illuminate\Auth\Events\Login;
 
-enum PresenceStatus: string
-{
-    case Active = 'active';
-    case Idle = 'idle';
-    case Inactive = 'inactive';
-    case Offline = 'offline';
+it('has no last logged in timestamp by default', function () {
+    $user = User::factory()->create();
 
-    public function getLabel(): string
-    {
-        return match ($this) {
-            self::Active => 'Online',
-            self::Idle => 'Idle',
-            self::Inactive => 'Inactive',
-            self::Offline => 'Offline',
-        };
-    }
+    expect($user->last_logged_in_at)->toBeNull();
+});
 
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::Active => 'success',
-            self::Idle => 'warning',
-            self::Inactive => 'gray',
-            self::Offline => 'gray',
-        };
-    }
+it('records the last logged in timestamp when a user logs in', function () {
+    $user = User::factory()->create();
 
-    public function getIcon(): string
-    {
-        return match ($this) {
-            self::Active => 'heroicon-m-check-circle',
-            self::Idle => 'heroicon-m-clock',
-            self::Inactive => 'heroicon-m-minus-circle',
-            self::Offline => 'heroicon-m-x-circle',
-        };
-    }
-}
+    event(new Login('web', $user, false));
+
+    expect($user->refresh()->last_logged_in_at)->not->toBeNull();
+});
+
+it('does not change updated_at when recording a login', function () {
+    $user = User::factory()->create(['updated_at' => now()->subDay()]);
+    $updatedAt = $user->updated_at->clone();
+
+    event(new Login('web', $user, false));
+
+    expect($user->refresh()->updated_at->eq($updatedAt))->toBeTrue();
+});

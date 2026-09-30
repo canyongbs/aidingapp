@@ -34,42 +34,32 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+use App\Features\LastLoggedInFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-enum PresenceStatus: string
-{
-    case Active = 'active';
-    case Idle = 'idle';
-    case Inactive = 'inactive';
-    case Offline = 'offline';
-
-    public function getLabel(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return match ($this) {
-            self::Active => 'Online',
-            self::Idle => 'Idle',
-            self::Inactive => 'Inactive',
-            self::Offline => 'Offline',
-        };
+        DB::transaction(function () {
+            Schema::table('users', function (Blueprint $table) {
+                $table->timestamp('last_logged_in_at')->nullable();
+            });
+
+            LastLoggedInFeature::activate();
+        });
     }
 
-    public function getColor(): string
+    public function down(): void
     {
-        return match ($this) {
-            self::Active => 'success',
-            self::Idle => 'warning',
-            self::Inactive => 'gray',
-            self::Offline => 'gray',
-        };
-    }
+        DB::transaction(function () {
+            LastLoggedInFeature::deactivate();
 
-    public function getIcon(): string
-    {
-        return match ($this) {
-            self::Active => 'heroicon-m-check-circle',
-            self::Idle => 'heroicon-m-clock',
-            self::Inactive => 'heroicon-m-minus-circle',
-            self::Offline => 'heroicon-m-x-circle',
-        };
+            Schema::table('users', function (Blueprint $table) {
+                $table->dropColumn('last_logged_in_at');
+            });
+        });
     }
-}
+};

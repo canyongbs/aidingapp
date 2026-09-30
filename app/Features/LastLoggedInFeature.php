@@ -34,42 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace App\Enums;
+namespace App\Features;
 
-enum PresenceStatus: string
+use App\Support\AbstractFeatureFlag;
+
+class LastLoggedInFeature extends AbstractFeatureFlag
 {
-    case Active = 'active';
-    case Idle = 'idle';
-    case Inactive = 'inactive';
-    case Offline = 'offline';
-
-    public function getLabel(): string
+    public function resolve(mixed $scope): mixed
     {
-        return match ($this) {
-            self::Active => 'Online',
-            self::Idle => 'Idle',
-            self::Inactive => 'Inactive',
-            self::Offline => 'Offline',
-        };
-    }
-
-    public function getColor(): string
-    {
-        return match ($this) {
-            self::Active => 'success',
-            self::Idle => 'warning',
-            self::Inactive => 'gray',
-            self::Offline => 'gray',
-        };
-    }
-
-    public function getIcon(): string
-    {
-        return match ($this) {
-            self::Active => 'heroicon-m-check-circle',
-            self::Idle => 'heroicon-m-clock',
-            self::Inactive => 'heroicon-m-minus-circle',
-            self::Offline => 'heroicon-m-x-circle',
-        };
+        return false;
     }
 }
