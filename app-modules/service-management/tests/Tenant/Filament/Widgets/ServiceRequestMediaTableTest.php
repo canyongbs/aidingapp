@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\Media;
 use App\Models\User;
@@ -363,7 +364,9 @@ describe('ServiceRequest', function () {
     test('uploadFile action is visible for a user who can update the service request', function () {
         asSuperAdmin();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -389,7 +392,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -425,7 +430,9 @@ describe('ServiceRequest', function () {
     test('uploadFile action requires a file', function () {
         asSuperAdmin();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -444,7 +451,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -463,7 +472,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         foreach (range(1, 6) as $index) {
             $serviceRequest
@@ -484,7 +495,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         foreach (range(1, 6) as $index) {
             $serviceRequest
@@ -518,7 +531,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -541,7 +556,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -566,7 +583,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -593,7 +612,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -787,7 +808,11 @@ describe('ServiceRequestUpdate', function () {
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -806,7 +831,11 @@ describe('ServiceRequestUpdate', function () {
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -829,7 +858,11 @@ describe('ServiceRequestUpdate', function () {
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
         $media = $serviceRequestUpdate
             ->addMedia(UploadedFile::fake()->image('attachment.png'))
             ->usingName('attachment')
