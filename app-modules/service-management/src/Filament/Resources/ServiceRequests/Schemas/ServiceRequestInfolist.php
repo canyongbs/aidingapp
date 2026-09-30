@@ -103,7 +103,9 @@ class ServiceRequestInfolist
                             })
                             ->color('primary')
                             ->action(ViewContactAction::make($record->respondent))
-                            ->afterContent(EditServiceRequestContactAction::make($record)),
+                            ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
+                                EditServiceRequestContactAction::make($record),
+                            ])),
                         TextEntry::make('created_at')
                             ->label('Created')
                             ->dateTime()
