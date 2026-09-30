@@ -38,6 +38,7 @@ namespace App\Http\Requests\Api\V1\Users;
 
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
+use App\Features\FullNameFeature;
 use App\Models\Authenticatable;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Illuminate\Database\Query\Expression;
@@ -63,7 +64,6 @@ class CreateUserRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'email', 'max:255', new EmailNotInUseOrSoftDeleted()],
             'is_external' => ['required', 'boolean'],
             'job_title' => ['nullable', 'string', 'max:255'],
@@ -74,6 +74,26 @@ class CreateUserRequest extends FormRequest
             'department' => ['nullable', 'string', 'max:255'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['string', 'max:255'],
+            ...(FullNameFeature::active()
+                ? [
+                    'first_name' => ['required', 'string', 'max:255'],
+                    'last_name' => ['required', 'string', 'max:255'],
+                    'preferred_name' => ['nullable', 'string', 'max:255'],
+                    'employee_id' => ['nullable', 'string', 'max:255'],
+                    'student_id' => ['nullable', 'string', 'max:255'],
+                    'school' => ['nullable', 'string', 'max:255'],
+                    'academic_department' => ['nullable', 'string', 'max:255'],
+                    'program' => ['nullable', 'string', 'max:255'],
+                    'address' => ['nullable', 'string', 'max:255'],
+                    'address_2' => ['nullable', 'string', 'max:255'],
+                    'city' => ['nullable', 'string', 'max:255'],
+                    'state' => ['nullable', 'string', 'max:255'],
+                    'postal_code' => ['nullable', 'string', 'max:255'],
+                    'country' => ['nullable', 'string', 'max:255'],
+                ]
+                : [
+                    'name' => ['required', 'string', 'max:255'],
+                ]),
         ];
     }
 
