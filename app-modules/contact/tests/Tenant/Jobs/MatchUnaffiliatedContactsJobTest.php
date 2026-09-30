@@ -66,3 +66,35 @@ it('matches unaffiliated contacts only to the targeted organization', function (
         ->and($otherDomainContact->refresh()->organization_id)->toBeNull()
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
+
+it('matches unaffiliated contacts to any matching organization during reconciliation', function () {
+    Queue::fake([MatchUnaffiliatedContactsJob::class]);
+    $organization = Organization::factory()->create([
+        'domains' => [],
+    ]);
+    $otherOrganization = Organization::factory()->create([
+        'domains' => [],
+    ]);
+    $matchingContact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $unmatchedContact = Contact::factory()->create([
+        'email' => 'person@unmatched.com',
+        'organization_id' => null,
+    ]);
+    $assignedContact = Contact::factory()
+        ->for($otherOrganization, 'organization')
+        ->create(['email' => 'assigned@example.com']);
+
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->save();
+    $otherOrganization->domains = [['domain' => 'other.com']];
+    $otherOrganization->save();
+
+    (new MatchUnaffiliatedContactsJob())->handle(app(MatchContactToOrganization::class));
+
+    expect($matchingContact->refresh()->organization_id)->toBe($organization->getKey())
+        ->and($unmatchedContact->refresh()->organization_id)->toBeNull()
+        ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
+});
