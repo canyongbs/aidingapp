@@ -43,7 +43,6 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\ManageAuditors;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageFiles;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageGuests;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageManagers;
-use AidingApp\Project\Filament\Resources\Projects\Pages\ManageMilestones;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManagePipelines;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ViewProject;
 use AidingApp\Project\Models\Project;
@@ -127,7 +126,6 @@ class ProjectResource extends Resource
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
             'manage-files' => ManageFiles::route('/{record}/files'),
             'pipelines' => ManagePipelines::route('/{record}/pipelines'),
-            'manage-milestones' => ManageMilestones::route('/{record}/milestones'),
             'manage-guests' => ManageGuests::route('/{record}/guests'),
         ];
     }

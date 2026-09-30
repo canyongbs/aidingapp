@@ -57,33 +57,14 @@ class ProjectMilestoneFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
+            'pipeline_id' => fn (array $attributes): string | PipelineFactory => Pipeline::query()
+                ->where('project_id', $attributes['project_id'])
+                ->withoutArchived()
+                ->tap(new ActivePipelineFirst())
+                ->value('id') ?? Pipeline::factory()->state(['project_id' => $attributes['project_id']]),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'description' => $this->faker->sentence(3),
             'created_by_id' => User::factory(),
         ];
-    }
-
-    /**
-     * A milestone must always belong to a pipeline. The observer no longer assigns one, so resolve
-     * the project's active (oldest, non-archived) pipeline here, creating one when the project has
-     * none, and set it explicitly unless a pipeline was already provided.
-     */
-    public function configure(): static
-    {
-        return $this->afterMaking(function (ProjectMilestone $projectMilestone): void {
-            if (filled($projectMilestone->pipeline_id) || blank($projectMilestone->project_id)) {
-                return;
-            }
-
-            $pipelineId = Pipeline::query()
-                ->where('project_id', $projectMilestone->project_id)
-                ->withoutArchived()
-                ->tap(new ActivePipelineFirst())
-                ->value('id');
-
-            $projectMilestone->pipeline_id = $pipelineId ?? Pipeline::factory()->create([
-                'project_id' => $projectMilestone->project_id,
-            ])->getKey();
-        });
     }
 }
