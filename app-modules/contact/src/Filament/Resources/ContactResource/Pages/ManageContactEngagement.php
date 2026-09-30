@@ -51,7 +51,7 @@ class ManageContactEngagement extends ManageRelatedRecords
 
     protected static ?string $navigationLabel = 'Emails';
 
-    protected static ?string $breadcrumb = 'Email and Texts';
+    protected static ?string $breadcrumb = 'Emails';
 
     public function getTitle(): string | Htmlable
     {
