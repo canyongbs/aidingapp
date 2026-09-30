@@ -39,6 +39,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\Servic
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
@@ -529,7 +530,9 @@ describe('archiving', function () {
         $settings->data->addons->serviceManagement = true;
         $settings->save();
 
-        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ]);
 
         $contact = Contact::factory()->create();
 
@@ -541,6 +544,7 @@ describe('archiving', function () {
             'ownerRecord' => $contact,
             'pageClass' => ContactServiceManagement::class,
         ])
+            ->assertCanSeeTableRecords([$serviceRequest])
             ->mountTableAction('edit', $serviceRequest)
             ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($archivedStatus): bool {
                 $optionIds = collect($select->getOptions())
