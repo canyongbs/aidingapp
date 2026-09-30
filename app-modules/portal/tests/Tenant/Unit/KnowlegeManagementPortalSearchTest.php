@@ -42,6 +42,22 @@ use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\post;
 
+/**
+ * @param  array<string, mixed>  $response
+ *
+ * @return array<string, mixed>
+ */
+function normalizeKnowledgeBasePublicIds(array $response): array
+{
+    array_walk_recursive($response, function (mixed &$value, string $key): void {
+        if ($key === 'publicId') {
+            $value = '<public-id>';
+        }
+    });
+
+    return $response;
+}
+
 test('search will not work if Knowledge Management Portal is not enabled.', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
     $response = post($url);
@@ -87,7 +103,7 @@ test('categories and items are returned without filtering', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
     $response = post($url);
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response->json()))->toMatchSnapshot();
 });
 
 test('category should present in response', function () {
@@ -107,7 +123,34 @@ test('category should present in response', function () {
 
     $response = $response->json();
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+});
+
+it('includes parent category metadata for subcategory search results', function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    $parentCategory = KnowledgeBaseCategory::factory()->create([
+        'name' => 'Student Resources',
+        'slug' => 'student-resources',
+    ]);
+
+    $subcategory = KnowledgeBaseCategory::factory()
+        ->for($parentCategory, 'parentCategory')
+        ->create([
+            'name' => 'Financial Aid',
+            'slug' => 'financial-aid',
+        ]);
+
+    $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
+
+    post($url, ['search' => json_encode('Financial Aid')])
+        ->assertCreated()
+        ->assertJsonPath('data.categories.0.slug', $subcategory->slug)
+        ->assertJsonPath('data.categories.0.publicId', $subcategory->public_id)
+        ->assertJsonPath('data.categories.0.parentCategory.slug', $parentCategory->slug)
+        ->assertJsonPath('data.categories.0.parentCategory.publicId', $parentCategory->public_id);
 });
 
 test('filter featured articles', function () {
@@ -145,7 +188,7 @@ test('filter featured articles', function () {
 
     $response = $response->json();
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
 test('filter article based on selected tags', function () {
@@ -192,7 +235,7 @@ test('filter article based on selected tags', function () {
 
     $response = $response->json();
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
 test('filter article and category based on searched keyword', function () {
@@ -245,7 +288,7 @@ test('filter article and category based on searched keyword', function () {
 
     $response = $response->json();
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
 test('filter most viewed articles', function () {
@@ -301,5 +344,5 @@ test('filter most viewed articles', function () {
 
     $response = $response->json();
 
-    expect($response)->toMatchSnapshot();
+    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });

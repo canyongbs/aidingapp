@@ -50,6 +50,7 @@
     import { useRoute, useRouter } from 'vue-router';
     import { useKnowledgeManagementSearch } from '../Composables/useKnowledgeManagementSearch.js';
     import { apiGet } from '../Services/api.js';
+    import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
     import { useCategoryData, useTagsData } from './loaders.js';
 
     const route = useRoute();
@@ -67,21 +68,10 @@
         (categoryValue) => {
             if (!categoryValue) return;
 
-            if (route.params.parentCategorySlug) {
-                router.replace({
-                    name: 'view-subcategory',
-                    params: {
-                        parentCategorySlug: categoryValue.parentCategory.slug,
-                        categorySlug: categoryValue.slug,
-                    },
-                    query: { ...route.query },
-                });
-            } else {
-                router.replace({
-                    name: 'view-category',
-                    params: { categorySlug: categoryValue.slug },
-                    query: { ...route.query },
-                });
+            const canonicalRoute = categoryRoute(categoryValue);
+
+            if (router.resolve(canonicalRoute).path !== route.path) {
+                router.replace({ ...canonicalRoute, query: { ...route.query } });
             }
         },
         { immediate: true },
@@ -113,7 +103,7 @@
         (category.value?.subCategories ?? []).map((subCategory) => ({
             ...subCategory,
             key: subCategory.slug,
-            to: { name: 'view-category', params: { categorySlug: subCategory.slug } },
+            to: categoryRoute(subCategory),
         })),
     );
 
@@ -170,7 +160,7 @@
         (shownArticles.value?.data ?? []).map((article) => ({
             ...article,
             key: article.id,
-            to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
+            to: articleRoute(article),
         })),
     );
 
@@ -184,11 +174,13 @@
 
     const breadcrumbs = computed(() => {
         if (category.value?.parentCategory) {
+            const parentRoute = categoryRoute(category.value.parentCategory);
+
             return [
                 {
                     name: category.value.parentCategory.name,
-                    route: 'view-category',
-                    params: { categorySlug: category.value.parentCategory.slug },
+                    route: parentRoute.name,
+                    params: parentRoute.params,
                 },
             ];
         }

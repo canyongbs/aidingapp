@@ -32,6 +32,10 @@
     </COPYRIGHT>
 --}}
 
+@use('AidingApp\Portal\Support\KnowledgeBasePortalUrl')
+@use('App\Features\KnowledgeBasePortalStableUrlsFeature')
+@use('Illuminate\Support\Js')
+
 <div class="flex items-center gap-2">
     @if ($getRecord()->status)
         <x-filament::badge>
@@ -40,11 +44,17 @@
     @endif
 
     @if ($getRecord()->public && ! empty($getRecord()->category_id))
+        @php
+            $portalArticleUrl = KnowledgeBasePortalStableUrlsFeature::active()
+                ? KnowledgeBasePortalUrl::article($getRecord())
+                : route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey();
+        @endphp
+
         <x-filament::badge>Public</x-filament::badge>
         <x-filament::icon
             class="flex h-4 w-4 cursor-pointer items-center justify-center"
             icon="heroicon-m-clipboard"
-            :x-on:click="'window.navigator.clipboard.writeText(' . \Illuminate\Support\Js::from(route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey()).').then(() => {
+            :x-on:click="'window.navigator.clipboard.writeText(' . Js::from($portalArticleUrl).').then(() => {
 
                     $tooltip(\'Copied!\', {
 

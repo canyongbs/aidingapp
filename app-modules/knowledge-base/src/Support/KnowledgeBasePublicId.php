@@ -34,21 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace AidingApp\KnowledgeBase\Support;
 
-use Illuminate\Support\Collection;
-use Spatie\LaravelData\Data;
+use Illuminate\Support\Str;
 
-class KnowledgeBaseCategoryData extends Data
+final class KnowledgeBasePublicId
 {
-    public function __construct(
-        public string $slug,
-        public string $name,
-        public ?string $description,
-        public ?string $icon,
-        public ?KnowledgeBaseCategoryData $parentCategory,
-        /** @var null|Collection<int, KnowledgeBaseCategoryData> */
-        public ?Collection $subCategories,
-        public ?string $publicId = null,
-    ) {}
+    public const int LENGTH = 8;
+
+    public static function generate(): string
+    {
+        return Str::random(self::LENGTH);
+    }
 }

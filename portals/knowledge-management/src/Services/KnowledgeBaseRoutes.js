@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -34,21 +32,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Routing;
+const publicIdPattern = /-[0-9A-Za-z]{8}$/;
 
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
+export function hasPublicIdLocator(locator) {
+    return publicIdPattern.test(locator ?? '');
+}
 
-class CategoryShowMissingHandler
-{
-    public function __invoke(Request $request): RedirectResponse
-    {
-        throw_if(! str()->isUuid($request->category), ModelNotFoundException::class);
+export function categoryLocator(category) {
+    return category.publicId ? `${category.slug}-${category.publicId}` : category.slug;
+}
 
-        $category = KnowledgeBaseCategory::findOrFail($request->category);
-
-        return redirect()->route('api.portal.category.show', $category->slug);
+export function categoryRoute(category) {
+    if (category.publicId && category.parentCategory?.publicId) {
+        return {
+            name: 'view-subcategory',
+            params: {
+                parentCategorySlug: categoryLocator(category.parentCategory),
+                categorySlug: categoryLocator(category),
+            },
+        };
     }
+
+    return {
+        name: 'view-category',
+        params: { categorySlug: categoryLocator(category) },
+    };
+}
+
+export function articleRoute(article, category = article.category) {
+    if (!article.publicId || !category?.publicId) {
+        return {
+            name: 'view-article',
+            params: { categorySlug: article.categorySlug, articleId: article.id },
+        };
+    }
+
+    const params = {
+        categorySlug: categoryLocator(category),
+        articleId: `${article.slug}-${article.publicId}`,
+    };
+
+    if (category.parentCategory?.publicId) {
+        return {
+            name: 'view-subcategory-article',
+            params: {
+                ...params,
+                parentCategorySlug: categoryLocator(category.parentCategory),
+            },
+        };
+    }
+
+    return { name: 'view-article', params };
 }

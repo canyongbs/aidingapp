@@ -34,21 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\DataTransferObjects;
+namespace App\Features;
 
-use Illuminate\Support\Collection;
-use Spatie\LaravelData\Data;
+use App\Support\AbstractFeatureFlag;
 
-class KnowledgeBaseCategoryData extends Data
+class KnowledgeBasePortalStableUrlsFeature extends AbstractFeatureFlag
 {
-    public function __construct(
-        public string $slug,
-        public string $name,
-        public ?string $description,
-        public ?string $icon,
-        public ?KnowledgeBaseCategoryData $parentCategory,
-        /** @var null|Collection<int, KnowledgeBaseCategoryData> */
-        public ?Collection $subCategories,
-        public ?string $publicId = null,
-    ) {}
+    public function resolve(mixed $scope): mixed
+    {
+        return false;
+    }
 }

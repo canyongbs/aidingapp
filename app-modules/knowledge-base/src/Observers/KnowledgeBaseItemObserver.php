@@ -41,10 +41,23 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleImagesJob;
 use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use AidingApp\KnowledgeBase\Support\KnowledgeBasePublicId;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\KnowledgeBasePortalStableUrlsFeature;
 
 class KnowledgeBaseItemObserver
 {
+    public function creating(KnowledgeBaseItem $knowledgeBaseItem): void
+    {
+        if (! KnowledgeBasePortalStableUrlsFeature::active() || filled($knowledgeBaseItem->public_id)) {
+            return;
+        }
+
+        do {
+            $knowledgeBaseItem->public_id = KnowledgeBasePublicId::generate();
+        } while (KnowledgeBaseItem::query()->where('public_id', $knowledgeBaseItem->public_id)->exists());
+    }
+
     public function saving(KnowledgeBaseItem $knowledgeBaseItem): void
     {
         if (! blank($knowledgeBaseItem->article_details)) {

@@ -36,6 +36,7 @@ import { useQuery } from '@pinia/colada';
 import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { apiPostUrl } from '../Services/api.js';
+import { articleRoute, categoryRoute } from '../Services/KnowledgeBaseRoutes.js';
 import { useConfigStore } from '../Stores/config.js';
 
 export const searchFilterTabs = [
@@ -153,7 +154,7 @@ export function useKnowledgeManagementSearch() {
         (shownEnvelope.value?.articles?.data ?? []).map((article) => ({
             ...article,
             key: article.id,
-            to: { name: 'view-article', params: { categorySlug: article.categorySlug, articleId: article.id } },
+            to: articleRoute(article),
         })),
     );
 
@@ -161,7 +162,7 @@ export function useKnowledgeManagementSearch() {
         (shownEnvelope.value?.categories ?? []).map((category) => ({
             ...category,
             key: category.slug,
-            to: { name: 'view-category', params: { categorySlug: category.slug } },
+            to: categoryRoute(category),
         })),
     );
 

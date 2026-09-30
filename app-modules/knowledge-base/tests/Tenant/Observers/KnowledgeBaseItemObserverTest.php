@@ -34,37 +34,12 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Portal\Http\Routing;
-
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 
-class ArticleShowMissingHandler
-{
-    public function __invoke(Request $request): RedirectResponse
-    {
-        throw_if(
-            ! $request->category instanceof KnowledgeBaseCategory
-            && ! str()->isUuid($request->category),
-            ModelNotFoundException::class
-        );
+it('assigns a public ID when creating an article', function () {
+    $article = KnowledgeBaseItem::factory()->create();
 
-        $category = $request->category instanceof KnowledgeBaseCategory ? $request->category : KnowledgeBaseCategory::findOrFail($request->category);
-
-        throw_if(
-            ! $request->article instanceof KnowledgeBaseItem
-            && ! str()->isUuid($request->article),
-            ModelNotFoundException::class
-        );
-
-        $article = $request->article instanceof KnowledgeBaseItem ? $request->article : KnowledgeBaseItem::findOrFail($request->article);
-
-        return redirect()->route('api.portal.article.show', [
-            'category' => $category,
-            'article' => $article,
-        ]);
-    }
-}
+    expect($article->public_id)
+        ->toHaveLength(8)
+        ->toMatch('/^[0-9A-Za-z]{8}$/');
+});

@@ -37,93 +37,38 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\Models\PortalGuest;
+use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
+use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use App\Http\Controllers\Controller;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 
 class KnowledgeManagementPortalArticleController extends Controller
 {
-    public function show(KnowledgeBaseCategory $category, KnowledgeBaseItem $article): JsonResponse
+    public function show(string $article): JsonResponse
     {
-        if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
-            $portalGuest = PortalGuest::create();
-            session()->put('guest_id', $portalGuest->getKey());
-        }
-        $article->increment('portal_view_count');
-        $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
-        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
+        abort_unless(KnowledgeBasePortalStableUrlsFeature::active(), 404);
 
-        $totalVotes = $article->votes->count();
-        $helpfulVotes = $article->votes->where('is_helpful', true)->count();
+        $article = KnowledgeBasePortalUrl::resolveArticle($article);
 
-        $helpfulVotePercentage = 0;
+        abort_if($article === null, 404);
 
-        if ($totalVotes > 0) {
-            $helpfulVotePercentage = round(($helpfulVotes / $totalVotes) * 100, 0);
-        }
+        return $this->response($article);
+    }
 
-        if (! $article->public) {
-            return response()->json([], 401);
-        }
+    public function showLegacy(string $category, string $article): JsonResponse
+    {
+        abort_if(KnowledgeBasePortalUrl::resolveCategory($category) === null, 404);
 
-        $content = $article->article_details ? $article->renderRichContent('article_details') : '';
+        $article = KnowledgeBasePortalUrl::resolveArticle($article);
 
-        if ($article->has_table_of_contents) {
-            $tableOfContents = static::generateTableOfContents($article->article_details);
+        abort_if($article === null, 404);
 
-            if (filled($tableOfContents)) {
-                $content = '<h2>Table of Contents</h2><div class="prose-toc">' . $tableOfContents . '</div>' . $content;
-            }
-        }
-
-        return response()->json([
-            'category' => KnowledgeBaseCategoryData::from([
-                'slug' => $category->slug,
-                'name' => $category->name,
-                'description' => $category->description,
-                'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
-                    'slug' => $category->parentCategory->slug,
-                    'name' => $category->parentCategory->name,
-                    'description' => $category->parentCategory->description,
-                ]) : null,
-            ]),
-            'article' => KnowledgeBaseArticleData::from([
-                'id' => $article->getKey(),
-                'categorySlug' => $article->category->slug,
-                'name' => $article->title,
-                'lastUpdated' => $article->updated_at->toIso8601String(),
-                'content' => $content,
-                'tags' => $article->tags()
-                    ->orderBy('name')
-                    ->select([
-                        'id',
-                        'name',
-                    ])
-                    ->get()
-                    ->toArray(),
-                'vote' => optional(
-                    $article->votes()
-                        ->where('voter_id', $voterId)
-                        ->where('voter_type', $voterType)
-                        ->select([
-                            'id',
-                            'is_helpful',
-                        ])
-                        ->first()
-                )->toArray(),
-                'featured' => $article->is_featured,
-                'attachments' => $article->getMedia('article_attachments')->map(fn ($media) => [
-                    'name' => $media->file_name,
-                    'url' => route('api.portal.knowledge-base-article.media.download', ['media' => $media->getKey()]),
-                ])->toArray(),
-            ]),
-            'portal_view_count' => $article->portal_view_count,
-            'helpful_vote_percentage' => $helpfulVotePercentage,
-        ]);
+        return $this->response($article);
     }
 
     /**
@@ -195,5 +140,96 @@ class KnowledgeManagementPortalArticleController extends Controller
         }
 
         return $headings;
+    }
+
+    private function response(KnowledgeBaseItem $article): JsonResponse
+    {
+        $category = $article->category;
+        $stableUrlsActive = KnowledgeBasePortalStableUrlsFeature::active();
+
+        if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
+            $portalGuest = PortalGuest::create();
+            session()->put('guest_id', $portalGuest->getKey());
+        }
+        $article->increment('portal_view_count');
+        $voterType = session()->has('guest_id') ? (new PortalGuest())->getMorphClass() : (new Contact())->getMorphClass();
+        $voterId = session()->has('guest_id') ? session('guest_id') : auth('contact')->user()?->getKey();
+
+        $article->loadCount([
+            'votes',
+            'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
+        ]);
+
+        $totalVotes = (int) $article->getAttribute('votes_count');
+        $helpfulVotes = (int) $article->getAttribute('helpful_votes_count');
+
+        $helpfulVotePercentage = 0;
+
+        if ($totalVotes > 0) {
+            $helpfulVotePercentage = round(($helpfulVotes / $totalVotes) * 100, 0);
+        }
+
+        if (! $article->public) {
+            return response()->json([], 401);
+        }
+
+        $content = $article->article_details ? $article->renderRichContent('article_details') : '';
+
+        if ($article->has_table_of_contents) {
+            $tableOfContents = static::generateTableOfContents($article->article_details);
+
+            if (filled($tableOfContents)) {
+                $content = '<h2>Table of Contents</h2><div class="prose-toc">' . $tableOfContents . '</div>' . $content;
+            }
+        }
+
+        return response()->json([
+            'category' => KnowledgeBaseCategoryData::from([
+                'slug' => $category->slug,
+                'name' => $category->name,
+                'description' => $category->description,
+                'publicId' => $stableUrlsActive ? $category->public_id : null,
+                'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
+                    'slug' => $category->parentCategory->slug,
+                    'name' => $category->parentCategory->name,
+                    'description' => $category->parentCategory->description,
+                    'publicId' => $stableUrlsActive ? $category->parentCategory->public_id : null,
+                ]) : null,
+            ]),
+            'article' => KnowledgeBaseArticleData::from([
+                'id' => $article->getKey(),
+                'categorySlug' => $article->category->slug,
+                'name' => $article->title,
+                'publicId' => $stableUrlsActive ? $article->public_id : null,
+                'slug' => $stableUrlsActive ? KnowledgeBasePortalUrl::articleSlug($article) : null,
+                'lastUpdated' => $article->updated_at->toIso8601String(),
+                'content' => $content,
+                'tags' => $article->tags()
+                    ->orderBy('name')
+                    ->select([
+                        'id',
+                        'name',
+                    ])
+                    ->get()
+                    ->toArray(),
+                'vote' => optional(
+                    $article->votes()
+                        ->where('voter_id', $voterId)
+                        ->where('voter_type', $voterType)
+                        ->select([
+                            'id',
+                            'is_helpful',
+                        ])
+                        ->first()
+                )->toArray(),
+                'featured' => $article->is_featured,
+                'attachments' => $article->getMedia('article_attachments')->map(fn ($media) => [
+                    'name' => $media->file_name,
+                    'url' => route('api.portal.knowledge-base-article.media.download', ['media' => $media->getKey()]),
+                ])->toArray(),
+            ]),
+            'portal_view_count' => $article->portal_view_count,
+            'helpful_vote_percentage' => $helpfulVotePercentage,
+        ]);
     }
 }

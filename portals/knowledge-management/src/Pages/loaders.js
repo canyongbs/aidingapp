@@ -34,6 +34,7 @@
 
 import { defineColadaLoader } from 'vue-router/experimental/pinia-colada';
 import { apiGet } from '../Services/api.js';
+import { hasPublicIdLocator } from '../Services/KnowledgeBaseRoutes.js';
 
 const fiveMinutes = 1000 * 60 * 5;
 
@@ -75,7 +76,12 @@ export const useCategoryData = defineColadaLoader({
 export const useArticleData = defineColadaLoader({
     key: (to) => ['knowledge-management', 'article', String(to.params.categorySlug), String(to.params.articleId)],
     query: (to) =>
-        tolerant(apiGet(`/categories/${to.params.categorySlug}/articles/${to.params.articleId}`), { notFound: true }),
+        tolerant(
+            hasPublicIdLocator(to.params.articleId)
+                ? apiGet(`/articles/${to.params.articleId}`)
+                : apiGet(`/categories/${to.params.categorySlug}/articles/${to.params.articleId}`),
+            { notFound: true },
+        ),
 });
 
 export const useServiceRequestsData = defineColadaLoader({
