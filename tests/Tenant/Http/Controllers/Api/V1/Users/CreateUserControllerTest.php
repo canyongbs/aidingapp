@@ -40,6 +40,7 @@ use App\Models\Authenticatable;
 use App\Models\SystemUser;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Queue;
 use Laravel\Sanctum\Sanctum;
@@ -53,7 +54,8 @@ beforeEach(function () {
 
 it('is gated with proper access control', function () {
     $payload = [
-        'name' => 'Test User',
+        'first_name' => 'Test',
+        'last_name' => 'User',
         'email' => 'test@example.com',
         'is_external' => false,
     ];
@@ -79,7 +81,8 @@ it('creates a user and returns a 201 response with required fields', function ()
     Sanctum::actingAs($user, ['api']);
 
     $payload = [
-        'name' => 'Jane Doe',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
         'email' => 'jane.doe@example.com',
         'is_external' => false,
     ];
@@ -105,7 +108,8 @@ it('creates a user with all optional fields', function () {
     Sanctum::actingAs($user, ['api']);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Full User',
+        'first_name' => 'Full',
+        'last_name' => 'User',
         'email' => 'full@example.com',
         'is_external' => false,
         'job_title' => 'Engineer',
@@ -130,6 +134,76 @@ it('creates a user with all optional fields', function () {
     expect($created->hasRole($role))->toBeTrue();
 });
 
+it('creates a user with all newly added demographic and address fields', function () {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.create');
+    Sanctum::actingAs($user, ['api']);
+
+    $payload = [
+        'first_name' => 'Demographic',
+        'last_name' => 'Fields',
+        'email' => 'demographic.fields@example.com',
+        'is_external' => false,
+        'preferred_name' => 'Demo',
+        'employee_id' => 'EMP-1001',
+        'student_id' => 'STU-1001',
+        'school' => 'College of Engineering',
+        'academic_department' => 'Computer Science',
+        'program' => 'Bachelor of Science',
+        'address' => '123 Main St',
+        'address_2' => 'Suite 100',
+        'city' => 'Springfield',
+        'state' => 'IL',
+        'postal_code' => '62701',
+        'country' => 'United States',
+    ];
+
+    $response = postJson(route('api.v1.users.store', absolute: false), $payload);
+
+    $response->assertCreated();
+    $response->assertJsonStructure(['data' => [
+        'id',
+        'name',
+        'first_name',
+        'last_name',
+        'preferred_name',
+        'employee_id',
+        'student_id',
+        'school',
+        'academic_department',
+        'program',
+        'address',
+        'address_2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+        'email',
+        'roles',
+        'department',
+        'permissions',
+    ]]);
+
+    foreach (Arr::except($payload, ['email', 'is_external']) as $key => $value) {
+        expect($response['data'][$key])->toBe($value);
+    }
+
+    $created = User::where('email', 'demographic.fields@example.com')->firstOrFail();
+
+    expect($created->preferred_name)->toBe('Demo');
+    expect($created->employee_id)->toBe('EMP-1001');
+    expect($created->student_id)->toBe('STU-1001');
+    expect($created->school)->toBe('College of Engineering');
+    expect($created->academic_department)->toBe('Computer Science');
+    expect($created->program)->toBe('Bachelor of Science');
+    expect($created->address)->toBe('123 Main St');
+    expect($created->address_2)->toBe('Suite 100');
+    expect($created->city)->toBe('Springfield');
+    expect($created->state)->toBe('IL');
+    expect($created->postal_code)->toBe('62701');
+    expect($created->country)->toBe('United States');
+});
+
 it('sends SetPasswordNotification only to non-external users', function (bool $isExternal, bool $shouldSend) {
     Notification::fake();
 
@@ -138,7 +212,8 @@ it('sends SetPasswordNotification only to non-external users', function (bool $i
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Test User',
+        'first_name' => 'Test',
+        'last_name' => 'User',
         'email' => 'notifytest@example.com',
         'is_external' => $isExternal,
     ])->assertCreated();
@@ -163,7 +238,8 @@ it('resolves department case-insensitively', function () {
     Sanctum::actingAs($user, ['api']);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'HR User',
+        'first_name' => 'HR',
+        'last_name' => 'User',
         'email' => 'hr@example.com',
         'is_external' => false,
         'department' => 'human resources',
@@ -181,7 +257,8 @@ it('resolves role names case-insensitively', function () {
     Sanctum::actingAs($user, ['api']);
 
     $response = postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Agent User',
+        'first_name' => 'Agent',
+        'last_name' => 'User',
         'email' => 'agent@example.com',
         'is_external' => false,
         'roles' => ['support agent'],
@@ -201,7 +278,8 @@ it('rejects a duplicate email address', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Duplicate',
+        'first_name' => 'Dup',
+        'last_name' => 'Licate',
         'email' => 'taken@example.com',
         'is_external' => false,
     ])->assertUnprocessable()
@@ -217,7 +295,8 @@ it('rejects the email of a soft-deleted user', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Archived Duplicate',
+        'first_name' => 'Archived',
+        'last_name' => 'Duplicate',
         'email' => 'archived@example.com',
         'is_external' => false,
     ])->assertUnprocessable()
@@ -230,7 +309,8 @@ it('returns 422 when department name does not exist', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'No Dept User',
+        'first_name' => 'No',
+        'last_name' => 'Dept User',
         'email' => 'nodept@example.com',
         'is_external' => false,
         'department' => 'Nonexistent Department',
@@ -244,7 +324,8 @@ it('returns 422 when a role name does not exist', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Bad Role User',
+        'first_name' => 'Bad',
+        'last_name' => 'Role User',
         'email' => 'badrole@example.com',
         'is_external' => false,
         'roles' => ['nonexistent-role'],
@@ -260,7 +341,8 @@ it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Admin Attempt',
+        'first_name' => 'Admin',
+        'last_name' => 'Attempt',
         'email' => 'adminattempt@example.com',
         'is_external' => false,
         'roles' => [$roleNameToSend],
@@ -273,14 +355,14 @@ it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend
     'SaaS Global Admin (lowercase)' => [Authenticatable::SUPER_ADMIN_ROLE, 'saas global admin'],
 ]);
 
-it('requires name, email, and is_external fields', function () {
+it('requires first_name, last_name, email, and is_external fields', function () {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.create');
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [])
         ->assertUnprocessable()
-        ->assertJsonValidationErrors(['name', 'email', 'is_external']);
+        ->assertJsonValidationErrors(['first_name', 'last_name', 'email', 'is_external']);
 });
 
 it('rejects an invalid email format', function () {
@@ -289,7 +371,8 @@ it('rejects an invalid email format', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'Bad Email',
+        'first_name' => 'Bad',
+        'last_name' => 'Email',
         'email' => 'not-an-email',
         'is_external' => false,
     ])->assertUnprocessable()
@@ -302,7 +385,8 @@ it('does not set a password on the created user', function () {
     Sanctum::actingAs($user, ['api']);
 
     postJson(route('api.v1.users.store', absolute: false), [
-        'name' => 'No Password User',
+        'first_name' => 'No Password',
+        'last_name' => 'User',
         'email' => 'nopassword@example.com',
         'is_external' => false,
     ])->assertCreated();

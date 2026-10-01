@@ -33,10 +33,12 @@
 
 </COPYRIGHT>
 */
-
 use App\Filament\Resources\Users\Pages\ViewUser;
+use App\Filament\Resources\Users\UserResource;
+use App\Models\Authenticatable;
 use App\Models\User;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
@@ -83,4 +85,106 @@ it('allows super admin user to impersonate', function () {
 
     expect($user->isImpersonated())->toBeTrue();
     expect(auth()->id())->toBe($user->id);
+});
+
+test('ViewUser is gated with proper access control', function () {
+    $user = User::factory()->create();
+
+    $record = User::factory()->create();
+
+    actingAs($user)
+        ->get(
+            UserResource::getUrl('view', ['record' => $record])
+        )->assertForbidden();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertForbidden();
+
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.view');
+
+    actingAs($user)
+        ->get(
+            UserResource::getUrl('view', ['record' => $record])
+        )->assertSuccessful();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful();
+});
+
+test('ViewUser displays the record\'s current field values', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create([
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
+        'name' => 'Jordan Blake',
+        'email' => 'jordan.blake@example.com',
+    ]);
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertFormSet([
+            'first_name' => 'Jordan',
+            'last_name' => 'Blake',
+            'name' => 'Jordan Blake',
+            'email' => 'jordan.blake@example.com',
+        ]);
+});
+
+test('ViewUser shows first and last name fields when the full name feature is active', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldIsVisible('first_name')
+        ->assertFormFieldIsVisible('last_name');
+});
+
+test('ViewUser disables all editable fields', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldDisabled('first_name')
+        ->assertFormFieldDisabled('last_name')
+        ->assertFormFieldDisabled('name')
+        ->assertFormFieldDisabled('email')
+        ->assertFormFieldDisabled('job_title');
+});
+
+test('ViewUser hides the Department section for admin records', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+    $record->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldIsHidden('department_id');
+});
+
+test('ViewUser shows the Department section for non-admin records', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldIsVisible('department_id');
+});
+
+test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function () {
+    $actingUser = User::factory()->create(['timezone' => 'America/New_York']);
+    asSuperAdmin($actingUser);
+
+    $record = User::factory()->create();
+    $record->timestamps = false;
+    $record->created_at = '2026-01-15 12:00:00';
+    $record->save();
+
+    livewire(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful()
+        ->assertSee('Jan 15, 2026')
+        ->assertSee('7:00 am (EST)')
+        ->assertSee('fi-datetime-description', false);
 });

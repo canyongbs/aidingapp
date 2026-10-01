@@ -69,7 +69,8 @@ it('creates a new user with all fields, department and roles', function () {
     Role::factory()->create(['name' => 'Advisor', 'guard_name' => 'web']);
 
     runUserImport([
-        'name' => 'Jonathan Smith',
+        'first_name' => 'Jonathan',
+        'last_name' => 'Smith',
         'email' => 'jonathan@example.com',
         'job_title' => 'Advisor',
         'work_number' => '+1 555 123 4567',
@@ -82,7 +83,9 @@ it('creates a new user with all fields, department and roles', function () {
 
     $user = User::query()->where('email', 'jonathan@example.com')->firstOrFail();
 
-    expect($user->name)->toBe('Jonathan Smith')
+    expect($user->first_name)->toBe('Jonathan')
+        ->and($user->last_name)->toBe('Smith')
+        ->and($user->name)->toBe('Jonathan Smith')
         ->and($user->job_title)->toBe('Advisor')
         ->and($user->work_number)->toBe('+1 555 123 4567')
         ->and($user->work_extension)->toBe(123)
@@ -100,13 +103,15 @@ it('updates an existing user matched by email case-insensitively', function () {
 
     $existing = User::factory()->create([
         'email' => 'casey@example.com',
-        'name' => 'Old Name',
+        'first_name' => 'Old',
+        'last_name' => 'Name',
         'job_title' => 'Old Title',
         'is_external' => true,
     ]);
 
     runUserImport([
-        'name' => 'Casey New',
+        'first_name' => 'Casey',
+        'last_name' => 'New',
         'email' => 'CASEY@EXAMPLE.COM',
         'job_title' => 'New Title',
         'department' => 'Support',
@@ -117,7 +122,8 @@ it('updates an existing user matched by email case-insensitively', function () {
 
     $existing->refresh();
 
-    expect($existing->name)->toBe('Casey New')
+    expect($existing->first_name)->toBe('Casey')
+        ->and($existing->last_name)->toBe('New')
         ->and($existing->job_title)->toBe('New Title')
         ->and($existing->department->is($department))->toBeTrue()
         ->and($existing->roles->pluck('name')->all())->toBe(['Agent']);
@@ -131,7 +137,8 @@ it('replaces (syncs) roles, removing roles not listed', function () {
     $user->assignRole('RemoveMe');
 
     runUserImport([
-        'name' => 'Sync User',
+        'first_name' => 'Sync',
+        'last_name' => 'User',
         'email' => 'sync@example.com',
         'job_title' => 'Title',
         'roles' => 'KeepMe',
@@ -147,7 +154,8 @@ it('leaves existing roles untouched when the roles column is blank', function ()
     $user->assignRole('Existing');
 
     runUserImport([
-        'name' => 'Blank Roles',
+        'first_name' => 'Blank',
+        'last_name' => 'Roles',
         'email' => 'blank@example.com',
         'job_title' => 'Title',
         'roles' => '',
@@ -161,7 +169,8 @@ it('resolves department and roles by name case-insensitively', function () {
     Role::factory()->create(['name' => 'Reviewer', 'guard_name' => 'web']);
 
     runUserImport([
-        'name' => 'Case User',
+        'first_name' => 'Case',
+        'last_name' => 'User',
         'email' => 'case@example.com',
         'job_title' => 'Title',
         'department' => 'finance',
@@ -176,7 +185,8 @@ it('resolves department and roles by name case-insensitively', function () {
 
 it('fails the row when the department does not exist', function () {
     runUserImport([
-        'name' => 'No Dept',
+        'first_name' => 'No',
+        'last_name' => 'Dept',
         'email' => 'nodept@example.com',
         'job_title' => 'Title',
         'department' => 'Nonexistent Department',
@@ -187,7 +197,8 @@ it('fails the row when a role does not exist', function () {
     Role::factory()->create(['name' => 'RealRole', 'guard_name' => 'web']);
 
     runUserImport([
-        'name' => 'No Role',
+        'first_name' => 'No',
+        'last_name' => 'Role',
         'email' => 'norole@example.com',
         'job_title' => 'Title',
         'roles' => 'RealRole|FakeRole',
@@ -199,7 +210,8 @@ it('fails the row when the email belongs to an archived user', function () {
     $archived->delete();
 
     runUserImport([
-        'name' => 'Archived',
+        'first_name' => 'Archived',
+        'last_name' => 'User',
         'email' => 'archived@example.com',
         'job_title' => 'Title',
     ]);
