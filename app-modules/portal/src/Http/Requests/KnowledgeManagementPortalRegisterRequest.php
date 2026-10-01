@@ -36,7 +36,7 @@
 
 namespace AidingApp\Portal\Http\Requests;
 
-use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
+use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 use AidingApp\Portal\Models\PortalAuthentication;
 use App\Rules\ValidAuthenticationCode;
 use Illuminate\Database\Query\Builder;
@@ -47,7 +47,7 @@ class KnowledgeManagementPortalRegisterRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return app(FindOrganizationByEmailDomain::class)((string) $this->input('email')) !== null;
+        return app(FindPortalRegistrationOrganization::class)((string) $this->input('email')) !== null;
     }
 
     /**

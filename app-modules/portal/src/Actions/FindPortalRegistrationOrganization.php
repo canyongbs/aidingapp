@@ -39,7 +39,7 @@ namespace AidingApp\Portal\Actions;
 use AidingApp\Contact\Actions\FindOrganizationByEmailDomain as FindContactOrganizationByEmailDomain;
 use AidingApp\Contact\Models\Organization;
 
-class FindOrganizationByEmailDomain
+class FindPortalRegistrationOrganization
 {
     public function __construct(
         private FindContactOrganizationByEmailDomain $findOrganizationByEmailDomain,
