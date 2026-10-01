@@ -40,12 +40,10 @@ use AidingApp\ServiceManagement\Actions\DescribeAutomatedStatusUsage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
-use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -61,8 +59,6 @@ class ListServiceRequestStatuses extends ListRecords
 
     public function table(Table $table): Table
     {
-        $isArchivingActive = ServiceRequestStatusArchivingFeature::active();
-
         return $table
             ->columns([
                 IdColumn::make(),
@@ -102,33 +98,28 @@ class ListServiceRequestStatuses extends ListRecords
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    $isArchivingActive
-                        ? ArchiveBulkAction::make()
-                            ->authorizeIndividualRecords('delete')
-                            ->modalDescription(fn (ArchiveBulkAction $action): ?string => app(DescribeAutomatedStatusUsage::class)(
-                                $action->getSelectedRecordsQuery(),
-                            ))
-                        : DeleteBulkAction::make()
-                            ->authorizeIndividualRecords('delete'),
+                    ArchiveBulkAction::make()
+                        ->authorizeIndividualRecords('delete')
+                        ->modalDescription(fn (ArchiveBulkAction $action): ?string => app(DescribeAutomatedStatusUsage::class)(
+                            $action->getSelectedRecordsQuery(),
+                        )),
                 ]),
             ])
             ->filters([
                 TrashedFilter::make(),
-                ...($isArchivingActive ? [
-                    TernaryFilter::make('archived')
-                        ->label('Archived')
-                        ->placeholder('Without archived records')
-                        ->trueLabel('With archived records')
-                        ->falseLabel('Only archived records')
-                        ->queries(
-                            true: fn (Builder $query): Builder => $query,
-                            false: $this->onlyArchived(...),
-                            blank: $this->withoutArchived(...),
-                        )
-                        // Without this the default `withoutArchived()` would hide the very record
-                        // the unarchive action needs to resolve.
-                        ->excludeWhenResolvingRecord(),
-                ] : []),
+                TernaryFilter::make('archived')
+                    ->label('Archived')
+                    ->placeholder('Without archived records')
+                    ->trueLabel('With archived records')
+                    ->falseLabel('Only archived records')
+                    ->queries(
+                        true: fn (Builder $query): Builder => $query,
+                        false: $this->onlyArchived(...),
+                        blank: $this->withoutArchived(...),
+                    )
+                    // Without this the default `withoutArchived()` would hide the very record
+                    // the unarchive action needs to resolve.
+                    ->excludeWhenResolvingRecord(),
             ]);
     }
 
