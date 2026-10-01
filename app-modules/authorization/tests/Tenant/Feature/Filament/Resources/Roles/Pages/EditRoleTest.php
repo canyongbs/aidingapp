@@ -167,7 +167,8 @@ describe('authorization', function () {
             ->assertForbidden();
 
         expect($admin->can('update', $role))->toBeFalse()
-            ->and($admin->can('delete', $role))->toBeFalse();
+            ->and($admin->can('delete', $role))->toBeFalse()
+            ->and($admin->can('forceDelete', $role))->toBeFalse();
 
         assertModelExists($role);
     })->with('admins')->with('admin roles');
