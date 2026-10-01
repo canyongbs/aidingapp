@@ -87,10 +87,10 @@ class ManagedContactService
             $contact->deleted_at = null;
         }
 
-        $contact->fill($this->mapUserAttributes($user));
         $contact->type()->associate($contactTypeId);
         $contact->managedByUser()->associate($user);
-        $contact->save();
+
+        $this->syncContact($contact, $user);
 
         return $contact;
     }
@@ -124,6 +124,15 @@ class ManagedContactService
             return;
         }
 
+        $this->syncContact($contact, $user);
+    }
+
+    /**
+     * Re-synchronize the given Contact's data from an already loaded User, without
+     * resolving the link again. The Contact Type is left untouched.
+     */
+    public function syncContact(Contact $contact, User $user): void
+    {
         $contact->fill($this->mapUserAttributes($user));
         $contact->save();
     }

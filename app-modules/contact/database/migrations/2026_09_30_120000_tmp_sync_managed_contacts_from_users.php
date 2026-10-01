@@ -34,39 +34,63 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Services\ManagedContactService;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
-            $managedContactService = app(ManagedContactService::class);
-
-            Contact::query()
+            DB::table('contacts')
                 ->whereNotNull('user_id')
-                ->with('managedByUser')
-                ->chunkById(100, function (Collection $contacts) use ($managedContactService): void {
-                    foreach ($contacts as $contact) {
-                        assert($contact instanceof Contact);
+                ->whereNull('deleted_at')
+                ->chunkById(100, function (Collection $contacts): void {
+                    $users = DB::table('users')
+                        ->whereIn('id', $contacts->pluck('user_id'))
+                        ->whereNull('deleted_at')
+                        ->get()
+                        ->keyBy('id');
 
-                        $user = $contact->managedByUser;
+                    foreach ($contacts as $contact) {
+                        $user = $users->get($contact->user_id);
 
                         if (is_null($user)) {
                             continue;
                         }
 
-                        $managedContactService->syncContact($contact, $user);
+                        $optionalAttributes = [
+                            'job_title' => $user->job_title,
+                            'phone' => $user->work_number,
+                            'mobile' => $user->mobile,
+                            'work_number' => $user->work_number,
+                            'work_extension' => is_null($user->work_extension) ? null : (string) $user->work_extension,
+                            'preferred' => $user->preferred_name,
+                            'address' => $user->address,
+                            'address_2' => $user->address_2,
+                            'city' => $user->city,
+                            'state' => $user->state,
+                            'postal' => $user->postal_code,
+                            'employee_id' => $user->employee_id,
+                            'student_id' => $user->student_id,
+                            'school' => $user->school,
+                            'academic_department' => $user->academic_department,
+                            'program' => $user->program,
+                            'country' => $user->country,
+                        ];
+
+                        DB::table('contacts')
+                            ->where('id', $contact->id)
+                            ->update([
+                                'full_name' => trim($user->name),
+                                'first_name' => trim((string) $user->first_name),
+                                'last_name' => trim((string) $user->last_name),
+                                'email' => $user->email,
+                                ...array_map(fn (mixed $value): mixed => filled($value) ? $value : null, $optionalAttributes),
+                                'updated_at' => now(),
+                            ]);
                     }
                 });
         });
-    }
-
-    public function down(): void
-    {
-        // This migration only re-synchronizes data that is derived from users, so the down method is intentionally left blank
     }
 };
