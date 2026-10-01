@@ -93,16 +93,19 @@ class ServiceRequestInfolist
                     ->schema(fn (ServiceRequest $record): array => [
                         TextEntry::make('respondent')
                             ->label('Customer Contact')
-                            ->html()
-                            ->state(function (ServiceRequest $record): string {
+                            ->state(function (ServiceRequest $record): HtmlString {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
-                                $organizationName = $respondent->organization->name ?? 'Unaffiliated';
 
-                                // Spinner shown only while the contact slide-over is mounting, so a slow open does not look unresponsive.
-                                $loadingIndicator = '<svg wire:loading wire:target="mountAction(\'viewContact\')" class="ms-1 inline-block h-4 w-4 animate-spin align-middle" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>';
+                                $name = e($respondent->{Contact::displayNameKey()});
+                                $type = e($respondent->type->name);
+                                $organizationName = e($respondent->organization->name ?? 'Unaffiliated');
 
-                                return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name}){$loadingIndicator}<br>{$organizationName}";
+                                // Spinner is hidden until the trigger button is disabled by wire:loading, which Filament toggles only while this entry's viewContact action mounts, so a slow slide-over open does not look unresponsive.
+                                $loadingIndicator = '<style>.fi-sr-contact-loading{display:none}button:disabled .fi-sr-contact-loading{display:inline-flex}</style><span class="fi-sr-contact-loading ms-1 align-middle"><svg class="inline-block h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"></path></svg></span>';
+
+                                // Returned as HtmlString so Filament renders it raw instead of stripping the <style>/<svg> via Str::sanitizeHtml(); dynamic values above are e()-escaped.
+                                return new HtmlString("{$name} ({$type}){$loadingIndicator}<br>{$organizationName}");
                             })
                             ->color('primary')
                             ->action(ViewContactAction::make($record->respondent))
