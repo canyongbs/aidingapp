@@ -126,7 +126,6 @@ class ManagedContactService
 
         $contact->fill($this->mapUserAttributes($user));
         $contact->save();
-        
     }
 
     protected function resolveContactFor(User $user): ?Contact
