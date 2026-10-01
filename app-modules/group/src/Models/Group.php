@@ -39,6 +39,9 @@ namespace AidingApp\Group\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Group\Database\Factories\GroupFactory;
 use AidingApp\Group\Observers\GroupObserver;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeAuditorGroup;
+use AidingApp\ServiceManagement\Models\ServiceRequestTypeManagerGroup;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
@@ -81,6 +84,24 @@ class Group extends Model implements Auditable
     {
         return $this->belongsToMany(User::class, 'group_user')
             ->using(GroupUser::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeManagerGroup> */
+    public function manageableServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_manager_groups')
+            ->using(ServiceRequestTypeManagerGroup::class)
+            ->withPivot('id')
+            ->withTimestamps();
+    }
+
+    /** @return BelongsToMany<ServiceRequestType, $this, covariant ServiceRequestTypeAuditorGroup> */
+    public function auditableServiceRequestTypes(): BelongsToMany
+    {
+        return $this->belongsToMany(ServiceRequestType::class, 'service_request_type_auditor_groups')
+            ->using(ServiceRequestTypeAuditorGroup::class)
             ->withPivot('id')
             ->withTimestamps();
     }

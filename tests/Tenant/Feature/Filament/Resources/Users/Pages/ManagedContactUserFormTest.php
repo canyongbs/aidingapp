@@ -49,6 +49,8 @@ it('creates a linked managed contact when the toggle is enabled', function () {
 
     livewire(CreateUser::class)
         ->fillForm([
+            'first_name' => 'Manny',
+            'last_name' => 'Ged',
             'name' => 'Manny Ged',
             'email' => 'manny@example.com',
             'is_managed_contact' => true,
@@ -73,6 +75,8 @@ it('does not create a managed contact when the toggle is disabled', function () 
 
     livewire(CreateUser::class)
         ->fillForm([
+            'first_name' => 'Plain',
+            'last_name' => 'User',
             'name' => 'Plain User',
             'email' => 'plain@example.com',
             'is_managed_contact' => false,
@@ -90,6 +94,8 @@ it('requires a contact type when managed contact is enabled', function () {
 
     livewire(CreateUser::class)
         ->fillForm([
+            'first_name' => 'No',
+            'last_name' => 'Type',
             'name' => 'No Type',
             'email' => 'notype@example.com',
             'is_managed_contact' => true,

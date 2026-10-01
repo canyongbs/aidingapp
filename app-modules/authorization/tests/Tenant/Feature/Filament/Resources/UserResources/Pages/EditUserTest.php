@@ -41,9 +41,9 @@ use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
-use Illuminate\Support\Collection;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
@@ -155,41 +155,176 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
 test('EditUser is gated with proper access control', function () {
     $user = User::factory()->create();
 
-    $anotherUser = User::factory()->create();
+    $record = User::factory()->create();
 
     actingAs($user)
         ->get(
-            UserResource::getUrl('edit', [
-                'record' => $anotherUser,
-            ])
+            UserResource::getUrl('edit', ['record' => $record])
         )->assertForbidden();
 
-    livewire(EditUser::class, [
-        'record' => $anotherUser->getRouteKey(),
-    ])
+    livewire(EditUser::class, ['record' => $record->getKey()])
         ->assertForbidden();
 
-    $user->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
+    $user->givePermissionTo('user.view-any');
+    $user->givePermissionTo('user.*.view');
+    $user->givePermissionTo('user.*.update');
 
     actingAs($user)
         ->get(
-            UserResource::getUrl('edit', [
-                'record' => $anotherUser,
-            ])
+            UserResource::getUrl('edit', ['record' => $record])
         )->assertSuccessful();
 
-    $request = new Collection(User::factory()->make());
-
-    livewire(EditUser::class, [
-        'record' => $anotherUser->getRouteKey(),
-    ])
-        ->fillForm($request->toArray())
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'Jordan',
+            'last_name' => 'Blake',
+            'name' => 'Jordan Blake',
+            'email' => 'jordan.blake@example.com',
+        ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($anotherUser->fresh()->name)->toEqual($request->get('name'))
-        ->and($anotherUser->fresh()->email)->toEqual($request->get('email'))
-        ->and($anotherUser->fresh()->is_external)->toEqual($request->get('is_external'));
+    assertDatabaseHas(User::class, [
+        'id' => $record->getKey(),
+        'name' => 'Jordan Blake',
+        'email' => 'jordan.blake@example.com',
+    ]);
+});
+
+test('EditUser requires an email address', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'No',
+            'last_name' => 'Email',
+            'name' => 'No Email',
+            'email' => null,
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'required']);
+});
+
+test('EditUser rejects an invalid email address', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'Bad',
+            'last_name' => 'Email',
+            'name' => 'Bad Email',
+            'email' => 'not-an-email',
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['email' => 'email']);
+});
+
+test('EditUser allows saving with its own unchanged email address', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create(['email' => 'unchanged@example.com']);
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'Still',
+            'last_name' => 'Here',
+            'name' => 'Still Here',
+            'email' => 'unchanged@example.com',
+        ])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(User::class, [
+        'id' => $record->getKey(),
+        'email' => 'unchanged@example.com',
+    ]);
+});
+
+test('EditUser rejects a duplicate email belonging to another user case-insensitively', function () {
+    asSuperAdmin();
+
+    User::factory()->create(['email' => 'taken@example.com']);
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'Duplicate',
+            'last_name' => 'Email',
+            'name' => 'Duplicate Email',
+            'email' => 'Taken@Example.com',
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['email']);
+});
+
+test('EditUser rejects reusing another soft-deleted user\'s email', function () {
+    asSuperAdmin();
+
+    User::factory()->create(['email' => 'archived@example.com'])->delete();
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->fillForm([
+            'first_name' => 'Reuse',
+            'last_name' => 'Attempt',
+            'name' => 'Reuse Attempt',
+            'email' => 'Archived@Example.com',
+        ])
+        ->call('save')
+        ->assertHasFormErrors(['email']);
+});
+
+test('EditUser shows and requires first and last name fields when the full name feature is active', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldIsVisible('first_name')
+        ->assertFormFieldIsVisible('last_name')
+        ->fillForm([
+            'first_name' => null,
+            'last_name' => null,
+        ])
+        ->call('save')
+        ->assertHasFormErrors([
+            'first_name' => 'required',
+            'last_name' => 'required',
+        ]);
+});
+
+test('EditUser disables demographic and contact fields when editing an admin record', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+    $record->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldDisabled('first_name')
+        ->assertFormFieldDisabled('last_name')
+        ->assertFormFieldDisabled('name')
+        ->assertFormFieldDisabled('job_title')
+        ->assertFormFieldDisabled('email')
+        ->assertFormFieldDisabled('is_external');
+});
+
+test('EditUser enables demographic and contact fields when editing a non-admin record', function () {
+    asSuperAdmin();
+
+    $record = User::factory()->create();
+
+    livewire(EditUser::class, ['record' => $record->getKey()])
+        ->assertFormFieldEnabled('first_name')
+        ->assertFormFieldEnabled('last_name')
+        ->assertFormFieldEnabled('job_title')
+        ->assertFormFieldEnabled('email')
+        ->assertFormFieldEnabled('is_external');
 });
 
 test('delete action visible with proper access control', function () {
@@ -235,13 +370,53 @@ test('EditUser validates the inputs', function ($data, $errors) {
         ->assertHasFormErrors($errors);
 })->with(
     [
-        'names required' => [
-            ['name' => null],
-            ['name' => 'required'],
+        'first name required' => [
+            ['first_name' => null],
+            ['first_name' => 'required'],
         ],
-        'name max' => [
-            ['name' => str()->random(256)],
-            ['name' => 'max'],
+        'first_name max' => [
+            ['first_name' => str()->random(256)],
+            ['first_name' => 'max'],
+        ],
+        'last name required' => [
+            ['last_name' => null],
+            ['last_name' => 'required'],
+        ],
+        'last_name max' => [
+            ['last_name' => str()->random(256)],
+            ['last_name' => 'max'],
+        ],
+        'preferred_name max' => [
+            ['preferred_name' => str()->random(256)],
+            ['preferred_name' => 'max'],
+        ],
+        'employee_id max' => [
+            ['employee_id' => str()->random(256)],
+            ['employee_id' => 'max'],
+        ],
+        'job_title max' => [
+            ['job_title' => str()->random(256)],
+            ['job_title' => 'max'],
+        ],
+        'work_extension numeric' => [
+            ['work_extension' => 'invalid'],
+            ['work_extension' => 'numeric'],
+        ],
+        'student_id max' => [
+            ['student_id' => str()->random(256)],
+            ['student_id' => 'max'],
+        ],
+        'school max' => [
+            ['school' => str()->random(256)],
+            ['school' => 'max'],
+        ],
+        'academic_department max' => [
+            ['academic_department' => str()->random(256)],
+            ['academic_department' => 'max'],
+        ],
+        'program max' => [
+            ['program' => str()->random(256)],
+            ['program' => 'max'],
         ],
         'email required' => [
             ['email' => null],
@@ -255,13 +430,33 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['email' => 'invalidEmail'],
             ['email' => 'email'],
         ],
-        'work_extension numeric' => [
-            ['work_extension' => 'invalid'],
-            ['work_extension' => 'numeric'],
+        'address max' => [
+            ['address' => str()->random(256)],
+            ['address' => 'max'],
         ],
-        'job_title max' => [
-            ['job_title' => str()->random(256)],
-            ['job_title' => 'max'],
+        'address_2 max' => [
+            ['address_2' => str()->random(256)],
+            ['address_2' => 'max'],
+        ],
+        'city max' => [
+            ['city' => str()->random(256)],
+            ['city' => 'max'],
+        ],
+        'state max' => [
+            ['state' => str()->random(256)],
+            ['state' => 'max'],
+        ],
+        'postal_code max' => [
+            ['postal_code' => str()->random(256)],
+            ['postal_code' => 'max'],
+        ],
+        'country max' => [
+            ['country' => str()->random(256)],
+            ['country' => 'max'],
+        ],
+        'managed_contact_type_id required when managed contact enabled' => [
+            ['is_managed_contact' => true, 'managed_contact_type_id' => null],
+            ['managed_contact_type_id' => 'required'],
         ],
     ]
 );

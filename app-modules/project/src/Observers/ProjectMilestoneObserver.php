@@ -40,6 +40,11 @@ use AidingApp\Project\Models\ProjectMilestone;
 
 class ProjectMilestoneObserver
 {
+    /**
+     * A milestone's pipeline is set by the caller (e.g. the create milestone action uses the
+     * currently selected pipeline) before the model is saved. The observer intentionally does not
+     * resolve or default it, so a milestone can only be created once a pipeline has been chosen.
+     */
     public function creating(ProjectMilestone $projectMilestone): void
     {
         if (blank($projectMilestone->created_by_id)) {

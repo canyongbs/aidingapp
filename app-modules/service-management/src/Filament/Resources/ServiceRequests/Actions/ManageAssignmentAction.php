@@ -79,7 +79,7 @@ class ManageAssignmentAction
                         'excludeUserId' => $serviceRequest->assignedTo?->user_id,
                     ])
                     ->required(),
-                ServiceRequestStatusToggleButtons::make()
+                ServiceRequestStatusToggleButtons::make(selectedId: $serviceRequest->status_id)
                     ->label('Update Status')
                     ->required()
                     ->helperText('You may simultaneously update the status along with this change.'),

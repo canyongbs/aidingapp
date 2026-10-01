@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
@@ -90,7 +91,9 @@ class CreateServiceRequest extends CreateRecord
                                     ->relationship('status', 'name')
                                     ->label('Status')
                                     ->allowHtml()
-                                    ->options(fn () => ServiceRequestStatus::orderBy('sort')
+                                    ->options(fn () => ServiceRequestStatus::query()
+                                        ->tap(new SelectableServiceRequestStatuses())
+                                        ->orderBy('sort')
                                         ->get(['id', 'name', 'classification', 'color'])
                                         ->groupBy(fn (ServiceRequestStatus $status) => $status->classification->getlabel())
                                         ->map(fn (Collection $group) => $group->mapWithKeys(fn (ServiceRequestStatus $status): array => [

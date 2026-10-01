@@ -136,6 +136,32 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
         );
 });
 
+it('only lists milestones that belong to the entry\'s pipeline', function () {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()
+        ->for($project)
+        ->has(PipelineStage::factory()->count(1), 'stages')
+        ->create();
+    $otherPipeline = Pipeline::factory()->for($project)->create();
+
+    $pipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $pipeline->getKey()]);
+    $otherPipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $otherPipeline->getKey()]);
+
+    $entry = PipelineEntry::factory()->create([
+        'pipeline_stage_id' => $pipeline->stages->sole()->getKey(),
+    ]);
+
+    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
+        ->assertFormFieldExists(
+            'project_milestone_id',
+            fn (Select $select): bool => array_key_exists($pipelineMilestone->getKey(), $select->getOptions())
+                && ! array_key_exists($otherPipelineMilestone->getKey(), $select->getOptions()),
+        );
+});
+
 it('still resolves the label and keeps the option selectable for an archived milestone still related to an entry', function () {
     asSuperAdmin();
 

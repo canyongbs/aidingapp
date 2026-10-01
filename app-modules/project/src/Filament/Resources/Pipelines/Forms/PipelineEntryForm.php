@@ -47,6 +47,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use App\Models\User;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ModalTableSelect;
@@ -235,7 +236,10 @@ class PipelineEntryForm
     private static function milestoneOptionsQuery(Builder $query, ?Pipeline $pipeline): Builder
     {
         return $query
-            ->when($pipeline, fn (Builder $query): Builder => $query->where('project_id', $pipeline->project_id))
+            // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is removed, always scope by pipeline_id.
+            ->when($pipeline, fn (Builder $query): Builder => AssociateMilestoneWithActivePipelineFeature::active()
+                ? $query->where('pipeline_id', $pipeline->getKey())
+                : $query->where('project_id', $pipeline->project_id))
             ->withoutArchivedAndUnused()
             ->addSelect([
                 'tasks_count' => self::milestonePipelineEntriesQuery(),
