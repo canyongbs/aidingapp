@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Sche
 
 use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Schemas\Components\Utilities\Get;
 
@@ -54,7 +53,7 @@ class HttpMethodToggleButtons
             ->live()
             ->inline()
             ->required()
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint)
             ->columnSpanFull();
     }
 }

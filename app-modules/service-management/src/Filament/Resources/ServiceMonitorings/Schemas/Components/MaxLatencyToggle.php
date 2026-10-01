@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Sche
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Toggle;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -57,7 +56,7 @@ class MaxLatencyToggle
             ->dehydrated(false)
             ->afterStateHydrated(fn (Set $set, ?ServiceMonitoringTarget $record) => $set('is_max_latency_enabled', filled($record?->max_latency_ms)))
             ->afterStateUpdated(fn (Set $set, bool $state) => $state ?: $set('max_latency_ms', null))
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint)
             ->columnSpanFull();
     }
 }

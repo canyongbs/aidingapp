@@ -34,46 +34,36 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_monitoring_targets', function (Blueprint $table) {
-                $table->boolean('follow_redirection')->initial(true);
-                $table->jsonb('successful_status_codes')->nullable();
-                $table->unsignedInteger('max_latency_ms')->nullable();
-                $table->string('http_method')->nullable();
-                $table->text('request_body')->nullable();
-                $table->boolean('is_request_body_json')->default(false);
-                $table->jsonb('request_headers')->nullable();
-            });
-
-            ServiceMonitoringApiEndpointFeature::activate();
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->boolean('follow_redirection')->initial(true);
+            $table->jsonb('successful_status_codes')->nullable();
+            $table->unsignedInteger('max_latency_ms')->nullable();
+            $table->string('http_method')->nullable();
+            $table->text('request_body')->nullable();
+            $table->boolean('is_request_body_json')->default(false);
+            $table->jsonb('request_headers')->nullable();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceMonitoringApiEndpointFeature::deactivate();
-
-            Schema::table('service_monitoring_targets', function (Blueprint $table) {
-                $table->dropColumn([
-                    'follow_redirection',
-                    'successful_status_codes',
-                    'max_latency_ms',
-                    'http_method',
-                    'request_body',
-                    'is_request_body_json',
-                    'request_headers',
-                ]);
-            });
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->dropColumn([
+                'follow_redirection',
+                'successful_status_codes',
+                'max_latency_ms',
+                'http_method',
+                'request_body',
+                'is_request_body_json',
+                'request_headers',
+            ]);
         });
     }
 };

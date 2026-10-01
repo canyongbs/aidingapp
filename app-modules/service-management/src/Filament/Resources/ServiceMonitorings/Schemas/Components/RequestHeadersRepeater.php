@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Sche
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Rules\UniqueRequestHeaderNames;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
@@ -76,7 +75,7 @@ class RequestHeadersRepeater
             ->defaultItems(0)
             ->rules([new UniqueRequestHeaderNames()])
             ->helperText('These are stored in plain text and shown as entered. Do not put sensitive values (API keys, tokens, passwords) in them.')
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint)
             ->columnSpanFull();
     }
 }
