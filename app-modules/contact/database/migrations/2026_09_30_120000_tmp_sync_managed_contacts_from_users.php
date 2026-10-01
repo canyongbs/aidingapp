@@ -93,4 +93,9 @@ return new class () extends Migration {
                 });
         });
     }
+
+    public function down(): void
+    {
+        // No-op: This migration is irreversible.
+    }
 };
