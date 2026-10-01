@@ -38,6 +38,7 @@ namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineFactory;
+use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
@@ -84,6 +85,14 @@ class Pipeline extends BaseModel implements Auditable
     }
 
     /**
+     * @return HasMany<ProjectMilestone, $this>
+     */
+    public function milestones(): HasMany
+    {
+        return $this->hasMany(ProjectMilestone::class, 'pipeline_id');
+    }
+
+    /**
      * @return HasManyThrough<PipelineEntry, PipelineStage, $this>
      */
     public function entries(): HasManyThrough
@@ -104,6 +113,13 @@ class Pipeline extends BaseModel implements Auditable
             $pipeline->stages()->withoutArchived()->eachById(function (PipelineStage $stage): void {
                 $stage->archive();
             });
+
+            // TODO: Cleanup Task (associate-milestone-with-active-pipeline): when the flag is removed, drop this guard.
+            if (AssociateMilestoneWithActivePipelineFeature::active()) {
+                $pipeline->milestones()->withoutArchived()->eachById(function (ProjectMilestone $milestone): void {
+                    $milestone->archive();
+                });
+            }
         });
     }
 }

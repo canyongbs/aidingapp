@@ -38,6 +38,7 @@ namespace AidingApp\Project\Filament\Concerns;
 
 use AidingApp\Project\Filament\Tables\ProjectPipelinesTable;
 use AidingApp\Project\Models\Pipeline;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
 use Filament\Actions\Action;
 use Filament\Forms\Components\TableSelect;
 use Filament\Notifications\Notification;
@@ -138,7 +139,7 @@ trait HasPipelineSwitcherAction
         $next = Pipeline::query()
             ->where('project_id', $projectId)
             ->withoutArchived()
-            ->oldest()
+            ->tap(new ActivePipelineFirst())
             ->value('id');
 
         if (filled($next)) {

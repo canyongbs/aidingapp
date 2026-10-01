@@ -36,6 +36,8 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
+use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Actions\AttachServiceRequestSecrets;
 use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
@@ -51,6 +53,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -336,5 +339,20 @@ class ServiceRequestsRelationManager extends RelationManager
 
         $serviceRequest->serviceRequestFormSubmission()->associate($submission);
         $serviceRequest->save();
+
+        $secretIds = $allFields
+            ->filter(fn (ServiceRequestFormField $field): bool => $field->type === PasswordFormFieldBlock::type())
+            ->map(fn (ServiceRequestFormField $field): mixed => $dynamicFields[$field->getKey()] ?? null)
+            ->filter(fn (mixed $secretId): bool => filled($secretId))
+            ->values()
+            ->all();
+
+        if ($secretIds !== []) {
+            $author = auth()->user();
+
+            assert($author instanceof Authenticatable);
+
+            app(AttachServiceRequestSecrets::class)($serviceRequest, $secretIds, $author);
+        }
     }
 }
