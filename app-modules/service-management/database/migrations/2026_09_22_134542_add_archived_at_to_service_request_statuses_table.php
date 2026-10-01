@@ -34,39 +34,22 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceRequestStatusArchivingFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-/*
- * TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): this migration is permanent — do not
- * delete it. Keep the `archived_at` schema changes and remove only the flag activation: the
- * activate() and deactivate() calls and their import. Both DB::transaction() wrappers then have
- * a single statement left, so unwrap them back to a plain Schema::table() call and drop the
- * Illuminate\Support\Facades\DB import.
- */
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_statuses', function (Blueprint $table) {
-                $table->timestamp('archived_at')->nullable();
-            });
-
-            ServiceRequestStatusArchivingFeature::activate();
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->timestamp('archived_at')->nullable();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceRequestStatusArchivingFeature::deactivate();
-
-            Schema::table('service_request_statuses', function (Blueprint $table) {
-                $table->dropColumn('archived_at');
-            });
+        Schema::table('service_request_statuses', function (Blueprint $table) {
+            $table->dropColumn('archived_at');
         });
     }
 };
