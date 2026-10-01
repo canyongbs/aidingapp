@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Enums\Feature;
 use App\Models\Authenticatable;
 use App\Support\FeatureAccessResponse;
+use Filament\Support\Authorization\DenyResponse;
 use Illuminate\Auth\Access\Response;
 use Illuminate\Support\Facades\Gate;
 
@@ -98,8 +99,8 @@ class ServiceRequestStatusPolicy
             return Response::deny('You cannot delete this service request status because it is system protected.');
         }
 
-        if ($serviceRequestStatus->serviceRequests()->exists()) {
-            return Response::deny('You cannot delete this service request status because it has associated service requests.');
+        if ($serviceRequestStatus->isInUse()) {
+            return Response::deny('You cannot delete this service request status because it is still in use.');
         }
 
         return $authenticatable->canOrElse(
@@ -138,8 +139,8 @@ class ServiceRequestStatusPolicy
             return Response::deny('You cannot delete this service request status because it is system protected.');
         }
 
-        if ($serviceRequestStatus->serviceRequests()->exists()) {
-            return Response::deny('You cannot force delete this service request status because it has associated service requests.');
+        if ($serviceRequestStatus->isInUse()) {
+            return Response::deny('You cannot force delete this service request status because it is still in use.');
         }
 
         return $authenticatable->canOrElse(
@@ -153,6 +154,56 @@ class ServiceRequestStatusPolicy
         return $authenticatable->canOrElse(
             abilities: 'settings.*.force-delete',
             denyResponse: 'You do not have permissions to force delete any service request status.'
+        );
+    }
+
+    public function archive(Authenticatable $authenticatable, ServiceRequestStatus $serviceRequestStatus): Response
+    {
+        if ($serviceRequestStatus->is_system_protected) {
+            return DenyResponse::make(
+                'system_protected',
+                message: function (int $failureCount, int $totalCount): string {
+                    if ($failureCount === 1 && $totalCount === 1) {
+                        return 'This service request status is system protected, so it cannot be archived.';
+                    }
+
+                    if ($failureCount === $totalCount) {
+                        return 'All of the selected service request statuses are system protected and cannot be archived.';
+                    }
+
+                    if ($failureCount === 1) {
+                        return 'One of the selected service request statuses is system protected and cannot be archived.';
+                    }
+
+                    return "{$failureCount} of the selected service request statuses are system protected and cannot be archived.";
+                },
+            );
+        }
+
+        if ($serviceRequestStatus->isArchived()) {
+            return DenyResponse::make(
+                'already_archived',
+                message: function (int $failureCount, int $totalCount): string {
+                    if ($failureCount === 1 && $totalCount === 1) {
+                        return 'This service request status is already archived.';
+                    }
+
+                    if ($failureCount === $totalCount) {
+                        return 'All of the selected service request statuses are already archived.';
+                    }
+
+                    if ($failureCount === 1) {
+                        return 'One of the selected service request statuses was already archived.';
+                    }
+
+                    return "{$failureCount} of the selected service request statuses were already archived.";
+                },
+            );
+        }
+
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.delete',
+            denyResponse: 'You do not have permissions to archive this service request status.'
         );
     }
 

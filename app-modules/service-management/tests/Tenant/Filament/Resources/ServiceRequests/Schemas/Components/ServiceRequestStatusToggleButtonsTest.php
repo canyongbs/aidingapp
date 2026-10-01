@@ -78,3 +78,55 @@ it('maps statuses to colors matching their color option', function () {
 
     expect($toggleButtons->getColors())->toHaveKey($status->getKey(), $status->color->value);
 });
+
+describe('archiving', function () {
+    it('does not offer archived service request statuses', function () {
+        $active = ServiceRequestStatus::factory()->create();
+        $archived = ServiceRequestStatus::factory()->archived()->create();
+
+        $options = ServiceRequestStatusToggleButtons::make()->getOptions();
+
+        expect($options)->toHaveKey($active->getKey(), $active->name)
+            ->and($options)->not->toHaveKey($archived->getKey());
+    });
+
+    it('offers the currently selected status even when it is archived', function () {
+        $archived = ServiceRequestStatus::factory()->archived()->create();
+
+        $options = ServiceRequestStatusToggleButtons::make(selectedId: $archived->getKey())->getOptions();
+
+        expect($options)->toHaveKey($archived->getKey(), $archived->name);
+    });
+
+    it('does not offer an archived status other than the selected one', function () {
+        $selected = ServiceRequestStatus::factory()->archived()->create();
+        $otherArchived = ServiceRequestStatus::factory()->archived()->create();
+
+        $options = ServiceRequestStatusToggleButtons::make(selectedId: $selected->getKey())->getOptions();
+
+        expect($options)->toHaveKey($selected->getKey())
+            ->and($options)->not->toHaveKey($otherArchived->getKey());
+    });
+});
+
+describe('soft deleted statuses', function () {
+    it('does not offer soft deleted service request statuses', function () {
+        $active = ServiceRequestStatus::factory()->create();
+        $trashed = ServiceRequestStatus::factory()->create();
+        $trashed->delete();
+
+        $options = ServiceRequestStatusToggleButtons::make()->getOptions();
+
+        expect($options)->toHaveKey($active->getKey())
+            ->and($options)->not->toHaveKey($trashed->getKey());
+    });
+
+    it('offers the currently selected status even when it is soft deleted', function () {
+        $trashed = ServiceRequestStatus::factory()->create();
+        $trashed->delete();
+
+        $options = ServiceRequestStatusToggleButtons::make(selectedId: $trashed->getKey())->getOptions();
+
+        expect($options)->toHaveKey($trashed->getKey(), $trashed->name);
+    });
+});

@@ -48,11 +48,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 
@@ -762,4 +764,23 @@ test('validate service requests type if user is direct manager of any service re
         ])
         ->call('create')
         ->assertHasFormErrors(['type_id']);
+});
+
+describe('archiving', function () {
+    test('the status select does not offer archived statuses', function () {
+        asSuperAdmin();
+
+        $activeStatus = ServiceRequestStatus::factory()->create();
+        $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
+
+        livewire(CreateServiceRequest::class)
+            ->assertFormFieldExists('status_id', function (Select $field) use ($activeStatus, $archivedStatus): bool {
+                $optionIds = collect($field->getOptions())
+                    ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
+                    ->all();
+
+                return in_array($activeStatus->getKey(), $optionIds, true)
+                    && ! in_array($archivedStatus->getKey(), $optionIds, true);
+            });
+    });
 });

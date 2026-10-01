@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Exceptions\NoOpenServiceRequestStatusFoundException;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 
@@ -50,6 +51,7 @@ class ReopenServiceRequestAction
         }
 
         $openStatus = ServiceRequestStatus::query()
+            ->tap(new SelectableServiceRequestStatuses())
             ->where('classification', SystemServiceRequestClassification::Open)
             ->orderBy('sort')
             ->orderBy('created_at')
