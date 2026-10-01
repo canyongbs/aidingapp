@@ -38,7 +38,7 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
+use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalAuthenticationRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -59,7 +59,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
     public function __invoke(
         KnowledgeManagementPortalAuthenticationRequest $request,
         ResolveEducatableFromEmail $resolveEducatableFromEmail,
-        FindOrganizationByEmailDomain $findOrganizationByEmailDomain,
+        FindPortalRegistrationOrganization $findPortalRegistrationOrganization,
         AuthenticationCodeRateLimiter $rateLimiter,
     ): JsonResponse {
         $email = $request->safe()->email;
@@ -67,7 +67,7 @@ class KnowledgeManagementPortalRequestAuthenticationController extends Controlle
         $educatable = $resolveEducatableFromEmail($email);
 
         if (! $educatable) {
-            $organization = $findOrganizationByEmailDomain($email);
+            $organization = $findPortalRegistrationOrganization($email);
 
             if ($organization) {
                 $authenticationUrl = $this->createPortalAuthentication($request, $rateLimiter, organization: $organization);
