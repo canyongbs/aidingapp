@@ -42,7 +42,6 @@ use AidingApp\Ai\Models\AiThread;
 use AidingApp\Ai\Models\LegacyAiMessageLog;
 use AidingApp\Ai\Models\PortalAssistantMessage;
 use AidingApp\Ai\Models\PortalAssistantThread;
-use AidingApp\Alert\Models\Alert;
 use AidingApp\Audit\Models\Audit;
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
@@ -140,8 +139,6 @@ use App\Models\FailedImportRow;
 use App\Models\HealthCheckResultHistoryItem;
 use App\Models\Import;
 use App\Models\LandlordSettingsProperty;
-use App\Models\NotificationSetting;
-use App\Models\NotificationSettingPivot;
 use App\Models\Pronouns;
 use App\Models\SettingsProperty;
 use App\Models\SystemUser;
@@ -164,7 +161,6 @@ return [
     LegacyAiMessageLog::class,
     PortalAssistantMessage::class,
     PortalAssistantThread::class,
-    Alert::class,
     Audit::class,
     Permission::class,
     PermissionGroup::class,
@@ -256,8 +252,6 @@ return [
     HealthCheckResultHistoryItem::class,
     Import::class,
     LandlordSettingsProperty::class,
-    NotificationSetting::class, // TODO: Cleanup Task NotificationSettingsFeature - delete this line
-    NotificationSettingPivot::class, // TODO: Cleanup Task NotificationSettingsFeature - delete this line
     Pronouns::class,
     SettingsProperty::class,
     SystemUser::class,

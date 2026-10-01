@@ -55,8 +55,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
 test('editStatus action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -118,7 +116,7 @@ test('editStatus action is hidden for user without update permission', function 
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name'));
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is hidden for a department auditor who is not a manager of the service request type', function () {
@@ -150,7 +148,7 @@ test('editStatus action is hidden for a department auditor who is not a manager 
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name'));
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is hidden for a direct auditor user who is not a manager of the service request type', function () {
@@ -178,7 +176,7 @@ test('editStatus action is hidden for a direct auditor user who is not a manager
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editStatus')->schemaComponent('status.name'));
+        ->assertActionDoesNotExist(TestAction::make('editStatus')->schemaComponent('status.name'));
 });
 
 test('editStatus action is gated with proper feature access control', function () {
@@ -281,8 +279,6 @@ test('editStatus action is gated with proper feature access control for direct u
     expect($serviceRequest->fresh()->status_id)->toBe($newStatus->getKey());
 });
 
-// Validation
-
 test('editStatus requires status_id', function () {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -300,8 +296,6 @@ test('editStatus requires status_id', function () {
         ])
         ->assertHasFormErrors(['status_id' => 'required']);
 });
-
-// Success
 
 test('can update the service request status', function () {
     $serviceRequest = ServiceRequest::factory()->state([

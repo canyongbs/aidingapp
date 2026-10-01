@@ -863,6 +863,52 @@ describe('password fields', function () {
             ->assertSeeHtml('fi-not-prose')
             ->assertSeeHtml('data-secret-reveal');
     });
+
+    it('renders an unanswered optional password field', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+
+        $form = ServiceRequestForm::factory()->create();
+        $field = new ServiceRequestFormField([
+            'label' => 'Private credential',
+            'type' => PasswordFormFieldBlock::type(),
+            'is_required' => false,
+            'config' => [],
+        ]);
+        $field->submissible()->associate($form);
+        $field->save();
+
+        $form->content = [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => [
+                    'id' => PasswordFormFieldBlock::type(),
+                    'config' => [
+                        'fieldId' => $field->getKey(),
+                        'label' => $field->label,
+                        'isRequired' => false,
+                    ],
+                ],
+            ]],
+        ];
+        $form->save();
+
+        $submission = ServiceRequestFormSubmission::create([
+            'service_request_form_id' => $form->getKey(),
+            'submitted_at' => now(),
+        ]);
+
+        $serviceRequest->serviceRequestFormSubmission()->associate($submission);
+        $serviceRequest->save();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSee('Private credential')
+            ->assertSee('No response')
+            ->assertDontSee('••••••••');
+    });
 });
 
 describe('feedback tab', function () {

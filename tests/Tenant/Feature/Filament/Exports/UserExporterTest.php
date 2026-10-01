@@ -46,13 +46,27 @@ use Filament\Actions\Exports\Models\Export;
 function exportUserRow(User $user): array
 {
     $columnMap = [
-        'name' => 'Name',
+        'first_name' => 'First Name',
+        'last_name' => 'Last Name',
+        'name' => 'Full Name',
+        'preferred_name' => 'Preferred Name',
         'email' => 'Email address',
         'job_title' => 'Job title',
         'is_external' => 'External User',
+        'employee_id' => 'Employee ID',
         'work_number' => 'Work Number',
         'work_extension' => 'Work Extension',
+        'student_id' => 'Student ID',
+        'school' => 'School',
+        'academic_department' => 'Academic Department',
+        'program' => 'Program',
         'mobile' => 'Mobile number',
+        'address' => 'Address',
+        'address_2' => 'Address 2',
+        'city' => 'City',
+        'state' => 'State',
+        'postal_code' => 'Postal',
+        'country' => 'Country',
         'department.name' => 'Department',
         'roles' => 'Assigned Role',
     ];
@@ -74,6 +88,8 @@ it('exports all user fields, the department name, and roles joined with a pipe',
     $user = User::factory()
         ->for($department)
         ->create([
+            'first_name' => 'Jonathan',
+            'last_name' => 'Smith',
             'name' => 'Jonathan Smith',
             'email' => 'jonathan@example.com',
             'job_title' => 'Advisor',
@@ -87,16 +103,18 @@ it('exports all user fields, the department name, and roles joined with a pipe',
 
     $row = exportUserRow($user);
 
-    expect($row[0])->toBe('Jonathan Smith')
-        ->and($row[1])->toBe('jonathan@example.com')
-        ->and($row[2])->toBe('Advisor')
-        ->and($row[3])->toBe('false')
-        ->and($row[4])->toBe('+1 555 123 4567')
-        ->and((string) $row[5])->toBe('123')
-        ->and($row[6])->toBe('+1 555 987 6543')
-        ->and($row[7])->toBe('Engineering');
+    expect($row[0])->toBe('Jonathan')
+        ->and($row[1])->toBe('Smith')
+        ->and($row[2])->toBe('Jonathan Smith')
+        ->and($row[4])->toBe('jonathan@example.com')
+        ->and($row[5])->toBe('Advisor')
+        ->and($row[6])->toBe('false')
+        ->and($row[8])->toBe('+1 555 123 4567')
+        ->and((string) $row[9])->toBe('123')
+        ->and($row[14])->toBe('+1 555 987 6543')
+        ->and($row[21])->toBe('Engineering');
 
-    expect(explode('|', $row[8]))
+    expect(explode('|', $row[22]))
         ->toContain('Manager')
         ->toContain('Advisor');
 });
@@ -104,11 +122,11 @@ it('exports all user fields, the department name, and roles joined with a pipe',
 it('exports is_external as true for external users', function () {
     $user = User::factory()->create(['is_external' => true]);
 
-    expect(exportUserRow($user)[3])->toBe('true');
+    expect(exportUserRow($user)[6])->toBe('true');
 });
 
 it('exports a blank roles value when the user has no web-guard roles', function () {
     $user = User::factory()->create();
 
-    expect(blank(exportUserRow($user)[8]))->toBeTrue();
+    expect(blank(exportUserRow($user)[22]))->toBeTrue();
 });

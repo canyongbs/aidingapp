@@ -46,7 +46,7 @@ enum PresenceStatus: string
     public function getLabel(): string
     {
         return match ($this) {
-            self::Active => 'Active',
+            self::Active => 'Online',
             self::Idle => 'Idle',
             self::Inactive => 'Inactive',
             self::Offline => 'Offline',

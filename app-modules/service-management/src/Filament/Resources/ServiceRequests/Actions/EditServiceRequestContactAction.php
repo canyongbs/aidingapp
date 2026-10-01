@@ -50,7 +50,7 @@ class EditServiceRequestContactAction
     {
         return Action::make('editContact')
             ->label('Edit customer contact')
-            ->icon(Heroicon::Pencil)
+            ->icon(Heroicon::PencilSquare)
             ->iconButton()
             ->authorize('update', $serviceRequest)
             ->extraAttributes([

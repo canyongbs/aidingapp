@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
+use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ServiceRequestTypeAssignmentsIndividualUserMustBeAManager;
@@ -78,7 +79,12 @@ class EditServiceRequestTypeAssignments extends EditRecord
 
     public function form(Schema $schema): Schema
     {
+        $record = $this->record;
+
+        assert($record instanceof ServiceRequestType);
+
         $defaultStatusId = ServiceRequestStatus::query()
+            ->tap(new SelectableServiceRequestStatuses())
             ->where('classification', SystemServiceRequestClassification::Open)
             ->orderBy('sort')
             ->value('id');
@@ -132,7 +138,7 @@ class EditServiceRequestTypeAssignments extends EditRecord
                                     $set('automated_status_id', $defaultStatusId);
                                 }
                             }),
-                        ServiceRequestStatusSelect::make('automated_status_id')
+                        ServiceRequestStatusSelect::make('automated_status_id', selectedId: $record->automated_status_id)
                             ->required()
                             ->columnSpanFull()
                             ->visible(fn (Get $get): bool => $get('assignment_type') !== ServiceRequestTypeAssignmentTypes::None

@@ -36,6 +36,14 @@
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 
+it('assigns a public ID when creating a category', function () {
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    expect($category->public_id)
+        ->toHaveLength(8)
+        ->toMatch('/^[0-9A-Za-z]{8}$/');
+});
+
 it('auto assigns sort when creating a parent category without sort', function () {
     $category1 = KnowledgeBaseCategory::factory()->create();
     $category2 = KnowledgeBaseCategory::factory()->create();

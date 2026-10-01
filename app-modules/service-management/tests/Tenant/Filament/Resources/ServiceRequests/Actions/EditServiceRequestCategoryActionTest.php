@@ -49,8 +49,6 @@ use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-// Authorization
-
 test('editCategory action is visible for manager department member with update permission', function () {
     $user = User::factory()->create();
 
@@ -112,10 +110,8 @@ test('editCategory action is hidden for user without update permission', functio
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertActionHidden(TestAction::make('editCategory')->schemaComponent('category'));
+        ->assertActionDoesNotExist(TestAction::make('editCategory')->schemaComponent('category'));
 });
-
-// Validation
 
 test('editCategory requires category', function () {
     $serviceRequest = ServiceRequest::factory()->state([
@@ -134,8 +130,6 @@ test('editCategory requires category', function () {
         ])
         ->assertHasFormErrors(['category' => 'required']);
 });
-
-// Success
 
 test('can update the service request category', function () {
     $serviceRequest = ServiceRequest::factory()->state([

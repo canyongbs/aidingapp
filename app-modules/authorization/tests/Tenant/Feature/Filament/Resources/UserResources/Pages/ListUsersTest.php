@@ -35,13 +35,21 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\Group\Models\Group;
+use AidingApp\ServiceManagement\Models\Scopes\AuditedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Support\Enums\VerticalAlignment;
+use Illuminate\Contracts\Support\Htmlable;
 use Lab404\Impersonate\Services\ImpersonateManager;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
@@ -219,6 +227,101 @@ it('only shows the bulk delete action to a user with the user.delete permission'
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
+it('can assign groups to multiple users via the bulk action', function () {
+    asSuperAdmin();
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    $users = User::factory()->count(3)->create();
+    $users->first()->groups()->attach($existingGroup);
+
+    livewire(ListUsers::class)
+        ->assertTableBulkActionExists('assign_groups')
+        ->callTableBulkAction('assign_groups', $users, [
+            'replace' => false,
+            'groups' => [$newGroup->getKey()],
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    $users->each(function (User $user) use ($newGroup) {
+        assertDatabaseHas('group_user', [
+            'user_id' => $user->getKey(),
+            'group_id' => $newGroup->getKey(),
+        ]);
+    });
+
+    assertDatabaseHas('group_user', [
+        'user_id' => $users->first()->getKey(),
+        'group_id' => $existingGroup->getKey(),
+    ]);
+});
+
+it('replaces existing group assignments when replace is enabled on the bulk action', function () {
+    asSuperAdmin();
+
+    $existingGroup = Group::factory()->create();
+    $newGroup = Group::factory()->create();
+
+    $user = User::factory()->create();
+    $user->groups()->attach($existingGroup);
+
+    livewire(ListUsers::class)
+        ->callTableBulkAction('assign_groups', [$user], [
+            'replace' => true,
+            'groups' => [$newGroup->getKey()],
+        ])
+        ->assertHasNoTableBulkActionErrors();
+
+    assertDatabaseMissing('group_user', [
+        'user_id' => $user->getKey(),
+        'group_id' => $existingGroup->getKey(),
+    ]);
+
+    assertDatabaseHas('group_user', [
+        'user_id' => $user->getKey(),
+        'group_id' => $newGroup->getKey(),
+    ]);
+});
+
+it('only shows the bulk assign groups action to a user with the user.*.update permission', function () {
+    User::factory(5)->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('user.view-any', 'user.*.view');
+
+    actingAs($user);
+
+    livewire(ListUsers::class)
+        ->assertActionHidden(TestAction::make('assign_groups')->table()->bulk());
+
+    $user->givePermissionTo('user.*.update');
+
+    livewire(ListUsers::class)
+        ->assertActionVisible(TestAction::make('assign_groups')->table()->bulk());
+});
+
+it('excludes archived groups from the bulk assign groups selection', function () {
+    asSuperAdmin();
+
+    $activeGroup = Group::factory()->create();
+    $archivedGroup = Group::factory()->create(['archived_at' => now()]);
+
+    $users = User::factory()->count(2)->create();
+
+    $component = livewire(ListUsers::class);
+
+    $component->mountTableBulkAction('assign_groups', $users->modelKeys());
+
+    $groupsSelect = $component->instance()->getMountedTableBulkActionForm()?->getComponent('groups');
+
+    assert($groupsSelect instanceof Select);
+
+    expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
+    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
+});
+
 it('can search users by name', function () {
     asSuperAdmin();
 
@@ -241,4 +344,278 @@ it('can search users by email', function () {
         ->searchTable('searchable@example.com')
         ->assertCanSeeTableRecords([$matchingUser])
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+});
+
+describe('name column', function () {
+    it('shows the Online presence label in the tooltip and aria-label for an active user', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_activity_at' => now()]);
+
+        $component = livewire(ListUsers::class)
+            ->assertTableColumnHasExtraAttributes('name', [
+                'aria-label' => "{$user->name} (Presence: Online)",
+            ], $user);
+
+        $column = $component->instance()->getTable()->getColumn('name');
+        $column->record($user);
+
+        expect($column->getTooltip())->toBe('Presence: Online');
+    });
+
+    it('shows the copy email tooltip and message on the email description', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create();
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('name');
+        $column->record($user);
+
+        expect($column->getDescriptionBelow()->getData())->toMatchArray([
+            'text' => $user->email,
+            'tooltip' => 'Copy Email Address',
+            'copyMessage' => 'Email address copied to clipboard',
+        ]);
+    });
+});
+
+describe('service details column', function () {
+    it('shows the job title as the state when it is set', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => 'Software Engineer']);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('job_title', 'Software Engineer', $user)
+            ->assertTableColumnFormattedStateSet('job_title', 'Software Engineer', $user)
+            ->assertTableColumnHasDescription('job_title', null, $user);
+    });
+
+    it('shows the placeholder and does not center the column when the job title and service areas are both blank', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('job_title', null, $user)
+            ->assertTableColumnHasDescription('job_title', null, $user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        expect($column->getPlaceholder())->toBe('—')
+            ->and($column->getVerticalAlignment())->toBeNull();
+    });
+
+    it('renders the service details badge and centers the column when the job title is blank but service areas exist', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        $managedType = ServiceRequestType::factory()->create();
+        $managedType->managerUsers()->attach($user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        expect($column->formatState($column->getState()))->toBe('')
+            ->and($column->getVerticalAlignment())->toBe(VerticalAlignment::Center);
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description)->not->toBeNull()
+            ->and($description->getData()['label'])->toBe('1 Service Area');
+    });
+
+    it('renders the service details tooltip as HTML listing manager and auditor service areas', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['job_title' => null]);
+
+        $managedType = ServiceRequestType::factory()->create(['name' => 'Manager <script>alert("xss")</script> & "Sons"']);
+        $managedType->managerUsers()->attach($user);
+
+        $auditedType = ServiceRequestType::factory()->create(['name' => 'Auditor <b>Team</b> & "Co"']);
+        $auditedType->auditorUsers()->attach($user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        $tooltip = $column->getDescriptionBelow()->getData()['tooltip'];
+
+        expect($tooltip)->toBeInstanceOf(Htmlable::class)
+            ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
+            ->and($tooltip->toHtml())->not->toContain('<script>')
+            ->and($tooltip->toHtml())->not->toContain('<b>');
+    });
+
+    it('matches scoped service areas from direct, department, and group assignments without double counting', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $group = Group::factory()->create();
+        $user = User::factory()->for($department)->create(['job_title' => null]);
+        $user->groups()->attach($group);
+
+        $directType = ServiceRequestType::factory()->create(['name' => 'Direct']);
+        $directType->managerUsers()->attach($user);
+
+        $departmentType = ServiceRequestType::factory()->create(['name' => 'Department']);
+        $departmentType->managerDepartments()->attach($department);
+
+        $groupType = ServiceRequestType::factory()->create(['name' => 'Group']);
+        $groupType->auditorGroups()->attach($group);
+
+        $sharedType = ServiceRequestType::factory()->create(['name' => 'Shared']);
+        $sharedType->managerGroups()->attach($group);
+        $sharedType->auditorUsers()->attach($user);
+
+        $managedNames = ServiceRequestType::query()
+            ->tap(new ManagedServiceRequestTypes($user))
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
+        $auditedNames = ServiceRequestType::query()
+            ->tap(new AuditedServiceRequestTypes($user))
+            ->pluck('name')
+            ->sort()
+            ->values()
+            ->all();
+
+        expect($managedNames)->toBe(['Department', 'Direct', 'Shared'])
+            ->and($auditedNames)->toBe(['Group', 'Shared']);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column->record($user);
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description->getData()['label'])->toBe('4 Service Areas')
+            ->and($description->getData()['tooltip']->toHtml())->toBe('Manager (Agent): Direct, Department, Shared<br />Auditor: Shared, Group');
+    });
+});
+
+describe('associations column', function () {
+    it('shows the building icon only when the user has a department', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $userWithDepartment = User::factory()->for($department)->create();
+        $userWithoutDepartment = User::factory()->create(['department_id' => null]);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+
+        $column->record($userWithDepartment);
+        expect($column->getIcon($column->getState()))->toBe('heroicon-o-building-office-2');
+
+        $column->record($userWithoutDepartment);
+        expect($column->getIcon($column->getState()))->toBeNull();
+    });
+
+    it('centers the column and shows the department tooltip when only the department is populated', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $user = User::factory()->for($department)->create();
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
+            ->and($column->getTooltip())->toBe("Department: {$department->name}");
+    });
+
+    it('renders the groups badge and centers the column when there is no department but groups exist', function () {
+        asSuperAdmin();
+
+        $group = Group::factory()->create(['name' => 'VIP']);
+        $user = User::factory()->create(['department_id' => null]);
+        $user->groups()->attach($group);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->formatState($column->getState()))->toBe('')
+            ->and($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
+            ->and($column->getIcon($column->getState()))->toBeNull();
+
+        $description = $column->getDescriptionBelow();
+
+        expect($description)->not->toBeNull()
+            ->and($description->getData()['label'])->toBe('VIP');
+    });
+
+    it('does not center the column when both the department and groups are populated', function () {
+        asSuperAdmin();
+
+        $department = Department::factory()->create();
+        $group = Group::factory()->create();
+        $user = User::factory()->for($department)->create();
+        $user->groups()->attach($group);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column->record($user);
+
+        expect($column->getVerticalAlignment())->toBeNull();
+    });
+});
+
+describe('last login column', function () {
+    it('shows Never as the placeholder when the user has never logged in', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_logged_in_at' => null]);
+
+        livewire(ListUsers::class)
+            ->assertTableColumnStateSet('last_logged_in_at', null, $user);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
+        $column->record($user);
+
+        expect($column->getPlaceholder())->toBe('Never');
+    });
+
+    it('shows the last login date and time in the display timezone', function () {
+        asSuperAdmin();
+
+        $user = User::factory()->create(['last_logged_in_at' => now()]);
+
+        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
+        $column->record($user);
+
+        $loggedInAt = $user->last_logged_in_at->clone()->timezone($column->getTimezone());
+
+        $formattedState = (string) $column->formatState($column->getState());
+
+        expect($column->isDateTime())->toBeTrue()
+            ->and($formattedState)->toContain($loggedInAt->format('M j, Y'))
+            ->and($formattedState)->toContain($loggedInAt->format('g:i a'));
+    });
+});
+
+describe('hidden column search', function () {
+    it('can search users by preferred name', function () {
+        asSuperAdmin();
+
+        $matchingUser = User::factory()->create(['preferred_name' => 'Ace']);
+        $nonMatchingUser = User::factory()->create(['preferred_name' => 'Bee']);
+
+        livewire(ListUsers::class)
+            ->searchTable('Ace')
+            ->assertCanSeeTableRecords([$matchingUser])
+            ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+    });
+
+    it('can search users by work extension', function () {
+        asSuperAdmin();
+
+        $matchingUser = User::factory()->create(['work_extension' => 12345]);
+        $nonMatchingUser = User::factory()->create(['work_extension' => 98765]);
+
+        livewire(ListUsers::class)
+            ->searchTable('12345')
+            ->assertCanSeeTableRecords([$matchingUser])
+            ->assertCanNotSeeTableRecords([$nonMatchingUser]);
+    });
 });

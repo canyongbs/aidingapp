@@ -11,7 +11,18 @@
                     "tags": [],
                     "vote": null,
                     "featured": false,
-                    "attachments": null
+                    "attachments": null,
+                    "publicId": "<public-id>",
+                    "slug": "from-stem-to-steam-the-power-of-creativity-in-education",
+                    "category": {
+                        "slug": "student-centered-learning",
+                        "name": "Student-Centered Learning",
+                        "description": "Focus on approaches that place students' needs, interests, and goals at the forefront of education.",
+                        "icon": null,
+                        "parentCategory": null,
+                        "subCategories": null,
+                        "publicId": "<public-id>"
+                    }
                 },
                 {
                     "id": "9dbe944d-330e-40c1-94b2-3312b07b7589",
@@ -22,7 +33,18 @@
                     "tags": [],
                     "vote": null,
                     "featured": false,
-                    "attachments": null
+                    "attachments": null,
+                    "publicId": "<public-id>",
+                    "slug": "personalized-learning-tailoring-education-for-every-student",
+                    "category": {
+                        "slug": "student-centered-learning",
+                        "name": "Student-Centered Learning",
+                        "description": "Focus on approaches that place students' needs, interests, and goals at the forefront of education.",
+                        "icon": null,
+                        "parentCategory": null,
+                        "subCategories": null,
+                        "publicId": "<public-id>"
+                    }
                 }
             ],
             "links": [
@@ -66,7 +88,8 @@
                 "description": "Focus on approaches that place students' needs, interests, and goals at the forefront of education.",
                 "icon": null,
                 "parentCategory": null,
-                "subCategories": null
+                "subCategories": null,
+                "publicId": "<public-id>"
             },
             {
                 "slug": "teaching-techniques-unlocked",
@@ -74,7 +97,8 @@
                 "description": "Deep dive into methods and tools that empower educators to create impactful learning experiences.",
                 "icon": null,
                 "parentCategory": null,
-                "subCategories": null
+                "subCategories": null,
+                "publicId": "<public-id>"
             }
         ],
         "featured_articles": null,

@@ -192,6 +192,7 @@ class PipelineEntryKanban extends Component implements HasForms, HasActions
             'pipelineEntries' => $pipelineEntries,
             'stages' => $this->getStages(),
             'stageCounts' => $pipelineEntries->map->count(),
+            'canUpdatePipelineTask' => auth()->user()->can('update', $this->pipeline),
         ]);
     }
 

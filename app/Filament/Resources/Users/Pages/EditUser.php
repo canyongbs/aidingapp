@@ -38,22 +38,25 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
+use App\Enums\PresenceStatus;
+use App\Features\FullNameFeature;
+use App\Filament\Forms\Components\AddressInput;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use App\Rules\EmailNotInUseOrSoftDeleted;
-use Carbon\Carbon;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -68,15 +71,99 @@ class EditUser extends EditRecord
 
     public function form(Schema $schema): Schema
     {
+        $generateFullName = function (Get $get, Set $set) {
+            $firstName = trim($get('first_name'));
+
+            if (blank($firstName)) {
+                return;
+            }
+
+            $lastName = trim($get('last_name'));
+
+            if (blank($lastName)) {
+                return;
+            }
+
+            $set(User::displayNameKey(), "{$firstName} {$lastName}");
+        };
+
         return $schema
             ->components([
-                Section::make()
-                    ->columns()
+                Section::make('Demographic Information')
                     ->schema([
-                        TextInput::make('name')
+                        TextInput::make('first_name')
                             ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->disabled(fn (User $record) => $record->isAdmin())
+                            ->live(onBlur: true)
+                            ->afterStateUpdated($generateFullName)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextInput::make('last_name')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->disabled(fn (User $record) => $record->isAdmin())
+                            ->live(onBlur: true)
+                            ->afterStateUpdated($generateFullName)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextEntry::make('presence_status')
+                            ->label('Presence')
+                            ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
+                            ->badge()
+                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
+                        TextInput::make('name')
+                            ->label('Full Name')
+                            ->required(fn (): bool => ! FullNameFeature::active())
+                            ->maxLength(255)
+                            ->disabled(fn (User $record): bool => FullNameFeature::active() || $record->isAdmin())
+                            ->dehydrated(),
+                        TextInput::make('preferred_name')
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                    ])
+                    ->columns(2),
+                Section::make('Employment Information')
+                    ->schema([
+                        TextInput::make('employee_id')
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextInput::make('job_title')
+                            ->string()
                             ->maxLength(255)
                             ->disabled(fn (User $record) => $record->isAdmin()),
+                        PhoneInput::make('work_number')
+                            ->nullable()
+                            ->label('Work Number'),
+                        TextInput::make('work_extension')
+                            ->label('Work Extension')
+                            ->nullable()
+                            ->numeric(),
+                    ])
+                    ->columns(2),
+                Section::make('Academic Information')
+                    ->schema([
+                        TextInput::make('student_id')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('school')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('academic_department')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('program')
+                            ->string()
+                            ->maxLength(255),
+                    ])
+                    ->visible(fn (): bool => FullNameFeature::active())
+                    ->columns(2),
+                Section::make('Contact Information')
+                    ->schema([
                         TextInput::make('email')
                             ->label('Email address')
                             ->email()
@@ -86,45 +173,66 @@ class EditUser extends EditRecord
                                 new EmailNotInUseOrSoftDeleted($this->getRecord()->getKey()),
                             ])
                             ->disabled(fn (User $record) => $record->isAdmin()),
-                        TextInput::make('job_title')
-                            ->string()
-                            ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin()),
-                        PhoneInput::make('work_number')
-                            ->label('Work Number')
-                            ->nullable(),
-                        TextInput::make('work_extension')
-                            ->label('Work Extension')
-                            ->nullable()
-                            ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
-                        Grid::make(2)
-                            ->schema([
-                                Toggle::make('is_managed_contact')
-                                    ->label('Managed Contact')
-                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
-                                    ->live(),
-                                Select::make('managed_contact_type_id')
-                                    ->label('Contact Type')
-                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
-                                    ->searchable()
-                                    ->preload()
-                                    ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
-                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
-                            ])
-                            ->columnSpanFull(),
+                    ])
+                    ->columns(2),
+                Section::make('Address Information')
+                    ->schema([
+                        AddressInput::make([
+                            'address' => 'address',
+                            'city' => 'city',
+                            'state' => 'state',
+                            'postal_code' => 'postalCode',
+                            'country' => 'country',
+                        ]),
+                        TextInput::make('address_2')
+                            ->label('Address 2')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('city')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('state')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('postal_code')
+                            ->label('Postal')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('country')
+                            ->string()
+                            ->maxLength(255),
+                    ])
+                    ->visible(fn (): bool => FullNameFeature::active())
+                    ->columns(2),
+                Section::make('Account Settings')
+                    ->schema([
+                        Toggle::make('is_managed_contact')
+                            ->label('Managed Contact')
+                            ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
+                            ->live(),
+                        Select::make('managed_contact_type_id')
+                            ->label('Type')
+                            ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                            ->searchable()
+                            ->preload()
+                            ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
+                            ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
-                            ->columnSpanFull()
                             ->disabled(fn (User $record) => $record->isAdmin()),
-                        TextInput::make('created_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
-                            ->disabled(),
-                        TextInput::make('updated_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
-                            ->disabled(),
                     ]),
+                Section::make('System Information')
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime(),
+                        TextEntry::make('updated_at')
+                            ->label('Updated At')
+                            ->dateTime(),
+                    ])
+                    ->columns(2),
                 Section::make('Department')
                     ->schema([
                         Select::make('department_id')

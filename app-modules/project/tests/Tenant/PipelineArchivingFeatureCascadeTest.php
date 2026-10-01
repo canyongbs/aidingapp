@@ -62,11 +62,12 @@ it('leaves a milestone with no linked tasks untouched', function () {
     expect($milestone->refresh()->isArchived())->toBeFalse();
 });
 
-it('keeps a milestone active while it still has a task in another active pipeline', function () {
-    $milestone = ProjectMilestone::factory()->create();
+it('keeps a milestone active while it still has a non-archived task', function () {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $stage->pipeline_id]);
 
-    $entryA = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
-    $entryB = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
+    $entryA = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['project_milestone_id' => $milestone->getKey()]);
+    $entryB = PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['project_milestone_id' => $milestone->getKey()]);
 
     $entryA->archive();
 
@@ -99,12 +100,26 @@ it('archives all of a pipeline\'s tasks when the pipeline is archived', function
 it('archives a milestone linked only to tasks in the archived pipeline', function () {
     $pipeline = Pipeline::factory()->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
-    $milestone = ProjectMilestone::factory()->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
     PipelineEntry::factory()->for($stage, 'pipelineStage')->create(['project_milestone_id' => $milestone->getKey()]);
 
     $pipeline->archive();
 
     expect($milestone->refresh()->isArchived())->toBeTrue();
+});
+
+it('archives a pipeline\'s milestones without tasks when the pipeline is archived', function () {
+    $project = Project::factory()->create();
+    $pipeline = Pipeline::factory()->for($project)->create();
+    $otherPipeline = Pipeline::factory()->for($project)->create();
+
+    $milestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $pipeline->getKey()]);
+    $otherPipelineMilestone = ProjectMilestone::factory()->for($project)->create(['pipeline_id' => $otherPipeline->getKey()]);
+
+    $pipeline->archive();
+
+    expect($milestone->refresh()->isArchived())->toBeTrue()
+        ->and($otherPipelineMilestone->refresh()->isArchived())->toBeFalse();
 });
 
 it('archives a pipeline\'s stages when the pipeline is archived', function () {

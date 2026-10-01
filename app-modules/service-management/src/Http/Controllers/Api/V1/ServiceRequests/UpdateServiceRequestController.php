@@ -44,12 +44,15 @@ use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 use Illuminate\Validation\ValidationException;
 
 class UpdateServiceRequestController
@@ -64,7 +67,7 @@ class UpdateServiceRequestController
         Gate::authorize('update', $serviceRequest);
 
         $data = $request->validate([
-            'status_id' => ['nullable', 'uuid:4', Rule::exists(ServiceRequestStatus::class, 'id')],
+            'status_id' => ['nullable', 'uuid:4', $this->statusRule($serviceRequest)],
             'priority_id' => ['nullable', 'uuid:4', Rule::exists(ServiceRequestPriority::class, 'id')],
             'assigned_to_id' => ['nullable', 'uuid:4', Rule::exists(User::class, 'id')],
             'category' => ['nullable', 'string', 'max:255', Rule::in(ServiceRequestCategory::cases())],
@@ -82,5 +85,23 @@ class UpdateServiceRequestController
         return $serviceRequest
             ->fresh(['status', 'priority', 'assignedTo.user', 'respondent'])
             ->toResource(ServiceRequestResource::class);
+    }
+
+    private function statusRule(ServiceRequest $serviceRequest): Exists
+    {
+        $rule = Rule::exists(ServiceRequestStatus::class, 'id');
+
+        if (! ServiceRequestStatusArchivingFeature::active()) {
+            return $rule;
+        }
+
+        return $rule->where(
+            fn (Builder $query) => $query
+                ->whereNull('archived_at')
+                ->when(
+                    filled($serviceRequest->status_id),
+                    fn (Builder $query) => $query->orWhere('id', $serviceRequest->status_id),
+                ),
+        );
     }
 }

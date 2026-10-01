@@ -36,8 +36,10 @@
 
 namespace AidingApp\Project\Database\Factories;
 
+use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
+use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -55,6 +57,11 @@ class ProjectMilestoneFactory extends Factory
     {
         return [
             'project_id' => Project::factory(),
+            'pipeline_id' => fn (array $attributes): string | PipelineFactory => Pipeline::query()
+                ->where('project_id', $attributes['project_id'])
+                ->withoutArchived()
+                ->tap(new ActivePipelineFirst())
+                ->value('id') ?? Pipeline::factory()->state(['project_id' => $attributes['project_id']]),
             'title' => str($this->faker->words(asText: true))->headline()->toString(),
             'description' => $this->faker->sentence(3),
             'created_by_id' => User::factory(),

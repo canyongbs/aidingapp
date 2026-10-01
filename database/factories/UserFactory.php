@@ -36,6 +36,7 @@
 
 namespace Database\Factories;
 
+use App\Features\FullNameFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -50,8 +51,11 @@ class UserFactory extends Factory
      */
     public function definition(): array
     {
+        $firstName = $this->faker->firstName();
+        $lastName = $this->faker->lastName();
+
         return [
-            'name' => $this->faker->name(),
+            'name' => "{$firstName} {$lastName}",
             'email' => $this->faker->unique()->safeEmail(),
             'email_verified_at' => now(),
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', // password
@@ -61,6 +65,10 @@ class UserFactory extends Factory
             'work_number' => $this->faker->numerify('+1 ### ### ####'),
             'work_extension' => $this->faker->randomNumber(4),
             'mobile' => $this->faker->numerify('+1 ### ### ####'),
+            ...(FullNameFeature::active() ? [
+                'first_name' => $firstName,
+                'last_name' => $lastName,
+            ] : []),
         ];
     }
 

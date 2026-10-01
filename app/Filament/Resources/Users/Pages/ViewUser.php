@@ -37,17 +37,17 @@
 namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
+use App\Enums\PresenceStatus;
+use App\Features\FullNameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
-use Carbon\Carbon;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
@@ -63,61 +63,143 @@ class ViewUser extends ViewRecord
         return $schema
             ->disabled(false)
             ->components([
-                Section::make()
-                    ->columns()
+                Section::make('Demographic Information')
                     ->schema([
-                        TextInput::make('name')
+                        TextInput::make('first_name')
                             ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextInput::make('last_name')
+                            ->required()
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextEntry::make('presence_status')
+                            ->label('Presence')
+                            ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
+                            ->badge()
+                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
+                        TextInput::make('name')
+                            ->label('Full Name')
+                            ->maxLength(255)
+                            ->disabled()
+                            ->dehydrated(),
+                        TextInput::make('preferred_name')
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                    ])
+                    ->columns(2)
+                    ->disabled(),
+                Section::make('Employment Information')
+                    ->schema([
+                        TextInput::make('employee_id')
+                            ->string()
+                            ->maxLength(255)
+                            ->visible(fn (): bool => FullNameFeature::active()),
+                        TextInput::make('job_title')
+                            ->string()
                             ->maxLength(255),
+                        PhoneInput::make('work_number')
+                            ->nullable()
+                            ->label('Work Number'),
+                        TextInput::make('work_extension')
+                            ->label('Work Extension')
+                            ->nullable()
+                            ->numeric(),
+                    ])
+                    ->columns(2)
+                    ->disabled(),
+                Section::make('Academic Information')
+                    ->schema([
+                        TextInput::make('student_id')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('school')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('academic_department')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('program')
+                            ->string()
+                            ->maxLength(255),
+                    ])
+                    ->visible(fn (): bool => FullNameFeature::active())
+                    ->columns(2)
+                    ->disabled(),
+                Section::make('Contact Information')
+                    ->schema([
                         TextInput::make('email')
                             ->label('Email address')
                             ->email()
                             ->required()
                             ->maxLength(255)
                             ->rules([
-                                new EmailNotInUseOrSoftDeleted(),
+                                new EmailNotInUseOrSoftDeleted($this->getRecord()->getKey()),
                             ]),
-                        TextEntry::make('presence_status')
-                            ->label('Presence')
-                            ->state(fn (User $record) => $record->presenceStatus())
-                            ->badge()
-                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
-                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
-                        TextInput::make('job_title')
-                            ->string()
-                            ->maxLength(255),
-                        PhoneInput::make('work_number')
-                            ->label('Work Number')
-                            ->nullable(),
-                        TextInput::make('work_extension')
-                            ->label('Work Extension')
-                            ->nullable()
-                            ->numeric(),
                         PhoneInput::make('mobile')
                             ->nullable(),
-                        Grid::make(2)
-                            ->schema([
-                                Toggle::make('is_managed_contact')
-                                    ->label('Managed Contact')
-                                    ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.'),
-                                Select::make('managed_contact_type_id')
-                                    ->label('Contact Type')
-                                    ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
-                                    ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
-                            ])
-                            ->columnSpanFull(),
+                    ])
+                    ->columns(2)
+                    ->disabled(),
+                Section::make('Address Information')
+                    ->schema([
+                        TextInput::make('address')
+                            ->label('Address')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('address_2')
+                            ->label('Address 2')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('city')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('state')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('postal_code')
+                            ->label('Postal')
+                            ->string()
+                            ->maxLength(255),
+                        TextInput::make('country')
+                            ->string()
+                            ->maxLength(255),
+                    ])
+                    ->visible(fn (): bool => FullNameFeature::active())
+                    ->columns(2)
+                    ->disabled(),
+                Section::make('Account Settings')
+                    ->schema([
+                        Toggle::make('is_managed_contact')
+                            ->label('Managed Contact')
+                            ->helperText('Creates a linked, read-only contact record for the self-service portal that stays in sync with this user.')
+                            ->live(),
+                        Select::make('managed_contact_type_id')
+                            ->label('Type')
+                            ->options(fn (): array => ContactType::query()->pluck('name', 'id')->all())
+                            ->searchable()
+                            ->preload()
+                            ->required(fn (Get $get): bool => (bool) $get('is_managed_contact'))
+                            ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
                         Toggle::make('is_external')
-                            ->label('User can only log in via a social provider.')
-                            ->columnSpanFull(),
-                        TextInput::make('created_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
-                            ->disabled(),
-                        TextInput::make('updated_at')
-                            ->formatStateUsing(fn ($state) => Carbon::parse($state)->format('M j, Y g:i a (T)'))
-                            ->disabled(),
+                            ->label('User can only log in via a social provider.'),
                     ])
                     ->disabled(),
+                Section::make('System Information')
+                    ->schema([
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime(),
+                        TextEntry::make('updated_at')
+                            ->label('Updated At')
+                            ->dateTime(),
+                    ])
+                    ->columns(2),
                 Section::make('Department')
                     ->schema([
                         Select::make('department_id')

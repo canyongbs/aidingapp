@@ -53,5 +53,8 @@ class KnowledgeBaseArticleData extends Data
         public ?array $vote,
         public bool $featured,
         public ?array $attachments = null,
+        public ?string $publicId = null,
+        public ?string $slug = null,
+        public ?KnowledgeBaseCategoryData $category = null,
     ) {}
 }
