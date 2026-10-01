@@ -135,6 +135,15 @@ it('does not show a service monitor that does not exist', function () {
 });
 
 describe('authorization', function () {
+    it('requires contact authentication', function () {
+        auth()->forgetGuards();
+
+        $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+        getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
+            ->assertUnauthorized();
+    });
+
     it('does not show a confidential service monitor unless the contact is granted access', function () {
         $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
 

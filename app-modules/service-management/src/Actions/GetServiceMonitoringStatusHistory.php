@@ -69,11 +69,21 @@ class GetServiceMonitoringStatusHistory
 
         $firstBucketStartsAt = $period->getFirstBucketStartsAt(CarbonImmutable::now($timezone));
 
+        // Days are keyed by their local calendar date, but hours and minutes are keyed by the instant they start
+        // at, as keying them by local time would merge the hour that repeats when daylight saving time ends.
+        $isKeyedByLocalTime = $period->getBucketUnit() === 'day';
+
+        $localCreatedAt = 'historical_service_monitorings.created_at at time zone ? at time zone ?';
+
         $bucketCounts = HistoricalServiceMonitoring::query()
             ->select('historical_service_monitorings.service_monitoring_target_id')
             ->selectRaw(
-                "to_char(date_trunc(?, historical_service_monitorings.created_at at time zone ? at time zone ?), 'YYYY-MM-DD HH24:MI:SS') as bucket",
-                [$period->getBucketUnit(), $databaseTimezone, $timezone],
+                $isKeyedByLocalTime
+                    ? "to_char(date_trunc(?, {$localCreatedAt}), 'YYYY-MM-DD HH24:MI:SS') as bucket"
+                    : "to_char(date_trunc(?, {$localCreatedAt}) - ({$localCreatedAt} - historical_service_monitorings.created_at), 'YYYY-MM-DD HH24:MI:SS') as bucket",
+                $isKeyedByLocalTime
+                    ? [$period->getBucketUnit(), $databaseTimezone, $timezone]
+                    : [$period->getBucketUnit(), $databaseTimezone, $timezone, $databaseTimezone, $timezone],
             )
             ->selectRaw('count(*) as checks_count')
             ->selectRaw('count(*) filter (where historical_service_monitorings.succeeded) as successful_checks_count')
@@ -93,7 +103,9 @@ class GetServiceMonitoringStatusHistory
             for ($index = 0; $index < $period->getBucketCount(); $index++) {
                 $bucketStartsAt = $firstBucketStartsAt->addUnit($period->getBucketUnit(), $index);
 
-                $counts = $bucketCounts->get($serviceMonitoringTargetId)?->get($bucketStartsAt->format('Y-m-d H:i:s'));
+                $bucketKey = ($isKeyedByLocalTime ? $bucketStartsAt : $bucketStartsAt->setTimezone($databaseTimezone))->format('Y-m-d H:i:s');
+
+                $counts = $bucketCounts->get($serviceMonitoringTargetId)?->get($bucketKey);
 
                 $checksCount = (int) ($counts->checks_count ?? 0);
                 $successfulChecksCount = (int) ($counts->successful_checks_count ?? 0);
@@ -115,35 +127,40 @@ class GetServiceMonitoringStatusHistory
      * Resolves a client-supplied timezone name into one PHP's date extension can use.
      *
      * Browsers (via `Intl.DateTimeFormat().resolvedOptions().timeZone`) can report legacy IANA aliases, e.g.
-     * `Asia/Calcutta` for `Asia/Kolkata`, that PHP's bundled tzdata no longer recognizes, so `new DateTimeZone()`
-     * throws on them even though they are real, unambiguous zones. Rather than fail the whole request over a
-     * display preference, this falls back to the zone's current UTC offset (via the `intl` extension's own,
-     * more complete tzdata) when the name itself is not directly usable, and to the app's timezone as a last
-     * resort when the value cannot be resolved at all.
+     * `Asia/Calcutta` for `Asia/Kolkata` or `US/Eastern` for `America/New_York`, that PHP's bundled tzdata may not
+     * recognize. Rather than fail the whole request over a display preference, this maps them to an equivalent
+     * zone that PHP does recognize (via the `intl` extension's more complete tzdata), so that daylight saving time
+     * rules are kept, and falls back to the app's timezone when the value cannot be resolved at all.
      */
     protected function resolveTimezone(string $timezone): string
     {
-        try {
-            new DateTimeZone($timezone);
-
+        if ($this->isSupportedTimezone($timezone)) {
             return $timezone;
-        } catch (Exception) {
-            // Not a name PHP's date extension recognizes directly; fall through to the intl-based resolution.
         }
 
-        $icuTimeZone = IntlTimeZone::createTimeZone($timezone);
-        $isRecognizedZone = null;
-        IntlTimeZone::getCanonicalID($timezone, $isRecognizedZone);
+        for ($index = 0; $index < IntlTimeZone::countEquivalentIDs($timezone); $index++) {
+            $equivalentTimezone = IntlTimeZone::getEquivalentID($timezone, $index);
 
-        if ($isRecognizedZone) {
-            $offsetMinutes = intdiv($icuTimeZone->getRawOffset(), 60000);
-
-            return sprintf('%s%02d:%02d', $offsetMinutes < 0 ? '-' : '+', intdiv(abs($offsetMinutes), 60), abs($offsetMinutes) % 60);
+            // Abbreviations such as `IST` are skipped, as they are ambiguous and ignore daylight saving time.
+            if (str_contains($equivalentTimezone, '/') && $this->isSupportedTimezone($equivalentTimezone)) {
+                return $equivalentTimezone;
+            }
         }
 
         $appTimezone = config('app.timezone');
         assert(is_string($appTimezone));
 
         return $appTimezone;
+    }
+
+    protected function isSupportedTimezone(string $timezone): bool
+    {
+        try {
+            new DateTimeZone($timezone);
+
+            return true;
+        } catch (Exception) {
+            return false;
+        }
     }
 }

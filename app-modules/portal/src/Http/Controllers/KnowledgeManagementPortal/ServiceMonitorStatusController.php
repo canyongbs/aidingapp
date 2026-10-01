@@ -48,10 +48,11 @@ use AidingApp\ServiceManagement\Models\Scopes\WithUptimePercentages;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
-use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -131,17 +132,25 @@ class ServiceMonitorStatusController extends Controller
      */
     protected function summarize(): ServiceMonitorSummaryData
     {
-        $targets = ServiceMonitoringTarget::query()
-            ->select('service_monitoring_targets.id')
-            ->tap(new WithCurrentStatus())
-            ->get();
+        $statusAggregates = DB::query()
+            ->fromSub(
+                ServiceMonitoringTarget::query()
+                    ->select('service_monitoring_targets.id')
+                    ->tap(new WithCurrentStatus()),
+                'targets',
+            )
+            ->select('current_status')
+            ->selectRaw('count(*) as targets_count')
+            ->selectRaw('max(last_checked_at) as last_checked_at')
+            ->groupBy('current_status')
+            ->get()
+            ->keyBy('current_status');
 
-        $statusCounts = [
-            ...collect(ServiceMonitoringStatus::cases())->mapWithKeys(fn (ServiceMonitoringStatus $status): array => [$status->value => 0]),
-            ...$targets->countBy(fn (ServiceMonitoringTarget $target): string => $target->getCurrentStatus()->value),
-        ];
+        $statusCounts = collect(ServiceMonitoringStatus::cases())
+            ->mapWithKeys(fn (ServiceMonitoringStatus $status): array => [$status->value => (int) ($statusAggregates->get($status->value)->targets_count ?? 0)])
+            ->all();
 
-        $lastCheckedAt = $targets->map(fn (ServiceMonitoringTarget $target): ?CarbonInterface => $target->getLastCheckedAt())->max();
+        $lastCheckedAt = $statusAggregates->max('last_checked_at');
 
         return new ServiceMonitorSummaryData(
             status: match (true) {
@@ -149,9 +158,9 @@ class ServiceMonitorStatusController extends Controller
                 $statusCounts[ServiceMonitoringStatus::Operational->value] > 0 => ServiceMonitoringStatus::Operational,
                 default => ServiceMonitoringStatus::Unknown,
             },
-            totalCount: $targets->count(),
+            totalCount: array_sum($statusCounts),
             statusCounts: $statusCounts,
-            lastCheckedAt: $lastCheckedAt instanceof CarbonInterface ? $lastCheckedAt->toIso8601String() : null,
+            lastCheckedAt: is_string($lastCheckedAt) ? Carbon::parse($lastCheckedAt)->toIso8601String() : null,
         );
     }
 }

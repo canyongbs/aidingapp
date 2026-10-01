@@ -191,6 +191,16 @@ it('summarizes the service monitors as operational when none have issues', funct
         ->assertJsonPath('summary.status', 'operational');
 });
 
+it('summarizes the service monitors as unknown when none have been checked', function () {
+    ServiceMonitoringTarget::factory()->count(2)->create();
+
+    getServiceMonitorStatuses()
+        ->assertOk()
+        ->assertJsonPath('summary.status', 'unknown')
+        ->assertJsonPath('summary.total_count', 2)
+        ->assertJsonPath('summary.last_checked_at', null);
+});
+
 it('can search by name and description', function () {
     $matchingNameTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Student Portal', 'description' => null]);
     $matchingDescriptionTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Website', 'description' => 'The public portal']);
@@ -205,9 +215,11 @@ it('can search by name and description', function () {
 });
 
 it('can sort by column', function (string $sort, string $direction, array $expectedOrder) {
+    freezeTime();
+
     $targets = collect([
-        'Alpha' => ['frequency' => ServiceMonitoringFrequency::OneHour, 'checks' => [700 => true, 1 => true]],
-        'Bravo' => ['frequency' => ServiceMonitoringFrequency::FiveMinutes, 'checks' => [700 => true, 3 => false, 1 => true]],
+        'Alpha' => ['frequency' => ServiceMonitoringFrequency::OneHour, 'checks' => [8748 => false, 700 => true, 1 => true]],
+        'Bravo' => ['frequency' => ServiceMonitoringFrequency::FiveMinutes, 'checks' => [8748 => true, 700 => true, 3 => false, 1 => true]],
         'Charlie' => ['frequency' => ServiceMonitoringFrequency::TwentyFourHours, 'checks' => [700 => true, 2 => false]],
         'Delta' => ['frequency' => ServiceMonitoringFrequency::FifteenMinutes, 'checks' => []],
     ])->map(function (array $attributes, string $name): ServiceMonitoringTarget {
@@ -232,13 +244,18 @@ it('can sort by column', function (string $sort, string $direction, array $expec
     'status descending' => ['status', 'desc', ['Charlie', 'Bravo', 'Alpha', 'Delta']],
     '30-day uptime ascending' => ['thirty_day_uptime', 'asc', ['Charlie', 'Bravo', 'Alpha', 'Delta']],
     '30-day uptime descending' => ['thirty_day_uptime', 'desc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
+    '12-month uptime ascending' => ['twelve_month_uptime', 'asc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
+    '12-month uptime descending' => ['twelve_month_uptime', 'desc', ['Bravo', 'Alpha', 'Charlie', 'Delta']],
     'last checked ascending' => ['last_checked_at', 'asc', ['Charlie', 'Alpha', 'Bravo', 'Delta']],
+    'last checked descending' => ['last_checked_at', 'desc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
     'frequency ascending' => ['frequency', 'asc', ['Bravo', 'Delta', 'Alpha', 'Charlie']],
+    'frequency descending' => ['frequency', 'desc', ['Charlie', 'Alpha', 'Delta', 'Bravo']],
 ]);
 
 it('validates the inputs', function (array $query, string $error) {
     getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
 })->with([
+    'search string' => [['search' => ['portal']], 'search'],
     'sort enum' => [['sort' => 'domain'], 'sort'],
     'direction in' => [['direction' => 'sideways'], 'direction'],
     'timezone max' => [['timezone' => str_repeat('a', 256)], 'timezone'],
@@ -251,6 +268,14 @@ it('does not reject a timezone the date extension cannot resolve by name', funct
 });
 
 describe('authorization', function () {
+    it('requires contact authentication', function () {
+        $settings = app(PortalSettings::class);
+        $settings->knowledge_management_portal_enabled = true;
+        $settings->save();
+
+        getJson(URL::route('api.portal.status', absolute: false))->assertUnauthorized();
+    });
+
     it('denies access without the service monitoring add-on', function () {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->serviceMonitoring = false;

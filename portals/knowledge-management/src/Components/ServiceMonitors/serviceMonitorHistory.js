@@ -90,7 +90,7 @@ export function describeBucket(bucket, period) {
     const failures =
         bucket.failed_checks_count === 0
             ? `${bucket.checks_count} ${bucket.checks_count === 1 ? 'check' : 'checks'} passed`
-            : `${bucket.failed_checks_count} of ${bucket.checks_count} checks failed`;
+            : `${bucket.failed_checks_count} of ${bucket.checks_count} ${bucket.checks_count === 1 ? 'check' : 'checks'} failed`;
 
     return `${when}: ${status}, ${formatUptimePercentage(bucket.uptime_percentage)} uptime (${failures})`;
 }

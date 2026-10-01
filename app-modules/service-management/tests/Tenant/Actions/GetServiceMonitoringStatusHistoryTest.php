@@ -99,15 +99,51 @@ it('aligns the buckets to the given timezone', function () {
         ->and($buckets[28]->status)->toBe(ServiceMonitoringStatus::Outage);
 });
 
-it('resolves a legacy timezone alias unsupported by the date extension using its UTC offset', function () {
+it('resolves a legacy timezone alias unsupported by the date extension to an equivalent zone', function (string $timezone, string $lastBucketStartsAt) {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    // `Asia/Calcutta` is the pre-1996 IANA alias for `Asia/Kolkata` (UTC+05:30). Some browsers still report it
-    // from `Intl.DateTimeFormat().resolvedOptions().timeZone`, but PHP's bundled tzdata does not recognize the
-    // name, so `new DateTimeZone('Asia/Calcutta')` throws.
-    $buckets = app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastMonth, 'Asia/Calcutta')[$serviceMonitoringTarget->getKey()];
+    $buckets = app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastMonth, $timezone)[$serviceMonitoringTarget->getKey()];
 
-    expect($buckets[29]->startsAt)->toBe('2026-09-28T00:00:00+05:30');
+    expect($buckets[29]->startsAt)->toBe($lastBucketStartsAt);
+})->with([
+    'without daylight saving time' => ['Asia/Calcutta', '2026-09-28T00:00:00+05:30'],
+    'observing daylight saving time' => ['US/Eastern', '2026-09-28T00:00:00-04:00'],
+]);
+
+it('keeps the hour repeated when daylight saving time ends as separate buckets', function () {
+    travelTo(CarbonImmutable::parse('2026-11-01 08:30:00', 'UTC'));
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    // 1:30 am in New York, before and after the clocks go back.
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => '2026-11-01 05:30:00']);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => '2026-11-01 06:30:00']);
+
+    $buckets = collect(app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastDay, 'America/New_York')[$serviceMonitoringTarget->getKey()])
+        ->keyBy('startsAt');
+
+    expect($buckets['2026-11-01T01:00:00-04:00']->status)->toBe(ServiceMonitoringStatus::Outage)
+        ->and($buckets['2026-11-01T01:00:00-04:00']->checksCount)->toBe(1)
+        ->and($buckets['2026-11-01T01:00:00-05:00']->status)->toBe(ServiceMonitoringStatus::Operational)
+        ->and($buckets['2026-11-01T01:00:00-05:00']->checksCount)->toBe(1);
+});
+
+it('skips the hour missing when daylight saving time starts', function () {
+    travelTo(CarbonImmutable::parse('2026-03-08 09:30:00', 'UTC'));
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    // 1:30 am and 3:30 am in New York, either side of the clocks going forward.
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => '2026-03-08 06:30:00']);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => '2026-03-08 07:30:00']);
+
+    $buckets = collect(app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastDay, 'America/New_York')[$serviceMonitoringTarget->getKey()])
+        ->keyBy('startsAt');
+
+    expect($buckets)->toHaveCount(24)
+        ->and($buckets->keys()->filter(fn (string $startsAt): bool => str_starts_with($startsAt, '2026-03-08T02:')))->toBeEmpty()
+        ->and($buckets['2026-03-08T01:00:00-05:00']->status)->toBe(ServiceMonitoringStatus::Outage)
+        ->and($buckets['2026-03-08T03:00:00-04:00']->status)->toBe(ServiceMonitoringStatus::Operational);
 });
 
 it('falls back to the app timezone when the timezone cannot be resolved at all', function () {

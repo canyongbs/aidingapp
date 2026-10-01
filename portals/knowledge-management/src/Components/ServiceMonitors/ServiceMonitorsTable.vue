@@ -70,7 +70,7 @@
     const emit = defineEmits(['sort']);
 
     const sortableColumns = [
-        { column: 'name', label: 'Monitor', class: 'min-w-64' },
+        { column: 'name', label: 'Monitor', class: 'min-w-56' },
         { column: 'status', label: 'Status' },
         { column: 'thirty_day_uptime', label: '30-day uptime' },
         { column: 'twelve_month_uptime', label: '12-month uptime' },
@@ -165,8 +165,8 @@
                         icon-position="after"
                         class="whitespace-nowrap"
                     >
-                        View details
-                        <span class="sr-only">for {{ monitor.name }}</span>
+                        View
+                        <span class="sr-only">details for {{ monitor.name }}</span>
                     </BaseButton>
                 </BaseTableCell>
             </BaseTableRow>

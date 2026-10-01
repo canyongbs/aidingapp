@@ -77,7 +77,7 @@
         ]"
     >
         <span
-            :class="['h-1.5 w-1.5 rounded-full flex-shrink-0', dotClasses, pulse ? 'animate-pulse' : '']"
+            :class="['h-1.5 w-1.5 shrink-0 rounded-full', dotClasses, pulse ? 'animate-pulse' : '']"
             aria-hidden="true"
         />
         <slot />

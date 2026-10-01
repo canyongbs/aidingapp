@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,36 +32,29 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { computed } from 'vue';
-    import { describeBucket } from './serviceMonitorHistory.js';
-    import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
+*/
 
-    const props = defineProps({
-        history: {
-            type: Array,
-            required: true,
-        },
-    });
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-    const summary = computed(() => {
-        const counts = STATUS_ORDER.map((status) => ({
-            label: getStatus(status).label.toLowerCase(),
-            count: props.history.filter((bucket) => bucket.status === status).length,
-        })).filter(({ count }) => count > 0);
+return new class () extends Migration {
+    public $withinTransaction = false;
 
-        return `${props.history.length}-day history: ${counts.map(({ label, count }) => `${count} ${label}`).join(', ')}`;
-    });
-</script>
+    public function up(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->index(['service_monitoring_target_id', 'created_at'], 'historical_service_monitorings_target_id_created_at_index')
+                ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'))
+                ->concurrently();
+        });
+    }
 
-<template>
-    <div class="flex h-6 items-stretch gap-px" role="img" :aria-label="summary">
-        <span
-            v-for="bucket in history"
-            :key="bucket.starts_at"
-            :class="['w-[3px] rounded-[1px]', getStatus(bucket.status).barClass]"
-            :title="describeBucket(bucket, 'past_month')"
-        />
-    </div>
-</template>
+    public function down(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->dropIndexIfExists('historical_service_monitorings_target_id_created_at_index');
+        });
+    }
+};
