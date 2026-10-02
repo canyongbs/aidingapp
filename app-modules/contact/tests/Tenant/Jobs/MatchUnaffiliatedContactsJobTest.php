@@ -108,6 +108,34 @@ it('matches unaffiliated contacts to any matching organization during reconcilia
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
+it('does not match contacts when the targeted organization has been deleted', function (bool $forceDelete) {
+    $organization = Organization::factory()->create(['domains' => []]);
+    $otherOrganization = Organization::factory()->create(['domains' => []]);
+    $contact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $job = new MatchUnaffiliatedContactsJob((string) $organization->getKey());
+
+    $otherOrganization->domains = [['domain' => 'example.com']];
+    $otherOrganization->saveQuietly();
+
+    if ($forceDelete) {
+        $organization->forceDelete();
+    } else {
+        $organization->delete();
+    }
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    $job->handle(app(MatchContactToOrganization::class));
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+})->with([
+    'soft deleted' => false,
+    'permanently deleted' => true,
+]);
+
 it('does not run reconciliation when another reconciliation for the tenant holds the lock', function () {
     $job = new MatchUnaffiliatedContactsJob();
     $middleware = $job->middleware()[0];
