@@ -32,6 +32,9 @@ use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use App\Models\Tenant;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Queue;
 
 it('matches unaffiliated contacts only to the targeted organization', function () {
@@ -97,4 +100,31 @@ it('matches unaffiliated contacts to any matching organization during reconcilia
     expect($matchingContact->refresh()->organization_id)->toBe($organization->getKey())
         ->and($unmatchedContact->refresh()->organization_id)->toBeNull()
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
+});
+
+it('does not run reconciliation when another reconciliation for the tenant holds the lock', function () {
+    $job = new MatchUnaffiliatedContactsJob();
+    $middleware = $job->middleware()[0];
+
+    assert($middleware instanceof WithoutOverlapping);
+
+    $tenant = Tenant::current();
+    assert($tenant instanceof Tenant);
+
+    expect($middleware->getLockKey($job))->toContain((string) $tenant->getKey());
+
+    $lock = Cache::lock($middleware->getLockKey($job), $middleware->expiresAfter);
+    expect($lock->get())->toBeTrue();
+
+    $handled = false;
+
+    try {
+        $middleware->handle($job, function () use (&$handled): void {
+            $handled = true;
+        });
+    } finally {
+        $lock->release();
+    }
+
+    expect($handled)->toBeFalse();
 });
