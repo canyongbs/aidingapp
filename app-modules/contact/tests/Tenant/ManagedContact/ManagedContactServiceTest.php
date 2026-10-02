@@ -37,6 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\FullNameFeature;
 use App\Models\User;
 use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -67,6 +68,42 @@ it('creates a managed contact synchronized from the user', function () {
         ->and($contact->mobile)->toBe('+1 555 333 4444')
         ->and($contact->type_id)->toBe($type->getKey())
         ->and($contact->isManaged())->toBeTrue();
+});
+
+it('parses the first and last name from a user name that includes a salutation', function () {
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create([
+        'name' => 'Dr. Jane Doe',
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+    ]);
+
+    FullNameFeature::deactivate();
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->first_name)->toBe('Jane')
+        ->and($contact->last_name)->toBe('Doe')
+        ->and($contact->full_name)->toBe('Dr. Jane Doe');
+});
+
+it('handles a single word name by leaving the last name empty', function () {
+    $type = ContactType::factory()->create();
+
+    $user = User::factory()->create([
+        'name' => 'Cher',
+        'first_name' => 'Cher',
+        'last_name' => '',
+    ]);
+
+    FullNameFeature::deactivate();
+
+    $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
+
+    expect($contact->first_name)->toBe('Cher')
+        ->and($contact->last_name)->toBe('')
+        ->and($contact->full_name)->toBe('Cher');
 });
 
 it('synchronizes every supported field from the user to the managed contact', function () {
