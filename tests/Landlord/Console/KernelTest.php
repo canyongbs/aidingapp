@@ -157,6 +157,7 @@ describe('schedule', function () {
 
         artisan('schedule:run');
 
+        Queue::assertNotPushed(DispatchMatchUnaffiliatedContactsForEachTenant::class);
         Queue::assertPushed(DispatchPrepareKnowledgeBaseVectorStoreForEachTenant::class);
         Queue::assertPushed(DispatchServiceMonitoringForEachTenant::class, 1);
         Queue::assertPushed(
