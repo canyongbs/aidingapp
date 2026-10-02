@@ -125,3 +125,32 @@ it('preserves an organization assigned after a stale contact was loaded', functi
 
     expect($currentContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
+
+it('matches the current email when a stale contact is passed', function (?string $currentEmail, bool $targeted, bool $matches) {
+    $oldOrganization = Organization::factory()->create(['domains' => []]);
+    $currentOrganization = Organization::factory()->create(['domains' => []]);
+    $contact = Contact::factory()->create([
+        'email' => 'person@old.example',
+        'organization_id' => null,
+    ]);
+    $staleContact = Contact::query()->findOrFail($contact->getKey());
+
+    $oldOrganization->domains = [['domain' => 'old.example']];
+    $oldOrganization->saveQuietly();
+    $currentOrganization->domains = [['domain' => 'current.example']];
+    $currentOrganization->saveQuietly();
+    $contact->email = $currentEmail;
+    $contact->saveQuietly();
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    app(MatchContactToOrganization::class)($staleContact, $targeted ? $oldOrganization : null);
+
+    expect($contact->refresh()->email)->toBe($currentEmail)
+        ->and($contact->organization_id)->toBe($matches ? $currentOrganization->getKey() : null);
+})->with([
+    'changed to a matching domain' => ['person@current.example', false, true],
+    'changed to an unmatched domain' => ['person@unmatched.example', false, false],
+    'cleared' => [null, false, false],
+    'changed away from the targeted organization' => ['person@current.example', true, false],
+]);
