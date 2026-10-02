@@ -20,10 +20,16 @@
       of the licensor in the software. Any use of the licensor’s trademarks is subject
       to applicable law.
     - Canyon GBS Inc. respects the intellectual property rights of others and expects the
-      same in return. Canyon GBS® and Aiding App® are registered trademarks, and we are
-      committed to enforcing and protecting our trademarks vigorously.
+      same in return. Canyon GBS® and Aiding App® are registered trademarks of
+      Canyon GBS Inc., and we are committed to enforcing and protecting our trademarks
+      vigorously.
     - The software solution, including services, infrastructure, and code, is offered as a
       Software as a Service (SaaS) by Canyon GBS Inc.
+    - Use of this software implies agreement to the license terms and conditions as stated
+      in the Elastic License 2.0.
+
+    For more information or inquiries please visit our website at
+    <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
 */
