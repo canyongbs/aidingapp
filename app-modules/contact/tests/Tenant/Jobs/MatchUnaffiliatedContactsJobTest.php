@@ -112,7 +112,9 @@ it('does not run reconciliation when another reconciliation for the tenant holds
     assert($tenant instanceof Tenant);
 
     expect($middleware->getLockKey($job))->toContain((string) $tenant->getKey());
+    expect($middleware->expiresAfter)->toBe(180);
 
+    $job->withFakeQueueInteractions();
     $lock = Cache::lock($middleware->getLockKey($job), $middleware->expiresAfter);
     expect($lock->get())->toBeTrue();
 
@@ -127,4 +129,6 @@ it('does not run reconciliation when another reconciliation for the tenant holds
     }
 
     expect($handled)->toBeFalse();
+
+    $job->assertNotReleased();
 });
