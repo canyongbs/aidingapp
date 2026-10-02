@@ -47,6 +47,10 @@ class UserObserver
 
     public function saved(User $user): void
     {
+        if (! $user->wasChanged(ManagedContactService::SYNCED_USER_ATTRIBUTES)) {
+            return;
+        }
+
         $this->managedContactService->sync($user);
     }
 
