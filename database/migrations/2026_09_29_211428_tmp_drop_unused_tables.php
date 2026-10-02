@@ -79,6 +79,9 @@ return new class () extends SettingsMigration {
         'event.*.restore' => 'Event',
         'event.*.force-delete' => 'Event',
 
+        'view_azure_calendar_settings' => 'View Azure Calendar Settings',
+        'view_google_calendar_settings' => 'View Google Calendar Settings',
+
         'analytics_resource_category.view-any' => 'Analytics Resource Category',
         'analytics_resource_category.create' => 'Analytics Resource Category',
         'analytics_resource_category.*.view' => 'Analytics Resource Category',
@@ -118,6 +121,7 @@ return new class () extends SettingsMigration {
         'campaign.*.delete' => 'Campaign',
         'campaign.*.restore' => 'Campaign',
         'campaign.*.force-delete' => 'Campaign',
+        'campaign.view_campaign_settings' => 'Campaign',
 
         'caseload.view-any' => 'Caseload',
         'caseload.create' => 'Caseload',
@@ -142,6 +146,38 @@ return new class () extends SettingsMigration {
         'application_submission_state.*.delete' => 'Application Submission State',
         'application_submission_state.*.restore' => 'Application Submission State',
         'application_submission_state.*.force-delete' => 'Application Submission State',
+
+        'application_field.view-any' => 'Application Field',
+        'application_field.create' => 'Application Field',
+        'application_field.*.view' => 'Application Field',
+        'application_field.*.update' => 'Application Field',
+        'application_field.*.delete' => 'Application Field',
+        'application_field.*.restore' => 'Application Field',
+        'application_field.*.force-delete' => 'Application Field',
+
+        'application_submission.view-any' => 'Application Submission',
+        'application_submission.create' => 'Application Submission',
+        'application_submission.*.view' => 'Application Submission',
+        'application_submission.*.update' => 'Application Submission',
+        'application_submission.*.delete' => 'Application Submission',
+        'application_submission.*.restore' => 'Application Submission',
+        'application_submission.*.force-delete' => 'Application Submission',
+
+        'application_step.view-any' => 'Application Step',
+        'application_step.create' => 'Application Step',
+        'application_step.*.view' => 'Application Step',
+        'application_step.*.update' => 'Application Step',
+        'application_step.*.delete' => 'Application Step',
+        'application_step.*.restore' => 'Application Step',
+        'application_step.*.force-delete' => 'Application Step',
+
+        'application_authentication.view-any' => 'Application Authentication',
+        'application_authentication.create' => 'Application Authentication',
+        'application_authentication.*.view' => 'Application Authentication',
+        'application_authentication.*.update' => 'Application Authentication',
+        'application_authentication.*.delete' => 'Application Authentication',
+        'application_authentication.*.restore' => 'Application Authentication',
+        'application_authentication.*.force-delete' => 'Application Authentication',
 
         'interaction_campaign.view-any' => 'Interaction Campaign',
         'interaction_campaign.create' => 'Interaction Campaign',
