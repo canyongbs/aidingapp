@@ -39,6 +39,7 @@ namespace AidingApp\Contact\Jobs;
 use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use App\Models\Tenant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
@@ -66,8 +67,10 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
         ];
     }
 
-    public function handle(MatchContactToOrganization $matchContactToOrganization): void
-    {
+    public function handle(
+        MatchContactToOrganization $matchContactToOrganization,
+        OrganizationEmailDomainLookup $domainLookup,
+    ): void {
         $organization = $this->organizationId === null
             ? null
             : Organization::query()->find($this->organizationId);
@@ -76,13 +79,21 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
             return;
         }
 
+        $domainSet = $domainLookup->domainSet($organization);
+
+        if ($domainSet === []) {
+            return;
+        }
+
         Contact::query()
             ->select(['id', 'email', 'organization_id'])
             ->whereNull('organization_id')
             ->whereNotNull('email')
-            ->chunkById(100, function (Collection $contacts) use ($matchContactToOrganization, $organization): void {
+            ->chunkById(100, function (Collection $contacts) use ($matchContactToOrganization, $organization, $domainLookup, $domainSet): void {
                 foreach ($contacts as $contact) {
-                    $matchContactToOrganization($contact, $organization);
+                    if (isset($domainSet[$domainLookup->extractEmailDomain($contact->email) ?? ''])) {
+                        $matchContactToOrganization($contact, $organization);
+                    }
                 }
             });
     }
