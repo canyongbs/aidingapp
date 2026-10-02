@@ -52,12 +52,6 @@ class MatchContactToOrganization
             return;
         }
 
-        $organization = ($this->findOrganizationByEmailDomain)($contact->email, $organization);
-
-        if ($organization === null) {
-            return;
-        }
-
         DB::transaction(function () use ($contact, $organization): void {
             $contact = Contact::query()
                 ->whereKey($contact->getKey())
@@ -65,7 +59,13 @@ class MatchContactToOrganization
                 ->lockForUpdate()
                 ->first();
 
-            if ($contact === null) {
+            if ($contact === null || blank($contact->email)) {
+                return;
+            }
+
+            $organization = ($this->findOrganizationByEmailDomain)($contact->email, $organization);
+
+            if ($organization === null) {
                 return;
             }
 
