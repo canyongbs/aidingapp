@@ -34,22 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Actions;
-
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 
-class FindOrganizationByEmailDomain
-{
-    public function __construct(
-        private OrganizationEmailDomainLookup $lookup,
-    ) {}
+it('builds a normalized domain set from eligible organizations', function () {
+    $organization = Organization::factory()->create([
+        'is_contact_generation_enabled' => false,
+        'domains' => [
+            ['domain' => ' HTTPS://WWW.Example.COM:8443/path '],
+            ['domain' => 'example.com'],
+            ['domain' => ''],
+            ['domain' => null],
+        ],
+    ]);
+    Organization::factory()->create(['domains' => [['domain' => 'other.example']]]);
+    $deletedOrganization = Organization::factory()->create(['domains' => [['domain' => 'deleted.example']]]);
+    $deletedOrganization->delete();
+    $lookup = app(OrganizationEmailDomainLookup::class);
 
-    public function __invoke(
-        string $email,
-        ?Organization $organization = null,
-        bool $requireContactGenerationEnabled = false,
-    ): ?Organization {
-        return $this->lookup->find($email, $organization, $requireContactGenerationEnabled);
-    }
-}
+    expect($lookup->domainSet())->toEqual(['example.com' => true, 'other.example' => true])
+        ->and($lookup->domainSet($organization))->toBe(['example.com' => true]);
+});
