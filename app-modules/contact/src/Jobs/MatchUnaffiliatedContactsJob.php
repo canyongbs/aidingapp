@@ -33,9 +33,11 @@ namespace AidingApp\Contact\Jobs;
 use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use App\Models\Tenant;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Throwable;
 
 class MatchUnaffiliatedContactsJob implements ShouldQueue
@@ -45,6 +47,18 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
     public function __construct(
         public ?string $organizationId = null,
     ) {}
+
+    /**
+     * @return array<int, WithoutOverlapping>
+     */
+    public function middleware(): array
+    {
+        return [
+            (new WithoutOverlapping((string) Tenant::current()->getKey()))
+                ->dontRelease()
+                ->expireAfter(180),
+        ];
+    }
 
     public function handle(MatchContactToOrganization $matchContactToOrganization): void
     {
