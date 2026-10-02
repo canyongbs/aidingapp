@@ -96,9 +96,9 @@ it('preserves an existing organization when importing a contact', function () {
     $otherOrganization = Organization::factory()->create([
         'domains' => [['domain' => 'other.com']],
     ]);
-    Contact::factory()
+    $existingContact = Contact::factory()
         ->for($otherOrganization, 'organization')
-        ->create(['email' => 'person@example.com']);
+        ->create(['email' => 'person@example.com', 'first_name' => 'Original']);
 
     runContactImport([
         'first_name' => 'Updated',
@@ -110,6 +110,7 @@ it('preserves an existing organization when importing a contact', function () {
 
     $contact = Contact::query()->where('email', 'person@example.com')->firstOrFail();
 
-    expect($contact->organization_id)->toBe($otherOrganization->getKey())
-        ->and($organization->is($otherOrganization))->toBeFalse();
+    expect($contact->getKey())->toBe($existingContact->getKey())
+        ->and($contact->first_name)->toBe('Updated')
+        ->and($contact->organization_id)->toBe($otherOrganization->getKey());
 });

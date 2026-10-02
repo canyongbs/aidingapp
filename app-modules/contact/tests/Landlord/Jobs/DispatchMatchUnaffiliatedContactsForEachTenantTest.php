@@ -36,12 +36,39 @@
 
 use AidingApp\Contact\Jobs\DispatchMatchUnaffiliatedContactsForEachTenant;
 use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
+use App\Enums\SubscriptionStatus;
+use App\Models\Tenant;
 use Illuminate\Support\Facades\Queue;
 
 it('dispatches a contact reconciliation job for each eligible tenant', function () {
-    Queue::fake([MatchUnaffiliatedContactsJob::class]);
+    $firstTenant = Tenant::query()->firstOrFail();
+    $secondTenant = Tenant::factory()->create([
+        'domain' => 'second-contact-reconciliation.aidingapp.local',
+        'setup_complete' => true,
+        'subscription_status' => SubscriptionStatus::Active,
+    ]);
+    $dispatchedTenantIds = [];
+    Queue::fake([MatchUnaffiliatedContactsJob::class])
+        ->beforePushing(function (mixed $job) use (&$dispatchedTenantIds): void {
+            if (! $job instanceof MatchUnaffiliatedContactsJob) {
+                return;
+            }
 
-    (new DispatchMatchUnaffiliatedContactsForEachTenant())->handle();
+            $tenant = Tenant::current();
+            assert($tenant instanceof Tenant);
 
-    Queue::assertPushed(MatchUnaffiliatedContactsJob::class, 1);
+            $dispatchedTenantIds[] = $tenant->getKey();
+        });
+
+    try {
+        (new DispatchMatchUnaffiliatedContactsForEachTenant())->handle();
+
+        Queue::assertPushed(MatchUnaffiliatedContactsJob::class, 2);
+        expect($dispatchedTenantIds)->toEqualCanonicalizing([
+            $firstTenant->getKey(),
+            $secondTenant->getKey(),
+        ]);
+    } finally {
+        $secondTenant->delete();
+    }
 });

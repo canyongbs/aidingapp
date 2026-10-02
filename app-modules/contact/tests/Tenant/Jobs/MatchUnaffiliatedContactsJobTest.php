@@ -96,6 +96,10 @@ it('matches unaffiliated contacts to any matching organization during reconcilia
         'email' => 'person@unmatched.com',
         'organization_id' => null,
     ]);
+    $otherMatchingContact = Contact::factory()->create([
+        'email' => 'person@other.com',
+        'organization_id' => null,
+    ]);
     $assignedContact = Contact::factory()
         ->for($otherOrganization, 'organization')
         ->create(['email' => 'assigned@example.com']);
@@ -108,6 +112,7 @@ it('matches unaffiliated contacts to any matching organization during reconcilia
     (new MatchUnaffiliatedContactsJob())->handle(app(MatchContactToOrganization::class), app(OrganizationEmailDomainLookup::class));
 
     expect($matchingContact->refresh()->organization_id)->toBe($organization->getKey())
+        ->and($otherMatchingContact->refresh()->organization_id)->toBe($otherOrganization->getKey())
         ->and($unmatchedContact->refresh()->organization_id)->toBeNull()
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
