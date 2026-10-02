@@ -70,7 +70,11 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
     {
         $organization = $this->organizationId === null
             ? null
-            : Organization::query()->findOrFail($this->organizationId);
+            : Organization::query()->find($this->organizationId);
+
+        if ($this->organizationId !== null && $organization === null) {
+            return;
+        }
 
         Contact::query()
             ->select(['id', 'email', 'organization_id'])
