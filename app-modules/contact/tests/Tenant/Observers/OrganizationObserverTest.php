@@ -72,3 +72,15 @@ it('does not dispatch targeted matching when another organization attribute chan
 
     Queue::assertNotPushed(MatchUnaffiliatedContactsJob::class);
 });
+
+it('does not dispatch targeted matching when organization domains are cleared', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    Queue::fake([MatchUnaffiliatedContactsJob::class]);
+
+    $organization->domains = [];
+    $organization->save();
+
+    Queue::assertNotPushed(MatchUnaffiliatedContactsJob::class);
+});

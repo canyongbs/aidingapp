@@ -46,7 +46,7 @@ class OrganizationObserver
 
     public function updated(Organization $organization): void
     {
-        if (! $organization->wasChanged('domains')) {
+        if (! $organization->wasChanged('domains') || blank($organization->domains)) {
             return;
         }
 
