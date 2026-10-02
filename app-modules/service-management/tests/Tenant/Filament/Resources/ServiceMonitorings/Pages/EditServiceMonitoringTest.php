@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -561,45 +560,6 @@ test('EditServiceMonitoring can update a service monitor with an API endpoint mo
         ->and($serviceMonitoringTarget->request_headers)->toBe([
             ['name' => 'X-Custom-Header', 'value' => 'custom-value'],
         ]);
-});
-
-test('EditServiceMonitoring hides the API endpoint monitor type option when the feature is inactive', function () {
-    ServiceMonitoringApiEndpointFeature::deactivate();
-
-    asSuperAdmin();
-
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
-
-    $request = ServiceMonitoringTargetRequestFactory::new()->state(['monitor_type' => MonitorType::ApiEndpoint])->create();
-
-    livewire(EditServiceMonitoring::class, [
-        'record' => $serviceMonitoringTarget->getRouteKey(),
-    ])
-        ->fillForm($request)
-        ->call('save')
-        ->assertHasFormErrors(['monitor_type']);
-});
-
-test('EditServiceMonitoring can still save an existing API endpoint monitor while the feature is inactive', function () {
-    // Filtering the API Endpoint radio option by the feature flag must not also invalidate an
-    // existing record that's already using it — otherwise deactivating the flag makes every
-    // API Endpoint monitor uneditable, since monitor_type itself would fail validation.
-    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
-        ->apiEndpoint()
-        ->create();
-
-    ServiceMonitoringApiEndpointFeature::deactivate();
-
-    asSuperAdmin();
-
-    livewire(EditServiceMonitoring::class, [
-        'record' => $serviceMonitoringTarget->getRouteKey(),
-    ])
-        ->fillForm(['name' => 'renamed while the feature is inactive'])
-        ->call('save')
-        ->assertHasNoFormErrors();
-
-    expect($serviceMonitoringTarget->refresh()->name)->toBe('renamed while the feature is inactive');
 });
 
 test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
