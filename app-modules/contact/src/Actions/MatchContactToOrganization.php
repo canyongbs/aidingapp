@@ -38,12 +38,13 @@ namespace AidingApp\Contact\Actions;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use Illuminate\Support\Facades\DB;
 
 class MatchContactToOrganization
 {
     public function __construct(
-        private FindOrganizationByEmailDomain $findOrganizationByEmailDomain,
+        private OrganizationEmailDomainLookup $domainLookup,
     ) {}
 
     public function __invoke(Contact $contact, ?Organization $organization = null): void
@@ -63,7 +64,7 @@ class MatchContactToOrganization
                 return;
             }
 
-            $organization = ($this->findOrganizationByEmailDomain)($contact->email, $organization);
+            $organization = $this->domainLookup->find($contact->email, $organization);
 
             if ($organization === null) {
                 return;

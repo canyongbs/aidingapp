@@ -37,6 +37,77 @@
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 
+it('matches an exact email domain', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    $result = app(OrganizationEmailDomainLookup::class)->find('person@example.com');
+
+    expect($result?->is($organization))->toBeTrue();
+});
+
+it('matches email domains without regard to case', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    $result = app(OrganizationEmailDomainLookup::class)->find('person@EXAMPLE.COM');
+
+    expect($result?->is($organization))->toBeTrue();
+});
+
+it('normalizes stored www domains before matching', function () {
+    $organization = Organization::factory()->create([
+        'is_contact_generation_enabled' => false,
+        'domains' => [['domain' => 'www.example.com']],
+    ]);
+
+    $result = app(OrganizationEmailDomainLookup::class)->find('person@example.com');
+
+    expect($result?->is($organization))->toBeTrue();
+});
+
+it('normalizes stored URLs with a path and port before matching', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'https://www.example.com:8443/path']],
+    ]);
+
+    $result = app(OrganizationEmailDomainLookup::class)->find('person@example.com');
+
+    expect($result?->is($organization))->toBeTrue();
+});
+
+it('returns no organization for an invalid email address', function () {
+    $lookup = app(OrganizationEmailDomainLookup::class);
+
+    expect($lookup->find('invalid-email'))->toBeNull()
+        ->and($lookup->find('person@'))->toBeNull();
+});
+
+it('returns no organization when the email domain does not match', function () {
+    Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+
+    $result = app(OrganizationEmailDomainLookup::class)->find('person@other.com');
+
+    expect($result)->toBeNull();
+});
+
+it('limits matching to the supplied organization', function () {
+    $matchingOrganization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    $otherOrganization = Organization::factory()->create([
+        'domains' => [['domain' => 'other.com']],
+    ]);
+    $lookup = app(OrganizationEmailDomainLookup::class);
+
+    expect($lookup->find('person@example.com', $matchingOrganization)?->is($matchingOrganization))->toBeTrue()
+        ->and($lookup->find('person@example.com', $otherOrganization))->toBeNull();
+});
+
 it('builds a normalized domain set from eligible organizations', function () {
     $organization = Organization::factory()->create([
         'is_contact_generation_enabled' => false,

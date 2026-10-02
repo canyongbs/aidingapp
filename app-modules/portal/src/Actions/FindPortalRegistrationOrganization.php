@@ -36,17 +36,17 @@
 
 namespace AidingApp\Portal\Actions;
 
-use AidingApp\Contact\Actions\FindOrganizationByEmailDomain as FindContactOrganizationByEmailDomain;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 
 class FindPortalRegistrationOrganization
 {
     public function __construct(
-        private FindContactOrganizationByEmailDomain $findOrganizationByEmailDomain,
+        private OrganizationEmailDomainLookup $domainLookup,
     ) {}
 
     public function __invoke(string $email): ?Organization
     {
-        return ($this->findOrganizationByEmailDomain)($email, requireContactGenerationEnabled: true);
+        return $this->domainLookup->find($email, requireContactGenerationEnabled: true);
     }
 }
