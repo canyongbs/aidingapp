@@ -40,12 +40,17 @@ use AidingApp\Contact\Models\Organization;
 
 it('associates an unaffiliated contact with the matching organization', function () {
     $organization = Organization::factory()->create([
-        'domains' => [['domain' => 'example.com']],
+        'domains' => [],
     ]);
     $contact = Contact::factory()->create([
         'email' => 'person@example.com',
         'organization_id' => null,
     ]);
+
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    expect($contact->refresh()->organization_id)->toBeNull();
 
     app(MatchContactToOrganization::class)($contact->refresh());
 
