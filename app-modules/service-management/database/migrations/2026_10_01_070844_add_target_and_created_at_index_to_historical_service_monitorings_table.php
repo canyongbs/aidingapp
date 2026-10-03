@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,38 +32,29 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
-    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
+*/
 
-    const props = defineProps({
-        name: {
-            type: String,
-            required: true,
-        },
-        message: {
-            type: String,
-            required: true,
-        },
-        status: {
-            type: Boolean,
-            required: true,
-        },
-    });
-</script>
-<template>
-    <div class="flex items-start w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
-        <div class="shrink-0 size-6" aria-hidden="true">
-            <CheckCircleIcon v-if="status === true" class="size-6 text-green-700" />
-            <XCircleIcon v-if="status === false" class="size-6 text-red-600" />
-        </div>
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-        <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-            <span class="text-sm font-medium text-gray-950">{{ name }}</span>
-            <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">{{ message }}</p>
-        </div>
+return new class () extends Migration {
+    public $withinTransaction = false;
 
-        <InformationCircleIcon class="shrink-0 size-5 self-center text-gray-400" aria-hidden="true" />
-    </div>
-</template>
+    public function up(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->index(['service_monitoring_target_id', 'created_at'], 'historical_service_monitorings_target_id_created_at_index')
+                ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'))
+                ->concurrently();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->dropIndexIfExists('historical_service_monitorings_target_id_created_at_index');
+        });
+    }
+};

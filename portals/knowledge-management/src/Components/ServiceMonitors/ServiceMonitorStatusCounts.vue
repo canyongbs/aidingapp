@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,42 +30,47 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { computed } from 'vue';
+    import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
 
-namespace AidingApp\ServiceManagement\Models;
+    const props = defineProps({
+        totalCount: {
+            type: Number,
+            required: true,
+        },
+        statusCounts: {
+            type: Object,
+            required: true,
+        },
+    });
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+    const counts = computed(() =>
+        STATUS_ORDER.filter((status) => (props.statusCounts[status] ?? 0) > 0).map((status) => ({
+            status,
+            count: props.statusCounts[status],
+            ...getStatus(status),
+        })),
+    );
+</script>
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+<template>
+    <ul class="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Monitors by status">
+        <li
+            class="inline-flex items-center gap-2 rounded-[var(--rounding-md)] bg-[rgba(var(--primary-50),1)] px-3 py-1.5 text-sm font-semibold text-[rgba(var(--primary-700),1)]"
+        >
+            All monitors
+            <span class="tabular-nums">{{ totalCount }}</span>
+        </li>
+        <li
+            v-for="item in counts"
+            :key="item.status"
+            class="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700"
+        >
+            <span :class="['size-2 rounded-full', item.barClass]" aria-hidden="true" />
+            {{ item.label }}
+            <span class="font-semibold tabular-nums text-gray-900">{{ item.count }}</span>
+        </li>
+    </ul>
+</template>

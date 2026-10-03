@@ -34,40 +34,53 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
+enum ServiceMonitoringStatus: string implements HasLabel
 {
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
+    case Operational = 'operational';
 
-    use SoftDeletes;
+    case Degraded = 'degraded';
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
+    case Outage = 'outage';
 
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
+    case Unknown = 'unknown';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Operational => 'Operational',
+            self::Degraded => 'Degraded',
+            self::Outage => 'Outage',
+            self::Unknown => 'No data',
+        };
+    }
 
     /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     * The status of a group of checks, such as those in one bar of a status history chart.
      */
-    public function serviceMonitoringTarget(): BelongsTo
+    public static function fromCheckCounts(int $checksCount, int $successfulChecksCount): self
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        return match (true) {
+            $checksCount === 0 => self::Unknown,
+            $successfulChecksCount === $checksCount => self::Operational,
+            $successfulChecksCount === 0 => self::Outage,
+            default => self::Degraded,
+        };
+    }
+
+    /**
+     * The position of the status when sorting in ascending order, from no data through to the most severe.
+     */
+    public function getSortRank(): int
+    {
+        return match ($this) {
+            self::Unknown => 0,
+            self::Operational => 1,
+            self::Degraded => 2,
+            self::Outage => 3,
+        };
     }
 }

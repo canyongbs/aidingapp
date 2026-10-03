@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,42 +30,41 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
 
-namespace AidingApp\ServiceManagement\Models;
+    defineProps({
+        modelValue: {
+            type: String,
+            default: '',
+        },
+        label: {
+            type: String,
+            required: true,
+        },
+        placeholder: {
+            type: String,
+            default: '',
+        },
+    });
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+    defineEmits(['update:modelValue']);
+</script>
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+<template>
+    <div class="relative w-full">
+        <MagnifyingGlassIcon
+            class="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-gray-400"
+            aria-hidden="true"
+        />
+        <input
+            type="search"
+            :value="modelValue"
+            :aria-label="label"
+            :placeholder="placeholder"
+            class="w-full rounded-[var(--rounding-md)] border border-gray-300 bg-white py-2 pl-9 pr-3 text-sm text-gray-900 placeholder:text-gray-400 focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
+            @input="$emit('update:modelValue', $event.target.value)"
+        />
+    </div>
+</template>

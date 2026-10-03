@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,41 +31,23 @@
 
 </COPYRIGHT>
 */
-
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+import { onMounted, onUnmounted, ref } from 'vue';
 
 /**
- * @mixin IdeHelperHistoricalServiceMonitoring
+ * The current time in milliseconds, refreshed on an interval so that relative times ("2 minutes ago") stay current.
  */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
+export function useNow(interval = 30000) {
+    const now = ref(Date.now());
 
-    use SoftDeletes;
+    let timer = null;
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
+    onMounted(() => {
+        timer = setInterval(() => {
+            now.value = Date.now();
+        }, interval);
+    });
 
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
+    onUnmounted(() => clearInterval(timer));
 
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
+    return now;
 }

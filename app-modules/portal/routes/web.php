@@ -107,5 +107,7 @@ Route::prefix('portal')
                 ->name('projects.show');
             Route::get('/status', RenderKnowledgeManagementPortal::class)
                 ->name('status');
+            Route::get('/status/{serviceMonitoringTarget}', RenderKnowledgeManagementPortal::class)
+                ->name('status.show');
         });
     });

@@ -1,5 +1,3 @@
-<?php
-
 /*
 <COPYRIGHT>
 
@@ -33,41 +31,42 @@
 
 </COPYRIGHT>
 */
+const UNITS = [
+    { unit: 'year', seconds: 60 * 60 * 24 * 365 },
+    { unit: 'month', seconds: 60 * 60 * 24 * 30 },
+    { unit: 'day', seconds: 60 * 60 * 24 },
+    { unit: 'hour', seconds: 60 * 60 },
+    { unit: 'minute', seconds: 60 },
+];
 
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+const relativeTimeFormat = new Intl.RelativeTimeFormat('en-US', { numeric: 'auto' });
 
 /**
- * @mixin IdeHelperHistoricalServiceMonitoring
+ * Describes how long ago (or how far ahead) a datetime is, e.g. "2 minutes ago".
+ *
+ * @param {string|Date|null} value
+ * @param {number} [now] The current time, in milliseconds, so that callers can re-render on a timer.
+ * @returns {string|null}
  */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+export default function formatRelativeTime(value, now = Date.now()) {
+    if (!value) {
+        return null;
     }
+
+    const date = value instanceof Date ? value : new Date(value);
+
+    if (isNaN(date.getTime())) {
+        return null;
+    }
+
+    const seconds = Math.round((date.getTime() - now) / 1000);
+
+    if (Math.abs(seconds) < 45) {
+        return 'just now';
+    }
+
+    const { unit, seconds: unitSeconds } =
+        UNITS.find(({ seconds: unitSeconds }) => Math.abs(seconds) >= unitSeconds) ?? UNITS[UNITS.length - 1];
+
+    return relativeTimeFormat.format(Math.round(seconds / unitSeconds), unit);
 }
