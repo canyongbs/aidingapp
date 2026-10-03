@@ -34,47 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Engagement\Notifications;
-
-use AidingApp\Notification\Notifications\Attributes\SystemNotification;
-use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
-use Illuminate\Bus\Queueable;
 use Illuminate\Notifications\AnonymousNotifiable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Support\HtmlString;
 
-#[SystemNotification]
-class IneligibleContactSesS3InboundEmailServiceRequestNotification extends Notification
+function makeIneligibleContactNotification(?string $bcc): IneligibleContactSesS3InboundEmailServiceRequestNotification
 {
-    use Queueable;
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'email_automatic_creation_bcc' => $bcc,
+    ]);
 
-    public function __construct(
-        protected TenantServiceRequestTypeDomain $serviceRequestTypeDomain,
-        protected string $content,
-    ) {}
+    $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::factory()->make([
+        'service_request_type_id' => $serviceRequestType->getKey(),
+    ]);
 
-    /**
-     * @return array<int, string>
-     */
-    public function via(AnonymousNotifiable $notifiable): array
-    {
-        return ['mail'];
-    }
-
-    public function toMail(AnonymousNotifiable $notifiable): MailMessage
-    {
-        $bcc = $this->serviceRequestTypeDomain->serviceRequestType->email_automatic_creation_bcc;
-
-        return MailMessage::make()
-            ->subject('Ineligible for Service Request Creation')
-            ->when(filled($bcc), fn (MailMessage $message) => $message->bcc($bcc))
-            ->line('Thank you for your service request.')
-            ->line('Unfortunately, we were unable to locate your serviceable account in our systems and therefore are unable to automatically open your service request.')
-            ->line('Please contact your account manager for additional details.')
-            ->line('Original Message (Inline embeds like images may not be displayed):')
-            ->line(new HtmlString('<hr />'))
-            ->line(str($this->content)->sanitizeHtml()->toHtmlString())
-            ->line(new HtmlString('<br /><hr />'));
-    }
+    return new IneligibleContactSesS3InboundEmailServiceRequestNotification($serviceRequestTypeDomain, 'Original message');
 }
+
+it('bccs the service request type bcc address when one is configured', function () {
+    $mailMessage = makeIneligibleContactNotification('bcc@example.com')
+        ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
+
+    expect($mailMessage->bcc)->toBe([['bcc@example.com', null]]);
+});
+
+it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) {
+    $mailMessage = makeIneligibleContactNotification($bcc)
+        ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
+
+    expect($mailMessage->bcc)->toBeEmpty();
+})->with([
+    'null' => [null],
+    'empty string' => [''],
+]);
