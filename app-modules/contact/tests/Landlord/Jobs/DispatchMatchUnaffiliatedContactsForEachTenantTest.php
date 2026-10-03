@@ -34,40 +34,41 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+use AidingApp\Contact\Jobs\DispatchMatchUnaffiliatedContactsForEachTenant;
+use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
+use App\Enums\SubscriptionStatus;
+use App\Models\Tenant;
+use Illuminate\Support\Facades\Queue;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
-use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+it('dispatches a contact reconciliation job for each eligible tenant', function () {
+    $firstTenant = Tenant::query()->firstOrFail();
+    $secondTenant = Tenant::factory()->create([
+        'domain' => 'second-contact-reconciliation.aidingapp.local',
+        'setup_complete' => true,
+        'subscription_status' => SubscriptionStatus::Active,
+    ]);
+    $dispatchedTenantIds = [];
+    Queue::fake([MatchUnaffiliatedContactsJob::class])
+        ->beforePushing(function (mixed $job) use (&$dispatchedTenantIds): void {
+            if (! $job instanceof MatchUnaffiliatedContactsJob) {
+                return;
+            }
 
-class ContactObserver
-{
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
+            $tenant = Tenant::current();
+            assert($tenant instanceof Tenant);
 
-    public function creating(Contact $contact): void
-    {
-        $user = auth()->user();
+            $dispatchedTenantIds[] = $tenant->getKey();
+        });
 
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
+    try {
+        (new DispatchMatchUnaffiliatedContactsForEachTenant())->handle();
+
+        Queue::assertPushed(MatchUnaffiliatedContactsJob::class, 2);
+        expect($dispatchedTenantIds)->toEqualCanonicalizing([
+            $firstTenant->getKey(),
+            $secondTenant->getKey(),
+        ]);
+    } finally {
+        $secondTenant->delete();
     }
-
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
-
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-}
+});

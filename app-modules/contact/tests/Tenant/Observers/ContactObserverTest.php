@@ -34,40 +34,35 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
-
-use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Models\Organization;
 
-class ContactObserver
-{
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
+it('associates a new contact with the matching organization', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
 
-    public function creating(Contact $contact): void
-    {
-        $user = auth()->user();
+    $contact = Contact::factory()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
 
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
-    }
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
 
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
+it('preserves an existing organization when a contact is saved', function () {
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com']],
+    ]);
+    $otherOrganization = Organization::factory()->create([
+        'domains' => [['domain' => 'other.com']],
+    ]);
+    $contact = Contact::factory()
+        ->for($otherOrganization, 'organization')
+        ->create(['email' => 'person@example.com']);
 
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
+    $contact->first_name = 'Updated';
+    $contact->save();
 
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-}
+    expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
+});
