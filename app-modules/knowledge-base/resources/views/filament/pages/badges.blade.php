@@ -33,7 +33,6 @@
 --}}
 
 @use('AidingApp\Portal\Support\KnowledgeBasePortalUrl')
-@use('App\Features\KnowledgeBasePortalStableUrlsFeature')
 @use('Illuminate\Support\Js')
 
 <div class="flex items-center gap-2">
@@ -45,9 +44,7 @@
 
     @if ($getRecord()->public && ! empty($getRecord()->category_id))
         @php
-            $portalArticleUrl = KnowledgeBasePortalStableUrlsFeature::active()
-                ? KnowledgeBasePortalUrl::article($getRecord())
-                : route('portal.show') . '/categories/' . $getRecord()->category_id . '/articles/' . $getRecord()->getKey();
+            $portalArticleUrl = KnowledgeBasePortalUrl::article($getRecord());
         @endphp
 
         <x-filament::badge>Public</x-filament::badge>

@@ -43,13 +43,12 @@ use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Support\KnowledgeBasePublicId;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 
 class KnowledgeBaseItemObserver
 {
     public function creating(KnowledgeBaseItem $knowledgeBaseItem): void
     {
-        if (! KnowledgeBasePortalStableUrlsFeature::active() || filled($knowledgeBaseItem->public_id)) {
+        if (filled($knowledgeBaseItem->public_id)) {
             return;
         }
 
