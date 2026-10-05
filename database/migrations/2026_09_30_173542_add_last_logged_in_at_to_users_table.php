@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\LastLoggedInFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -47,16 +46,12 @@ return new class () extends Migration {
             Schema::table('users', function (Blueprint $table) {
                 $table->timestamp('last_logged_in_at')->nullable();
             });
-
-            LastLoggedInFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            LastLoggedInFeature::deactivate();
-
             Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn('last_logged_in_at');
             });
