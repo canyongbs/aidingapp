@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
@@ -472,19 +471,6 @@ test('CreateServiceMonitor hides the request body fields when the HTTP method do
         ->fillForm(['http_method' => HttpMethod::Post])
         ->assertSchemaComponentVisible('request_body')
         ->assertSchemaComponentVisible('is_request_body_json');
-});
-
-test('CreateServiceMonitor hides the API endpoint monitor type option when the feature is inactive', function () {
-    ServiceMonitoringApiEndpointFeature::deactivate();
-
-    asSuperAdmin();
-
-    $request = ServiceMonitoringTargetRequestFactory::new()->state(['monitor_type' => MonitorType::ApiEndpoint])->create();
-
-    livewire(CreateServiceMonitoring::class)
-        ->fillForm($request)
-        ->call('create')
-        ->assertHasFormErrors(['monitor_type']);
 });
 
 test('CreateServiceMonitor can create a service monitor with an API endpoint monitor', function () {

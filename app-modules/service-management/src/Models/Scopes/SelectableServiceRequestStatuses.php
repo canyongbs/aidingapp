@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Models\Scopes;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
 
 /**
@@ -63,10 +62,6 @@ class SelectableServiceRequestStatuses
      */
     public function __invoke(Builder $query): void
     {
-        if (! ServiceRequestStatusArchivingFeature::active()) {
-            return;
-        }
-
         $query->where(function (Builder $query): void {
             $query->withoutArchived();
 

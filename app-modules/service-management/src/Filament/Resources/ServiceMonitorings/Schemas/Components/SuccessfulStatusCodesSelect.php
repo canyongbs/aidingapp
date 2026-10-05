@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Sche
 
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Rules\ValidHttpStatusCodes;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Select;
 use Filament\Schemas\Components\Utilities\Get;
 
@@ -55,7 +54,7 @@ class SuccessfulStatusCodesSelect
             ->required()
             ->rules([new ValidHttpStatusCodes()])
             ->helperText('The response is considered successful when its final HTTP status code (after following any redirects, if enabled) matches one of the selected codes.')
-            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active())
+            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::ApiEndpoint)
             ->columnSpanFull();
     }
 

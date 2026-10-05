@@ -41,7 +41,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Servic
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestStatusRequestFactory;
-use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -395,21 +394,5 @@ describe('archiving', function () {
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('delete'));
-    });
-
-    // TODO: Cleanup Task (ServiceRequestStatusArchivingFeature): delete this test — it covers the
-    // inactive branch, which no longer exists once the flag is removed.
-    it('offers the `DeleteAction` instead of the `ArchiveAction` when `ServiceRequestStatusArchivingFeature` is inactive', function () {
-        ServiceRequestStatusArchivingFeature::deactivate();
-
-        asSuperAdmin();
-
-        $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
-
-        livewire(EditServiceRequestStatus::class, [
-            'record' => $serviceRequestStatus->getRouteKey(),
-        ])
-            ->assertActionDoesNotExist(TestAction::make('archive'))
-            ->assertActionVisible(TestAction::make('delete'));
     });
 });

@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use App\Features\ServiceMonitoringAuthTypeFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
@@ -92,8 +91,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->columnSpanFull(),
                                 IconEntry::make('follow_redirection')
                                     ->label('Follow Redirection')
-                                    ->boolean()
-                                    ->visible(ServiceMonitoringApiEndpointFeature::active()),
+                                    ->boolean(),
                                 TextEntry::make('should_contain')
                                     ->label('Should Contain')
                                     ->listWithLineBreaks()
@@ -107,28 +105,28 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->state(fn (ServiceMonitoringTarget $record): string => collect($record->successful_status_codes ?? [])
                                         ->map(fn (int | string $code): string => SuccessfulStatusCodesSelect::options()[(int) $code] ?? (string) $code)
                                         ->implode(', '))
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint),
                                 IconEntry::make('is_max_latency_enabled')
                                     ->label('Maximum Latency Enforced')
                                     ->boolean()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint),
                                 TextEntry::make('max_latency_ms')
                                     ->label('Maximum Latency')
                                     ->suffix('ms')
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled),
                                 TextEntry::make('auth_type')
                                     ->label('Auth Type')
                                     ->visible(ServiceMonitoringAuthTypeFeature::active()),
                                 TextEntry::make('http_method')
                                     ->label('HTTP Method')
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint),
                                 TextEntry::make('request_body')
                                     ->label('Request Body')
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody() && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody()),
                                 IconEntry::make('is_request_body_json')
                                     ->label('Sent as JSON')
                                     ->boolean()
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody() && ServiceMonitoringApiEndpointFeature::active()),
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_body) && $record->http_method->supportsRequestBody()),
                                 RepeatableEntry::make('request_headers')
                                     ->label('Request Headers')
                                     ->schema([
@@ -136,7 +134,7 @@ class ViewServiceMonitoring extends ViewRecord
                                         TextEntry::make('value'),
                                     ])
                                     ->columns(2)
-                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_headers) && ServiceMonitoringApiEndpointFeature::active())
+                                    ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && filled($record->request_headers))
                                     ->columnSpanFull(),
                             ])
                             ->columns(2),

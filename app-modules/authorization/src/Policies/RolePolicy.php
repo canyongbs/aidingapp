@@ -68,6 +68,10 @@ class RolePolicy
 
     public function update(Authenticatable $authenticatable, Role $role): Response
     {
+        if ($this->isAdminRole($role)) {
+            return Response::deny('Admin roles cannot be updated.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['role.*.update'],
             denyResponse: 'You do not have permission to update this role.'
@@ -76,6 +80,10 @@ class RolePolicy
 
     public function delete(Authenticatable $authenticatable, Role $role): Response
     {
+        if ($this->isAdminRole($role)) {
+            return Response::deny('Admin roles cannot be deleted.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['role.*.delete'],
             denyResponse: 'You do not have permission to delete this role.'
@@ -108,6 +116,10 @@ class RolePolicy
 
     public function forceDelete(Authenticatable $authenticatable, Role $role): Response
     {
+        if ($this->isAdminRole($role)) {
+            return Response::deny('Admin roles cannot be permanently deleted.');
+        }
+
         return $authenticatable->canOrElse(
             abilities: ['role.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete this role.'
@@ -120,5 +132,14 @@ class RolePolicy
             abilities: ['role.*.force-delete'],
             denyResponse: 'You do not have permission to permanently delete any role.'
         );
+    }
+
+    protected function isAdminRole(Role $role): bool
+    {
+        return in_array($role->name, [
+            Authenticatable::SUPER_ADMIN_ROLE,
+            Authenticatable::PARTNER_ADMIN_ROLE,
+            Authenticatable::AI_ADMIN_ROLE,
+        ], true);
     }
 }

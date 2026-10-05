@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Http\Resources\Api\V1\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Features\ServiceRequestStatusArchivingFeature;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Group;
 use Illuminate\Database\Query\Builder;
@@ -90,10 +89,6 @@ class UpdateServiceRequestController
     private function statusRule(ServiceRequest $serviceRequest): Exists
     {
         $rule = Rule::exists(ServiceRequestStatus::class, 'id');
-
-        if (! ServiceRequestStatusArchivingFeature::active()) {
-            return $rule;
-        }
 
         return $rule->where(
             fn (Builder $query) => $query

@@ -38,7 +38,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Sche
 
 use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
-use App\Features\ServiceMonitoringApiEndpointFeature;
 use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Utilities\Get;
 
@@ -56,7 +55,7 @@ class RequestBodyTextarea
 
     public static function monitorSupportsRequestBody(Get $get): bool
     {
-        if ($get('monitor_type') !== MonitorType::ApiEndpoint || ! ServiceMonitoringApiEndpointFeature::active()) {
+        if ($get('monitor_type') !== MonitorType::ApiEndpoint) {
             return false;
         }
 
