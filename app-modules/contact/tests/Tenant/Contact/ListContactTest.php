@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\Engagement;
@@ -76,17 +76,16 @@ test('can list records of engagements timelineable', function () {
 
     $contact = Contact::factory()->create();
 
-    actingAs($user)
-        ->get(
-            ContactResource::getUrl('manage-engagement', [
-                'record' => $contact->getKey(),
-            ])
-        )->assertForbidden();
+    actingAs($user);
+
+    expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
     $user->givePermissionTo('engagement.view-any');
     $user->givePermissionTo('engagement_response.view-any');
 
     actingAs($user);
+
+    expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
 
     $engagements = Engagement::factory()->count(1)
         ->state([
@@ -116,7 +115,7 @@ test('can list records of engagements timelineable', function () {
 
     livewire(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => EditContact::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords($engagements->pluck('timelineRecord')->merge($engagementResponses->pluck('timelineRecord')))
         ->assertSuccessful();
@@ -128,17 +127,16 @@ test('can filter engagements timelineable', function () {
 
     $contact = Contact::factory()->create();
 
-    actingAs($user)
-        ->get(
-            ContactResource::getUrl('manage-engagement', [
-                'record' => $contact->getKey(),
-            ])
-        )->assertForbidden();
+    actingAs($user);
+
+    expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
 
     $user->givePermissionTo('engagement.view-any');
     $user->givePermissionTo('engagement_response.view-any');
 
     actingAs($user);
+
+    expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
 
     $engagements = Engagement::factory()->count(1)
         ->state([
@@ -168,7 +166,7 @@ test('can filter engagements timelineable', function () {
 
     livewire(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => EditContact::class,
+        'pageClass' => ViewContact::class,
     ])
         ->assertCanSeeTableRecords($engagements->pluck('timelineRecord')->merge($engagementResponses->pluck('timelineRecord')))
         ->filterTable('direction', Engagement::class)
