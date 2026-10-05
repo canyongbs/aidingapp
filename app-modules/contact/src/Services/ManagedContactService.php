@@ -37,12 +37,42 @@
 namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
+use App\Features\EnhanceContactsTableDataModelFeature;
+use App\Features\FullNameFeature;
 use App\Models\User;
 use CanyonGBS\Common\Parser\Parser;
 use Illuminate\Database\Eloquent\Builder;
 
 class ManagedContactService
 {
+    /**
+     * The User attributes that are synchronized to the managed Contact.
+     *
+     * @var array<int, string>
+     */
+    public const SYNCED_USER_ATTRIBUTES = [
+        'name',
+        'first_name',
+        'last_name',
+        'preferred_name',
+        'email',
+        'mobile',
+        'employee_id',
+        'job_title',
+        'work_number',
+        'work_extension',
+        'student_id',
+        'school',
+        'academic_department',
+        'program',
+        'address',
+        'address_2',
+        'city',
+        'state',
+        'postal_code',
+        'country',
+    ];
+
     /**
      * Turn a User into a managed contact (or update the existing link), keeping
      * the Contact's data synchronized with the User. If a Contact already exists
@@ -57,10 +87,10 @@ class ManagedContactService
             $contact->deleted_at = null;
         }
 
-        $contact->fill($this->mapUserAttributes($user));
         $contact->type()->associate($contactTypeId);
         $contact->managedByUser()->associate($user);
-        $contact->save();
+
+        $this->syncContact($contact, $user);
 
         return $contact;
     }
@@ -94,6 +124,15 @@ class ManagedContactService
             return;
         }
 
+        $this->syncContact($contact, $user);
+    }
+
+    /**
+     * Re-synchronize the given Contact's data from an already loaded User, without
+     * resolving the link again. The Contact Type is left untouched.
+     */
+    public function syncContact(Contact $contact, User $user): void
+    {
         $contact->fill($this->mapUserAttributes($user));
         $contact->save();
     }
@@ -124,16 +163,70 @@ class ManagedContactService
      */
     protected function mapUserAttributes(User $user): array
     {
+        $attributes = [
+            'full_name' => trim($user->name),
+            'email' => $user->email,
+            ...$this->mapNameAttributes($user),
+        ];
+
+        $optionalAttributes = [
+            'job_title' => $user->job_title,
+            'phone' => $user->work_number,
+            'mobile' => $user->mobile,
+        ];
+
+        if (EnhanceContactsTableDataModelFeature::active()) {
+            $optionalAttributes['work_number'] = $user->work_number;
+            $optionalAttributes['work_extension'] = is_null($user->work_extension) ? null : (string) $user->work_extension;
+        }
+
+        if (FullNameFeature::active()) {
+            $optionalAttributes = [
+                ...$optionalAttributes,
+                'preferred' => $user->preferred_name,
+                'address' => $user->address,
+                'address_2' => $user->address_2,
+                'city' => $user->city,
+                'state' => $user->state,
+                'postal' => $user->postal_code,
+            ];
+
+            if (EnhanceContactsTableDataModelFeature::active()) {
+                $optionalAttributes = [
+                    ...$optionalAttributes,
+                    'employee_id' => $user->employee_id,
+                    'student_id' => $user->student_id,
+                    'school' => $user->school,
+                    'academic_department' => $user->academic_department,
+                    'program' => $user->program,
+                    'country' => $user->country,
+                ];
+            }
+        }
+
+        return [
+            ...$attributes,
+            ...array_map(fn (mixed $value): mixed => filled($value) ? $value : null, $optionalAttributes),
+        ];
+    }
+
+    /**
+     * @return array{first_name: string, last_name: string}
+     */
+    protected function mapNameAttributes(User $user): array
+    {
+        if (FullNameFeature::active()) {
+            return [
+                'first_name' => trim((string) $user->first_name),
+                'last_name' => trim((string) $user->last_name),
+            ];
+        }
+
         $name = (new Parser())->parse(trim($user->name));
 
         return [
             'first_name' => $name->getFirstname(),
             'last_name' => $name->getLastname(),
-            'full_name' => trim($user->name),
-            'email' => $user->email,
-            'job_title' => $user->job_title,
-            'phone' => $user->work_number,
-            'mobile' => $user->mobile,
         ];
     }
 }

@@ -41,6 +41,7 @@ use AidingApp\Authorization\Filament\Resources\Roles\RoleResource;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Authorization\Models\Role;
 use CanyonGBS\Common\Filament\Forms\Components\PermissionsMatrix;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -95,6 +96,7 @@ class EditRole extends EditRecord
     {
         return [
             ViewAction::make(),
+            DeleteAction::make(),
         ];
     }
 }
