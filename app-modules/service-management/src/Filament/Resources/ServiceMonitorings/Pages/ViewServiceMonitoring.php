@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Widgets\ServiceUptimeWidget;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use Filament\Actions\EditAction;
 use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\RepeatableEntry;
@@ -115,8 +114,7 @@ class ViewServiceMonitoring extends ViewRecord
                                     ->suffix('ms')
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint && $record->is_max_latency_enabled),
                                 TextEntry::make('auth_type')
-                                    ->label('Auth Type')
-                                    ->visible(ServiceMonitoringAuthTypeFeature::active()),
+                                    ->label('Auth Type'),
                                 TextEntry::make('http_method')
                                     ->label('HTTP Method')
                                     ->visible(fn (ServiceMonitoringTarget $record): bool => $record->monitor_type === MonitorType::ApiEndpoint),

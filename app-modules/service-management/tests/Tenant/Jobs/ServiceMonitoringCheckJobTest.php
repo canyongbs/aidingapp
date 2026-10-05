@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Jobs\ServiceMonitoringCheckJob;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Models\User;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\Request;
@@ -901,20 +900,6 @@ it('does not apply basic auth when the auth type is none', function () {
     Http::fake(fn () => Http::response('Test', 200));
 
     $serviceMonitorTarget = ServiceMonitoringTarget::factory()
-        ->create(['monitor_type' => MonitorType::Availability]);
-
-    (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();
-
-    Http::assertSent(fn (Request $request) => ! $request->hasHeader('Authorization'));
-});
-
-it('does not apply basic auth when the feature is inactive', function () {
-    ServiceMonitoringAuthTypeFeature::deactivate();
-
-    Http::fake(fn () => Http::response('Test', 200));
-
-    $serviceMonitorTarget = ServiceMonitoringTarget::factory()
-        ->basicAuth()
         ->create(['monitor_type' => MonitorType::Availability]);
 
     (new ServiceMonitoringCheckJob($serviceMonitorTarget))->handle();

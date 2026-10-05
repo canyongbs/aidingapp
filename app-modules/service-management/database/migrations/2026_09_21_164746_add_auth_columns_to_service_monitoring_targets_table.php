@@ -34,34 +34,24 @@
 </COPYRIGHT>
 */
 
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_monitoring_targets', function (Blueprint $table) {
-                $table->string('auth_type')->initial('none');
-                $table->text('auth_username')->nullable();
-                $table->text('auth_password')->nullable();
-            });
-
-            ServiceMonitoringAuthTypeFeature::activate();
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->string('auth_type')->initial('none');
+            $table->text('auth_username')->nullable();
+            $table->text('auth_password')->nullable();
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            ServiceMonitoringAuthTypeFeature::deactivate();
-
-            Schema::table('service_monitoring_targets', function (Blueprint $table) {
-                $table->dropColumn(['auth_type', 'auth_username', 'auth_password']);
-            });
+        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+            $table->dropColumn(['auth_type', 'auth_username', 'auth_password']);
         });
     }
 };

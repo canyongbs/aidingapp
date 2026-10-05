@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use Filament\Forms\Components\Select;
 
 class AuthTypeSelect
@@ -51,7 +50,6 @@ class AuthTypeSelect
             ->default(AuthType::None)
             ->live()
             ->required()
-            ->visible(ServiceMonitoringAuthTypeFeature::active())
             ->columnSpanFull();
     }
 }
