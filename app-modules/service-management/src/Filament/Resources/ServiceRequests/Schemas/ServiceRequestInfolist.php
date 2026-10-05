@@ -36,7 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Actions\ViewContactAction;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
@@ -90,24 +90,25 @@ class ServiceRequestInfolist
             ))
             ->schema([
                 Grid::make(3)
-                    ->schema([
+                    ->schema(fn (ServiceRequest $record): array => [
                         TextEntry::make('respondent')
                             ->label('Customer Contact')
+                            ->state(function (ServiceRequest $record, TextEntry $component): HtmlString {
+                                /** @var Contact $respondent */
+                                $respondent = $record->respondent;
+
+                                $viewContactAction = $component->getAction();
+                                assert($viewContactAction instanceof Action);
+
+                                return new HtmlString(view('service-management::filament.infolists.respondent-contact', [
+                                    'name' => $respondent->{Contact::displayNameKey()},
+                                    'type' => $respondent->type->name,
+                                    'organizationName' => $respondent->organization->name ?? 'Unaffiliated',
+                                    'loadingTarget' => $viewContactAction->getLivewireClickHandler(),
+                                ])->render());
+                            })
                             ->color('primary')
-                            ->html()
-                            ->state(function (ServiceRequest $record): string {
-                                /** @var Contact $respondent */
-                                $respondent = $record->respondent;
-                                $organizationName = $respondent->organization->name ?? 'Unaffiliated';
-
-                                return "{$respondent->{Contact::displayNameKey()}} ({$respondent->type->name})<br>{$organizationName}";
-                            })
-                            ->url(function (ServiceRequest $record) {
-                                /** @var Contact $respondent */
-                                $respondent = $record->respondent;
-
-                                return ContactResource::getUrl('view', ['record' => $respondent->id]);
-                            })
+                            ->action(ViewContactAction::make($record->respondent))
                             ->afterLabel(fn (ServiceRequest $record): Schema => Schema::start([
                                 EditServiceRequestContactAction::make($record),
                             ])),
