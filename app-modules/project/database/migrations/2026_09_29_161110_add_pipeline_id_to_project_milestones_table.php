@@ -34,7 +34,6 @@
 </COPYRIGHT>
 */
 
-use App\Features\AssociateMilestoneWithActivePipelineFeature;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
@@ -88,20 +87,12 @@ return new class () extends Migration {
             Schema::table('project_milestones', function (Blueprint $table) {
                 $table->foreignUuid('pipeline_id')->nullable(false)->change();
             });
-
-            // TODO: Cleanup Task (associate-milestone-with-active-pipeline): this permanent
-            // migration cannot be deleted, so when the flag is removed drop these activate()/
-            // deactivate() calls and the AssociateMilestoneWithActivePipelineFeature import —
-            // otherwise it references a deleted class and breaks migrate/tests on fresh databases.
-            AssociateMilestoneWithActivePipelineFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            AssociateMilestoneWithActivePipelineFeature::deactivate();
-
             Schema::table('project_milestones', function (Blueprint $table) {
                 $table->dropForeign(['pipeline_id']);
                 $table->dropColumn('pipeline_id');
