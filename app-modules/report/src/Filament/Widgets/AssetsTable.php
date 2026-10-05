@@ -45,6 +45,7 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Livewire\Attributes\On;
 
 class AssetsTable extends BaseWidget
@@ -123,7 +124,7 @@ class AssetsTable extends BaseWidget
                     ->label('Name')
                     ->searchable()
                     ->getSearchResultsUsing(fn (string $search): array => Asset::query()
-                        ->whereRaw('lower(name) like ?', ['%' . strtolower($search) . '%'])
+                        ->whereRaw('lower(name) like ?', ['%' . Str::lower($search) . '%'])
                         ->limit(50)
                         ->pluck('name', 'name')
                         ->toArray())
