@@ -39,7 +39,6 @@ namespace AidingApp\Portal\Support;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Support\KnowledgeBasePublicId;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use Illuminate\Support\Str;
 
 final class KnowledgeBasePortalUrl
@@ -82,7 +81,7 @@ final class KnowledgeBasePortalUrl
 
     public static function resolveCategory(string $locator): ?KnowledgeBaseCategory
     {
-        if (KnowledgeBasePortalStableUrlsFeature::active() && ($publicId = self::publicIdFromLocator($locator))) {
+        if ($publicId = self::publicIdFromLocator($locator)) {
             $category = KnowledgeBaseCategory::query()
                 ->where('public_id', $publicId)
                 ->first();
@@ -103,7 +102,7 @@ final class KnowledgeBasePortalUrl
 
     public static function resolveArticle(string $locator): ?KnowledgeBaseItem
     {
-        if (KnowledgeBasePortalStableUrlsFeature::active() && ($publicId = self::publicIdFromLocator($locator))) {
+        if ($publicId = self::publicIdFromLocator($locator)) {
             $article = KnowledgeBaseItem::query()
                 ->where('public_id', $publicId)
                 ->first();

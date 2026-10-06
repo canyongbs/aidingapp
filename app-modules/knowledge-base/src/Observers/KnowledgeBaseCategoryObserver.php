@@ -38,7 +38,6 @@ namespace AidingApp\KnowledgeBase\Observers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Support\KnowledgeBasePublicId;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use InvalidArgumentException;
@@ -47,7 +46,7 @@ class KnowledgeBaseCategoryObserver
 {
     public function creating(KnowledgeBaseCategory $category): void
     {
-        if (KnowledgeBasePortalStableUrlsFeature::active() && blank($category->public_id)) {
+        if (blank($category->public_id)) {
             do {
                 $category->public_id = KnowledgeBasePublicId::generate();
             } while (KnowledgeBaseCategory::query()->where('public_id', $category->public_id)->exists());

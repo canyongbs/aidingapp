@@ -42,7 +42,6 @@ use AidingApp\Portal\DataTransferObjects\KnowledgeBaseArticleData;
 use AidingApp\Portal\DataTransferObjects\KnowledgeBaseCategoryData;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use App\Http\Controllers\Controller;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -51,8 +50,6 @@ class KnowledgeManagementPortalArticleController extends Controller
 {
     public function show(string $article): JsonResponse
     {
-        abort_unless(KnowledgeBasePortalStableUrlsFeature::active(), 404);
-
         $article = KnowledgeBasePortalUrl::resolveArticle($article);
 
         abort_if($article === null, 404);
@@ -145,7 +142,6 @@ class KnowledgeManagementPortalArticleController extends Controller
     private function response(KnowledgeBaseItem $article): JsonResponse
     {
         $category = $article->category;
-        $stableUrlsActive = KnowledgeBasePortalStableUrlsFeature::active();
 
         if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
             $portalGuest = PortalGuest::create();
@@ -188,20 +184,20 @@ class KnowledgeManagementPortalArticleController extends Controller
                 'slug' => $category->slug,
                 'name' => $category->name,
                 'description' => $category->description,
-                'publicId' => $stableUrlsActive ? $category->public_id : null,
+                'publicId' => $category->public_id,
                 'parentCategory' => $category->parentCategory ? KnowledgeBaseCategoryData::from([
                     'slug' => $category->parentCategory->slug,
                     'name' => $category->parentCategory->name,
                     'description' => $category->parentCategory->description,
-                    'publicId' => $stableUrlsActive ? $category->parentCategory->public_id : null,
+                    'publicId' => $category->parentCategory->public_id,
                 ]) : null,
             ]),
             'article' => KnowledgeBaseArticleData::from([
                 'id' => $article->getKey(),
                 'categorySlug' => $article->category->slug,
                 'name' => $article->title,
-                'publicId' => $stableUrlsActive ? $article->public_id : null,
-                'slug' => $stableUrlsActive ? KnowledgeBasePortalUrl::articleSlug($article) : null,
+                'publicId' => $article->public_id,
+                'slug' => KnowledgeBasePortalUrl::articleSlug($article),
                 'lastUpdated' => $article->updated_at->toIso8601String(),
                 'content' => $content,
                 'tags' => $article->tags()

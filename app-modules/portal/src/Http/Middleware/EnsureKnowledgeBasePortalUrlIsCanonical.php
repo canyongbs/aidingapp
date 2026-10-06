@@ -37,7 +37,6 @@
 namespace AidingApp\Portal\Http\Middleware;
 
 use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 use Closure;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -50,10 +49,6 @@ class EnsureKnowledgeBasePortalUrlIsCanonical
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (! KnowledgeBasePortalStableUrlsFeature::active()) {
-            return $next($request);
-        }
-
         $canonicalUrl = match ($request->route()?->getName()) {
             'portal.category.show' => $this->categoryUrl((string) $request->route('category')),
             'portal.subcategory.show' => $this->categoryUrl((string) $request->route('subcategory')),
