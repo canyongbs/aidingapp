@@ -34,52 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
-use AidingApp\Engagement\Filament\Resources\EngagementResponses\Actions\EngagementResponseViewAction;
-use AidingApp\Engagement\Models\EngagementResponse;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
-
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class EngagementResponseTimeline extends CustomTimeline
-{
-    public function __construct(
-        public EngagementResponse $engagementResponse
-    ) {}
-
-    public function icon(): string
+return new class () extends Migration {
+    public function up(): void
     {
-        return 'heroicon-o-arrow-small-left';
+        // Reclassification was the only code path that soft-deleted assignments; it now marks them inactive instead.
+        DB::transaction(function (): void {
+            DB::table('service_request_assignments')
+                ->whereNotNull('deleted_at')
+                ->update([
+                    'deleted_at' => null,
+                    'status' => 'inactive',
+                ]);
+        });
     }
 
-    public function sortableBy(): string
+    public function down(): void
     {
-        return $this->engagementResponse->sent_at;
+        // Restored rows are indistinguishable from other inactive assignments, so this cannot be reversed
     }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'engagement::engagement-response-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return EngagementResponseViewAction::make()->record($this->engagementResponse);
-    }
-
-    public function missingRecordTitle(): string
-    {
-        return 'Engagement Response Received';
-    }
-
-    public function missingRecordDescription(): ?string
-    {
-        return null;
-    }
-}
+};

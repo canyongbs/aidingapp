@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -565,7 +566,7 @@ test('reclassify with override assignment creates manual assignment to selected 
     expect($assignment->assigned_by_type)->toBe((new User())->getMorphClass());
 });
 
-test('reclassify deletes existing active assignment', function () {
+test('reclassify marks the existing active assignment inactive instead of deleting it', function () {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -592,7 +593,7 @@ test('reclassify deletes existing active assignment', function () {
         'priority_id' => $originalPriority->getKey(),
     ])->create();
 
-    $serviceRequest->assignments()->create([
+    $assignment = $serviceRequest->assignments()->create([
         'user_id' => $previousAssignee->getKey(),
         'assigned_by_id' => null,
         'assigned_by_type' => null,
@@ -600,7 +601,7 @@ test('reclassify deletes existing active assignment', function () {
         'status' => ServiceRequestAssignmentStatus::Active,
     ]);
 
-    expect($serviceRequest->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(1);
+    expect($assignment->status)->toBe(ServiceRequestAssignmentStatus::Active);
 
     asSuperAdmin();
 
@@ -614,8 +615,122 @@ test('reclassify deletes existing active assignment', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($serviceRequest->refresh()->assignments()->where('status', ServiceRequestAssignmentStatus::Active)->count())->toBe(0);
-    expect(ServiceRequestAssignment::withTrashed()->where('service_request_id', $serviceRequest->getKey())->where('user_id', $previousAssignee->getKey())->first()?->trashed())->toBeTrue();
+    $assignment = ServiceRequestAssignment::withTrashed()->find($assignment->getKey());
+
+    expect($assignment->trashed())->toBeFalse()
+        ->and($assignment->status)->toBe(ServiceRequestAssignmentStatus::Inactive)
+        ->and($serviceRequest->refresh()->assignedTo)->toBeNull();
+});
+
+test('reclassify records an `Assignment Removed` history entry when it leaves the service request unassigned', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $previousAssignee = User::factory()->create(['name' => 'Jane Doe']);
+    $originalType->managerUsers()->attach($previousAssignee);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    $serviceRequest->assignments()->create([
+        'user_id' => $previousAssignee->getKey(),
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    $actor = User::factory()->create();
+    asSuperAdmin($actor);
+
+    $removalHistories = fn () => $serviceRequest->histories()->get()
+        ->filter(fn (ServiceRequestHistory $history): bool => $history->isAssignmentRemovedEvent());
+
+    expect($removalHistories())->toBeEmpty();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'default',
+        ])
+        ->assertHasNoFormErrors();
+
+    $removalHistory = $removalHistories()->sole();
+
+    expect($removalHistory->removedAssigneeName())->toBe('Jane Doe')
+        ->and($removalHistory->actor_id)->toBe($actor->getKey())
+        ->and($removalHistory->actor_type)->toBe($actor->getMorphClass());
+});
+
+test('reclassify does not record an `Assignment Removed` history entry when it reassigns the service request', function () {
+    $originalType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $newType = ServiceRequestType::factory()->create([
+        'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
+    ]);
+
+    $originalPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $originalType->getKey(),
+    ]);
+
+    $newPriority = ServiceRequestPriority::factory()->create([
+        'type_id' => $newType->getKey(),
+    ]);
+
+    $previousAssignee = User::factory()->create();
+    $originalType->managerUsers()->attach($previousAssignee);
+
+    $newAssignee = User::factory()->create();
+    $newType->managerUsers()->attach($newAssignee);
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => $originalPriority->getKey(),
+    ])->create();
+
+    $serviceRequest->assignments()->create([
+        'user_id' => $previousAssignee->getKey(),
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    asSuperAdmin();
+
+    livewire(ViewServiceRequest::class, [
+        'record' => $serviceRequest->getRouteKey(),
+    ])
+        ->callAction('reclassify', data: [
+            'type_id' => $newType->getKey(),
+            'priority_id' => $newPriority->getKey(),
+            'assignment_method' => 'override',
+            'assign_to' => $newAssignee->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($serviceRequest->refresh()->assignedTo?->user_id)->toBe($newAssignee->getKey())
+        ->and($serviceRequest->histories()->get()->contains(fn (ServiceRequestHistory $history): bool => $history->isAssignmentRemovedEvent()))->toBeFalse();
 });
 
 test('reclassify with default assignment invokes the correct assigner class', function (ServiceRequestTypeAssignmentTypes $assignmentType, ?string $assignerClass) {

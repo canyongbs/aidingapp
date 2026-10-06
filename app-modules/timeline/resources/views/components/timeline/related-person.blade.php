@@ -31,43 +31,20 @@
     
     </COPYRIGHT>
 --}}
-@php
-    $createdBy = $record
-        ->createdBy()
-        ->withTrashed()
-        ->first();
-@endphp
 
-<div>
-    <div class="flex flex-row justify-between">
-        <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <x-timeline::timeline.related-person class="font-medium" :person="$createdBy" :name="$createdBy?->name" />
-        </h3>
+@props(['person' => null, 'name' => null])
 
-        <div>
-            {{ $viewRecordIcon }}
-        </div>
-    </div>
-
-    <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        Sent {{ $record->dispatched_at?->diffForHumans() }}
-    </time>
-
-    <div
-        class="my-4 rounded-lg border-2 border-gray-200 p-2 text-base font-normal text-gray-500 dark:border-gray-800 dark:text-gray-400"
+@if ($person === null)
+    <span {{ $attributes->class('italic') }}>Deleted user</span>
+@elseif (method_exists($person, 'trashed') && $person->trashed())
+    <span {{ $attributes->class('italic') }}>{{ $name }}</span>
+@elseif (method_exists($person, 'filamentResource'))
+    <a
+        {{ $attributes->class('underline') }}
+        href="{{ $person::filamentResource()::getUrl('view', ['record' => $person]) }}"
     >
-        @if (! blank($record->subject))
-            <div class="mb-2 flex flex-col">
-                <p class="text-xs text-gray-400 dark:text-gray-500">Subject:</p>
-                <p>{{ $record->subject }}</p>
-            </div>
-        @endif
-
-        <div class="flex flex-col">
-            <p class="text-xs text-gray-400 dark:text-gray-500">Body:</p>
-            <div class="prose dark:prose-invert">
-                {{ $record->getBody() }}
-            </div>
-        </div>
-    </div>
-</div>
+        {{ $name }}
+    </a>
+@else
+    <span {{ $attributes }}>{{ $name }}</span>
+@endif

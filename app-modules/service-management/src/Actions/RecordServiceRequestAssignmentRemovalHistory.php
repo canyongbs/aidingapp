@@ -34,52 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Timeline\Timelines;
+namespace AidingApp\ServiceManagement\Actions;
 
-use AidingApp\Engagement\Filament\Resources\EngagementResponses\Actions\EngagementResponseViewAction;
-use AidingApp\Engagement\Models\EngagementResponse;
-use AidingApp\Timeline\Models\CustomTimeline;
-use Filament\Actions\ViewAction;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
+use App\Models\User;
 
-// TODO Decide where these belong - might want to keep these in the context of the original module
-class EngagementResponseTimeline extends CustomTimeline
+class RecordServiceRequestAssignmentRemovalHistory
 {
-    public function __construct(
-        public EngagementResponse $engagementResponse
-    ) {}
-
-    public function icon(): string
+    public function __invoke(ServiceRequest $serviceRequest, ServiceRequestAssignment $removedAssignment): void
     {
-        return 'heroicon-o-arrow-small-left';
-    }
+        $actor = auth()->user();
 
-    public function sortableBy(): string
-    {
-        return $this->engagementResponse->sent_at;
-    }
-
-    public function providesCustomView(): bool
-    {
-        return true;
-    }
-
-    public function renderCustomView(): string
-    {
-        return 'engagement::engagement-response-timeline-item';
-    }
-
-    public function modalViewAction(): ViewAction
-    {
-        return EngagementResponseViewAction::make()->record($this->engagementResponse);
-    }
-
-    public function missingRecordTitle(): string
-    {
-        return 'Engagement Response Received';
-    }
-
-    public function missingRecordDescription(): ?string
-    {
-        return null;
+        $serviceRequest->histories()->create([
+            'original_values' => [
+                'removed_assignment' => User::withTrashed()->find($removedAssignment->user_id)?->name,
+            ],
+            'new_values' => ['removed_assignment' => null],
+            'actor_type' => $actor?->getMorphClass(),
+            'actor_id' => $actor?->getKey(),
+        ]);
     }
 }

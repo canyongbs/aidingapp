@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestAssignmentRemovalHistory;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Enums\ServiceRequestUpdateType;
@@ -64,6 +65,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
+use AidingApp\Timeline\Models\Timeline;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Carbon\CarbonImmutable;
@@ -636,6 +638,85 @@ describe('tabs', function () {
             ->assertSuccessful()
             ->assertSeeText('Service Request Assigned')
             ->assertSeeText('Jane Doe');
+    });
+
+    it('shows a soft-deleted assignment on the timeline', function () {
+        $manager = User::factory()->create([
+            'name' => 'Jane Doe',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($manager);
+
+        asSuperAdmin();
+
+        $assignment = ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($manager, 'user')
+            ->create();
+
+        // A query-builder delete skips the observer, leaving the timeline row in place.
+        ServiceRequestAssignment::query()->whereKey($assignment->getKey())->delete();
+
+        expect(Timeline::query()->where('timelineable_id', $assignment->getKey())->exists())->toBeTrue()
+            ->and($assignment->refresh()->trashed())->toBeTrue();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Service Request Assigned')
+            ->assertSeeText('Jane Doe');
+    });
+
+    it('shows a fallback entry for an assignment that was permanently deleted', function () {
+        $manager = User::factory()->create([
+            'name' => 'Jane Doe',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($manager);
+
+        asSuperAdmin();
+
+        $assignment = ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($manager, 'user')
+            ->create();
+
+        ServiceRequestAssignment::query()->whereKey($assignment->getKey())->forceDelete();
+
+        expect(Timeline::query()->where('timelineable_id', $assignment->getKey())->exists())->toBeTrue()
+            ->and(ServiceRequestAssignment::withTrashed()->whereKey($assignment->getKey())->exists())->toBeFalse();
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeText('Service Request Assigned')
+            ->assertSeeText('Assigned to Unknown user')
+            ->assertDontSeeText('Jane Doe');
+    });
+
+    it('shows a removed assignment on the timeline', function () {
+        $manager = User::factory()->create([
+            'name' => 'Jane Doe',
+        ]);
+        $serviceRequest = serviceRequestManagedBy($manager);
+
+        $actor = User::factory()->create([
+            'name' => 'John Smith',
+        ]);
+        asSuperAdmin($actor);
+
+        $assignment = ServiceRequestAssignment::factory()
+            ->active()
+            ->for($serviceRequest, 'serviceRequest')
+            ->for($manager, 'user')
+            ->create();
+
+        app(RecordServiceRequestAssignmentRemovalHistory::class)($serviceRequest, $assignment);
+
+        livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->set('tab', ServiceRequestTab::Timeline->value)
+            ->assertSuccessful()
+            ->assertSeeTextInOrder(['Assignment Removed', 'Unassigned', 'Jane Doe', 'by', 'John Smith']);
     });
 
     it('shows submitted feedback on the timeline', function () {
