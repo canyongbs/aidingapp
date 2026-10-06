@@ -34,35 +34,31 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
+use Mockery\MockInterface;
 
-it('associates a new contact with the matching organization', function () {
-    $organization = Organization::factory()->create([
-        'domains' => [['domain' => 'example.com']],
-    ]);
+it('delegates organization matching when a contact is created', function () {
+    $contact = Contact::factory()->make();
 
-    $contact = Contact::factory()->create([
-        'email' => 'person@example.com',
-        'organization_id' => null,
-    ]);
+    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+        $mock->shouldReceive('__invoke')
+            ->once()
+            ->with($contact);
+    });
 
-    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+    $contact->save();
 });
 
-it('preserves an existing organization when a contact is saved', function () {
-    $organization = Organization::factory()->create([
-        'domains' => [['domain' => 'example.com']],
-    ]);
-    $otherOrganization = Organization::factory()->create([
-        'domains' => [['domain' => 'other.com']],
-    ]);
-    $contact = Contact::factory()
-        ->for($otherOrganization, 'organization')
-        ->create(['email' => 'person@example.com']);
+it('delegates organization matching when a contact is updated', function () {
+    $contact = Contact::factory()->createQuietly();
+
+    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+        $mock->shouldReceive('__invoke')
+            ->once()
+            ->with($contact);
+    });
 
     $contact->first_name = 'Updated';
     $contact->save();
-
-    expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
