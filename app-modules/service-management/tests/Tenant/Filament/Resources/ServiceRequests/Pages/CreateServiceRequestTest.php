@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
@@ -105,6 +106,26 @@ test('A successful action on the CreateServiceRequest page', function () {
         ->toEqual($request->get('priority_id'))
         ->and($serviceRequest->category)
         ->toEqual($request->get('category'));
+});
+
+it('omits the unaffiliated placeholder from the contact option label and includes the organization name when present', function () {
+    asSuperAdmin();
+
+    $organization = Organization::factory()->create(['name' => 'Acme University']);
+    $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
+    $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
+
+    $field = livewire(CreateServiceRequest::class)
+        ->assertSuccessful()
+        ->instance()
+        ->getSchema('form')
+        ->getComponent(fn ($component): bool => $component instanceof Select && $component->getName() === 'respondent_id');
+
+    expect($field)->not->toBeNull()
+        ->and($field->getOptionLabelFromRecord($contactWithOrganization))
+        ->toContain('Acme University')
+        ->and($field->getOptionLabelFromRecord($contactWithoutOrganization))
+        ->not->toContain('Unaffiliated');
 });
 
 it('securely stores password fields on staff-created service requests', function () {
