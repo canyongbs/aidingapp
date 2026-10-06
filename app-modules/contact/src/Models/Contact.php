@@ -55,9 +55,11 @@ use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
+use App\Enums\PresenceStatus;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use App\Settings\ContactPresenceSettings;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -124,10 +126,12 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'academic_department',
         'program',
         'user_id',
+        'last_activity_at',
     ];
 
     protected $casts = [
         'email_bounce' => 'boolean',
+        'last_activity_at' => 'datetime',
     ];
 
     public function isSuperAdmin(): bool
@@ -138,6 +142,30 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function canRecieveSms(): bool
     {
         return filled($this->mobile);
+    }
+
+    public function presenceStatus(): PresenceStatus
+    {
+        if (! $this->last_activity_at) {
+            return PresenceStatus::Offline;
+        }
+
+        $settings = app(ContactPresenceSettings::class);
+        $minutesAgo = $this->last_activity_at->diffInMinutes(now());
+
+        if ($minutesAgo < $settings->active_threshold) {
+            return PresenceStatus::Active;
+        }
+
+        if ($minutesAgo < $settings->idle_threshold) {
+            return PresenceStatus::Idle;
+        }
+
+        if ($minutesAgo < $settings->inactive_threshold) {
+            return PresenceStatus::Inactive;
+        }
+
+        return PresenceStatus::Offline;
     }
 
     /**

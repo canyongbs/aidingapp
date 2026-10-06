@@ -70,6 +70,7 @@ test('The correct details are displayed on the ViewContact page', function () {
 
     livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful()
+        ->assertSee('Presence')
         ->assertSchemaStateSet([
             'first_name' => 'John',
             'last_name' => 'Doe',
