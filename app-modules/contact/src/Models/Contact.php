@@ -59,7 +59,7 @@ use App\Enums\PresenceStatus;
 use App\Models\Authenticatable;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
-use App\Settings\ContactPresenceSettings;
+use App\Settings\PresenceSettings;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -150,7 +150,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
             return PresenceStatus::Offline;
         }
 
-        $settings = app(ContactPresenceSettings::class);
+        $settings = app(PresenceSettings::class);
         $minutesAgo = $this->last_activity_at->diffInMinutes(now());
 
         if ($minutesAgo < $settings->active_threshold) {

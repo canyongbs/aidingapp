@@ -43,7 +43,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 
-use function Pest\Laravel\{actingAs, get};
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
+use function Pest\Laravel\getJson;
 
 it('updates contact last_activity_at on a standard page request', function () {
     $contact = Contact::factory()->create(['last_activity_at' => null]);
@@ -79,6 +81,47 @@ it('tracks contacts on portal page requests', function () {
     get(route('portal.show'))->assertSuccessful();
 
     expect($portalContact->refresh()->last_activity_at)->not->toBeNull();
+});
+
+it('tracks the portal contact when both contact and web guards are authenticated', function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+
+    $embedCode = Mockery::mock(GeneratePortalEmbedCode::class);
+    $embedCode
+        ->shouldReceive('handle')
+        ->once()
+        ->with(PortalType::KnowledgeManagement)
+        ->andReturn('<div></div>');
+    app()->instance(GeneratePortalEmbedCode::class, $embedCode);
+
+    $portalContact = Contact::factory()->create(['last_activity_at' => null]);
+    $portalUser = User::factory()->create();
+    $portalUser->managedContact()->save($portalContact);
+
+    actingAs($portalContact, 'contact');
+    // Keep the existing web session active alongside the portal's contact session.
+    actingAs($portalUser, 'web');
+
+    get(route('portal.show'))->assertSuccessful();
+
+    expect($portalContact->refresh()->last_activity_at)->not->toBeNull();
+});
+
+it('tracks contacts on authenticated portal API requests', function () {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->save();
+
+    $contact = Contact::factory()->create(['last_activity_at' => null]);
+    $token = $contact->createToken('external-portal-widget')->plainTextToken;
+
+    getJson(route('api.portal.define'), [
+        'Authorization' => "Bearer {$token}",
+    ])->assertSuccessful();
+
+    expect($contact->refresh()->last_activity_at)->not->toBeNull();
 });
 
 it('does not update a managed contact when its user visits the admin panel', function () {
