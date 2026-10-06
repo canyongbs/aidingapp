@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Components;
 
 use AidingApp\ServiceManagement\Enums\AuthType;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Utilities\Get;
 
@@ -52,7 +51,7 @@ class AuthPasswordInput
             ->password()
             ->revealable()
             ->required(fn (Get $get): bool => $get('auth_type') === AuthType::Basic)
-            ->visible(fn (Get $get): bool => $get('auth_type') === AuthType::Basic && ServiceMonitoringAuthTypeFeature::active())
+            ->visible(fn (Get $get): bool => $get('auth_type') === AuthType::Basic)
             ->columnSpan(1);
     }
 }
