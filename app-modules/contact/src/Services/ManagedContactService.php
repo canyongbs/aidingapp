@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Features\FullNameFeature;
 use App\Models\User;
 use CanyonGBS\Common\Parser\Parser;
@@ -173,12 +172,9 @@ class ManagedContactService
             'job_title' => $user->job_title,
             'phone' => $user->work_number,
             'mobile' => $user->mobile,
+            'work_number' => $user->work_number,
+            'work_extension' => is_null($user->work_extension) ? null : (string) $user->work_extension,
         ];
-
-        if (EnhanceContactsTableDataModelFeature::active()) {
-            $optionalAttributes['work_number'] = $user->work_number;
-            $optionalAttributes['work_extension'] = is_null($user->work_extension) ? null : (string) $user->work_extension;
-        }
 
         if (FullNameFeature::active()) {
             $optionalAttributes = [
@@ -189,19 +185,13 @@ class ManagedContactService
                 'city' => $user->city,
                 'state' => $user->state,
                 'postal' => $user->postal_code,
+                'employee_id' => $user->employee_id,
+                'student_id' => $user->student_id,
+                'school' => $user->school,
+                'academic_department' => $user->academic_department,
+                'program' => $user->program,
+                'country' => $user->country,
             ];
-
-            if (EnhanceContactsTableDataModelFeature::active()) {
-                $optionalAttributes = [
-                    ...$optionalAttributes,
-                    'employee_id' => $user->employee_id,
-                    'student_id' => $user->student_id,
-                    'school' => $user->school,
-                    'academic_department' => $user->academic_department,
-                    'program' => $user->program,
-                    'country' => $user->country,
-                ];
-            }
         }
 
         return [

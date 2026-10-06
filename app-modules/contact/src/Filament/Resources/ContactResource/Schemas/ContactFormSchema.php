@@ -39,7 +39,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
-use App\Features\EnhanceContactsTableDataModelFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
@@ -62,8 +61,7 @@ class ContactFormSchema
             self::demographicInformation(),
             self::contactInformation($ignoreRecord),
             self::employmentInformation(),
-            // TODO: Cleanup Task (enhance-contacts-data-model): always include the academic section once the flag is removed.
-            ...(EnhanceContactsTableDataModelFeature::active() ? [self::academicInformation()] : []),
+            self::academicInformation(),
             self::addressInformation(),
             self::customerInformation(),
             self::engagementRestrictions(),
@@ -155,20 +153,17 @@ class ContactFormSchema
                     ->label('Job Title')
                     ->string()
                     ->maxLength(255),
-                // TODO: Cleanup Task (enhance-contacts-data-model): unwrap these fields once the flag is removed.
-                ...(EnhanceContactsTableDataModelFeature::active() ? [
-                    TextInput::make('employee_id')
-                        ->label('Employee ID')
-                        ->string()
-                        ->maxLength(255),
-                    PhoneInput::make('work_number')
-                        ->label('Work Number')
-                        ->string(),
-                    TextInput::make('work_extension')
-                        ->label('Work Extension')
-                        ->string()
-                        ->maxLength(255),
-                ] : []),
+                TextInput::make('employee_id')
+                    ->label('Employee ID')
+                    ->string()
+                    ->maxLength(255),
+                PhoneInput::make('work_number')
+                    ->label('Work Number')
+                    ->string(),
+                TextInput::make('work_extension')
+                    ->label('Work Extension')
+                    ->string()
+                    ->maxLength(255),
             ])
             ->columns(2);
     }
@@ -206,8 +201,7 @@ class ContactFormSchema
                     'city' => 'city',
                     'state' => 'state',
                     'postal' => 'postalCode',
-                    // TODO: Cleanup Task (enhance-contacts-data-model): always map the country component once the flag is removed.
-                    ...(EnhanceContactsTableDataModelFeature::active() ? ['country' => 'country'] : []),
+                    'country' => 'country',
                 ]),
                 TextInput::make('address_2')
                     ->label('Address 2')
@@ -225,13 +219,10 @@ class ContactFormSchema
                     ->label('Postal')
                     ->string()
                     ->maxLength(255),
-                // TODO: Cleanup Task (enhance-contacts-data-model): unwrap this field once the flag is removed.
-                ...(EnhanceContactsTableDataModelFeature::active() ? [
-                    TextInput::make('country')
-                        ->label('Country')
-                        ->string()
-                        ->maxLength(255),
-                ] : []),
+                TextInput::make('country')
+                    ->label('Country')
+                    ->string()
+                    ->maxLength(255),
             ])
             ->columns(2);
     }
