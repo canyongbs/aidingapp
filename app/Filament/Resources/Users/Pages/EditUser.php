@@ -39,7 +39,6 @@ namespace App\Filament\Resources\Users\Pages;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
 use App\Enums\PresenceStatus;
-use App\Features\FullNameFeature;
 use App\Filament\Forms\Components\AddressInput;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
@@ -97,16 +96,14 @@ class EditUser extends EditRecord
                             ->maxLength(255)
                             ->disabled(fn (User $record) => $record->isAdmin())
                             ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->afterStateUpdated($generateFullName),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
                             ->maxLength(255)
                             ->disabled(fn (User $record) => $record->isAdmin())
                             ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->afterStateUpdated($generateFullName),
                         TextEntry::make('presence_status')
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
@@ -116,22 +113,19 @@ class EditUser extends EditRecord
                             ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
                         TextInput::make('name')
                             ->label('Full Name')
-                            ->required(fn (): bool => ! FullNameFeature::active())
                             ->maxLength(255)
-                            ->disabled(fn (User $record): bool => FullNameFeature::active() || $record->isAdmin())
+                            ->disabled()
                             ->dehydrated(),
                         TextInput::make('preferred_name')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                     ])
                     ->columns(2),
                 Section::make('Employment Information')
                     ->schema([
                         TextInput::make('employee_id')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255)
@@ -160,7 +154,6 @@ class EditUser extends EditRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2),
                 Section::make('Contact Information')
                     ->schema([
@@ -204,7 +197,6 @@ class EditUser extends EditRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2),
                 Section::make('Account Settings')
                     ->schema([

@@ -36,7 +36,6 @@
 
 namespace App\Filament\Exports;
 
-use App\Features\FullNameFeature;
 use App\Models\User;
 use Filament\Actions\Exports\ExportColumn;
 use Filament\Actions\Exports\Exporter;
@@ -50,16 +49,13 @@ class UserExporter extends Exporter
     {
         return [
             ExportColumn::make('first_name')
-                ->label('First Name')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('First Name'),
             ExportColumn::make('last_name')
-                ->label('Last Name')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Last Name'),
             ExportColumn::make('name')
                 ->label('Full Name'),
             ExportColumn::make('preferred_name')
-                ->label('Preferred Name')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Preferred Name'),
             ExportColumn::make('email')
                 ->label('Email address'),
             ExportColumn::make('job_title')
@@ -68,44 +64,33 @@ class UserExporter extends Exporter
                 ->label('External User')
                 ->state(fn (User $record): string => $record->is_external ? 'true' : 'false'),
             ExportColumn::make('employee_id')
-                ->label('Employee ID')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Employee ID'),
             ExportColumn::make('work_number')
                 ->label('Work Number'),
             ExportColumn::make('work_extension')
                 ->label('Work Extension'),
             ExportColumn::make('student_id')
-                ->label('Student ID')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Student ID'),
             ExportColumn::make('school')
-                ->label('School')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('School'),
             ExportColumn::make('academic_department')
-                ->label('Academic Department')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Academic Department'),
             ExportColumn::make('program')
-                ->label('Program')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Program'),
             ExportColumn::make('mobile')
                 ->label('Mobile number'),
             ExportColumn::make('address')
-                ->label('Address')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Address'),
             ExportColumn::make('address_2')
-                ->label('Address 2')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Address 2'),
             ExportColumn::make('city')
-                ->label('City')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('City'),
             ExportColumn::make('state')
-                ->label('State')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('State'),
             ExportColumn::make('postal_code')
-                ->label('Postal')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Postal'),
             ExportColumn::make('country')
-                ->label('Country')
-                ->visible(fn (): bool => FullNameFeature::active()),
+                ->label('Country'),
             ExportColumn::make('department.name')
                 ->label('Department'),
             ExportColumn::make('roles')

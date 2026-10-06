@@ -36,7 +36,6 @@
 
 namespace Database\Factories;
 
-use App\Features\FullNameFeature;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
@@ -65,10 +64,8 @@ class UserFactory extends Factory
             'work_number' => $this->faker->numerify('+1 ### ### ####'),
             'work_extension' => $this->faker->randomNumber(4),
             'mobile' => $this->faker->numerify('+1 ### ### ####'),
-            ...(FullNameFeature::active() ? [
-                'first_name' => $firstName,
-                'last_name' => $lastName,
-            ] : []),
+            'first_name' => $firstName,
+            'last_name' => $lastName,
         ];
     }
 
