@@ -34,40 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+namespace AidingApp\Portal\Actions;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
-use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 
-class ContactObserver
+class FindPortalRegistrationOrganization
 {
     public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
+        private OrganizationEmailDomainLookup $domainLookup,
     ) {}
 
-    public function creating(Contact $contact): void
+    public function __invoke(string $email): ?Organization
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
-    }
-
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
-
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
+        return $this->domainLookup->find($email, requireContactGenerationEnabled: true);
     }
 }

@@ -35,7 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Organization;
-use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
+use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 
 test('it returns organization for exact matching domain', function () {
     $organization = Organization::factory()->create([
@@ -45,7 +45,7 @@ test('it returns organization for exact matching domain', function () {
         ],
     ]);
 
-    $result = app(FindOrganizationByEmailDomain::class)('myemail@example.com');
+    $result = app(FindPortalRegistrationOrganization::class)('myemail@example.com');
 
     expect($result)->not->toBeNull()
         ->and($result?->is($organization))->toBeTrue();
@@ -59,7 +59,7 @@ test('it matches case-insensitive email domain', function () {
         ],
     ]);
 
-    $result = app(FindOrganizationByEmailDomain::class)('myemail@EXAMPLE.COM');
+    $result = app(FindPortalRegistrationOrganization::class)('myemail@EXAMPLE.COM');
 
     expect($result)->not->toBeNull()
         ->and($result?->is($organization))->toBeTrue();
@@ -73,7 +73,7 @@ test('it normalizes stored www domain for matching', function () {
         ],
     ]);
 
-    $result = app(FindOrganizationByEmailDomain::class)('myemail@example.com');
+    $result = app(FindPortalRegistrationOrganization::class)('myemail@example.com');
 
     expect($result)->not->toBeNull()
         ->and($result?->is($organization))->toBeTrue();
@@ -87,7 +87,7 @@ test('it does not match when only email domain includes www', function () {
         ],
     ]);
 
-    $result = app(FindOrganizationByEmailDomain::class)('myemail@www.example.com');
+    $result = app(FindPortalRegistrationOrganization::class)('myemail@www.example.com');
 
     expect($result)->toBeNull();
 });
@@ -100,13 +100,13 @@ test('it ignores organizations where contact generation is disabled', function (
         ],
     ]);
 
-    $result = app(FindOrganizationByEmailDomain::class)('myemail@example.com');
+    $result = app(FindPortalRegistrationOrganization::class)('myemail@example.com');
 
     expect($result)->toBeNull();
 });
 
 test('it returns null for invalid email format', function () {
-    $action = app(FindOrganizationByEmailDomain::class);
+    $action = app(FindPortalRegistrationOrganization::class);
 
     expect($action('invalid-email'))->toBeNull()
         ->and($action('myemail@'))->toBeNull();

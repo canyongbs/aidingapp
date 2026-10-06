@@ -34,40 +34,15 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+namespace AidingApp\Contact\Jobs;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
-use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use App\Jobs\DispatchForEachTenant;
+use App\Models\Tenant;
 
-class ContactObserver
+class DispatchMatchUnaffiliatedContactsForEachTenant extends DispatchForEachTenant
 {
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
-
-    public function creating(Contact $contact): void
+    protected function jobForTenant(Tenant $tenant): ?object
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
-    }
-
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
-
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
+        return new MatchUnaffiliatedContactsJob();
     }
 }

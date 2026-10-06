@@ -34,40 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+namespace AidingApp\Contact\Actions;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
+use Illuminate\Support\Facades\DB;
 
-class ContactObserver
+class MatchContactToOrganization
 {
     public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
+        private OrganizationEmailDomainLookup $domainLookup,
     ) {}
 
-    public function creating(Contact $contact): void
+    public function __invoke(Contact $contact, ?Organization $organization = null): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
+        if ($contact->organization_id !== null || blank($contact->email)) {
+            return;
         }
-    }
 
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
+        DB::transaction(function () use ($contact, $organization): void {
+            $contact = Contact::query()
+                ->whereKey($contact->getKey())
+                ->whereNull('organization_id')
+                ->lockForUpdate()
+                ->first();
 
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
+            if ($contact === null || blank($contact->email)) {
+                return;
+            }
 
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
+            $organization = $this->domainLookup->find($contact->email, $organization);
+
+            if ($organization === null) {
+                return;
+            }
+
+            $contact->organization()->associate($organization);
+            $contact->save();
+        });
     }
 }
