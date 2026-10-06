@@ -93,18 +93,19 @@ class ServiceRequestInfolist
                     ->schema(fn (ServiceRequest $record): array => [
                         TextEntry::make('respondent')
                             ->label('Customer Contact')
-                            ->html()
-                            ->state(function (ServiceRequest $record): HtmlString {
+                            ->state(function (ServiceRequest $record, TextEntry $component): HtmlString {
                                 /** @var Contact $respondent */
                                 $respondent = $record->respondent;
 
-                                return new HtmlString(
-                                    view('filament.infolists.components.service-request-respondent', [
-                                        'name' => $respondent->{Contact::displayNameKey()},
-                                        'contactType' => $respondent->type,
-                                        'organizationName' => $respondent->organization?->name,
-                                    ])->render()
-                                );
+                                $viewContactAction = $component->getAction();
+                                assert($viewContactAction instanceof Action);
+
+                                return new HtmlString(view('service-management::filament.infolists.respondent-contact', [
+                                    'name' => $respondent->{Contact::displayNameKey()},
+                                    'type' => $respondent->type->name,
+                                    'organizationName' => $respondent->organization?->name,
+                                    'loadingTarget' => $viewContactAction->getLivewireClickHandler(),
+                                ])->render());
                             })
                             ->color('primary')
                             ->action(ViewContactAction::make($record->respondent))
