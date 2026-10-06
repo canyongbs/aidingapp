@@ -183,7 +183,7 @@ class ServiceRequestMediaTable extends TableWidget
         return Action::make('uploadFile')
             ->label('Upload File')
             ->icon(Heroicon::ArrowUpTray)
-            ->authorize('update', $this->record)
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->disabled($hasReachedFileLimit)
             ->tooltip(fn (): ?string => $hasReachedFileLimit() ? "You have reached the maximum of {$maxNumberOfFiles} uploaded files." : null)
             ->schema([$fileUpload])
@@ -246,7 +246,7 @@ class ServiceRequestMediaTable extends TableWidget
             ->icon(Heroicon::Trash)
             ->color('danger')
             ->requiresConfirmation()
-            ->authorize('update', $this->record)
+            ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
             ->action(function (Media $record): void {
                 $fileName = $record->file_name;
 

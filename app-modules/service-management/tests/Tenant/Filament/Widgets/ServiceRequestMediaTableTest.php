@@ -38,7 +38,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
+use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Models\Authenticatable;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -363,7 +365,9 @@ describe('ServiceRequest', function () {
     test('uploadFile action is visible for a user who can update the service request', function () {
         asSuperAdmin();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -389,7 +393,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -420,12 +426,84 @@ describe('ServiceRequest', function () {
             ->assertTableActionHidden('delete', record: $media);
     });
 
+    test('uploadFile action is hidden for an admin when the service request is closed', function () {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->closed(),
+        ]);
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('uploadFile');
+    });
+
+    test('delete action is hidden for an admin when the service request is closed', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->closed(),
+        ]);
+        $media = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->usingName('report')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('delete', record: $media);
+
+        expect(Media::find($media->getKey()))->not->toBeNull();
+    });
+
+    test('a partner admin is granted a registered permission ability via the gate bypass but is still denied by a record-level policy restriction', function () {
+        $partnerAdmin = User::factory()->create();
+        $partnerAdmin->assignRole(Authenticatable::PARTNER_ADMIN_ROLE);
+
+        actingAs($partnerAdmin);
+
+        // A role-less user receives no abilities, proving the bypass - not an assigned permission - is what grants the ability below.
+        $regularUser = User::factory()->create();
+
+        // The partner admin does not manage this service request's type, which is the record-level policy restriction under test.
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+
+        expect($partnerAdmin->can('service_request.*.update'))->toBeTrue()
+            ->and($regularUser->can('service_request.*.update'))->toBeFalse()
+            // The bypass only covers registered permissions; the policy still denies because the partner admin is not a manager of the type.
+            ->and($partnerAdmin->can('update', $serviceRequest))->toBeFalse();
+    });
+
+    test('a partner admin granted the delete permission via the gate bypass is still denied deleting a service request whose type they do not manage', function () {
+        $partnerAdmin = User::factory()->create();
+        $partnerAdmin->assignRole(Authenticatable::PARTNER_ADMIN_ROLE);
+
+        actingAs($partnerAdmin);
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+
+        expect($partnerAdmin->can('service_request.*.delete'))->toBeTrue()
+            ->and($partnerAdmin->can('delete', $serviceRequest))->toBeFalse();
+    });
+
     // Validation
 
     test('uploadFile action requires a file', function () {
         asSuperAdmin();
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -444,7 +522,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -463,7 +543,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         foreach (range(1, 6) as $index) {
             $serviceRequest
@@ -484,7 +566,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         foreach (range(1, 6) as $index) {
             $serviceRequest
@@ -518,7 +602,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -541,7 +627,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -566,7 +654,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -593,7 +683,9 @@ describe('ServiceRequest', function () {
 
         Storage::fake('s3');
 
-        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
         $media = $serviceRequest
             ->addMedia(UploadedFile::fake()->image('report.png'))
             ->usingName('report')
@@ -782,12 +874,56 @@ describe('ServiceRequestUpdate', function () {
             ->assertSeeText('No uploads');
     });
 
+    test('uploadFile action is hidden for an admin when the parent service request is closed', function () {
+        asSuperAdmin();
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->closed(),
+            ])->getKey(),
+        ]);
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('uploadFile');
+    });
+
+    test('delete action is hidden for an admin when the parent service request is closed', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->closed(),
+            ])->getKey(),
+        ]);
+        $media = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->usingName('attachment')
+            ->toMediaCollection('uploads');
+
+        livewire(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionHidden('delete', record: $media);
+
+        expect(Media::find($media->getKey()))->not->toBeNull();
+    });
+
     test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
         asSuperAdmin();
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -806,7 +942,11 @@ describe('ServiceRequestUpdate', function () {
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
 
         livewire(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -829,7 +969,11 @@ describe('ServiceRequestUpdate', function () {
 
         Storage::fake('s3');
 
-        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
+            'service_request_id' => ServiceRequest::factory()->create([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ])->getKey(),
+        ]);
         $media = $serviceRequestUpdate
             ->addMedia(UploadedFile::fake()->image('attachment.png'))
             ->usingName('attachment')
