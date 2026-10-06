@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
@@ -81,8 +82,12 @@ if (! function_exists('recordServiceRequestHistory')) {
 describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
     it('removes division-only history rows and preserves other changes', function () {
         isolatedMigration('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
-            // Setup data before migration
-            $serviceRequest = ServiceRequest::factory()->create();
+            // Setup data before migration.
+            // created_by_id is null on both records to avoid UserFactory, whose columns postdate this migration's schema snapshot.
+            $serviceRequest = ServiceRequest::factory()->create([
+                'created_by_id' => null,
+                'respondent_id' => Contact::factory()->create(['created_by_id' => null]),
+            ]);
 
             DB::table('service_request_histories')->delete();
 

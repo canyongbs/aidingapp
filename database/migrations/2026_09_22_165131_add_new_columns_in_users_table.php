@@ -34,10 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Features\FullNameFeature;
-use CanyonGBS\Common\Parser\Parser;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
@@ -63,52 +60,17 @@ return new class () extends Migration {
                 $table->string('country')->nullable();
             });
 
-            //TODO: FullNameFeature - Remove this query section once the feature flag is removed.
-            DB::table('users')
-                ->whereNull('first_name')
-                ->chunkById(500, function (Collection $users) {
-                    foreach ($users as $user) {
-                        $fullName = trim($user->name ?? '');
-
-                        if ($fullName === '') {
-                            DB::table('users')
-                                ->where('id', $user->id)
-                                ->update([
-                                    'first_name' => 'Unknown',
-                                    'last_name' => 'Unknown',
-                                    'name' => 'Unknown',
-                                ]);
-
-                            continue;
-                        }
-
-                        $name = (new Parser())->parse($fullName);
-
-                        DB::table('users')
-                            ->where('id', $user->id)
-                            ->update([
-                                'first_name' => $name->getFirstname() ?: $fullName,
-                                'last_name' => $name->getLastname() ?: '',
-                                'name' => $fullName,
-                            ]);
-                    }
-                });
-
             Schema::table('users', function (Blueprint $table) {
                 $table->string('first_name')->nullable(false)->change();
                 $table->string('last_name')->nullable(false)->change();
                 $table->string('name')->nullable(false)->change();
             });
-
-            FullNameFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function () {
-            FullNameFeature::deactivate();
-
             Schema::table('users', function (Blueprint $table) {
                 $table->dropColumn([
                     'first_name',

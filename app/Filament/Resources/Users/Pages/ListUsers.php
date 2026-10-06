@@ -38,7 +38,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\FullNameFeature;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
@@ -161,35 +160,27 @@ class ListUsers extends ListRecords
                     ->label('Last Login')
                     ->dateTime()
                     ->placeholder('Never'),
-                ...(FullNameFeature::active() ? [
-                    TextColumn::make('preferred_name')
-                        ->hidden(),
-                    TextColumn::make('employee_id')
-                        ->hidden(),
-                ] : []),
+                TextColumn::make('preferred_name')
+                    ->hidden(),
+                TextColumn::make('employee_id')
+                    ->hidden(),
                 TextColumn::make('work_number')
                     ->hidden(),
                 TextColumn::make('work_extension')
                     ->hidden(),
                 TextColumn::make('mobile')
                     ->hidden(),
-                ...(FullNameFeature::active() ? [
-                    TextColumn::make('student_id')
-                        ->hidden(),
-                ] : []),
+                TextColumn::make('student_id')
+                    ->hidden(),
             ])
             ->searchable([
-                ...(FullNameFeature::active() ? [
-                    'preferred_name',
-                    'employee_id',
-                ] : []),
+                'preferred_name',
+                'employee_id',
                 'work_number',
                 fn (Builder $query, string $search): Builder => $query
                     ->where(new Expression('lower(CAST(work_extension AS TEXT))'), 'like', '%' . Str::lower($search) . '%'),
                 'mobile',
-                ...(FullNameFeature::active() ? [
-                    'student_id',
-                ] : []),
+                'student_id',
             ])
             ->filters([
                 SelectFilter::make('department')
