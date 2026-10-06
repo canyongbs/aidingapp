@@ -39,7 +39,6 @@ namespace App\Filament\Resources\Users\Pages;
 use AidingApp\Group\Models\Group;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\FullNameFeature;
-use App\Features\LastLoggedInFeature;
 use App\Filament\Exports\UserExporter;
 use App\Filament\Imports\UserImporter;
 use App\Filament\Resources\Users\Actions\AssignDepartmentBulkAction;
@@ -161,8 +160,7 @@ class ListUsers extends ListRecords
                 TextColumn::make('last_logged_in_at')
                     ->label('Last Login')
                     ->dateTime()
-                    ->placeholder('Never')
-                    ->visible(LastLoggedInFeature::active()),
+                    ->placeholder('Never'),
                 ...(FullNameFeature::active() ? [
                     TextColumn::make('preferred_name')
                         ->hidden(),
