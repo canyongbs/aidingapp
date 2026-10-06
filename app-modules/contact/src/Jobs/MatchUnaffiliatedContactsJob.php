@@ -45,7 +45,6 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
-use Throwable;
 
 class MatchUnaffiliatedContactsJob implements ShouldQueue
 {
@@ -96,12 +95,5 @@ class MatchUnaffiliatedContactsJob implements ShouldQueue
                     }
                 }
             });
-    }
-
-    public function failed(?Throwable $exception): void
-    {
-        if ($exception !== null) {
-            report($exception);
-        }
     }
 }
