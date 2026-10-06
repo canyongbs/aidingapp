@@ -38,7 +38,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\Portal\Support\KnowledgeBasePortalUrl;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 
 use function Pest\Laravel\get;
 
@@ -120,13 +119,4 @@ it('redirects a legacy article UUID URL to its canonical URL', function () {
     ]))
         ->assertStatus(Response::HTTP_MOVED_PERMANENTLY)
         ->assertRedirect(KnowledgeBasePortalUrl::article($article));
-});
-
-it('renders legacy category URLs while the feature is inactive', function () {
-    $category = KnowledgeBaseCategory::factory()->create();
-
-    KnowledgeBasePortalStableUrlsFeature::deactivate();
-
-    get(route('portal.category.show', ['category' => $category->slug]))
-        ->assertOk();
 });

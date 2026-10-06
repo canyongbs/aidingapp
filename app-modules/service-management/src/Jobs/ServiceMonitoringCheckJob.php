@@ -45,7 +45,6 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Notifications\ServiceMonitoringNotification;
 use AidingApp\ServiceManagement\Services\ChallengePageDetector;
 use AidingApp\ServiceManagement\Services\HtmlTextExtractor;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -152,7 +151,7 @@ class ServiceMonitoringCheckJob implements ShouldQueue, ShouldBeUnique
             ->connectTimeout(10)
             ->timeout($this->requestTimeoutInSeconds());
 
-        if (ServiceMonitoringAuthTypeFeature::active() && $this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
+        if ($this->serviceMonitoringTarget->auth_type === AuthType::Basic) {
             $request = $request->withBasicAuth(
                 $this->serviceMonitoringTarget->auth_username ?? '',
                 $this->serviceMonitoringTarget->auth_password ?? '',

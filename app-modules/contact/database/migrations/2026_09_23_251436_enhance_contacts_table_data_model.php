@@ -34,56 +34,44 @@
 </COPYRIGHT>
 */
 
-use App\Features\EnhanceContactsTableDataModelFeature;
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Support\Facades\DB;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('contacts', function (Blueprint $table) {
-                $table->string('employee_id')->nullable();
-                $table->string('work_number')->nullable();
-                $table->string('work_extension')->nullable();
-                $table->string('student_id')->nullable();
-                $table->string('school')->nullable();
-                $table->string('academic_department')->nullable();
-                $table->string('program')->nullable();
-                $table->string('country')->nullable();
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->string('employee_id')->nullable();
+            $table->string('work_number')->nullable();
+            $table->string('work_extension')->nullable();
+            $table->string('student_id')->nullable();
+            $table->string('school')->nullable();
+            $table->string('academic_department')->nullable();
+            $table->string('program')->nullable();
+            $table->string('country')->nullable();
 
-                $table->dropColumn(['title', 'address_3', 'sms_opt_out']);
-            });
-
-            // TODO: Cleanup Task (enhance-contacts-data-model): remove this activation and the DB::transaction/feature-flag import when the flag is removed.
-            EnhanceContactsTableDataModelFeature::activate();
+            $table->dropColumn(['title', 'address_3', 'sms_opt_out']);
         });
     }
 
     public function down(): void
     {
-        DB::transaction(function () {
-            // TODO: Cleanup Task (enhance-contacts-data-model): remove this deactivation and the DB::transaction/feature-flag import when the flag is removed.
-            EnhanceContactsTableDataModelFeature::deactivate();
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn([
+                'employee_id',
+                'work_number',
+                'work_extension',
+                'student_id',
+                'school',
+                'academic_department',
+                'program',
+                'country',
+            ]);
 
-            Schema::table('contacts', function (Blueprint $table) {
-                $table->dropColumn([
-                    'employee_id',
-                    'work_number',
-                    'work_extension',
-                    'student_id',
-                    'school',
-                    'academic_department',
-                    'program',
-                    'country',
-                ]);
-
-                $table->string('title')->nullable();
-                $table->string('address_3')->nullable();
-                $table->boolean('sms_opt_out')->default(false);
-            });
+            $table->string('title')->nullable();
+            $table->string('address_3')->nullable();
+            $table->boolean('sms_opt_out')->default(false);
         });
     }
 };

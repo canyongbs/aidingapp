@@ -38,7 +38,6 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Portal\Models\KnowledgeBaseArticleVote;
 use AidingApp\Portal\Settings\PortalSettings;
-use App\Features\KnowledgeBasePortalStableUrlsFeature;
 
 use function Pest\Laravel\getJson;
 
@@ -87,16 +86,6 @@ it('returns the helpful vote percentage', function () {
         ->assertJsonPath('helpful_vote_percentage', 67);
 });
 
-it('rejects the canonical article API while the feature is inactive', function () {
-    $article = KnowledgeBaseItem::factory()->create(['public' => true]);
-
-    KnowledgeBasePortalStableUrlsFeature::deactivate();
-
-    getJson(route('api.portal.article.show-canonical', [
-        'article' => "{$article->title}-{$article->public_id}",
-    ]))->assertNotFound();
-});
-
 it('rejects the legacy article API when the category does not exist', function () {
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
 
@@ -106,11 +95,9 @@ it('rejects the legacy article API when the category does not exist', function (
     ]))->assertNotFound();
 });
 
-it('preserves the legacy article API while the feature is inactive', function () {
+it('resolves an article via the legacy category-slug route', function () {
     $category = KnowledgeBaseCategory::factory()->create();
     $article = KnowledgeBaseItem::factory()->for($category, 'category')->create(['public' => true]);
-
-    KnowledgeBasePortalStableUrlsFeature::deactivate();
 
     getJson(route('api.portal.article.show', [
         'category' => $category->slug,
@@ -118,5 +105,5 @@ it('preserves the legacy article API while the feature is inactive', function ()
     ]))
         ->assertOk()
         ->assertJsonPath('article.id', $article->getKey())
-        ->assertJsonPath('article.publicId', null);
+        ->assertJsonPath('article.publicId', $article->public_id);
 });

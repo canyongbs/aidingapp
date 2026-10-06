@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
-use App\Features\ServiceMonitoringAuthTypeFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -398,17 +397,6 @@ test('CreateServiceMonitor hides auth username and password fields until basic a
         ->fillForm(['auth_type' => AuthType::Basic])
         ->assertSchemaComponentVisible('auth_username')
         ->assertSchemaComponentVisible('auth_password');
-});
-
-test('CreateServiceMonitor hides auth fields when the feature is inactive', function () {
-    ServiceMonitoringAuthTypeFeature::deactivate();
-
-    asSuperAdmin();
-
-    livewire(CreateServiceMonitoring::class)
-        ->assertSchemaComponentHidden('auth_type')
-        ->assertSchemaComponentHidden('auth_username')
-        ->assertSchemaComponentHidden('auth_password');
 });
 
 test('CreateServiceMonitor hides API endpoint fields until the API endpoint monitor type is selected', function () {

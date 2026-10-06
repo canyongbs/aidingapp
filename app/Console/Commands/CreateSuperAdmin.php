@@ -37,7 +37,6 @@
 namespace App\Console\Commands;
 
 use AidingApp\Authorization\Models\Role;
-use App\Features\FullNameFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -71,30 +70,17 @@ class CreateSuperAdmin extends Command
 
         $this->comment('Creating super admin user...');
 
-        //TODO: FullNameFeature - Keep only the first_name/last_name branch once the feature flag is removed.
-        if (FullNameFeature::active()) {
-            $input = [
-                'email' => $this->ask('Enter the email address for the super admin user'),
-                'first_name' => $this->ask('Enter the first name for the super admin user'),
-                'last_name' => $this->ask('Enter the last name for the super admin user'),
-            ];
+        $input = [
+            'email' => $this->ask('Enter the email address for the super admin user'),
+            'first_name' => $this->ask('Enter the first name for the super admin user'),
+            'last_name' => $this->ask('Enter the last name for the super admin user'),
+        ];
 
-            $rules = [
-                'email' => ['required', 'email', 'unique:users,email'],
-                'first_name' => ['required', 'string', 'max:255'],
-                'last_name' => ['required', 'string', 'max:255'],
-            ];
-        } else {
-            $input = [
-                'email' => $this->ask('Enter the email address for the super admin user'),
-                'name' => $this->ask('Enter the name for the super admin user'),
-            ];
-
-            $rules = [
-                'email' => ['required', 'email', 'unique:users,email'],
-                'name' => ['required', 'string', 'max:255'],
-            ];
-        }
+        $rules = [
+            'email' => ['required', 'email', 'unique:users,email'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+        ];
 
         $validator = Validator::make($input, $rules);
 
@@ -109,13 +95,9 @@ class CreateSuperAdmin extends Command
             'password' => Hash::make($password),
         ];
 
-        if (FullNameFeature::active()) {
-            $userData['first_name'] = $validated['first_name'];
-            $userData['last_name'] = $validated['last_name'];
-            $userData['name'] = trim("{$validated['first_name']} {$validated['last_name']}");
-        } else {
-            $userData['name'] = $validated['name'];
-        }
+        $userData['first_name'] = $validated['first_name'];
+        $userData['last_name'] = $validated['last_name'];
+        $userData['name'] = trim("{$validated['first_name']} {$validated['last_name']}");
 
         $user = User::create($userData);
 

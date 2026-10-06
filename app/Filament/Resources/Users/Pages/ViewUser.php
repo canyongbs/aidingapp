@@ -38,7 +38,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
 use App\Enums\PresenceStatus;
-use App\Features\FullNameFeature;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
@@ -68,13 +67,11 @@ class ViewUser extends ViewRecord
                         TextInput::make('first_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                         TextEntry::make('presence_status')
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
@@ -89,8 +86,7 @@ class ViewUser extends ViewRecord
                             ->dehydrated(),
                         TextInput::make('preferred_name')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                     ])
                     ->columns(2)
                     ->disabled(),
@@ -98,8 +94,7 @@ class ViewUser extends ViewRecord
                     ->schema([
                         TextInput::make('employee_id')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
@@ -128,7 +123,6 @@ class ViewUser extends ViewRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2)
                     ->disabled(),
                 Section::make('Contact Information')
@@ -170,7 +164,6 @@ class ViewUser extends ViewRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2)
                     ->disabled(),
                 Section::make('Account Settings')

@@ -35,16 +35,25 @@
 @props([
     'name',
     'type',
-    'organizationName',
+    'organizationName' => null,
     'loadingTarget',
 ])
 
-{{ $name }} ({{ $type }})
-<x-filament::loading-indicator
-    class="ms-1 inline-block h-4 w-4 align-middle"
-    style="color: inherit"
-    wire:loading
-    wire:target="{{ $loadingTarget }}"
-/>
-<br />
-{{ $organizationName }}
+<div class="inline-flex flex-col gap-1">
+    <span class="inline-flex items-center gap-1">
+        {{ $name }}
+        <x-filament::badge color="info">
+            {{ $type }}
+        </x-filament::badge>
+        <x-filament::loading-indicator
+            class="ms-1 inline-block h-4 w-4 align-middle"
+            style="color: inherit"
+            wire:loading
+            wire:target="{{ $loadingTarget }}"
+        />
+    </span>
+
+    @if ($organizationName)
+        <span>{{ $organizationName }}</span>
+    @endif
+</div>
