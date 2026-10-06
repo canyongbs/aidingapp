@@ -54,7 +54,7 @@ class OrganizationFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->company(),
+            'name' => $this->faker->unique()->company(),
             'email' => $this->faker->companyEmail(),
             'domains' => array_map(fn () => ['domain' => $this->faker->domainName()], range(1, 3)),
             'phone_number' => $this->faker->e164PhoneNumber(),
