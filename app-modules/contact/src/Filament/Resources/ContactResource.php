@@ -36,13 +36,9 @@
 
 namespace AidingApp\Contact\Filament\Resources;
 
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\AssetManagement;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ContactServiceManagement;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactEngagement;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ManageContactFiles;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
 use App\Enums\NavigationGroup;
@@ -70,10 +66,6 @@ class ContactResource extends Resource
         return $page->generateNavigationItems([
             ViewContact::class,
             EditContact::class,
-            ContactServiceManagement::class,
-            AssetManagement::class,
-            ManageContactFiles::class,
-            ManageContactEngagement::class,
         ]);
     }
 
@@ -97,11 +89,7 @@ class ContactResource extends Resource
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
             'edit' => EditContact::route('/{record}/edit'),
-            'manage-engagement' => ManageContactEngagement::route('/{record}/engagement'),
-            'manage-files' => ManageContactFiles::route('/{record}/files'),
             'view' => ViewContact::route('/{record}'),
-            'service-management' => ContactServiceManagement::route('/{record}/service-management'),
-            'asset-management' => AssetManagement::route('/{record}/asset-management'),
         ];
     }
 }
