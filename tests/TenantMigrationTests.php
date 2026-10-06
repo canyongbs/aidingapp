@@ -34,11 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 if (! function_exists('recordServiceRequestHistory')) {
@@ -82,7 +85,16 @@ describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories',
     it('removes division-only history rows and preserves other changes', function () {
         isolatedMigration('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
             // Setup data before migration
-            $serviceRequest = ServiceRequest::factory()->create();
+            // Build the respondent from only the columns present at this migration point, since the
+            // enhanced-contacts columns are added by a later migration that has not run here.
+            $respondentId = (string) Str::uuid();
+
+            DB::table('contacts')->insert([
+                'id' => $respondentId,
+                ...Arr::only(Contact::factory()->raw(), Schema::getColumnListing('contacts')),
+            ]);
+
+            $serviceRequest = ServiceRequest::factory()->create(['respondent_id' => $respondentId]);
 
             DB::table('service_request_histories')->delete();
 
