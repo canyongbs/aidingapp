@@ -41,18 +41,11 @@ use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
-use App\Features\EnhanceContactsTableDataModelFeature;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
 use Filament\Actions\ImportAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Support\Enums\IconPosition;
-use Filament\Support\Icons\Heroicon;
-use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -64,10 +57,6 @@ class ListContacts extends ListRecords
 
     public function table(Table $table): Table
     {
-        if (! EnhanceContactsTableDataModelFeature::active()) {
-            return $this->legacyTable($table);
-        }
-
         return $table
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with(['type', 'organization'])
@@ -100,69 +89,6 @@ class ListContacts extends ListRecords
                     ->relationship('type', 'name')
                     ->multiple()
                     ->preload(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make()
-                        ->authorizeIndividualRecords('delete'),
-                    BulkEngagementAction::make(context: 'contacts'),
-                ]),
-            ]);
-    }
-
-    /**
-     * TODO: Cleanup Task (enhance-contacts-data-model): remove this legacy table and the feature-flag branch in table() when the flag is removed.
-     */
-    protected function legacyTable(Table $table): Table
-    {
-        return $table
-            ->columns([
-                IdColumn::make(),
-                TextColumn::make(Contact::displayNameKey())
-                    ->label('Name')
-                    ->searchable()
-                    ->sortable()
-                    ->icon(fn (Contact $record): ?Heroicon => $record->isManaged() ? Heroicon::LockClosed : null)
-                    ->iconColor('gray')
-                    ->iconPosition(IconPosition::After)
-                    ->tooltip(fn (Contact $record): ?string => $record->isManaged() ? 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.' : null),
-                TextColumn::make('email')
-                    ->label('Email')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('mobile')
-                    ->label('Mobile')
-                    ->searchable()
-                    ->sortable(),
-                TextColumn::make('type')
-                    ->badge()
-                    ->state(function (Contact $record) {
-                        return $record->type->name;
-                    })
-                    ->color(function (Contact $record) {
-                        return $record->type->color->value;
-                    })
-                    ->sortable(query: function (Builder $query, string $direction): Builder {
-                        return $query
-                            ->join('contact_types', 'contacts.type_id', '=', 'contact_types.id')
-                            ->orderBy('contact_types.name', $direction);
-                    }),
-                TextColumn::make('created_at')
-                    ->label('Created')
-                    ->dateTime()
-                    ->sortable(),
-            ])
-            ->filters([
-                SelectFilter::make('type_id')
-                    ->label('Type')
-                    ->relationship('type', 'name')
-                    ->multiple()
-                    ->preload(),
-            ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make()
-                    ->hidden(fn (Contact $record): bool => $record->isManaged()),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

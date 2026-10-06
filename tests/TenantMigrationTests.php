@@ -38,8 +38,10 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
 if (! function_exists('recordServiceRequestHistory')) {
@@ -82,11 +84,18 @@ if (! function_exists('recordServiceRequestHistory')) {
 describe('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
     it('removes division-only history rows and preserves other changes', function () {
         isolatedMigration('2026_09_14_220000_tmp_remove_division_from_service_request_histories', function () {
-            // Setup data before migration.
-            // created_by_id is null on both records to avoid UserFactory, whose columns postdate this migration's schema snapshot.
+            // These fixtures predate later contact and user columns, so avoid factory values
+            // outside the migration's schema snapshot.
+            $respondentId = (string) Str::uuid();
+
+            DB::table('contacts')->insert([
+                'id' => $respondentId,
+                ...Arr::only(Contact::factory()->raw(['created_by_id' => null]), Schema::getColumnListing('contacts')),
+            ]);
+
             $serviceRequest = ServiceRequest::factory()->create([
                 'created_by_id' => null,
-                'respondent_id' => Contact::factory()->create(['created_by_id' => null]),
+                'respondent_id' => $respondentId,
             ]);
 
             DB::table('service_request_histories')->delete();
