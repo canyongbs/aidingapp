@@ -112,18 +112,18 @@ it('preserves an organization assigned after a stale contact was loaded', functi
         'email' => 'person@example.com',
         'organization_id' => null,
     ]);
-    $staleContact = Contact::query()->findOrFail($contact->getKey());
+    $staleContact = $contact->fresh();
+    assert($staleContact instanceof Contact);
 
     $organization->domains = [['domain' => 'example.com']];
     $organization->saveQuietly();
 
-    $currentContact = Contact::query()->findOrFail($contact->getKey());
-    $currentContact->organization()->associate($otherOrganization);
-    $currentContact->save();
+    $contact->organization()->associate($otherOrganization);
+    $contact->save();
 
     app(MatchContactToOrganization::class)($staleContact);
 
-    expect($currentContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
+    expect($contact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
 it('matches the current email when a stale contact is passed', function (?string $currentEmail, bool $targeted, bool $matches) {
