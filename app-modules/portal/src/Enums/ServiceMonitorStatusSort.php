@@ -77,7 +77,6 @@ enum ServiceMonitorStatusSort: string
             ) . " {$direction}"),
             self::ThirtyDayUptime, self::TwelveMonthUptime => $query->orderByRaw("uptime_stats.{$this->value} {$direction} nulls last"),
             self::LastCheckedAt => $query->orderByRaw("latest_check.created_at {$direction} nulls last"),
-            // Frequencies are declared from the most to the least frequent.
             self::Frequency => $query->orderByRaw($this->rankExpression(
                 'service_monitoring_targets.frequency',
                 collect(ServiceMonitoringFrequency::cases())->pluck('value')->flip()->all(),

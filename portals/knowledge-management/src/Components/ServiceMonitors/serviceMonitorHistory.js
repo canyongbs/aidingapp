@@ -36,6 +36,14 @@ import { formatUptimePercentage, getStatus } from './serviceMonitorStatuses.js';
 
 export const DEFAULT_HISTORY_PERIOD = 'past_month';
 
+const INTRADAY_TOOLTIP_FORMAT = {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit',
+    timeZoneName: 'short',
+};
+
 /**
  * The periods the history chart can show, with how each bucket is labelled along the axis and in tooltips.
  */
@@ -46,7 +54,7 @@ export const HISTORY_PERIODS = {
         description: 'Service availability for each minute of the last hour.',
         axisLabelEvery: 10,
         axisFormat: { hour: 'numeric', minute: '2-digit' },
-        tooltipFormat: { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' },
+        tooltipFormat: INTRADAY_TOOLTIP_FORMAT,
     },
     past_day: {
         label: 'Past 24 hours',
@@ -54,7 +62,7 @@ export const HISTORY_PERIODS = {
         description: 'Hourly service availability for the last 24 hours.',
         axisLabelEvery: 3,
         axisFormat: { hour: 'numeric' },
-        tooltipFormat: { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' },
+        tooltipFormat: INTRADAY_TOOLTIP_FORMAT,
     },
     past_month: {
         label: 'Past 30 days',

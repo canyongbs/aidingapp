@@ -124,13 +124,8 @@ class GetServiceMonitoringStatusHistory
     }
 
     /**
-     * Resolves a client-supplied timezone name into one PHP's date extension can use.
-     *
-     * Browsers (via `Intl.DateTimeFormat().resolvedOptions().timeZone`) can report legacy IANA aliases, e.g.
-     * `Asia/Calcutta` for `Asia/Kolkata` or `US/Eastern` for `America/New_York`, that PHP's bundled tzdata may not
-     * recognize. Rather than fail the whole request over a display preference, this maps them to an equivalent
-     * zone that PHP does recognize (via the `intl` extension's more complete tzdata), so that daylight saving time
-     * rules are kept, and falls back to the app's timezone when the value cannot be resolved at all.
+     * Maps legacy timezone aliases (e.g. `Asia/Calcutta`) that PHP does not recognize to an equivalent zone, falling
+     * back to the app's timezone.
      */
     protected function resolveTimezone(string $timezone): string
     {

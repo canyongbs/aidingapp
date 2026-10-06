@@ -83,7 +83,6 @@ it('displays the service monitor data', function () {
         ->assertJsonPath('data.monitor_type_label', 'Availability')
         ->assertJsonPath('data.frequency_label', '5 minutes')
         ->assertJsonPath('data.status', 'degraded')
-        ->assertJsonPath('data.status_label', 'Degraded')
         ->assertJsonPath('data.last_checked_at', now()->subMinutes(2)->toIso8601String())
         ->assertJsonPath('data.uptime_percentages', [
             'twenty_four_hours' => 50,
@@ -123,8 +122,6 @@ it('validates the inputs', function (array $query, string $error) {
 it('does not reject a timezone the date extension cannot resolve by name', function () {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    // Browsers can report a legacy IANA alias (e.g. `Asia/Calcutta`) PHP's tzdata does not recognize, and
-    // `GetServiceMonitoringStatusHistory` resolves those gracefully rather than the request being rejected.
     getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget, 'timezone' => 'Asia/Calcutta']))
         ->assertOk();
 });

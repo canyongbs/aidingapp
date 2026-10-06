@@ -42,8 +42,7 @@ import {
 } from '@heroicons/vue/24/outline';
 
 /**
- * Presentation of each service monitor status returned by the API. The copy here is provisional until the
- * final status communications are written.
+ * Presentation of each service monitor status returned by the API.
  */
 const STATUSES = {
     operational: {

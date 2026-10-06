@@ -144,7 +144,6 @@ it('lists service monitors with their status, uptime, and daily history', functi
         ->assertJsonPath('data.0.monitor_type_label', 'Availability')
         ->assertJsonPath('data.0.frequency_label', '5 minutes')
         ->assertJsonPath('data.0.status', 'operational')
-        ->assertJsonPath('data.0.status_label', 'Operational')
         ->assertJsonPath('data.0.last_checked_at', now()->subMinutes(2)->toIso8601String())
         ->assertJsonPath('data.0.thirty_day_uptime_percentage', 100)
         ->assertJsonPath('data.0.twelve_month_uptime_percentage', null)
@@ -252,6 +251,20 @@ it('can sort by column', function (string $sort, string $direction, array $expec
     'frequency descending' => ['frequency', 'desc', ['Charlie', 'Alpha', 'Delta', 'Bravo']],
 ]);
 
+it('includes the uptime of each monitor whether or not the list is sorted by it', function (string $sort) {
+    freezeTime();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subDays(29)->subHours(12)]);
+    HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()->subHour()]);
+
+    getServiceMonitorStatuses(['sort' => $sort])
+        ->assertOk()
+        ->assertJsonPath('data.0.thirty_day_uptime_percentage', 50)
+        ->assertJsonPath('data.0.twelve_month_uptime_percentage', null);
+})->with(['name', 'status', 'thirty_day_uptime', 'twelve_month_uptime']);
+
 it('validates the inputs', function (array $query, string $error) {
     getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
 })->with([
@@ -262,8 +275,6 @@ it('validates the inputs', function (array $query, string $error) {
 ]);
 
 it('does not reject a timezone the date extension cannot resolve by name', function () {
-    // Browsers can report a legacy IANA alias (e.g. `Asia/Calcutta`) PHP's tzdata does not recognize, and
-    // `GetServiceMonitoringStatusHistory` resolves those gracefully rather than the request being rejected.
     getServiceMonitorStatuses(['timezone' => 'Asia/Calcutta'])->assertOk();
 });
 

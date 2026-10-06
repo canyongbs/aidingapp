@@ -57,7 +57,6 @@ class ServiceMonitorData extends Data
         public string $monitorTypeLabel,
         public string $frequencyLabel,
         public ServiceMonitoringStatus $status,
-        public string $statusLabel,
         public ?string $lastCheckedAt,
         public ?float $thirtyDayUptimePercentage,
         public ?float $twelveMonthUptimePercentage,

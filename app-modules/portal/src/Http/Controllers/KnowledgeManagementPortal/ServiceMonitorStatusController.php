@@ -53,6 +53,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -66,9 +67,6 @@ class ServiceMonitorStatusController extends Controller
             'search' => ['nullable', 'string', 'max:255'],
             'sort' => ['nullable', Rule::enum(ServiceMonitorStatusSort::class)],
             'direction' => ['nullable', Rule::in(['asc', 'desc'])],
-            // Not validated as a strict IANA identifier: browsers can report legacy aliases PHP doesn't
-            // recognize by name (e.g. `Asia/Calcutta`), and `GetServiceMonitoringStatusHistory` resolves those
-            // gracefully rather than rejecting the request over a display preference.
             'timezone' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -76,42 +74,56 @@ class ServiceMonitorStatusController extends Controller
         $sort = ServiceMonitorStatusSort::tryFrom($validated['sort'] ?? '') ?? ServiceMonitorStatusSort::Name;
         $timezone = $validated['timezone'] ?? app(ResolvePortalDisplayTimezone::class)() ?? config('app.timezone');
 
+        $uptimePeriods = [
+            ServiceMonitorStatusSort::ThirtyDayUptime->value => 30,
+            ServiceMonitorStatusSort::TwelveMonthUptime->value => 365,
+        ];
+
+        $sortsByUptime = in_array($sort, [ServiceMonitorStatusSort::ThirtyDayUptime, ServiceMonitorStatusSort::TwelveMonthUptime], true);
+
         $targets = ServiceMonitoringTarget::query()
             ->tap(new WithCurrentStatus())
-            ->tap(new WithUptimePercentages([
-                ServiceMonitorStatusSort::ThirtyDayUptime->value => 30,
-                ServiceMonitorStatusSort::TwelveMonthUptime->value => 365,
-            ]))
+            ->when($sortsByUptime, fn (Builder $query) => $query->tap(new WithUptimePercentages($uptimePeriods)))
             ->when(filled($search), function (Builder $query) use ($search): void {
-                $pattern = '%' . addcslashes($search, '%_\\') . '%';
+                $pattern = '%' . addcslashes(Str::lower($search), '%_\\') . '%';
 
                 $query->where(fn (Builder $query): Builder => $query
-                    ->where('service_monitoring_targets.name', 'ilike', $pattern)
-                    ->orWhere('service_monitoring_targets.description', 'ilike', $pattern));
+                    ->whereRaw('lower(service_monitoring_targets.name) like ?', [$pattern])
+                    ->orWhereRaw('lower(service_monitoring_targets.description) like ?', [$pattern]));
             })
             ->tap(fn (Builder $query) => $sort->apply($query, $validated['direction'] ?? 'asc'))
             ->paginate(10);
 
-        $history = $getStatusHistory(
-            collect($targets->items())->map(fn (ServiceMonitoringTarget $target): string => $target->getKey())->all(),
-            ServiceMonitoringHistoryPeriod::PastMonth,
-            $timezone,
-        );
+        $targetIds = collect($targets->items())->map(fn (ServiceMonitoringTarget $target): string => $target->getKey());
 
-        $targets->through(fn (ServiceMonitoringTarget $target): ServiceMonitorData => new ServiceMonitorData(
-            id: $target->getKey(),
-            name: $target->name,
-            description: $target->description,
-            monitorType: $target->monitor_type,
-            monitorTypeLabel: $target->monitor_type->getLabel(),
-            frequencyLabel: $target->frequency->getLabel(),
-            status: $target->getCurrentStatus(),
-            statusLabel: $target->getCurrentStatus()->getLabel(),
-            lastCheckedAt: $target->getLastCheckedAt()?->toIso8601String(),
-            thirtyDayUptimePercentage: $target->getSelectedUptimePercentage(ServiceMonitorStatusSort::ThirtyDayUptime->value),
-            twelveMonthUptimePercentage: $target->getSelectedUptimePercentage(ServiceMonitorStatusSort::TwelveMonthUptime->value),
-            history: $history[$target->getKey()] ?? [],
-        ));
+        $uptimeByTargetId = $sortsByUptime
+            ? collect($targets->items())->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey())
+            : ServiceMonitoringTarget::query()
+                ->select('service_monitoring_targets.id')
+                ->tap(new WithUptimePercentages($uptimePeriods))
+                ->whereIn('service_monitoring_targets.id', $targetIds)
+                ->get()
+                ->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey());
+
+        $history = $getStatusHistory($targetIds->all(), ServiceMonitoringHistoryPeriod::PastMonth, $timezone);
+
+        $targets->through(function (ServiceMonitoringTarget $target) use ($uptimeByTargetId, $history): ServiceMonitorData {
+            $uptime = $uptimeByTargetId->get($target->getKey());
+
+            return new ServiceMonitorData(
+                id: $target->getKey(),
+                name: $target->name,
+                description: $target->description,
+                monitorType: $target->monitor_type,
+                monitorTypeLabel: $target->monitor_type->getLabel(),
+                frequencyLabel: $target->frequency->getLabel(),
+                status: $target->getCurrentStatus(),
+                lastCheckedAt: $target->getLastCheckedAt()?->toIso8601String(),
+                thirtyDayUptimePercentage: $uptime?->getSelectedUptimePercentage(ServiceMonitorStatusSort::ThirtyDayUptime->value),
+                twelveMonthUptimePercentage: $uptime?->getSelectedUptimePercentage(ServiceMonitorStatusSort::TwelveMonthUptime->value),
+                history: $history[$target->getKey()] ?? [],
+            );
+        });
 
         return response()->json([
             'summary' => $this->summarize(),

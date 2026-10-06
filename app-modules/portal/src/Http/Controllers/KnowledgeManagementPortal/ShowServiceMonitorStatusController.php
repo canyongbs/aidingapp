@@ -71,9 +71,6 @@ class ShowServiceMonitorStatusController extends Controller
 
         $validated = $request->validate([
             'period' => ['nullable', Rule::enum(ServiceMonitoringHistoryPeriod::class)],
-            // Not validated as a strict IANA identifier: browsers can report legacy aliases PHP doesn't
-            // recognize by name (e.g. `Asia/Calcutta`), and `GetServiceMonitoringStatusHistory` resolves those
-            // gracefully rather than rejecting the request over a display preference.
             'timezone' => ['nullable', 'string', 'max:255'],
         ]);
 
@@ -97,7 +94,6 @@ class ShowServiceMonitorStatusController extends Controller
                 monitorTypeLabel: $target->monitor_type->getLabel(),
                 frequencyLabel: $target->frequency->getLabel(),
                 status: $target->getCurrentStatus(),
-                statusLabel: $target->getCurrentStatus()->getLabel(),
                 lastCheckedAt: $target->getLastCheckedAt()?->toIso8601String(),
                 uptimePercentages: collect(self::UPTIME_PERIODS)
                     ->map(fn (int $days, string $alias): ?float => $target->getSelectedUptimePercentage($alias))
