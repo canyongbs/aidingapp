@@ -37,9 +37,7 @@
 namespace AidingApp\Contact\Services;
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\FullNameFeature;
 use App\Models\User;
-use CanyonGBS\Common\Parser\Parser;
 use Illuminate\Database\Eloquent\Builder;
 
 class ManagedContactService
@@ -174,25 +172,19 @@ class ManagedContactService
             'mobile' => $user->mobile,
             'work_number' => $user->work_number,
             'work_extension' => is_null($user->work_extension) ? null : (string) $user->work_extension,
+            'preferred' => $user->preferred_name,
+            'address' => $user->address,
+            'address_2' => $user->address_2,
+            'city' => $user->city,
+            'state' => $user->state,
+            'postal' => $user->postal_code,
+            'employee_id' => $user->employee_id,
+            'student_id' => $user->student_id,
+            'school' => $user->school,
+            'academic_department' => $user->academic_department,
+            'program' => $user->program,
+            'country' => $user->country,
         ];
-
-        if (FullNameFeature::active()) {
-            $optionalAttributes = [
-                ...$optionalAttributes,
-                'preferred' => $user->preferred_name,
-                'address' => $user->address,
-                'address_2' => $user->address_2,
-                'city' => $user->city,
-                'state' => $user->state,
-                'postal' => $user->postal_code,
-                'employee_id' => $user->employee_id,
-                'student_id' => $user->student_id,
-                'school' => $user->school,
-                'academic_department' => $user->academic_department,
-                'program' => $user->program,
-                'country' => $user->country,
-            ];
-        }
 
         return [
             ...$attributes,
@@ -205,18 +197,9 @@ class ManagedContactService
      */
     protected function mapNameAttributes(User $user): array
     {
-        if (FullNameFeature::active()) {
-            return [
-                'first_name' => trim((string) $user->first_name),
-                'last_name' => trim((string) $user->last_name),
-            ];
-        }
-
-        $name = (new Parser())->parse(trim($user->name));
-
         return [
-            'first_name' => $name->getFirstname(),
-            'last_name' => $name->getLastname(),
+            'first_name' => trim((string) $user->first_name),
+            'last_name' => trim((string) $user->last_name),
         ];
     }
 }

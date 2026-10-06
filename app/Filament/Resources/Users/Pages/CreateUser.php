@@ -38,7 +38,6 @@ namespace App\Filament\Resources\Users\Pages;
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
-use App\Features\FullNameFeature;
 use App\Filament\Forms\Components\AddressInput;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
@@ -92,26 +91,22 @@ class CreateUser extends CreateRecord
                             ->string()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->afterStateUpdated($generateFullName),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
                             ->maxLength(255)
                             ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->afterStateUpdated($generateFullName),
                         TextInput::make('name')
                             ->label('Full Name')
-                            ->required(fn (): bool => ! FullNameFeature::active())
                             ->maxLength(255)
-                            ->disabled(fn (): bool => FullNameFeature::active())
+                            ->disabled()
                             ->dehydrated(),
 
                         TextInput::make('preferred_name')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                     ])
 
                     ->columns(2),
@@ -119,8 +114,7 @@ class CreateUser extends CreateRecord
                     ->schema([
                         TextInput::make('employee_id')
                             ->string()
-                            ->maxLength(255)
-                            ->visible(fn (): bool => FullNameFeature::active()),
+                            ->maxLength(255),
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255),
@@ -148,7 +142,6 @@ class CreateUser extends CreateRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2),
                 Section::make('Contact Information')
                     ->schema([
@@ -191,7 +184,6 @@ class CreateUser extends CreateRecord
                             ->string()
                             ->maxLength(255),
                     ])
-                    ->visible(fn (): bool => FullNameFeature::active())
                     ->columns(2),
                 Section::make('Account Settings')
                     ->schema([

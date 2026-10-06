@@ -38,7 +38,6 @@ namespace App\Filament\Imports;
 
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
-use App\Features\FullNameFeature;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use App\Rules\DepartmentExists;
@@ -54,7 +53,7 @@ class UserImporter extends Importer
 
     public static function getColumns(): array
     {
-        $columns = [
+        return [
             ImportColumn::make('first_name')
                 ->label('First Name')
                 ->exampleHeader('First Name')
@@ -189,23 +188,6 @@ class UserImporter extends Importer
                 ->rules([new RolesExist()])
                 ->example('Authorization Admin|Super Admin'),
         ];
-
-        if (FullNameFeature::active()) {
-            return $columns;
-        }
-
-        return [
-            ImportColumn::make('name')
-                ->label('Name')
-                ->exampleHeader('Name')
-                ->rules(['required', 'string', 'max:255'])
-                ->requiredMapping()
-                ->example('Jonathan Smith'),
-            ...array_values(array_filter(
-                $columns,
-                fn (ImportColumn $column): bool => ! in_array($column->getName(), static::newDemographicColumnNames(), true),
-            )),
-        ];
     }
 
     public function resolveRecord(): ?User
@@ -228,38 +210,13 @@ class UserImporter extends Importer
         return $body;
     }
 
-    /**
-     * @return array<string>
-     */
-    protected static function newDemographicColumnNames(): array
-    {
-        return [
-            'first_name',
-            'last_name',
-            'preferred_name',
-            'employee_id',
-            'student_id',
-            'school',
-            'academic_department',
-            'program',
-            'address',
-            'address_2',
-            'city',
-            'state',
-            'postal_code',
-            'country',
-        ];
-    }
-
     protected function afterFill(): void
     {
         /** @var User $record */
         $record = $this->record;
         $record->is_external ??= true;
 
-        if (FullNameFeature::active()) {
-            $record->name = trim("{$record->first_name} {$record->last_name}");
-        }
+        $record->name = trim("{$record->first_name} {$record->last_name}");
     }
 
     protected function afterSave(): void

@@ -37,7 +37,6 @@
 namespace App\Actions;
 
 use App\DataTransferObjects\CreateUserDataObject;
-use App\Features\FullNameFeature;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Arr;
@@ -51,12 +50,10 @@ class CreateUserAction
         $user = DB::transaction(function () use ($data) {
             $userData = Arr::except($data->toArray(), ['roles']);
 
-            if (FullNameFeature::active()) {
-                assert(! ($data->firstName instanceof Optional));
-                assert(! ($data->lastName instanceof Optional));
+            assert(! ($data->firstName instanceof Optional));
+            assert(! ($data->lastName instanceof Optional));
 
-                $userData['name'] = trim("{$data->firstName} {$data->lastName}");
-            }
+            $userData['name'] = trim("{$data->firstName} {$data->lastName}");
 
             $user = User::create($userData);
 

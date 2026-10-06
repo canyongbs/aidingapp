@@ -103,7 +103,7 @@ class ServiceRequestInfolist
                                 return new HtmlString(view('service-management::filament.infolists.respondent-contact', [
                                     'name' => $respondent->{Contact::displayNameKey()},
                                     'type' => $respondent->type->name,
-                                    'organizationName' => $respondent->organization->name ?? 'Unaffiliated',
+                                    'organizationName' => $respondent->organization?->name,
                                     'loadingTarget' => $viewContactAction->getLivewireClickHandler(),
                                 ])->render());
                             })

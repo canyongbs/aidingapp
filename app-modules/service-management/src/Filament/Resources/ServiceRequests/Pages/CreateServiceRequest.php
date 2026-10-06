@@ -177,7 +177,13 @@ class CreateServiceRequest extends CreateRecord
                             ->required()
                             ->searchable()
                             ->preload()
-                            ->getOptionLabelFromRecordUsing(fn (Contact $record) => $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ")\n" . ($record->organization->name ?? 'Unaffiliated'))
+                            ->getOptionLabelFromRecordUsing(function (Contact $record): string {
+                                $label = $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ')';
+
+                                return $record->organization?->name
+                                    ? $label . "\n" . $record->organization->name
+                                    : $label;
+                            })
                             ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Additional Information')
