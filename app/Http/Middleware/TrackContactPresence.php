@@ -51,7 +51,7 @@ class TrackContactPresence
         $contact = $request->user('contact');
 
         if (! $contact instanceof Contact) {
-          $contact = $request->user('sanctum');
+            $contact = $request->user('sanctum');
         }
 
         if (! $contact instanceof Contact) {
