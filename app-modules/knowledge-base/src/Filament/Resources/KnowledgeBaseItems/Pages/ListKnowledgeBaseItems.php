@@ -53,14 +53,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -142,7 +143,39 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->relationship('category', 'name')
                     ->multiple()
                     ->preload(),
-                TernaryFilter::make('public'),
+                Filter::make('public')
+                    ->schema([
+                        ToggleButtons::make('value')
+                            ->label('Public')
+                            ->options([
+                                '1' => 'Yes',
+                                '0' => 'No',
+                            ])
+                            ->colors([
+                                '1' => 'success',
+                                '0' => 'danger',
+                            ])
+                            ->multiple()
+                            ->inline(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        $value = $data['value'] ?? [];
+
+                        if (count($value) !== 1) {
+                            return $query;
+                        }
+
+                        return $query->where('public', (bool) reset($value));
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        $value = $data['value'] ?? [];
+
+                        if (count($value) !== 1) {
+                            return [];
+                        }
+
+                        return [Indicator::make('Public: ' . ((bool) reset($value) ? 'Yes' : 'No'))];
+                    }),
                 Filter::make('created_at')
                     ->label('Created After')
                     ->schema([
