@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Components;
 
+use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 
@@ -48,7 +49,7 @@ class ServiceRequestFeedbackViewAction extends ViewAction
         $this->schema([
             TextEntry::make('contact.full_name')
                 ->label('Submitted By')
-                ->default('Unknown'),
+                ->state(fn (ServiceRequestFeedback $record): string => $record->contact()->withTrashed()->first()->full_name ?? 'Deleted user'),
             TextEntry::make('csat_answer')
                 ->label('CSAT')
                 ->default('N/A'),

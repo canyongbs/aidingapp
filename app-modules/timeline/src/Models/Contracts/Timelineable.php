@@ -47,4 +47,11 @@ interface Timelineable
     public function providesCustomView(): bool;
 
     public function modalViewAction(): ViewAction;
+
+    /**
+     * Shown, together with the icon, when the subject record was permanently deleted, so must not read record data.
+     */
+    public function missingRecordTitle(): string;
+
+    public function missingRecordDescription(): ?string;
 }
