@@ -44,6 +44,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use App\Models\Tag;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -63,7 +64,9 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class ListKnowledgeBaseItems extends ListRecords
 {
@@ -138,10 +141,29 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->relationship('status', 'name')
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('category')
-                    ->relationship('category', 'name')
-                    ->multiple()
-                    ->preload(),
+                Filter::make('category')
+                    ->label('Category')
+                    ->schema([
+                        SelectTree::make('categories')
+                            ->label('Category')
+                            ->getTreeUsing(fn (): array => static::buildCategoryTreeOptions(KnowledgeBaseCategory::query()))
+                            ->enableBranchNode()
+                            ->multiple()
+                            ->searchable()
+                            ->placeholder('All'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        ! empty($data['categories']),
+                        fn (Builder $query) => $query->whereIn('category_id', $data['categories'])
+                    ))
+                    ->indicateUsing(
+                        fn (array $data): ?string => empty($data['categories'])
+                            ? null
+                            : 'Category: ' . KnowledgeBaseCategory::query()
+                                ->whereIn('id', $data['categories'])
+                                ->pluck('name')
+                                ->implode(', ')
+                    ),
                 TernaryFilter::make('public'),
                 Filter::make('created_at')
                     ->label('Created After')
@@ -263,6 +285,28 @@ class ListKnowledgeBaseItems extends ListRecords
             ->defaultSort('updated_at', 'desc');
     }
 
+    /**
+     * Build the nested option tree a `SelectTree` expects from a self-referencing
+     * (parent/child) model, so managed subcategories are shown instead of a flat list.
+     *
+     * @param  Builder<covariant Model>  $query
+     *
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
+     */
+    public static function buildCategoryTreeOptions(
+        Builder $query,
+        string $labelAttribute = 'name',
+        string $parentAttribute = 'parent_id',
+        string $sortAttribute = 'sort',
+    ): array {
+        $recordsByParent = $query
+            ->orderBy($sortAttribute)
+            ->get()
+            ->groupBy(fn (Model $record): string => (string) $record->getAttribute($parentAttribute));
+
+        return static::buildCategoryTreeNodes($recordsByParent, '', $labelAttribute);
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -273,5 +317,26 @@ class ListKnowledgeBaseItems extends ListRecords
                 ->slideOver()
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
+    }
+
+    /**
+     * @param  Collection<int|string, EloquentCollection<int, Model>>  $recordsByParent
+     *
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
+     */
+    protected static function buildCategoryTreeNodes(
+        Collection $recordsByParent,
+        string $parentKey,
+        string $labelAttribute,
+    ): array {
+        return $recordsByParent
+            ->get($parentKey, collect())
+            ->map(fn (Model $record): array => [
+                'name' => (string) $record->getAttribute($labelAttribute),
+                'value' => $record->getKey(),
+                'children' => static::buildCategoryTreeNodes($recordsByParent, (string) $record->getKey(), $labelAttribute),
+            ])
+            ->values()
+            ->all();
     }
 }

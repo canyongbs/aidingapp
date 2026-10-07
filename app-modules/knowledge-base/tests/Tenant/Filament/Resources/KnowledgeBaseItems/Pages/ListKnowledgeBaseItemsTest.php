@@ -180,12 +180,47 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
                 ->merge($passwordManagementKnowledgeBaseItems)
                 ->merge($networkTroubleshootingKnowledgeBaseItems)
         )
-        ->filterTable('category', [$passwordManagement, $softwareCategory])
+        ->filterTable('category', ['categories' => [$passwordManagement->getKey(), $softwareCategory->getKey()]])
         ->assertCanSeeTableRecords(
             $passwordManagementKnowledgeBaseItems
                 ->merge($softwareCategoryKnowledgeBaseItems)
         )
         ->assertCanNotSeeTableRecords($networkTroubleshootingKnowledgeBaseItems);
+});
+
+test('Filter ListKnowledgeBaseItems with `category` filter only matches the selected category, not its subcategories', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->knowledgeManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    actingAs($user);
+
+    $parentCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Hardware',
+    ])->create();
+
+    $childCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Printers',
+        'parent_id' => $parentCategory->getKey(),
+    ])->create();
+
+    $parentCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(2)->for($parentCategory, 'category')->create();
+
+    $childCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(2)->for($childCategory, 'category')->create();
+
+    $user->refresh();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($parentCategoryKnowledgeBaseItems->merge($childCategoryKnowledgeBaseItems))
+        ->filterTable('category', ['categories' => [$childCategory->getKey()]])
+        ->assertCanSeeTableRecords($childCategoryKnowledgeBaseItems)
+        ->assertCanNotSeeTableRecords($parentCategoryKnowledgeBaseItems);
 });
 
 test('Filter ListKnowledgeBaseItems with `public` filter', function () {
