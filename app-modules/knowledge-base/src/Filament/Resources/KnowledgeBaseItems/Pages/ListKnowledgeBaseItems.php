@@ -147,34 +147,24 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->schema([
                         ToggleButtons::make('value')
                             ->label('Public')
-                            ->options([
-                                '1' => 'Yes',
-                                '0' => 'No',
-                            ])
-                            ->colors([
-                                '1' => 'success',
-                                '0' => 'danger',
-                            ])
-                            ->multiple()
-                            ->inline(),
+                            ->boolean()
+                            ->inline()
+                            ->extraInputAttributes(fn (ToggleButtons $component): array => [
+                                'x-on:click' => "if (\$wire.\$get('{$component->getStatePath()}') == \$el.value) { \$wire.\$set('{$component->getStatePath()}', null) }",
+                            ]),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
-                        $value = $data['value'] ?? [];
-
-                        if (count($value) !== 1) {
-                            return $query;
-                        }
-
-                        return $query->where('public', (bool) reset($value));
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->where('public', (bool) $data['value']),
+                        );
                     })
                     ->indicateUsing(function (array $data): array {
-                        $value = $data['value'] ?? [];
-
-                        if (count($value) !== 1) {
+                        if (blank($data['value'] ?? null)) {
                             return [];
                         }
 
-                        return [Indicator::make('Public: ' . ((bool) reset($value) ? 'Yes' : 'No'))];
+                        return [Indicator::make('Public: ' . ($data['value'] ? 'Yes' : 'No'))];
                     }),
                 Filter::make('created_at')
                     ->label('Created After')
