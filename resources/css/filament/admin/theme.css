@@ -161,6 +161,11 @@ li[data-group-label=''] > ul > .fi-sidebar-item > .fi-sidebar-item-button > .fi-
     @apply bg-white dark:bg-gray-900;
 }
 
+/* Fixes a bug where the color of `codewithdennis/filament-select-tree` crosses are transparent in dark mode. */
+html.dark .treeselect-input__tags-element .treeselect-input__tags-cross svg {
+    stroke: var(--color-white, #ffffff);
+}
+
 .fi-datetime-description {
     @apply text-gray-500 dark:text-gray-400;
 }
