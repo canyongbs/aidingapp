@@ -93,7 +93,7 @@ it('leaves the bounce flag true when the email is set to the same value', functi
     expect($contact->fresh()->email_bounce)->toBeTrue();
 });
 
-it('keeps the bounce flag true when the email changes and email_bounce is explicitly set true in the same save', function () {
+it('keeps an explicit `email_bounce` value set in the same save as the email change', function () {
     $contact = Contact::factory()->create(['email' => 'original@example.com', 'email_bounce' => false]);
 
     expect($contact->email_bounce)->toBeFalse();
@@ -104,4 +104,17 @@ it('keeps the bounce flag true when the email changes and email_bounce is explic
     ]);
 
     expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('cannot keep an already-true `email_bounce` reasserted in the same save as the email change (known limitation)', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update([
+        'email' => 'changed@example.com',
+        'email_bounce' => true,
+    ]);
+
+    expect($contact->fresh()->email_bounce)->toBeFalse();
 });
