@@ -34,40 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
-
 use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use Mockery\MockInterface;
 
-class ContactObserver
-{
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
+it('delegates organization matching when a contact is created', function () {
+    $contact = Contact::factory()->make();
 
-    public function creating(Contact $contact): void
-    {
-        $user = auth()->user();
+    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+        $mock->shouldReceive('__invoke')
+            ->once()
+            ->with($contact);
+    });
 
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
-    }
+    $contact->save();
+});
 
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
+it('delegates organization matching when a contact is updated', function () {
+    $contact = Contact::factory()->createQuietly();
 
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
+    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+        $mock->shouldReceive('__invoke')
+            ->once()
+            ->with($contact);
+    });
 
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-}
+    $contact->first_name = 'Updated';
+    $contact->save();
+});

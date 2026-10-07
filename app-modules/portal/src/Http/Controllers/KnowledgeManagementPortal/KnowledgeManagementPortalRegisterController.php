@@ -40,7 +40,7 @@ use AidingApp\Ai\Settings\AiSupportAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Actions\AuthenticatePortalContact;
-use AidingApp\Portal\Actions\FindOrganizationByEmailDomain;
+use AidingApp\Portal\Actions\FindPortalRegistrationOrganization;
 use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
@@ -78,7 +78,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
             ]);
         $type = ContactType::resolveDefault();
 
-        $organization = app(FindOrganizationByEmailDomain::class)($data['email']);
+        $organization = app(FindPortalRegistrationOrganization::class)($data['email']);
 
         if ($organization) {
             $contact->organization()->associate($organization);

@@ -38,10 +38,12 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\OrganizationFactory;
+use AidingApp\Contact\Observers\OrganizationObserver;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectGuest;
 use App\Models\BaseModel;
 use App\Models\Media;
+use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -55,6 +57,7 @@ use Spatie\MediaLibrary\InteractsWithMedia;
 /**
  * @mixin IdeHelperOrganization
  */
+#[ObservedBy([OrganizationObserver::class])]
 class Organization extends BaseModel implements HasMedia, Auditable
 {
     /** @use HasFactory<OrganizationFactory> */

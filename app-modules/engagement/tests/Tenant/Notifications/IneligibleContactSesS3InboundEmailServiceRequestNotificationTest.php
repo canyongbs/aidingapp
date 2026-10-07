@@ -34,40 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Observers;
+use AidingApp\Engagement\Notifications\IneligibleContactSesS3InboundEmailServiceRequestNotification;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use Illuminate\Notifications\AnonymousNotifiable;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
-use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
-
-class ContactObserver
+function makeIneligibleContactNotification(?string $bcc): IneligibleContactSesS3InboundEmailServiceRequestNotification
 {
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
+    $serviceRequestType = ServiceRequestType::factory()->create([
+        'email_automatic_creation_bcc' => $bcc,
+    ]);
 
-    public function creating(Contact $contact): void
-    {
-        $user = auth()->user();
+    $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::factory()->make([
+        'service_request_type_id' => $serviceRequestType->getKey(),
+    ]);
 
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
-        }
-    }
-
-    public function saved(Contact $contact): void
-    {
-        ($this->matchContactToOrganization)($contact);
-    }
-
-    public function created(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
-
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
-    }
+    return new IneligibleContactSesS3InboundEmailServiceRequestNotification($serviceRequestTypeDomain, 'Original message');
 }
+
+it('bccs the service request type bcc address when one is configured', function () {
+    $mailMessage = makeIneligibleContactNotification('bcc@example.com')
+        ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
+
+    expect($mailMessage->bcc)->toBe([['bcc@example.com', null]]);
+});
+
+it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) {
+    $mailMessage = makeIneligibleContactNotification($bcc)
+        ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
+
+    expect($mailMessage->bcc)->toBeEmpty();
+})->with([
+    'null' => [null],
+    'empty string' => [''],
+]);

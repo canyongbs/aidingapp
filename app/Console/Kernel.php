@@ -37,6 +37,7 @@
 namespace App\Console;
 
 use AidingApp\Ai\Jobs\DispatchPrepareKnowledgeBaseVectorStoreForEachTenant;
+use AidingApp\Contact\Jobs\DispatchMatchUnaffiliatedContactsForEachTenant;
 use AidingApp\Engagement\Jobs\DispatchDeliverEngagementsForEachTenant;
 use AidingApp\Engagement\Jobs\DispatchUnmatchedInboundCommunicationsForEachTenant;
 use AidingApp\Engagement\Jobs\GatherAndDispatchSesS3InboundEmails;
@@ -85,6 +86,10 @@ class Kernel extends ConsoleKernel
 
         $schedule->job(new DispatchPrepareKnowledgeBaseVectorStoreForEachTenant())
             ->everyFiveMinutes()
+            ->onOneServer();
+
+        $schedule->job(new DispatchMatchUnaffiliatedContactsForEachTenant())
+            ->everyTenMinutes()
             ->onOneServer();
 
         $schedule->job(new DispatchServiceMonitoringForEachTenant(ServiceMonitoringFrequency::FiveMinutes))
