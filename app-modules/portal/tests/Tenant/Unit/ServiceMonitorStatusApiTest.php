@@ -238,6 +238,7 @@ it('can sort by column', function (string $sort, string $direction, array $expec
 
     expect(collect($response->json('data'))->pluck('name')->all())->toBe($expectedOrder);
 })->with([
+    'name ascending' => ['name', 'asc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
     'name descending' => ['name', 'desc', ['Delta', 'Charlie', 'Bravo', 'Alpha']],
     'status ascending' => ['status', 'asc', ['Delta', 'Alpha', 'Bravo', 'Charlie']],
     'status descending' => ['status', 'desc', ['Charlie', 'Bravo', 'Alpha', 'Delta']],

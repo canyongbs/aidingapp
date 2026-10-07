@@ -54,6 +54,7 @@
     import { getStatus } from '../Components/ServiceMonitors/serviceMonitorStatuses.js';
     import ServiceMonitorUptimeCards from '../Components/ServiceMonitors/ServiceMonitorUptimeCards.vue';
     import BaseCard from '../Components/ui/BaseCard.vue';
+    import BaseInputError from '../Components/ui/BaseInputError.vue';
     import BaseSelect from '../Components/ui/BaseSelect.vue';
     import { useNow } from '../Composables/useNow.js';
     import { apiGet } from '../Services/api.js';
@@ -67,11 +68,18 @@
     const now = useNow();
 
     const period = ref(DEFAULT_HISTORY_PERIOD);
+    const periodLoadFailed = ref(false);
     const monitorId = computed(() => initialEnvelope.value?.data?.id ?? null);
 
     watch(monitorId, () => {
         period.value = DEFAULT_HISTORY_PERIOD;
+        periodLoadFailed.value = false;
     });
+
+    function selectPeriod(value) {
+        periodLoadFailed.value = false;
+        period.value = value;
+    }
 
     const periodQuery = useQuery({
         key: () => ['knowledge-management', 'service-monitor', monitorId.value, period.value],
@@ -98,6 +106,16 @@
     const statusConfig = computed(() => getStatus(monitor.value?.status));
     const historyPeriodConfig = computed(() => getHistoryPeriod(monitor.value?.history_period));
     const isFetchingHistory = computed(() => period.value !== DEFAULT_HISTORY_PERIOD && periodQuery.isLoading.value);
+
+    // Revert the dropdown rather than leaving it pointed at a period whose chart failed to load.
+    watch(periodQuery.error, (error) => {
+        if (!error) {
+            return;
+        }
+
+        periodLoadFailed.value = true;
+        period.value = monitor.value?.history_period ?? DEFAULT_HISTORY_PERIOD;
+    });
 
     const breadcrumbs = [{ name: 'Status', route: 'status' }];
 </script>
@@ -151,12 +169,19 @@
                             <p class="text-sm text-gray-500">{{ historyPeriodConfig.description }}</p>
                         </div>
                     </div>
-                    <BaseSelect
-                        v-model="period"
-                        :options="HISTORY_PERIOD_OPTIONS"
-                        label="Uptime history period"
-                        class="sm:w-44"
-                    />
+                    <div>
+                        <BaseSelect
+                            :model-value="period"
+                            :options="HISTORY_PERIOD_OPTIONS"
+                            label="Uptime history period"
+                            class="sm:w-44"
+                            @update:model-value="selectPeriod"
+                        />
+                        <BaseInputError
+                            v-if="periodLoadFailed"
+                            :errors="['Could not load that period. Showing the last loaded data instead.']"
+                        />
+                    </div>
                 </div>
 
                 <ServiceMonitorHistoryChart

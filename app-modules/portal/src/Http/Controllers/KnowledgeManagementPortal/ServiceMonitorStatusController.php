@@ -96,14 +96,16 @@ class ServiceMonitorStatusController extends Controller
 
         $targetIds = collect($targets->items())->map(fn (ServiceMonitoringTarget $target): string => $target->getKey());
 
-        $uptimeByTargetId = $sortsByUptime
-            ? collect($targets->items())->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey())
-            : ServiceMonitoringTarget::query()
+        $uptimeByTargetId = match (true) {
+            $sortsByUptime => collect($targets->items())->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey()),
+            $targetIds->isEmpty() => collect(),
+            default => ServiceMonitoringTarget::query()
                 ->select('service_monitoring_targets.id')
                 ->tap(new WithUptimePercentages($uptimePeriods))
                 ->whereIn('service_monitoring_targets.id', $targetIds)
                 ->get()
-                ->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey());
+                ->keyBy(fn (ServiceMonitoringTarget $target): string => $target->getKey()),
+        };
 
         $history = $getStatusHistory($targetIds->all(), ServiceMonitoringHistoryPeriod::PastMonth, $timezone);
 

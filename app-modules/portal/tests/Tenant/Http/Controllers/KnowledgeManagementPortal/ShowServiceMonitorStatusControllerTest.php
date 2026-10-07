@@ -131,6 +131,10 @@ it('does not show a service monitor that does not exist', function () {
         ->assertNotFound();
 });
 
+it('does not show a service monitor when the id is not a uuid', function () {
+    getJson('/api/portal/status/not-a-uuid')->assertNotFound();
+});
+
 describe('authorization', function () {
     it('requires contact authentication', function () {
         auth()->forgetGuards();
