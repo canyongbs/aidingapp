@@ -132,7 +132,7 @@ it('does not show a service monitor that does not exist', function () {
 });
 
 it('does not show a service monitor when the id is not a uuid', function () {
-    getJson('/api/portal/status/not-a-uuid')->assertNotFound();
+    getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => 'not-a-uuid']))->assertNotFound();
 });
 
 describe('authorization', function () {
