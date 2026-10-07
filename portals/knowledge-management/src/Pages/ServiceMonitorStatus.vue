@@ -132,13 +132,23 @@
     const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
     const isFetching = computed(() => !usesInitialData.value && pageQuery.isLoading.value);
     const loadingPage = computed(() => (isFetching.value ? currentPage.value : null));
+    const loadFailed = computed(() => !usesInitialData.value && !isFetching.value && Boolean(pageQuery.error.value));
 
     const summaryCopy = computed(() => {
         const total = summary.value?.total_count ?? 0;
         const affected = (summary.value?.status_counts?.degraded ?? 0) + (summary.value?.status_counts?.outage ?? 0);
+        const unchecked = summary.value?.status_counts?.unknown ?? 0;
+        const operational = total - unchecked;
 
         switch (summary.value?.status) {
             case 'operational':
+                if (unchecked > 0) {
+                    return {
+                        title: 'All checked systems operational',
+                        description: `${operational} of ${total} monitored services ${operational === 1 ? 'is' : 'are'} running as expected. ${unchecked} ${unchecked === 1 ? "hasn't" : "haven't"} completed ${unchecked === 1 ? 'its' : 'their'} first check yet.`,
+                    };
+                }
+
                 return {
                     title: 'All systems operational',
                     description: 'All monitored services are running as expected.',
@@ -207,7 +217,13 @@
             </div>
 
             <div :class="['transition-opacity', isFetching && 'opacity-60']" :aria-busy="isFetching">
-                <BaseTableEmptyState v-if="monitors.length === 0">
+                <BaseTableEmptyState v-if="loadFailed">
+                    <p class="text-base font-semibold text-gray-700">Could not load monitors</p>
+                    <p class="mt-1 text-sm text-gray-400">Something went wrong while loading these results.</p>
+                    <BaseButton color="gray" size="md" class="mt-4" @click="pageQuery.refetch()">Try again</BaseButton>
+                </BaseTableEmptyState>
+
+                <BaseTableEmptyState v-else-if="monitors.length === 0">
                     <p class="text-base font-semibold text-gray-700">No monitors match your search</p>
                     <p class="mt-1 text-sm text-gray-400">Try searching for a different name or description.</p>
                 </BaseTableEmptyState>
@@ -223,7 +239,7 @@
             </div>
 
             <Pagination
-                v-if="lastPage > 1"
+                v-if="!loadFailed && lastPage > 1"
                 :current-page="currentPage"
                 :last-page="lastPage"
                 :from-item="fromItem"
