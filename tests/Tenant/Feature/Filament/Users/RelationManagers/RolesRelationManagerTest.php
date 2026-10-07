@@ -152,6 +152,36 @@ it('does not display the Saas Global Admin role if the user is not itself a Saas
         ->assertSuccessful();
 });
 
+it('searches attachable roles case insensitively', function (string $roleName, string $search) {
+    $loggedInUser = User::factory()->create();
+    $loggedInUser->givePermissionTo(
+        'role.view-any',
+        'role.*.view',
+        'user.view-any',
+        'user.*.view',
+        'user.*.update',
+    );
+
+    actingAs($loggedInUser);
+
+    $role = Role::factory()->create(['name' => $roleName, 'guard_name' => 'web']);
+    Role::factory()->create(['name' => 'Unrelated Role', 'guard_name' => 'web']);
+
+    livewire(RolesRelationManager::class, [
+        'ownerRecord' => User::factory()->create(),
+        'pageClass' => EditUser::class,
+    ])
+        ->mountTableAction(AttachAction::class)
+        ->assertFormFieldExists('recordId', checkFieldUsing: function (Select $select) use ($role, $roleName, $search): bool {
+            expect($select->getSearchResults($search))->toBe([$role->getKey() => $roleName]);
+
+            return true;
+        });
+})->with([
+    'ASCII uppercase partial match' => ['Support Agent', 'AGENT'],
+    'multibyte uppercase partial match' => ["\u{00E9}quipe Support", "\u{00C9}QUIPE"],
+]);
+
 it('only shows the attach role action to a user with the user.update permission', function () {
     $user = User::factory()->create();
 

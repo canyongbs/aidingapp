@@ -103,7 +103,7 @@ class ServiceRequestMediaTable extends TableWidget
                         return $record->name . '.' . $extension;
                     })
                     ->searchable(
-                        query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . strtolower($search) . '%'])
+                        query: fn (Builder $query, string $search) => $query->whereRaw('LOWER(name) LIKE ?', ['%' . Str::lower($search) . '%'])
                     )
                     ->wrap(),
 
@@ -116,7 +116,7 @@ class ServiceRequestMediaTable extends TableWidget
                             'createdBy',
                             [User::class, Contact::class],
                             function (Builder $subQuery, string $type) use ($search): void {
-                                $searchLower = strtolower($search);
+                                $searchLower = Str::lower($search);
 
                                 if ($type === User::class) {
                                     $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%']);

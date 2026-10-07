@@ -43,6 +43,7 @@ use App\Rules\EmailNotInUseOrSoftDeleted;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Validator;
 
 class CreateUserRequest extends FormRequest
@@ -112,7 +113,7 @@ class CreateUserRequest extends FormRequest
         }
 
         $this->resolvedDepartment = Department::query()
-            ->where(new Expression('lower(name)'), 'like', '%' . strtolower($departmentName) . '%')
+            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($departmentName) . '%')
             ->first();
 
         if (! $this->resolvedDepartment) {
@@ -137,10 +138,10 @@ class CreateUserRequest extends FormRequest
             Authenticatable::AI_ADMIN_ROLE,
         ];
 
-        $loweredAdminNames = array_map('strtolower', $adminRoleNames);
+        $loweredAdminNames = array_map(fn (string $roleName): string => Str::lower($roleName), $adminRoleNames);
 
         foreach ($roleNames as $index => $roleName) {
-            if (in_array(strtolower($roleName), $loweredAdminNames, true)) {
+            if (in_array(Str::lower($roleName), $loweredAdminNames, true)) {
                 $validator->errors()->add(
                     "roles.{$index}",
                     'Invalid role.'
@@ -151,14 +152,14 @@ class CreateUserRequest extends FormRequest
         }
 
         $this->resolvedRoles = Role::query()
-            ->whereRaw('LOWER(name) IN (' . implode(',', array_fill(0, count($roleNames), '?')) . ')', array_map('strtolower', $roleNames))
+            ->whereRaw('LOWER(name) IN (' . implode(',', array_fill(0, count($roleNames), '?')) . ')', array_map(fn (string $roleName): string => Str::lower($roleName), $roleNames))
             ->get();
 
         if ($this->resolvedRoles->count() !== count($roleNames)) {
-            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name) => strtolower($name))->toArray();
+            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name) => Str::lower($name))->toArray();
 
             foreach ($roleNames as $index => $roleName) {
-                if (! in_array(strtolower($roleName), $foundNames, true)) {
+                if (! in_array(Str::lower($roleName), $foundNames, true)) {
                     $validator->errors()->add(
                         "roles.{$index}",
                         "The role '{$roleName}' does not exist."

@@ -50,4 +50,6 @@ test('app')
     ->and('AidingApp\KnowledgeBase')
     ->not->toUse('OwenIt\Auditing\Auditable')
     ->and('AidingApp\Contact')
+    ->not->toUse('OwenIt\Auditing\Auditable')
+    ->and('AidingApp\Report')
     ->not->toUse('OwenIt\Auditing\Auditable');

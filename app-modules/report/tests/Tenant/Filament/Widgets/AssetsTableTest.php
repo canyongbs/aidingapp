@@ -187,6 +187,39 @@ it('filters assets by name', function () {
         ->assertCanNotSeeTableRecords(collect([$laptop2, $desktop]));
 });
 
+it('searches asset name filter options case insensitively', function (string $assetName, string $search) {
+    actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
+
+    $type = AssetType::factory()->create();
+    $status = AssetStatus::factory()->available()->create();
+
+    Asset::factory()
+        ->for($type, 'type')
+        ->for($status, 'status')
+        ->state(['name' => $assetName])
+        ->create();
+
+    Asset::factory()
+        ->for($type, 'type')
+        ->for($status, 'status')
+        ->state(['name' => 'Unrelated Desktop'])
+        ->create();
+
+    $select = livewire(AssetsTable::class, [
+        'cacheTag' => 'test-assets-table-name-search',
+    ])
+        ->instance()
+        ->getTable()
+        ->getFilter('name')
+        ->getFormField();
+
+    expect($select->getSearchResults($search))->toBe([$assetName => $assetName])
+        ->and($select->getSearchResults('No matching asset'))->toBe([]);
+})->with([
+    'ASCII uppercase' => ['Office Laptop 001', 'LAPTOP'],
+    'multibyte uppercase' => ["Office \u{00E9}cran 001", "\u{00C9}CRAN"],
+]);
+
 it('filters assets by type', function () {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 

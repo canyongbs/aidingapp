@@ -35,6 +35,7 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
@@ -157,6 +158,51 @@ it('returns all service requests when no date filters are applied', function () 
             $request3,
         ]));
 });
+
+it('searches service requests by contact or organization name case insensitively', function (string $contactName, string $organizationName, string $search) {
+    actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
+
+    $contact = Contact::factory()
+        ->for(Organization::factory()->state(['name' => $organizationName]), 'organization')
+        ->state([
+            'first_name' => $contactName,
+            'last_name' => 'Example',
+            'full_name' => "{$contactName} Example",
+        ])
+        ->create();
+
+    $matchingRequest = ServiceRequest::factory()
+        ->for($contact, 'respondent')
+        ->state(['title' => 'Matching request'])
+        ->create();
+
+    $otherContact = Contact::factory()
+        ->for(Organization::factory()->state(['name' => 'Unrelated Company']), 'organization')
+        ->state([
+            'first_name' => 'Other',
+            'last_name' => 'Person',
+            'full_name' => 'Other Person',
+        ])
+        ->create();
+
+    $otherRequest = ServiceRequest::factory()
+        ->for($otherContact, 'respondent')
+        ->state(['title' => 'Unrelated request'])
+        ->create();
+
+    livewire(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-related-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCanSeeTableRecords(collect([$matchingRequest]))
+        ->assertCanNotSeeTableRecords(collect([$otherRequest]));
+})->with([
+    'ASCII contact' => ['Alice', 'Other Company', 'ALICE'],
+    'ASCII organization' => ['Other', 'Example University', 'UNIVERSITY'],
+    'multibyte contact' => ["Ren\u{00E9}e", 'Other Company', "REN\u{00C9}E"],
+    'multibyte organization' => ['Other', "\u{00E9}cole Example", "\u{00C9}COLE"],
+]);
 
 it('has table an export action', function () {
     livewire(ServiceRequestsTable::class, [

@@ -125,10 +125,10 @@ class ServiceRequestsTable extends BaseWidget
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
+                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . Str::lower($search) . '%'])
                                 ->orWhereHas(
                                     'organization',
-                                    fn (Builder $query) => $query->whereRaw('lower(name) like ?', ['%' . strtolower($search) . '%'])
+                                    fn (Builder $query) => $query->whereRaw('lower(name) like ?', ['%' . Str::lower($search) . '%'])
                                 )
                         )
                     )

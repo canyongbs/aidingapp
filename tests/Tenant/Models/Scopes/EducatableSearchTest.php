@@ -34,36 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Report\Models;
+use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Scopes\EducatableSearch;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\Report\Database\Factories\ReportUserAccessFactory;
-use App\Models\BaseModel;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Contracts\Auditable;
+it('matches related respondent names case insensitively', function (string $firstName, string $search) {
+    $respondent = Contact::factory()->state([
+        'first_name' => $firstName,
+        'last_name' => 'Example',
+        'full_name' => "{$firstName} Example",
+    ])->create();
 
-/**
- * @mixin IdeHelperReportUserAccess
- */
-class ReportUserAccess extends BaseModel implements Auditable
-{
-    /** @use HasFactory<ReportUserAccessFactory> */
-    use HasFactory;
+    $matchingRequest = ServiceRequest::factory()->for($respondent, 'respondent')->create();
 
-    use AuditableTrait;
+    $otherRespondent = Contact::factory()->state([
+        'first_name' => 'Other',
+        'last_name' => 'Person',
+        'full_name' => 'Other Person',
+    ])->create();
 
-    protected $fillable = [
-        'report_key',
-        'user_id',
-    ];
+    ServiceRequest::factory()->for($otherRespondent, 'respondent')->create();
 
-    /**
-     * @return BelongsTo<User, $this>
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class);
-    }
-}
+    $results = ServiceRequest::query()
+        ->tap(new EducatableSearch(relationship: 'respondent', search: $search))
+        ->get();
+
+    expect($results->modelKeys())->toBe([$matchingRequest->getKey()]);
+})->with([
+    'ASCII uppercase partial match' => ['Alice', 'LIC'],
+    'multibyte uppercase partial match' => ["Ren\u{00E9}e", "N\u{00C9}E"],
+]);
