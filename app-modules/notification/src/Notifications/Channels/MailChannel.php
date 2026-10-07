@@ -41,6 +41,7 @@ use AidingApp\Notification\DataTransferObjects\EmailChannelResultData;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Exceptions\NotificationQuotaExceeded;
+use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\StoredAnonymousNotifiable;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
@@ -93,6 +94,27 @@ class MailChannel extends BaseMailChannel
         }
 
         $emailMessage->save();
+
+        if ($notifiable instanceof CanBeNotified && (! $notifiable->canReceiveEmail())) {
+            $result = new EmailChannelResultData(
+                success: false,
+            );
+
+            $emailMessage->events()->create([
+                'type' => EmailMessageEventType::SuppressedByBounced,
+                'payload' => [
+                    ...$result->toArray(),
+                    'message' => 'Recipient email address has bounced previously.',
+                ],
+                'occurred_at' => now(),
+            ]);
+
+            if ($notification instanceof HasAfterSendHook) {
+                $notification->afterSend($notifiable, $emailMessage, $result);
+            }
+
+            return;
+        }
 
         $tenant = Tenant::current();
         $tenantMailConfig = $tenant?->config->mail;

@@ -37,6 +37,8 @@
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
+use AidingApp\Notification\Enums\EmailMessageEventType;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Notification;
 
 it('will send engagements that have been scheduled for a past date and have not been dispatched', function () {
@@ -96,4 +98,34 @@ it('will not send engagements that have already been dispatched', function () {
         $engagement->recipient,
         EngagementNotification::class
     );
+});
+
+it('suppresses a scheduled engagement when the recipient bounces before delivery and still marks it dispatched', function () {
+    $engagement = Engagement::factory()->create([
+        'scheduled_at' => now()->subMinute(),
+    ]);
+
+    $contact = $engagement->recipient;
+    $contact->update(['email_bounce' => true]);
+
+    expect($engagement->dispatched_at)->toBeNull();
+
+    Mail::fake();
+
+    dispatch(app(DeliverEngagements::class));
+
+    $engagement->refresh();
+
+    expect($engagement->dispatched_at)->not->toBeNull();
+    expect($engagement->dispatch_failed_at)->toBeNull();
+
+    $events = $engagement->latestEmailMessage->events;
+
+    expect($events->count())->toBe(1);
+    expect($events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
+    expect($events->first()->payload['message'])->toBe('Recipient email address has bounced previously.');
+
+    Mail::assertNothingSent();
+
+    expect($engagement->user->notifications()->count())->toBe(0);
 });
