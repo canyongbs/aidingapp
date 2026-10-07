@@ -55,11 +55,11 @@ use AidingApp\Project\Models\ProjectGuest;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
-use App\Enums\PresenceStatus;
 use App\Models\Authenticatable;
+use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
-use App\Settings\PresenceSettings;
+use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -97,6 +97,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use SoftDeletes;
     use UsesTenantConnection;
     use HasApiTokens;
+    use HasPresence;
 
     protected $fillable = [
         'first_name',
@@ -142,30 +143,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function canRecieveSms(): bool
     {
         return filled($this->mobile);
-    }
-
-    public function presenceStatus(): PresenceStatus
-    {
-        if (! $this->last_activity_at) {
-            return PresenceStatus::Offline;
-        }
-
-        $settings = app(PresenceSettings::class);
-        $minutesAgo = $this->last_activity_at->diffInMinutes(now());
-
-        if ($minutesAgo < $settings->active_threshold) {
-            return PresenceStatus::Active;
-        }
-
-        if ($minutesAgo < $settings->idle_threshold) {
-            return PresenceStatus::Idle;
-        }
-
-        if ($minutesAgo < $settings->inactive_threshold) {
-            return PresenceStatus::Inactive;
-        }
-
-        return PresenceStatus::Offline;
     }
 
     /**
@@ -328,5 +305,10 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
+    }
+
+    protected function lastActivityAt(): ?Carbon
+    {
+        return $this->last_activity_at;
     }
 }

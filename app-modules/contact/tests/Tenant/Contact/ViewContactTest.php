@@ -44,6 +44,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use App\Enums\PresenceStatus;
 use App\Models\User;
 
 use function Pest\Laravel\actingAs;
@@ -66,16 +67,17 @@ test('The correct details are displayed on the ViewContact page', function () {
         'city' => 'Springfield',
         'type_id' => $contactType->getKey(),
         'organization_id' => $organization->getKey(),
+        'last_activity_at' => now(),
     ]);
 
     livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful()
-        ->assertSee('Presence')
         ->assertSchemaStateSet([
             'first_name' => 'John',
             'last_name' => 'Doe',
             Contact::displayNameKey() => 'Mr. John Doe',
             'preferred' => 'Johnny',
+            'presence_status' => PresenceStatus::Active,
             'job_title' => 'Manager',
             'email' => 'john.doe@example.com',
             'city' => 'Springfield',
