@@ -38,6 +38,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
 use App\Models\User;
+use Filament\Forms\Components\TextInput;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
@@ -50,6 +51,21 @@ it('renders successfully with no record', function () {
 
     livewire(CreateContact::class)
         ->assertSuccessful();
+});
+
+it('does not show an email health hint icon on the email field', function () {
+    asSuperAdmin();
+
+    $component = livewire(CreateContact::class)
+        ->assertSuccessful();
+
+    $emailField = $component->instance()
+        ->getSchema('form')
+        ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+
+    expect($emailField)->not->toBeNull()
+        ->and($emailField->getHintIcon())->toBeNull()
+        ->and($emailField->getHintIconTooltip())->toBeNull();
 });
 
 // TODO: Write CreateContact page tests

@@ -51,11 +51,7 @@ class SaveBouncedContactEmail extends HandleSesEvent
         foreach ($event->data->bounce->bouncedRecipients as $bouncedRecipient) {
             Contact::query()
                 ->where('email', $bouncedRecipient->emailAddress)
-                ->get()
-                ->each(function (Contact $contact): void {
-                    $contact->email_bounce = true;
-                    $contact->save();
-                });
+                ->update(['email_bounce' => true]);
         }
     }
 }
