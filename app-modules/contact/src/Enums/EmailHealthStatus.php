@@ -34,43 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models\Contracts;
+namespace AidingApp\Contact\Enums;
 
-interface CanBeNotified
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
+
+enum EmailHealthStatus: string implements HasLabel, HasColor, HasIcon
 {
-    /**
-     * @param mixed $instance
-     *
-     * @return mixed
-     */
-    public function notify($instance);
+    case Healthy = 'healthy';
 
-    /**
-     * @param mixed $instance
-     * @param array<int, string>|null $channels
-     *
-     * @return mixed
-     */
-    public function notifyNow($instance, ?array $channels = null);
+    case Bounced = 'bounced';
 
-    /**
-     * @param string $driver
-     * @param mixed $notification
-     *
-     * @return mixed
-     */
-    public function routeNotificationFor($driver, $notification = null);
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Healthy => 'Healthy',
+            self::Bounced => 'Bounced',
+        };
+    }
 
-    /** @return mixed */
-    public function notifications();
+    public function getColor(): string
+    {
+        return match ($this) {
+            self::Healthy => 'success',
+            self::Bounced => 'warning',
+        };
+    }
 
-    /** @return mixed */
-    public function readNotifications();
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::Healthy => 'heroicon-m-check-circle',
+            self::Bounced => 'heroicon-m-exclamation-triangle',
+        };
+    }
 
-    /** @return mixed */
-    public function unreadNotifications();
+    public function getTooltipText(): string
+    {
+        return match ($this) {
+            self::Healthy => 'Healthy. No delivery issues detected.',
+            self::Bounced => 'Bounced. Email delivery failed and a bounce was received from our email provider.',
+        };
+    }
 
-    public function canRecieveSms(): bool;
-
-    public function canReceiveEmail(): bool;
+    public function getCalloutText(): ?string
+    {
+        return match ($this) {
+            self::Healthy => null,
+            self::Bounced => 'The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.',
+        };
+    }
 }

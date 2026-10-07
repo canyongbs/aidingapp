@@ -34,43 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models\Contracts;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 
-interface CanBeNotified
-{
-    /**
-     * @param mixed $instance
-     *
-     * @return mixed
-     */
-    public function notify($instance);
-
-    /**
-     * @param mixed $instance
-     * @param array<int, string>|null $channels
-     *
-     * @return mixed
-     */
-    public function notifyNow($instance, ?array $channels = null);
-
-    /**
-     * @param string $driver
-     * @param mixed $notification
-     *
-     * @return mixed
-     */
-    public function routeNotificationFor($driver, $notification = null);
-
-    /** @return mixed */
-    public function notifications();
-
-    /** @return mixed */
-    public function readNotifications();
-
-    /** @return mixed */
-    public function unreadNotifications();
-
-    public function canRecieveSms(): bool;
-
-    public function canReceiveEmail(): bool;
-}
+it('has the expected label, color, icon, tooltip, and callout text', function (
+    EmailHealthStatus $status,
+    string $label,
+    string $color,
+    string $icon,
+    string $tooltip,
+    ?string $callout,
+) {
+    expect($status->getLabel())->toBe($label)
+        ->and($status->getColor())->toBe($color)
+        ->and($status->getIcon())->toBe($icon)
+        ->and($status->getTooltipText())->toBe($tooltip)
+        ->and($status->getCalloutText())->toBe($callout);
+})->with([
+    'healthy' => [
+        EmailHealthStatus::Healthy,
+        'Healthy',
+        'success',
+        'heroicon-m-check-circle',
+        'Healthy. No delivery issues detected.',
+        null,
+    ],
+    'bounced' => [
+        EmailHealthStatus::Bounced,
+        'Bounced',
+        'warning',
+        'heroicon-m-exclamation-triangle',
+        'Bounced. Email delivery failed and a bounce was received from our email provider.',
+        'The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.',
+    ],
+]);

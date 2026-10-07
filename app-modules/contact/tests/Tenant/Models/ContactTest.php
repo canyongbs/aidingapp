@@ -34,43 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Notification\Models\Contracts;
+use AidingApp\Contact\Enums\EmailHealthStatus;
+use AidingApp\Contact\Models\Contact;
 
-interface CanBeNotified
-{
-    /**
-     * @param mixed $instance
-     *
-     * @return mixed
-     */
-    public function notify($instance);
+it('reports a bounced email health status and cannot receive email when the email has bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => true]);
 
-    /**
-     * @param mixed $instance
-     * @param array<int, string>|null $channels
-     *
-     * @return mixed
-     */
-    public function notifyNow($instance, ?array $channels = null);
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Bounced)
+        ->and($contact->canReceiveEmail())->toBeFalse();
+});
 
-    /**
-     * @param string $driver
-     * @param mixed $notification
-     *
-     * @return mixed
-     */
-    public function routeNotificationFor($driver, $notification = null);
+it('reports a healthy email health status and can receive email when the email has not bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => false]);
 
-    /** @return mixed */
-    public function notifications();
-
-    /** @return mixed */
-    public function readNotifications();
-
-    /** @return mixed */
-    public function unreadNotifications();
-
-    public function canRecieveSms(): bool;
-
-    public function canReceiveEmail(): bool;
-}
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)
+        ->and($contact->canReceiveEmail())->toBeTrue();
+});
