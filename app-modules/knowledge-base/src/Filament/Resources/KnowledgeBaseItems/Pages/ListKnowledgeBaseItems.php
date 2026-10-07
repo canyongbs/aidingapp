@@ -299,10 +299,24 @@ class ListKnowledgeBaseItems extends ListRecords
         string $parentAttribute = 'parent_id',
         string $sortAttribute = 'sort',
     ): array {
-        $recordsByParent = $query
+        $records = $query
             ->orderBy($sortAttribute)
-            ->get()
-            ->groupBy(fn (Model $record): string => (string) $record->getAttribute($parentAttribute));
+            ->get();
+
+        $presentKeys = $records
+            ->map(fn (Model $record): string => (string) $record->getKey())
+            ->all();
+
+        $recordsByParent = $records
+            ->groupBy(function (Model $record) use ($parentAttribute, $presentKeys): string {
+                $parentKey = (string) $record->getAttribute($parentAttribute);
+
+                // Promote records whose parent is absent from the result set (e.g. a
+                // soft-deleted parent category) to the root so their still-active
+                // descendants remain reachable instead of being stranded under a key
+                // the recursion never visits.
+                return in_array($parentKey, $presentKeys, true) ? $parentKey : '';
+            });
 
         return static::buildCategoryTreeNodes($recordsByParent, '', $labelAttribute);
     }
