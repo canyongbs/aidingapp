@@ -34,24 +34,36 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+namespace App\Http\Middleware;
 
-//describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
-//    it('properly changed the data', function () {
-//        isolatedMigration(
-//            '2025_01_01_165527_tmp_data_do_a_thing',
-//            function () {
-//                // Setup data before migration
-//
-//                // Run the migration
-//                $migrate = Artisan::call('migrate', ['--path' => 'app/database/migrations/2025_01_01_165527_tmp_data_do_a_thing.php']);
-//                // Confirm migration ran successfully
-//                expect($migrate)->toBe(Command::SUCCESS);
-//
-//                // Add any assertions to verify the migration's effects
-//            }
-//        );
-//    });
-//});
+use AidingApp\Contact\Models\Contact;
+use App\Features\ContactTrackingFeature;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class TrackContactPresence
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        $response = $next($request);
+
+        $contact = $request->user('contact');
+
+        if (! $contact instanceof Contact) {
+            $contact = $request->user('sanctum');
+        }
+
+        if (! $contact instanceof Contact) {
+            return $response;
+        }
+
+        if (! ContactTrackingFeature::active()) {
+            return $response;
+        }
+
+        Contact::withoutTimestamps(fn () => $contact->touchQuietly('last_activity_at'));
+
+        return $response;
+    }
+}

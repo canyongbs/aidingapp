@@ -39,11 +39,13 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ContactTrackingFeature;
 use App\Filament\Forms\Components\AddressInput;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
@@ -113,6 +115,14 @@ class ContactFormSchema
                     ->label('Preferred Name')
                     ->string()
                     ->maxLength(255),
+                TextEntry::make('presence_status')
+                    ->label('Presence')
+                    ->visible(fn (string $operation): bool => $operation === 'view' && ContactTrackingFeature::active())
+                    ->state(fn (Contact $record) => $record->presenceStatus())
+                    ->badge()
+                    ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
+                    ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
+                    ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
                 Select::make('type_id')
                     ->label('Type')
                     ->required()
