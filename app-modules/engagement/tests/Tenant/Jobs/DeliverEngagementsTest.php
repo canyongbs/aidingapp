@@ -120,7 +120,6 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
 
     expect($events->count())->toBe(1);
     expect($events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
-    expect($events->first()->payload['message'])->toBe('Recipient email address has bounced previously.');
 
     expect($engagement->user->notifications()->count())->toBe(0);
 });

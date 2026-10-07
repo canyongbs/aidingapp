@@ -139,7 +139,6 @@ it('suppresses the send and records a SuppressedByBounced event for a bounced co
     expect($emailMessages->count())->toBe(1);
     expect($emailMessages->first()->events->count())->toBe(1);
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
-    expect($emailMessages->first()->events->first()->payload['message'])->toBe('Recipient email address has bounced previously.');
 });
 
 it('still dispatches to a healthy contact', function () {

@@ -103,10 +103,7 @@ class MailChannel extends BaseMailChannel
             try {
                 $emailMessage->events()->create([
                     'type' => EmailMessageEventType::SuppressedByBounced,
-                    'payload' => [
-                        ...$result->toArray(),
-                        'message' => 'Recipient email address has bounced previously.',
-                    ],
+                    'payload' => $result->toArray(),
                     'occurred_at' => now(),
                 ]);
 
