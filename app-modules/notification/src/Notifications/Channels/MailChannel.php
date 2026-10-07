@@ -100,17 +100,21 @@ class MailChannel extends BaseMailChannel
                 success: false,
             );
 
-            $emailMessage->events()->create([
-                'type' => EmailMessageEventType::SuppressedByBounced,
-                'payload' => [
-                    ...$result->toArray(),
-                    'message' => 'Recipient email address has bounced previously.',
-                ],
-                'occurred_at' => now(),
-            ]);
+            try {
+                $emailMessage->events()->create([
+                    'type' => EmailMessageEventType::SuppressedByBounced,
+                    'payload' => [
+                        ...$result->toArray(),
+                        'message' => 'Recipient email address has bounced previously.',
+                    ],
+                    'occurred_at' => now(),
+                ]);
 
-            if ($notification instanceof HasAfterSendHook) {
-                $notification->afterSend($notifiable, $emailMessage, $result);
+                if ($notification instanceof HasAfterSendHook) {
+                    $notification->afterSend($notifiable, $emailMessage, $result);
+                }
+            } catch (Throwable $exception) {
+                report($exception);
             }
 
             return;

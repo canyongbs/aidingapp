@@ -38,6 +38,7 @@ use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\IntegrationAwsSesEventHandling\DataTransferObjects\SesEventData;
 use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesEvent;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -114,15 +115,17 @@ it('does not flag a contact for an undetermined bounce', function () {
 });
 
 it('does nothing when no contact matches the bounced address', function () {
-    Contact::factory()->create([
+    $other = Contact::factory()->create([
         'email' => 'someone-else@example.com',
     ]);
+
+    expect($other->email_bounce)->toBeFalse();
 
     $data = makeSesBounceEventData('Permanent', 'unknown@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
-    expect(Contact::query()->where('email', 'unknown@example.com')->exists())->toBeFalse();
+    expect($other->refresh()->email_bounce)->toBeFalse();
 });
 
 it('does not flag a soft-deleted contact with the bounced address', function () {
@@ -166,7 +169,23 @@ it('flags the contact when the bounce event is dispatched through the event syst
 
     $data = makeSesBounceEventData('Permanent', 'recipient@example.com');
 
+    $handled = 0;
+
+    app()->bind(SaveBouncedContactEmail::class, function () use (&$handled) {
+        return new class ($handled) extends SaveBouncedContactEmail {
+            public function __construct(private int &$handled) {}
+
+            public function handle(SesEvent $event): void
+            {
+                $this->handled++;
+
+                parent::handle($event);
+            }
+        };
+    });
+
     SesBounceEvent::dispatch($data);
 
+    expect($handled)->toBe(1);
     expect($contact->refresh()->email_bounce)->toBeTrue();
 });

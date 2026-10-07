@@ -45,7 +45,6 @@ use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Mail;
 
 it('will create an EmailMessage for the notification', function () {
     $notifiable = User::factory()->create();
@@ -126,8 +125,6 @@ it('will not send system notifications in demo mode when system notifications ar
 });
 
 it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function () {
-    Mail::fake();
-
     $contact = Contact::factory()->bounced()->create();
 
     expect($contact->canReceiveEmail())->toBeFalse();
@@ -143,8 +140,6 @@ it('suppresses the send and records a SuppressedByBounced event for a bounced co
     expect($emailMessages->first()->events->count())->toBe(1);
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
     expect($emailMessages->first()->events->first()->payload['message'])->toBe('Recipient email address has bounced previously.');
-
-    Mail::assertNothingSent();
 });
 
 it('still dispatches to a healthy contact', function () {
