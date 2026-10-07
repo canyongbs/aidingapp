@@ -62,3 +62,46 @@ it('delegates organization matching when a contact is updated', function () {
     $contact->first_name = 'Updated';
     $contact->save();
 });
+
+it('clears the bounce flag when the email changes', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['email' => 'changed@example.com']);
+
+    expect($contact->fresh()->email_bounce)->toBeFalse();
+});
+
+it('leaves the bounce flag true when another attribute changes', function () {
+    $contact = Contact::factory()->bounced()->create(['first_name' => 'Original']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['first_name' => 'Changed']);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('leaves the bounce flag true when the email is set to the same value', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'same@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['email' => 'same@example.com']);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('keeps the bounce flag true when the email changes and email_bounce is explicitly set true in the same save', function () {
+    $contact = Contact::factory()->create(['email' => 'original@example.com', 'email_bounce' => false]);
+
+    expect($contact->email_bounce)->toBeFalse();
+
+    $contact->update([
+        'email' => 'changed@example.com',
+        'email_bounce' => true,
+    ]);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
