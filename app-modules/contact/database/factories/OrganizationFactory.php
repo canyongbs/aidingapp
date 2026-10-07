@@ -56,7 +56,7 @@ class OrganizationFactory extends Factory
         return [
             'name' => $this->faker->unique()->company(),
             'email' => $this->faker->companyEmail(),
-            'domains' => array_map(fn () => ['domain' => $this->faker->domainName()], range(1, 3)),
+            'domains' => array_map(fn () => ['domain' => $this->faker->unique()->domainName()], range(1, 3)),
             'phone_number' => $this->faker->e164PhoneNumber(),
             'website' => $this->faker->url(),
             'industry_id' => OrganizationIndustry::factory(),
