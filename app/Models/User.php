@@ -61,14 +61,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserAuditor;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeUserManager;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
-use App\Enums\PresenceStatus;
 use App\Filament\Resources\Users\UserResource;
+use App\Models\Concerns\HasPresence;
 use App\Observers\UserObserver;
 use App\Settings\DisplaySettings;
-use App\Settings\PresenceSettings;
 use App\Support\HasAdvancedFilter;
 use CanyonGBS\Common\BrowserNotifications\Concerns\HasBrowserNotificationSubscriptions;
 use CanyonGBS\Common\BrowserNotifications\Contracts\ReceivesBrowserNotifications;
+use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use DateTimeInterface;
 use Filament\Models\Contracts\FilamentUser;
@@ -112,6 +112,7 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     use HasManyEngagements;
     use HasManyEngagementBatches;
     use Impersonate;
+    use HasPresence;
 
     /** @use InteractsWithMedia<\App\Models\Media> */
     use InteractsWithMedia;
@@ -191,30 +192,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public function canRecieveSms(): bool
     {
         return false;
-    }
-
-    public function presenceStatus(): PresenceStatus
-    {
-        if (! $this->last_activity_at) {
-            return PresenceStatus::Offline;
-        }
-
-        $settings = app(PresenceSettings::class);
-        $minutesAgo = $this->last_activity_at->diffInMinutes(now());
-
-        if ($minutesAgo < $settings->active_threshold) {
-            return PresenceStatus::Active;
-        }
-
-        if ($minutesAgo < $settings->idle_threshold) {
-            return PresenceStatus::Idle;
-        }
-
-        if ($minutesAgo < $settings->inactive_threshold) {
-            return PresenceStatus::Inactive;
-        }
-
-        return PresenceStatus::Offline;
     }
 
     /**
@@ -457,5 +434,10 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
+
+    protected function lastActivityAt(): ?Carbon
+    {
+        return $this->last_activity_at;
     }
 }

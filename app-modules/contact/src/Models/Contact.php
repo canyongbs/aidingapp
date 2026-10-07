@@ -56,8 +56,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
+use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -95,6 +97,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use SoftDeletes;
     use UsesTenantConnection;
     use HasApiTokens;
+    use HasPresence;
 
     protected $fillable = [
         'first_name',
@@ -124,10 +127,12 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'academic_department',
         'program',
         'user_id',
+        'last_activity_at',
     ];
 
     protected $casts = [
         'email_bounce' => 'boolean',
+        'last_activity_at' => 'datetime',
     ];
 
     public function isSuperAdmin(): bool
@@ -300,5 +305,10 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
+    }
+
+    protected function lastActivityAt(): ?Carbon
+    {
+        return $this->last_activity_at;
     }
 }
