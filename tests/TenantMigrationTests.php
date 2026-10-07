@@ -42,24 +42,6 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-if (! function_exists('recordServiceRequestHistory')) {
-    /**
-     * @param array<string, mixed> $originalValues
-     * @param array<string, mixed> $newValues
-     */
-    function recordServiceRequestHistory(ServiceRequest $serviceRequest, array $originalValues, array $newValues, CarbonInterface $createdAt): void
-    {
-        DB::table('service_request_histories')->insert([
-            'id' => (string) Str::uuid(),
-            'service_request_id' => $serviceRequest->getKey(),
-            'original_values' => json_encode($originalValues),
-            'new_values' => json_encode($newValues),
-            'created_at' => $createdAt,
-            'updated_at' => $createdAt,
-        ]);
-    }
-}
-
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
 //        isolatedMigration(
