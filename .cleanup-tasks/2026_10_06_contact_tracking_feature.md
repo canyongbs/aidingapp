@@ -1,17 +1,15 @@
 ---
-title: Remove Division From Service Request Histories
-created: 2026-09-14
+title: Contact Tracking Feature
+created: 2026-10-06
 ---
 
 ## Feature Flags
 
+- App\Features\ContactTrackingFeature
+
 ## Temporary Migrations
 
-- app-modules/service-management/database/migrations/2026_09_14_220000_tmp_remove_division_from_service_request_histories.php
-
 ## Additional Cleanup
-
-- Search for "TODO: Cleanup Task Service Request Division Decoupling -" for additional cleanup tasks.
 
 <!--
 Only list cleanup that has no home in code. Do NOT restate obvious feature-flag

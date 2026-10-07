@@ -65,6 +65,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequ
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
+use App\Http\Middleware\TrackContactPresence;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpFoundation\Response;
@@ -85,6 +86,7 @@ Route::prefix('api')
 
         Route::prefix('portal')
             ->name('portal.')
+            ->middleware(TrackContactPresence::class)
             ->group(function () {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
                     ->name('define');

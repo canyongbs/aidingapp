@@ -34,24 +34,32 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+use App\Features\ContactTrackingFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-//describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
-//    it('properly changed the data', function () {
-//        isolatedMigration(
-//            '2025_01_01_165527_tmp_data_do_a_thing',
-//            function () {
-//                // Setup data before migration
-//
-//                // Run the migration
-//                $migrate = Artisan::call('migrate', ['--path' => 'app/database/migrations/2025_01_01_165527_tmp_data_do_a_thing.php']);
-//                // Confirm migration ran successfully
-//                expect($migrate)->toBe(Command::SUCCESS);
-//
-//                // Add any assertions to verify the migration's effects
-//            }
-//        );
-//    });
-//});
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function () {
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->timestamp('last_activity_at')->nullable()->index();
+            });
+
+            ContactTrackingFeature::activate();
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function () {
+            ContactTrackingFeature::deactivate();
+
+            Schema::table('contacts', function (Blueprint $table) {
+                $table->dropColumn('last_activity_at');
+            });
+        });
+    }
+};

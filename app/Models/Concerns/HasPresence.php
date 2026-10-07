@@ -34,24 +34,39 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Models\Contact;
-use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Artisan;
+namespace App\Models\Concerns;
 
-//describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
-//    it('properly changed the data', function () {
-//        isolatedMigration(
-//            '2025_01_01_165527_tmp_data_do_a_thing',
-//            function () {
-//                // Setup data before migration
-//
-//                // Run the migration
-//                $migrate = Artisan::call('migrate', ['--path' => 'app/database/migrations/2025_01_01_165527_tmp_data_do_a_thing.php']);
-//                // Confirm migration ran successfully
-//                expect($migrate)->toBe(Command::SUCCESS);
-//
-//                // Add any assertions to verify the migration's effects
-//            }
-//        );
-//    });
-//});
+use App\Enums\PresenceStatus;
+use App\Settings\PresenceSettings;
+use Carbon\Carbon;
+
+trait HasPresence
+{
+    public function presenceStatus(): PresenceStatus
+    {
+        $lastActivityAt = $this->lastActivityAt();
+
+        if (! $lastActivityAt) {
+            return PresenceStatus::Offline;
+        }
+
+        $settings = app(PresenceSettings::class);
+        $minutesAgo = $lastActivityAt->diffInMinutes(now());
+
+        if ($minutesAgo < $settings->active_threshold) {
+            return PresenceStatus::Active;
+        }
+
+        if ($minutesAgo < $settings->idle_threshold) {
+            return PresenceStatus::Idle;
+        }
+
+        if ($minutesAgo < $settings->inactive_threshold) {
+            return PresenceStatus::Inactive;
+        }
+
+        return PresenceStatus::Offline;
+    }
+
+    abstract protected function lastActivityAt(): ?Carbon;
+}
