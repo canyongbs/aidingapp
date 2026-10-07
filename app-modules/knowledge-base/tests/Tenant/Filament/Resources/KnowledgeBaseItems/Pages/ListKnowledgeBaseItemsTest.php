@@ -381,6 +381,43 @@ test('SearchKnowledgeBaseItems by article body text', function () {
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
 });
 
+it('displays the full category path as the title description', function () {
+    asSuperAdmin();
+
+    $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
+
+    $wifi = KnowledgeBaseCategory::factory()->state(['name' => 'Wifi'])->create();
+    $wifi->parentCategory()->associate($networking)->save();
+
+    $quickStartGuides = KnowledgeBaseCategory::factory()->state(['name' => 'Quick Start Guides'])->create();
+    $quickStartGuides->parentCategory()->associate($wifi)->save();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($quickStartGuides, 'category')->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', 'Networking > Wifi > Quick Start Guides', $knowledgeBaseItem);
+});
+
+it('displays only the category name as the title description for a top-level category', function () {
+    asSuperAdmin();
+
+    $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($networking, 'category')->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', 'Networking', $knowledgeBaseItem);
+});
+
+it('does not display a title description when the article has no category', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->state(['category_id' => null])->create();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', null, $knowledgeBaseItem);
+});
+
 test('Health column shows true when knowledge base item has title, article content, manager, and no unresolved concerns', function () {
     asSuperAdmin();
 

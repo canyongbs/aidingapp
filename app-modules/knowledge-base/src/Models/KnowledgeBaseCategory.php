@@ -91,12 +91,34 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
     }
 
     /**
+     * @return BelongsTo<self, $this>
+     */
+    public function parentCategoryWithAncestors(): BelongsTo
+    {
+        return $this->parentCategory()->with('parentCategoryWithAncestors');
+    }
+
+    /**
      * @return HasMany<self, $this>
      */
     public function subCategories(): HasMany
     {
         return $this->hasMany(self::class, 'parent_id')
             ->orderBy('sort');
+    }
+
+    public function getPath(): string
+    {
+        $names = [];
+        $category = $this;
+
+        while ($category instanceof self) {
+            array_unshift($names, $category->name);
+
+            $category = $category->parentCategoryWithAncestors;
+        }
+
+        return implode(' > ', $names);
     }
 
     protected function serializeDate(DateTimeInterface $date): string
