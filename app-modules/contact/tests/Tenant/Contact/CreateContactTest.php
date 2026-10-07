@@ -43,6 +43,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
+use function Tests\asSuperAdmin;
+
+it('renders successfully with no record', function () {
+    asSuperAdmin();
+
+    livewire(CreateContact::class)
+        ->assertSuccessful();
+});
 
 // TODO: Write CreateContact page tests
 //test('A successful action on the CreateContact page', function () {});
