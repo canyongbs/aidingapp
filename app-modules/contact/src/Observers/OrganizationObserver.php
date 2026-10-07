@@ -36,38 +36,31 @@
 
 namespace AidingApp\Contact\Observers;
 
-use AidingApp\Contact\Actions\MatchContactToOrganization;
-use AidingApp\Contact\Models\Contact;
-use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
+use AidingApp\Contact\Models\Organization;
 
-class ContactObserver
+class OrganizationObserver
 {
-    public function __construct(
-        private MatchContactToOrganization $matchContactToOrganization,
-    ) {}
-
-    public function creating(Contact $contact): void
+    public function created(Organization $organization): void
     {
-        $user = auth()->user();
-
-        if ($user instanceof User && ! $contact->createdBy) {
-            $contact->createdBy()->associate($user);
+        if (blank($organization->domains)) {
+            return;
         }
+
+        $this->dispatchMatching($organization);
     }
 
-    public function saved(Contact $contact): void
+    public function updated(Organization $organization): void
     {
-        ($this->matchContactToOrganization)($contact);
+        if (! $organization->wasChanged('domains') || blank($organization->domains)) {
+            return;
+        }
+
+        $this->dispatchMatching($organization);
     }
 
-    public function created(): void
+    private function dispatchMatching(Organization $organization): void
     {
-        Cache::tags('{contacts}')->flush();
-    }
-
-    public function deleted(): void
-    {
-        Cache::tags('{contacts}')->flush();
+        dispatch((new MatchUnaffiliatedContactsJob((string) $organization->getKey()))->afterCommit());
     }
 }

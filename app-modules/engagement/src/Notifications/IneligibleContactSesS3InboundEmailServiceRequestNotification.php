@@ -64,9 +64,11 @@ class IneligibleContactSesS3InboundEmailServiceRequestNotification extends Notif
 
     public function toMail(AnonymousNotifiable $notifiable): MailMessage
     {
+        $bcc = $this->serviceRequestTypeDomain->serviceRequestType->email_automatic_creation_bcc;
+
         return MailMessage::make()
             ->subject('Ineligible for Service Request Creation')
-            ->bcc($this->serviceRequestTypeDomain->serviceRequestType->email_automatic_creation_bcc)
+            ->when(filled($bcc), fn (MailMessage $message) => $message->bcc($bcc))
             ->line('Thank you for your service request.')
             ->line('Unfortunately, we were unable to locate your serviceable account in our systems and therefore are unable to automatically open your service request.')
             ->line('Please contact your account manager for additional details.')
