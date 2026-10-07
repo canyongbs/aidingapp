@@ -34,40 +34,13 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+it('resolves the status of a group of checks', function (int $checksCount, int $successfulChecksCount, ServiceMonitoringStatus $status) {
+    expect(ServiceMonitoringStatus::fromCheckCounts($checksCount, $successfulChecksCount))->toBe($status);
+})->with([
+    'no checks' => [0, 0, ServiceMonitoringStatus::Unknown],
+    'every check succeeded' => [3, 3, ServiceMonitoringStatus::Operational],
+    'every check failed' => [3, 0, ServiceMonitoringStatus::Outage],
+    'some checks failed' => [3, 2, ServiceMonitoringStatus::Degraded],
+]);

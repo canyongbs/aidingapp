@@ -34,40 +34,56 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Enums;
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Carbon\CarbonImmutable;
+use Filament\Support\Contracts\HasLabel;
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
+enum ServiceMonitoringHistoryPeriod: string implements HasLabel
 {
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
+    case PastHour = 'past_hour';
 
-    use SoftDeletes;
+    case PastDay = 'past_day';
 
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
+    case PastMonth = 'past_month';
 
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::PastHour => 'Past hour',
+            self::PastDay => 'Past 24 hours',
+            self::PastMonth => 'Past 30 days',
+        };
+    }
 
     /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     * The unit of time covered by each bucket, as understood by both Carbon and PostgreSQL's `date_trunc()`.
      */
-    public function serviceMonitoringTarget(): BelongsTo
+    public function getBucketUnit(): string
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        return match ($this) {
+            self::PastHour => 'minute',
+            self::PastDay => 'hour',
+            self::PastMonth => 'day',
+        };
+    }
+
+    public function getBucketCount(): int
+    {
+        return match ($this) {
+            self::PastHour => 60,
+            self::PastDay => 24,
+            self::PastMonth => 30,
+        };
+    }
+
+    /**
+     * The start of the oldest bucket, such that the newest bucket is the one containing `$now`.
+     */
+    public function getFirstBucketStartsAt(CarbonImmutable $now): CarbonImmutable
+    {
+        return $now
+            ->startOf($this->getBucketUnit())
+            ->subUnit($this->getBucketUnit(), $this->getBucketCount() - 1);
     }
 }

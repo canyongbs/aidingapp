@@ -34,40 +34,37 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Database\Factories;
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
+use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @mixin IdeHelperHistoricalServiceMonitoring
+ * @extends Factory<HistoricalServiceMonitoring>
  */
-class HistoricalServiceMonitoring extends BaseModel
+class HistoricalServiceMonitoringFactory extends Factory
 {
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
     /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
      */
-    public function serviceMonitoringTarget(): BelongsTo
+    public function definition(): array
     {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
+        return [
+            'service_monitoring_target_id' => ServiceMonitoringTarget::factory(),
+            'response' => 200,
+            'response_time' => $this->faker->randomFloat(3, 0.05, 2),
+            'succeeded' => true,
+        ];
+    }
+
+    public function failed(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'response' => 500,
+            'succeeded' => false,
+        ]);
     }
 }

@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,42 +30,36 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    import { computed } from 'vue';
+    import { describeBucket } from './serviceMonitorHistory.js';
+    import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
 
-namespace AidingApp\ServiceManagement\Models;
+    const props = defineProps({
+        history: {
+            type: Array,
+            required: true,
+        },
+    });
 
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
+    const summary = computed(() => {
+        const counts = STATUS_ORDER.map((status) => ({
+            label: getStatus(status).label.toLowerCase(),
+            count: props.history.filter((bucket) => bucket.status === status).length,
+        })).filter(({ count }) => count > 0);
 
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
+        return `${props.history.length}-day history: ${counts.map(({ label, count }) => `${count} ${label}`).join(', ')}`;
+    });
+</script>
 
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+<template>
+    <div class="flex h-6 items-stretch gap-px" role="img" :aria-label="summary">
+        <span
+            v-for="bucket in history"
+            :key="bucket.starts_at"
+            :class="['w-[3px] rounded-[1px]', getStatus(bucket.status).barClass]"
+            :title="describeBucket(bucket, 'past_month')"
+        />
+    </div>
+</template>

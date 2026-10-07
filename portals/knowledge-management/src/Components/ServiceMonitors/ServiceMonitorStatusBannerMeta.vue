@@ -1,6 +1,4 @@
-<?php
-
-/*
+<!--
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -32,42 +30,19 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/
+-->
+<script setup>
+    defineProps({
+        label: {
+            type: String,
+            required: true,
+        },
+    });
+</script>
 
-namespace AidingApp\ServiceManagement\Models;
-
-use AidingApp\ServiceManagement\Database\Factories\HistoricalServiceMonitoringFactory;
-use App\Models\BaseModel;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\SoftDeletes;
-
-/**
- * @mixin IdeHelperHistoricalServiceMonitoring
- */
-class HistoricalServiceMonitoring extends BaseModel
-{
-    /** @use HasFactory<HistoricalServiceMonitoringFactory> */
-    use HasFactory;
-
-    use SoftDeletes;
-
-    protected $fillable = [
-        'response',
-        'response_time',
-        'succeeded',
-        'keyword_match_failures',
-    ];
-
-    protected $casts = [
-        'keyword_match_failures' => 'array',
-    ];
-
-    /**
-     * @return BelongsTo<ServiceMonitoringTarget, $this>
-     */
-    public function serviceMonitoringTarget(): BelongsTo
-    {
-        return $this->belongsTo(ServiceMonitoringTarget::class);
-    }
-}
+<template>
+    <div class="grid gap-0.5 md:border-l md:border-gray-300 md:pl-6">
+        <dt class="text-xs text-gray-500">{{ label }}</dt>
+        <dd class="text-sm font-semibold text-gray-900"><slot /></dd>
+    </div>
+</template>

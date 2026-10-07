@@ -32,31 +32,46 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from '@heroicons/vue/16/solid';
     import { computed } from 'vue';
-    import BaseSelect from '../ui/BaseSelect.vue';
+    import BaseTableHeaderCell from './BaseTableHeaderCell.vue';
 
     const props = defineProps({
-        modelValue: {
+        column: {
+            type: String,
+            required: true,
+        },
+        sort: {
             type: String,
             default: null,
         },
-        pipelines: {
-            type: Array,
-            required: true,
+        direction: {
+            type: String,
+            default: 'asc',
+            validator: (v) => ['asc', 'desc'].includes(v),
         },
     });
 
-    defineEmits(['update:modelValue']);
+    const emit = defineEmits(['sort']);
 
-    const options = computed(() => props.pipelines.map((pipeline) => ({ value: pipeline.id, label: pipeline.name })));
+    const isActive = computed(() => props.sort === props.column);
 </script>
 
 <template>
-    <BaseSelect
-        :model-value="modelValue"
-        :options="options"
-        label="Select pipeline"
-        class="max-w-xs"
-        @update:model-value="$emit('update:modelValue', $event)"
-    />
+    <BaseTableHeaderCell :aria-sort="isActive ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'">
+        <button
+            type="button"
+            class="group inline-flex items-center gap-1 whitespace-nowrap rounded-sm text-left hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(var(--primary-500),1)]"
+            @click="emit('sort', column)"
+        >
+            <slot />
+            <ChevronUpIcon v-if="isActive && direction === 'asc'" class="size-4 text-gray-700" aria-hidden="true" />
+            <ChevronDownIcon v-else-if="isActive" class="size-4 text-gray-700" aria-hidden="true" />
+            <ChevronUpDownIcon
+                v-else
+                class="size-4 text-gray-300 transition-colors group-hover:text-gray-500"
+                aria-hidden="true"
+            />
+        </button>
+    </BaseTableHeaderCell>
 </template>
