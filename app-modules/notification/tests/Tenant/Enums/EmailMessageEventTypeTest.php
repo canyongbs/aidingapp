@@ -39,3 +39,11 @@ use AidingApp\Notification\Enums\EmailMessageEventType;
 it('labels SuppressedByBounced as Suppressed because bounced', function () {
     expect(EmailMessageEventType::SuppressedByBounced->getLabel())->toBe('Suppressed because bounced');
 });
+
+it('keeps the headline label for cases without a custom label', function (EmailMessageEventType $type, string $label) {
+    expect($type->getLabel())->toBe($label);
+})->with([
+    'failed dispatch' => [EmailMessageEventType::FailedDispatch, 'Failed Dispatch'],
+    'blocked by demo mode' => [EmailMessageEventType::BlockedByDemoMode, 'Blocked By Demo Mode'],
+    'delivery delay' => [EmailMessageEventType::DeliveryDelay, 'Delivery Delay'],
+]);
