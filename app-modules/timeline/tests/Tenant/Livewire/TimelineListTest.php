@@ -34,10 +34,15 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\InventoryManagement\Models\AssetCheckOut;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
+use App\Models\User;
+use Illuminate\Support\Str;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
@@ -183,4 +188,93 @@ it('opens the slide over for a timeline record', function () {
         ->call('viewRecord', $update->getKey(), $update->getMorphClass())
         ->assertSuccessful()
         ->assertSet('currentRecordToView.id', $update->getKey());
+});
+
+it('opens the slide over for a soft-deleted timeline record', function () {
+    asSuperAdmin();
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $update = ServiceRequestUpdate::factory()
+        ->for($serviceRequest, 'serviceRequest')
+        ->create();
+
+    $component = livewire(TimelineList::class, [
+        'record' => $serviceRequest,
+        'modelsToTimeline' => [ServiceRequestUpdate::class],
+    ]);
+
+    // A query-builder delete skips the observer, leaving the timeline row in place.
+    ServiceRequestUpdate::query()->whereKey($update->getKey())->delete();
+
+    expect($update->refresh()->trashed())->toBeTrue();
+
+    $component
+        ->call('viewRecord', $update->getKey(), $update->getMorphClass())
+        ->assertSuccessful()
+        ->assertSet('currentRecordToView.id', $update->getKey());
+});
+
+describe('related people', function () {
+    it('shows a soft-deleted person by name', function () {
+        asSuperAdmin();
+
+        $performer = User::factory()->create(['name' => 'Jane Doe']);
+
+        $checkOut = AssetCheckOut::factory()->create([
+            'checked_out_by_type' => $performer->getMorphClass(),
+            'checked_out_by_id' => $performer->getKey(),
+        ]);
+
+        $performer->delete();
+
+        expect($performer->refresh()->trashed())->toBeTrue();
+
+        livewire(TimelineList::class, [
+            'record' => $checkOut->asset,
+            'modelsToTimeline' => [AssetCheckOut::class],
+        ])
+            ->assertSuccessful()
+            ->assertSeeText('Jane Doe')
+            ->assertDontSeeText('Deleted user');
+    });
+
+    it('shows `Deleted user` when the person no longer exists', function () {
+        asSuperAdmin();
+
+        $checkOut = AssetCheckOut::factory()->create([
+            'checked_out_by_type' => (new User())->getMorphClass(),
+            'checked_out_by_id' => Str::uuid()->toString(),
+        ]);
+
+        livewire(TimelineList::class, [
+            'record' => $checkOut->asset,
+            'modelsToTimeline' => [AssetCheckOut::class],
+        ])
+            ->assertSuccessful()
+            ->assertSeeText('Deleted user');
+    });
+
+    it('shows the soft-deleted creator of an engagement by name', function () {
+        asSuperAdmin();
+
+        $creator = User::factory()->create(['name' => 'Jane Doe']);
+        $contact = Contact::factory()->create();
+
+        Engagement::factory()
+            ->for($creator, 'user')
+            ->for($contact, 'recipient')
+            ->create();
+
+        $creator->delete();
+
+        expect($creator->refresh()->trashed())->toBeTrue();
+
+        livewire(TimelineList::class, [
+            'record' => $contact,
+            'modelsToTimeline' => [Engagement::class],
+        ])
+            ->assertSuccessful()
+            ->assertSeeText('Jane Doe');
+    });
 });

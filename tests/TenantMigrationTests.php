@@ -35,8 +35,15 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+
+use function Pest\Laravel\assertDatabaseHas;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -55,3 +62,52 @@ use Illuminate\Support\Facades\Artisan;
 //        );
 //    });
 //});
+
+// TODO: Cleanup Task (restore-reclassified-assignments): delete this describe and the test within
+describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function () {
+    it('restores soft-deleted assignments as inactive and leaves other assignments untouched', function () {
+        isolatedMigration('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function () {
+            // Setup data before migration
+            $serviceRequest = ServiceRequest::factory()->create();
+            $user = User::factory()->create();
+
+            $insertAssignment = function (string $status, ?CarbonInterface $deletedAt) use ($serviceRequest, $user): string {
+                $id = (string) Str::uuid();
+
+                DB::table('service_request_assignments')->insert([
+                    'id' => $id,
+                    'service_request_id' => $serviceRequest->getKey(),
+                    'user_id' => $user->getKey(),
+                    'assigned_at' => now(),
+                    'status' => $status,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                    'deleted_at' => $deletedAt,
+                ]);
+
+                return $id;
+            };
+
+            $deletedAssignmentId = $insertAssignment('active', now());
+            $activeAssignmentId = $insertAssignment('active', null);
+
+            // Run the migration
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_10_06_150704_tmp_restore_reclassified_service_request_assignments.php']);
+            // Confirm migration ran successfully
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // Add any assertions to verify the migration's effects
+            assertDatabaseHas('service_request_assignments', [
+                'id' => $deletedAssignmentId,
+                'deleted_at' => null,
+                'status' => 'inactive',
+            ]);
+
+            assertDatabaseHas('service_request_assignments', [
+                'id' => $activeAssignmentId,
+                'deleted_at' => null,
+                'status' => 'active',
+            ]);
+        });
+    });
+});

@@ -36,6 +36,10 @@
 @else
     <ol class="relative px-2">
         @foreach ($timelineRecords as $record)
+            @php
+                $subjectTimeline = $record->subjectTimeline();
+            @endphp
+
             <li
                 class="relative -left-6 mb-10 ml-10 w-full rounded-lg p-4 hover:bg-gray-200 md:ml-6 hover:dark:bg-gray-800"
             >
@@ -50,14 +54,19 @@
                 >
                     <x-filament::icon
                         class="h-4 w-4 text-gray-800 dark:text-gray-100"
-                        icon="{{ $record->timelineable->timeline()->icon() }}"
+                        icon="{{ $subjectTimeline->icon() }}"
                     />
                 </span>
 
                 <div class="ml-2">
-                    @if ($record->timelineable()->timeline()->providesCustomView())
+                    @if ($record->timelineable === null)
+                        <x-timeline::missing-timeline-record
+                            :timeline="$subjectTimeline"
+                            :datetime="$record->record_sortable_date"
+                        />
+                    @elseif ($subjectTimeline->providesCustomView())
                         <x-dynamic-component
-                            :component="$record->timelineable->timeline()->renderCustomView()"
+                            :component="$subjectTimeline->renderCustomView()"
                             :record="$record->timelineable"
                         >
                             <x-slot:view-record-icon>
@@ -96,7 +105,7 @@
                         }, {
                             root: null
                         })
-                
+
                         observer.observe(this.$el)
                     }
                 }"

@@ -45,10 +45,12 @@ use AidingApp\ServiceManagement\Enums\HttpMethod;
 use AidingApp\ServiceManagement\Enums\MonitorType;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
 use AidingApp\ServiceManagement\Models\Scopes\ServiceMonitoringTargetVisibilityScope;
 use AidingApp\ServiceManagement\Observers\ServiceMonitoringTargetObserver;
 use App\Models\BaseModel;
 use App\Models\User;
+use Carbon\CarbonInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Attributes\ScopedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -248,6 +250,46 @@ class ServiceMonitoringTarget extends BaseModel implements Auditable
         $percentage = ($successes->count() / $serviceChecks->count()) * 100;
 
         return ((int) $percentage === $percentage ? (int) $percentage : round($percentage, 1)) . '%';
+    }
+
+    /**
+     * Requires the `WithCurrentStatus` scope to have been applied to the query.
+     */
+    public function getCurrentStatus(): ServiceMonitoringStatus
+    {
+        $status = $this->getAttribute('current_status');
+
+        assert($status instanceof ServiceMonitoringStatus, 'The `WithCurrentStatus` scope must be applied to the query.');
+
+        return $status;
+    }
+
+    /**
+     * Requires the `WithCurrentStatus` scope to have been applied to the query.
+     */
+    public function getLastCheckedAt(): ?CarbonInterface
+    {
+        assert(array_key_exists('last_checked_at', $this->getAttributes()), 'The `WithCurrentStatus` scope must be applied to the query.');
+
+        $lastCheckedAt = $this->getAttribute('last_checked_at');
+
+        assert(($lastCheckedAt === null) || ($lastCheckedAt instanceof CarbonInterface));
+
+        return $lastCheckedAt;
+    }
+
+    /**
+     * Requires the `WithUptimePercentages` scope to have been applied to the query, selecting the given alias.
+     */
+    public function getSelectedUptimePercentage(string $alias): ?float
+    {
+        assert(array_key_exists($alias, $this->getAttributes()), "The `WithUptimePercentages` scope must be applied to the query to select `{$alias}`.");
+
+        $percentage = $this->getAttribute($alias);
+
+        assert(($percentage === null) || is_float($percentage));
+
+        return $percentage;
     }
 
     /**

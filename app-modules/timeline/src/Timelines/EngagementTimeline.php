@@ -53,7 +53,7 @@ class EngagementTimeline extends CustomTimeline
 
     public function icon(): string
     {
-        return match ($this->engagement->getDeliveryMethod()) {
+        return match ($this->engagement->channel) {
             NotificationChannel::Email => 'heroicon-o-envelope',
             default => 'heroicon-o-arrow-small-right',
         };
@@ -79,7 +79,8 @@ class EngagementTimeline extends CustomTimeline
         return ViewAction::make()
             ->schema([
                 TextEntry::make('user.name')
-                    ->label('Created By'),
+                    ->label('Created By')
+                    ->state(fn (Engagement $engagement): string => $engagement->user()->withTrashed()->first()->name ?? 'Deleted user'),
                 Fieldset::make('Content')
                     ->schema([
                         TextEntry::make('subject')
@@ -99,5 +100,15 @@ class EngagementTimeline extends CustomTimeline
                     ->columns(2),
             ])
             ->record($this->engagement);
+    }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Engagement Sent';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
     }
 }
