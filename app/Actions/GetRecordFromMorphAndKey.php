@@ -38,6 +38,7 @@ namespace App\Actions;
 
 use Exception;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class GetRecordFromMorphAndKey
 {
@@ -49,6 +50,9 @@ class GetRecordFromMorphAndKey
             throw new Exception("Model not found for reference: {$morphReference}");
         }
 
-        return $className::whereKey($key)->firstOrFail();
+        return $className::query()
+            ->withoutGlobalScope(SoftDeletingScope::class)
+            ->whereKey($key)
+            ->firstOrFail();
     }
 }

@@ -90,6 +90,11 @@
             <span class="font-semibold">{{ $record->uploadedFileName() }}</span>
             by
             <span class="font-semibold">{{ $actorName }}</span>
+        @elseif ($record->isAssignmentRemovedEvent())
+            Unassigned
+            <span class="font-semibold">{{ $record->removedAssigneeName() }}</span>
+            by
+            <span class="font-semibold">{{ $actorName }}</span>
         @else
             @php
                 $field = $record->changedField();

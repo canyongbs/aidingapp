@@ -32,9 +32,10 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChevronDownIcon } from '@heroicons/vue/16/solid';
+    import { computed } from 'vue';
+    import BaseSelect from '../ui/BaseSelect.vue';
 
-    defineProps({
+    const props = defineProps({
         modelValue: {
             type: String,
             default: null,
@@ -46,23 +47,16 @@
     });
 
     defineEmits(['update:modelValue']);
+
+    const options = computed(() => props.pipelines.map((pipeline) => ({ value: pipeline.id, label: pipeline.name })));
 </script>
 
 <template>
-    <div class="relative inline-block w-full max-w-xs">
-        <select
-            :value="modelValue"
-            aria-label="Select pipeline"
-            class="w-full appearance-none rounded-[var(--rounding-md)] border border-gray-300 bg-white py-2 pl-3 pr-9 text-sm text-gray-900 focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
-            @change="$emit('update:modelValue', $event.target.value)"
-        >
-            <option v-for="pipeline in pipelines" :key="pipeline.id" :value="pipeline.id">
-                {{ pipeline.name }}
-            </option>
-        </select>
-        <ChevronDownIcon
-            class="pointer-events-none absolute right-2.5 top-1/2 size-4 -translate-y-1/2 text-gray-400"
-            aria-hidden="true"
-        />
-    </div>
+    <BaseSelect
+        :model-value="modelValue"
+        :options="options"
+        label="Select pipeline"
+        class="max-w-xs"
+        @update:model-value="$emit('update:modelValue', $event)"
+    />
 </template>

@@ -31,15 +31,21 @@
     
     </COPYRIGHT>
 --}}
+@php
+    $sender = $record
+        ->sender()
+        ->withTrashed()
+        ->getResults();
+@endphp
+
 <div>
     <div class="flex flex-row justify-between">
         <h3 class="mb-1 flex items-center text-lg font-semibold text-gray-500 dark:text-gray-100">
-            <a
-                class="font-medium underline"
-                href="{{ $record->sender->filamentResource()::getUrl('view', ['record' => $record->sender]) }}"
-            >
-                {{ $record->sender->full_name }}
-            </a>
+            <x-timeline::timeline.related-person
+                class="font-medium"
+                :person="$sender"
+                :name="$sender?->full_name ?? $sender?->name"
+            />
         </h3>
 
         <div>
@@ -48,7 +54,7 @@
     </div>
 
     <time class="mb-2 block text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-        Sent {{ $record->sent_at->diffForHumans() }}
+        Sent {{ $record->sent_at?->diffForHumans() }}
     </time>
 
     <div

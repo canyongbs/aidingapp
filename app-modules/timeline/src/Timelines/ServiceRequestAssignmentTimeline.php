@@ -72,4 +72,14 @@ class ServiceRequestAssignmentTimeline extends CustomTimeline
     {
         return ServiceRequestAssignmentViewAction::make()->record($this->serviceRequestAssignment);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Service Request Assigned';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return 'Assigned to Unknown user';
+    }
 }
