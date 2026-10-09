@@ -218,7 +218,7 @@
                         <form wire:submit="create" class="flex flex-col gap-y-4">
                             {{ $this->form }}
 
-                            <div class="flex justify-end">
+                            <div class="flex">
                                 <x-filament::button
                                     type="submit"
                                     :color="($data['internal'] ?? false) ? 'warning' : 'primary'"
