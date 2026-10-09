@@ -38,6 +38,7 @@
         "resolve-url-loader": "^5.0.0",
         "select2": "^4.1.0",
         "tailwindcss": "^4.3.3",
+        "typescript": "^5.9.3",
         "vue-signature-pad": "^3.0.2",
         "vue-tsc": "^3.3.11"
     },
