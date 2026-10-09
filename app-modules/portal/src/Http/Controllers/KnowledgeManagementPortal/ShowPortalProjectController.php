@@ -106,6 +106,7 @@ class ShowPortalProjectController
                     ->whereColumn('project_milestones.id', 'pipeline_entries.project_milestone_id'),
             )
             ->oldest('pipeline_entries.created_at')
+            ->oldest('pipeline_entries.id')
             ->paginate(50, [
                 'pipeline_entries.id',
                 'pipeline_entries.name',
