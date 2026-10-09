@@ -142,3 +142,37 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
     livewire(ListAdvisories::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
+
+it('links each row to the advisory view page', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view');
+
+    actingAs($user);
+
+    $advisory = Advisory::factory()->create();
+
+    $url = livewire(ListAdvisories::class)
+        ->instance()
+        ->getTable()
+        ->getRecordUrl($advisory);
+
+    expect($url)->toBe(AdvisoryResource::getUrl('view', ['record' => $advisory]));
+});
+
+it('does not link a row when the user cannot view the advisory', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any');
+
+    actingAs($user);
+
+    $advisory = Advisory::factory()->create();
+
+    $url = livewire(ListAdvisories::class)
+        ->instance()
+        ->getTable()
+        ->getRecordUrl($advisory);
+
+    expect($url)->toBeNull();
+});
