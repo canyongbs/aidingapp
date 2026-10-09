@@ -110,6 +110,29 @@ it('lists updates with their authors, visibility, and attachments', function () 
         ->assertSeeHtml(Vite::asset('resources/images/canyon-ai-headshot.jpg'));
 });
 
+it('shows the latest updates first and loads earlier updates on request', function () {
+    $serviceRequest = ServiceRequest::factory()->create();
+    $contact = Contact::factory()->create();
+
+    foreach (range(1, 51) as $number) {
+        ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create([
+            'update' => "Update number {$number}.",
+            'created_by_id' => $contact->getKey(),
+            'created_by_type' => $contact->getMorphClass(),
+            'created_at' => now()->subMinutes(60 - $number),
+        ]);
+    }
+
+    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSeeText('51 updates')
+        ->assertSeeText('Show earlier updates')
+        ->assertSeeText('Update number 51.')
+        ->assertDontSeeText('Update number 1.')
+        ->call('loadEarlierUpdates')
+        ->assertSeeText('Update number 1.')
+        ->assertDontSeeText('Show earlier updates');
+});
+
 it('polls for updates added after the feed loads', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
@@ -296,6 +319,29 @@ describe('authorization', function () {
             ->assertForbidden();
 
         assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'Unauthorized update.']);
+    });
+
+    it('does not change the status without permission to update the service request', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo(['service_request_update.view-any', 'service_request_update.create']);
+        actingAs($user);
+
+        $serviceRequest = openServiceRequest();
+        $originalStatusId = $serviceRequest->status_id;
+        $status = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+            ->assertFormFieldHidden('status_id')
+            ->fillForm([
+                'update' => 'Update from a non-manager.',
+                'status_id' => $status->getKey(),
+            ])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'Update from a non-manager.']);
+
+        expect($serviceRequest->refresh()->status_id)->toBe($originalStatusId);
     });
 
     it('hides the `deleteUpdate` action without the `service_request_update.*.delete` permission', function () {
