@@ -34,42 +34,55 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+namespace AidingApp\Contact\Enums;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Filament\Support\Contracts\HasColor;
+use Filament\Support\Contracts\HasIcon;
+use Filament\Support\Contracts\HasLabel;
 
-class ContactServiceProvider extends ServiceProvider
+enum EmailHealthStatus: string implements HasLabel, HasColor, HasIcon
 {
-    public function register(): void
+    case Healthy = 'healthy';
+
+    case Bounced = 'bounced';
+
+    public function getLabel(): string
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
+        return match ($this) {
+            self::Healthy => 'Healthy',
+            self::Bounced => 'Bounced',
+        };
     }
 
-    public function boot(): void
+    public function getColor(): string
     {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+        return match ($this) {
+            self::Healthy => 'success',
+            self::Bounced => 'warning',
+        };
+    }
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+    public function getIcon(): string
+    {
+        return match ($this) {
+            self::Healthy => 'heroicon-m-check-circle',
+            self::Bounced => 'heroicon-m-exclamation-triangle',
+        };
+    }
 
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
+    public function getTooltipText(): string
+    {
+        return match ($this) {
+            self::Healthy => 'Healthy. No delivery issues detected.',
+            self::Bounced => 'Bounced. Email delivery failed and a bounce was received from our email provider.',
+        };
+    }
+
+    public function getCalloutText(): ?string
+    {
+        return match ($this) {
+            self::Healthy => null,
+            self::Bounced => 'The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.',
+        };
     }
 }

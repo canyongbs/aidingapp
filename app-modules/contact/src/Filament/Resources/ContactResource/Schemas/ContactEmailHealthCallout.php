@@ -34,42 +34,23 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Filament\Schemas\Components\Callout;
 
-class ContactServiceProvider extends ServiceProvider
+class ContactEmailHealthCallout
 {
-    public function register(): void
+    public static function make(Contact $contact): Callout
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+        $status = $contact->getEmailHealthStatus();
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
-
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
+        return Callout::make()
+            ->key('email-health-callout')
+            ->color($status->getColor())
+            ->icon($status->getIcon())
+            ->description($status->getCalloutText())
+            ->visible(filled($status->getCalloutText()))
+            ->columnSpanFull();
     }
 }

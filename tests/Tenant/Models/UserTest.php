@@ -38,6 +38,12 @@ use App\Models\User;
 
 use function Pest\Laravel\assertDatabaseHas;
 
+it('can always receive email', function () {
+    $user = User::factory()->create();
+
+    expect($user->canReceiveEmail())->toBeTrue();
+});
+
 describe('push subscriptions', function () {
     it('stores a push subscription for the user on the tenant connection', function () {
         $user = User::factory()->create();

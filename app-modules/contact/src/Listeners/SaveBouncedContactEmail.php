@@ -34,42 +34,25 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+namespace AidingApp\Contact\Listeners;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesEvent;
+use AidingApp\IntegrationAwsSesEventHandling\Listeners\HandleSesEvent;
 
-class ContactServiceProvider extends ServiceProvider
+class SaveBouncedContactEmail extends HandleSesEvent
 {
-    public function register(): void
+    public function handle(SesEvent $event): void
     {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+        if ($event->data->bounce->bounceType !== 'Permanent') {
+            return;
+        }
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
-
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
+        foreach ($event->data->bounce->bouncedRecipients as $bouncedRecipient) {
+            Contact::query()
+                ->withTrashed()
+                ->where('email', $bouncedRecipient->emailAddress)
+                ->update(['email_bounce' => true]);
+        }
     }
 }
