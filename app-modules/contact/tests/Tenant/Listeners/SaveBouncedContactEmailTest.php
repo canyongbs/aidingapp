@@ -128,7 +128,7 @@ it('does nothing when no contact matches the bounced address', function () {
     expect($other->refresh()->email_bounce)->toBeFalse();
 });
 
-it('does not flag a soft-deleted contact with the bounced address', function () {
+it('flags a soft-deleted contact with the bounced address so the flag survives a restore', function () {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
@@ -140,7 +140,9 @@ it('does not flag a soft-deleted contact with the bounced address', function () 
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
-    expect($contact->refresh()->email_bounce)->toBeFalse();
+    $contact->restore();
+
+    expect($contact->refresh()->email_bounce)->toBeTrue();
 });
 
 it('does not flag the new address of a contact who already replaced the bounced address', function () {
