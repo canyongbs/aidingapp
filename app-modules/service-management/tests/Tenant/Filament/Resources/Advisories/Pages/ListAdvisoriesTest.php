@@ -37,8 +37,10 @@
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 
@@ -141,4 +143,59 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
 
     livewire(ListAdvisories::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('links each row to the advisory view page', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view');
+
+    actingAs($user);
+
+    $advisory = Advisory::factory()->create();
+
+    $url = livewire(ListAdvisories::class)
+        ->instance()
+        ->getTable()
+        ->getRecordUrl($advisory);
+
+    expect($url)->toBe(AdvisoryResource::getUrl('view', ['record' => $advisory]));
+});
+
+it('does not link a row when the user cannot view the advisory', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any');
+
+    actingAs($user);
+
+    $advisory = Advisory::factory()->create();
+
+    $url = livewire(ListAdvisories::class)
+        ->instance()
+        ->getTable()
+        ->getRecordUrl($advisory);
+
+    expect($url)->toBeNull();
+});
+
+it('renders the severity column as a badge using the severity color', function () {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any');
+
+    actingAs($user);
+
+    $advisory = Advisory::factory()
+        ->for(AdvisorySeverity::factory()->state(['color' => Color::Red]), 'severity')
+        ->create();
+
+    $column = livewire(ListAdvisories::class)
+        ->instance()
+        ->getTable()
+        ->getColumn('severity.name')
+        ->record($advisory);
+
+    expect($column->isBadge())->toBeTrue()
+        ->and($column->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
