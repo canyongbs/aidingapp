@@ -234,4 +234,3 @@ class ViewContact extends ViewRecord
             ->after(fn (Contact $record) => $record->refresh());
     }
 }
-
