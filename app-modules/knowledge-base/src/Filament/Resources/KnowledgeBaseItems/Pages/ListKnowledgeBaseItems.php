@@ -146,7 +146,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->schema([
                         SelectTree::make('categories')
                             ->label('Category')
-                            ->getTreeUsing(fn (): array => static::buildCategoryTreeOptions(KnowledgeBaseCategory::query()))
+                            ->getTreeUsing(fn (): array => static::buildCategoryTreeOptions())
                             ->enableBranchNode()
                             ->multiple()
                             ->searchable()
@@ -286,39 +286,36 @@ class ListKnowledgeBaseItems extends ListRecords
     }
 
     /**
-     * Build the nested option tree a `SelectTree` expects from a self-referencing
-     * (parent/child) model, so managed subcategories are shown instead of a flat list.
-     *
-     * @param  Builder<covariant Model>  $query
+     * Build the nested option tree a `SelectTree` expects from the self-referencing
+     * (parent/child) `KnowledgeBaseCategory` model, so managed subcategories are shown
+     * instead of a flat list.
      *
      * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
-    public static function buildCategoryTreeOptions(
-        Builder $query,
-        string $labelAttribute = 'name',
-        string $parentAttribute = 'parent_id',
-        string $sortAttribute = 'sort',
-    ): array {
-        $records = $query
-            ->orderBy($sortAttribute)
+    public static function buildCategoryTreeOptions(): array
+    {
+        $records = KnowledgeBaseCategory::query()
+            ->orderBy('sort')
             ->get();
 
+        // Keyed by key for O(1) `isset()` lookups below, avoiding an O(n) scan per record.
         $presentKeys = $records
-            ->map(fn (Model $record): string => (string) $record->getKey())
+            ->map(fn (KnowledgeBaseCategory $record): string => (string) $record->getKey())
+            ->flip()
             ->all();
 
         $recordsByParent = $records
-            ->groupBy(function (Model $record) use ($parentAttribute, $presentKeys): string {
-                $parentKey = (string) $record->getAttribute($parentAttribute);
+            ->groupBy(function (KnowledgeBaseCategory $record) use ($presentKeys): string {
+                $parentKey = (string) $record->parent_id;
 
                 // Promote records whose parent is absent from the result set (e.g. a
                 // soft-deleted parent category) to the root so their still-active
                 // descendants remain reachable instead of being stranded under a key
                 // the recursion never visits.
-                return in_array($parentKey, $presentKeys, true) ? $parentKey : '';
+                return isset($presentKeys[$parentKey]) ? $parentKey : '';
             });
 
-        return static::buildCategoryTreeNodes($recordsByParent, '', $labelAttribute);
+        return static::buildCategoryTreeNodes($recordsByParent, '');
     }
 
     protected function getHeaderActions(): array
@@ -334,21 +331,20 @@ class ListKnowledgeBaseItems extends ListRecords
     }
 
     /**
-     * @param  Collection<int|string, EloquentCollection<int, Model>>  $recordsByParent
+     * @param  Collection<int|string, EloquentCollection<int, KnowledgeBaseCategory>>  $recordsByParent
      *
      * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
      */
     protected static function buildCategoryTreeNodes(
         Collection $recordsByParent,
         string $parentKey,
-        string $labelAttribute,
     ): array {
         return $recordsByParent
             ->get($parentKey, collect())
-            ->map(fn (Model $record): array => [
-                'name' => (string) $record->getAttribute($labelAttribute),
+            ->map(fn (KnowledgeBaseCategory $record): array => [
+                'name' => $record->name,
                 'value' => $record->getKey(),
-                'children' => static::buildCategoryTreeNodes($recordsByParent, (string) $record->getKey(), $labelAttribute),
+                'children' => static::buildCategoryTreeNodes($recordsByParent, (string) $record->getKey()),
             ])
             ->values()
             ->all();
