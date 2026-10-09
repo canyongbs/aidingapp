@@ -81,8 +81,8 @@ test('The correct details are displayed on the ViewContact page', function () {
             'job_title' => 'Manager',
             'email' => 'john.doe@example.com',
             'city' => 'Springfield',
-            'type_id' => $contactType->getKey(),
-            'organization_id' => $organization->getKey(),
+            'type.name' => 'Student',
+            'organization.name' => 'Acme Inc',
         ]);
 });
 
@@ -99,7 +99,7 @@ test('ViewContact renders successfully when optional fields have no value', func
         ->assertSuccessful()
         ->assertSchemaStateSet([
             'job_title' => null,
-            'organization_id' => null,
+            'organization.name' => null,
             'address_2' => null,
         ]);
 });

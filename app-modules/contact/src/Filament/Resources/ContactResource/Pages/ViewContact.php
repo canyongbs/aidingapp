@@ -40,8 +40,11 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
+use App\Features\ContactTrackingFeature;
 use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
+use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -53,19 +56,134 @@ class ViewContact extends ViewRecord
 {
     protected static string $resource = ContactResource::class;
 
-    // TODO: Automatically set from Filament
-    protected static ?string $navigationLabel = 'View';
-
-    public function form(Schema $schema): Schema
+    public function infolist(Schema $schema): Schema
     {
         $contact = $this->getRecord();
 
         assert($contact instanceof Contact);
 
         return $schema
-            ->disabled()
             ->components([
-                ...ContactFormSchema::make(),
+                Section::make('Demographic Information')
+                    ->key('demographicInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editDemographicInformation', 'Demographic Information')
+                            ->schema(ContactFormSchema::demographicInformationFields()),
+                    ])
+                    ->schema([
+                        TextEntry::make('first_name')
+                            ->label('First Name'),
+                        TextEntry::make('last_name')
+                            ->label('Last Name'),
+                        TextEntry::make(Contact::displayNameKey())
+                            ->label('Full Name'),
+                        TextEntry::make('preferred')
+                            ->label('Preferred Name'),
+                        TextEntry::make('presence_status')
+                            ->label('Presence')
+                            ->visible(fn (): bool => ContactTrackingFeature::active())
+                            ->state(fn (Contact $record) => $record->presenceStatus())
+                            ->badge()
+                            ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
+                            ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
+                        TextEntry::make('type.name')
+                            ->label('Type'),
+                    ])
+                    ->columns(2),
+                Section::make('Contact Information')
+                    ->key('contactInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editContactInformation', 'Contact Information')
+                            ->schema(ContactFormSchema::contactInformationFields(ignoreRecord: true)),
+                    ])
+                    ->schema([
+                        TextEntry::make('email')
+                            ->label('Email'),
+                        TextEntry::make('mobile')
+                            ->label('Mobile'),
+                        TextEntry::make('phone')
+                            ->label('Phone'),
+                    ])
+                    ->columns(2),
+                Section::make('Employment Information')
+                    ->key('employmentInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editEmploymentInformation', 'Employment Information')
+                            ->schema(ContactFormSchema::employmentInformationFields()),
+                    ])
+                    ->schema([
+                        TextEntry::make('job_title')
+                            ->label('Job Title'),
+                        TextEntry::make('employee_id')
+                            ->label('Employee ID'),
+                        TextEntry::make('work_number')
+                            ->label('Work Number'),
+                        TextEntry::make('work_extension')
+                            ->label('Work Extension'),
+                    ])
+                    ->columns(2),
+                Section::make('Academic Information')
+                    ->key('academicInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editAcademicInformation', 'Academic Information')
+                            ->schema(ContactFormSchema::academicInformationFields()),
+                    ])
+                    ->schema([
+                        TextEntry::make('student_id')
+                            ->label('Student ID'),
+                        TextEntry::make('school')
+                            ->label('School'),
+                        TextEntry::make('academic_department')
+                            ->label('Academic Department'),
+                        TextEntry::make('program')
+                            ->label('Program'),
+                    ])
+                    ->columns(2),
+                Section::make('Address Information')
+                    ->key('addressInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editAddressInformation', 'Address Information')
+                            ->schema(ContactFormSchema::addressInformationFields()),
+                    ])
+                    ->schema([
+                        TextEntry::make('address')
+                            ->label('Address'),
+                        TextEntry::make('address_2')
+                            ->label('Address 2'),
+                        TextEntry::make('city')
+                            ->label('City'),
+                        TextEntry::make('state')
+                            ->label('State'),
+                        TextEntry::make('postal')
+                            ->label('Postal'),
+                        TextEntry::make('country')
+                            ->label('Country'),
+                    ])
+                    ->columns(2),
+                Section::make('Customer Information')
+                    ->key('customerInformation')
+                    ->headerActions([
+                        self::sectionEditAction('editCustomerInformation', 'Customer Information')
+                            ->schema(ContactFormSchema::customerInformationFields()),
+                    ])
+                    ->schema([
+                        TextEntry::make('organization.name')
+                            ->label('Organization'),
+                    ])
+                    ->columns(2),
+                Section::make('Engagement Restrictions')
+                    ->key('engagementRestrictions')
+                    ->headerActions([
+                        self::sectionEditAction('editEngagementRestrictions', 'Engagement Restrictions')
+                            ->schema(ContactFormSchema::engagementRestrictionsFields()),
+                    ])
+                    ->schema([
+                        IconEntry::make('email_bounce')
+                            ->label('Email Bounce')
+                            ->boolean(),
+                    ])
+                    ->columns(2),
                 Section::make('System Information')
                     ->schema([
                         TextEntry::make('created_at')
@@ -100,7 +218,18 @@ class ViewContact extends ViewRecord
         }
 
         return [
-            EditAction::make(),
+            DeleteAction::make(),
         ];
     }
+
+    protected static function sectionEditAction(string $name, string $sectionLabel): EditAction
+    {
+        return EditAction::make($name)
+            ->label('Edit')
+            ->modalHeading("Edit {$sectionLabel}")
+            ->modalSubmitActionLabel('Save')
+            ->slideOver()
+            ->after(fn (Contact $record) => $record->refresh());
+    }
 }
+

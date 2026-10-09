@@ -34,51 +34,22 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
-use AidingApp\Contact\Models\Contact;
-use App\Enums\NavigationGroup;
-use Filament\Resources\Resource;
-use Illuminate\Database\Eloquent\Model;
-use UnitEnum;
-
-class ContactResource extends Resource
-{
-    protected static ?string $model = Contact::class;
-
-    protected static string | UnitEnum | null $navigationGroup = NavigationGroup::Clients;
-
-    protected static ?int $navigationSort = 20;
-
-    protected static ?int $globalSearchSort = 3;
-
-    protected static ?string $recordTitleAttribute = 'full_name';
-
-    protected static bool $isGloballySearchable = true;
-
-    public static function getGloballySearchableAttributes(): array
+return new class () extends Migration {
+    public function up(): void
     {
-        return ['full_name', 'email', 'mobile', 'phone'];
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
     }
 
-    public static function getGlobalSearchResultDetails(Model $record): array
+    public function down(): void
     {
-        return array_filter([
-            'Other ID' => $record->otherid,
-            'Email Address' => collect([$record->email, $record->email_id])->filter()->implode(', '),
-            'Phone' => collect([$record->mobile, $record->phone])->filter()->implode(', '),
-        ], fn (mixed $value): bool => filled($value));
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->longText('description')->nullable();
+        });
     }
-
-    public static function getPages(): array
-    {
-        return [
-            'index' => ListContacts::route('/'),
-            'create' => CreateContact::route('/create'),
-            'view' => ViewContact::route('/{record}'),
-        ];
-    }
-}
+};
