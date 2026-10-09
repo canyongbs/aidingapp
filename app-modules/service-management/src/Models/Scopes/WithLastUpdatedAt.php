@@ -34,66 +34,33 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Models\Scopes;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\Advisory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 
 /**
- * @mixin IdeHelperAdvisorySeverity
+ * Selects each advisory's `last_updated_at`: the date of its latest update, or when it was created if it has none.
  */
-#[ObservedBy([AdvisorySeverityObserver::class])]
-class AdvisorySeverity extends BaseModel implements Auditable
+class WithLastUpdatedAt
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    /** @use HasFactory<AdvisorySeverityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'color',
-        'sort',
-    ];
-
-    protected $table = 'advisory_severities';
-
     /**
-     * @return HasMany<Advisory, $this>
+     * @param Builder<Advisory> $query
      */
-    public function advisories(): HasMany
+    public function __invoke(Builder $query): void
     {
-        return $this->hasMany(Advisory::class, 'severity_id');
+        if ($query->getQuery()->columns === null) {
+            $query->select($query->qualifyColumn('*'));
+        }
+
+        $query
+            ->addSelect(new Expression(static::expression() . ' as last_updated_at'))
+            ->withCasts(['last_updated_at' => 'datetime']);
     }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public static function expression(): string
     {
-        return [
-            'color' => Color::class,
-            'sort' => 'integer',
-        ];
-    }
-
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function rgbColor(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->color->getRgb(),
-        );
+        return '(coalesce((select max(advisory_updates.date) from advisory_updates where advisory_updates.advisory_id = advisories.id), advisories.created_at))';
     }
 }

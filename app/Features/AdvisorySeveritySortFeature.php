@@ -34,66 +34,14 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace App\Features;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use App\Support\AbstractFeatureFlag;
 
-/**
- * @mixin IdeHelperAdvisorySeverity
- */
-#[ObservedBy([AdvisorySeverityObserver::class])]
-class AdvisorySeverity extends BaseModel implements Auditable
+class AdvisorySeveritySortFeature extends AbstractFeatureFlag
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    /** @use HasFactory<AdvisorySeverityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'color',
-        'sort',
-    ];
-
-    protected $table = 'advisory_severities';
-
-    /**
-     * @return HasMany<Advisory, $this>
-     */
-    public function advisories(): HasMany
+    public function resolve(mixed $scope): mixed
     {
-        return $this->hasMany(Advisory::class, 'severity_id');
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'color' => Color::class,
-            'sort' => 'integer',
-        ];
-    }
-
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function rgbColor(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->color->getRgb(),
-        );
+        return false;
     }
 }

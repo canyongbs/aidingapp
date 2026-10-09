@@ -34,37 +34,31 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Database\Factories;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
 
-use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
-use Illuminate\Database\Eloquent\Factories\Factory;
+it('ranks a new severity last', function () {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
 
-/**
- * @extends Factory<AdvisoryStatus>
- */
-class AdvisoryStatusFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            'name' => $this->faker->words(10, true),
-            'classification' => $this->faker->randomElement(SystemAdvisoryStatusClassification::cases()),
-        ];
-    }
+    $severity = AdvisorySeverity::factory()->create();
 
-    public function open(): static
-    {
-        return $this->state(['classification' => SystemAdvisoryStatusClassification::Open]);
-    }
+    expect($severity->refresh()->sort)->toBe(5);
+});
 
-    public function resolved(): static
-    {
-        return $this->state(['classification' => SystemAdvisoryStatusClassification::Resolved]);
-    }
-}
+it('keeps an explicitly provided rank', function () {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
+
+    $severity = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+    expect($severity->refresh()->sort)->toBe(2);
+});
+
+it('does not rank a new severity when `AdvisorySeveritySortFeature` is inactive', function () {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
+
+    AdvisorySeveritySortFeature::deactivate();
+
+    $severity = AdvisorySeverity::factory()->create();
+
+    expect($severity->refresh()->sort)->toBe(0);
+});
