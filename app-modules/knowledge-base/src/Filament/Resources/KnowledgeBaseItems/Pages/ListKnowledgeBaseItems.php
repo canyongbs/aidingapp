@@ -78,7 +78,7 @@ class ListKnowledgeBaseItems extends ListRecords
             ->modifyQueryUsing(fn (Builder $query) => $query->withCount([
                 'votes',
                 'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
-            ])->with(['managers', 'concerns']))
+            ])->with(['managers', 'concerns', 'category.parentCategoryWithAncestors']))
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('title')
@@ -89,7 +89,8 @@ class ListKnowledgeBaseItems extends ListRecords
                             [$search]
                         );
                     })
-                    ->sortable(),
+                    ->sortable()
+                    ->description(fn (KnowledgeBaseItem $record): ?string => $record->category?->getPath()),
                 TextColumn::make('rating')
                     ->label('Rating')
                     ->toggleable()
@@ -102,10 +103,6 @@ class ListKnowledgeBaseItems extends ListRecords
 
                         return (int) round(($record->getAttribute('helpful_votes_count') / $totalVotes) * 100) . '%';
                     }),
-                TextColumn::make('category.name')
-                    ->label('Category')
-                    ->toggleable()
-                    ->sortable(),
                 IconColumn::make('health')
                     ->label('Health')
                     ->toggleable()
