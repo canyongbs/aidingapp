@@ -43,14 +43,13 @@ use AidingApp\Ai\Settings\AiIntegratedAssistantSettings;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
+use AidingApp\ServiceManagement\Livewire\ServiceRequestUpdates;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
-use Filament\Resources\RelationManagers\RelationManager;
-use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Illuminate\Support\Facades\Vite;
@@ -65,9 +64,8 @@ class DraftServiceRequestUpdateWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(function (RelationManager $livewire) {
-                /** @var ServiceRequest $serviceRequest */
-                $serviceRequest = $livewire->getOwnerRecord();
+            ->modalContent(function (ServiceRequestUpdates $livewire) {
+                $serviceRequest = $livewire->serviceRequest;
 
                 return view('service-management::filament.actions.draft-with-ai-modal-content-service-request-update', [
                     'contactName' => $serviceRequest->respondent->full_name,
@@ -85,11 +83,10 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                     ->placeholder('Describe the update you wish to share, and I will help you draft it. I already have all the context of this service request, and your knowledge base, so no need to share those details.')
                     ->required(),
             ])
-            ->action(function (array $data, Get $get, Set $set, RelationManager $livewire) {
+            ->action(function (array $data, Set $set, ServiceRequestUpdates $livewire) {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
-                /** @var ServiceRequest $serviceRequest */
-                $serviceRequest = $livewire->getOwnerRecord();
+                $serviceRequest = $livewire->serviceRequest;
 
                 $serviceRequestNumber = $serviceRequest->service_request_number;
                 $serviceRequestTitle = $serviceRequest->title;

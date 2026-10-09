@@ -34,26 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
-use Filament\Support\Contracts\HasLabel;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
-enum ServiceRequestUpdateType: string implements HasLabel
+class ServiceRequestUpdateUploadsFileUpload
 {
-    case ClarifyingQuestion = 'clarifying_question';
-    case ClarifyingAnswer = 'clarifying_answer';
-    case AiResolutionProposed = 'ai_resolution_proposed';
-    case AiResolutionResponse = 'ai_resolution_response';
-    case AiResolutionSummary = 'ai_resolution_summary';
-
-    public function getLabel(): string
+    public static function make(): SpatieMediaLibraryFileUpload
     {
-        return match ($this) {
-            self::ClarifyingQuestion => 'Clarifying Question',
-            self::ClarifyingAnswer => 'Clarifying Answer',
-            self::AiResolutionProposed => 'Proposed Resolution',
-            self::AiResolutionResponse => 'Resolution Response',
-            self::AiResolutionSummary => 'Resolution Summary',
-        };
+        return SpatieMediaLibraryFileUpload::make('uploads')
+            ->label('Attachments')
+            ->visibility('private')
+            ->collection('uploads')
+            ->multiple()
+            ->acceptedFileTypes((new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes)
+            ->downloadable();
     }
 }

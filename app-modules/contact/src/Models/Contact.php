@@ -61,6 +61,7 @@ use App\Models\Contracts\Educatable;
 use App\Models\User;
 use Carbon\Carbon;
 use DateTimeInterface;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -82,7 +83,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
-class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified
+class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified, HasName
 {
     use AuditableTrait;
 
@@ -218,6 +219,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public static function displayNameKey(): string
     {
         return 'full_name';
+    }
+
+    public function getFilamentName(): string
+    {
+        return (string) $this->full_name;
     }
 
     public static function displayEmailKey(): string

@@ -34,26 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Enums;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
-use Filament\Support\Contracts\HasLabel;
+use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\StateCasts\BooleanStateCast;
+use Filament\Support\Icons\Heroicon;
 
-enum ServiceRequestUpdateType: string implements HasLabel
+class ServiceRequestUpdateVisibilityToggleButtons
 {
-    case ClarifyingQuestion = 'clarifying_question';
-    case ClarifyingAnswer = 'clarifying_answer';
-    case AiResolutionProposed = 'ai_resolution_proposed';
-    case AiResolutionResponse = 'ai_resolution_response';
-    case AiResolutionSummary = 'ai_resolution_summary';
-
-    public function getLabel(): string
+    public static function make(): ToggleButtons
     {
-        return match ($this) {
-            self::ClarifyingQuestion => 'Clarifying Question',
-            self::ClarifyingAnswer => 'Clarifying Answer',
-            self::AiResolutionProposed => 'Proposed Resolution',
-            self::AiResolutionResponse => 'Resolution Response',
-            self::AiResolutionSummary => 'Resolution Summary',
-        };
+        return ToggleButtons::make('internal')
+            ->label('Visibility')
+            ->options([
+                0 => 'Visible to customer',
+                1 => 'Internal',
+            ])
+            ->icons([
+                0 => Heroicon::Eye,
+                1 => Heroicon::LockClosed,
+            ])
+            ->colors([
+                0 => 'primary',
+                1 => 'warning',
+            ])
+            ->stateCast(new BooleanStateCast(isNullable: false, isStoredAsInt: true))
+            ->grouped()
+            ->live()
+            ->helperText(fn (mixed $state): string => (bool) $state
+                ? 'Only visible to staff. The customer will not be notified.'
+                : 'Visible to the customer and service provider.')
+            ->rule('boolean');
     }
 }
