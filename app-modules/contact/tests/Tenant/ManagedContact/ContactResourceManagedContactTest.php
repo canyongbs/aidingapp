@@ -34,8 +34,6 @@
 </COPYRIGHT>
 */
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
@@ -45,7 +43,6 @@ use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\get;
 use function Pest\Livewire\livewire;
 
 function makeManagedContact(): Contact
@@ -82,7 +79,7 @@ it('shows a lock action instead of edit on the view page of a managed contact', 
 
     livewire(ViewContact::class, ['record' => $managed->getKey()])
         ->assertActionVisible('managed')
-        ->assertActionDoesNotExist('edit');
+        ->assertActionDoesNotExist(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
 });
 
 it('shows the edit action on the view page of an unmanaged contact', function () {
@@ -94,27 +91,8 @@ it('shows the edit action on the view page of an unmanaged contact', function ()
     $unmanaged = Contact::factory()->create();
 
     livewire(ViewContact::class, ['record' => $unmanaged->getKey()])
-        ->assertActionVisible('edit')
+        ->assertActionVisible(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'))
         ->assertActionDoesNotExist('managed');
-});
-
-it('forbids access to and hides the edit page of a managed contact', function () {
-    $user = User::factory()->create()
-        ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
-
-    actingAs($user);
-
-    $managed = makeManagedContact();
-    $unmanaged = Contact::factory()->create();
-
-    expect(EditContact::canAccess(['record' => $managed]))->toBeFalse()
-        ->and(EditContact::canAccess(['record' => $unmanaged]))->toBeTrue();
-
-    get(ContactResource::getUrl('edit', ['record' => $managed]))
-        ->assertForbidden();
-
-    get(ContactResource::getUrl('edit', ['record' => $unmanaged]))
-        ->assertSuccessful();
 });
 
 it('denies the update ability for a managed contact via the policy', function () {

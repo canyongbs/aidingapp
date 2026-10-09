@@ -33,8 +33,7 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
-use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
 
@@ -45,10 +44,8 @@ it('populates the address fields when a suggestion is selected', function () {
     actingAs(
         User::factory()
             ->create()
-            ->givePermissionTo('contact.view-any', 'contact.*.update')
+            ->givePermissionTo('contact.view-any', 'contact.create')
     );
-
-    $contact = Contact::factory()->create();
 
     $address = new AutocompletedAddress(
         address: '123 Main St',
@@ -59,9 +56,7 @@ it('populates the address fields when a suggestion is selected', function () {
         label: '123 Main St, Austin, TX, 78701, US',
     );
 
-    livewire(EditContact::class, [
-        'record' => $contact->getRouteKey(),
-    ])
+    livewire(CreateContact::class)
         ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
             'value' => $address->label,
             'label' => $address->label,

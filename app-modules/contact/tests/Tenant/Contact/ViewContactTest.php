@@ -44,8 +44,8 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
-use App\Enums\PresenceStatus;
 use App\Models\User;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
 
@@ -74,18 +74,16 @@ test('The correct details are displayed on the ViewContact page', function () {
 
     livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful()
-        ->assertSchemaStateSet([
-            'first_name' => 'John',
-            'last_name' => 'Doe',
-            Contact::displayNameKey() => 'Mr. John Doe',
-            'preferred' => 'Johnny',
-            'presence_status' => PresenceStatus::Active,
-            'job_title' => 'Manager',
-            'email' => 'john.doe@example.com',
-            'city' => 'Springfield',
-            'type_id' => $contactType->getKey(),
-            'organization_id' => $organization->getKey(),
-        ]);
+        ->assertSee('John')
+        ->assertSee('Doe')
+        ->assertSee('Mr. John Doe')
+        ->assertSee('Johnny')
+        ->assertSee('Online')
+        ->assertSee('Manager')
+        ->assertSee('john.doe@example.com')
+        ->assertSee('Springfield')
+        ->assertSee('Student')
+        ->assertSee('Acme Inc');
 });
 
 test('ViewContact renders successfully when optional fields have no value', function () {
@@ -98,12 +96,7 @@ test('ViewContact renders successfully when optional fields have no value', func
     ]);
 
     livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
-        ->assertSuccessful()
-        ->assertSchemaStateSet([
-            'job_title' => null,
-            'organization_id' => null,
-            'address_2' => null,
-        ]);
+        ->assertSuccessful();
 });
 
 // Permission Tests
@@ -142,20 +135,21 @@ describe('email health', function () {
             ->assertSchemaComponentVisible('email-health-callout');
 
         $callout = $component->instance()
-            ->getSchema('form')
+            ->getSchema('infolist')
             ->getComponent('email-health-callout');
 
         expect($callout)->toBeInstanceOf(Callout::class)
             ->and($callout->getDescription())->toBe('The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.');
 
-        $emailField = $component->instance()
-            ->getSchema('form')
-            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+        $component
+            ->mountAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'))
+            ->assertFormFieldExists('email', 'mountedActionSchema0', function (TextInput $field): bool {
+                expect($field->getHintIcon())->toBe('heroicon-m-exclamation-triangle')
+                    ->and($field->getHintColor())->toBe('warning')
+                    ->and($field->getHintIconTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
 
-        expect($emailField)->not->toBeNull()
-            ->and($emailField->getHintIcon())->toBe('heroicon-m-exclamation-triangle')
-            ->and($emailField->getHintColor())->toBe('warning')
-            ->and($emailField->getHintIconTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
+                return true;
+            });
     });
 
     it('hides the email health callout and shows the healthy hint icon for a healthy contact', function () {
@@ -163,18 +157,17 @@ describe('email health', function () {
 
         $contact = Contact::factory()->create(['email_bounce' => false]);
 
-        $component = livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
-            ->assertSchemaComponentHidden('email-health-callout');
+            ->assertSchemaComponentHidden('email-health-callout')
+            ->mountAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'))
+            ->assertFormFieldExists('email', 'mountedActionSchema0', function (TextInput $field): bool {
+                expect($field->getHintIcon())->toBe('heroicon-m-check-circle')
+                    ->and($field->getHintColor())->toBe('success')
+                    ->and($field->getHintIconTooltip())->toBe('Healthy. No delivery issues detected.');
 
-        $emailField = $component->instance()
-            ->getSchema('form')
-            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
-
-        expect($emailField)->not->toBeNull()
-            ->and($emailField->getHintIcon())->toBe('heroicon-m-check-circle')
-            ->and($emailField->getHintColor())->toBe('success')
-            ->and($emailField->getHintIconTooltip())->toBe('Healthy. No delivery issues detected.');
+                return true;
+            });
     });
 });
 

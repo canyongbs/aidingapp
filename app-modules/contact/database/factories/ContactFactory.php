@@ -57,7 +57,6 @@ class ContactFactory extends Factory
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",
             'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
             'email' => $this->faker->unique()->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
             'email_bounce' => false,
