@@ -120,6 +120,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
 
                 EmailMessageEventType::FailedDispatch => $status = self::SystemDelayed,
                 EmailMessageEventType::RateLimited => $status = self::Failed,
+                EmailMessageEventType::SuppressedByBounced => $status = self::Failed,
 
                 // We will consider the message "delivered" if blocked by demo mode
                 // for visual demo purposes

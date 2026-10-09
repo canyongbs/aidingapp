@@ -37,6 +37,7 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactEmailHealthCallout;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
@@ -64,6 +65,7 @@ class ViewContact extends ViewRecord
 
         return $schema
             ->components([
+                ContactEmailHealthCallout::make($contact),
                 Section::make('Demographic Information')
                     ->key('demographicInformation')
                     ->headerActions([

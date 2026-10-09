@@ -34,42 +34,19 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
-
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
 
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+it('reports a bounced email health status and cannot receive email when the email has bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => true]);
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Bounced)
+        ->and($contact->canReceiveEmail())->toBeFalse();
+});
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+it('reports a healthy email health status and can receive email when the email has not bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => false]);
 
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
-    }
-}
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)
+        ->and($contact->canReceiveEmail())->toBeTrue();
+});

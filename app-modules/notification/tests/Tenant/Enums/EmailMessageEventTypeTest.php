@@ -34,42 +34,16 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+use AidingApp\Notification\Enums\EmailMessageEventType;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+it('labels SuppressedByBounced as Suppressed because bounced', function () {
+    expect(EmailMessageEventType::SuppressedByBounced->getLabel())->toBe('Suppressed because bounced');
+});
 
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
-
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
-    }
-}
+it('keeps the headline label for cases without a custom label', function (EmailMessageEventType $type, string $label) {
+    expect($type->getLabel())->toBe($label);
+})->with([
+    'failed dispatch' => [EmailMessageEventType::FailedDispatch, 'Failed Dispatch'],
+    'blocked by demo mode' => [EmailMessageEventType::BlockedByDemoMode, 'Blocked By Demo Mode'],
+    'delivery delay' => [EmailMessageEventType::DeliveryDelay, 'Delivery Delay'],
+]);

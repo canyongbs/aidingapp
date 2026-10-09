@@ -34,42 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
-use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
-
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
-
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
-
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
-
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
-    }
-}
+it('has the expected label, color, icon, tooltip, and callout text', function (
+    EmailHealthStatus $status,
+    string $label,
+    string $color,
+    string $icon,
+    string $tooltip,
+    ?string $callout,
+) {
+    expect($status->getLabel())->toBe($label)
+        ->and($status->getColor())->toBe($color)
+        ->and($status->getIcon())->toBe($icon)
+        ->and($status->getTooltipText())->toBe($tooltip)
+        ->and($status->getCalloutText())->toBe($callout);
+})->with([
+    'healthy' => [
+        EmailHealthStatus::Healthy,
+        'Healthy',
+        'success',
+        'heroicon-m-check-circle',
+        'Healthy. No delivery issues detected.',
+        null,
+    ],
+    'bounced' => [
+        EmailHealthStatus::Bounced,
+        'Bounced',
+        'warning',
+        'heroicon-m-exclamation-triangle',
+        'Bounced. Email delivery failed and a bounce was received from our email provider.',
+        'The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.',
+    ],
+]);

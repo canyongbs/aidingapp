@@ -62,3 +62,59 @@ it('delegates organization matching when a contact is updated', function () {
     $contact->first_name = 'Updated';
     $contact->save();
 });
+
+it('clears the bounce flag when the email changes', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['email' => 'changed@example.com']);
+
+    expect($contact->fresh()->email_bounce)->toBeFalse();
+});
+
+it('leaves the bounce flag true when another attribute changes', function () {
+    $contact = Contact::factory()->bounced()->create(['first_name' => 'Original']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['first_name' => 'Changed']);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('leaves the bounce flag true when the email is set to the same value', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'same@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update(['email' => 'same@example.com']);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('keeps an explicit `email_bounce` value set in the same save as the email change', function () {
+    $contact = Contact::factory()->create(['email' => 'original@example.com', 'email_bounce' => false]);
+
+    expect($contact->email_bounce)->toBeFalse();
+
+    $contact->update([
+        'email' => 'changed@example.com',
+        'email_bounce' => true,
+    ]);
+
+    expect($contact->fresh()->email_bounce)->toBeTrue();
+});
+
+it('cannot keep an already-true `email_bounce` reasserted in the same save as the email change (known limitation)', function () {
+    $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
+
+    expect($contact->email_bounce)->toBeTrue();
+
+    $contact->update([
+        'email' => 'changed@example.com',
+        'email_bounce' => true,
+    ]);
+
+    expect($contact->fresh()->email_bounce)->toBeFalse();
+});

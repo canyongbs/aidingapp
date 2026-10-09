@@ -276,6 +276,30 @@ test('viewContact hides the Emails tab for a user without permission', function 
         ->assertMountedActionModalDontSee('Outbound');
 });
 
+// Email health
+
+test('viewContact shows the email health callout for a bounced respondent contact', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+    $contact->update(['email_bounce' => true]);
+
+    mountViewContact($serviceRequest)
+        ->assertSchemaComponentVisible('email-health-callout', 'mountedActionSchema0');
+});
+
+test('viewContact hides the email health callout for a healthy respondent contact', function () {
+    $serviceRequest = actingAsServiceRequestViewer();
+
+    $contact = $serviceRequest->respondent;
+    assert($contact instanceof Contact);
+    $contact->update(['email_bounce' => false]);
+
+    mountViewContact($serviceRequest)
+        ->assertSchemaComponentHidden('email-health-callout', 'mountedActionSchema0');
+});
+
 // Success - full contact details
 
 test('viewContact shows the full contact details for the service request respondent', function () {

@@ -45,6 +45,7 @@ enum EmailMessageEventType: string implements HasLabel
     case FailedDispatch = 'failed_dispatch';
     case RateLimited = 'rate_limited';
     case BlockedByDemoMode = 'blocked_by_demo_mode';
+    case SuppressedByBounced = 'suppressed_by_bounced';
 
     // External
     case Bounce = 'bounce';
@@ -60,6 +61,9 @@ enum EmailMessageEventType: string implements HasLabel
 
     public function getLabel(): string
     {
-        return str($this->name)->headline();
+        return match ($this) {
+            self::SuppressedByBounced => 'Suppressed because bounced',
+            default => str($this->name)->headline(),
+        };
     }
 }

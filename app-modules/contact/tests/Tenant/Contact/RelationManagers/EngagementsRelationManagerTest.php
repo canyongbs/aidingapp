@@ -34,42 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Providers;
-
-use AidingApp\Contact\ContactPlugin;
-use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
-use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
+use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\ContactType;
-use AidingApp\Contact\Models\Organization;
-use AidingApp\Contact\Models\OrganizationIndustry;
-use AidingApp\Contact\Models\OrganizationType;
-use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
-use Filament\Actions\Imports\Events\ImportCompleted;
-use Filament\Panel;
-use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\ServiceProvider;
+use Filament\Actions\Testing\TestAction;
 
-class ContactServiceProvider extends ServiceProvider
-{
-    public function register(): void
-    {
-        Panel::configureUsing(fn (Panel $panel) => ($panel->getId() !== 'admin') || $panel->plugin(new ContactPlugin()));
-    }
+use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
-    public function boot(): void
-    {
-        Relation::morphMap([
-            'contact' => Contact::class,
-            'contact_type' => ContactType::class,
-            'organization' => Organization::class,
-            'organization_industry' => OrganizationIndustry::class,
-            'organization_type' => OrganizationType::class,
-        ]);
+it('disables the `engage` header action with the bounced tooltip for a bounced owner contact', function () {
+    asSuperAdmin();
 
-        Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+    $contact = Contact::factory()->bounced()->create();
 
-        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
-    }
-}
+    $component = livewire(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionDisabled(TestAction::make('engage')->table());
+
+    $action = $component->instance()->getTable()->getAction('engage');
+
+    expect($action)->not->toBeNull()
+        ->and($action->getTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
+});
+
+it('enables the `engage` header action with no tooltip for a healthy owner contact', function () {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create(['email_bounce' => false]);
+
+    $component = livewire(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionEnabled(TestAction::make('engage')->table());
+
+    $action = $component->instance()->getTable()->getAction('engage');
+
+    expect($action)->not->toBeNull()
+        ->and($action->getTooltip())->toBeNull();
+});

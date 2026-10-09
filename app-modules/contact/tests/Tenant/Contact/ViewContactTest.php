@@ -46,6 +46,8 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use App\Enums\PresenceStatus;
 use App\Models\User;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Callout;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -127,6 +129,53 @@ test('ViewContact is gated with proper access control', function () {
                 'record' => $contact,
             ])
         )->assertSuccessful();
+});
+
+describe('email health', function () {
+    it('shows the email health callout and the bounced hint icon for a bounced contact', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->bounced()->create();
+
+        $component = livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentVisible('email-health-callout');
+
+        $callout = $component->instance()
+            ->getSchema('form')
+            ->getComponent('email-health-callout');
+
+        expect($callout)->toBeInstanceOf(Callout::class)
+            ->and($callout->getDescription())->toBe('The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.');
+
+        $emailField = $component->instance()
+            ->getSchema('form')
+            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+
+        expect($emailField)->not->toBeNull()
+            ->and($emailField->getHintIcon())->toBe('heroicon-m-exclamation-triangle')
+            ->and($emailField->getHintColor())->toBe('warning')
+            ->and($emailField->getHintIconTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
+    });
+
+    it('hides the email health callout and shows the healthy hint icon for a healthy contact', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create(['email_bounce' => false]);
+
+        $component = livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentHidden('email-health-callout');
+
+        $emailField = $component->instance()
+            ->getSchema('form')
+            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+
+        expect($emailField)->not->toBeNull()
+            ->and($emailField->getHintIcon())->toBe('heroicon-m-check-circle')
+            ->and($emailField->getHintColor())->toBe('success')
+            ->and($emailField->getHintIconTooltip())->toBe('Healthy. No delivery issues detected.');
+    });
 });
 
 describe('tabs', function () {
