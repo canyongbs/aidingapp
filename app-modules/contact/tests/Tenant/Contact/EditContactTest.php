@@ -41,7 +41,6 @@ use Filament\Actions\Testing\TestAction;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
-use function Tests\asSuperAdmin;
 
 test('the contact section edit actions are gated with proper access control', function () {
     $user = User::factory()->create();
