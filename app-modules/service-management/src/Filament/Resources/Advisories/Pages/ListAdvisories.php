@@ -60,7 +60,7 @@ class ListAdvisories extends ListRecords
                 TextColumn::make('severity.name')
                     ->label('Severity')
                     ->badge()
-                    ->color(fn (Advisory $record) => $record->severity->color->value),
+                    ->color(fn (Advisory $record): string => $record->severity->color->value),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
