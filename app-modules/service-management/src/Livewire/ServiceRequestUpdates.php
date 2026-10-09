@@ -78,6 +78,9 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
     #[Locked]
     public ServiceRequest $serviceRequest;
 
+    #[Locked]
+    public int $visibleUpdatesLimit = 50;
+
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
@@ -103,7 +106,8 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
                 Grid::make(['default' => 1, 'md' => 2])
                     ->schema([
                         ServiceRequestUpdateVisibilityToggleButtons::make(),
-                        ServiceRequestStatusSelect::make(selectedId: $this->serviceRequest->status_id),
+                        ServiceRequestStatusSelect::make(selectedId: $this->serviceRequest->status_id)
+                            ->visible(fn (): bool => $this->canUpdateServiceRequest()),
                     ]),
                 ServiceRequestUpdateUploadsFileUpload::make(),
             ])
@@ -126,7 +130,7 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
             $this->form->model($serviceRequestUpdate)->saveRelationships();
 
-            if (filled($data['status_id'] ?? null)) {
+            if (filled($data['status_id'] ?? null) && $this->canUpdateServiceRequest()) {
                 $this->serviceRequest->update(['status_id' => $data['status_id']]);
             }
         });
@@ -158,9 +162,16 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
             ->color('gray');
     }
 
+    public function loadEarlierUpdates(): void
+    {
+        $this->visibleUpdatesLimit += 50;
+    }
+
     public function render(): View
     {
         $timezone = app(DisplaySettings::class)->getTimezone();
+
+        $updatesCount = $this->serviceRequest->serviceRequestUpdates()->count();
 
         $updates = $this->serviceRequest
             ->serviceRequestUpdates()
@@ -172,18 +183,21 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
                 },
                 'media',
             ])
-            ->orderBy('created_at')
-            ->orderBy('id')
-            ->get();
+            ->latest()
+            ->orderByDesc('id')
+            ->limit($this->visibleUpdatesLimit)
+            ->get()
+            ->reverse();
 
         return view('service-management::livewire.service-request-updates', [
             'aiAvatarUrl' => $updates->contains(fn (ServiceRequestUpdate $update): bool => $update->createdBy instanceof ServiceRequest)
                 ? $this->getAiAvatarUrl()
                 : null,
             'canCreateUpdates' => $this->canCreateUpdates(),
+            'hasEarlierUpdates' => $updatesCount > $updates->count(),
             'isClosed' => $this->isServiceRequestClosed(),
             'timezone' => $timezone,
-            'updatesCount' => $updates->count(),
+            'updatesCount' => $updatesCount,
             'updatesByDate' => $updates->groupBy(
                 fn (ServiceRequestUpdate $update): string => $update->created_at->copy()->setTimezone($timezone)->toDateString(),
             ),
@@ -207,6 +221,11 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
     protected function canCreateUpdates(): bool
     {
         return (! $this->isServiceRequestClosed()) && Gate::allows('create', ServiceRequestUpdate::class);
+    }
+
+    protected function canUpdateServiceRequest(): bool
+    {
+        return Gate::allows('update', $this->serviceRequest);
     }
 
     protected function isServiceRequestClosed(): bool

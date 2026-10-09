@@ -52,6 +52,14 @@
             </x-filament::badge>
         </x-slot>
 
+        @if ($hasEarlierUpdates)
+            <div class="mb-6 flex justify-center">
+                <x-filament::button wire:click="loadEarlierUpdates" color="gray" size="sm" icon="heroicon-m-arrow-up">
+                    Show earlier updates
+                </x-filament::button>
+            </div>
+        @endif
+
         @forelse ($updatesByDate as $date => $updates)
             <div @class(['mt-8' => ! $loop->first])>
                 <div class="flex items-center gap-x-3">
