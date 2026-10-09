@@ -50,9 +50,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignmentHistoryRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestConversationsRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
+use AidingApp\ServiceManagement\Livewire\ServiceRequestUpdates;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
@@ -514,7 +514,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(CreatedByRelationManager::class);
     });
 
-    it('renders the relation manager for the updates tab', function () {
+    it('renders the updates feed for the updates tab', function () {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -522,7 +522,7 @@ describe('tabs', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Updates->value)
             ->assertSuccessful()
-            ->assertSeeLivewire(ServiceRequestUpdatesRelationManager::class);
+            ->assertSeeLivewire(ServiceRequestUpdates::class);
     });
 
     it('renders the relation manager for the chats tab', function () {
@@ -794,7 +794,7 @@ describe('tabs', function () {
         livewire(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->assertSuccessful()
             ->assertDontSeeLivewire(ServiceRequestMediaTable::class)
-            ->assertDontSeeLivewire(ServiceRequestUpdatesRelationManager::class)
+            ->assertDontSeeLivewire(ServiceRequestUpdates::class)
             ->assertDontSeeLivewire(ServiceRequestConversationsRelationManager::class)
             ->assertDontSeeLivewire(TimelineList::class);
     });
