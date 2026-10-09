@@ -180,12 +180,117 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
                 ->merge($passwordManagementKnowledgeBaseItems)
                 ->merge($networkTroubleshootingKnowledgeBaseItems)
         )
-        ->filterTable('category', [$passwordManagement, $softwareCategory])
+        ->filterTable('category', ['categories' => [$passwordManagement->getKey(), $softwareCategory->getKey()]])
         ->assertCanSeeTableRecords(
             $passwordManagementKnowledgeBaseItems
                 ->merge($softwareCategoryKnowledgeBaseItems)
         )
         ->assertCanNotSeeTableRecords($networkTroubleshootingKnowledgeBaseItems);
+});
+
+test('Filter ListKnowledgeBaseItems with `category` filter only matches the selected category, not its subcategories', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->knowledgeManagement = true;
+
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    $user->givePermissionTo('knowledge_base_item.view-any');
+
+    actingAs($user);
+
+    $parentCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Hardware',
+    ])->create();
+
+    $childCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Printers',
+        'parent_id' => $parentCategory->getKey(),
+    ])->create();
+
+    $parentCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(2)->for($parentCategory, 'category')->create();
+
+    $childCategoryKnowledgeBaseItems = KnowledgeBaseItem::factory()->count(2)->for($childCategory, 'category')->create();
+
+    $user->refresh();
+
+    livewire(ListKnowledgeBaseItems::class)
+        ->assertCanSeeTableRecords($parentCategoryKnowledgeBaseItems->merge($childCategoryKnowledgeBaseItems))
+        ->filterTable('category', ['categories' => [$parentCategory->getKey()]])
+        ->assertCanSeeTableRecords($parentCategoryKnowledgeBaseItems)
+        ->assertCanNotSeeTableRecords($childCategoryKnowledgeBaseItems);
+});
+
+it('nests child categories beneath their parent in sort order in the category filter tree', function () {
+    $parentCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Hardware',
+    ])->create();
+
+    // `sort` and alphabetical name order disagree here: ordering by name would put
+    // Printers before Scanners, so asserting Scanners first proves the tree uses `sort`.
+    $firstChild = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Scanners',
+        'parent_id' => $parentCategory->getKey(),
+        'sort' => 1,
+    ])->create();
+
+    $secondChild = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Printers',
+        'parent_id' => $parentCategory->getKey(),
+        'sort' => 2,
+    ])->create();
+
+    $tree = ListKnowledgeBaseItems::buildCategoryTreeOptions();
+
+    expect($tree)
+        ->toHaveCount(1)
+        ->and($tree[0]['value'])->toBe($parentCategory->getKey())
+        ->and($tree[0]['name'])->toBe('Hardware')
+        ->and($tree[0]['children'])->toHaveCount(2)
+        ->and($tree[0]['children'][0]['value'])->toBe($firstChild->getKey())
+        ->and($tree[0]['children'][0]['name'])->toBe('Scanners')
+        ->and($tree[0]['children'][0]['children'])->toBe([])
+        ->and($tree[0]['children'][1]['value'])->toBe($secondChild->getKey())
+        ->and($tree[0]['children'][1]['name'])->toBe('Printers')
+        ->and($tree[0]['children'][1]['children'])->toBe([]);
+});
+
+it('promotes categories whose parent is soft-deleted to the root of the category filter tree', function () {
+    // An existing active root category. Its integer key can collide with the orphan
+    // group's key under PHP array union, which is how the package's query() path
+    // silently drops a promoted orphan. Asserting both appear guards against that
+    // and against anyone switching back to the package's query() method.
+    $activeRootCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Software',
+        'sort' => 1,
+    ])->create();
+
+    $parentCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Hardware',
+    ])->create();
+
+    $childCategory = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Printers',
+        'parent_id' => $parentCategory->getKey(),
+        'sort' => 2,
+    ])->create();
+
+    // Soft-deleting the parent leaves the still-active child pointing at a parent
+    // that is excluded from the default query, which previously stranded it.
+    $parentCategory->delete();
+
+    $tree = ListKnowledgeBaseItems::buildCategoryTreeOptions();
+
+    expect($tree)
+        ->toHaveCount(2)
+        ->and($tree[0]['value'])->toBe($activeRootCategory->getKey())
+        ->and($tree[0]['name'])->toBe('Software')
+        ->and($tree[0]['children'])->toBe([])
+        ->and($tree[1]['value'])->toBe($childCategory->getKey())
+        ->and($tree[1]['name'])->toBe('Printers')
+        ->and($tree[1]['children'])->toBe([]);
 });
 
 test('Filter ListKnowledgeBaseItems with `public` filter', function () {
