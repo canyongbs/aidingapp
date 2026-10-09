@@ -37,6 +37,7 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySe
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ListAdvisorySeverities;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
@@ -163,4 +164,42 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     livewire(ListAdvisorySeverities::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+describe('ranking', function () {
+    beforeEach(function () {
+        actingAs(User::factory()->create()->givePermissionTo('settings.view-any', 'settings.*.update'));
+    });
+
+    it('lists severities in rank order', function () {
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+
+        livewire(ListAdvisorySeverities::class)
+            ->assertCanSeeTableRecords([$critical, $minor], inOrder: true);
+    });
+
+    it('can rank severities by reordering them', function () {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        livewire(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(1)
+            ->and($critical->refresh()->sort)->toBe(2);
+    });
+
+    it('does not reorder severities when `AdvisorySeveritySortFeature` is inactive', function () {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        AdvisorySeveritySortFeature::deactivate();
+
+        livewire(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(2)
+            ->and($critical->refresh()->sort)->toBe(1);
+    });
 });

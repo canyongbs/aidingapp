@@ -34,66 +34,44 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
-
-/**
- * @mixin IdeHelperAdvisorySeverity
- */
-#[ObservedBy([AdvisorySeverityObserver::class])]
-class AdvisorySeverity extends BaseModel implements Auditable
-{
-    use AuditableTrait;
-    use SoftDeletes;
-
-    /** @use HasFactory<AdvisorySeverityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'color',
-        'sort',
-    ];
-
-    protected $table = 'advisory_severities';
-
-    /**
-     * @return HasMany<Advisory, $this>
-     */
-    public function advisories(): HasMany
+return new class () extends Migration {
+    public function up(): void
     {
-        return $this->hasMany(Advisory::class, 'severity_id');
+        DB::transaction(function () {
+            Schema::table('advisory_severities', function (Blueprint $table) {
+                $table->integer('sort')->default(0);
+                $table->index('sort');
+            });
+
+            DB::statement(<<<'SQL'
+                UPDATE advisory_severities
+                SET sort = ranked.position
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS position
+                    FROM advisory_severities
+                ) AS ranked
+                WHERE advisory_severities.id = ranked.id
+            SQL);
+
+            AdvisorySeveritySortFeature::activate();
+        });
     }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
+    public function down(): void
     {
-        return [
-            'color' => Color::class,
-            'sort' => 'integer',
-        ];
-    }
+        DB::transaction(function () {
+            AdvisorySeveritySortFeature::deactivate();
 
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function rgbColor(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->color->getRgb(),
-        );
+            Schema::table('advisory_severities', function (Blueprint $table) {
+                $table->dropIndex(['sort']);
+                $table->dropColumn('sort');
+            });
+        });
     }
-}
+};

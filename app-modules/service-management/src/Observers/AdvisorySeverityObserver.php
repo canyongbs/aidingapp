@@ -34,66 +34,28 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\ServiceManagement\Observers;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Support\Facades\DB;
 
-/**
- * @mixin IdeHelperAdvisorySeverity
- */
-#[ObservedBy([AdvisorySeverityObserver::class])]
-class AdvisorySeverity extends BaseModel implements Auditable
+class AdvisorySeverityObserver
 {
-    use AuditableTrait;
-    use SoftDeletes;
-
-    /** @use HasFactory<AdvisorySeverityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'color',
-        'sort',
-    ];
-
-    protected $table = 'advisory_severities';
-
     /**
-     * @return HasMany<Advisory, $this>
+     * New severities are ranked last (lowest), so admins only reorder when they want a higher rank.
      */
-    public function advisories(): HasMany
+    public function creating(AdvisorySeverity $advisorySeverity): void
     {
-        return $this->hasMany(Advisory::class, 'severity_id');
-    }
+        if (! AdvisorySeveritySortFeature::active()) {
+            return;
+        }
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'color' => Color::class,
-            'sort' => 'integer',
-        ];
-    }
-
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function rgbColor(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->color->getRgb(),
-        );
+        if (! isset($advisorySeverity->sort)) {
+            $advisorySeverity->setAttribute(
+                'sort',
+                DB::raw('(SELECT COALESCE(MAX(advisory_severities.sort), 0) + 1 FROM advisory_severities)')
+            );
+        }
     }
 }

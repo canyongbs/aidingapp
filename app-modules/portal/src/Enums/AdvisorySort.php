@@ -34,66 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\ServiceManagement\Models;
+namespace AidingApp\Portal\Enums;
 
-use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
-use AidingApp\ServiceManagement\Database\Factories\AdvisorySeverityFactory;
-use AidingApp\ServiceManagement\Observers\AdvisorySeverityObserver;
-use App\Models\BaseModel;
-use CanyonGBS\Common\Enums\Color;
-use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Casts\Attribute;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use OwenIt\Auditing\Contracts\Auditable;
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
- * @mixin IdeHelperAdvisorySeverity
+ * The orders the portal's advisory list can be sorted in. Severities are ranked by their admin-defined `sort`,
+ * where the first (lowest `sort`) is the highest severity. Ties fall back to the most recently updated advisory.
  */
-#[ObservedBy([AdvisorySeverityObserver::class])]
-class AdvisorySeverity extends BaseModel implements Auditable
+enum AdvisorySort: string
 {
-    use AuditableTrait;
-    use SoftDeletes;
+    case HighestSeverity = 'highest_severity';
 
-    /** @use HasFactory<AdvisorySeverityFactory> */
-    use HasFactory;
-
-    protected $fillable = [
-        'name',
-        'color',
-        'sort',
-    ];
-
-    protected $table = 'advisory_severities';
+    case LowestSeverity = 'lowest_severity';
 
     /**
-     * @return HasMany<Advisory, $this>
+     * @param Builder<Advisory> $query
      */
-    public function advisories(): HasMany
+    public function apply(Builder $query): void
     {
-        return $this->hasMany(Advisory::class, 'severity_id');
-    }
+        if (AdvisorySeveritySortFeature::active()) {
+            $direction = $this === self::HighestSeverity ? 'asc' : 'desc';
 
-    /**
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'color' => Color::class,
-            'sort' => 'integer',
-        ];
-    }
+            $query->orderByRaw("(select advisory_severities.sort from advisory_severities where advisory_severities.id = advisories.severity_id and advisory_severities.deleted_at is null) {$direction} nulls last");
+        }
 
-    /**
-     * @return Attribute<string|null, never>
-     */
-    protected function rgbColor(): Attribute
-    {
-        return new Attribute(
-            get: fn () => $this->color->getRgb(),
-        );
+        $query
+            ->orderByRaw(WithLastUpdatedAt::expression() . ' desc')
+            ->orderBy('advisories.id');
     }
 }
