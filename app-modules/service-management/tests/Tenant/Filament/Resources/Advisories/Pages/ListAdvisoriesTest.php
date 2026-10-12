@@ -187,7 +187,7 @@ it('renders the severity column as a badge using the severity color', function (
     actingAs($user);
 
     $advisory = Advisory::factory()
-        ->for(AdvisorySeverity::factory()->state(['color' => Color::Red]), 'severity')
+        ->for(AdvisorySeverity::factory()->color(Color::Red), 'severity')
         ->create();
 
     $column = Livewire::test(ListAdvisories::class)

@@ -38,17 +38,12 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisorySeverity;
-use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TableSelect;
-use Filament\Forms\Components\Textarea;
-use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\ToggleButtons;
-use Filament\Infolists\Components\ColorEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -80,20 +75,7 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit properties')
                             ->slideOver()
-                            ->schema([
-                                TextInput::make('title')
-                                    ->label('Title')
-                                    ->required()
-                                    ->maxLength(255)
-                                    ->string()
-                                    ->columnSpanFull(),
-                                Textarea::make('description')
-                                    ->label('Description')
-                                    ->required()
-                                    ->maxLength(65535)
-                                    ->string()
-                                    ->columnSpanFull(),
-                            ]),
+                            ->schema(AdvisoryForm::propertiesComponents()),
                     ])
                     ->schema([
                         TextEntry::make('title')
@@ -110,28 +92,14 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit tracking details')
                             ->slideOver()
-                            ->schema([
-                                ToggleButtons::make('severity_id')
-                                    ->label('Severity')
-                                    ->inline()
-                                    ->options(fn (): array => AdvisorySeverity::query()->orderBy('name')->pluck('name', 'id')->all())
-                                    ->exists((new AdvisorySeverity())->getTable(), 'id')
-                                    ->required()
-                                    ->columnSpanFull(),
-                                ToggleButtons::make('status_id')
-                                    ->label('Status')
-                                    ->inline()
-                                    ->options(fn (): array => AdvisoryStatus::query()->orderBy('name')->pluck('name', 'id')->all())
-                                    ->exists((new AdvisoryStatus())->getTable(), 'id')
-                                    ->required()
-                                    ->columnSpanFull(),
-                            ])
+                            ->schema(AdvisoryForm::trackingComponents())
                             ->after(fn (Advisory $record) => $record->refresh()),
                     ])
                     ->schema([
-                        ColorEntry::make('severity.rgb_color')
+                        TextEntry::make('severity.name')
                             ->label('Severity')
-                            ->tooltip(fn (Advisory $record) => $record->severity->name)
+                            ->badge()
+                            ->color(fn (Advisory $record): string => $record->severity->color->value)
                             ->columnSpan(1),
                         TextEntry::make('status.name')
                             ->label('Status')

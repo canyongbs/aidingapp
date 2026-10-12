@@ -42,7 +42,9 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Models\User;
+use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\Testing\TestAction;
+use Filament\Infolists\Components\TextEntry;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -82,6 +84,27 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
                 $advisory->assignedDepartment->name,
             ]
         );
+});
+
+test('the Severity entry renders as a badge using the severity color', function () {
+    asSuperAdmin();
+
+    $advisory = Advisory::factory()
+        ->for(AdvisorySeverity::factory()->color(Color::Red), 'severity')
+        ->create();
+
+    $entry = livewire(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->instance()
+        ->getSchema('infolist')
+        ->getComponent(fn ($component): bool => $component instanceof TextEntry && $component->getName() === 'severity.name');
+
+    expect($entry)
+        ->not->toBeNull()
+        ->and($entry->isBadge())->toBeTrue()
+        ->and($entry->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
 
 test('the Tracking Details status refreshes when an advisory update changes the status', function () {

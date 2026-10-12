@@ -34,58 +34,80 @@
 </COPYRIGHT>
 */
 
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\CreateAdvisory;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
 use App\Models\User;
-use Livewire\Livewire;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('CreateAdvisory is gated with proper access control', function () {
+test('advisories can be created from the list page create modal with proper access control', function () {
     $user = User::factory()->create();
 
-    actingAs($user)
-        ->get(
-            AdvisoryResource::getUrl('create')
-        )->assertForbidden();
-
-    Livewire::test(CreateAdvisory::class)
-        ->assertForbidden();
+    actingAs($user);
 
     $user->givePermissionTo('advisory.view-any');
-    $user->givePermissionTo('advisory.create');
 
-    actingAs($user)
-        ->get(
-            AdvisoryResource::getUrl('create')
-        )->assertSuccessful();
+    livewire(ListAdvisories::class)
+        ->assertSuccessful()
+        ->assertActionDisabled('create');
+
+    $user->givePermissionTo('advisory.create');
 
     $request = AdvisoryRequestFactory::new()->create();
 
-    Livewire::test(CreateAdvisory::class)
-        ->fillForm($request)
-        ->call('create')
-        ->assertHasNoFormErrors();
+    livewire(ListAdvisories::class)
+        ->assertActionEnabled('create')
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors();
 
     assertCount(1, Advisory::all());
 
     assertDatabaseHas(Advisory::class, $request);
 });
 
-test('CreateAdvisory validates the inputs', function ($data, $errors) {
+test('creating an advisory from the list page modal is gated by the advisory management feature', function () {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->advisoryManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.create');
+
+    livewire(ListAdvisories::class)
+        ->assertForbidden();
+
+    $settings->data->addons->advisoryManagement = true;
+    $settings->save();
+
+    $request = AdvisoryRequestFactory::new()->create();
+
+    livewire(ListAdvisories::class)
+        ->assertSuccessful()
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors();
+
+    assertDatabaseHas(Advisory::class, $request);
+});
+
+test('the create advisory modal validates the inputs', function ($data, $errors) {
     asSuperAdmin();
 
     $request = AdvisoryRequestFactory::new($data)->create();
 
-    Livewire::test(CreateAdvisory::class)
-        ->fillForm($request)
-        ->call('create')
-        ->assertHasFormErrors($errors);
+    livewire(ListAdvisories::class)
+        ->callAction('create', $request)
+        ->assertHasActionErrors($errors);
 })->with(
     [
         'title required' => [
