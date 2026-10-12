@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Actions;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
+use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactEmailHealthCallout;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
@@ -68,6 +69,7 @@ class ViewContactAction
             ->modalSubmitAction(false)
             ->modalCancelActionLabel('Close')
             ->schema(fn (): array => [
+                ContactEmailHealthCallout::make($contact),
                 Actions::make([
                     Action::make('goToContact')
                         ->label('Go to Contact')

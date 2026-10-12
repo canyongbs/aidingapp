@@ -36,6 +36,8 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
+use AidingApp\Contact\Enums\EmailHealthStatus;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\SendEngagementAction;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementResponse;
@@ -203,7 +205,11 @@ class EngagementsRelationManager extends RelationManager
                         $recipients = collect([$livewire->getOwnerRecord()]);
 
                         return $recipients;
-                    }),
+                    })
+                    ->disabled(fn (SendEngagementAction $action): bool => ! self::resolveOwnerContact($action)->canReceiveEmail())
+                    ->tooltip(fn (SendEngagementAction $action): ?string => self::resolveOwnerContact($action)->canReceiveEmail()
+                        ? null
+                        : EmailHealthStatus::Bounced->getTooltipText()),
             ])
             ->recordActions([
                 ViewAction::make()
@@ -234,5 +240,18 @@ class EngagementsRelationManager extends RelationManager
     {
         return auth()->user()->can('viewAny', Engagement::class)
             || auth()->user()->can('viewAny', EngagementResponse::class);
+    }
+
+    protected static function resolveOwnerContact(SendEngagementAction $action): Contact
+    {
+        $livewire = $action->getLivewire();
+
+        assert($livewire instanceof RelationManager);
+
+        $owner = $livewire->getOwnerRecord();
+
+        assert($owner instanceof Contact);
+
+        return $owner;
     }
 }

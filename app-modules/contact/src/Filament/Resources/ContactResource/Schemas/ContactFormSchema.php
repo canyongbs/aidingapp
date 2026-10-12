@@ -144,7 +144,12 @@ class ContactFormSchema
                     ->label('Email')
                     ->email()
                     ->maxLength(255)
-                    ->unique(ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ->unique(ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
+                    ->hintIcon(
+                        fn (?Contact $record) => $record?->getEmailHealthStatus()->getIcon(),
+                        tooltip: fn (?Contact $record) => $record?->getEmailHealthStatus()->getTooltipText(),
+                    )
+                    ->hintColor(fn (?Contact $record) => $record?->getEmailHealthStatus()->getColor()),
                 PhoneInput::make('mobile')
                     ->label('Mobile')
                     ->string(),

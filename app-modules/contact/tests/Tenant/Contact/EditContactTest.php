@@ -38,14 +38,55 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use App\Models\User;
+use Filament\Forms\Components\TextInput;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
+use function Tests\asSuperAdmin;
 
 // TODO: Write EditContact page tests
 //test('A successful action on the EditContact page', function () {});
 //
 //test('EditContact requires valid data', function ($data, $errors) {})->with([]);
+
+describe('email health', function () {
+    it('shows the bounced hint icon for a bounced contact and does not render the email health callout', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->bounced()->create();
+
+        $component = livewire(EditContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSuccessful()
+            ->assertSchemaComponentDoesNotExist('email-health-callout');
+
+        $emailField = $component->instance()
+            ->getSchema('form')
+            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+
+        expect($emailField)->not->toBeNull()
+            ->and($emailField->getHintIcon())->toBe('heroicon-m-exclamation-triangle')
+            ->and($emailField->getHintColor())->toBe('warning')
+            ->and($emailField->getHintIconTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
+    });
+
+    it('shows the healthy hint icon for a healthy contact', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create(['email_bounce' => false]);
+
+        $component = livewire(EditContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSuccessful();
+
+        $emailField = $component->instance()
+            ->getSchema('form')
+            ->getComponent(fn ($component): bool => $component instanceof TextInput && $component->getName() === 'email');
+
+        expect($emailField)->not->toBeNull()
+            ->and($emailField->getHintIcon())->toBe('heroicon-m-check-circle')
+            ->and($emailField->getHintColor())->toBe('success')
+            ->and($emailField->getHintIconTooltip())->toBe('Healthy. No delivery issues detected.');
+    });
+});
 
 // Permission Tests
 
