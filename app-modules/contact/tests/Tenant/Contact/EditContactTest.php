@@ -35,6 +35,7 @@
 */
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
@@ -100,7 +101,166 @@ test('the contact sections can be updated', function () {
         ->last_name->toEqual($request->get('last_name'))
         ->full_name->toEqual("{$request->get('first_name')} {$request->get('last_name')}")
         ->preferred->toEqual($request->get('preferred'))
-        ->email->toEqual($request->get('email'));
+        ->email->toEqual($request->get('email'))
+        ->mobile->toEqual($request->get('mobile'))
+        ->phone->toEqual($request->get('phone'));
+});
+
+test('the employment information section can be updated', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contact.*.update');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create([
+        'job_title' => 'Old Title',
+        'employee_id' => 'OLD-EMP',
+        'work_number' => null,
+        'work_extension' => 'OLD-EXT',
+    ]);
+
+    $request = collect(EditContactRequestFactory::new()->create());
+
+    livewire(ViewContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editEmploymentInformation')->schemaComponent('employmentInformation'), data: [
+            'job_title' => $request->get('job_title'),
+            'employee_id' => $request->get('employee_id'),
+            'work_number' => $request->get('work_number'),
+            'work_extension' => $request->get('work_extension'),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh())
+        ->job_title->toEqual($request->get('job_title'))
+        ->employee_id->toEqual($request->get('employee_id'))
+        ->work_number->toEqual($request->get('work_number'))
+        ->work_extension->toEqual($request->get('work_extension'));
+});
+
+test('the academic information section can be updated', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contact.*.update');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create([
+        'student_id' => 'OLD-STU',
+        'school' => 'Old School',
+        'academic_department' => 'Old Department',
+        'program' => 'Old Program',
+    ]);
+
+    $request = collect(EditContactRequestFactory::new()->create());
+
+    livewire(ViewContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editAcademicInformation')->schemaComponent('academicInformation'), data: [
+            'student_id' => $request->get('student_id'),
+            'school' => $request->get('school'),
+            'academic_department' => $request->get('academic_department'),
+            'program' => $request->get('program'),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh())
+        ->student_id->toEqual($request->get('student_id'))
+        ->school->toEqual($request->get('school'))
+        ->academic_department->toEqual($request->get('academic_department'))
+        ->program->toEqual($request->get('program'));
+});
+
+test('the address information section can be updated', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contact.*.update');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create([
+        'address' => 'Old Address',
+        'address_2' => 'Old Address 2',
+        'city' => 'Old City',
+        'state' => 'Old State',
+        'postal' => 'Old Postal',
+        'country' => 'Old Country',
+    ]);
+
+    $request = collect(EditContactRequestFactory::new()->create());
+
+    livewire(ViewContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editAddressInformation')->schemaComponent('addressInformation'), data: [
+            'address' => $request->get('address'),
+            'address_2' => $request->get('address_2'),
+            'city' => $request->get('city'),
+            'state' => $request->get('state'),
+            'postal' => $request->get('postal'),
+            'country' => $request->get('country'),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh())
+        ->address->toEqual($request->get('address'))
+        ->address_2->toEqual($request->get('address_2'))
+        ->city->toEqual($request->get('city'))
+        ->state->toEqual($request->get('state'))
+        ->postal->toEqual($request->get('postal'))
+        ->country->toEqual($request->get('country'));
+});
+
+test('the customer information section can be updated', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contact.*.update');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create(['organization_id' => null]);
+
+    $organization = Organization::factory()->create();
+
+    livewire(ViewContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
+            'organization_id' => $organization->getKey(),
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh())
+        ->organization_id->toEqual($organization->getKey());
+});
+
+test('the engagement restrictions section can be updated', function () {
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.*.view');
+    $user->givePermissionTo('contact.*.update');
+
+    actingAs($user);
+
+    $contact = Contact::factory()->create(['email_bounce' => false]);
+
+    livewire(ViewContact::class, [
+        'record' => $contact->getRouteKey(),
+    ])
+        ->callAction(TestAction::make('editEngagementRestrictions')->schemaComponent('engagementRestrictions'), data: [
+            'email_bounce' => true,
+        ])
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh())
+        ->email_bounce->toBeTrue();
 });
 
 test('EditContact keeps its own email but rejects another contact\'s email case-insensitively', function () {
