@@ -39,11 +39,9 @@ namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
-use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\TableSelect;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
@@ -113,13 +111,7 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit assignment')
                             ->slideOver()
-                            ->schema([
-                                TableSelect::make('assigned_department_id')
-                                    ->label('Department')
-                                    ->relationship('assignedDepartment')
-                                    ->tableConfiguration(DepartmentsTable::class)
-                                    ->columnSpanFull(),
-                            ]),
+                            ->schema(AdvisoryForm::assignmentComponents()),
                     ])
                     ->schema([
                         TextEntry::make('assignedDepartment.name')

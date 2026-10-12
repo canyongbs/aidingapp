@@ -36,10 +36,11 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas;
 
+use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use Filament\Forms\Components\Field;
-use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
@@ -96,11 +97,10 @@ class AdvisoryForm
     public static function assignmentComponents(): array
     {
         return [
-            Select::make('assigned_department_id')
+            TableSelect::make('assigned_department_id')
                 ->label('Department')
-                ->relationship('assignedDepartment', 'name')
-                ->searchable()
-                ->preload()
+                ->relationship('assignedDepartment')
+                ->tableConfiguration(DepartmentsTable::class)
                 ->default(auth()->user()?->department?->getKey())
                 ->columnSpanFull(),
         ];
