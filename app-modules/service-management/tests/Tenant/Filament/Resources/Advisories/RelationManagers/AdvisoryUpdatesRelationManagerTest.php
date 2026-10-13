@@ -207,7 +207,13 @@ test('the create action opens in a slide over with the advisory status field lab
         'pageClass' => ViewAdvisory::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('status_id', fn (ToggleButtons $field): bool => $field->getLabel() === 'Advisory Status');
+        ->assertFormFieldExists('status_id', function (ToggleButtons $field): bool {
+            return $field->getLabel() === 'Advisory Status'
+                && str_contains(
+                    (string) $field->getChildSchema($field::ABOVE_CONTENT_SCHEMA_KEY)?->toHtmlString(),
+                    'You may change the overall status of the advisory by selecting a new status below.',
+                );
+        });
 
     expect($component->instance()->getTable()->getAction('create')->isModalSlideOver())->toBeTrue();
 });
@@ -228,9 +234,44 @@ test('the view or edit action opens in a slide over with the advisory status fie
         'pageClass' => ViewAdvisory::class,
     ])
         ->mountAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
-        ->assertFormFieldExists('status_id', fn (ToggleButtons $field): bool => $field->getLabel() === 'Advisory Status');
+        ->assertFormFieldExists('status_id', function (ToggleButtons $field): bool {
+            return $field->getLabel() === 'Advisory Status'
+                && str_contains(
+                    (string) $field->getChildSchema($field::ABOVE_CONTENT_SCHEMA_KEY)?->toHtmlString(),
+                    'You may change the overall status of the advisory by selecting a new status below.',
+                );
+        });
 
     expect($component->instance()->getTable()->getAction('viewOrEditAdvisoryUpdate')->isModalSlideOver())->toBeTrue();
+});
+
+test('the view or edit action hides the status change guidance when the user cannot update the advisory update', function () {
+    // Resolved advisories cannot be edited, per AdvisoryUpdatePolicy::update().
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Resolved,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('advisory.view-any', 'advisory.*.view', 'advisory_update.view-any', 'advisory_update.*.view', 'advisory_update.*.update');
+
+    actingAs($user);
+
+    livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->mountAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertFormFieldExists('status_id', function (ToggleButtons $field): bool {
+            return ! str_contains(
+                (string) $field->getChildSchema($field::ABOVE_CONTENT_SCHEMA_KEY)?->toHtmlString(),
+                'You may change the overall status of the advisory by selecting a new status below.',
+            );
+        });
 });
 
 test('the create form date field defaults to now', function () {

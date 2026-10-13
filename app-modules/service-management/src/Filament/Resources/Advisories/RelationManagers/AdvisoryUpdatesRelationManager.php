@@ -136,7 +136,9 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->schema([
                         ToggleButtons::make('status_id')
                             ->label('Advisory Status')
-                            ->aboveContent('You may change the overall status of the advisory by selecting a new status below.')
+                            ->aboveContent(fn (AdvisoryUpdate $record): ?string => auth()->user()->can('update', $record)
+                                ? 'You may change the overall status of the advisory by selecting a new status below.'
+                                : null)
                             ->inline()
                             ->options(fn (AdvisoryUpdate $record): array => self::getStatusOptions($record->advisory))
                             ->exists((new AdvisoryStatus())->getTable(), 'id')
