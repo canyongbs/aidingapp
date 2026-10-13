@@ -38,7 +38,6 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\DataTransferObjects\AdvisoryDetailData;
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 
@@ -53,7 +52,6 @@ class ShowAdvisoryController extends Controller
                 'assignedDepartment',
                 'advisoryUpdates' => fn ($query) => $query->orderByDesc('date')->orderByDesc('created_at'),
             ])
-            ->tap(new WithLastUpdatedAt())
             ->findOrFail($advisory);
 
         return response()->json([

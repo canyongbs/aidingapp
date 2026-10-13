@@ -56,7 +56,7 @@ beforeEach(function () {
 });
 
 it('displays the advisory data', function () {
-    $createdAt = Carbon::parse('2026-10-08 07:30:00', 'UTC');
+    $date = Carbon::parse('2026-10-08 08:30:00', 'UTC');
 
     $severity = AdvisorySeverity::factory()->create(['name' => 'Major', 'color' => 'orange']);
     $status = AdvisoryStatus::factory()->open()->create(['name' => 'Mitigating']);
@@ -68,13 +68,12 @@ it('displays the advisory data', function () {
         ->create([
             'title' => 'Science Hall flooding',
             'description' => 'A burst pipe has flooded the ground floor.',
-            'created_at' => $createdAt,
         ]);
 
     $update = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create([
         'title' => 'Water removal underway',
         'update' => 'Crews are removing water.',
-        'date' => $createdAt->copy()->addHour(),
+        'date' => $date,
     ]);
 
     getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))
@@ -85,8 +84,6 @@ it('displays the advisory data', function () {
         ->assertJsonPath('data.severity', ['id' => $severity->getKey(), 'name' => 'Major', 'color' => 'orange'])
         ->assertJsonPath('data.status', ['id' => $status->getKey(), 'name' => 'Mitigating', 'classification' => 'open'])
         ->assertJsonPath('data.department_name', 'Facilities')
-        ->assertJsonPath('data.created_at', '2026-10-08T07:30:00+00:00')
-        ->assertJsonPath('data.last_updated_at', '2026-10-08T08:30:00+00:00')
         ->assertJsonPath('data.updates', [[
             'id' => $update->getKey(),
             'title' => 'Water removal underway',

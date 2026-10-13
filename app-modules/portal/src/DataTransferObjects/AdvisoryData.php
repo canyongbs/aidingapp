@@ -50,7 +50,6 @@ class AdvisoryData extends Data
         public string $description,
         public ?AdvisorySeverityData $severity,
         public ?AdvisoryStatusData $status,
-        public ?string $departmentName,
         public string $lastUpdatedAt,
     ) {}
 
@@ -65,7 +64,6 @@ class AdvisoryData extends Data
             description: $advisory->description,
             severity: $advisory->severity ? AdvisorySeverityData::fromModel($advisory->severity) : null,
             status: $advisory->status ? AdvisoryStatusData::fromModel($advisory->status) : null,
-            departmentName: $advisory->assignedDepartment?->name,
             lastUpdatedAt: $advisory->getLastUpdatedAt()->toIso8601String(),
         );
     }

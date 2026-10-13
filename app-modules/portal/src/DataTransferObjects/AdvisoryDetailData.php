@@ -27,7 +27,7 @@
       Software as a Service (SaaS) by Canyon GBS Inc.
     - Use of this software implies agreement to the license terms and conditions as stated
       in the Elastic License 2.0.
-
+      
     For more information or inquiries please visit our website at
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
@@ -55,13 +55,11 @@ class AdvisoryDetailData extends Data
         public ?AdvisorySeverityData $severity,
         public ?AdvisoryStatusData $status,
         public ?string $departmentName,
-        public ?string $createdAt,
-        public string $lastUpdatedAt,
         public array $updates,
     ) {}
 
     /**
-     * Expects the advisory to have been queried with the `WithLastUpdatedAt` scope and its updates loaded newest first.
+     * Expects the advisory's updates to have been loaded newest first.
      */
     public static function fromModel(Advisory $advisory): self
     {
@@ -72,8 +70,6 @@ class AdvisoryDetailData extends Data
             severity: $advisory->severity ? AdvisorySeverityData::fromModel($advisory->severity) : null,
             status: $advisory->status ? AdvisoryStatusData::fromModel($advisory->status) : null,
             departmentName: $advisory->assignedDepartment?->name,
-            createdAt: $advisory->created_at?->toIso8601String(),
-            lastUpdatedAt: $advisory->getLastUpdatedAt()->toIso8601String(),
             updates: $advisory->advisoryUpdates
                 ->map(fn (AdvisoryUpdate $advisoryUpdate): AdvisoryUpdateData => AdvisoryUpdateData::fromModel($advisoryUpdate))
                 ->values()
