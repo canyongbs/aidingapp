@@ -45,6 +45,7 @@ import { bootPortal } from './Composables/usePortalBoot.js';
 import config from './formkit.config.js';
 import {
     useAdvisoriesData,
+    useAdvisoryData,
     useArticleData,
     useAssetsData,
     useCategoriesData,
@@ -206,6 +207,15 @@ customElements.define(
                         meta: {
                             requiresAuth: true,
                             loaders: [useAdvisoriesData],
+                        },
+                    },
+                    {
+                        path: baseUrl + '/advisories/:advisoryId',
+                        name: 'view-advisory',
+                        component: () => import('./Pages/ViewAdvisory.vue'),
+                        meta: {
+                            requiresAuth: true,
+                            loaders: [useAdvisoryData],
                         },
                     },
                     {

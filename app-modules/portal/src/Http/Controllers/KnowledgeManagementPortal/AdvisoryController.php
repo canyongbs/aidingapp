@@ -72,7 +72,7 @@ class AdvisoryController extends Controller
         $sort = AdvisorySort::tryFrom($validated['sort'] ?? '') ?? AdvisorySort::HighestSeverity;
 
         $advisories = Advisory::query()
-            ->with(['severity', 'status', 'assignedDepartment'])
+            ->with(['severity', 'status'])
             ->tap(new WithLastUpdatedAt())
             ->whereHas('status', fn (Builder $query): Builder => $query->where('classification', $classification))
             ->when(filled($severityId), fn (Builder $query): Builder => $query->where('advisories.severity_id', $severityId))

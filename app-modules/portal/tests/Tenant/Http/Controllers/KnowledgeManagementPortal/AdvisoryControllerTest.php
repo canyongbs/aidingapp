@@ -78,12 +78,10 @@ it('can list the resolved advisories', function () {
 it('displays the advisory data', function () {
     $severity = AdvisorySeverity::factory()->create(['name' => 'Major', 'color' => 'orange']);
     $status = AdvisoryStatus::factory()->open()->create(['name' => 'Mitigating']);
-    $department = Department::factory()->create(['name' => 'Facilities']);
 
     $advisory = Advisory::factory()
         ->for($severity, 'severity')
         ->for($status, 'status')
-        ->for($department, 'assignedDepartment')
         ->create([
             'title' => 'Science Hall flooding',
             'description' => 'A burst pipe has flooded the ground floor.',
@@ -95,8 +93,7 @@ it('displays the advisory data', function () {
         ->assertJsonPath('data.0.title', 'Science Hall flooding')
         ->assertJsonPath('data.0.description', 'A burst pipe has flooded the ground floor.')
         ->assertJsonPath('data.0.severity', ['id' => $severity->getKey(), 'name' => 'Major', 'color' => 'orange'])
-        ->assertJsonPath('data.0.status', ['id' => $status->getKey(), 'name' => 'Mitigating', 'classification' => 'open'])
-        ->assertJsonPath('data.0.department_name', 'Facilities');
+        ->assertJsonPath('data.0.status', ['id' => $status->getKey(), 'name' => 'Mitigating', 'classification' => 'open']);
 });
 
 it('resolves the last updated date from the latest update', function () {
