@@ -587,4 +587,90 @@ describe('authorization', function () {
         'deleteType' => fn () => ['deleteType', [(string) Str::uuid()]],
         'archiveType' => fn () => ['archiveType', [(string) Str::uuid()]],
     ]);
+
+    it('does not create a type without the `settings.create` permission', function () {
+        actingAs(builderEditor());
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('createType', 'Unauthorized Type')
+            ->assertReturned(fn (array $result): bool => $result['saved'] === false)
+            ->assertNotified('Unable to save changes');
+
+        assertDatabaseMissing(ServiceRequestType::class, ['name' => 'Unauthorized Type']);
+    });
+
+    it('does not delete a type without the `settings.*.delete` permission', function () {
+        actingAs(builderEditor());
+
+        $type = ServiceRequestType::factory()->create();
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('deleteType', $type->getKey())
+            ->assertNotified('Unable to save changes');
+
+        assertNotSoftDeleted($type);
+    });
+
+    it('does not archive a type without the `settings.*.delete` permission', function () {
+        actingAs(builderEditor());
+
+        $type = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
+        ServiceRequest::factory()->create(['priority_id' => $priority->id]);
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('archiveType', $type->getKey())
+            ->assertNotified('Unable to save changes');
+
+        expect($type->refresh()->isArchived())->toBeFalse();
+    });
+
+    it('does not restore an archived type without the `settings.*.restore` permission', function () {
+        actingAs(builderEditor());
+
+        $type = ServiceRequestType::factory()->create();
+        $type->archive();
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('restoreArchivedType', $type->getKey())
+            ->assertNotified('Unable to save changes');
+
+        expect($type->refresh()->isArchived())->toBeTrue();
+    });
+
+    it('does not delete an area whose types would be deleted without the `settings.*.delete` permission', function () {
+        actingAs(builderEditor());
+
+        $category = ServiceRequestTypeCategory::factory()->create();
+        $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('deleteCategory', $category->getKey())
+            ->assertNotified('Unable to save changes');
+
+        assertNotSoftDeleted($category);
+        assertNotSoftDeleted($type);
+    });
+
+    it('lets a user who can only update the builder change areas and type placements', function () {
+        actingAs(builderEditor());
+
+        $category = ServiceRequestTypeCategory::factory()->create();
+        $type = ServiceRequestType::factory()->create();
+
+        livewire(ListServiceRequestTypes::class)
+            ->call('createCategory', 'Editor Area')
+            ->call('moveType', $type->getKey(), null, $category->getKey(), [$type->getKey()]);
+
+        expect(ServiceRequestTypeCategory::query()->where('name', 'Editor Area')->exists())->toBeTrue()
+            ->and($type->refresh()->categories->pluck('id')->all())->toBe([$category->getKey()]);
+    });
 });
+
+function builderEditor(): User
+{
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any', 'settings.*.update');
+
+    return $user;
+}

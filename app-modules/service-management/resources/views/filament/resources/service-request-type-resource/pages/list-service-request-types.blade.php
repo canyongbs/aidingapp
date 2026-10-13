@@ -42,6 +42,7 @@
         x-data="serviceRequestTypeManager({
                     treeData: @js($this->hierarchicalData),
                     canEdit: @js($this->canEdit),
+                    typePermissions: @js($this->getTypePermissions()),
                     channelName: @js($this->getCatalogChannelName()),
                 })"
         @service-request-type-visibility-updated.window="onVisibilityUpdated($event.detail)"
@@ -80,7 +81,7 @@
                 </div>
 
                 {{-- Add Type Button --}}
-                <div id="show-type-wrapper">
+                <div id="show-type-wrapper" x-show="typePermissions.canCreateTypes">
                     <x-filament::button id="show-type-btn" type="button" size="sm">Add Type</x-filament::button>
                     <div
                         class="flex w-full flex-col gap-2 sm:w-auto sm:flex-row"

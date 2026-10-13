@@ -32,9 +32,10 @@
 </COPYRIGHT>
 */
 document.addEventListener('alpine:init', () => {
-    Alpine.data('serviceRequestTypeManager', ({ treeData, canEdit, channelName }) => ({
+    Alpine.data('serviceRequestTypeManager', ({ treeData, canEdit, typePermissions, channelName }) => ({
         treeData,
         canEdit,
+        typePermissions,
         channelName,
         categoryInputs: {},
         typeInputs: {},
@@ -53,6 +54,7 @@ document.addEventListener('alpine:init', () => {
         needsRefresh: false,
         isRefreshing: false,
         isRefreshQueued: false,
+        refreshRetryDelay: 0,
         dragData: {
             isDragging: false,
             draggedElement: null,
@@ -130,12 +132,26 @@ document.addEventListener('alpine:init', () => {
             try {
                 const tree = await this.getWire().getHierarchicalData();
 
+                if (!tree) {
+                    throw new Error('The builder tree could not be loaded.');
+                }
+
+                this.refreshRetryDelay = 0;
+
                 // A change may have been made locally while the tree was loading, in which case it is stale.
                 if (this.isBusy()) {
                     this.needsRefresh = true;
-                } else if (tree) {
+                } else {
                     this.applyServerTree(tree);
                 }
+            } catch (error) {
+                console.error('Refreshing the builder failed:', error);
+
+                // Stay pending until a reload succeeds, so an unsaved optimistic change is not left showing.
+                this.needsRefresh = true;
+                this.isRefreshQueued = false;
+                this.refreshRetryDelay = Math.min((this.refreshRetryDelay || 500) * 2, 30000);
+                setTimeout(() => this.syncWhenIdle(), this.refreshRetryDelay);
             } finally {
                 this.isRefreshing = false;
 
@@ -471,8 +487,8 @@ document.addEventListener('alpine:init', () => {
             const requestCount = typeof type.service_requests_count === 'number' ? type.service_requests_count : 0;
             const occurrences = this.countTypeOccurrences(type.id);
             const canRemove = occurrences > 1;
-            const canDelete = !canRemove && requestCount === 0;
-            const canArchive = !canRemove && requestCount > 0;
+            const canDelete = !canRemove && requestCount === 0 && this.typePermissions.canDeleteTypes;
+            const canArchive = !canRemove && requestCount > 0 && this.typePermissions.canDeleteTypes;
             const placementKey = this.typePlacementKey(type.id, owningCategoryId);
             const isRenaming = this.renamingTypes[placementKey] || false;
 
@@ -629,7 +645,7 @@ document.addEventListener('alpine:init', () => {
                             }
                             ${!isRenaming ? this.renderVisibilityControl(category, 'category') : ''}
                             ${
-                                this.canEdit && !isRenaming
+                                this.canEdit && this.typePermissions.canCreateTypes && !isRenaming
                                     ? `<button @click="showTypeInput('${category.id}')" class="p-1.5 -m-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors" x-tooltip.raw="Add type in area">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path d="M8.75 3.75a.75.75 0 0 0-1.5 0v3.5h-3.5a.75.75 0 0 0 0 1.5h3.5v3.5a.75.75 0 0 0 1.5 0v-3.5h3.5a.75.75 0 0 0 0-1.5h-3.5v-3.5Z" />
@@ -1851,6 +1867,12 @@ document.addEventListener('alpine:init', () => {
                 const archivedType = await this.getWire().checkArchivedTypeName(name.trim());
 
                 if (archivedType) {
+                    if (!this.typePermissions.canRestoreTypes) {
+                        this.notifyArchivedTypeName(name.trim());
+
+                        return;
+                    }
+
                     this.pendingRestore = { archivedType, categoryId };
                     window.dispatchEvent(
                         new CustomEvent('open-modal', { detail: { id: 'archived-type-restore-modal' } }),
@@ -1927,6 +1949,18 @@ document.addEventListener('alpine:init', () => {
                 .send();
         },
 
+        notifyArchivedTypeName(name) {
+            if (!window.FilamentNotification) {
+                return;
+            }
+
+            new window.FilamentNotification()
+                .title('Name already in use')
+                .body(`The name ${name} is used by an archived service request type. Please select a different name.`)
+                .danger()
+                .send();
+        },
+
         hideTypeInputAfterCreating(categoryId) {
             if (categoryId) {
                 this.hideTypeInput(categoryId);
@@ -1959,6 +1993,11 @@ document.addEventListener('alpine:init', () => {
 
             const typeHasRequests = (category.types || []).some((type) => (type.service_requests_count ?? 0) > 0);
             if (typeHasRequests) {
+                return false;
+            }
+
+            // Deleting an area can delete its types, which needs permission to delete types.
+            if ((category.types || []).length > 0 && !this.typePermissions.canDeleteTypes) {
                 return false;
             }
 

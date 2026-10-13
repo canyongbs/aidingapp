@@ -51,6 +51,7 @@ use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\UniqueConstraintViolationException;
@@ -85,6 +86,22 @@ class ListServiceRequestTypes extends ListRecords
     public function canEdit(): bool
     {
         return auth()->user()->can('updateAny', ServiceRequestType::class);
+    }
+
+    /**
+     * The type actions the builder should offer, mirroring the checks made when each is saved.
+     *
+     * @return array{canCreateTypes: bool, canDeleteTypes: bool, canRestoreTypes: bool}
+     */
+    public function getTypePermissions(): array
+    {
+        $user = auth()->user();
+
+        return [
+            'canCreateTypes' => $user->can('create', ServiceRequestType::class),
+            'canDeleteTypes' => $user->can('deleteAny', ServiceRequestType::class),
+            'canRestoreTypes' => $user->can('restoreAny', ServiceRequestType::class),
+        ];
     }
 
     /**
@@ -314,6 +331,8 @@ class ListServiceRequestTypes extends ListRecords
 
             foreach ($types as $type) {
                 if (array_diff($type->categories->modelKeys(), $categoryIds) === []) {
+                    Gate::authorize('delete', $type);
+
                     $type->delete();
                 }
             }
@@ -332,6 +351,8 @@ class ListServiceRequestTypes extends ListRecords
     public function createType(string $name, ?string $categoryId = null): array
     {
         return $this->mutateCatalog(function () use ($name, $categoryId): void {
+            Gate::authorize('create', ServiceRequestType::class);
+
             $name = $this->validateTypeName($name);
             $category = filled($categoryId) ? $this->findCategory($categoryId) : null;
 
@@ -363,6 +384,8 @@ class ListServiceRequestTypes extends ListRecords
         return $this->mutateCatalog(function () use ($typeId, $categoryId): void {
             $type = $this->findType($typeId, isArchived: true);
             $category = filled($categoryId) ? $this->findCategory($categoryId) : null;
+
+            Gate::authorize('restore', $type);
 
             $type->unarchive();
             $type->categories()->detach();
@@ -493,6 +516,8 @@ class ListServiceRequestTypes extends ListRecords
                 ]);
             }
 
+            Gate::authorize('delete', $type);
+
             $type->delete();
         });
     }
@@ -511,6 +536,8 @@ class ListServiceRequestTypes extends ListRecords
                     'typeId' => "Cannot archive type {$type->name} without service requests. Delete it instead.",
                 ]);
             }
+
+            Gate::authorize('archive', $type);
 
             $type->archive();
         });
@@ -563,6 +590,10 @@ class ListServiceRequestTypes extends ListRecords
             });
         } catch (ValidationException $exception) {
             $this->notifyUnableToSave(collect($exception->errors())->flatten()->first() ?? 'Please review your changes and try again.');
+
+            return ['saved' => false, 'tree' => $this->getHierarchicalData()];
+        } catch (AuthorizationException $exception) {
+            $this->notifyUnableToSave($exception->getMessage());
 
             return ['saved' => false, 'tree' => $this->getHierarchicalData()];
         } catch (UniqueConstraintViolationException) {
