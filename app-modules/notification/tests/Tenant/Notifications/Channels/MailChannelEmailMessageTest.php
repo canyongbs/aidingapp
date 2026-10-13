@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
@@ -121,6 +122,55 @@ it('will not send system notifications in demo mode when system notifications ar
     expect($emailMessages->count())->toBe(1);
     expect($emailMessages->first()->events->count())->toBe(1);
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::BlockedByDemoMode);
+});
+
+it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function () {
+    $contact = Contact::factory()->bounced()->create();
+
+    expect($contact->canReceiveEmail())->toBeFalse();
+
+    $notification = new TestEmailNotification();
+    $contact->notify($notification);
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
+});
+
+it('still dispatches to a healthy contact', function () {
+    $contact = Contact::factory()->create();
+
+    expect($contact->canReceiveEmail())->toBeTrue();
+
+    $notification = new TestEmailNotification();
+    $contact->notify($notification);
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
+});
+
+it('is unaffected for a User notifiable', function () {
+    $user = User::factory()->create();
+
+    $notification = new TestEmailNotification();
+    $user->notify($notification);
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
 #[SystemNotification]

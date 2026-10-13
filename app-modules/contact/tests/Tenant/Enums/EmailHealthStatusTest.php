@@ -34,48 +34,36 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
-use AidingApp\Contact\Models\Contact;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-
-class EditContact extends EditRecord
-{
-    protected static string $resource = ContactResource::class;
-
-    // TODO: Automatically set from Filament
-    protected static ?string $navigationLabel = 'Edit';
-
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
-    public static function canAccess(array $parameters = []): bool
-    {
-        $record = $parameters['record'] ?? null;
-
-        if ($record instanceof Contact && $record->isManaged()) {
-            return false;
-        }
-
-        return parent::canAccess($parameters);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ContactFormSchema::make(ignoreRecord: true));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
-}
+it('has the expected label, color, icon, tooltip, and callout text', function (
+    EmailHealthStatus $status,
+    string $label,
+    string $color,
+    string $icon,
+    string $tooltip,
+    ?string $callout,
+) {
+    expect($status->getLabel())->toBe($label)
+        ->and($status->getColor())->toBe($color)
+        ->and($status->getIcon())->toBe($icon)
+        ->and($status->getTooltipText())->toBe($tooltip)
+        ->and($status->getCalloutText())->toBe($callout);
+})->with([
+    'healthy' => [
+        EmailHealthStatus::Healthy,
+        'Healthy',
+        'success',
+        'heroicon-m-check-circle',
+        'Healthy. No delivery issues detected.',
+        null,
+    ],
+    'bounced' => [
+        EmailHealthStatus::Bounced,
+        'Bounced',
+        'warning',
+        'heroicon-m-exclamation-triangle',
+        'Bounced. Email delivery failed and a bounce was received from our email provider.',
+        'The email provider has reported that the email address for this contact is invalid. Future emails will not be sent to this contact.',
+    ],
+]);

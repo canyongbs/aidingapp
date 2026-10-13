@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactFactory;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
@@ -104,7 +105,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'last_name',
         'full_name',
         'preferred',
-        'description',
         'email',
         'mobile',
         'email_bounce',
@@ -143,6 +143,18 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function canRecieveSms(): bool
     {
         return filled($this->mobile);
+    }
+
+    public function getEmailHealthStatus(): EmailHealthStatus
+    {
+        return $this->email_bounce
+            ? EmailHealthStatus::Bounced
+            : EmailHealthStatus::Healthy;
+    }
+
+    public function canReceiveEmail(): bool
+    {
+        return ! $this->email_bounce;
     }
 
     /**

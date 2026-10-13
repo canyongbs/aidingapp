@@ -38,11 +38,13 @@ namespace AidingApp\Contact\Providers;
 
 use AidingApp\Contact\ContactPlugin;
 use AidingApp\Contact\Listeners\FlushOrganizationImportDomainClaims;
+use AidingApp\Contact\Listeners\SaveBouncedContactEmail;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\IntegrationAwsSesEventHandling\Events\SesBounceEvent;
 use Filament\Actions\Imports\Events\ImportCompleted;
 use Filament\Panel;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -67,5 +69,7 @@ class ContactServiceProvider extends ServiceProvider
         ]);
 
         Event::listen(ImportCompleted::class, FlushOrganizationImportDomainClaims::class);
+
+        Event::listen(SesBounceEvent::class, SaveBouncedContactEmail::class);
     }
 }

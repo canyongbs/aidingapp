@@ -194,6 +194,11 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
         return false;
     }
 
+    public function canReceiveEmail(): bool
+    {
+        return true;
+    }
+
     /**
      * @return HasManyDeep<Model, $this>
      */
