@@ -73,7 +73,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->schema([
                         ToggleButtons::make('status_id')
                             ->label('Advisory Status')
-                            ->helperText('You may change the overall status of the advisory by selecting a new status below.')
+                            ->aboveContent('You may change the overall status of the advisory by selecting a new status below.')
                             ->inline()
                             ->options(fn (): array => self::getStatusOptions($this->getOwnerRecord()))
                             ->default($this->getOwnerRecord()->status->getKey())
@@ -136,7 +136,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
                     ->schema([
                         ToggleButtons::make('status_id')
                             ->label('Advisory Status')
-                            ->helperText('You may change the overall status of the advisory by selecting a new status below.')
+                            ->aboveContent('You may change the overall status of the advisory by selecting a new status below.')
                             ->inline()
                             ->options(fn (AdvisoryUpdate $record): array => self::getStatusOptions($record->advisory))
                             ->exists((new AdvisoryStatus())->getTable(), 'id')
