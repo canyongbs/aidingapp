@@ -171,7 +171,7 @@ class EngagementsRelationManager extends RelationManager
             ->defaultSort('record_sortable_date', 'desc')
             ->modifyQueryUsing(fn (Builder $query) => $query->whereHasMorph('timelineable', [
                 ...($canAccessEngagements ? [Engagement::class] : []),
-                ...($canAccessEngagements ? [EngagementResponse::class] : []),
+                ...($canAccessEngagementResponses ? [EngagementResponse::class] : []),
             ]))
             ->columns([
                 TextColumn::make('direction')

@@ -37,10 +37,52 @@
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers\EngagementsRelationManager;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\Engagement;
+use AidingApp\Engagement\Models\EngagementResponse;
+use AidingApp\Timeline\Events\TimelineableRecordCreated;
+use AidingApp\Timeline\Listeners\AddRecordToTimeline;
+use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Illuminate\Database\Eloquent\Collection;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+
+/**
+ * Seeds the given contact with populated outbound (Engagement) and inbound
+ * (EngagementResponse) email records, each wired into the contact's timeline.
+ *
+ * @return array{outbound: Collection<int, Engagement>, inbound: Collection<int, EngagementResponse>}
+ */
+function seedContactEmails(Contact $contact): array
+{
+    $outbound = Engagement::factory()->count(2)
+        ->state([
+            'recipient_id' => $contact->getKey(),
+            'recipient_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $inbound = EngagementResponse::factory()->count(3)
+        ->state([
+            'sender_id' => $contact->getKey(),
+            'sender_type' => $contact->getMorphClass(),
+        ])->createQuietly();
+
+    $outbound->each(function (Engagement $engagement): void {
+        app(AddRecordToTimeline::class)->handle(
+            new TimelineableRecordCreated($engagement->recipient, $engagement),
+        );
+    });
+
+    $inbound->each(function (EngagementResponse $response): void {
+        app(AddRecordToTimeline::class)->handle(
+            new TimelineableRecordCreated($response->sender, $response),
+        );
+    });
+
+    return ['outbound' => $outbound, 'inbound' => $inbound];
+}
 
 it('disables the `engage` header action with the bounced tooltip for a bounced owner contact', function () {
     asSuperAdmin();
@@ -74,4 +116,99 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
 
     expect($action)->not->toBeNull()
         ->and($action->getTooltip())->toBeNull();
+});
+
+describe('email direction filtering by permission', function () {
+    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('engagement.view-any');
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        $emails = seedContactEmails($contact);
+
+        livewire(EngagementsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'))
+            ->assertCanNotSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
+    });
+
+    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('engagement_response.view-any');
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        $emails = seedContactEmails($contact);
+
+        livewire(EngagementsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords($emails['inbound']->pluck('timelineRecord'))
+            ->assertCanNotSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
+    });
+
+    it('shows both directions to a user with both engagement permissions', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('engagement.view-any');
+        $user->givePermissionTo('engagement_response.view-any');
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        $emails = seedContactEmails($contact);
+
+        livewire(EngagementsRelationManager::class, [
+            'ownerRecord' => $contact,
+            'pageClass' => ViewContact::class,
+        ])
+            ->assertSuccessful()
+            ->assertCanSeeTableRecords(
+                $emails['outbound']->pluck('timelineRecord')->merge($emails['inbound']->pluck('timelineRecord')),
+            );
+    });
+});
+
+describe('authorization', function () {
+    it('does not show the Emails tab to a user with neither engagement permission', function () {
+        $user = User::factory()->create();
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeFalse();
+    });
+
+    it('shows the Emails tab to a user with only the `engagement.view-any` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('engagement.view-any');
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
+    });
+
+    it('shows the Emails tab to a user with only the `engagement_response.view-any` permission', function () {
+        $user = User::factory()->create();
+        $user->givePermissionTo('engagement_response.view-any');
+
+        actingAs($user);
+
+        $contact = Contact::factory()->create();
+
+        expect(EngagementsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
+    });
 });
