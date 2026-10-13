@@ -69,14 +69,18 @@ class AdvisoryUpdatesRelationManager extends RelationManager
         return $schema
             ->components([
                 self::getPropertiesSectionSchema(),
-                ToggleButtons::make('status_id')
-                    ->label('Status')
-                    ->inline()
-                    ->options(fn (): array => self::getStatusOptions($this->getOwnerRecord()))
-                    ->default($this->getOwnerRecord()->status->getKey())
-                    ->exists((new AdvisoryStatus())->getTable(), 'id')
-                    ->required()
-                    ->columnSpanFull(),
+                Section::make('Tracking Details')
+                    ->schema([
+                        ToggleButtons::make('status_id')
+                            ->label('Advisory Status')
+                            ->helperText('You may change the overall status of the advisory by selecting a new status below.')
+                            ->inline()
+                            ->options(fn (): array => self::getStatusOptions($this->getOwnerRecord()))
+                            ->default($this->getOwnerRecord()->status->getKey())
+                            ->exists((new AdvisoryStatus())->getTable(), 'id')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -103,6 +107,7 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ->defaultSort('date', 'desc')
             ->headerActions([
                 CreateAction::make()
+                    ->slideOver()
                     ->visible(fn (): bool => $this->getOwnerRecord()->status->classification !== SystemAdvisoryStatusClassification::Resolved)
                     ->after(function (array $data): void {
                         $this->getOwnerRecord()->update(['status_id' => $data['status_id']]);
@@ -124,15 +129,20 @@ class AdvisoryUpdatesRelationManager extends RelationManager
             ->authorize(fn (AdvisoryUpdate $record): bool => auth()->user()->can('view', $record))
             ->label(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit' : 'View')
             ->modalHeading(fn (AdvisoryUpdate $record): string => auth()->user()->can('update', $record) ? 'Edit advisory update' : 'View advisory update')
+            ->slideOver()
             ->schema([
                 self::getPropertiesSectionSchema(),
-                ToggleButtons::make('status_id')
-                    ->label('Status')
-                    ->inline()
-                    ->options(fn (AdvisoryUpdate $record): array => self::getStatusOptions($record->advisory))
-                    ->exists((new AdvisoryStatus())->getTable(), 'id')
-                    ->required()
-                    ->columnSpanFull(),
+                Section::make('Tracking Details')
+                    ->schema([
+                        ToggleButtons::make('status_id')
+                            ->label('Advisory Status')
+                            ->helperText('You may change the overall status of the advisory by selecting a new status below.')
+                            ->inline()
+                            ->options(fn (AdvisoryUpdate $record): array => self::getStatusOptions($record->advisory))
+                            ->exists((new AdvisoryStatus())->getTable(), 'id')
+                            ->required()
+                            ->columnSpanFull(),
+                    ]),
             ])
             ->fillForm(fn (AdvisoryUpdate $record): array => [
                 'title' => $record->title,

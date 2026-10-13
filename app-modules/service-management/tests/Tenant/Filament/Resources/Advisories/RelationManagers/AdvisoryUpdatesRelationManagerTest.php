@@ -44,6 +44,7 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\ToggleButtons;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
@@ -190,6 +191,46 @@ test('creating an advisory update that resolves the advisory hides the create ac
         ->assertHasNoTableActionErrors();
 
     $component->assertTableActionHidden('create');
+});
+
+test('the create action opens in a slide over with the advisory status field labelled and described', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    asSuperAdmin();
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->mountTableAction('create')
+        ->assertFormFieldExists('status_id', fn (ToggleButtons $field): bool => $field->getLabel() === 'Advisory Status');
+
+    expect($component->instance()->getTable()->getAction('create')->isModalSlideOver())->toBeTrue();
+});
+
+test('the view or edit action opens in a slide over with the advisory status field labelled and described', function () {
+    $advisory = Advisory::factory()->create([
+        'status_id' => AdvisoryStatus::factory()->create([
+            'classification' => SystemAdvisoryStatusClassification::Open,
+        ])->getKey(),
+    ]);
+
+    $advisoryUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create();
+
+    asSuperAdmin();
+
+    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+        'ownerRecord' => $advisory,
+        'pageClass' => ViewAdvisory::class,
+    ])
+        ->mountAction(TestAction::make('viewOrEditAdvisoryUpdate')->table($advisoryUpdate))
+        ->assertFormFieldExists('status_id', fn (ToggleButtons $field): bool => $field->getLabel() === 'Advisory Status');
+
+    expect($component->instance()->getTable()->getAction('viewOrEditAdvisoryUpdate')->isModalSlideOver())->toBeTrue();
 });
 
 test('the create form date field defaults to now', function () {
