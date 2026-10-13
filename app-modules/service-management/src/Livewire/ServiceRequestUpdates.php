@@ -152,7 +152,7 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
                 ->serviceRequestUpdates()
                 ->find($arguments['update'] ?? null))
             ->authorize('delete')
-            ->hidden(fn (?ServiceRequestUpdate $record): bool => (! $record) || $record->trashed())
+            ->hidden(fn (?ServiceRequestUpdate $record): bool => ! $record)
             ->modalHeading('Delete update')
             ->icon(Heroicon::Trash)
             ->tooltip('Delete')
