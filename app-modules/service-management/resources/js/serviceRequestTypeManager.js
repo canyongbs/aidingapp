@@ -32,21 +32,27 @@
 </COPYRIGHT>
 */
 document.addEventListener('alpine:init', () => {
-    Alpine.data('serviceRequestTypeManager', ({ originalTreeData, treeData, canEdit }) => ({
-        originalTreeData,
+    Alpine.data('serviceRequestTypeManager', ({ treeData, canEdit, channelName }) => ({
         treeData,
         canEdit,
+        channelName,
         categoryInputs: {},
         typeInputs: {},
         existingTypeInputs: {},
         renamingCategories: {},
         renamingTypes: {},
-        hasUnsavedChanges: false,
-        isSaving: false,
-        isCheckingType: false,
-        nextTempId: 1,
+        isCreatingType: false,
+        isCreatingCategory: false,
         pendingRestore: null,
         collapsedCategories: {},
+        // Changes are saved one at a time, in order. While any are in flight (or a drag is in
+        // progress) server trees are held back so they don't overwrite optimistic local changes.
+        mutationQueue: Promise.resolve(),
+        pendingMutationCount: 0,
+        latestServerTree: null,
+        needsRefresh: false,
+        isRefreshing: false,
+        isRefreshQueued: false,
         dragData: {
             isDragging: false,
             draggedElement: null,
@@ -54,30 +60,187 @@ document.addEventListener('alpine:init', () => {
             draggedId: null,
             draggedSourceCategoryId: null, // owning category of the dragged type placement
             ghostElement: null,
-            currentDropTarget: null,
-            insertPosition: null, // 'before', 'after', or 'inside'
         },
 
         init() {
-            this.deepCopyTreeData();
             this.render();
             this.attachEventListeners();
             this.setupDragAndDrop();
+            this.subscribeToCatalogUpdates();
         },
 
-        deepCopyTreeData() {
-            // Make a deep copy of the original data so we can track changes
-            this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-            this.deletedCategories = [];
-            this.deletedTypes = [];
-            this.archivedTypes = [];
-            this.pendingRestore = null;
-            this.renamingCategories = {};
-            this.renamingTypes = {};
+        destroy() {
+            window.Echo?.leave(this.channelName);
         },
 
-        markAsChanged() {
-            this.hasUnsavedChanges = true;
+        subscribeToCatalogUpdates() {
+            const subscribe = () => {
+                window.Echo.private(this.channelName)
+                    // Also fires on every reconnect, catching up on changes missed while offline.
+                    .subscribed(() => this.refreshFromServer())
+                    .listen('.service-request-type-catalog.updated', (event) => {
+                        // This client already applied its own change from the save response.
+                        if (event.origin_socket_id && event.origin_socket_id === window.Echo.socketId()) {
+                            return;
+                        }
+
+                        this.refreshFromServer();
+                    });
+            };
+
+            if (window.Echo) {
+                subscribe();
+
+                return;
+            }
+
+            window.addEventListener('EchoLoaded', subscribe, { once: true });
+        },
+
+        isBusy() {
+            return this.pendingMutationCount > 0 || this.dragData.isDragging;
+        },
+
+        // `$wire` and `$el` resolve from the element that triggered a handler, which a re-render may
+        // already have removed by the time a queued save runs, so always resolve from the root.
+        getRootElement() {
+            return document.getElementById('service-request-type-manager');
+        },
+
+        getWire() {
+            return window.Livewire.find(this.getRootElement().closest('[wire\\:id]').getAttribute('wire:id'));
+        },
+
+        async refreshFromServer() {
+            if (this.isBusy()) {
+                this.needsRefresh = true;
+
+                return;
+            }
+
+            // Collapse a burst of remote changes into one reload in flight plus one to catch up.
+            if (this.isRefreshing) {
+                this.isRefreshQueued = true;
+
+                return;
+            }
+
+            this.isRefreshing = true;
+
+            try {
+                const tree = await this.getWire().getHierarchicalData();
+
+                // A change may have been made locally while the tree was loading, in which case it is stale.
+                if (this.isBusy()) {
+                    this.needsRefresh = true;
+                } else if (tree) {
+                    this.applyServerTree(tree);
+                }
+            } finally {
+                this.isRefreshing = false;
+
+                if (this.isRefreshQueued) {
+                    this.isRefreshQueued = false;
+                    this.refreshFromServer();
+                }
+            }
+        },
+
+        // Apply a local change straight away, then save it. Resolves with whether it was saved.
+        mutate(save, applyLocally = null) {
+            if (applyLocally) {
+                applyLocally();
+                this.render();
+            }
+
+            this.pendingMutationCount++;
+
+            const result = this.mutationQueue.then(async () => {
+                try {
+                    const { saved, tree } = await save();
+                    this.latestServerTree = tree;
+
+                    return saved;
+                } catch (error) {
+                    console.error('Save failed:', error);
+                    this.needsRefresh = true;
+
+                    return false;
+                } finally {
+                    this.pendingMutationCount--;
+                    this.syncWhenIdle();
+                }
+            });
+
+            this.mutationQueue = result;
+
+            return result;
+        },
+
+        syncWhenIdle() {
+            if (this.isBusy()) {
+                return;
+            }
+
+            if (this.needsRefresh) {
+                this.needsRefresh = false;
+                this.latestServerTree = null;
+                this.refreshFromServer();
+
+                return;
+            }
+
+            if (this.latestServerTree) {
+                const tree = this.latestServerTree;
+                this.latestServerTree = null;
+                this.applyServerTree(tree);
+            }
+        },
+
+        applyServerTree(tree) {
+            this.treeData = tree;
+
+            // Drop UI state for anything that no longer exists, e.g. an input for an area that
+            // another user just deleted.
+            const categoryIds = new Set();
+            const placementKeys = new Set();
+
+            const walk = (categories) => {
+                for (const category of categories || []) {
+                    categoryIds.add(category.id);
+                    (category.types || []).forEach((type) =>
+                        placementKeys.add(this.typePlacementKey(type.id, category.id)),
+                    );
+                    walk(category.children);
+                }
+            };
+
+            walk(this.treeData.categories);
+            (this.treeData.uncategorized_types || []).forEach((type) =>
+                placementKeys.add(this.typePlacementKey(type.id, null)),
+            );
+
+            [
+                this.categoryInputs,
+                this.typeInputs,
+                this.existingTypeInputs,
+                this.renamingCategories,
+                this.collapsedCategories,
+            ].forEach((state) => {
+                Object.keys(state).forEach((categoryId) => {
+                    if (!categoryIds.has(categoryId)) {
+                        delete state[categoryId];
+                    }
+                });
+            });
+
+            Object.keys(this.renamingTypes).forEach((placementKey) => {
+                if (!placementKeys.has(placementKey)) {
+                    delete this.renamingTypes[placementKey];
+                }
+            });
+
+            this.render();
         },
 
         toggleCategory(categoryId) {
@@ -107,8 +270,56 @@ document.addEventListener('alpine:init', () => {
         },
 
         render() {
+            // Re-rendering replaces the tree's markup, so keep anything being typed (and the focus)
+            // intact when a change from another user arrives mid-edit.
+            const inputValues = {};
+
+            this.getRootElement()
+                .querySelectorAll('#root-categories input, #root-categories select, #uncategorized-types input')
+                .forEach((input) => {
+                    if (input.id) {
+                        inputValues[input.id] = input.value;
+                    }
+                });
+
+            const activeElement = document.activeElement;
+            const focusedInputId =
+                activeElement?.id && inputValues[activeElement.id] !== undefined ? activeElement.id : null;
+            const selection =
+                focusedInputId && typeof activeElement.selectionStart === 'number'
+                    ? [activeElement.selectionStart, activeElement.selectionEnd]
+                    : null;
+
             this.renderCategories();
             this.renderUncategorizedTypes();
+
+            Object.entries(inputValues).forEach(([id, value]) => {
+                const input = document.getElementById(id);
+
+                if (!input) {
+                    return;
+                }
+
+                input.value = value;
+
+                if (input.dataset.confirmButton) {
+                    const confirmButton = document.getElementById(input.dataset.confirmButton);
+
+                    if (confirmButton) {
+                        confirmButton.disabled = !value.trim();
+                    }
+                }
+            });
+
+            if (focusedInputId) {
+                const input = document.getElementById(focusedInputId);
+
+                input?.focus();
+
+                if (input && selection) {
+                    input.setSelectionRange(...selection);
+                }
+            }
 
             // Only setup drag and drop if we're not currently dragging
             // to avoid attaching duplicate event listeners during a drag operation
@@ -154,16 +365,15 @@ document.addEventListener('alpine:init', () => {
 
             const { nodeType, nodeId, isRestricted, contactTypeIds } = detail;
 
-            [this.treeData, this.originalTreeData].forEach((data) => {
-                const node = this.findNode(data, nodeType, nodeId);
+            const node = this.findNode(this.treeData, nodeType, nodeId);
 
-                if (node) {
-                    node.is_visibility_restricted = !!isRestricted;
-                    node.restricted_to_contact_type_ids = contactTypeIds || [];
-                }
-            });
+            if (node) {
+                node.is_visibility_restricted = !!isRestricted;
+                node.restricted_to_contact_type_ids = contactTypeIds || [];
+            }
 
             this.render();
+            this.refreshFromServer();
         },
 
         findNode(data, nodeType, nodeId) {
@@ -283,6 +493,10 @@ document.addEventListener('alpine:init', () => {
                                         id="rename-type-${placementKey}"
                                         type="text"
                                         value="${this.escapeHtml(type.name)}"
+                                        data-confirm-button="confirm-rename-type-${placementKey}"
+                                        @input="document.getElementById('confirm-rename-type-${placementKey}').disabled = ! $event.target.value.trim()"
+                                        @keydown.enter="confirmTypeRename('${type.id}', '${placementKey}')"
+                                        @keydown.escape="cancelTypeRename('${placementKey}')"
                                         class="flex-1 h-5 text-sm text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                     />
                                     <button
@@ -295,11 +509,10 @@ document.addEventListener('alpine:init', () => {
                                             <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                                         </svg>
                                     </button>
-                                                `
+                                `
                                 : `
                                     <a
                                         href="${type.view_url}"
-                                        target="${this.hasUnsavedChanges ? '_blank' : '_self'}"
                                         class="flex-1 text-sm text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 cursor-pointer transition-colors"
                                     >${this.escapeHtml(type.name)}</a>
                             `
@@ -327,7 +540,7 @@ document.addEventListener('alpine:init', () => {
                         }
                         ${
                             this.canEdit && canArchive && !isRenaming
-                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-warning-50 dark:hover:bg-warning-600/20 text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 transition-colors" @click.stop="stageTypeArchive('${type.id}')" x-tooltip.raw="Archive">
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-warning-50 dark:hover:bg-warning-600/20 text-warning-600 hover:text-warning-800 dark:text-warning-500 dark:hover:text-warning-300 transition-colors" @click.stop="archiveType('${type.id}')" x-tooltip.raw="Archive">
                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                             <path d="M2 3a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3Z" />
                                             <path fill-rule="evenodd" d="M13 6H3v6a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6ZM5.72 7.47a.75.75 0 0 1 1.06 0L8 8.69l1.22-1.22a.75.75 0 1 1 1.06 1.06l-1.22 1.22 1.22 1.22a.75.75 0 1 1-1.06 1.06L8 10.81l-1.22 1.22a.75.75 0 0 1-1.06-1.06l1.22-1.22-1.22-1.22a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
@@ -337,7 +550,7 @@ document.addEventListener('alpine:init', () => {
                         }
                         ${
                             this.canEdit && canDelete && !isRenaming
-                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="stageTypeDeletion('${type.id}')" x-tooltip.raw="Delete">
+                                ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="deleteType('${type.id}')" x-tooltip.raw="Delete">
                                         <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                             <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
                                         </svg>
@@ -393,6 +606,10 @@ document.addEventListener('alpine:init', () => {
                                             id="rename-category-${category.id}"
                                             type="text"
                                             value="${this.escapeHtml(category.name)}"
+                                            data-confirm-button="confirm-rename-category-${category.id}"
+                                            @input="document.getElementById('confirm-rename-category-${category.id}').disabled = ! $event.target.value.trim()"
+                                            @keydown.enter="confirmCategoryRename('${category.id}')"
+                                            @keydown.escape="cancelCategoryRename('${category.id}')"
                                             class="flex-1 h-6 font-medium text-gray-900 dark:text-white bg-white dark:bg-gray-600 border border-primary-500 rounded px-2 py-0 focus:outline-none focus:ring-2 focus:ring-primary-500"
                                         />
                                         <button
@@ -452,7 +669,7 @@ document.addEventListener('alpine:init', () => {
                             }
                             ${
                                 this.canEdit && this.canDeleteCategory(category) && !isRenaming
-                                    ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="confirmDeleteCategory('${category.id}')" x-tooltip.raw="Delete">
+                                    ? `<button type="button" class="p-1.5 -m-1 rounded hover:bg-danger-50 dark:hover:bg-danger-600/20 dark:hover:text-danger-300 text-danger-600 hover:text-danger-800 transition-colors" @click.stop="deleteCategory('${category.id}')" x-tooltip.raw="Delete">
                                             <svg class="size-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
                                                 <path fill-rule="evenodd" d="M5 3.25V4H2.75a.75.75 0 0 0 0 1.5h.3l.815 8.15A1.5 1.5 0 0 0 5.357 15h5.285a1.5 1.5 0 0 0 1.493-1.35l.815-8.15h.3a.75.75 0 0 0 0-1.5H11v-.75A2.25 2.25 0 0 0 8.75 1h-1.5A2.25 2.25 0 0 0 5 3.25Zm2.25-.75a.75.75 0 0 0-.75.75V4h3v-.75a.75.75 0 0 0-.75-.75h-1.5ZM6.05 6a.75.75 0 0 1 .787.713l.275 5.5a.75.75 0 0 1-1.498.075l-.275-5.5A.75.75 0 0 1 6.05 6Zm3.9 0a.75.75 0 0 1 .712.787l-.275 5.5a.75.75 0 0 1-1.498-.075l.275-5.5a.75.75 0 0 1 .786-.711Z" clip-rule="evenodd" />
                                             </svg>
@@ -465,7 +682,7 @@ document.addEventListener('alpine:init', () => {
                             !isCollapsed && this.canEdit && canAddChildCategory && showCategoryInput
                                 ? `
                                     <div id="category-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-category-${category.id}" type="text" placeholder="Name of new child area" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <input id="child-category-${category.id}" type="text" placeholder="Name of new child area" @keydown.enter="createCategory('${category.id}')" @keydown.escape="hideCategoryInput('${category.id}')" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
                                         <button @click="createCategory('${category.id}')" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700">Add</button>
                                         <button @click="hideCategoryInput('${category.id}')" class="rounded-lg border border-gray-300 bg-white px-3 py-1 text-sm text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200">Cancel</button>
                                     </div>
@@ -477,10 +694,10 @@ document.addEventListener('alpine:init', () => {
                             !isCollapsed && this.canEdit && showTypeInput
                                 ? `
                                     <div id="type-input-${category.id}" class="flex gap-2 mt-2" style="margin-left: ${indent + 24}px">
-                                        <input id="child-type-${category.id}" type="text" placeholder="Name of new type in this area" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
-                                        <button @click="createType('${category.id}')" x-bind:disabled="isCheckingType" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
-                                            <span x-show="!isCheckingType">Add</span>
-                                            <svg x-show="isCheckingType" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="fi-icon fi-loading-indicator h-4 w-4">
+                                        <input id="child-type-${category.id}" type="text" placeholder="Name of new type in this area" @keydown.enter="createType('${category.id}')" @keydown.escape="hideTypeInput('${category.id}')" class="block w-full rounded-lg border-gray-300 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white" />
+                                        <button @click="createType('${category.id}')" x-bind:disabled="isCreatingType" class="rounded-lg bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700 disabled:opacity-50">
+                                            <span x-show="!isCreatingType">Add</span>
+                                            <svg x-show="isCreatingType" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" class="fi-icon fi-loading-indicator h-4 w-4">
                                                 <path clip-rule="evenodd" d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill-rule="evenodd" fill="currentColor" opacity="0.2"></path>
                                                 <path d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z" fill="currentColor"></path>
                                             </svg>
@@ -556,17 +773,11 @@ document.addEventListener('alpine:init', () => {
 
             document.getElementById('create-category-btn')?.addEventListener('click', () => {
                 this.createCategory(null);
-
-                const showTypeBtn = document.getElementById('show-type-btn');
-                if (showTypeBtn) showTypeBtn.style.display = 'block';
             });
 
             document.getElementById('new-category-name')?.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
                     this.createCategory(null);
-
-                    const showTypeBtn = document.getElementById('show-type-btn');
-                    if (showTypeBtn) showTypeBtn.style.display = 'block';
                 } else if (event.key === 'Escape') {
                     document.getElementById('cancel-category-btn')?.click();
                 }
@@ -595,28 +806,14 @@ document.addEventListener('alpine:init', () => {
 
             document.getElementById('create-type-btn')?.addEventListener('click', () => {
                 this.createType(null);
-
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
             });
 
             document.getElementById('new-type-name')?.addEventListener('keydown', (event) => {
                 if (event.key === 'Enter') {
                     this.createType(null);
-
-                    const showCategoryBtn = document.getElementById('show-category-btn');
-                    if (showCategoryBtn) showCategoryBtn.style.display = 'block';
                 } else if (event.key === 'Escape') {
                     document.getElementById('cancel-type-btn')?.click();
                 }
-            });
-
-            document.getElementById('save-changes-btn')?.addEventListener('click', () => {
-                this.saveChanges();
-            });
-
-            document.getElementById('discard-changes-btn')?.addEventListener('click', () => {
-                this.discardChanges();
             });
         },
 
@@ -784,6 +981,8 @@ document.addEventListener('alpine:init', () => {
             setTimeout(() => {
                 this.setupDragAndDrop();
             }, 100);
+
+            this.syncWhenIdle();
         },
 
         handleDragOver(event) {
@@ -1288,16 +1487,51 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                this.handleCategoryDrop(target, position);
-            } else if (this.dragData.draggedType === 'type') {
-                this.handleTypeDrop(target, position);
-            }
+                const categoryId = this.dragData.draggedId;
+                let parentId = null;
 
-            this.markAsChanged();
-            this.render();
+                this.mutate(
+                    () =>
+                        this.getWire().moveCategory(
+                            categoryId,
+                            parentId,
+                            this.getSiblingCategories(parentId).map((category) => category.id),
+                        ),
+                    () => {
+                        parentId = this.handleCategoryDrop(position);
+                    },
+                );
+            } else if (this.dragData.draggedType === 'type') {
+                const typeId = this.dragData.draggedId;
+                const sourceCategoryId = this.dragData.draggedSourceCategoryId || null;
+                let targetCategoryId = null;
+
+                this.mutate(
+                    () =>
+                        this.getWire().moveType(
+                            typeId,
+                            sourceCategoryId,
+                            targetCategoryId,
+                            this.getContainerTypes(targetCategoryId).map((type) => type.id),
+                        ),
+                    () => {
+                        targetCategoryId = this.handleTypeDrop(position);
+                    },
+                );
+            }
         },
 
-        handleCategoryDrop(target, position) {
+        getSiblingCategories(parentId) {
+            return parentId ? this.findCategoryById(parentId)?.children || [] : this.treeData.categories || [];
+        },
+
+        getContainerTypes(categoryId) {
+            return categoryId
+                ? this.findCategoryById(categoryId)?.types || []
+                : this.treeData.uncategorized_types || [];
+        },
+
+        handleCategoryDrop(position) {
             const categoryId = this.dragData.draggedId;
             let newParentId = null;
 
@@ -1311,9 +1545,11 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.updateCategoryInTreeData(categoryId, newParentId, position);
+
+            return newParentId;
         },
 
-        handleTypeDrop(target, position) {
+        handleTypeDrop(position) {
             const typeId = this.dragData.draggedId;
             const sourceCategoryId = this.dragData.draggedSourceCategoryId || null;
             let newCategoryId = null;
@@ -1329,6 +1565,8 @@ document.addEventListener('alpine:init', () => {
             }
 
             this.updateTypeInTreeData(typeId, sourceCategoryId, newCategoryId, position);
+
+            return newCategoryId;
         },
 
         wouldExceedDepthLimit(targetElement, parentId = null) {
@@ -1416,50 +1654,6 @@ document.addEventListener('alpine:init', () => {
             );
             if (uncategorizedIndex !== -1) {
                 return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
-            }
-
-            return null;
-        },
-
-        findCategoryParent(categoryId) {
-            const findParent = (categories, targetId, parentId = null) => {
-                for (const category of categories) {
-                    if (category.id === targetId) {
-                        return parentId;
-                    }
-                    if (category.children && category.children.length > 0) {
-                        const result = findParent(category.children, targetId, category.id);
-                        if (result !== undefined) return result;
-                    }
-                }
-                return undefined;
-            };
-
-            return findParent(this.treeData.categories || [], categoryId);
-        },
-
-        findTypeCategory(typeId) {
-            const findCategory = (categories) => {
-                for (const category of categories) {
-                    if (category.types && category.types.some((type) => type.id === typeId)) {
-                        return category.id;
-                    }
-                    if (category.children && category.children.length > 0) {
-                        const result = findCategory(category.children);
-                        if (result) return result;
-                    }
-                }
-                return null;
-            };
-
-            const categoryResult = findCategory(this.treeData.categories || []);
-            if (categoryResult) return categoryResult;
-
-            if (
-                this.treeData.uncategorized_types &&
-                this.treeData.uncategorized_types.some((type) => type.id === typeId)
-            ) {
-                return null;
             }
 
             return null;
@@ -1561,323 +1755,11 @@ document.addEventListener('alpine:init', () => {
             return null;
         },
 
-        findAndRemoveType(typeId) {
-            const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
-                (type) => type.id === typeId,
-            );
-            if (uncategorizedIndex !== -1) {
-                return this.treeData.uncategorized_types.splice(uncategorizedIndex, 1)[0];
-            }
-
-            return this.findAndRemoveTypeRecursive(typeId, this.treeData.categories || []);
-        },
-
-        findAndRemoveTypeRecursive(typeId, categories) {
-            for (const category of categories) {
-                if (category.types) {
-                    const typeIndex = category.types.findIndex((type) => type.id === typeId);
-                    if (typeIndex !== -1) {
-                        return category.types.splice(typeIndex, 1)[0];
-                    }
-                }
-                if (category.children) {
-                    const found = this.findAndRemoveTypeRecursive(typeId, category.children);
-                    if (found) return found;
-                }
-            }
-            return null;
-        },
-
-        async saveChanges() {
-            if (!this.hasUnsavedChanges || this.isSaving) return;
-
-            this.isSaving = true;
-
-            try {
-                const saveData = this.prepareSaveData();
-                const saved = await this.$wire.saveChanges(saveData);
-
-                if (!saved) {
-                    // The server rejected the changes and has already told the user why. Keep
-                    // their unsaved work intact rather than reloading over the top of it.
-                    return;
-                }
-
-                await new Promise((resolve) => setTimeout(resolve, 100));
-
-                const freshData = await this.$wire.call('getHierarchicalData');
-                this.originalTreeData = freshData;
-                this.treeData = JSON.parse(JSON.stringify(this.originalTreeData));
-                this.deletedCategories = [];
-                this.deletedTypes = [];
-                this.archivedTypes = [];
-                this.hasUnsavedChanges = false;
-                this.render();
-            } catch (error) {
-                console.error('Save failed:', error);
-
-                if (window.FilamentNotification) {
-                    new window.FilamentNotification()
-                        .title('Unable to save changes')
-                        .body(
-                            'An unexpected error occurred while saving your changes. Your work has not been lost — please try again.',
-                        )
-                        .danger()
-                        .send();
-                }
-            } finally {
-                this.isSaving = false;
-            }
-        },
-
-        prepareSaveData() {
-            const newCategories = [];
-            const newTypes = [];
-            const updatedCategories = [];
-            const updatedTypes = [];
-
-            this.deletedCategories = this.deletedCategories || [];
-            this.deletedTypes = this.deletedTypes || [];
-            this.archivedTypes = this.archivedTypes || [];
-
-            this.updateSortOrders();
-            this.extractNewItems(this.treeData.categories || [], newCategories, newTypes, null);
-            this.extractNewItemsFromUncategorized(newTypes);
-            this.extractUpdatedItems(this.treeData.categories || [], updatedCategories, updatedTypes);
-            this.extractUpdatedItemsFromUncategorized(updatedTypes);
-
-            return {
-                categories: this.treeData.categories || [],
-                uncategorized_types: this.treeData.uncategorized_types || [],
-                new_categories: newCategories,
-                new_types: newTypes,
-                updated_categories: updatedCategories,
-                updated_types: updatedTypes,
-                deleted_categories: this.deletedCategories,
-                deleted_types: this.deletedTypes,
-                archived_types: this.archivedTypes,
-                restore_types: this.collectRestoreTypeIds(),
-            };
-        },
-
-        collectRestoreTypeIds() {
-            const ids = [];
-            const walkTypes = (types) => {
-                (types || []).forEach((type) => {
-                    if (type._restore) ids.push(type.id);
-                });
-            };
-            const walkCategories = (categories) => {
-                (categories || []).forEach((category) => {
-                    walkTypes(category.types);
-                    walkCategories(category.children);
-                });
-            };
-            walkTypes(this.treeData.uncategorized_types);
-            walkCategories(this.treeData.categories);
-            return ids;
-        },
-
-        updateSortOrders() {
-            if (this.treeData.categories) {
-                this.treeData.categories.forEach((category, index) => {
-                    category.sort = index + 1;
-                    category.parent_id = null;
-                    this.updateCategorySortOrders(category);
-                });
-            }
-
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type, index) => {
-                    type.sort = index + 1;
-                });
-            }
-        },
-
-        updateCategorySortOrders(category) {
-            if (category.types) {
-                category.types.forEach((type, index) => {
-                    type.sort = index + 1;
-                });
-            }
-
-            if (category.children) {
-                category.children.forEach((child, index) => {
-                    child.sort = index + 1;
-                    child.parent_id = category.id;
-                    this.updateCategorySortOrders(child);
-                });
-            }
-        },
-
-        extractNewItems(categories, newCategories, newTypes, parentId) {
-            categories.forEach((category, index) => {
-                if (typeof category.id === 'string' && category.id.startsWith('temp_')) {
-                    // This is a new category
-                    newCategories.push({
-                        temp_id: category.id,
-                        name: category.name,
-                        parent_id: parentId,
-                        sort: index + 1,
-                    });
-                }
-
-                // Extract new types from this category
-                if (category.types) {
-                    category.types.forEach((type, typeIndex) => {
-                        if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                            // A brand-new type may appear in several areas; it is only recorded
-                            // once for creation and its placements come from the tree structure.
-                            if (newTypes.some((newType) => newType.temp_id === type.id)) {
-                                return;
-                            }
-
-                            newTypes.push({
-                                temp_id: type.id,
-                                name: type.name,
-                                sort: typeIndex + 1,
-                            });
-                        }
-                    });
-                }
-
-                // Recursively handle children
-                if (category.children) {
-                    this.extractNewItems(category.children, newCategories, newTypes, category.id);
-                }
-            });
-        },
-
-        extractNewItemsFromUncategorized(newTypes) {
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type, index) => {
-                    if (typeof type.id === 'string' && type.id.startsWith('temp_')) {
-                        if (newTypes.some((newType) => newType.temp_id === type.id)) {
-                            return;
-                        }
-
-                        newTypes.push({
-                            temp_id: type.id,
-                            name: type.name,
-                            sort: index + 1,
-                        });
-                    }
-                });
-            }
-        },
-
-        extractUpdatedItems(categories, updatedCategories, updatedTypes) {
-            categories.forEach((category) => {
-                // Only check existing categories (not temp ones)
-                if (!(typeof category.id === 'string' && category.id.startsWith('temp_'))) {
-                    const originalCategory = this.findOriginalCategoryById(category.id);
-                    if (originalCategory && originalCategory.name !== category.name) {
-                        updatedCategories.push({
-                            id: category.id,
-                            name: category.name,
-                        });
-                    }
-                }
-
-                // Check types in this category
-                if (category.types) {
-                    category.types.forEach((type) => {
-                        if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
-                            const originalType = this.findOriginalTypeById(type.id);
-                            if (
-                                originalType &&
-                                originalType.name !== type.name &&
-                                !updatedTypes.some((updated) => updated.id === type.id)
-                            ) {
-                                updatedTypes.push({
-                                    id: type.id,
-                                    name: type.name,
-                                });
-                            }
-                        }
-                    });
-                }
-
-                // Recursively handle children
-                if (category.children) {
-                    this.extractUpdatedItems(category.children, updatedCategories, updatedTypes);
-                }
-            });
-        },
-
-        extractUpdatedItemsFromUncategorized(updatedTypes) {
-            if (this.treeData.uncategorized_types) {
-                this.treeData.uncategorized_types.forEach((type) => {
-                    if (!(typeof type.id === 'string' && type.id.startsWith('temp_'))) {
-                        const originalType = this.findOriginalTypeById(type.id);
-                        if (originalType && originalType.name !== type.name) {
-                            updatedTypes.push({
-                                id: type.id,
-                                name: type.name,
-                            });
-                        }
-                    }
-                });
-            }
-        },
-
-        findOriginalCategoryById(categoryId, categories = null) {
-            if (!categories) {
-                categories = this.originalTreeData.categories || [];
-            }
-
-            for (const category of categories) {
-                if (category.id === categoryId) {
-                    return category;
-                }
-                if (category.children) {
-                    const found = this.findOriginalCategoryById(categoryId, category.children);
-                    if (found) return found;
-                }
-            }
-            return null;
-        },
-
-        findOriginalTypeById(typeId) {
-            // Check uncategorized types first
-            if (this.originalTreeData.uncategorized_types) {
-                const type = this.originalTreeData.uncategorized_types.find((type) => type.id === typeId);
-                if (type) return type;
-            }
-
-            // Search in categories recursively
-            const findInCategories = (categories) => {
-                for (const category of categories) {
-                    if (category.types) {
-                        const type = category.types.find((type) => type.id === typeId);
-                        if (type) return type;
-                    }
-                    if (category.children) {
-                        const found = findInCategories(category.children);
-                        if (found) return found;
-                    }
-                }
-                return null;
-            };
-
-            return findInCategories(this.originalTreeData.categories || []);
-        },
-
-        discardChanges() {
-            this.deepCopyTreeData();
-            this.hasUnsavedChanges = false;
-            this.categoryInputs = {};
-            this.typeInputs = {};
-            this.existingTypeInputs = {};
-            this.render();
-        },
-
         showCategoryInput(categoryId) {
             this.categoryInputs[categoryId] = true;
             this.render();
             setTimeout(() => {
                 document.getElementById(`child-category-${categoryId}`)?.focus();
-                this.attachInputKeyHandlers(categoryId, 'category');
             }, 50);
         },
 
@@ -1891,7 +1773,6 @@ document.addEventListener('alpine:init', () => {
             this.render();
             setTimeout(() => {
                 document.getElementById(`child-type-${categoryId}`)?.focus();
-                this.attachInputKeyHandlers(categoryId, 'type');
             }, 50);
         },
 
@@ -1900,28 +1781,9 @@ document.addEventListener('alpine:init', () => {
             this.render();
         },
 
-        attachInputKeyHandlers(categoryId, inputType) {
-            const input = document.getElementById(`child-${inputType}-${categoryId}`);
-            if (!input) return;
+        async createCategory(parentId) {
+            if (this.isCreatingCategory) return;
 
-            input.addEventListener('keydown', (event) => {
-                if (event.key === 'Enter') {
-                    if (inputType === 'category') {
-                        this.createCategory(categoryId);
-                    } else {
-                        this.createType(categoryId);
-                    }
-                } else if (event.key === 'Escape') {
-                    if (inputType === 'category') {
-                        this.hideCategoryInput(categoryId);
-                    } else {
-                        this.hideTypeInput(categoryId);
-                    }
-                }
-            });
-        },
-
-        createCategory(parentId) {
             let name;
 
             if (parentId) {
@@ -1939,49 +1801,33 @@ document.addEventListener('alpine:init', () => {
 
             if (!name?.trim()) return;
 
-            // Create new category with temporary ID
-            const newCategory = {
-                id: `temp_${this.nextTempId++}`,
-                name: name.trim(),
-                type: 'category',
-                sort: 0,
-                parent_id: parentId,
-                children: [],
-                types: [],
-            };
+            this.isCreatingCategory = true;
 
-            // Add to the appropriate location in tree data
-            if (parentId) {
-                const parentCategory = this.findCategoryById(parentId);
-                if (parentCategory) {
-                    if (!parentCategory.children) {
-                        parentCategory.children = [];
-                    }
-                    parentCategory.children.push(newCategory);
+            try {
+                const saved = await this.mutate(() => this.getWire().createCategory(name.trim(), parentId));
+
+                if (!saved) {
+                    return;
                 }
-            } else {
-                if (!this.treeData.categories) {
-                    this.treeData.categories = [];
-                }
-                this.treeData.categories.push(newCategory);
+            } finally {
+                this.isCreatingCategory = false;
             }
 
-            // Mark as changed and re-render
-            this.markAsChanged();
-
-            // Hide input and clear form
             if (parentId) {
                 this.hideCategoryInput(parentId);
             } else {
                 document.getElementById('show-category-btn').style.display = 'block';
                 document.getElementById('category-input-form').style.display = 'none';
                 document.getElementById('new-category-name').value = '';
-            }
 
-            this.render();
+                const showTypeBtn = document.getElementById('show-type-btn');
+                if (showTypeBtn) showTypeBtn.style.display = 'block';
+            }
         },
 
         async createType(categoryId) {
+            if (this.isCreatingType) return;
+
             let name;
 
             if (categoryId) {
@@ -1994,22 +1840,15 @@ document.addEventListener('alpine:init', () => {
 
             if (!name?.trim()) return;
 
-            const locallyRemovedType = this.findLocallyRemovedTypeByName(name.trim());
-
-            if (locallyRemovedType) {
-                this.undoLocalRemoval(locallyRemovedType, categoryId);
-                return;
-            }
-
             if (this.activeTypeNameExists(name.trim())) {
                 this.notifyDuplicateTypeName(name.trim());
                 return;
             }
 
-            this.isCheckingType = true;
+            this.isCreatingType = true;
 
             try {
-                const archivedType = await this.$wire.checkArchivedTypeName(name.trim());
+                const archivedType = await this.getWire().checkArchivedTypeName(name.trim());
 
                 if (archivedType) {
                     this.pendingRestore = { archivedType, categoryId };
@@ -2019,84 +1858,32 @@ document.addEventListener('alpine:init', () => {
                     return;
                 }
 
-                this.addTypeToTree(
-                    {
-                        id: `temp_${this.nextTempId++}`,
-                        name: name.trim(),
-                        type: 'type',
-                        sort: 0,
-                        service_requests_count: 0,
-                    },
-                    categoryId,
-                );
+                const saved = await this.mutate(() => this.getWire().createType(name.trim(), categoryId));
+
+                if (saved) {
+                    this.hideTypeInputAfterCreating(categoryId);
+                }
             } finally {
-                this.isCheckingType = false;
+                this.isCreatingType = false;
             }
         },
 
-        confirmRestore() {
+        async confirmRestore() {
             if (!this.pendingRestore) return;
 
             const { archivedType, categoryId } = this.pendingRestore;
             this.pendingRestore = null;
 
-            this.addTypeToTree(
-                {
-                    id: archivedType.id,
-                    name: archivedType.name,
-                    type: 'type',
-                    sort: 0,
-                    service_requests_count: archivedType.service_requests_count,
-                    view_url: archivedType.view_url,
-                    _restore: true,
-                },
-                categoryId,
-            );
+            const saved = await this.mutate(() => this.getWire().restoreArchivedType(archivedType.id, categoryId));
+
+            if (saved) {
+                this.hideTypeInputAfterCreating(categoryId);
+            }
         },
 
-        findLocallyRemovedTypeByName(name) {
-            const removedIds = [...(this.deletedTypes || []), ...(this.archivedTypes || [])];
-            if (removedIds.length === 0) return null;
-
-            const findInTypes = (types) => {
-                return (types || []).find((type) => removedIds.includes(type.id) && type.name === name);
-            };
-            const findInCategories = (categories) => {
-                for (const category of categories || []) {
-                    const found = findInTypes(category.types);
-                    if (found) return found;
-                    const childResult = findInCategories(category.children);
-                    if (childResult) return childResult;
-                }
-                return null;
-            };
-
-            return (
-                findInTypes(this.originalTreeData.uncategorized_types) ||
-                findInCategories(this.originalTreeData.categories)
-            );
-        },
-
-        undoLocalRemoval(type, categoryId) {
-            this.deletedTypes = (this.deletedTypes || []).filter((id) => id !== type.id);
-            this.archivedTypes = (this.archivedTypes || []).filter((id) => id !== type.id);
-
-            this.addTypeToTree(
-                {
-                    id: type.id,
-                    name: type.name,
-                    type: 'type',
-                    sort: 0,
-                    service_requests_count: type.service_requests_count ?? 0,
-                    view_url: type.view_url ?? '',
-                },
-                categoryId,
-            );
-        },
-
-        // Whether an active (not staged for deletion/archival) type already uses this name
-        // anywhere in the tree. Names must be unique across every area, so this powers the
-        // client-side guard that stops duplicates before they ever reach the server.
+        // Whether a type already uses this name anywhere in the tree. Names must be unique across
+        // every area, so this powers the client-side guard that stops duplicates before they ever
+        // reach the server.
         activeTypeNameExists(name, excludeTypeId = null) {
             const target = (name || '').trim().toLowerCase();
 
@@ -2104,14 +1891,9 @@ document.addEventListener('alpine:init', () => {
                 return false;
             }
 
-            const removedIds = new Set([...(this.deletedTypes || []), ...(this.archivedTypes || [])]);
-
             const matches = (types) =>
                 (types || []).some(
-                    (type) =>
-                        type.id !== excludeTypeId &&
-                        !removedIds.has(type.id) &&
-                        (type.name || '').trim().toLowerCase() === target,
+                    (type) => type.id !== excludeTypeId && (type.name || '').trim().toLowerCase() === target,
                 );
 
             const walk = (categories) => {
@@ -2145,83 +1927,25 @@ document.addEventListener('alpine:init', () => {
                 .send();
         },
 
-        addTypeToTree(type, categoryId) {
-            if (categoryId) {
-                const category = this.findCategoryById(categoryId);
-                if (category) {
-                    if (!category.types) {
-                        category.types = [];
-                    }
-                    category.types.push(type);
-                }
-            } else {
-                if (!this.treeData.uncategorized_types) {
-                    this.treeData.uncategorized_types = [];
-                }
-                this.treeData.uncategorized_types.push(type);
-            }
-
-            this.markAsChanged();
-
+        hideTypeInputAfterCreating(categoryId) {
             if (categoryId) {
                 this.hideTypeInput(categoryId);
-            } else {
-                document.getElementById('show-type-btn').style.display = 'block';
-                document.getElementById('type-input-form').style.display = 'none';
-                document.getElementById('new-type-name').value = '';
-                const showCategoryBtn = document.getElementById('show-category-btn');
-                if (showCategoryBtn) showCategoryBtn.style.display = 'block';
-            }
 
-            this.render();
-        },
-
-        stageCategoryDeletion(categoryId) {
-            this.deletedCategories = this.deletedCategories || [];
-            if (!this.deletedCategories.includes(categoryId)) {
-                this.deletedCategories.push(categoryId);
-            }
-
-            this.removeCategoryFromTree(categoryId);
-            this.markAsChanged();
-            this.render();
-        },
-
-        removeCategoryFromTree(categoryId) {
-            const removedCategory = this.findAndRemoveCategory(categoryId);
-            if (!removedCategory) {
                 return;
             }
 
-            const queue = [...(removedCategory.children || [])];
-
-            while (queue.length) {
-                const child = queue.shift();
-                this.deletedCategories = this.deletedCategories || [];
-                if (!this.deletedCategories.includes(child.id)) {
-                    this.deletedCategories.push(child.id);
-                }
-
-                queue.push(...(child.children || []));
-
-                (child.types || []).forEach((type) => {
-                    this.deletedTypes = this.deletedTypes || [];
-                    if (!this.deletedTypes.includes(type.id)) {
-                        this.deletedTypes.push(type.id);
-                    }
-                });
-            }
-
-            (removedCategory.types || []).forEach((type) => {
-                this.deletedTypes = this.deletedTypes || [];
-                if (!this.deletedTypes.includes(type.id)) {
-                    this.deletedTypes.push(type.id);
-                }
-            });
+            document.getElementById('show-type-btn').style.display = 'block';
+            document.getElementById('type-input-form').style.display = 'none';
+            document.getElementById('new-type-name').value = '';
+            const showCategoryBtn = document.getElementById('show-category-btn');
+            if (showCategoryBtn) showCategoryBtn.style.display = 'block';
         },
 
-        confirmDeleteCategory(categoryId) {
-            this.stageCategoryDeletion(categoryId);
+        deleteCategory(categoryId) {
+            this.mutate(
+                () => this.getWire().deleteCategory(categoryId),
+                () => this.findAndRemoveCategory(categoryId),
+            );
         },
 
         canDeleteCategory(category) {
@@ -2242,7 +1966,17 @@ document.addEventListener('alpine:init', () => {
         },
 
         removeTypeFromTree(typeId) {
-            this.findAndRemoveType(typeId);
+            const removeFrom = (types) => (types || []).filter((type) => type.id !== typeId);
+
+            const walk = (categories) => {
+                for (const category of categories || []) {
+                    category.types = removeFrom(category.types);
+                    walk(category.children);
+                }
+            };
+
+            walk(this.treeData.categories);
+            this.treeData.uncategorized_types = removeFrom(this.treeData.uncategorized_types);
         },
 
         typePlacementKey(typeId, owningCategoryId) {
@@ -2308,23 +2042,22 @@ document.addEventListener('alpine:init', () => {
         removeTypePlacement(typeId, owningCategoryId) {
             const categoryId = owningCategoryId || null;
 
-            if (categoryId) {
-                const category = this.findCategoryById(categoryId);
-                if (category && category.types) {
-                    const index = category.types.findIndex((type) => type.id === typeId);
-                    if (index !== -1) {
-                        category.types.splice(index, 1);
-                    }
-                }
-            } else {
-                const index = (this.treeData.uncategorized_types || []).findIndex((type) => type.id === typeId);
-                if (index !== -1) {
-                    this.treeData.uncategorized_types.splice(index, 1);
-                }
+            if (!categoryId) {
+                return;
             }
 
-            this.markAsChanged();
-            this.render();
+            this.mutate(
+                () => this.getWire().removeTypeFromCategory(typeId, categoryId),
+                () => {
+                    const category = this.findCategoryById(categoryId);
+                    if (category && category.types) {
+                        const index = category.types.findIndex((type) => type.id === typeId);
+                        if (index !== -1) {
+                            category.types.splice(index, 1);
+                        }
+                    }
+                },
+            );
         },
 
         showExistingTypeInput(categoryId) {
@@ -2360,61 +2093,45 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // A type filed under any category can no longer be uncategorized, so drop it from the
-            // uncategorized bucket when it gains its first category placement.
-            const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
-                (type) => type.id === typeId,
-            );
-            if (uncategorizedIndex !== -1) {
-                this.treeData.uncategorized_types.splice(uncategorizedIndex, 1);
-            }
-
-            const placement = {
-                id: source.id,
-                name: source.name,
-                type: 'type',
-                sort: 0,
-                service_requests_count: source.service_requests_count ?? 0,
-                view_url: source.view_url ?? '',
-                is_visibility_restricted: source.is_visibility_restricted ?? false,
-                restricted_to_contact_type_ids: source.restricted_to_contact_type_ids ?? [],
-            };
-
-            const category = this.findCategoryById(categoryId);
-            if (category) {
-                category.types = category.types || [];
-                category.types.push(placement);
-            }
-
             if (this.collapsedCategories[categoryId]) {
                 delete this.collapsedCategories[categoryId];
             }
 
-            this.hideExistingTypeInput(categoryId);
-            this.markAsChanged();
-            this.render();
+            this.existingTypeInputs[categoryId] = false;
+
+            this.mutate(
+                () => this.getWire().addTypeToCategory(typeId, categoryId),
+                () => {
+                    // A type filed under any category can no longer be uncategorized, so drop it from
+                    // the uncategorized bucket when it gains its first category placement.
+                    const uncategorizedIndex = (this.treeData.uncategorized_types || []).findIndex(
+                        (type) => type.id === typeId,
+                    );
+                    if (uncategorizedIndex !== -1) {
+                        this.treeData.uncategorized_types.splice(uncategorizedIndex, 1);
+                    }
+
+                    const category = this.findCategoryById(categoryId);
+                    if (category) {
+                        category.types = category.types || [];
+                        category.types.push({ ...source, sort: 0 });
+                    }
+                },
+            );
         },
 
-        stageTypeDeletion(typeId) {
-            this.deletedTypes = this.deletedTypes || [];
-            if (!this.deletedTypes.includes(typeId)) {
-                this.deletedTypes.push(typeId);
-            }
-
-            this.removeTypeFromTree(typeId);
-            this.markAsChanged();
-            this.render();
+        deleteType(typeId) {
+            this.mutate(
+                () => this.getWire().deleteType(typeId),
+                () => this.removeTypeFromTree(typeId),
+            );
         },
 
-        stageTypeArchive(typeId) {
-            this.archivedTypes = this.archivedTypes || [];
-            if (!this.archivedTypes.includes(typeId)) {
-                this.archivedTypes.push(typeId);
-            }
-
-            this.removeTypeFromTree(typeId);
-            this.markAsChanged();
-            this.render();
+        archiveType(typeId) {
+            this.mutate(
+                () => this.getWire().archiveType(typeId),
+                () => this.removeTypeFromTree(typeId),
+            );
         },
 
         startTypeRename(typeId, placementKey) {
@@ -2422,25 +2139,10 @@ document.addEventListener('alpine:init', () => {
             this.render();
             setTimeout(() => {
                 const input = document.getElementById(`rename-type-${placementKey}`);
-                const confirmBtn = document.getElementById(`confirm-rename-type-${placementKey}`);
 
                 if (input) {
                     input.focus();
                     input.select();
-
-                    input.addEventListener('input', (event) => {
-                        if (confirmBtn) {
-                            confirmBtn.disabled = !event.target.value.trim();
-                        }
-                    });
-
-                    input.addEventListener('keydown', (event) => {
-                        if (event.key === 'Enter' && input.value.trim()) {
-                            this.confirmTypeRename(typeId, placementKey);
-                        } else if (event.key === 'Escape') {
-                            this.cancelTypeRename(placementKey);
-                        }
-                    });
                 }
             }, 50);
         },
@@ -2458,32 +2160,35 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            // Renaming is type-level, so update the name on every placement of this type.
-            let changed = false;
+            delete this.renamingTypes[placementKey];
 
-            const applyName = (type) => {
-                if (type.id === typeId && type.name !== newName) {
-                    type.name = newName;
-                    changed = true;
-                }
-            };
+            if (this.findTypeById(typeId)?.name === newName) {
+                this.render();
 
-            const walk = (categories) => {
-                for (const category of categories || []) {
-                    (category.types || []).forEach(applyName);
-                    walk(category.children);
-                }
-            };
-
-            walk(this.treeData.categories);
-            (this.treeData.uncategorized_types || []).forEach(applyName);
-
-            if (changed) {
-                this.markAsChanged();
+                return;
             }
 
-            delete this.renamingTypes[placementKey];
-            this.render();
+            this.mutate(
+                () => this.getWire().renameType(typeId, newName),
+                () => {
+                    // Renaming is type-level, so update the name on every placement of this type.
+                    const applyName = (type) => {
+                        if (type.id === typeId) {
+                            type.name = newName;
+                        }
+                    };
+
+                    const walk = (categories) => {
+                        for (const category of categories || []) {
+                            (category.types || []).forEach(applyName);
+                            walk(category.children);
+                        }
+                    };
+
+                    walk(this.treeData.categories);
+                    (this.treeData.uncategorized_types || []).forEach(applyName);
+                },
+            );
         },
 
         cancelTypeRename(placementKey) {
@@ -2496,25 +2201,10 @@ document.addEventListener('alpine:init', () => {
             this.render();
             setTimeout(() => {
                 const input = document.getElementById(`rename-category-${categoryId}`);
-                const confirmBtn = document.getElementById(`confirm-rename-category-${categoryId}`);
 
                 if (input) {
                     input.focus();
                     input.select();
-
-                    input.addEventListener('input', (event) => {
-                        if (confirmBtn) {
-                            confirmBtn.disabled = !event.target.value.trim();
-                        }
-                    });
-
-                    input.addEventListener('keydown', (event) => {
-                        if (event.key === 'Enter' && input.value.trim()) {
-                            this.confirmCategoryRename(categoryId);
-                        } else if (event.key === 'Escape') {
-                            this.cancelCategoryRename(categoryId);
-                        }
-                    });
                 }
             }, 50);
         },
@@ -2527,14 +2217,22 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
+            this.renamingCategories[categoryId] = false;
+
             const category = this.findCategoryById(categoryId);
-            if (category && category.name !== newName) {
-                category.name = newName;
-                this.markAsChanged();
+
+            if (!category || category.name === newName) {
+                this.render();
+
+                return;
             }
 
-            this.renamingCategories[categoryId] = false;
-            this.render();
+            this.mutate(
+                () => this.getWire().renameCategory(categoryId, newName),
+                () => {
+                    category.name = newName;
+                },
+            );
         },
 
         cancelCategoryRename(categoryId) {
@@ -2545,7 +2243,8 @@ document.addEventListener('alpine:init', () => {
         escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
-            return div.innerHTML;
+            // Quotes too, as names are also interpolated into attributes Alpine would evaluate.
+            return div.innerHTML.replaceAll('"', '&quot;').replaceAll("'", '&#39;');
         },
     }));
 });

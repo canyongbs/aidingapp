@@ -40,53 +40,12 @@
         id="service-request-type-manager"
         wire:ignore
         x-data="serviceRequestTypeManager({
-                    originalTreeData: @js($this->hierarchicalData),
                     treeData: @js($this->hierarchicalData),
                     canEdit: @js($this->canEdit),
+                    channelName: @js($this->getCatalogChannelName()),
                 })"
         @service-request-type-visibility-updated.window="onVisibilityUpdated($event.detail)"
     >
-        {{-- Sticky Save Banner --}}
-        <div
-            class="sticky top-20 z-30"
-            style="display: none"
-            x-show="hasUnsavedChanges && canEdit"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 -translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 -translate-y-2"
-        >
-            <x-filament::callout
-                color="warning"
-                icon="heroicon-m-exclamation-triangle"
-                heading="You have unsaved changes"
-                description="Save your changes or they will be lost"
-            >
-                <x-slot name="footer">
-                    <div class="flex gap-3">
-                        <x-filament::button
-                            @click="saveChanges()"
-                            x-bind:disabled="isSaving"
-                            icon="heroicon-m-arrow-down-tray"
-                        >
-                            <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
-                        </x-filament::button>
-
-                        <x-filament::button
-                            @click="discardChanges()"
-                            x-bind:disabled="isSaving"
-                            color="gray"
-                            icon="heroicon-m-x-mark"
-                        >
-                            Discard
-                        </x-filament::button>
-                    </div>
-                </x-slot>
-            </x-filament::callout>
-        </div>
-
         {{-- Top Action Buttons --}}
         <div class="flex flex-col items-end gap-2" x-show="canEdit">
             {{-- Add Service Request Area/Type Buttons (Right) --}}
@@ -134,7 +93,7 @@
                                 id="new-type-name"
                                 type="text"
                                 placeholder="Name of new type"
-                                x-bind:disabled="isCheckingType"
+                                x-bind:disabled="isCreatingType"
                             />
                         </div>
                         <div class="flex gap-2">
@@ -142,10 +101,10 @@
                                 id="create-type-btn"
                                 type="button"
                                 size="sm"
-                                x-bind:disabled="isCheckingType"
+                                x-bind:disabled="isCreatingType"
                             >
-                                <span x-show="!isCheckingType">Add</span>
-                                <x-filament::loading-indicator x-show="isCheckingType" class="h-4 w-4" />
+                                <span x-show="!isCreatingType">Add</span>
+                                <x-filament::loading-indicator x-show="isCreatingType" class="h-4 w-4" />
                             </x-filament::button>
                             <x-filament::button id="cancel-type-btn" type="button" color="gray" size="sm">
                                 Cancel
@@ -208,37 +167,6 @@
                         first items.
                     </p>
                 </div>
-            </div>
-        </div>
-
-        {{-- Bottom Action Buttons --}}
-        <div class="flex flex-col items-center justify-between gap-4 sm:flex-row sm:items-center" x-show="canEdit">
-            {{-- Save/Discard Buttons --}}
-            <div class="flex w-full justify-start gap-3 sm:w-auto">
-                <x-filament::button
-                    id="save-changes-btn"
-                    type="button"
-                    size="sm"
-                    icon="heroicon-m-check"
-                    x-bind:disabled="isSaving"
-                    x-show="hasUnsavedChanges"
-                    @click="saveChanges()"
-                >
-                    <span x-text="isSaving ? 'Saving...' : 'Save Changes'"></span>
-                </x-filament::button>
-
-                <x-filament::button
-                    id="discard-changes-btn"
-                    type="button"
-                    color="gray"
-                    size="sm"
-                    icon="heroicon-m-x-mark"
-                    x-bind:disabled="isSaving"
-                    x-show="hasUnsavedChanges"
-                    @click="discardChanges()"
-                >
-                    Discard Changes
-                </x-filament::button>
             </div>
         </div>
 

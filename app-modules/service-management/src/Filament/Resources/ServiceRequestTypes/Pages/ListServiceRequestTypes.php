@@ -38,20 +38,28 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pag
 
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
+use AidingApp\ServiceManagement\Events\ServiceRequestTypeCatalogUpdated;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Models\Tenant;
+use Closure;
 use Filament\Actions\Action;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\ToggleButtons;
 use Filament\Notifications\Notification;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Utilities\Get;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Broadcast;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 use Livewire\Attributes\Computed;
@@ -59,30 +67,19 @@ use Livewire\Attributes\Renderless;
 use Throwable;
 
 /**
+ * The service catalog builder. Every change is saved as soon as it is made, and other users viewing
+ * the builder are told over a websocket to reload the tree.
+ *
  * @property-read array<string, mixed> $hierarchicalData
  */
 class ListServiceRequestTypes extends ListRecords
 {
+    /** Arbitrary PostgreSQL advisory lock key; locks are per database, so per tenant. */
+    protected const CATALOG_LOCK_KEY = 7_418_211_903;
+
     protected static string $resource = ServiceRequestTypeResource::class;
 
     protected string $view = 'service-management::filament.resources.service-request-type-resource.pages.list-service-request-types';
-
-    /**
-     * Category placements accumulated while walking the tree during a save, keyed by type id then
-     * category id, with the per-area sort as the value. Applied in bulk once the whole tree has been
-     * walked so a type filed under several categories keeps every membership instead of only the
-     * last one written.
-     *
-     * @var array<string, array<string, int>>
-     */
-    protected array $pendingTypePlacements = [];
-
-    /**
-     * Desired `sort` values for types that end up uncategorised during a save, keyed by type id.
-     *
-     * @var array<string, int>
-     */
-    protected array $pendingUncategorizedTypeSorts = [];
 
     #[Computed]
     public function canEdit(): bool
@@ -102,6 +99,7 @@ class ListServiceRequestTypes extends ListRecords
     /**
      * @return array<string, mixed>
      */
+    #[Renderless]
     public function getHierarchicalData(): array
     {
         // Ordering is handled by the `types` relationship itself through the pivot `sort`, so no
@@ -156,6 +154,11 @@ class ListServiceRequestTypes extends ListRecords
         ];
     }
 
+    public function getCatalogChannelName(): string
+    {
+        return ServiceRequestTypeCatalogUpdated::channelName($this->getCurrentTenantId());
+    }
+
     public function manageVisibilityAction(): Action
     {
         return Action::make('manageVisibility')
@@ -196,6 +199,8 @@ class ListServiceRequestTypes extends ListRecords
                     $node->restrictedToContactTypes()->sync($contactTypeIds);
                 });
 
+                $this->broadcastCatalogUpdate();
+
                 unset($this->hierarchicalData);
 
                 $this->dispatch(
@@ -214,39 +219,301 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
-     * Persist the tree changes, returning whether they were saved.
-     *
-     * Any failure is reported to the user through a notification and results in `false` rather than
-     * an exception bubbling to the client, so the front-end never gets stuck in a "saving" state and
-     * the user's unsaved work is preserved instead of being wiped by a reload.
-     *
-     * @param array<string, mixed> $treeData
+     * @return array{saved: bool, tree: array<string, mixed>}
      */
-    public function saveChanges(array $treeData): bool
+    #[Renderless]
+    public function createCategory(string $name, ?string $parentId = null): array
     {
-        try {
-            $this->persistChanges($treeData);
-        } catch (ValidationException $exception) {
-            Notification::make()
-                ->danger()
-                ->title('Unable to save changes')
-                ->body(collect($exception->errors())->flatten()->first() ?? 'Please review your changes and try again.')
-                ->send();
+        return $this->mutateCatalog(function () use ($name, $parentId): void {
+            $name = $this->validateCategoryName($name);
+            $parent = filled($parentId) ? $this->findCategory($parentId) : null;
 
-            return false;
-        } catch (Throwable $exception) {
-            report($exception);
+            if ($parent?->parent_id !== null) {
+                $this->throwMaxDepthExceeded();
+            }
 
-            Notification::make()
-                ->danger()
-                ->title('Unable to save changes')
-                ->body('An unexpected error occurred while saving your changes. Your work has not been lost — please try again.')
-                ->send();
+            $category = new ServiceRequestTypeCategory();
+            $category->name = $name;
+            $category->parent()->associate($parent);
+            $category->save();
+        });
+    }
 
-            return false;
-        }
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function renameCategory(string $categoryId, string $name): array
+    {
+        return $this->mutateCatalog(function () use ($categoryId, $name): void {
+            $name = $this->validateCategoryName($name);
 
-        return true;
+            $category = $this->findCategory($categoryId);
+            $category->name = $name;
+            $category->save();
+        });
+    }
+
+    /**
+     * Move an area under a new parent (or to the root), then order its new siblings.
+     *
+     * @param array<int, mixed> $orderedSiblingIds
+     *
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function moveCategory(string $categoryId, ?string $parentId, array $orderedSiblingIds): array
+    {
+        return $this->mutateCatalog(function () use ($categoryId, $parentId, $orderedSiblingIds): void {
+            $category = $this->findCategory($categoryId);
+            $parent = filled($parentId) ? $this->findCategory($parentId) : null;
+
+            if (
+                ($parent !== null)
+                && ($parent->is($category) || ($parent->parent_id !== null) || $category->children()->exists())
+            ) {
+                $this->throwMaxDepthExceeded();
+            }
+
+            $category->parent()->associate($parent);
+            $category->save();
+
+            $this->reorderCategories($parent, $orderedSiblingIds);
+        });
+    }
+
+    /**
+     * Delete an area and its child areas. Types filed only within them are deleted; types that are
+     * also filed elsewhere are just removed from them.
+     *
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function deleteCategory(string $categoryId): array
+    {
+        return $this->mutateCatalog(function () use ($categoryId): void {
+            $categoryIds = $this->collectCategoryTreeIds($this->findCategory($categoryId));
+
+            $categories = ServiceRequestTypeCategory::query()
+                ->whereKey($categoryIds)
+                ->withCount('descendantServiceRequests')
+                ->get();
+
+            foreach ($categories as $category) {
+                if ($category->descendant_service_requests_count > 0) {
+                    throw ValidationException::withMessages([
+                        'categoryId' => "Cannot delete category {$category->name} while service requests exist in its descendants.",
+                    ]);
+                }
+            }
+
+            $types = ServiceRequestType::query()
+                ->whereHas('categories', fn (Builder $query) => $query->whereKey($categoryIds))
+                ->with('categories:id')
+                ->get();
+
+            foreach ($types as $type) {
+                if (array_diff($type->categories->modelKeys(), $categoryIds) === []) {
+                    $type->delete();
+                }
+            }
+
+            foreach ($categories as $category) {
+                $category->types()->detach();
+                $category->delete();
+            }
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function createType(string $name, ?string $categoryId = null): array
+    {
+        return $this->mutateCatalog(function () use ($name, $categoryId): void {
+            $name = $this->validateTypeName($name);
+            $category = filled($categoryId) ? $this->findCategory($categoryId) : null;
+
+            $type = new ServiceRequestType();
+            $type->name = $name;
+            $type->default_category = ServiceRequestCategory::Request;
+            $type->save();
+
+            $type->priorities()->createMany([
+                ['name' => 'High', 'order' => 1],
+                ['name' => 'Medium', 'order' => 2],
+                ['name' => 'Low', 'order' => 3],
+            ]);
+
+            if ($category !== null) {
+                $this->appendTypeToCategory($type, $category);
+            }
+        });
+    }
+
+    /**
+     * Unarchive a type, placing it only in the given area (or uncategorized).
+     *
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function restoreArchivedType(string $typeId, ?string $categoryId = null): array
+    {
+        return $this->mutateCatalog(function () use ($typeId, $categoryId): void {
+            $type = $this->findType($typeId, isArchived: true);
+            $category = filled($categoryId) ? $this->findCategory($categoryId) : null;
+
+            $type->unarchive();
+            $type->categories()->detach();
+
+            if ($category !== null) {
+                $this->appendTypeToCategory($type, $category);
+
+                return;
+            }
+
+            $type->sort = $this->getNextUncategorizedTypeSort();
+            $type->save();
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function renameType(string $typeId, string $name): array
+    {
+        return $this->mutateCatalog(function () use ($typeId, $name): void {
+            $type = $this->findType($typeId);
+
+            $type->name = $this->validateTypeName($name, ignoreTypeId: $type->getKey());
+            $type->save();
+        });
+    }
+
+    /**
+     * Move one placement of a type from an area (or uncategorized) to another, then order the types
+     * in its destination.
+     *
+     * @param array<int, mixed> $orderedTypeIds
+     *
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function moveType(string $typeId, ?string $fromCategoryId, ?string $toCategoryId, array $orderedTypeIds): array
+    {
+        return $this->mutateCatalog(function () use ($typeId, $fromCategoryId, $toCategoryId, $orderedTypeIds): void {
+            $type = $this->findType($typeId);
+            $from = filled($fromCategoryId) ? $this->findCategory($fromCategoryId) : null;
+            $to = filled($toCategoryId) ? $this->findCategory($toCategoryId) : null;
+
+            if ($to === null) {
+                $isFiledElsewhere = $type->categories()
+                    ->pluck('service_request_type_categories.id')
+                    ->contains(fn (string $id): bool => $id !== $from?->getKey());
+
+                if ($isFiledElsewhere) {
+                    throw ValidationException::withMessages([
+                        'toCategoryId' => 'A type filed under several areas cannot be uncategorized.',
+                    ]);
+                }
+
+                $type->categories()->detach();
+
+                $this->reorderUncategorizedTypes($orderedTypeIds);
+
+                return;
+            }
+
+            if (! $to->is($from)) {
+                if ($from !== null) {
+                    $type->categories()->detach($from);
+                }
+
+                if (! $type->categories()->whereKey($to->getKey())->exists()) {
+                    $this->appendTypeToCategory($type, $to);
+                }
+            }
+
+            $this->reorderCategoryTypes($to, $orderedTypeIds);
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function addTypeToCategory(string $typeId, string $categoryId): array
+    {
+        return $this->mutateCatalog(function () use ($typeId, $categoryId): void {
+            $type = $this->findType($typeId);
+            $category = $this->findCategory($categoryId);
+
+            if ($type->categories()->whereKey($category->getKey())->exists()) {
+                return;
+            }
+
+            $this->appendTypeToCategory($type, $category);
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function removeTypeFromCategory(string $typeId, string $categoryId): array
+    {
+        return $this->mutateCatalog(function () use ($typeId, $categoryId): void {
+            $type = $this->findType($typeId);
+            $category = $this->findCategory($categoryId);
+
+            if ($type->categories()->whereKeyNot($category->getKey())->doesntExist()) {
+                throw ValidationException::withMessages([
+                    'categoryId' => "Cannot remove type {$type->name} from its only area. Delete or archive it instead.",
+                ]);
+            }
+
+            $type->categories()->detach($category);
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function deleteType(string $typeId): array
+    {
+        return $this->mutateCatalog(function () use ($typeId): void {
+            $type = $this->findType($typeId);
+
+            if ($type->serviceRequests()->exists()) {
+                throw ValidationException::withMessages([
+                    'typeId' => "Cannot delete type {$type->name} while service requests exist.",
+                ]);
+            }
+
+            $type->delete();
+        });
+    }
+
+    /**
+     * @return array{saved: bool, tree: array<string, mixed>}
+     */
+    #[Renderless]
+    public function archiveType(string $typeId): array
+    {
+        return $this->mutateCatalog(function () use ($typeId): void {
+            $type = $this->findType($typeId);
+
+            if ($type->serviceRequests()->doesntExist()) {
+                throw ValidationException::withMessages([
+                    'typeId' => "Cannot archive type {$type->name} without service requests. Delete it instead.",
+                ]);
+            }
+
+            $type->archive();
+        });
     }
 
     /**
@@ -274,136 +541,235 @@ class ListServiceRequestTypes extends ListRecords
     }
 
     /**
-     * @param array<string, mixed> $treeData
+     * Save a single builder change, tell other viewers about it, and return the fresh tree.
+     *
+     * Failures are reported through a notification rather than an exception, and the fresh tree is
+     * still returned so the client can drop its optimistic change and show what is really saved.
+     *
+     * @param Closure(): void $operation
+     *
+     * @return array{saved: bool, tree: array<string, mixed>}
      */
-    protected function persistChanges(array $treeData): void
+    protected function mutateCatalog(Closure $operation): array
     {
-        Validator::validate(['treeData' => $treeData], [
-            'treeData' => 'required|array',
-            'treeData.categories' => 'array',
-            'treeData.uncategorized_types' => 'array',
-            'treeData.new_categories' => 'array',
-            'treeData.new_types' => 'array',
-            'treeData.new_types.*.name' => ['required', 'string', Rule::unique('service_request_types', 'name')->withoutTrashed()->whereNull('archived_at')],
-            'treeData.updated_categories' => 'array',
-            'treeData.updated_types' => 'array',
-            'treeData.deleted_categories' => 'array',
-            'treeData.deleted_types' => 'array',
-            'treeData.archived_types' => 'array',
-            'treeData.restore_types' => 'array',
-        ]);
+        Gate::authorize('updateAny', ServiceRequestType::class);
 
-        $this->assertNoDuplicateTypeNames($treeData);
+        try {
+            DB::transaction(function () use ($operation): void {
+                // Serialise builder changes so concurrent checks (such as nesting depth) cannot both pass.
+                DB::select('select pg_advisory_xact_lock(?)', [static::CATALOG_LOCK_KEY]);
 
-        $this->assertMaxCategoryDepth($treeData['categories'] ?? []);
+                $operation();
+            });
+        } catch (ValidationException $exception) {
+            $this->notifyUnableToSave(collect($exception->errors())->flatten()->first() ?? 'Please review your changes and try again.');
 
-        DB::transaction(function () use ($treeData) {
-            $newCategoryIds = [];
+            return ['saved' => false, 'tree' => $this->getHierarchicalData()];
+        } catch (UniqueConstraintViolationException) {
+            $this->notifyUnableToSave('The same name is already in use by another service request type. Please select a different name.');
 
-            $this->pendingTypePlacements = [];
-            $this->pendingUncategorizedTypeSorts = [];
+            return ['saved' => false, 'tree' => $this->getHierarchicalData()];
+        } catch (Throwable $exception) {
+            report($exception);
 
-            $this->handleRestoredTypes($treeData['restore_types'] ?? []);
+            $this->notifyUnableToSave('An unexpected error occurred while saving your change. Please try again.');
 
-            if (! empty($treeData['new_categories'])) {
-                foreach ($treeData['new_categories'] as $newCategory) {
-                    $parentId = null;
+            return ['saved' => false, 'tree' => $this->getHierarchicalData()];
+        }
 
-                    if (! empty($newCategory['parent_id']) && $newCategory['parent_id'] !== 'temp') {
-                        $parentId = $newCategoryIds[$newCategory['parent_id']]
-                            ?? $newCategory['parent_id']; // Could be UUID
-                    }
+        $this->broadcastCatalogUpdate();
 
-                    $category = ServiceRequestTypeCategory::create([
-                        'name' => trim($newCategory['name']),
-                        'parent_id' => $parentId,
-                        'sort' => $newCategory['sort'],
-                    ]);
-                    $newCategoryIds[$newCategory['temp_id']] = $category->id;
-                }
-            }
+        return ['saved' => true, 'tree' => $this->getHierarchicalData()];
+    }
 
-            // Create new types
-            $newTypeIds = [];
-
-            if (! empty($treeData['new_types'])) {
-                foreach ($treeData['new_types'] as $newType) {
-                    // A brand-new type may appear in several areas of the tree. It is only created
-                    // once here (keyed by its temp id); every placement is applied from the tree
-                    // walk below so it can sit under multiple categories.
-                    if (isset($newTypeIds[$newType['temp_id']])) {
-                        continue;
-                    }
-
-                    $type = ServiceRequestType::create([
-                        'name' => trim($newType['name']),
-                        'sort' => $newType['sort'],
-                        'default_category' => ServiceRequestCategory::Request,
-                    ]);
-
-                    $type->priorities()->createMany([
-                        ['name' => 'High', 'order' => 1],
-                        ['name' => 'Medium', 'order' => 2],
-                        ['name' => 'Low', 'order' => 3],
-                    ]);
-
-                    $newTypeIds[$newType['temp_id']] = $type->id;
-                }
-            }
-
-            // Update renamed categories
-            if (! empty($treeData['updated_categories'])) {
-                foreach ($treeData['updated_categories'] as $updatedCategory) {
-                    ServiceRequestTypeCategory::where('id', $updatedCategory['id'])->update([
-                        'name' => trim($updatedCategory['name']),
-                    ]);
-                }
-            }
-
-            // Update renamed types
-            if (! empty($treeData['updated_types'])) {
-                foreach ($treeData['updated_types'] as $updatedType) {
-                    Validator::validate(
-                        ['name' => trim($updatedType['name'])],
-                        ['name' => ['required', 'string', Rule::unique('service_request_types', 'name')->ignore($updatedType['id'])->withoutTrashed()->whereNull('archived_at')]],
-                    );
-
-                    ServiceRequestType::where('id', $updatedType['id'])->update([
-                        'name' => trim($updatedType['name']),
-                    ]);
-                }
-            }
-
-            // Update existing categories
-            $this->updateCategoriesRecursive($treeData['categories'] ?? [], null, $newCategoryIds, $newTypeIds);
-
-            // Update uncategorized types
-            if (! empty($treeData['uncategorized_types'])) {
-                foreach ($treeData['uncategorized_types'] as $index => $type) {
-                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
-
-                    if ($typeId !== null) {
-                        $this->assignTypeToCategory($typeId, null, $index + 1);
-                    }
-                }
-            }
-
-            // Apply the accumulated category placements in one pass so multi-category types keep
-            // every membership.
-            $this->applyPendingTypePlacements();
-
-            $this->handleDeletedTypes($treeData['deleted_types'] ?? []);
-            $this->handleDeletedCategories($treeData['deleted_categories'] ?? []);
-            $this->handleArchivedTypes($treeData['archived_types'] ?? []);
-        });
-
-        // Clear the cached hierarchicalData to force refresh
-        unset($this->hierarchicalData);
-
+    protected function notifyUnableToSave(string $message): void
+    {
         Notification::make()
-            ->success()
-            ->title('Changes saved successfully')
+            ->danger()
+            ->title('Unable to save changes')
+            ->body($message)
             ->send();
+    }
+
+    protected function broadcastCatalogUpdate(): void
+    {
+        $tenantId = $this->getCurrentTenantId();
+
+        // Ably rejects `toOthers()`, so the sender's socket ID is passed along for its client to skip.
+        $originSocketId = Broadcast::socket(request());
+
+        // The change is already saved, so a websocket outage must not report it as failed.
+        rescue(function () use ($tenantId, $originSocketId): void {
+            broadcast(new ServiceRequestTypeCatalogUpdated($tenantId, $originSocketId));
+        });
+    }
+
+    protected function getCurrentTenantId(): string
+    {
+        $tenant = Tenant::current();
+
+        assert($tenant instanceof Tenant);
+
+        return $tenant->getKey();
+    }
+
+    protected function findCategory(string $categoryId): ServiceRequestTypeCategory
+    {
+        $category = Str::isUuid($categoryId)
+            ? ServiceRequestTypeCategory::query()->find($categoryId)
+            : null;
+
+        if (! $category instanceof ServiceRequestTypeCategory) {
+            throw ValidationException::withMessages([
+                'categoryId' => 'This service request area no longer exists.',
+            ]);
+        }
+
+        return $category;
+    }
+
+    protected function findType(string $typeId, bool $isArchived = false): ServiceRequestType
+    {
+        $type = Str::isUuid($typeId)
+            ? ServiceRequestType::query()
+                ->when(
+                    $isArchived,
+                    fn (Builder $query) => $query->onlyArchived(),
+                    fn (Builder $query) => $query->withoutArchived(),
+                )
+                ->find($typeId)
+            : null;
+
+        if (! $type instanceof ServiceRequestType) {
+            throw ValidationException::withMessages([
+                'typeId' => 'This service request type no longer exists.',
+            ]);
+        }
+
+        return $type;
+    }
+
+    protected function validateCategoryName(string $name): string
+    {
+        $name = trim($name);
+
+        Validator::validate(['name' => $name], ['name' => ['required', 'string', 'max:255']]);
+
+        return $name;
+    }
+
+    protected function validateTypeName(string $name, ?string $ignoreTypeId = null): string
+    {
+        $name = trim($name);
+
+        Validator::validate(
+            ['name' => $name],
+            ['name' => [
+                'required',
+                'string',
+                'max:255',
+                Rule::unique(ServiceRequestType::class, 'name')->ignore($ignoreTypeId)->withoutTrashed()->whereNull('archived_at'),
+            ]],
+            ['name.unique' => 'The same name is already in use by another service request type. Please select a different name.'],
+        );
+
+        return $name;
+    }
+
+    protected function throwMaxDepthExceeded(): never
+    {
+        throw ValidationException::withMessages([
+            'parentId' => 'Categories may only be nested two levels deep.',
+        ]);
+    }
+
+    protected function appendTypeToCategory(ServiceRequestType $type, ServiceRequestTypeCategory $category): void
+    {
+        $sort = (int) $category->types()->newPivotQuery()->max('sort') + 1;
+
+        $type->categories()->attach($category, ['sort' => $sort]);
+    }
+
+    protected function getNextUncategorizedTypeSort(): int
+    {
+        return (int) ServiceRequestType::query()
+            ->withoutArchived()
+            ->whereDoesntHave('categories')
+            ->max('sort') + 1;
+    }
+
+    /**
+     * @param array<int, mixed> $orderedIds
+     */
+    protected function reorderCategories(?ServiceRequestTypeCategory $parent, array $orderedIds): void
+    {
+        $currentIds = ServiceRequestTypeCategory::query()
+            ->where('parent_id', $parent?->getKey())
+            ->orderBy('sort')
+            ->pluck('id');
+
+        foreach ($this->resolveOrder($orderedIds, $currentIds) as $index => $categoryId) {
+            ServiceRequestTypeCategory::query()->whereKey($categoryId)->update(['sort' => $index + 1]);
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $orderedIds
+     */
+    protected function reorderCategoryTypes(ServiceRequestTypeCategory $category, array $orderedIds): void
+    {
+        $currentIds = $category->types()->pluck('service_request_types.id');
+
+        foreach ($this->resolveOrder($orderedIds, $currentIds) as $index => $typeId) {
+            $category->types()->updateExistingPivot($typeId, ['sort' => $index + 1]);
+        }
+    }
+
+    /**
+     * @param array<int, mixed> $orderedIds
+     */
+    protected function reorderUncategorizedTypes(array $orderedIds): void
+    {
+        $currentIds = ServiceRequestType::query()
+            ->withoutArchived()
+            ->whereDoesntHave('categories')
+            ->orderBy('sort')
+            ->pluck('id');
+
+        foreach ($this->resolveOrder($orderedIds, $currentIds) as $index => $typeId) {
+            ServiceRequestType::query()->whereKey($typeId)->update(['sort' => $index + 1]);
+        }
+    }
+
+    /**
+     * Order a container's current items: the requested ids first (ignoring any that are no longer in
+     * it, such as items another user just moved away), then any remaining items in their current order.
+     *
+     * @param array<int, mixed> $requestedIds
+     * @param Collection<int, string> $currentIds
+     *
+     * @return array<int, string>
+     */
+    protected function resolveOrder(array $requestedIds, Collection $currentIds): array
+    {
+        $requestedIds = collect($requestedIds)
+            ->filter(fn (mixed $id): bool => is_string($id))
+            ->intersect($currentIds)
+            ->unique()
+            ->values();
+
+        return $requestedIds->merge($currentIds->diff($requestedIds))->values()->all();
+    }
+
+    /**
+     * @return array<int, string>
+     */
+    protected function collectCategoryTreeIds(ServiceRequestTypeCategory $category): array
+    {
+        return [
+            $category->getKey(),
+            ...$category->children->flatMap(fn (ServiceRequestTypeCategory $child): array => $this->collectCategoryTreeIds($child))->all(),
+        ];
     }
 
     /**
@@ -418,113 +784,6 @@ class ListServiceRequestTypes extends ListRecords
             'category' => ServiceRequestTypeCategory::query()->findOrFail($nodeId),
             default => abort(404),
         };
-    }
-
-    /**
-     * @param array<int, string> $typeIds
-     */
-    protected function handleDeletedTypes(array $typeIds): void
-    {
-        if (empty($typeIds)) {
-            return;
-        }
-
-        $types = ServiceRequestType::query()
-            ->whereIn('id', $typeIds)
-            ->withCount('serviceRequests')
-            ->get();
-
-        foreach ($types as $type) {
-            if ($type->service_requests_count > 0) {
-                throw ValidationException::withMessages([
-                    'treeData.deleted_types' => "Cannot delete type {$type->name} while service requests exist.",
-                ]);
-            }
-
-            $type->delete();
-        }
-    }
-
-    /**
-     * @param array<int, string> $categoryIds
-     */
-    protected function handleDeletedCategories(array $categoryIds): void
-    {
-        if (empty($categoryIds)) {
-            return;
-        }
-
-        $categories = ServiceRequestTypeCategory::query()
-            ->whereIn('id', $categoryIds)
-            ->withCount('descendantServiceRequests')
-            ->get();
-
-        foreach ($categories as $category) {
-            if ($category->descendant_service_requests_count > 0) {
-                throw ValidationException::withMessages([
-                    'treeData.deleted_categories' => "Cannot delete category {$category->name} while service requests exist in its descendants.",
-                ]);
-            }
-
-            $this->deleteCategoryWithDescendants($category);
-        }
-    }
-
-    protected function deleteCategoryWithDescendants(ServiceRequestTypeCategory $category): void
-    {
-        // `types()` is a many-to-many relationship, so types are only detached from this category
-        // (they may live under others).
-        $category->types()->detach();
-
-        foreach ($category->children as $child) {
-            $this->deleteCategoryWithDescendants($child);
-        }
-
-        $category->delete();
-    }
-
-    /**
-     * @param array<int, string> $typeIds
-     */
-    protected function handleRestoredTypes(array $typeIds): void
-    {
-        if (empty($typeIds)) {
-            return;
-        }
-
-        $types = ServiceRequestType::query()
-            ->onlyArchived()
-            ->whereIn('id', $typeIds)
-            ->get();
-
-        foreach ($types as $type) {
-            $type->unarchive();
-        }
-    }
-
-    /**
-     * @param array<int, string> $typeIds
-     */
-    protected function handleArchivedTypes(array $typeIds): void
-    {
-        if (empty($typeIds)) {
-            return;
-        }
-
-        $types = ServiceRequestType::query()
-            ->whereIn('id', $typeIds)
-            ->withCount('serviceRequests')
-            ->get();
-
-        foreach ($types as $type) {
-            if ($type->service_requests_count === 0) {
-                throw ValidationException::withMessages([
-                    'treeData.archived_types' => "Cannot archive type {$type->name} without service requests. Delete it instead.",
-                ]);
-            }
-
-            $type->archive();
-        }
     }
 
     /**
@@ -590,216 +849,5 @@ class ListServiceRequestTypes extends ListRecords
         }
 
         return (int) $type->sort;
-    }
-
-    /**
-     * Resolve the id to persist for a type node in the saved tree.
-     *
-     * Existing types return their own id. A brand-new type (temp id) is mapped to the real id
-     * created earlier in the save.
-     *
-     * @param array<string, string> $newTypeIds
-     */
-    protected function resolveSaveTypeId(string $treeTypeId, array $newTypeIds): ?string
-    {
-        if (! str_starts_with($treeTypeId, 'temp_')) {
-            return $treeTypeId;
-        }
-
-        return $newTypeIds[$treeTypeId] ?? null;
-    }
-
-    /**
-     * Record where a service request type sits in the tree and its sort order within that spot.
-     *
-     * Placement is accumulated and applied in bulk by {@see applyPendingTypePlacements()} so a type
-     * filed under several categories keeps every membership.
-     */
-    protected function assignTypeToCategory(string $typeId, ?string $categoryId, int $sort): void
-    {
-        $this->pendingTypePlacements[$typeId] ??= [];
-
-        if ($categoryId !== null) {
-            $this->pendingTypePlacements[$typeId][$categoryId] = $sort;
-
-            return;
-        }
-
-        $this->pendingUncategorizedTypeSorts[$typeId] = $sort;
-    }
-
-    /**
-     * Apply every category placement accumulated during the tree walk in a single pass.
-     *
-     * Each type is synced to the full set of categories it appears under, deduplicated by category
-     * (the pivot's unique constraint is the backstop), with the per-area sort stored on the pivot.
-     * Types that end up without any category are detached and keep their global `sort`.
-     */
-    protected function applyPendingTypePlacements(): void
-    {
-        $typeIds = array_unique([
-            ...array_keys($this->pendingTypePlacements),
-            ...array_keys($this->pendingUncategorizedTypeSorts),
-        ]);
-
-        foreach ($typeIds as $typeId) {
-            $type = ServiceRequestType::find($typeId);
-
-            if ($type === null) {
-                continue;
-            }
-
-            $placements = $this->pendingTypePlacements[$typeId] ?? [];
-
-            if ($placements === []) {
-                $sort = $this->pendingUncategorizedTypeSorts[$typeId] ?? $type->sort;
-
-                if ($type->sort !== $sort) {
-                    $type->sort = $sort;
-                    $type->save();
-                }
-
-                $type->categories()->sync([]);
-
-                continue;
-            }
-
-            $syncData = [];
-
-            foreach ($placements as $categoryId => $sort) {
-                $syncData[$categoryId] = ['sort' => $sort];
-            }
-
-            $type->categories()->sync($syncData);
-        }
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $categories
-     * @param array<string, string> $newCategoryIds
-     * @param array<string, string> $newTypeIds
-     */
-    protected function updateCategoriesRecursive(array $categories, ?string $parentId, array $newCategoryIds, array $newTypeIds = []): void
-    {
-        foreach ($categories as $index => $category) {
-            $originalCategoryId = $category['id'];
-            $categoryId = $originalCategoryId;
-
-            // Handle new categories by mapping temp IDs to real IDs
-            if (isset($newCategoryIds[$originalCategoryId])) {
-                $categoryId = $newCategoryIds[$originalCategoryId];
-            }
-
-            // If this is a new category that hasn't been created yet (no mapping), skip it.
-            // Otherwise (mapping exists) fall through and update the created category so moved
-            // types can be assigned to the right area and parent/sort can be set.
-            if (str_starts_with($originalCategoryId, 'temp_') && ! isset($newCategoryIds[$originalCategoryId])) {
-                // For truly new-but-not-yet-created categories we can't do anything here.
-                // Still attempt to recurse into children using the (unknown) category id would be wrong,
-                // so skip.
-                continue;
-            }
-
-            // Update existing or newly-created categories (UUIDs or any non-temp IDs)
-            $actualParentId = $parentId;
-
-            // If parent is a new category, map its temp ID to real ID
-            if ($actualParentId && isset($newCategoryIds[$actualParentId])) {
-                $actualParentId = $newCategoryIds[$actualParentId];
-            }
-
-            ServiceRequestTypeCategory::where('id', $categoryId)->update([
-                'parent_id' => $actualParentId,
-                'sort' => $index + 1,
-            ]);
-
-            // Update types in this category
-            if (! empty($category['types'])) {
-                foreach ($category['types'] as $typeIndex => $type) {
-                    $typeId = $this->resolveSaveTypeId($type['id'], $newTypeIds);
-
-                    if ($typeId !== null) {
-                        $this->assignTypeToCategory($typeId, $categoryId, $typeIndex + 1);
-                    }
-                }
-            }
-
-            // Recursively update children
-            if (! empty($category['children'])) {
-                $this->updateCategoriesRecursive($category['children'], $categoryId, $newCategoryIds, $newTypeIds);
-            }
-        }
-    }
-
-    /**
-     * @param array<int, array<string, mixed>> $categories
-     */
-    protected function assertMaxCategoryDepth(array $categories, int $depth = 0): void
-    {
-        if ($depth > 1) {
-            throw ValidationException::withMessages([
-                'treeData.categories' => 'Categories may only be nested two levels deep.',
-            ]);
-        }
-
-        foreach ($categories as $category) {
-            $children = $category['children'] ?? [];
-
-            if (! empty($children)) {
-                $this->assertMaxCategoryDepth($children, $depth + 1);
-            }
-        }
-    }
-
-    /**
-     * Guard against two types being saved with the same name within the same request.
-     *
-     * The per-row `unique` rule only compares each name against the database, so it cannot catch
-     * two brand-new types (or a new type and a rename) sharing a name in the same payload. Names
-     * must be unique across every area, so any collision here is rejected before writing.
-     *
-     * @param array<string, mixed> $treeData
-     */
-    protected function assertNoDuplicateTypeNames(array $treeData): void
-    {
-        $names = [];
-
-        // A brand-new type may be placed in several areas, appearing once per placement under the
-        // same temp id; count it a single time.
-        $seenTempIds = [];
-
-        foreach ($treeData['new_types'] ?? [] as $newType) {
-            $tempId = $newType['temp_id'] ?? null;
-
-            if ($tempId !== null && isset($seenTempIds[$tempId])) {
-                continue;
-            }
-
-            $seenTempIds[$tempId] = true;
-            $names[] = mb_strtolower(trim((string) ($newType['name'] ?? '')));
-        }
-
-        $seenIds = [];
-
-        foreach ($treeData['updated_types'] ?? [] as $updatedType) {
-            $id = $updatedType['id'] ?? null;
-
-            if ($id !== null && isset($seenIds[$id])) {
-                continue;
-            }
-
-            $seenIds[$id] = true;
-            $names[] = mb_strtolower(trim((string) ($updatedType['name'] ?? '')));
-        }
-
-        $names = array_filter($names, fn (string $name): bool => $name !== '');
-
-        $hasDuplicates = count($names) !== count(array_unique($names));
-
-        if ($hasDuplicates) {
-            throw ValidationException::withMessages([
-                'treeData.new_types' => 'The same name is already in use by another service request type. Please select a different name.',
-            ]);
-        }
     }
 }
