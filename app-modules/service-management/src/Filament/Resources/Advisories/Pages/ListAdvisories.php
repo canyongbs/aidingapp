@@ -43,7 +43,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -92,12 +91,9 @@ class ListAdvisories extends ListRecords
                     ? AdvisoryResource::getUrl('view', ['record' => $record])
                     : null)
                 ->schema([
-                    Section::make('Properties')
-                        ->schema(AdvisoryForm::propertiesComponents()),
-                    Section::make('Tracking Details')
-                        ->schema(AdvisoryForm::trackingComponents()),
-                    Section::make('Assignment')
-                        ->schema(AdvisoryForm::assignmentComponents()),
+                    AdvisoryForm::propertiesSection(),
+                    AdvisoryForm::trackingSection(),
+                    AdvisoryForm::assignmentSection(),
                 ]),
         ];
     }

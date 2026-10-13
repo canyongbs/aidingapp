@@ -44,9 +44,28 @@ use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Section;
 
 class AdvisoryForm
 {
+    public static function propertiesSection(): Section
+    {
+        return Section::make('Properties')
+            ->schema(self::propertiesComponents());
+    }
+
+    public static function trackingSection(): Section
+    {
+        return Section::make('Tracking Details')
+            ->schema(self::trackingComponents());
+    }
+
+    public static function assignmentSection(): Section
+    {
+        return Section::make('Assignment')
+            ->schema(self::assignmentComponents());
+    }
+
     /**
      * @return array<int, Field>
      */
