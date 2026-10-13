@@ -33,45 +33,23 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
-use AidingApp\Contact\Models\Contact;
-use App\DataTransferObjects\AutocompletedAddress;
-use App\Models\User;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+use Illuminate\Database\Migrations\Migration;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-it('populates the address fields when a suggestion is selected', function () {
-    actingAs(
-        User::factory()
-            ->create()
-            ->givePermissionTo('contact.view-any', 'contact.*.update')
-    );
+return new class () extends Migration {
+    public function up(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->dropColumn('description');
+        });
+    }
 
-    $contact = Contact::factory()->create();
-
-    $address = new AutocompletedAddress(
-        address: '123 Main St',
-        city: 'Austin',
-        state: 'TX',
-        postalCode: '78701',
-        country: 'US',
-        label: '123 Main St, Austin, TX, 78701, US',
-    );
-
-    livewire(EditContact::class, [
-        'record' => $contact->getRouteKey(),
-    ])
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
-            'value' => $address->label,
-            'label' => $address->label,
-            'data' => ['data' => json_decode(json_encode($address), true)],
-        ]])
-        ->assertSchemaStateSet([
-            'address' => '123 Main St',
-            'city' => 'Austin',
-            'state' => 'TX',
-            'postal' => '78701',
-            'country' => 'US',
-        ]);
-});
+    public function down(): void
+    {
+        Schema::table('contacts', function (Blueprint $table) {
+            $table->longText('description')->nullable();
+        });
+    }
+};

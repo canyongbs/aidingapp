@@ -105,7 +105,6 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'last_name',
         'full_name',
         'preferred',
-        'description',
         'email',
         'mobile',
         'email_bounce',

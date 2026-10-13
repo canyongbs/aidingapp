@@ -34,48 +34,51 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\Contact\Filament\Tables;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
-use AidingApp\Contact\Models\Contact;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use AidingApp\Contact\Models\Organization;
+use App\Filament\Tables\Columns\IdColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
-class EditContact extends EditRecord
+class OrganizationsTable
 {
-    protected static string $resource = ContactResource::class;
-
-    // TODO: Automatically set from Filament
-    protected static ?string $navigationLabel = 'Edit';
-
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
-    public static function canAccess(array $parameters = []): bool
+    public static function configure(Table $table): Table
     {
-        $record = $parameters['record'] ?? null;
-
-        if ($record instanceof Contact && $record->isManaged()) {
-            return false;
-        }
-
-        return parent::canAccess($parameters);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ContactFormSchema::make(ignoreRecord: true));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        return $table
+            ->query(fn (): Builder => Organization::query())
+            ->columns([
+                IdColumn::make(),
+                TextColumn::make('name')
+                    ->label('Organization Name')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('website')
+                    ->label('Website')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('industry.name')
+                    ->label('Industry')
+                    ->searchable()
+                    ->sortable(),
+                TextColumn::make('type.name')
+                    ->label('Type')
+                    ->sortable(),
+            ])
+            ->filters([
+                SelectFilter::make('industry_id')
+                    ->label('Industry')
+                    ->relationship('industry', 'name')
+                    ->searchable()
+                    ->preload(),
+                SelectFilter::make('type_id')
+                    ->label('Type')
+                    ->relationship('type', 'name')
+                    ->searchable()
+                    ->preload(),
+            ])
+            ->defaultSort('name');
     }
 }

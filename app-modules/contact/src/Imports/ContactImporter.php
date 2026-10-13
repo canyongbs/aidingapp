@@ -88,8 +88,6 @@ class ContactImporter extends Importer
                 ->guess(['type_id', 'type_name'])
                 ->requiredMapping()
                 ->example(fn (): ?string => ContactType::query()->value('name')),
-            ImportColumn::make('description')
-                ->example('A description of the contact.'),
             ImportColumn::make('email')
                 ->rules(['required', 'email'])
                 ->requiredMapping()
