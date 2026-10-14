@@ -66,10 +66,12 @@ trait HasAssetCheckOutInfolist
                 ->schema([
                     TextEntry::make('checkedOutBy.name')
                         ->label('Performed By')
-                        ->url(fn ($record) => UserResource::getUrl('view', ['record' => $record->checkedOutBy]))
+                        ->url(fn (AssetCheckOut $record): ?string => $record->checkedOutBy ? UserResource::getUrl('view', ['record' => $record->checkedOutBy]) : null)
+                        ->placeholder('Deleted user')
                         ->color('primary'),
                     TextEntry::make('checkedOutTo.full_name')
-                        ->label('Checked Out to'),
+                        ->label('Checked Out to')
+                        ->placeholder('Deleted user'),
                 ]),
             Fieldset::make('')
                 ->schema([

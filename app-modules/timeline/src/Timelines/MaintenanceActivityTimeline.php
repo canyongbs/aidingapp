@@ -72,4 +72,14 @@ class MaintenanceActivityTimeline extends CustomTimeline
     {
         return MaintenanceActivityViewAction::make()->record($this->maintenanceActivity);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Maintenance Activity Scheduled';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
+    }
 }

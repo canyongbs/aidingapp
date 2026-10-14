@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Filament\Actions;
 
+use AidingApp\ServiceManagement\Actions\RecordServiceRequestAssignmentRemovalHistory;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
@@ -158,9 +159,11 @@ class ReclassifyServiceRequestAction extends Action
                 try {
                     DB::beginTransaction();
 
+                    $removedAssignment = $record->assignedTo()->first();
+
                     $record->assignments()
                         ->where('status', ServiceRequestAssignmentStatus::Active)
-                        ->delete();
+                        ->update(['status' => ServiceRequestAssignmentStatus::Inactive]);
 
                     $record->priority_id = $data['priority_id'];
                     $record->save();
@@ -181,6 +184,10 @@ class ReclassifyServiceRequestAction extends Action
                             ->assignment_type
                             ->getAssignerClass()
                             ?->execute($record);
+                    }
+
+                    if ($removedAssignment && ! $record->assignedTo()->exists()) {
+                        app(RecordServiceRequestAssignmentRemovalHistory::class)($record, $removedAssignment);
                     }
 
                     DB::commit();

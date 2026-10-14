@@ -50,7 +50,6 @@ class CreateContactRequestFactory extends RequestFactory
             'last_name' => $this->faker->lastName(),
             'full_name' => fn (array $attributes): string => "{$attributes['first_name']} {$attributes['last_name']}",
             'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
             'email' => $this->faker->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
             'email_bounce' => intval($this->faker->boolean()),

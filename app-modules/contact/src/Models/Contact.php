@@ -38,6 +38,7 @@ namespace AidingApp\Contact\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Contact\Database\Factories\ContactFactory;
+use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Observers\ContactObserver;
 use AidingApp\Engagement\Models\Concerns\HasManyMorphedEngagementResponses;
@@ -56,9 +57,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\Timeline\Models\Contracts\HasFilamentResource;
 use AidingApp\Timeline\Models\Timeline;
 use App\Models\Authenticatable;
+use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use Carbon\Carbon;
 use DateTimeInterface;
+use Filament\Models\Contracts\HasName;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
@@ -80,7 +84,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
  * @mixin IdeHelperContact
  */
 #[ObservedBy([ContactObserver::class])]
-class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified
+class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified, HasName
 {
     use AuditableTrait;
 
@@ -95,13 +99,13 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     use SoftDeletes;
     use UsesTenantConnection;
     use HasApiTokens;
+    use HasPresence;
 
     protected $fillable = [
         'first_name',
         'last_name',
         'full_name',
         'preferred',
-        'description',
         'email',
         'mobile',
         'email_bounce',
@@ -124,10 +128,12 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'academic_department',
         'program',
         'user_id',
+        'last_activity_at',
     ];
 
     protected $casts = [
         'email_bounce' => 'boolean',
+        'last_activity_at' => 'datetime',
     ];
 
     public function isSuperAdmin(): bool
@@ -138,6 +144,18 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public function canRecieveSms(): bool
     {
         return filled($this->mobile);
+    }
+
+    public function getEmailHealthStatus(): EmailHealthStatus
+    {
+        return $this->email_bounce
+            ? EmailHealthStatus::Bounced
+            : EmailHealthStatus::Healthy;
+    }
+
+    public function canReceiveEmail(): bool
+    {
+        return ! $this->email_bounce;
     }
 
     /**
@@ -213,6 +231,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
     public static function displayNameKey(): string
     {
         return 'full_name';
+    }
+
+    public function getFilamentName(): string
+    {
+        return (string) $this->full_name;
     }
 
     public static function displayEmailKey(): string
@@ -300,5 +323,10 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return Attribute::make(
             get: fn (?string $value, array $attributes) => $attributes[$this->displayNameKey()],
         );
+    }
+
+    protected function lastActivityAt(): ?Carbon
+    {
+        return $this->last_activity_at;
     }
 }

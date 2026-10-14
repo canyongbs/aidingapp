@@ -32,7 +32,10 @@
     </COPYRIGHT>
 --}}
 @php
-    $contact = $record->contact;
+    $contact = $record
+        ->contact()
+        ->withTrashed()
+        ->first();
 @endphp
 
 <div>

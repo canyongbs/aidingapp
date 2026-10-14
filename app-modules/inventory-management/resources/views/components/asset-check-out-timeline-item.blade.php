@@ -32,17 +32,23 @@
     </COPYRIGHT>
 --}}
 
+@php
+    $checkedOutTo = $record
+        ->checkedOutTo()
+        ->withTrashed()
+        ->first();
+    $checkedOutBy = $record
+        ->checkedOutBy()
+        ->withTrashed()
+        ->getResults();
+@endphp
+
 <div>
     <div class="flex flex-row justify-between">
         <x-timeline::timeline.heading>
             Asset Checked Out to
 
-            <a
-                class="underline"
-                href="{{ $record->checkedOutTo->filamentResource()::getUrl('view', ['record' => $record->checkedOutTo]) }}"
-            >
-                {{ $record->checkedOutTo->full_name }}
-            </a>
+            <x-timeline::timeline.related-person :person="$checkedOutTo" :name="$checkedOutTo?->full_name" />
         </x-timeline::timeline.heading>
 
         <div>
@@ -51,19 +57,14 @@
     </div>
 
     <x-timeline::timeline.time>
-        {{ $record->checked_out_at->diffForHumans() }}
+        {{ $record->checked_out_at?->diffForHumans() }}
     </x-timeline::timeline.time>
 
     <div class="mt-4 flex flex-col space-y-2">
         <x-timeline::timeline.labeled-field>
             <x-slot:label>Performed By</x-slot>
 
-            <a
-                class="underline"
-                href="{{ $record->checkedOutBy->filamentResource()::getUrl('view', ['record' => $record->checkedOutBy]) }}"
-            >
-                {{ $record->checkedOutBy->name }}
-            </a>
+            <x-timeline::timeline.related-person :person="$checkedOutBy" :name="$checkedOutBy?->name" />
         </x-timeline::timeline.labeled-field>
 
         @if (is_null($record->asset_check_in_id))

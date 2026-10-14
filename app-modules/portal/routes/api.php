@@ -57,6 +57,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagemen
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowPortalProjectController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequestSecretController;
@@ -64,6 +65,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreServiceRequ
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\ServiceManagement\Http\Controllers\ServiceRequestMediaDownloadController;
+use App\Http\Middleware\TrackContactPresence;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 use Symfony\Component\HttpFoundation\Response;
@@ -84,6 +86,7 @@ Route::prefix('api')
 
         Route::prefix('portal')
             ->name('portal.')
+            ->middleware(TrackContactPresence::class)
             ->group(function () {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
                     ->name('define');
@@ -173,6 +176,10 @@ Route::prefix('api')
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');
+                Route::get('/status/{serviceMonitoringTarget}', ShowServiceMonitorStatusController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->whereUuid('serviceMonitoringTarget')
+                    ->name('status.show');
                 Route::get('/assets', AssetManagementPortalController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('assets.index');

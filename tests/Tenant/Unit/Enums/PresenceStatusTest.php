@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use App\Enums\PresenceStatus;
 use App\Models\User;
 use App\Settings\PresenceSettings;
@@ -94,4 +95,90 @@ it('returns Active at exactly the boundary', function () {
     ]);
 
     expect($user->presenceStatus())->toBe(PresenceStatus::Active);
+});
+
+it('returns Active when last activity is within active threshold for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->active_threshold - 1),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Active);
+});
+
+it('returns Idle when last activity is between active and idle thresholds for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->active_threshold + 1),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Idle);
+});
+
+it('returns Inactive when last activity is between idle and inactive thresholds for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->idle_threshold + 1),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Inactive);
+});
+
+it('returns Offline when last activity exceeds inactive threshold for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->inactive_threshold + 1),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Offline);
+});
+
+it('returns Offline when last_activity_at is null for contacts', function () {
+    $contact = Contact::factory()->create([
+        'last_activity_at' => null,
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Offline);
+});
+
+it('returns Active at exactly the boundary of now for contacts', function () {
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now(),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Active);
+});
+
+it('returns Idle at exactly the boundary for between active and idle for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->active_threshold),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Idle);
+});
+
+it('returns Inactive at exactly the boundary for between idle and inactive for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->idle_threshold),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Inactive);
+});
+
+it('returns Offline at exactly the boundary for between inactive and offline for contacts', function () {
+    $settings = app(PresenceSettings::class);
+
+    $contact = Contact::factory()->create([
+        'last_activity_at' => now()->subMinutes($settings->inactive_threshold),
+    ]);
+
+    expect($contact->presenceStatus())->toBe(PresenceStatus::Offline);
 });

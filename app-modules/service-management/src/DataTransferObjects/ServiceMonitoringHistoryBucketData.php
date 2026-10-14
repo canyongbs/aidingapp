@@ -34,48 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\ServiceManagement\DataTransferObjects;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
-use AidingApp\Contact\Models\Contact;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use AidingApp\ServiceManagement\Enums\ServiceMonitoringStatus;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
 
-class EditContact extends EditRecord
+#[MapOutputName(SnakeCaseMapper::class)]
+class ServiceMonitoringHistoryBucketData extends Data
 {
-    protected static string $resource = ContactResource::class;
-
-    // TODO: Automatically set from Filament
-    protected static ?string $navigationLabel = 'Edit';
-
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
-    public static function canAccess(array $parameters = []): bool
-    {
-        $record = $parameters['record'] ?? null;
-
-        if ($record instanceof Contact && $record->isManaged()) {
-            return false;
-        }
-
-        return parent::canAccess($parameters);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ContactFormSchema::make(ignoreRecord: true));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
-    }
+    public function __construct(
+        public string $startsAt,
+        public ServiceMonitoringStatus $status,
+        public ?float $uptimePercentage,
+        public int $checksCount,
+        public int $failedChecksCount,
+    ) {}
 }

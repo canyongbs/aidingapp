@@ -39,7 +39,7 @@ import { useTimezoneStore } from '../Stores/timezone.js';
  * is synchronous and cheap, so the browser timezone is read directly rather than
  * cached.
  */
-function resolveTimezone() {
+export function resolveTimezone() {
     return useTimezoneStore().displayTimezone ?? Intl.DateTimeFormat().resolvedOptions().timeZone;
 }
 

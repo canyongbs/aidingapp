@@ -173,6 +173,16 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
         return $this->new_values['uploaded_file'] ?? null;
     }
 
+    public function isAssignmentRemovedEvent(): bool
+    {
+        return $this->changedField() === 'removed_assignment';
+    }
+
+    public function removedAssigneeName(): string
+    {
+        return $this->original_values['removed_assignment'] ?? 'Deleted user';
+    }
+
     public function eventTitle(): string
     {
         if ($this->isCreatedEvent()) {
@@ -195,16 +205,21 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             'respondent_id' => 'Respondent Updated',
             'deleted_file' => 'File Deleted',
             'uploaded_file' => 'File Uploaded',
+            'removed_assignment' => 'Assignment Removed',
             default => $this->transformReadableKey($field) . ' Updated',
         };
     }
 
     public function actorName(): string
     {
-        $actor = $this->actor;
+        if (blank($this->actor_type) || blank($this->actor_id)) {
+            return 'System';
+        }
+
+        $actor = $this->actor()->withTrashed()->getResults();
 
         if ($actor === null) {
-            return 'System';
+            return 'Deleted user';
         }
 
         return $actor->getAttribute('name') ?? $actor->getAttribute('full_name') ?? 'System';
@@ -214,19 +229,21 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     {
         $id = $this->new_values['status_id'] ?? null;
 
-        return $id ? ServiceRequestStatus::find($id) : null;
+        return $id ? ServiceRequestStatus::withTrashed()->find($id) : null;
     }
 
     public function snapshotPriority(): ?ServiceRequestPriority
     {
         $id = $this->new_values['priority_id'] ?? null;
 
-        return $id ? ServiceRequestPriority::with('type')->find($id) : null;
+        return $id ? ServiceRequestPriority::withTrashed()->find($id) : null;
     }
 
     public function snapshotType(): ?ServiceRequestType
     {
-        return $this->snapshotPriority()?->type;
+        $typeId = $this->snapshotPriority()?->type_id;
+
+        return $typeId ? ServiceRequestType::withTrashed()->find($typeId) : null;
     }
 
     /**
@@ -277,7 +294,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
 
                         // This is to overcome an issue that comes from an incorrect type when trying to find a contact with the wrong data type
                         try {
-                            $found = $educatableClass::find($value[$key]);
+                            $found = $educatableClass::withTrashed()->find($value[$key]);
                         } catch (Exception $exception) {
                         }
 
@@ -286,7 +303,9 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
                         }
                     }
                 } else {
-                    $value[$readableKey] = ! is_null($value[$key]) ? $relationsMap[$key][0]::find($value[$key])->{$relationsMap[$key][1]} : 'NULL';
+                    $value[$readableKey] = ! is_null($value[$key])
+                        ? ($relationsMap[$key][0]::withTrashed()->find($value[$key])->{$relationsMap[$key][1]} ?? 'Unknown')
+                        : 'NULL';
                 }
             }
 

@@ -64,19 +64,21 @@ class ServiceRequestUpdateViewAction extends ViewAction
                 ->boolean(),
             TextEntry::make('createdBy')
                 ->label('Created By')
-                ->getStateUsing(fn (ServiceRequestUpdate $record): string => match ($record->createdBy::class) {
-                    User::class => $record->createdBy->name,
-                    Contact::class => $record->createdBy->full_name,
-                    SystemUser::class => $record->createdBy->name,
-                    ServiceRequest::class => 'AI',
-                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                ->getStateUsing(function (ServiceRequestUpdate $record): string {
+                    $createdBy = $record->createdBy()->withTrashed()->getResults();
+
+                    return match (true) {
+                        $createdBy instanceof User, $createdBy instanceof SystemUser => $createdBy->name,
+                        $createdBy instanceof Contact => $createdBy->full_name,
+                        $createdBy instanceof ServiceRequest => 'AI',
+                        $createdBy === null => filled($record->created_by_id) ? 'Deleted user' : 'Unknown',
+                        default => throw new Exception('Unknown createdBy type ' . $createdBy::class),
+                    };
                 })
-                ->url(fn (ServiceRequestUpdate $record): ?string => match ($record->createdBy::class) {
-                    User::class => UserResource::getUrl('view', ['record' => $record->createdBy]),
-                    Contact::class => ContactResource::getUrl('view', ['record' => $record->createdBy]),
-                    SystemUser::class => null,
-                    ServiceRequest::class => null,
-                    default => throw new Exception('Unknown createdBy type ' . $record->createdBy::class),
+                ->url(fn (ServiceRequestUpdate $record): ?string => match (true) {
+                    $record->createdBy instanceof User => UserResource::getUrl('view', ['record' => $record->createdBy]),
+                    $record->createdBy instanceof Contact => ContactResource::getUrl('view', ['record' => $record->createdBy]),
+                    default => null,
                 }),
             TextEntry::make('update')
                 ->columnSpanFull(),

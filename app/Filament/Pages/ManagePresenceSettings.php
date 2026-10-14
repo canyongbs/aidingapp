@@ -70,7 +70,7 @@ class ManagePresenceSettings extends SettingsPage
             ->components([
                 TextInput::make('active_threshold')
                     ->label('Active threshold')
-                    ->helperText('Minutes of inactivity before a user is considered idle.')
+                    ->helperText('Minutes of inactivity before a user or contact is considered idle.')
                     ->numeric()
                     ->minValue(1)
                     ->maxValue(fn (Get $get) => ($get('idle_threshold') ?? 2) - 1)
@@ -79,7 +79,7 @@ class ManagePresenceSettings extends SettingsPage
                     ->suffix('minutes'),
                 TextInput::make('idle_threshold')
                     ->label('Idle threshold')
-                    ->helperText('Minutes of inactivity before a user is considered inactive.')
+                    ->helperText('Minutes of inactivity before a user or contact is considered inactive.')
                     ->numeric()
                     ->minValue(fn (Get $get) => ($get('active_threshold') ?? 0) + 1)
                     ->maxValue(fn (Get $get) => ($get('inactive_threshold') ?? 2) - 1)
@@ -88,7 +88,7 @@ class ManagePresenceSettings extends SettingsPage
                     ->suffix('minutes'),
                 TextInput::make('inactive_threshold')
                     ->label('Inactive threshold')
-                    ->helperText('Minutes of inactivity before a user is considered offline.')
+                    ->helperText('Minutes of inactivity before a user or contact is considered offline.')
                     ->numeric()
                     ->minValue(fn (Get $get) => ($get('idle_threshold') ?? 0) + 1)
                     ->required()

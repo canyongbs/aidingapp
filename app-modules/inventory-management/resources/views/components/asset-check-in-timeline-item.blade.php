@@ -32,17 +32,23 @@
     </COPYRIGHT>
 --}}
 
+@php
+    $checkedInFrom = $record
+        ->checkedInFrom()
+        ->withTrashed()
+        ->first();
+    $checkedInBy = $record
+        ->checkedInBy()
+        ->withTrashed()
+        ->getResults();
+@endphp
+
 <div>
     <div class="flex flex-row justify-between">
         <x-timeline::timeline.heading>
             Asset Checked In from
 
-            <a
-                class="underline"
-                href="{{ $record->checkedInFrom->filamentResource()::getUrl('view', ['record' => $record->checkedInFrom]) }}"
-            >
-                {{ $record->checkedInFrom->full_name }}
-            </a>
+            <x-timeline::timeline.related-person :person="$checkedInFrom" :name="$checkedInFrom?->full_name" />
         </x-timeline::timeline.heading>
 
         <div>
@@ -51,19 +57,14 @@
     </div>
 
     <x-timeline::timeline.time>
-        {{ $record->checked_in_at->diffForHumans() }}
+        {{ $record->checked_in_at?->diffForHumans() }}
     </x-timeline::timeline.time>
 
     <div class="mt-4 flex flex-col space-y-2">
         <x-timeline::timeline.labeled-field>
             <x-slot:label>Performed By</x-slot>
 
-            <a
-                class="underline"
-                href="{{ $record->checkedInBy->filamentResource()::getUrl('view', ['record' => $record->checkedInBy]) }}"
-            >
-                {{ $record->checkedInBy->name }}
-            </a>
+            <x-timeline::timeline.related-person :person="$checkedInBy" :name="$checkedInBy?->name" />
         </x-timeline::timeline.labeled-field>
     </div>
 

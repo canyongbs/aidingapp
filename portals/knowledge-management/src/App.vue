@@ -152,6 +152,7 @@
                 routeName: 'status',
                 icon: SignalIcon,
                 visible: isStatusEnabled.value && user.value !== null,
+                activeRoutes: ['status', 'view-service-monitor'],
             },
             {
                 label: 'Advisories',

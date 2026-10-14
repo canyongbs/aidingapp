@@ -36,10 +36,12 @@
 
 namespace AidingApp\Timeline\Models;
 
+use AidingApp\Timeline\Models\Contracts\ProvidesATimeline;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -62,7 +64,25 @@ class Timeline extends BaseModel
      */
     public function timelineable(): MorphTo
     {
-        return $this->morphTo();
+        return $this->morphTo()->withTrashed();
+    }
+
+    /**
+     * Falls back to a blank subject when the subject was permanently deleted, so only its type-level presentation is available.
+     */
+    public function subjectTimeline(): CustomTimeline
+    {
+        $subject = $this->getRelationValue('timelineable');
+
+        if ($subject === null) {
+            $subjectClass = Relation::getMorphedModel($this->timelineable_type) ?? $this->timelineable_type;
+
+            $subject = new $subjectClass();
+        }
+
+        assert($subject instanceof ProvidesATimeline);
+
+        return $subject->timeline();
     }
 
     /**

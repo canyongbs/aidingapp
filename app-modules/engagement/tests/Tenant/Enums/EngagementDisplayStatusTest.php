@@ -377,6 +377,22 @@ it('returns the correct case given a particular Engagement', function (Engagemen
             ->create(),
         EngagementDisplayStatus::Unsubscribed,
     ],
+    'email | suppressedByBounced' => [
+        fn () => Engagement::factory()
+            ->has(
+                EmailMessage::factory()
+                    ->has(
+                        EmailMessageEvent::factory()
+                            ->state(['type' => EmailMessageEventType::SuppressedByBounced]),
+                        'events'
+                    ),
+                'latestEmailMessage'
+            )
+            ->email()
+            ->deliverNow()
+            ->create(),
+        EngagementDisplayStatus::Failed,
+    ],
     'email | dispatched, send, DeliveryDelay' => [
         fn () => Engagement::factory()
             ->has(

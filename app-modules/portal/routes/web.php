@@ -41,6 +41,7 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeBasePortalUrlIsCanonical;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized;
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
+use App\Http\Middleware\TrackContactPresence;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
@@ -59,6 +60,7 @@ Route::prefix('portal')
     ->middleware([
         'web',
         EnsureFrontendRequestsAreStateful::class,
+        TrackContactPresence::class,
     ])
     ->group(function () {
         Route::middleware([
@@ -107,5 +109,7 @@ Route::prefix('portal')
                 ->name('projects.show');
             Route::get('/status', RenderKnowledgeManagementPortal::class)
                 ->name('status');
+            Route::get('/status/{serviceMonitoringTarget}', RenderKnowledgeManagementPortal::class)
+                ->name('status.show');
         });
     });

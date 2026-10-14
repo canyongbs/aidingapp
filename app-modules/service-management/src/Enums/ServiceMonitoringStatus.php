@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,38 +32,55 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
-    import { CheckCircleIcon, XCircleIcon } from '@heroicons/vue/24/solid';
+*/
 
-    const props = defineProps({
-        name: {
-            type: String,
-            required: true,
-        },
-        message: {
-            type: String,
-            required: true,
-        },
-        status: {
-            type: Boolean,
-            required: true,
-        },
-    });
-</script>
-<template>
-    <div class="flex items-start w-full gap-3 rounded-xl bg-white px-6 py-4 ring-1 ring-gray-950/5">
-        <div class="shrink-0 size-6" aria-hidden="true">
-            <CheckCircleIcon v-if="status === true" class="size-6 text-green-700" />
-            <XCircleIcon v-if="status === false" class="size-6 text-red-600" />
-        </div>
+namespace AidingApp\ServiceManagement\Enums;
 
-        <div class="mt-0.5 grid flex-1 gap-1 min-w-0">
-            <span class="text-sm font-medium text-gray-950">{{ name }}</span>
-            <p class="overflow-hidden text-sm text-pretty break-words text-gray-500">{{ message }}</p>
-        </div>
+use Filament\Support\Contracts\HasLabel;
 
-        <InformationCircleIcon class="shrink-0 size-5 self-center text-gray-400" aria-hidden="true" />
-    </div>
-</template>
+enum ServiceMonitoringStatus: string implements HasLabel
+{
+    case Operational = 'operational';
+
+    case Degraded = 'degraded';
+
+    case Outage = 'outage';
+
+    case Unknown = 'unknown';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::Operational => 'Operational',
+            self::Degraded => 'Degraded',
+            self::Outage => 'Outage',
+            self::Unknown => 'No data',
+        };
+    }
+
+    /**
+     * The status of a group of checks, such as those in one bar of a status history chart.
+     */
+    public static function fromCheckCounts(int $checksCount, int $successfulChecksCount): self
+    {
+        return match (true) {
+            $checksCount === 0 => self::Unknown,
+            $successfulChecksCount === $checksCount => self::Operational,
+            $successfulChecksCount === 0 => self::Outage,
+            default => self::Degraded,
+        };
+    }
+
+    /**
+     * The position of the status when sorting in ascending order, from no data through to the most severe.
+     */
+    public function getSortRank(): int
+    {
+        return match ($this) {
+            self::Unknown => 0,
+            self::Operational => 1,
+            self::Degraded => 2,
+            self::Outage => 3,
+        };
+    }
+}

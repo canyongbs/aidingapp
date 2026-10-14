@@ -37,12 +37,10 @@
 namespace AidingApp\Contact\Filament\Resources;
 
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
 use App\Enums\NavigationGroup;
-use Filament\Resources\Pages\Page;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
@@ -60,14 +58,6 @@ class ContactResource extends Resource
     protected static ?string $recordTitleAttribute = 'full_name';
 
     protected static bool $isGloballySearchable = true;
-
-    public static function getRecordSubNavigation(Page $page): array
-    {
-        return $page->generateNavigationItems([
-            ViewContact::class,
-            EditContact::class,
-        ]);
-    }
 
     public static function getGloballySearchableAttributes(): array
     {
@@ -88,7 +78,6 @@ class ContactResource extends Resource
         return [
             'index' => ListContacts::route('/'),
             'create' => CreateContact::route('/create'),
-            'edit' => EditContact::route('/{record}/edit'),
             'view' => ViewContact::route('/{record}'),
         ];
     }

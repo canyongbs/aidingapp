@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManag
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignmentHistoryRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\CreatedByRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestConversationsRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestUpdatesRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Livewire\ServiceRequestUpdates;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
@@ -100,12 +100,11 @@ class ViewServiceRequest extends ViewRecord
                             ->visible(fn (ServiceRequest $record): bool => filled($this->assignmentRelationManagers($record)))
                             ->schema(fn (ServiceRequest $record): array => $this->assignmentRelationManagers($record)),
                         ServiceRequestTab::Updates->value => Tab::make(ServiceRequestTab::Updates->getLabel())
-                            ->visible(fn (ServiceRequest $record): bool => ServiceRequestUpdatesRelationManager::canViewForRecord($record, static::class))
+                            ->visible(fn (): bool => auth()->user()->can('viewAny', ServiceRequestUpdate::class))
                             ->schema([
-                                Livewire::make(ServiceRequestUpdatesRelationManager::class, fn (ServiceRequest $record): array => [
-                                    'ownerRecord' => $record,
-                                    'pageClass' => static::class,
-                                ])->key(ServiceRequestUpdatesRelationManager::class),
+                                Livewire::make(ServiceRequestUpdates::class, fn (ServiceRequest $record): array => [
+                                    'serviceRequest' => $record,
+                                ])->key(ServiceRequestUpdates::class),
                             ]),
                         ServiceRequestTab::Feedback->value => Tab::make(ServiceRequestTab::Feedback->getLabel())
                             ->visible(fn (ServiceRequest $record): bool => $this->canViewFeedback($record))

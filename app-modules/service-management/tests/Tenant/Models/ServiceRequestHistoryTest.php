@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
+use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 
@@ -174,6 +175,7 @@ it('renders specific event titles for known field changes', function () {
         'category' => 'Category Updated',
         'title' => 'Title Updated',
         'respondent_id' => 'Respondent Updated',
+        'removed_assignment' => 'Assignment Removed',
     ];
 
     foreach ($cases as $field => $expectedTitle) {
@@ -218,6 +220,40 @@ it('returns the Contact full_name as actorName when the actor is a Contact', fun
     expect($history->actorName())->toBe($contact->full_name);
 });
 
+it('returns the name of a soft-deleted User as actorName', function () {
+    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+
+    $history = new ServiceRequestHistory();
+    $history->actor()->associate($user);
+
+    $user->delete();
+
+    expect($user->refresh()->trashed())->toBeTrue()
+        ->and($history->actorName())->toBe('Heather Sheridan');
+});
+
+it('returns "Deleted user" as actorName when the actor no longer exists', function () {
+    $history = new ServiceRequestHistory([
+        'actor_type' => (new User())->getMorphClass(),
+        'actor_id' => Str::uuid()->toString(),
+    ]);
+
+    expect($history->actorName())->toBe('Deleted user');
+});
+
+it('returns the removed assignee name for Assignment Removed rows', function (?string $snapshotName, string $expectedName) {
+    $history = new ServiceRequestHistory([
+        'original_values' => ['removed_assignment' => $snapshotName],
+        'new_values' => ['removed_assignment' => null],
+    ]);
+
+    expect($history->isAssignmentRemovedEvent())->toBeTrue()
+        ->and($history->removedAssigneeName())->toBe($expectedName);
+})->with([
+    'known assignee' => ['Jane Doe', 'Jane Doe'],
+    'assignee already deleted' => [null, 'Deleted user'],
+]);
+
 it('resolves snapshot helpers from new_values for Created rows', function () {
     actingAs(User::factory()->create());
 
@@ -230,6 +266,40 @@ it('resolves snapshot helpers from new_values for Created rows', function () {
         ->and($createdRow->snapshotStatus()?->getKey())->toBe($serviceRequest->status_id)
         ->and($createdRow->snapshotPriority()?->getKey())->toBe($serviceRequest->priority_id)
         ->and($createdRow->snapshotType()?->getKey())->toBe($serviceRequest->priority->type_id);
+});
+
+it('resolves soft-deleted records in snapshot helpers', function () {
+    actingAs(User::factory()->create());
+
+    $serviceRequest = ServiceRequest::factory()->create();
+
+    $createdRow = $serviceRequest->histories
+        ->first(fn (ServiceRequestHistory $row) => $row->isCreatedEvent());
+
+    $serviceRequest->status->delete();
+    $serviceRequest->priority->type->delete();
+    $serviceRequest->priority->delete();
+
+    expect($serviceRequest->status->refresh()->trashed())->toBeTrue()
+        ->and($serviceRequest->priority->refresh()->trashed())->toBeTrue()
+        ->and($createdRow->snapshotStatus()?->getKey())->toBe($serviceRequest->status_id)
+        ->and($createdRow->snapshotPriority()?->getKey())->toBe($serviceRequest->priority_id)
+        ->and($createdRow->snapshotType()?->getKey())->toBe($serviceRequest->priority->type_id);
+});
+
+it('formats references to soft-deleted records by name and missing records as "Unknown"', function () {
+    $deletedStatus = ServiceRequestStatus::factory()->create(['name' => 'Retired Status']);
+    $deletedStatus->delete();
+
+    expect($deletedStatus->refresh()->trashed())->toBeTrue();
+
+    $history = new ServiceRequestHistory([
+        'original_values' => ['status_id' => Str::uuid()->toString()],
+        'new_values' => ['status_id' => $deletedStatus->getKey()],
+    ]);
+
+    expect($history->original_values_formatted)->toBe(['Status' => 'Unknown'])
+        ->and($history->new_values_formatted)->toBe(['Status' => 'Retired Status']);
 });
 
 it('returns empty getUpdates for the Created event', function () {

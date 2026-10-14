@@ -72,4 +72,14 @@ class ServiceRequestFeedbackTimeline extends CustomTimeline
     {
         return ServiceRequestFeedbackViewAction::make()->record($this->serviceRequestFeedback);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Feedback Submitted';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
+    }
 }

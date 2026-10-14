@@ -169,6 +169,59 @@ it('assigns to a manager through group membership', function () {
     expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
+it('does not count inactive assignments toward a manager\'s workload', function () {
+    asSuperAdmin();
+
+    $alice = User::factory()->create(['name' => 'Alice']);
+    $bob = User::factory()->create(['name' => 'Bob']);
+    $carol = User::factory()->create(['name' => 'Carol']);
+
+    $serviceRequestType = ServiceRequestType::factory()
+        ->state(['assignment_type' => ServiceRequestTypeAssignmentTypes::Workload])
+        ->create();
+
+    $serviceRequestType->managerUsers()->attach([$alice->getKey(), $bob->getKey(), $carol->getKey()]);
+
+    $reassignedRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    $bobsAssignment = $reassignedRequest->assignments()->create([
+        'user_id' => $bob->getKey(),
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    $reassignedRequest->assignments()->create([
+        'user_id' => $alice->getKey(),
+        'assigned_at' => now(),
+        'status' => ServiceRequestAssignmentStatus::Active,
+    ]);
+
+    expect($bobsAssignment->refresh()->status)->toBe(ServiceRequestAssignmentStatus::Inactive);
+
+    $serviceRequestType->last_assigned_id = $alice->getKey();
+    $serviceRequestType->save();
+
+    $serviceRequest = ServiceRequest::factory()->state([
+        'status_id' => ServiceRequestStatus::factory()->create([
+            'classification' => SystemServiceRequestClassification::Open,
+        ])->getKey(),
+        'priority_id' => ServiceRequestPriority::factory()->create([
+            'type_id' => $serviceRequestType->getKey(),
+        ])->getKey(),
+    ])->create();
+
+    app(WorkloadAssigner::class)->execute($serviceRequest);
+
+    expect($serviceRequest->assignedTo?->user_id)->toBe($bob->getKey());
+});
+
 test('workload assigner does not assign when no managers exist', function () {
     asSuperAdmin();
 

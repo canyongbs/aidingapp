@@ -72,4 +72,14 @@ class ServiceRequestUpdateTimeline extends CustomTimeline
     {
         return ServiceRequestUpdateViewAction::make()->record($this->serviceRequestUpdate);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Update Added';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
+    }
 }

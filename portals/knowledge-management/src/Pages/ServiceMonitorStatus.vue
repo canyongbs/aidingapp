@@ -37,123 +37,222 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { computed, ref, watch } from 'vue';
-    import ServiceMonitorCard from '../Components/ServiceMonitorCard.vue';
+    import { SignalIcon } from '@heroicons/vue/24/outline';
+    import { useQuery } from '@pinia/colada';
+    import { computed, onUnmounted, ref, watch } from 'vue';
+    import ServiceMonitorsTable from '../Components/ServiceMonitors/ServiceMonitorsTable.vue';
+    import ServiceMonitorStatusBanner from '../Components/ServiceMonitors/ServiceMonitorStatusBanner.vue';
+    import ServiceMonitorStatusBannerMeta from '../Components/ServiceMonitors/ServiceMonitorStatusBannerMeta.vue';
+    import ServiceMonitorStatusCounts from '../Components/ServiceMonitors/ServiceMonitorStatusCounts.vue';
+    import BaseSearchInput from '../Components/ui/BaseSearchInput.vue';
+    import BaseTableEmptyState from '../Components/ui/BaseTableEmptyState.vue';
+    import { useNow } from '../Composables/useNow.js';
     import { apiGet } from '../Services/api.js';
+    import formatDateTime, { resolveTimezone } from '../Services/FormatDateTime.js';
     import { useServiceMonitorData } from './loaders.js';
 
-    // Page 1 arrives via the route data loader; subsequent pages are fetched on demand.
+    const DEFAULT_SORT = 'name';
+    const DEFAULT_DIRECTION = 'asc';
+
+    // Page 1 with the default sort arrives via the route data loader; any other view is fetched on demand.
     const { data: initialData } = useServiceMonitorData();
 
-    const result = ref([]);
-    const loadingPage = ref(null);
+    const now = useNow();
 
     const currentPage = ref(1);
-    const lastPage = ref(1);
-    const totalArticles = ref(0);
-    const fromArticle = ref(0);
-    const toArticle = ref(0);
+    const search = ref('');
+    const appliedSearch = ref('');
+    const sort = ref(DEFAULT_SORT);
+    const direction = ref(DEFAULT_DIRECTION);
 
-    const okTitle = 'All systems operational';
-    const okMessage =
-        'All systems are functioning seamlessly, with no disruptions or downtime reported. Every component, from critical infrastructure to auxiliary services is running at full capacity, ensuring optimal performance and reliability.';
-    const issueTitle = 'Some systems are experiencing issues';
-    const issueMessage = 'One or more services are currently experiencing disruptions or downtime.';
+    let searchTimeout = null;
 
-    const hasIssues = computed(() =>
-        result.value.some((serviceMonitor) => serviceMonitor.latest_history?.succeeded === false),
+    watch(search, (value) => {
+        clearTimeout(searchTimeout);
+
+        searchTimeout = setTimeout(() => {
+            appliedSearch.value = value.trim();
+        }, 300);
+    });
+
+    onUnmounted(() => clearTimeout(searchTimeout));
+
+    watch([appliedSearch, sort, direction], () => {
+        currentPage.value = 1;
+    });
+
+    const usesInitialData = computed(
+        () =>
+            currentPage.value === 1 &&
+            appliedSearch.value === '' &&
+            sort.value === DEFAULT_SORT &&
+            direction.value === DEFAULT_DIRECTION,
     );
 
-    const hasAnyHistory = computed(() => result.value.some((serviceMonitor) => serviceMonitor.latest_history !== null));
+    const pageQuery = useQuery({
+        key: () => [
+            'knowledge-management',
+            'service-monitors',
+            currentPage.value,
+            appliedSearch.value,
+            sort.value,
+            direction.value,
+        ],
+        query: () =>
+            apiGet('/status', {
+                page: currentPage.value,
+                search: appliedSearch.value || undefined,
+                sort: sort.value,
+                direction: direction.value,
+                timezone: resolveTimezone(),
+            }),
+        enabled: () => !usesInitialData.value,
+    });
 
-    const systemTitle = computed(() => (hasIssues.value ? issueTitle : okTitle));
-    const systemMessage = computed(() => (hasIssues.value ? issueMessage : okMessage));
+    const currentEnvelope = computed(() =>
+        usesInitialData.value ? (initialData.value ?? null) : (pageQuery.data.value ?? null),
+    );
 
-    function setPagination(pagination) {
-        currentPage.value = pagination.current_page;
-        lastPage.value = pagination.last_page;
-        totalArticles.value = pagination.total;
-        fromArticle.value = pagination.from;
-        toArticle.value = pagination.to;
-    }
+    const shownEnvelope = ref(null);
+    watch(
+        currentEnvelope,
+        (envelope) => {
+            if (envelope) {
+                shownEnvelope.value = envelope;
+            }
+        },
+        { immediate: true },
+    );
 
-    function applyResponse(response) {
-        if (!response) {
+    const monitors = computed(() => shownEnvelope.value?.data ?? []);
+    const summary = computed(() => shownEnvelope.value?.summary ?? null);
+    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
+    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
+    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
+    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
+    const isFetching = computed(() => !usesInitialData.value && pageQuery.isLoading.value);
+    const loadingPage = computed(() => (isFetching.value ? currentPage.value : null));
+    const loadFailed = computed(() => !usesInitialData.value && !isFetching.value && Boolean(pageQuery.error.value));
+
+    const summaryCopy = computed(() => {
+        const total = summary.value?.total_count ?? 0;
+        const affected = (summary.value?.status_counts?.degraded ?? 0) + (summary.value?.status_counts?.outage ?? 0);
+        const unchecked = summary.value?.status_counts?.unknown ?? 0;
+        const operational = total - unchecked;
+
+        switch (summary.value?.status) {
+            case 'operational':
+                if (unchecked > 0) {
+                    return {
+                        title: 'All checked systems operational',
+                        description: `${operational} of ${total} monitored services ${operational === 1 ? 'is' : 'are'} running as expected. ${unchecked} ${unchecked === 1 ? "hasn't" : "haven't"} completed ${unchecked === 1 ? 'its' : 'their'} first check yet.`,
+                    };
+                }
+
+                return {
+                    title: 'All systems operational',
+                    description: 'All monitored services are running as expected.',
+                };
+            case 'degraded':
+                return {
+                    title: 'Some systems are experiencing issues',
+                    description: `${affected} of ${total} monitored ${total === 1 ? 'service' : 'services'} ${affected === 1 ? 'is' : 'are'} not fully operational.`,
+                };
+            default:
+                return {
+                    title: 'Awaiting status data',
+                    description: "Monitored services haven't completed their first checks yet.",
+                };
+        }
+    });
+
+    function toggleSort(column) {
+        if (sort.value === column) {
+            direction.value = direction.value === 'asc' ? 'desc' : 'asc';
+
             return;
         }
 
-        result.value = response.data;
-        setPagination(response.meta);
-    }
-
-    watch(initialData, applyResponse, { immediate: true });
-
-    async function getServiceMonitors(page = 1) {
-        loadingPage.value = page;
-
-        try {
-            applyResponse(await apiGet('/status', { page }));
-        } catch (error) {
-            console.error('Error fetching service monitors:', error);
-        } finally {
-            loadingPage.value = null;
-        }
-    }
-
-    function fetchNextPage() {
-        if (currentPage.value < lastPage.value) {
-            getServiceMonitors(currentPage.value + 1);
-        }
-    }
-
-    function fetchPreviousPage() {
-        if (currentPage.value > 1) {
-            getServiceMonitors(currentPage.value - 1);
-        }
+        sort.value = column;
+        direction.value = 'asc';
     }
 
     function fetchPage(page) {
-        getServiceMonitors(page);
+        if (page !== currentPage.value) {
+            currentPage.value = page;
+        }
     }
 </script>
 
 <template>
     <Page>
-        <template #heading> Status </template>
-        <template #description> Real-time status of services and systems </template>
+        <template #heading>Status</template>
+        <template #description>Real-time status of services and systems</template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Status'" />
         </template>
 
-        <template v-if="result.length > 0">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <ServiceMonitorCard
-                    v-for="(serviceMonitor, index) in result"
-                    :key="index"
-                    :name="serviceMonitor.name"
-                    :status="serviceMonitor.latest_history?.succeeded ?? true"
-                    :message="
-                        serviceMonitor.latest_history?.status_message ?? 'No known issues (monitoring not yet started).'
-                    "
+        <template v-if="summary && summary.total_count > 0">
+            <ServiceMonitorStatusBanner
+                :status="summary.status"
+                :title="summaryCopy.title"
+                :description="summaryCopy.description"
+            >
+                <template v-if="summary.last_checked_at" #meta>
+                    <ServiceMonitorStatusBannerMeta label="Last updated">
+                        <time :datetime="summary.last_checked_at">{{ formatDateTime(summary.last_checked_at) }}</time>
+                    </ServiceMonitorStatusBannerMeta>
+                </template>
+            </ServiceMonitorStatusBanner>
+
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <ServiceMonitorStatusCounts :total-count="summary.total_count" :status-counts="summary.status_counts" />
+                <BaseSearchInput
+                    v-model="search"
+                    label="Search monitors"
+                    placeholder="Search monitors…"
+                    class="md:max-w-xs"
+                />
+            </div>
+
+            <div :class="['transition-opacity', isFetching && 'opacity-60']" :aria-busy="isFetching">
+                <BaseTableEmptyState v-if="loadFailed">
+                    <p class="text-base font-semibold text-gray-700">Could not load monitors</p>
+                    <p class="mt-1 text-sm text-gray-400">Something went wrong while loading these results.</p>
+                    <BaseButton color="gray" size="md" class="mt-4" @click="pageQuery.refetch()">Try again</BaseButton>
+                </BaseTableEmptyState>
+
+                <BaseTableEmptyState v-else-if="monitors.length === 0">
+                    <p class="text-base font-semibold text-gray-700">No monitors match your search</p>
+                    <p class="mt-1 text-sm text-gray-400">Try searching for a different name or description.</p>
+                </BaseTableEmptyState>
+
+                <ServiceMonitorsTable
+                    v-else
+                    :monitors="monitors"
+                    :sort="sort"
+                    :direction="direction"
+                    :now="now"
+                    @sort="toggleSort"
                 />
             </div>
 
             <Pagination
-                v-if="lastPage > 1"
-                :currentPage="currentPage"
-                :lastPage="lastPage"
-                :fromItem="fromArticle"
-                :toItem="toArticle"
-                :totalItems="totalArticles"
-                :loadingPage="loadingPage"
-                @fetchNextPage="fetchNextPage"
-                @fetchPreviousPage="fetchPreviousPage"
+                v-if="!loadFailed && lastPage > 1"
+                :current-page="currentPage"
+                :last-page="lastPage"
+                :from-item="fromItem"
+                :to-item="toItem"
+                :total-items="totalItems"
+                :loading-page="loadingPage"
+                @fetchPreviousPage="fetchPage(currentPage - 1)"
+                @fetchNextPage="fetchPage(currentPage + 1)"
                 @fetchPage="fetchPage"
             />
         </template>
 
-        <EmptyState v-else>
+        <EmptyState v-else :icon="SignalIcon">
             <template #heading>There are no service monitors to display.</template>
             <template #actions>
                 <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>

@@ -38,7 +38,10 @@
 
     $createdAt = $record->created_at;
     $formattedPostedAt = $createdAt?->format('M j, Y \\a\\t g:i A') ?? '';
-    $createdBy = $record->createdBy;
+    $createdBy = $record
+        ->createdBy()
+        ->withTrashed()
+        ->getResults();
 
     $actorRole = match (true) {
         $createdBy instanceof ServiceRequest => 'AI',
@@ -51,6 +54,7 @@
         $createdBy instanceof ServiceRequest => 'Assistant',
         $createdBy instanceof User => $createdBy->name,
         $createdBy instanceof Contact => $createdBy->full_name,
+        filled($record->created_by_id) => 'Deleted user',
         default => 'Unknown',
     };
 @endphp

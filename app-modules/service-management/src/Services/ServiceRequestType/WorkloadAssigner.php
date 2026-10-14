@@ -36,6 +36,7 @@
 
 namespace AidingApp\ServiceManagement\Services\ServiceRequestType;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -82,7 +83,8 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                                 ->whereNull('service_request_statuses.deleted_at');
                         })
                         ->whereNull('service_requests.deleted_at')
-                        ->whereNull('service_request_assignments.deleted_at');
+                        ->whereNull('service_request_assignments.deleted_at')
+                        ->where('service_request_assignments.status', ServiceRequestAssignmentStatus::Active);
                 }, '<=', $lowestServiceRequest)
                 ->where('name', '>=', $lastAssignee->name)
                 ->where(fn (Builder $query) => $query

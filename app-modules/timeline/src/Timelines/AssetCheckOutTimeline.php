@@ -72,4 +72,14 @@ class AssetCheckOutTimeline extends CustomTimeline
     {
         return AssetCheckOutViewAction::make()->record($this->assetCheckOut);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Asset Checked Out';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
+    }
 }

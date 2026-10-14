@@ -33,45 +33,28 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
-use AidingApp\Contact\Models\Contact;
-use App\DataTransferObjects\AutocompletedAddress;
-use App\Models\User;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Query\Builder;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-it('populates the address fields when a suggestion is selected', function () {
-    actingAs(
-        User::factory()
-            ->create()
-            ->givePermissionTo('contact.view-any', 'contact.*.update')
-    );
+return new class () extends Migration {
+    public $withinTransaction = false;
 
-    $contact = Contact::factory()->create();
+    public function up(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->index(['service_monitoring_target_id', 'created_at'], 'historical_service_monitorings_target_id_created_at_index')
+                ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'))
+                ->concurrently();
+        });
+    }
 
-    $address = new AutocompletedAddress(
-        address: '123 Main St',
-        city: 'Austin',
-        state: 'TX',
-        postalCode: '78701',
-        country: 'US',
-        label: '123 Main St, Austin, TX, 78701, US',
-    );
-
-    livewire(EditContact::class, [
-        'record' => $contact->getRouteKey(),
-    ])
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
-            'value' => $address->label,
-            'label' => $address->label,
-            'data' => ['data' => json_decode(json_encode($address), true)],
-        ]])
-        ->assertSchemaStateSet([
-            'address' => '123 Main St',
-            'city' => 'Austin',
-            'state' => 'TX',
-            'postal' => '78701',
-            'country' => 'US',
-        ]);
-});
+    public function down(): void
+    {
+        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+            $table->dropIndexIfExists('historical_service_monitorings_target_id_created_at_index');
+        });
+    }
+};

@@ -72,4 +72,14 @@ class EngagementResponseTimeline extends CustomTimeline
     {
         return EngagementResponseViewAction::make()->record($this->engagementResponse);
     }
+
+    public function missingRecordTitle(): string
+    {
+        return 'Engagement Response Received';
+    }
+
+    public function missingRecordDescription(): ?string
+    {
+        return null;
+    }
 }
