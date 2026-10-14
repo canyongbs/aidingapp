@@ -45,6 +45,7 @@ use AidingApp\Notification\Notifications\Contracts\HasAfterSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasBeforeSendHook;
 use AidingApp\Notification\Notifications\Contracts\HasOutboundMailCustomization;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
+use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Notifications\Concerns\SetsServiceRequestEmailHeaders;
@@ -63,7 +64,9 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
     public function __construct(
         protected ServiceRequest $serviceRequest,
         public ?ServiceRequestTypeEmailTemplate $emailTemplate,
-    ) {}
+    ) {
+        $this->delay = 60;
+    }
 
     /**
      * @return array<int, string>
@@ -71,6 +74,11 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
     public function via(object $notifiable): array
     {
         return ['mail'];
+    }
+
+    public function shouldSend(object $notifiable, string $channel): bool
+    {
+        return ServiceRequest::query()->find($this->serviceRequest->getKey())?->status?->classification === SystemServiceRequestClassification::Closed;
     }
 
     public function toMail(object $notifiable): MailMessage
