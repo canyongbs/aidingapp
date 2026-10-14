@@ -19,7 +19,7 @@ concurrency:
 jobs:
     prep-and-code-consistency:
         name: Prep and Code Consistency
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         permissions:
             contents: read
@@ -62,8 +62,8 @@ jobs:
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.extcache.outputs.dir }}
-                  key: ${{ runner.os }}-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
-                  restore-keys: ${{ runner.os }}-phpext-${{ env.php-version }}
+                  key: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
+                  restore-keys: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}
 
             - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
               with:
@@ -164,7 +164,7 @@ jobs:
             matrix:
                 testsuite: [Landlord, Tenant]
 
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         permissions:
             contents: read
@@ -229,8 +229,8 @@ jobs:
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.extcache.outputs.dir }}
-                  key: ${{ runner.os }}-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
-                  restore-keys: ${{ runner.os }}-phpext-${{ env.php-version }}
+                  key: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
+                  restore-keys: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}
 
             - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
               with:
@@ -306,7 +306,7 @@ jobs:
 
     lint:
         name: Lint
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         permissions:
             contents: read
@@ -353,8 +353,8 @@ jobs:
               uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
                   path: ${{ steps.extcache.outputs.dir }}
-                  key: ${{ runner.os }}-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
-                  restore-keys: ${{ runner.os }}-phpext-${{ env.php-version }}
+                  key: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
+                  restore-keys: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}
 
             - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
               with:
@@ -422,7 +422,7 @@ jobs:
 
     request-copilot-review:
         name: Request Copilot Review
-        runs-on: ubuntu-22.04
+        runs-on: ubuntu-24.04
 
         permissions: {}
 
@@ -474,7 +474,7 @@ jobs:
 
     renovate-config-validator:
         name: Renovate Config Validator
-        runs-on: ubuntu-latest
+        runs-on: ubuntu-24.04
 
         permissions:
             contents: read
