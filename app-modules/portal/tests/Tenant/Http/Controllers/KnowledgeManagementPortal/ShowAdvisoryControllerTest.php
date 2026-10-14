@@ -70,7 +70,7 @@ it('displays the advisory data', function () {
             'description' => 'A burst pipe has flooded the ground floor.',
         ]);
 
-    $update = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create([
+    $update = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create([
         'title' => 'Water removal underway',
         'update' => 'Crews are removing water.',
         'date' => $date,
@@ -95,12 +95,23 @@ it('displays the advisory data', function () {
 it('lists the updates newest first', function () {
     $advisory = Advisory::factory()->create();
 
-    $olderUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create(['date' => now()->subDay(), 'created_at' => now()]);
-    $newerUpdate = AdvisoryUpdate::factory()->for($advisory, 'advisory')->create(['date' => now(), 'created_at' => now()->subDay()]);
+    $olderUpdate = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create(['date' => now()->subDay(), 'created_at' => now()]);
+    $newerUpdate = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create(['date' => now(), 'created_at' => now()->subDay()]);
 
     $updateIds = collect(getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertOk()->json('data.updates'))->pluck('id');
 
     expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
+});
+
+it('does not show internal updates', function () {
+    $advisory = Advisory::factory()->create();
+
+    $publicUpdate = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create();
+    AdvisoryUpdate::factory()->internal()->for($advisory, 'advisory')->create();
+
+    $updateIds = collect(getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertOk()->json('data.updates'))->pluck('id');
+
+    expect($updateIds->all())->toBe([$publicUpdate->getKey()]);
 });
 
 it('returns not found for a missing advisory', function () {

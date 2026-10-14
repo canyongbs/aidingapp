@@ -86,8 +86,10 @@ class AdvisoryController extends Controller
                     ->orWhereHas('assignedDepartment', fn (Builder $query): Builder => $query
                         ->whereRaw('lower(departments.name) like ?', [$pattern]))
                     ->orWhereHas('advisoryUpdates', fn (Builder $query): Builder => $query
-                        ->whereRaw('lower(advisory_updates.title) like ?', [$pattern])
-                        ->orWhereRaw('lower(advisory_updates.update) like ?', [$pattern])));
+                        ->where('advisory_updates.internal', false)
+                        ->where(fn (Builder $query): Builder => $query
+                            ->whereRaw('lower(advisory_updates.title) like ?', [$pattern])
+                            ->orWhereRaw('lower(advisory_updates.update) like ?', [$pattern]))));
             })
             ->tap(fn (Builder $query) => $sort->apply($query))
             ->paginate(10);

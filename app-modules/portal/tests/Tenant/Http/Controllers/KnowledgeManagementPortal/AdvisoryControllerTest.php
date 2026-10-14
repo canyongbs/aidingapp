@@ -100,8 +100,8 @@ it('resolves the last updated date from the latest update', function () {
     $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
 
     $advisoryWithUpdates = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
-    AdvisoryUpdate::factory()->for($advisoryWithUpdates, 'advisory')->create(['date' => $createdAt->copy()->addHour()]);
-    AdvisoryUpdate::factory()->for($advisoryWithUpdates, 'advisory')->create(['date' => $createdAt->copy()->addHours(2)]);
+    AdvisoryUpdate::factory()->public()->for($advisoryWithUpdates, 'advisory')->create(['date' => $createdAt->copy()->addHour()]);
+    AdvisoryUpdate::factory()->public()->for($advisoryWithUpdates, 'advisory')->create(['date' => $createdAt->copy()->addHours(2)]);
 
     $advisoryWithoutUpdates = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
 
@@ -147,13 +147,35 @@ it('can search advisories', function (Advisory $matchingAdvisory) {
         ->create(),
     'update title' => fn () => Advisory::factory()
         ->for(AdvisoryStatus::factory()->open(), 'status')
-        ->has(AdvisoryUpdate::factory()->state(['title' => 'Basement flooded']), 'advisoryUpdates')
+        ->has(AdvisoryUpdate::factory()->public()->state(['title' => 'Basement flooded']), 'advisoryUpdates')
         ->create(),
     'update description' => fn () => Advisory::factory()
         ->for(AdvisoryStatus::factory()->open(), 'status')
-        ->has(AdvisoryUpdate::factory()->state(['update' => 'The basement has flooded.']), 'advisoryUpdates')
+        ->has(AdvisoryUpdate::factory()->public()->state(['update' => 'The basement has flooded.']), 'advisoryUpdates')
         ->create(),
 ]);
+
+it('ignores internal updates when resolving the last updated date', function () {
+    $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
+
+    $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
+    AdvisoryUpdate::factory()->internal()->for($advisory, 'advisory')->create(['date' => $createdAt->copy()->addHour()]);
+
+    getJson(route('api.portal.advisories'))
+        ->assertOk()
+        ->assertJsonPath('data.0.last_updated_at', '2026-10-08T07:00:00+00:00');
+});
+
+it('does not search internal updates', function (string $field) {
+    Advisory::factory()
+        ->for(AdvisoryStatus::factory()->open(), 'status')
+        ->has(AdvisoryUpdate::factory()->internal()->state([$field => 'Basement flooded']), 'advisoryUpdates')
+        ->create();
+
+    getJson(route('api.portal.advisories', ['search' => 'flooded']))
+        ->assertOk()
+        ->assertJsonCount(0, 'data');
+})->with(['title', 'update']);
 
 it('treats search wildcards literally', function () {
     $status = AdvisoryStatus::factory()->open()->create();
