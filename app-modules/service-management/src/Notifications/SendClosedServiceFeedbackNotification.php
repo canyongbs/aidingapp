@@ -92,6 +92,10 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
             return false;
         }
 
+        if ($serviceRequest->respondent_id !== $notifiable->getKey()) {
+            return false;
+        }
+
         return $this->isReminder || ! $serviceRequest->feedback()->exists();
     }
 

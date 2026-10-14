@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -101,5 +102,37 @@ describe('shouldSend', function () {
         $notification = (new SendClosedServiceFeedbackNotification($serviceRequest, null))->asReminder();
 
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeTrue();
+    });
+
+    it('does not send when the respondent changed after the notification was queued', function () {
+        Notification::fake();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for(ServiceRequestStatus::factory()->closed(), 'status')
+            ->create();
+
+        $originalRespondent = $serviceRequest->respondent;
+
+        $notification = new SendClosedServiceFeedbackNotification($serviceRequest, null);
+
+        ServiceRequest::query()
+            ->whereKey($serviceRequest->getKey())
+            ->update(['respondent_id' => Contact::factory()->create()->getKey()]);
+
+        expect($notification->shouldSend($originalRespondent, 'mail'))->toBeFalse();
+    });
+
+    it('does not send when the service request no longer exists', function () {
+        Notification::fake();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for(ServiceRequestStatus::factory()->closed(), 'status')
+            ->create();
+
+        $notification = new SendClosedServiceFeedbackNotification($serviceRequest, null);
+
+        ServiceRequest::query()->whereKey($serviceRequest->getKey())->delete();
+
+        expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 });

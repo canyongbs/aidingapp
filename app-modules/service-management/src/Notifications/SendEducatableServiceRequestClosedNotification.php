@@ -78,7 +78,13 @@ class SendEducatableServiceRequestClosedNotification extends Notification implem
 
     public function shouldSend(object $notifiable, string $channel): bool
     {
-        return ServiceRequest::query()->find($this->serviceRequest->getKey())?->status?->classification === SystemServiceRequestClassification::Closed;
+        $serviceRequest = ServiceRequest::query()->find($this->serviceRequest->getKey());
+
+        if ($serviceRequest?->status?->classification !== SystemServiceRequestClassification::Closed) {
+            return false;
+        }
+
+        return $serviceRequest->respondent_id === $notifiable->getKey();
     }
 
     public function toMail(object $notifiable): MailMessage

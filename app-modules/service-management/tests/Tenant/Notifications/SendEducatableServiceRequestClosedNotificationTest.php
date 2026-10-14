@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Notifications\SendEducatableServiceRequestClosedNotification;
@@ -86,5 +87,23 @@ describe('shouldSend', function () {
         ServiceRequest::query()->whereKey($serviceRequest->getKey())->delete();
 
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
+    });
+
+    it('does not send when the respondent changed after the notification was queued', function () {
+        Notification::fake();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for(ServiceRequestStatus::factory()->closed(), 'status')
+            ->create();
+
+        $originalRespondent = $serviceRequest->respondent;
+
+        $notification = new SendEducatableServiceRequestClosedNotification($serviceRequest, null);
+
+        ServiceRequest::query()
+            ->whereKey($serviceRequest->getKey())
+            ->update(['respondent_id' => Contact::factory()->create()->getKey()]);
+
+        expect($notification->shouldSend($originalRespondent, 'mail'))->toBeFalse();
     });
 });
