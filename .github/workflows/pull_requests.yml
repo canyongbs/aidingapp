@@ -494,7 +494,7 @@ jobs:
         permissions: {}
 
         # Only request a review once code is green, so Copilot never reviews failing changes.
-        needs: [test, lint]
+        needs: [prep-and-code-consistency, test, lint]
 
         if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.event.pull_request.user.login != 'dependabot[bot]' }}
 
