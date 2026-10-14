@@ -36,19 +36,19 @@
 
 use App\Filament\Pages\ManagePresenceSettings;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(ManagePresenceSettings::class)->assertForbidden();
+    Livewire::test(ManagePresenceSettings::class)->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ManagePresenceSettings::class)->assertOk();
+    Livewire::test(ManagePresenceSettings::class)->assertOk();
 });

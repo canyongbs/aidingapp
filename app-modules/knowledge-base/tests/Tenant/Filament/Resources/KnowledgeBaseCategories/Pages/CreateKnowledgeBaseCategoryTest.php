@@ -40,10 +40,10 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories\CreateKnowledgeBaseCategoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 // TODO: Write CreateKnowledgeBaseCategory tests
@@ -61,7 +61,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
             KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseCategory::class)
+    Livewire::test(CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -74,7 +74,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
 
     $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(CreateKnowledgeBaseCategory::class)
+    Livewire::test(CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -101,7 +101,7 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
             KnowledgeBaseCategoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseCategory::class)
+    Livewire::test(CreateKnowledgeBaseCategory::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -115,7 +115,7 @@ test('CreateKnowledgeBaseCategory is gated with proper feature access control', 
 
     $request = collect(CreateKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(CreateKnowledgeBaseCategory::class)
+    Livewire::test(CreateKnowledgeBaseCategory::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

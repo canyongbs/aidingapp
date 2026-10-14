@@ -49,9 +49,9 @@ use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewContact page', function () {
@@ -73,7 +73,7 @@ test('The correct details are displayed on the ViewContact page', function () {
         'last_activity_at' => now(),
     ]);
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful()
         ->assertSee('John')
         ->assertSee('Doe')
@@ -92,7 +92,7 @@ test('The primary information sections are organized into tabs on the ViewContac
 
     $contact = Contact::factory()->create();
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful()
         ->assertSeeInOrder(['Demographic', 'Contact', 'Employment', 'Academic', 'Address', 'Affiliation', 'System']);
 });
@@ -106,7 +106,7 @@ test('ViewContact renders successfully when optional fields have no value', func
         'address_2' => null,
     ]);
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful();
 });
 
@@ -146,14 +146,14 @@ describe('section edit actions', function () {
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
 
         $user->givePermissionTo('contact.*.update');
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionVisible(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
@@ -171,7 +171,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'), data: [
@@ -216,7 +216,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editEmploymentInformation')->schemaComponent('employmentInformation'), data: [
@@ -251,7 +251,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editAcademicInformation')->schemaComponent('academicInformation'), data: [
@@ -288,7 +288,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editAddressInformation')->schemaComponent('addressInformation'), data: [
@@ -322,7 +322,7 @@ describe('section edit actions', function () {
 
         $organization = Organization::factory()->create();
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
@@ -344,7 +344,7 @@ describe('section edit actions', function () {
 
         $contact = Contact::factory()->create(['email_bounce' => false]);
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editEngagementRestrictions')->schemaComponent('engagementRestrictions'), data: [
@@ -367,7 +367,7 @@ describe('section edit actions', function () {
 
         actingAs($user);
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
@@ -375,7 +375,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
@@ -391,7 +391,7 @@ describe('email health', function () {
 
         $contact = Contact::factory()->bounced()->create();
 
-        $component = livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentVisible('email-health-callout');
 
@@ -418,7 +418,7 @@ describe('email health', function () {
 
         $contact = Contact::factory()->create(['email_bounce' => false]);
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('email-health-callout')
             ->mountAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'))
@@ -440,7 +440,7 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
@@ -456,12 +456,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class);
 
         $user->givePermissionTo('service_request.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSeeLivewire(ServiceRequestsRelationManager::class);
     });
@@ -473,20 +473,20 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
 
         $user->givePermissionTo('asset_check_out.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
 
         $user->givePermissionTo('asset_check_in.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertSeeLivewire(AssetCheckInRelationManager::class);
@@ -499,12 +499,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertDontSeeLivewire(EngagementFilesRelationManager::class);
 
         $user->givePermissionTo('engagement_file.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementFilesRelationManager::class);
     });
@@ -516,12 +516,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertDontSeeLivewire(EngagementsRelationManager::class);
 
         $user->givePermissionTo('engagement.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementsRelationManager::class);
     });

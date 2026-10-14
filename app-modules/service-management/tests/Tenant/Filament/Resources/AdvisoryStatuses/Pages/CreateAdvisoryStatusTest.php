@@ -39,10 +39,10 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\Create
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryStatusRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -51,7 +51,7 @@ test('CreateAdvisoryStatus requires valid data', function ($data, $errors) {
 
     $advisoryStatus = AdvisoryStatusRequestFactory::new($data)->create();
 
-    livewire(CreateAdvisoryStatus::class)
+    Livewire::test(CreateAdvisoryStatus::class)
         ->fillForm($advisoryStatus)
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -84,7 +84,7 @@ test('CreateAdvisoryStatus is gated with proper access control', function () {
             AdvisoryStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateAdvisoryStatus::class)
+    Livewire::test(CreateAdvisoryStatus::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -97,7 +97,7 @@ test('CreateAdvisoryStatus is gated with proper access control', function () {
 
     $request = AdvisoryStatusRequestFactory::new()->create();
 
-    livewire(CreateAdvisoryStatus::class)
+    Livewire::test(CreateAdvisoryStatus::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();

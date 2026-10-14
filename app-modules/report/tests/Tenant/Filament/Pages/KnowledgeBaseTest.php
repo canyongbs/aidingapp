@@ -41,9 +41,9 @@ use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -54,19 +54,19 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(KnowledgeBase::class)->assertForbidden();
+    Livewire::test(KnowledgeBase::class)->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
 
-    livewire(KnowledgeBase::class)->assertForbidden();
+    Livewire::test(KnowledgeBase::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::KnowledgeBase->value,
         'user_id' => $user->getKey(),
     ]);
 
-    livewire(KnowledgeBase::class)->assertOk();
+    Livewire::test(KnowledgeBase::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -80,12 +80,12 @@ it('grants access to a user belonging to a department that has been granted acce
 
     actingAs($user);
 
-    livewire(KnowledgeBase::class)->assertForbidden();
+    Livewire::test(KnowledgeBase::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
         'report_key' => ReportAccessKey::KnowledgeBase->value,
         'department_id' => $department->getKey(),
     ]);
 
-    livewire(KnowledgeBase::class)->assertOk();
+    Livewire::test(KnowledgeBase::class)->assertOk();
 });

@@ -45,9 +45,9 @@ use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Config;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can associate multiple users with a group', function () {
@@ -55,7 +55,7 @@ it('can associate multiple users with a group', function () {
     $group = Group::factory()->create();
     $users = User::factory()->count(3)->create();
 
-    livewire(UsersRelationManager::class, [
+    Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ])
@@ -84,7 +84,7 @@ it('does not show admin users in the associate users selection by default', func
         return $user;
     });
 
-    $component = livewire(UsersRelationManager::class, [
+    $component = Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ]);
@@ -115,7 +115,7 @@ it('allows admin users in the associate users selection when admin filtering is 
         return $user;
     });
 
-    $component = livewire(UsersRelationManager::class, [
+    $component = Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ]);
@@ -136,7 +136,7 @@ it('does not associate an admin user when admin filtering is enabled', function 
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(UsersRelationManager::class, [
+    Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ])
@@ -153,7 +153,7 @@ it('can detach a user from a group', function () {
     $user = User::factory()->create();
     $group->users()->attach($user);
 
-    livewire(UsersRelationManager::class, [
+    Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ])->callAction(TestAction::make(DetachAction::class)->table($user));
@@ -167,7 +167,7 @@ it('can bulk detach users from a group', function () {
     $users = User::factory()->count(2)->create();
     $group->users()->attach($users);
 
-    livewire(UsersRelationManager::class, [
+    Livewire::test(UsersRelationManager::class, [
         'ownerRecord' => $group,
         'pageClass' => EditGroup::class,
     ])
@@ -184,14 +184,14 @@ describe('authorization', function () {
         actingAs($user);
         $group = Group::factory()->create();
 
-        livewire(UsersRelationManager::class, [
+        Livewire::test(UsersRelationManager::class, [
             'ownerRecord' => $group,
             'pageClass' => EditGroup::class,
         ])->assertActionHidden(TestAction::make(AttachAction::class)->table());
 
         $user->givePermissionTo('group.*.update');
 
-        livewire(UsersRelationManager::class, [
+        Livewire::test(UsersRelationManager::class, [
             'ownerRecord' => $group,
             'pageClass' => EditGroup::class,
         ])->assertActionVisible(TestAction::make(AttachAction::class)->table());

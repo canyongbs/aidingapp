@@ -39,11 +39,11 @@ use AidingApp\Group\Filament\Resources\Groups\Pages\EditGroup;
 use AidingApp\Group\Models\Group;
 use AidingApp\Group\Tests\Tenant\Filament\Resources\Groups\RequestFactories\GroupRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the edit group page', function () {
@@ -57,7 +57,7 @@ it('displays the group data', function () {
     asSuperAdmin();
     $group = Group::factory()->create();
 
-    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+    Livewire::test(EditGroup::class, ['record' => $group->getRouteKey()])
         ->assertSchemaStateSet([
             'name' => $group->name,
             'description' => $group->description,
@@ -68,7 +68,7 @@ it('can update a group', function () {
     asSuperAdmin();
     $group = Group::factory()->create();
 
-    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+    Livewire::test(EditGroup::class, ['record' => $group->getRouteKey()])
         ->fillForm(['name' => 'Advisors', 'description' => 'Academic advisors'])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -84,7 +84,7 @@ it('allows saving with the same name as the current group', function () {
     asSuperAdmin();
     $group = Group::factory()->create();
 
-    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+    Livewire::test(EditGroup::class, ['record' => $group->getRouteKey()])
         ->fillForm(['name' => $group->name])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -96,7 +96,7 @@ it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
     Group::factory()->create(['name' => 'Student Success']);
     $group = Group::factory()->create();
 
-    livewire(EditGroup::class, ['record' => $group->getRouteKey()])
+    Livewire::test(EditGroup::class, ['record' => $group->getRouteKey()])
         ->fillForm($data->create())
         ->call('save')
         ->assertHasFormErrors($errors);

@@ -40,10 +40,10 @@ use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\EditAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 dataset('admins', [
@@ -105,7 +105,7 @@ describe('authorization', function () {
 
         $role = Role::factory()->create();
 
-        livewire(ViewRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(ViewRole::class, ['record' => $role->getRouteKey()])
             ->assertActionVisible(EditAction::class);
     });
 
@@ -117,7 +117,7 @@ describe('authorization', function () {
             ->where('guard_name', 'web')
             ->firstOrFail();
 
-        livewire(ViewRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(ViewRole::class, ['record' => $role->getRouteKey()])
             ->assertActionHidden(EditAction::class);
     })->with('admins')->with('admin roles');
 });

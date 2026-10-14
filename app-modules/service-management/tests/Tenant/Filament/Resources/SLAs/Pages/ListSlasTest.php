@@ -39,9 +39,9 @@ use AidingApp\ServiceManagement\Models\Sla;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -52,17 +52,17 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(ListSlas::class)->assertForbidden();
+    Livewire::test(ListSlas::class)->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ListSlas::class)->assertForbidden();
+    Livewire::test(ListSlas::class)->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    livewire(ListSlas::class)->assertOk();
+    Livewire::test(ListSlas::class)->assertOk();
 });
 
 it('only shows the bulk delete action to a user with the settings.delete permission', function () {
@@ -74,11 +74,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListSlas::class)
+    Livewire::test(ListSlas::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListSlas::class)
+    Livewire::test(ListSlas::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

@@ -44,10 +44,10 @@ use App\Settings\LicenseSettings;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 // TODO: Write EditKnowledgeBaseItem tests
 //test('A successful action on the EditKnowledgeBaseItem page', function () {});
@@ -69,7 +69,7 @@ test('EditKnowledgeBaseItem is gated with proper access control', function () {
         ])
     )->assertForbidden();
 
-    livewire(EditKnowledgeBaseItem::class, [
+    Livewire::test(EditKnowledgeBaseItem::class, [
         'record' => $knowledgeBaseItem->getRouteKey(),
     ])
         ->assertForbidden();
@@ -108,7 +108,7 @@ test('EditKnowledgeBaseItem is gated with proper feature access control', functi
         ])
     )->assertForbidden();
 
-    livewire(EditKnowledgeBaseItem::class, [
+    Livewire::test(EditKnowledgeBaseItem::class, [
         'record' => $knowledgeBaseItem->getRouteKey(),
     ])
         ->assertForbidden();
@@ -142,7 +142,7 @@ test('managers UserSelect does not show admin users in options by default', func
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
-    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             $options = $field->getSearchResults($regularUser->name);
@@ -168,7 +168,7 @@ test('managers UserSelect shows a pre-selected admin user so they can be deselec
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
     $knowledgeBaseItem->managers()->attach($adminUser);
 
-    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
             $options = $field->getSearchResults($adminUser->name);
@@ -194,7 +194,7 @@ test('managers UserSelect shows all users including admins when filter_admins_fr
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
-    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
             $options = $field->getSearchResults($adminUser->name);
@@ -233,7 +233,7 @@ test('file attachments can be uploaded and saved on the edit page', function () 
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
-    livewire(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->fillForm([
             'article_attachments' => [
                 UploadedFile::fake()->create('test-document.pdf', 100),

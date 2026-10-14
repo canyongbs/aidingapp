@@ -40,15 +40,15 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Carbon\CarbonImmutable;
+use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('CreateChangeRequest end_time field is disabled', function () {
     asSuperAdmin();
 
-    livewire(CreateChangeRequest::class)
+    Livewire::test(CreateChangeRequest::class)
         ->assertSuccessful()
         ->assertFormFieldIsDisabled('end_time');
 });
@@ -66,7 +66,7 @@ test('CreateChangeRequest calculates end_time from start_time and duration and s
     $duration = 3;
     $expectedEndTime = CarbonImmutable::parse($startTime)->addMinutes($duration)->toDateTimeString();
 
-    livewire(CreateChangeRequest::class)
+    Livewire::test(CreateChangeRequest::class)
         ->fillForm([
             'title' => 'Database Migration Rollout',
             'description' => 'Apply zero downtime schema update.',

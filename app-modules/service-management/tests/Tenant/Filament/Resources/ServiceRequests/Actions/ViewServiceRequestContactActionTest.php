@@ -49,9 +49,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 // A user who can reach the ViewServiceRequest page must always have `service_request.view-any`,
@@ -86,7 +86,7 @@ function actingAsServiceRequestViewer(string ...$extraPermissions): ServiceReque
 
 function mountViewContact(ServiceRequest $serviceRequest)
 {
-    return livewire(ViewServiceRequest::class, [
+    return Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction(TestAction::make('viewContact')->schemaComponent('respondent'))
@@ -98,7 +98,7 @@ function mountViewContact(ServiceRequest $serviceRequest)
 test('viewContact action is visible for a user with permission to view contacts', function () {
     $serviceRequest = actingAsServiceRequestViewer();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -128,7 +128,7 @@ test('viewContact action is hidden for a user without permission to view contact
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()

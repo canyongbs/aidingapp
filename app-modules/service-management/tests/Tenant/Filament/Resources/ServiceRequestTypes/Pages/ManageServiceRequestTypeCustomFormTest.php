@@ -42,9 +42,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -72,7 +72,7 @@ it('is forbidden for users without the required permissions', function () {
 
     actingAs($user);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])->assertForbidden();
 });
@@ -84,7 +84,7 @@ it('creates a form for a type that does not have one yet', function () {
 
     expect($type->form)->toBeNull();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -105,7 +105,7 @@ it('edits the form in place when it has no submissions', function () {
 
     $form = ServiceRequestForm::factory()->for($type, 'type')->create();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -129,7 +129,7 @@ it('archives the current form and creates a new version when submissions exist',
 
     $form->submissions()->create(['submitted_at' => now()]);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -157,7 +157,7 @@ it('creates a new version when a non-submitted submission exists so its field re
     // A submission that was never submitted (e.g. canceled) still references the form's fields.
     $form->submissions()->create(['canceled_at' => now()]);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -178,7 +178,7 @@ it('only ever has one active form per type after repeated edits with submissions
     $type = ServiceRequestType::factory()->create();
 
     foreach (['v1', 'v2', 'v3'] as $label) {
-        livewire(ManageServiceRequestTypeCustomForm::class, [
+        Livewire::test(ManageServiceRequestTypeCustomForm::class, [
             'record' => $type->getKey(),
         ])
             ->set('data.is_wizard', false)
@@ -209,7 +209,7 @@ it('keeps prior submissions rendering against their archived form version', func
 
     $submission = $form->submissions()->create(['submitted_at' => now()]);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -229,7 +229,7 @@ it('preserves the field responses of a prior submission after a version bump', f
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -247,7 +247,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         'response' => 'Jane Doe',
     ]);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -271,7 +271,7 @@ it('saves the description', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.description', 'How to request access.')
@@ -290,7 +290,7 @@ it('saves the is_first_step_combined toggle', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
@@ -313,7 +313,7 @@ it('hydrates the is_first_step_combined toggle from an existing form', function 
         ->for($type, 'type')
         ->create(['is_first_step_combined' => true]);
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->assertSet('data.is_first_step_combined', true);
@@ -324,7 +324,7 @@ it('stores steps and clears top-level content for a multi-step form', function (
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestTypeCustomForm::class, [
+    Livewire::test(ManageServiceRequestTypeCustomForm::class, [
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', true)

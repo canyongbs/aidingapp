@@ -43,9 +43,9 @@ use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
 use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // TODO: Write ListContacts page test
 //test('The correct details are displayed on the ListContacts page', function () {});
@@ -113,7 +113,7 @@ test('can list records of engagements timelineable', function () {
         $listener->handle($event);
     });
 
-    livewire(EngagementsRelationManager::class, [
+    Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -164,7 +164,7 @@ test('can filter engagements timelineable', function () {
         $listener->handle($event);
     });
 
-    livewire(EngagementsRelationManager::class, [
+    Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])

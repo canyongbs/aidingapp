@@ -40,8 +40,8 @@ use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Illuminate\Support\Facades\Config;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 // UserSelect (userApprovers field) admin-filtering tests
@@ -54,7 +54,7 @@ test('userApprovers UserSelect does not show admin users in options by default o
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
+    Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
@@ -70,7 +70,7 @@ test('userApprovers UserSelect shows a pre-selected admin user so they can be de
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
     $changeRequestType->userApprovers()->attach($adminUser);
 
-    livewire(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
+    Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
@@ -85,7 +85,7 @@ test('userApprovers UserSelect shows all users when filter_admins_from_selection
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
+    Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));

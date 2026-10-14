@@ -38,12 +38,12 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\CreateProject;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\CreateProjectRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function () {
@@ -78,7 +78,7 @@ it('validates the inputs', function (CreateProjectRequestFactory $data, array $e
 
     Project::factory()->for($user, 'createdBy')->create(['name' => 'Test Project']);
 
-    livewire(CreateProject::class)
+    Livewire::test(CreateProject::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -135,7 +135,7 @@ it('can create a record', function () {
 
     $request = CreateProjectRequestFactory::new()->create();
 
-    livewire(CreateProject::class)
+    Livewire::test(CreateProject::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors()
@@ -167,7 +167,7 @@ it('can create a record with target completion date', function () {
 
     $request = CreateProjectRequestFactory::new()->withTargetCompletionDate()->create();
 
-    livewire(CreateProject::class)
+    Livewire::test(CreateProject::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors()
@@ -189,7 +189,7 @@ it('stores null target_completion_date when indefinite is selected', function ()
 
     $request = CreateProjectRequestFactory::new()->create();
 
-    livewire(CreateProject::class)
+    Livewire::test(CreateProject::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();

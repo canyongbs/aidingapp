@@ -40,10 +40,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission', function () {
@@ -84,7 +84,7 @@ it('can view a pipeline', function () {
         ->for($project)
         ->create();
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -119,7 +119,7 @@ it('displays correct pipeline details', function () {
             'description' => 'Test Pipeline Description',
         ]);
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -151,7 +151,7 @@ it('displays pipeline with multiple stages', function () {
         'order' => 2,
     ]);
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -172,7 +172,7 @@ it('can access pipeline from project context', function () {
 
     expect($pipeline->project->id)->toBe($project->id);
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])

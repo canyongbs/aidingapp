@@ -42,12 +42,12 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 test('ListAdvisoryStatuses is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -103,7 +103,7 @@ test('can list records', function () {
 
     $records = AdvisoryStatus::factory()->count(5)->create();
 
-    livewire(ListAdvisoryStatuses::class)
+    Livewire::test(ListAdvisoryStatuses::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
@@ -119,7 +119,7 @@ test('bulk delete AdvisoryStatuses', function () {
 
     $advisoryStatuses = AdvisoryStatus::factory()->count(10)->create();
 
-    livewire(ListAdvisoryStatuses::class)
+    Livewire::test(ListAdvisoryStatuses::class)
         ->callTableBulkAction(DeleteBulkAction::class, $advisoryStatuses);
 
     foreach ($advisoryStatuses as $advisoryStatus) {
@@ -140,7 +140,7 @@ test('prevent deletion of AdvisoryStatus if it has associated Advisories', funct
         ->count(2)
         ->create();
 
-    livewire(ListAdvisoryStatuses::class)
+    Livewire::test(ListAdvisoryStatuses::class)
         ->callTableBulkAction(DeleteBulkAction::class, $advisoryStatuses);
 
     foreach ($advisoryStatuses as $advisoryStatus) {
@@ -157,11 +157,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListAdvisoryStatuses::class)
+    Livewire::test(ListAdvisoryStatuses::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListAdvisoryStatuses::class)
+    Livewire::test(ListAdvisoryStatuses::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

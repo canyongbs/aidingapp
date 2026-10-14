@@ -42,9 +42,9 @@ use AidingApp\Contact\Tests\Tenant\OrganizationType\RequestFactories\EditOrganiz
 use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('Edit Organization Type is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -57,7 +57,7 @@ test('Edit Organization Type is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditOrganizationType::class, [
+    Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -72,7 +72,7 @@ test('Edit Organization Type is gated with proper access control', function () {
             ])
         )->assertSuccessful();
 
-    livewire(EditOrganizationType::class, [
+    Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])->assertSuccessful();
 });
@@ -88,7 +88,7 @@ test('Edit Organization Type Record', function () {
 
     $request = collect(EditOrganizationTypeRequestFactory::new()->create());
 
-    livewire(EditOrganizationType::class, [
+    Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -111,7 +111,7 @@ test('the organization type name must be unique among other non-trashed types', 
 
     actingAs($user);
 
-    livewire(EditOrganizationType::class, [
+    Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])
         ->fillForm(['name' => 'Vendor'])
@@ -129,7 +129,7 @@ test('an organization type can keep its own name when editing', function () {
 
     actingAs($user);
 
-    livewire(EditOrganizationType::class, [
+    Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])
         ->fillForm(['name' => 'Vendor'])
@@ -150,7 +150,7 @@ test('does not apply the unique form rule when the feature is disabled', functio
 
     actingAs($user);
 
-    expect(fn () => livewire(EditOrganizationType::class, [
+    expect(fn () => Livewire::test(EditOrganizationType::class, [
         'record' => $organizationType->getRouteKey(),
     ])
         ->fillForm(['name' => 'Vendor'])

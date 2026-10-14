@@ -41,10 +41,10 @@ use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
 
@@ -55,7 +55,7 @@ it('renders impersonate button for non super admin users when user is super admi
 
     $user = User::factory()->create();
 
-    $component = livewire(EditUser::class, [
+    $component = Livewire::test(EditUser::class, [
         'record' => $user->getRouteKey(),
     ]);
 
@@ -71,7 +71,7 @@ it('does not render impersonate button for super admin users at all', function (
     $user = User::factory()->create();
     asSuperAdmin($user);
 
-    $component = livewire(EditUser::class, [
+    $component = Livewire::test(EditUser::class, [
         'record' => $superAdmin->getRouteKey(),
     ]);
 
@@ -86,7 +86,7 @@ it('allows super admin user to impersonate', function () {
 
     $user = User::factory()->create();
 
-    $component = livewire(EditUser::class, [
+    $component = Livewire::test(EditUser::class, [
         'record' => $user->getRouteKey(),
     ]);
 
@@ -105,7 +105,7 @@ it('allows user with permission to impersonate', function () {
 
     $second = User::factory()->create();
 
-    $component = livewire(EditUser::class, [
+    $component = Livewire::test(EditUser::class, [
         'record' => $second->getRouteKey(),
     ]);
 
@@ -140,7 +140,7 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
             ])
         )->assertSuccessful();
 
-    livewire(RolesRelationManager::class, [
+    Livewire::test(RolesRelationManager::class, [
         'ownerRecord' => $second,
         'pageClass' => EditUser::class,
     ])
@@ -162,7 +162,7 @@ test('EditUser is gated with proper access control', function () {
             UserResource::getUrl('edit', ['record' => $record])
         )->assertForbidden();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertForbidden();
 
     $user->givePermissionTo('user.view-any');
@@ -174,7 +174,7 @@ test('EditUser is gated with proper access control', function () {
             UserResource::getUrl('edit', ['record' => $record])
         )->assertSuccessful();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
@@ -196,7 +196,7 @@ test('EditUser requires an email address', function () {
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
@@ -212,7 +212,7 @@ test('EditUser rejects an invalid email address', function () {
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
@@ -228,7 +228,7 @@ test('EditUser allows saving with its own unchanged email address', function () 
 
     $record = User::factory()->create(['email' => 'unchanged@example.com']);
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'Still',
             'last_name' => 'Here',
@@ -251,7 +251,7 @@ test('EditUser rejects a duplicate email belonging to another user case-insensit
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
@@ -269,7 +269,7 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function () 
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
@@ -285,7 +285,7 @@ test('EditUser shows and requires first and last name fields when the full name 
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldIsVisible('first_name')
         ->assertFormFieldIsVisible('last_name')
         ->fillForm([
@@ -305,7 +305,7 @@ test('EditUser disables demographic and contact fields when editing an admin rec
     $record = User::factory()->create();
     $record->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
         ->assertFormFieldDisabled('name')
@@ -319,7 +319,7 @@ test('EditUser enables demographic and contact fields when editing a non-admin r
 
     $record = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $record->getKey()])
+    Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldEnabled('first_name')
         ->assertFormFieldEnabled('last_name')
         ->assertFormFieldEnabled('job_title')
@@ -337,14 +337,14 @@ test('delete action visible with proper access control', function () {
     $user->givePermissionTo('user.view-any');
     $user->givePermissionTo('user.*.update');
 
-    livewire(EditUser::class, [
+    Livewire::test(EditUser::class, [
         'record' => $anotherUser->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
     $user->givePermissionTo('user.*.delete');
 
-    livewire(EditUser::class, [
+    Livewire::test(EditUser::class, [
         'record' => $anotherUser->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);
@@ -362,7 +362,7 @@ test('EditUser validates the inputs', function ($data, $errors) {
 
     $request = User::factory()->state($data)->make()->toArray();
 
-    livewire(EditUser::class, [
+    Livewire::test(EditUser::class, [
         'record' => $anotherUser->getRouteKey(),
     ])
         ->fillForm($request)
@@ -472,7 +472,7 @@ it('prevents assigning an email that belongs to a soft-deleted user', function (
 
     $request = User::factory()->make(['email' => $deletedUser->email])->toArray();
 
-    livewire(EditUser::class, [
+    Livewire::test(EditUser::class, [
         'record' => $user->getRouteKey(),
     ])
         ->fillForm($request)
@@ -491,7 +491,7 @@ it('prevents assigning duplicate email to a user', function () {
 
     $request = User::factory()->make(['email' => $anotherUser->email])->toArray();
 
-    livewire(EditUser::class, [
+    Livewire::test(EditUser::class, [
         'record' => $user->getRouteKey(),
     ])
         ->fillForm($request)

@@ -40,9 +40,9 @@ use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryStatusRequestFactory;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('EditAdvisoryStatus is gated with proper access control', function () {
@@ -57,7 +57,7 @@ test('EditAdvisoryStatus is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditAdvisoryStatus::class, [
+    Livewire::test(EditAdvisoryStatus::class, [
         'record' => $advisoryStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -74,7 +74,7 @@ test('EditAdvisoryStatus is gated with proper access control', function () {
 
     $request = collect(AdvisoryStatusRequestFactory::new()->create());
 
-    livewire(EditAdvisoryStatus::class, [
+    Livewire::test(EditAdvisoryStatus::class, [
         'record' => $advisoryStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -92,7 +92,7 @@ test('EditAdvisoryStatus validates the inputs', function ($data, $errors) {
 
     $request = collect(AdvisoryStatusRequestFactory::new($data)->create());
 
-    livewire(EditAdvisoryStatus::class, [
+    Livewire::test(EditAdvisoryStatus::class, [
         'record' => $advisoryStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -129,14 +129,14 @@ test('delete action visible with proper access control', function () {
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
 
-    livewire(EditAdvisoryStatus::class, [
+    Livewire::test(EditAdvisoryStatus::class, [
         'record' => $advisoryStatus->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(EditAdvisoryStatus::class, [
+    Livewire::test(EditAdvisoryStatus::class, [
         'record' => $advisoryStatus->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);

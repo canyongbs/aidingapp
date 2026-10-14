@@ -44,9 +44,9 @@ use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Config;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('A successful action on the ManageServiceRequestTypeManagers page', function () {
@@ -68,7 +68,7 @@ it('can attach manager users to a service request type', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -88,7 +88,7 @@ it('can attach manager departments to a service request type', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -107,7 +107,7 @@ it('can attach manager groups to a service request type', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -129,7 +129,7 @@ it('can attach manager users, departments, and groups to a service request type'
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -159,7 +159,7 @@ test('ManageServiceRequestTypeManagers is gated with proper access control', fun
             ])
         )->assertForbidden();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -176,7 +176,7 @@ test('ManageServiceRequestTypeManagers is gated with proper access control', fun
 
     $managerUser = User::factory()->create();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -211,7 +211,7 @@ test('ManageServiceRequestTypeManagers is gated with proper feature access contr
             ])
         )->assertForbidden();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -229,7 +229,7 @@ test('ManageServiceRequestTypeManagers is gated with proper feature access contr
 
     $managerDepartment = Department::factory()->create();
 
-    livewire(ManageServiceRequestTypeManagers::class, [
+    Livewire::test(ManageServiceRequestTypeManagers::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -253,7 +253,7 @@ it('managerUsers UserSelect does not show admin users in options by default', fu
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
@@ -269,7 +269,7 @@ it('managerUsers UserSelect shows a pre-selected admin user so they can be desel
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
     $serviceRequestType->managerUsers()->attach($adminUser);
 
-    livewire(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
@@ -284,7 +284,7 @@ it('managerUsers UserSelect shows all users when filter_admins_from_selection co
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));

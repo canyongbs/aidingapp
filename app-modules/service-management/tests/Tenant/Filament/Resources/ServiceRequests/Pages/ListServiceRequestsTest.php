@@ -53,9 +53,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequests page', function () {
@@ -96,7 +96,7 @@ test('The correct details are displayed on the ListServiceRequests page', functi
         ->count(10)
         ->create();
 
-    $component = livewire(ListServiceRequests::class);
+    $component = Livewire::test(ListServiceRequests::class);
 
     $component->assertSuccessful()
         ->assertCanSeeTableRecords($serviceRequests)
@@ -166,7 +166,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
         ->count(10)
         ->create();
 
-    $component = livewire(ListServiceRequests::class);
+    $component = Livewire::test(ListServiceRequests::class);
 
     $component->assertSuccessful()
         ->assertCanSeeTableRecords($serviceRequests)
@@ -231,7 +231,7 @@ it('lists service requests for manager and auditor group members', function () {
 
     actingAs($user);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($visibleRequests)
         ->assertCanNotSeeTableRecords([$hiddenRequest]);
 });
@@ -246,7 +246,7 @@ test('category is rendered inline with the service request number on the ListSer
         'status_id' => $openStatus->getKey(),
     ]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertTableColumnExists('service_request_number')
         ->assertSee($serviceRequest->service_request_number)
@@ -272,7 +272,7 @@ test('can filter service request by category', function () {
             'status_id' => $openStatus->getKey(),
         ]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($incidentServiceRequests->merge($requestServiceRequests))
         ->filterTable('category', ServiceRequestCategory::Incident->value)
         ->assertCanSeeTableRecords($incidentServiceRequests)
@@ -293,7 +293,7 @@ test('can sort service requests by type', function () {
     $firstServiceRequest = ServiceRequest::factory()->create(['priority_id' => $firstPriority->getKey(), 'status_id' => $openStatus->getKey()]);
     $secondServiceRequest = ServiceRequest::factory()->create(['priority_id' => $secondPriority->getKey(), 'status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->sortTable('priority.type.name', 'asc')
         ->assertCanSeeTableRecords([$firstServiceRequest, $secondServiceRequest], inOrder: true)
         ->sortTable('priority.type.name', 'desc')
@@ -311,7 +311,7 @@ test('type column displays the correct service request type name', function () {
 
     $serviceRequest = ServiceRequest::factory()->create(['priority_id' => $priority->getKey(), 'status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertTableColumnStateSet(
             'priority.type.name',
             'Test Type',
@@ -383,7 +383,7 @@ test('can filter service request by organization', function () {
         ->count(3)
         ->create(['status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsInOrganization->merge($serviceRequestsNotInOrganization))
         ->filterTable('organization', $organization->id)
         ->assertCanSeeTableRecords(
@@ -430,7 +430,7 @@ test('service requests only visible to service request type managers', function 
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords(
             $serviceRequestsWithManager
         )
@@ -469,7 +469,7 @@ test('service requests only visible to direct user service request type managers
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords(
             $serviceRequestsWithManager
         )
@@ -514,7 +514,7 @@ test('service requests only visible to service request type auditors', function 
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords(
             $serviceRequestsWithAuditors
         )
@@ -553,7 +553,7 @@ test('service requests only visible to direct user service request type auditors
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords(
             $serviceRequestsWithAuditors
         )
@@ -594,7 +594,7 @@ test('can list audit member to service request type', function () {
 
     expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -633,7 +633,7 @@ test('can list direct user manager to service request type', function () {
 
     expect(ServiceRequestsRelationManager::canViewForRecord($contact, ViewContact::class))->toBeTrue();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -708,7 +708,7 @@ it('can filter service requests by assigned to with unassigned option', function
     ])
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords([
             $unassignedRequest,
             $assignedRequest,
@@ -769,7 +769,7 @@ it('can filter service requests by assigned to with unassigned option via direct
         ])
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords([
             $unassignedRequest,
             $assignedRequest,
@@ -846,7 +846,7 @@ it('can filter service requests by searched assigned user outside initial preloa
         ])
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->filterTable('assignedTo', $searchedUser->getKey())
         ->assertHasNoErrors()
         ->assertCanSeeTableRecords([$matchingRequest])
@@ -874,7 +874,7 @@ it('default non closed service request will not display', function () {
 
     asSuperAdmin();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($nonClosedServiceRequests)
         ->assertCanNotSeeTableRecords($closedServiceRequests)
         ->removeTableFilter('status')
@@ -905,7 +905,7 @@ it('can filter service requests by type', function () {
         ->count(2)
         ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
         ->filterTable('type', ['types' => [$typeA->getKey()]])
         ->assertCanSeeTableRecords($serviceRequestsTypeA)
@@ -945,7 +945,7 @@ it('can filter service requests by multiple types', function () {
         ->count(2)
         ->create(['priority_id' => $priorityC->getKey(), 'status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB)->merge($serviceRequestsTypeC))
         ->filterTable('type', ['types' => [$typeA->getKey(), $typeB->getKey()]])
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB))
@@ -976,7 +976,7 @@ it('shows all service requests when no type filter is selected', function () {
         ->count(2)
         ->create(['priority_id' => $priorityB->getKey(), 'status_id' => $openStatus->getKey()]);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->filterTable('type', ['types' => []])
         ->assertCanSeeTableRecords($serviceRequestsTypeA->merge($serviceRequestsTypeB));
 });
@@ -1180,12 +1180,12 @@ it('only shows the bulk delete action to a user with the service_request.delete 
 
     actingAs($user);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('service_request.*.delete');
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 

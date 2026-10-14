@@ -40,9 +40,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\EditKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 
 // TODO: Write EditKnowledgeBaseStatus tests
@@ -64,7 +64,7 @@ test('EditKnowledgeBaseStatus is gated with proper access control', function () 
             ])
         )->assertForbidden();
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -81,7 +81,7 @@ test('EditKnowledgeBaseStatus is gated with proper access control', function () 
 
     $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -112,7 +112,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
             ])
         )->assertForbidden();
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -130,7 +130,7 @@ test('EditKnowledgeBaseStatus is gated with proper feature access control', func
 
     $request = collect(EditKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -150,7 +150,7 @@ test('EditKnowledgeBaseStatus prevents renaming to a case-insensitive duplicate 
 
     actingAs($user);
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm(['name' => 'published'])
@@ -169,7 +169,7 @@ test('EditKnowledgeBaseStatus allows saving a status without changing its name',
 
     actingAs($user);
 
-    livewire(EditKnowledgeBaseStatus::class, [
+    Livewire::test(EditKnowledgeBaseStatus::class, [
         'record' => $knowledgeBaseStatus->getRouteKey(),
     ])
         ->fillForm(['name' => 'Published'])
