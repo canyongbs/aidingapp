@@ -88,6 +88,9 @@ class ListAdvisories extends ListRecords
         return [
             CreateAction::make()
                 ->slideOver()
+                ->successRedirectUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
+                    ? AdvisoryResource::getUrl('view', ['record' => $record])
+                    : null)
                 ->schema([
                     Section::make('Properties')
                         ->schema(AdvisoryForm::propertiesComponents()),

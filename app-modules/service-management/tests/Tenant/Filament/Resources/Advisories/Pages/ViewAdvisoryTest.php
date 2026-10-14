@@ -93,7 +93,7 @@ test('the Severity entry renders as a badge using the severity color', function 
         ->for(AdvisorySeverity::factory()->color(Color::Red), 'severity')
         ->create();
 
-    $entry = livewire(ViewAdvisory::class, [
+    $entry = Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertSuccessful()
