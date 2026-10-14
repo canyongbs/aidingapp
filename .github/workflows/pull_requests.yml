@@ -158,8 +158,31 @@ jobs:
                       exit 1
                   fi
 
+    shard-timings:
+        name: Resolve Shard Timings
+        runs-on: ubuntu-24.04
+
+        permissions: {}
+
+        timeout-minutes: 5
+
+        # Resolved once so every shard splits the suite with the same timings, even if newer ones are saved mid-run.
+        outputs:
+            cache-key: ${{ steps.lookup.outputs.cache-matched-key }}
+
+        steps:
+            - name: Find the latest Tenant shard timings
+              id: lookup
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: tests/.pest/shards.json
+                  key: tenant-shard-timings-
+                  restore-keys: tenant-shard-timings-
+                  lookup-only: true
+
     test:
         name: Test
+        needs: [shard-timings]
         strategy:
             matrix:
                 include:
@@ -188,125 +211,26 @@ jobs:
 
         timeout-minutes: 15
 
-        services:
-            redis:
-                image: redis:7.4@sha256:e9b2e45ecd47fbb69b877cf8d045d5cccaaaed52524b6e098b4abe8212994f73
-                ports:
-                    - 6379:6379
-                options: --health-cmd="redis-cli ping" --health-interval=10s --health-timeout=5s --health-retries=3
-
         steps:
-            - name: Start PostgreSQL
-              run: |
-                  docker run -d \
-                    --name postgres \
-                    -p 5432:5432 \
-                    -e POSTGRES_DB=${DB_DATABASE} \
-                    -e POSTGRES_USER=${DB_USERNAME} \
-                    -e POSTGRES_PASSWORD=${DB_PASSWORD} \
-                    --tmpfs /var/lib/postgresql/data \
-                    --health-cmd 'pg_isready -h 127.0.0.1' \
-                    --health-interval 1s \
-                    --health-timeout 5s \
-                    --health-retries 30 \
-                    postgres:16.8@sha256:301bcb60b8a3ee4ab7e147932723e3abd1cef53516ce5210b39fd9fe5e3602ae \
-                    -c max_locks_per_transaction=256 \
-                    -c fsync=off \
-                    -c synchronous_commit=off \
-                    -c full_page_writes=off
-
-            - name: Wait for PostgreSQL
-              run: |
-                  until docker inspect --format='{{.State.Health.Status}}' postgres | grep -q healthy; do
-                    sleep 2
-                  done
-
-            - name: Create tenant database
-              run: psql -h 127.0.0.1 -d ${DB_DATABASE} -U ${DB_USERNAME} -c 'CREATE DATABASE testing_tenant;'
-              env:
-                  PGPASSWORD: ${{ env.DB_PASSWORD }}
-
-            - name: Setup cache environment
-              id: extcache
-              uses: shivammathur/cache-extensions@22e24453af1bf3851994136f122ce065ab828a74 # 1.15.2
-              with:
-                  php-version: ${{ env.php-version }}
-                  extensions: ${{ env.php-extensions }}
-                  key: ${{ env.php-extensions-key }}
-
-            - name: Cache extensions
-              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-              with:
-                  path: ${{ steps.extcache.outputs.dir }}
-                  key: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
-                  restore-keys: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}
-
-            - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
-              with:
-                  php-version: ${{ env.php-version }}
-                  coverage: none
-                  extensions: ${{ env.php-extensions }}
-
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   fetch-depth: 0
                   fetch-tags: true
                   persist-credentials: false
 
-            - name: Copy .env
-              run: php -r "file_exists('.env') || copy('.env.example', '.env');"
-
-            - name: Cache dependencies
-              id: cache-composer
-              uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+            - uses: ./.github/actions/setup-test-environment # zizmor: ignore[self-repository]
               with:
-                  path: vendor
-                  key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock', 'app-modules/**/composer.lock') }}
+                  php-version: ${{ env.php-version }}
+                  php-extensions: ${{ env.php-extensions }}
+                  php-extensions-key: ${{ env.php-extensions-key }}
 
-            - if: ${{ steps.cache-composer.outputs.cache-hit != 'true' }}
-              name: Install Dependencies
-              run: composer install -q --no-ansi --no-interaction --no-scripts --no-progress --prefer-dist --optimize-autoloader
-              shell: bash
-
-            # Local path-repo packages (e.g. app-modules/**) can add/remove classes without changing
-            # composer.lock, leaving a cache hit's autoloader stale. Regenerating is fast and network-free.
-            - if: ${{ steps.cache-composer.outputs.cache-hit == 'true' }}
-              name: Refresh autoloader for local path repositories
-              run: composer dump-autoload -q --no-ansi --no-interaction --optimize
-              shell: bash
-
-            - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+            - name: Restore Tenant shard timings
+              if: ${{ matrix.shard && needs.shard-timings.outputs.cache-key }}
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
               with:
-                  node-version-file: '.nvmrc'
-                  cache: 'npm'
-            - run: npm install
-
-            - name: Build Assets
-              run: npm run build
-
-            - name: Generate key
-              run: php artisan key:generate
-
-            - name: Cache Modular Modules
-              run: php artisan modules:cache --env=testing
-
-            - name: Cache Routes
-              run: php artisan route:cache --env=testing
-
-            - name: Cache Views
-              run: php artisan view:cache --env=testing
-
-            - name: Cache Events
-              run: php artisan event:cache --env=testing
-
-            - name: Cache Icons
-              run: php artisan icons:cache --env=testing
-
-            - name: Cache Filament Components
-              run: php artisan filament:cache-components --env=testing
-
-            - name: Check route integrity
-              run: php artisan route:list
+                  path: tests/.pest/shards.json
+                  key: ${{ needs.shard-timings.outputs.cache-key }}
+                  fail-on-cache-miss: true
 
             - name: Execute tests (Unit and Feature tests) via PHPUnit
               env:
@@ -322,6 +246,7 @@ jobs:
 
     shard-coverage:
         name: Shard Coverage
+        needs: [shard-timings]
         runs-on: ubuntu-24.04
 
         permissions:
@@ -349,7 +274,7 @@ jobs:
                   key: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}-${{ env.php-extensions-key }}
                   restore-keys: ${{ runner.os }}-24.04-phpext-${{ env.php-version }}
 
-            - uses: shivammathur/setup-php@f3e473d116dcccaddc5834248c87452386958240 # 2.37.2
+            - uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
               with:
                   php-version: ${{ env.php-version }}
                   coverage: none
@@ -358,6 +283,14 @@ jobs:
             - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
                   persist-credentials: false
+
+            - name: Restore Tenant shard timings
+              if: ${{ needs.shard-timings.outputs.cache-key }}
+              uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+              with:
+                  path: tests/.pest/shards.json
+                  key: ${{ needs.shard-timings.outputs.cache-key }}
+                  fail-on-cache-miss: true
 
             - name: Copy .env
               run: php -r "file_exists('.env') || copy('.env.example', '.env');"
