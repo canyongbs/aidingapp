@@ -36,11 +36,24 @@
 
 namespace AidingApp\ServiceManagement\Enums;
 
-enum ServiceRequestUpdateType: string
+use Filament\Support\Contracts\HasLabel;
+
+enum ServiceRequestUpdateType: string implements HasLabel
 {
     case ClarifyingQuestion = 'clarifying_question';
     case ClarifyingAnswer = 'clarifying_answer';
     case AiResolutionProposed = 'ai_resolution_proposed';
     case AiResolutionResponse = 'ai_resolution_response';
     case AiResolutionSummary = 'ai_resolution_summary';
+
+    public function getLabel(): string
+    {
+        return match ($this) {
+            self::ClarifyingQuestion => 'Clarifying Question',
+            self::ClarifyingAnswer => 'Clarifying Answer',
+            self::AiResolutionProposed => 'Proposed Resolution',
+            self::AiResolutionResponse => 'Resolution Response',
+            self::AiResolutionSummary => 'Resolution Summary',
+        };
+    }
 }
