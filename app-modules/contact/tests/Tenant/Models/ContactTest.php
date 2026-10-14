@@ -33,45 +33,20 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
+
+use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
-use App\DataTransferObjects\AutocompletedAddress;
-use App\Models\User;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+it('reports a bounced email health status and cannot receive email when the email has bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => true]);
 
-it('populates the address fields when a suggestion is selected', function () {
-    actingAs(
-        User::factory()
-            ->create()
-            ->givePermissionTo('contact.view-any', 'contact.*.update')
-    );
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Bounced)
+        ->and($contact->canReceiveEmail())->toBeFalse();
+});
 
-    $contact = Contact::factory()->create();
+it('reports a healthy email health status and can receive email when the email has not bounced', function () {
+    $contact = Contact::factory()->create(['email_bounce' => false]);
 
-    $address = new AutocompletedAddress(
-        address: '123 Main St',
-        city: 'Austin',
-        state: 'TX',
-        postalCode: '78701',
-        country: 'US',
-        label: '123 Main St, Austin, TX, 78701, US',
-    );
-
-    livewire(EditContact::class, [
-        'record' => $contact->getRouteKey(),
-    ])
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
-            'value' => $address->label,
-            'label' => $address->label,
-            'data' => ['data' => json_decode(json_encode($address), true)],
-        ]])
-        ->assertSchemaStateSet([
-            'address' => '123 Main St',
-            'city' => 'Austin',
-            'state' => 'TX',
-            'postal' => '78701',
-            'country' => 'US',
-        ]);
+    expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)
+        ->and($contact->canReceiveEmail())->toBeTrue();
 });

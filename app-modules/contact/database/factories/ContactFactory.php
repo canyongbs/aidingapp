@@ -57,10 +57,9 @@ class ContactFactory extends Factory
             'last_name' => $lastName,
             'full_name' => "{$firstName} {$lastName}",
             'preferred' => $this->faker->firstName(),
-            'description' => $this->faker->paragraph(),
             'email' => $this->faker->unique()->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
-            'email_bounce' => $this->faker->boolean(),
+            'email_bounce' => false,
             'phone' => $this->faker->e164PhoneNumber(),
             'job_title' => $this->faker->jobTitle(),
             'employee_id' => (string) $this->faker->unique()->numberBetween(10000, 99999),
@@ -78,5 +77,12 @@ class ContactFactory extends Factory
             'postal' => str($this->faker->postcode())->before('-')->toString(),
             'created_by_id' => User::factory(),
         ];
+    }
+
+    public function bounced(): static
+    {
+        return $this->state([
+            'email_bounce' => true,
+        ]);
     }
 }

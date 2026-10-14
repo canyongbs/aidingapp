@@ -56,6 +56,13 @@ class ContactObserver
         }
     }
 
+    public function updating(Contact $contact): void
+    {
+        if ($contact->isDirty('email') && ! $contact->isDirty('email_bounce')) {
+            $contact->email_bounce = false;
+        }
+    }
+
     public function saved(Contact $contact): void
     {
         ($this->matchContactToOrganization)($contact);

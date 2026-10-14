@@ -113,6 +113,7 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->boolean(),
                 TextColumn::make('status.name')
                     ->label('Status')
+                    ->badge()
                     ->toggleable()
                     ->sortable(),
                 TextColumn::make('public')
