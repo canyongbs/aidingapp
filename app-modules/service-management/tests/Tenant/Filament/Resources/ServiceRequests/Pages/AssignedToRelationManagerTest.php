@@ -63,7 +63,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $department = Department::factory()->create();
 
@@ -103,7 +103,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -134,7 +134,7 @@ test('Assign To Me action is visible when the logged-in user belongs to a manage
     $settings->save();
 
     $user = User::factory()->create();
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $group = Group::factory()->create();
     $group->users()->attach($user);
@@ -229,7 +229,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -272,7 +272,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -309,7 +309,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $department = Department::factory()->create();
 
@@ -346,7 +346,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -380,7 +380,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -420,7 +420,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -487,6 +487,8 @@ test('Manage Assignment action is not visible when the logged-in user cannot upd
 
     $user = User::factory()->create();
 
+    $user->givePermissionTo('service_request_assignment.view-any');
+
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequestType->managerUsers()->attach($user);
@@ -519,7 +521,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -559,7 +561,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -593,7 +595,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $department = Department::factory()->create();
 
@@ -633,7 +635,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -667,7 +669,7 @@ test('Manage Assignment action is not visible when the logged-in user is not a m
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 
@@ -699,7 +701,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when unass
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -733,7 +735,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
@@ -772,7 +774,7 @@ test('Manage Assignment action is hidden and the page renders when the Service R
 
     $user = User::factory()->create();
 
-    $user->givePermissionTo('service_request.*.update');
+    $user->givePermissionTo(['service_request.*.update', 'service_request_assignment.view-any']);
 
     actingAs($user);
 

@@ -37,6 +37,7 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\RelationManagers\AdvisoryUpdatesRelationManager;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
@@ -394,4 +395,29 @@ test('the Assignment section validates the department exists', function () {
         ->assertHasFormErrors([
             'assigned_department_id' => 'in',
         ]);
+});
+
+test('the advisory updates are only embedded for users who can view them', function () {
+    $user = User::factory()->create();
+
+    $advisory = Advisory::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.*.view');
+
+    livewire(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertDontSeeLivewire(AdvisoryUpdatesRelationManager::class);
+
+    $user->givePermissionTo('advisory_update.view-any');
+
+    livewire(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->assertSeeLivewire(AdvisoryUpdatesRelationManager::class);
 });

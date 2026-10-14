@@ -54,14 +54,15 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ToggleButtons;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Filters\Filter;
+use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
-use Filament\Tables\Filters\TernaryFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection as EloquentCollection;
@@ -170,7 +171,26 @@ class ListKnowledgeBaseItems extends ListRecords
                                 ->pluck('name')
                                 ->implode(', ')
                     ),
-                TernaryFilter::make('public'),
+                Filter::make('public')
+                    ->schema([
+                        ToggleButtons::make('value')
+                            ->label('Public')
+                            ->boolean()
+                            ->inline(),
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        return $query->when(
+                            filled($data['value'] ?? null),
+                            fn (Builder $query): Builder => $query->where('public', (bool) $data['value']),
+                        );
+                    })
+                    ->indicateUsing(function (array $data): array {
+                        if (blank($data['value'] ?? null)) {
+                            return [];
+                        }
+
+                        return [Indicator::make('Public: ' . ($data['value'] ? 'Yes' : 'No'))];
+                    }),
                 Filter::make('created_at')
                     ->label('Created After')
                     ->schema([
