@@ -37,6 +37,8 @@
 use AidingApp\Ai\Models\PortalAssistantThread;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Support\Facades\Broadcast;
 
@@ -92,4 +94,9 @@ Broadcast::channel('conversation.{conversationId}', function (User $user, string
 
 Broadcast::channel('user.{userId}', function (User $user, string $userId): bool {
     return $user->id === $userId;
+});
+
+Broadcast::channel('service-request-type-catalog.{tenantId}', function (User $user, string $tenantId): bool {
+    return $tenantId === Tenant::current()?->getKey()
+        && $user->can('viewAny', ServiceRequestType::class);
 });

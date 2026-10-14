@@ -33,45 +33,53 @@
 
 </COPYRIGHT>
 */
-use AidingApp\Contact\Filament\Resources\ContactResource\Pages\EditContact;
-use AidingApp\Contact\Models\Contact;
-use App\DataTransferObjects\AutocompletedAddress;
-use App\Models\User;
 
-use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
+namespace AidingApp\ServiceManagement\Events;
 
-it('populates the address fields when a suggestion is selected', function () {
-    actingAs(
-        User::factory()
-            ->create()
-            ->givePermissionTo('contact.view-any', 'contact.*.update')
-    );
+use Illuminate\Broadcasting\Channel;
+use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\PrivateChannel;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Foundation\Events\Dispatchable;
 
-    $contact = Contact::factory()->create();
+/**
+ * Tells everyone viewing the service catalog builder that it changed, so they refetch the tree.
+ *
+ * The payload only identifies the sender's socket: listeners reload through the page, which enforces access.
+ */
+class ServiceRequestTypeCatalogUpdated implements ShouldBroadcastNow
+{
+    use Dispatchable;
+    use InteractsWithSockets;
 
-    $address = new AutocompletedAddress(
-        address: '123 Main St',
-        city: 'Austin',
-        state: 'TX',
-        postalCode: '78701',
-        country: 'US',
-        label: '123 Main St, Austin, TX, 78701, US',
-    );
+    public function __construct(
+        public string $tenantId,
+        public ?string $originSocketId = null,
+    ) {}
 
-    livewire(EditContact::class, [
-        'record' => $contact->getRouteKey(),
-    ])
-        ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
-            'value' => $address->label,
-            'label' => $address->label,
-            'data' => ['data' => json_decode(json_encode($address), true)],
-        ]])
-        ->assertSchemaStateSet([
-            'address' => '123 Main St',
-            'city' => 'Austin',
-            'state' => 'TX',
-            'postal' => '78701',
-            'country' => 'US',
-        ]);
-});
+    public static function channelName(string $tenantId): string
+    {
+        return "service-request-type-catalog.{$tenantId}";
+    }
+
+    public function broadcastAs(): string
+    {
+        return 'service-request-type-catalog.updated';
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function broadcastWith(): array
+    {
+        return ['origin_socket_id' => $this->originSocketId];
+    }
+
+    /**
+     * @return array<int, Channel>
+     */
+    public function broadcastOn(): array
+    {
+        return [new PrivateChannel(static::channelName($this->tenantId))];
+    }
+}

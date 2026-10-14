@@ -34,48 +34,21 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
+namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components;
 
-use AidingApp\Contact\Filament\Resources\ContactResource;
-use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
-use AidingApp\Contact\Models\Contact;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use Filament\Forms\Components\SpatieMediaLibraryFileUpload;
 
-class EditContact extends EditRecord
+class ServiceRequestUpdateUploadsFileUpload
 {
-    protected static string $resource = ContactResource::class;
-
-    // TODO: Automatically set from Filament
-    protected static ?string $navigationLabel = 'Edit';
-
-    /**
-     * @param  array<string, mixed>  $parameters
-     */
-    public static function canAccess(array $parameters = []): bool
+    public static function make(): SpatieMediaLibraryFileUpload
     {
-        $record = $parameters['record'] ?? null;
-
-        if ($record instanceof Contact && $record->isManaged()) {
-            return false;
-        }
-
-        return parent::canAccess($parameters);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ContactFormSchema::make(ignoreRecord: true));
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            DeleteAction::make(),
-        ];
+        return SpatieMediaLibraryFileUpload::make('uploads')
+            ->label('Attachments')
+            ->visibility('private')
+            ->collection('uploads')
+            ->multiple()
+            ->acceptedFileTypes((new ServiceRequestUpdate())->getMediaCollection('uploads')->acceptsMimeTypes)
+            ->downloadable();
     }
 }
