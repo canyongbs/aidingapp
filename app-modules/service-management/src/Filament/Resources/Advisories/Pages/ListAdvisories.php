@@ -90,6 +90,9 @@ class ListAdvisories extends ListRecords
                 ->successRedirectUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
                     ? AdvisoryResource::getUrl('view', ['record' => $record])
                     : null)
+                ->fillForm(fn (): array => [
+                    'assigned_department_id' => auth()->user()?->department?->getKey(),
+                ])
                 ->schema([
                     AdvisoryForm::propertiesSection(),
                     AdvisoryForm::trackingSection(),

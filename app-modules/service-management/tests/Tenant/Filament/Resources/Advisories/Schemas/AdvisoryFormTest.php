@@ -35,16 +35,23 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
+use Filament\Forms\Components\Field;
 use Filament\Schemas\Components\Section;
 
-test('each advisory schema section is headed with its group name', function (string $method, string $heading) {
-    $section = AdvisoryForm::{$method}();
+test('each advisory schema section is headed with its group name and groups the expected fields', function (string $sectionMethod, string $componentsMethod, string $heading, array $expectedFieldNames) {
+    $section = AdvisoryForm::{$sectionMethod}();
+
+    $fieldNames = array_map(
+        fn (Field $field): string => $field->getName(),
+        AdvisoryForm::{$componentsMethod}(),
+    );
 
     expect($section)
         ->toBeInstanceOf(Section::class)
-        ->and($section->getHeading())->toBe($heading);
+        ->and($section->getHeading())->toBe($heading)
+        ->and($fieldNames)->toBe($expectedFieldNames);
 })->with([
-    'properties' => ['propertiesSection', 'Properties'],
-    'tracking details' => ['trackingSection', 'Tracking Details'],
-    'assignment' => ['assignmentSection', 'Assignment'],
+    'properties' => ['propertiesSection', 'propertiesComponents', 'Properties', ['title', 'description']],
+    'tracking details' => ['trackingSection', 'trackingComponents', 'Tracking Details', ['severity_id', 'status_id']],
+    'assignment' => ['assignmentSection', 'assignmentComponents', 'Assignment', ['assigned_department_id']],
 ]);

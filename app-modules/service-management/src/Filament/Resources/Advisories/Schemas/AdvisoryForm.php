@@ -120,7 +120,6 @@ class AdvisoryForm
                 ->label('Department')
                 ->relationship('assignedDepartment')
                 ->tableConfiguration(DepartmentsTable::class)
-                ->default(auth()->user()?->department?->getKey())
                 ->columnSpanFull(),
         ];
     }
