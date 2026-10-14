@@ -148,10 +148,7 @@ class ListKnowledgeBaseItems extends ListRecords
                         ToggleButtons::make('value')
                             ->label('Public')
                             ->boolean()
-                            ->inline()
-                            ->extraInputAttributes(fn (ToggleButtons $component): array => [
-                                'x-on:click' => "if (\$wire.\$get('{$component->getStatePath()}') == \$el.value) { \$wire.\$set('{$component->getStatePath()}', null) }",
-                            ]),
+                            ->inline(),
                     ])
                     ->query(function (Builder $query, array $data): Builder {
                         return $query->when(
