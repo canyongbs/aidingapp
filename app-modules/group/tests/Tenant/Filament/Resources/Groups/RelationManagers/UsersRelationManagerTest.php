@@ -180,7 +180,7 @@ it('can bulk detach users from a group', function () {
 describe('authorization', function () {
     it('hides membership actions without the `group.*.update` permission', function () {
         $user = User::factory()->create();
-        $user->givePermissionTo(['group.view-any', 'group.*.view']);
+        $user->givePermissionTo(['group.view-any', 'group.*.view', 'user.view-any']);
         actingAs($user);
         $group = Group::factory()->create();
 

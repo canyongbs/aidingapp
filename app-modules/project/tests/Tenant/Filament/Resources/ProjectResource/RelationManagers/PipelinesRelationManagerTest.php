@@ -105,6 +105,7 @@ describe('authorization', function () {
         $user->givePermissionTo('project.view-any');
         $user->givePermissionTo('project.*.view');
         $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('pipeline.view-any');
 
         actingAs($user);
 
@@ -137,6 +138,7 @@ describe('authorization', function () {
         $user->givePermissionTo('project.view-any');
         $user->givePermissionTo('project.*.view');
         $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('pipeline.view-any');
 
         $project = Project::factory()->for(User::factory(), 'createdBy')->create();
 
@@ -168,6 +170,7 @@ describe('authorization', function () {
 
         $user->givePermissionTo('project.view-any');
         $user->givePermissionTo('project.*.view');
+        $user->givePermissionTo('pipeline.view-any');
 
         actingAs($user);
 
@@ -186,6 +189,7 @@ describe('authorization', function () {
         $user->givePermissionTo('project.view-any');
         $user->givePermissionTo('project.*.view');
         $user->givePermissionTo('project.*.update');
+        $user->givePermissionTo('pipeline.view-any');
 
         $project = Project::factory()->for(User::factory(), 'createdBy')->create();
 
