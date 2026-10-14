@@ -162,7 +162,16 @@ jobs:
         name: Test
         strategy:
             matrix:
-                testsuite: [Landlord, Tenant]
+                include:
+                    - testsuite: Landlord
+                    - testsuite: Tenant
+                      shard: 1/4
+                    - testsuite: Tenant
+                      shard: 2/4
+                    - testsuite: Tenant
+                      shard: 3/4
+                    - testsuite: Tenant
+                      shard: 4/4
 
         runs-on: ubuntu-24.04
 
@@ -299,10 +308,17 @@ jobs:
             - name: Check route integrity
               run: php artisan route:list
 
-            - name: Execute tests
+            - name: Execute tests (Unit and Feature tests) via PHPUnit
               env:
                   TESTSUITE: ${{ matrix.testsuite }}
-              run: php artisan test --configuration phpunit-ci.xml --parallel --testsuite=${TESTSUITE}
+                  SHARD: ${{ matrix.shard }}
+              run: |
+                  args=(--configuration phpunit-ci.xml --parallel --testsuite="${TESTSUITE}")
+                  if [[ -n "${SHARD}" ]]; then
+                      args+=(--shard="${SHARD}")
+                  fi
+                  # Called directly as `artisan test` breaks `--shard` by forwarding its `--runner` to Pest's test listing.
+                  vendor/bin/pest "${args[@]}"
 
     lint:
         name: Lint
