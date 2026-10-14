@@ -214,9 +214,20 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
 
     livewire(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($knowledgeBaseItems)
-        ->filterTable('public', $isPublic)
+        ->filterTable('public', ['value' => 1])
         ->assertCanSeeTableRecords($knowledgeBaseItems->where('public', $isPublic))
-        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('public', '!=', $isPublic));
+        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('public', '!=', $isPublic))
+        ->assertSee('Public: Yes')
+        ->assertDontSee('Public: No')
+        ->filterTable('public', ['value' => 0])
+        ->assertCanSeeTableRecords($knowledgeBaseItems->where('public', '!=', $isPublic))
+        ->assertCanNotSeeTableRecords($knowledgeBaseItems->where('public', $isPublic))
+        ->assertSee('Public: No')
+        ->assertDontSee('Public: Yes')
+        ->filterTable('public', ['value' => null])
+        ->assertCanSeeTableRecords($knowledgeBaseItems)
+        ->assertDontSee('Public: Yes')
+        ->assertDontSee('Public: No');
 });
 
 test('Filter ListKnowledgeBaseItems with `created after` filter', function () {

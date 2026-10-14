@@ -162,6 +162,7 @@ class ViewAdvisory extends ViewRecord
                     'pageClass' => static::class,
                 ])
                     ->key(AdvisoryUpdatesRelationManager::class)
+                    ->visible(fn (Advisory $record): bool => AdvisoryUpdatesRelationManager::canViewForRecord($record, static::class))
                     ->columnSpanFull(),
             ]);
     }

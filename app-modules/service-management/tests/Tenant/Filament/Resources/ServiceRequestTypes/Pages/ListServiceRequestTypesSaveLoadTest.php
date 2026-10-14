@@ -34,15 +34,19 @@
 </COPYRIGHT>
 */
 
+use AidingApp\ServiceManagement\Events\ServiceRequestTypeCatalogUpdated;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\ListServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use Illuminate\Support\Facades\Event;
 
 use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
     asSuperAdmin();
+
+    Event::fake([ServiceRequestTypeCatalogUpdated::class]);
 });
 
 it('loads hierarchical data', function () {
@@ -68,62 +72,16 @@ it('loads hierarchical data', function () {
     expect($first['children'][0]['id'])->toBe($child->id);
 });
 
-it('saves new category and moves existing type into it in one operation', function () {
-    // Existing category and type
-    $existingCategory = ServiceRequestTypeCategory::factory()->create(['name' => 'Existing', 'sort' => 1]);
+it('moves a type into an area another user just created', function () {
     $type = ServiceRequestType::factory()->create(['name' => 'Movable', 'sort' => 1]);
 
-    // Prepare payload: create new category (temp) and move type into it
-    $tempId = 'temp_1';
+    $component = livewire(ListServiceRequestTypes::class);
 
-    $treeData = [
-        'categories' => [
-            [
-                'id' => $tempId,
-                'name' => 'New Cat',
-                'type' => 'category',
-                'sort' => 1,
-                'parent_id' => null,
-                'children' => [],
-                'types' => [
-                    [
-                        'id' => $type->id,
-                        'name' => $type->name,
-                        'type' => 'type',
-                        'sort' => 1,
-                    ],
-                ],
-            ],
-        ],
-        'uncategorized_types' => [],
-        'new_categories' => [
-            [
-                'temp_id' => $tempId,
-                'name' => 'New Cat',
-                'parent_id' => null,
-                'sort' => 1,
-            ],
-        ],
-        'new_types' => [],
-        'updated_categories' => [],
-        'updated_types' => [],
-        'deleted_categories' => [],
-        'deleted_types' => [],
-    ];
+    $newCategory = ServiceRequestTypeCategory::factory()->create(['name' => 'New Cat']);
 
-    livewire(ListServiceRequestTypes::class)
-        ->call('saveChanges', $treeData)
-        ->assertHasNoErrors();
+    $component->call('moveType', $type->getKey(), null, $newCategory->getKey(), [$type->getKey()]);
 
-    // After save, the type should be assigned to the new category
-    $freshType = $type->fresh();
-
-    expect($freshType->categoryIds())->not->toBeEmpty();
-
-    $newCategory = ServiceRequestTypeCategory::find($freshType->categoryIds()[0]);
-
-    expect($newCategory)->not->toBeNull();
-    expect($newCategory->name)->toBe('New Cat');
+    expect($type->fresh()->categoryIds())->toBe([$newCategory->id]);
 });
 
 it('moves type from one existing category to another existing category', function () {
@@ -132,37 +90,8 @@ it('moves type from one existing category to another existing category', functio
 
     $type = ServiceRequestType::factory()->hasAttached($catA, relationship: 'categories')->create(['name' => 'ToMove', 'sort' => 1]);
 
-    $treeData = [
-        'categories' => [
-            [
-                'id' => $catB->id,
-                'name' => $catB->name,
-                'type' => 'category',
-                'sort' => 1,
-                'parent_id' => null,
-                'children' => [],
-                'types' => [
-                    [
-                        'id' => $type->id,
-                        'name' => $type->name,
-                        'type' => 'type',
-                        'sort' => 1,
-                    ],
-                ],
-            ],
-        ],
-        'uncategorized_types' => [],
-        'new_categories' => [],
-        'new_types' => [],
-        'updated_categories' => [],
-        'updated_types' => [],
-        'deleted_categories' => [],
-        'deleted_types' => [],
-    ];
-
     livewire(ListServiceRequestTypes::class)
-        ->call('saveChanges', $treeData)
-        ->assertHasNoErrors();
+        ->call('moveType', $type->getKey(), $catA->getKey(), $catB->getKey(), [$type->getKey()]);
 
     expect($type->fresh()->categoryIds())->toBe([$catB->id]);
 });
