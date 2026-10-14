@@ -38,12 +38,12 @@
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import Tabs from '@common/portal/Tabs.vue';
     import { ClipboardDocumentCheckIcon } from '@heroicons/vue/24/outline';
     import { useQuery } from '@pinia/colada';
     import { computed, onUnmounted, ref, watch } from 'vue';
     import AdvisoriesTable from '../Components/Advisories/AdvisoriesTable.vue';
     import { DEFAULT_SORT, SORT_OPTIONS } from '../Components/Advisories/advisoryPresentation.js';
+    import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import ServiceMonitorStatusBanner from '../Components/ServiceMonitors/ServiceMonitorStatusBanner.vue';
     import BaseSearchInput from '../Components/ui/BaseSearchInput.vue';
     import BaseSelect from '../Components/ui/BaseSelect.vue';
@@ -145,8 +145,8 @@
     const loadFailed = computed(() => !usesInitialData.value && !isFetching.value && Boolean(pageQuery.error.value));
 
     const tabs = computed(() => [
-        { value: 'open', label: `Active (${counts.value.open})` },
-        { value: 'resolved', label: `Resolved (${counts.value.resolved})` },
+        { key: 'open', label: `Active (${counts.value.open})` },
+        { key: 'resolved', label: `Resolved (${counts.value.resolved})` },
     ]);
 
     const classificationLabel = computed(() => (classification.value === 'open' ? 'active' : 'resolved'));
@@ -201,82 +201,97 @@
                 description="There are currently no active advisories."
             />
 
-            <PageCard>
-                <div class="-mx-6 -mt-4">
-                    <Tabs v-model="classification" :tabs="tabs" contained />
-                </div>
+            <div>
+                <AssetFilterTabs
+                    v-model="classification"
+                    :tabs="tabs"
+                    label="Advisory tabs"
+                    id-prefix="advisories"
+                    class="mb-0!"
+                />
 
-                <div v-if="hasAdvisoriesInTab" class="flex flex-col gap-3 lg:flex-row lg:items-center">
-                    <BaseSearchInput
-                        v-model="search"
-                        label="Search advisories"
-                        placeholder="Search advisories…"
-                        class="lg:max-w-sm"
-                    />
-                    <BaseSelect v-model="severity" :options="severityOptions" label="Severity" class="lg:w-48" />
-                    <BaseSelect v-model="status" :options="statusOptions" label="Status" class="lg:w-48" />
-                    <BaseSelect v-model="sort" :options="SORT_OPTIONS" label="Sort" class="lg:ml-auto lg:w-56" />
-                </div>
-
-                <div :class="['transition-opacity', isFetching && 'opacity-60']" :aria-busy="isFetching">
-                    <BaseTableEmptyState v-if="loadFailed">
-                        <p class="text-base font-semibold text-gray-700">Could not load advisories</p>
-                        <p class="mt-1 text-sm text-gray-400">Something went wrong while loading these results.</p>
-                        <BaseButton color="gray" size="md" class="mt-4" @click="pageQuery.refetch()">
-                            Try again
-                        </BaseButton>
-                    </BaseTableEmptyState>
-
-                    <EmptyState
-                        v-else-if="!hasAdvisoriesInTab && classification === 'open'"
-                        :icon="ClipboardDocumentCheckIcon"
-                        :contained="false"
-                    >
-                        <template #heading>No active advisories</template>
-                        <template #description>Resolved advisories are available in the history.</template>
-                        <template v-if="counts.resolved > 0" #actions>
-                            <BaseButton color="gray" size="md" @click="classification = 'resolved'">
-                                View resolved advisories
-                            </BaseButton>
-                        </template>
-                    </EmptyState>
-
-                    <EmptyState v-else-if="!hasAdvisoriesInTab" :icon="ClipboardDocumentCheckIcon" :contained="false">
-                        <template #heading>No resolved advisories</template>
-                        <template #description>Advisories will appear here once they have been resolved.</template>
-                    </EmptyState>
-
-                    <BaseTableEmptyState v-else-if="advisories.length === 0">
-                        <p class="text-base font-semibold text-gray-700">No advisories match your search</p>
-                        <p class="mt-1 text-sm text-gray-400">Try a different search or clear the filters.</p>
-                        <BaseButton v-if="isFiltered" color="gray" size="md" class="mt-4" @click="clearFilters">
-                            Clear filters
-                        </BaseButton>
-                    </BaseTableEmptyState>
-
-                    <template v-else>
-                        <AdvisoriesTable :advisories="advisories" />
-
-                        <Pagination
-                            v-if="lastPage > 1"
-                            class="-mx-6 mt-4"
-                            :current-page="currentPage"
-                            :last-page="lastPage"
-                            :from-item="fromItem"
-                            :to-item="toItem"
-                            :total-items="totalItems"
-                            :loading-page="loadingPage"
-                            @fetchPreviousPage="fetchPage(currentPage - 1)"
-                            @fetchNextPage="fetchPage(currentPage + 1)"
-                            @fetchPage="fetchPage"
+                <PageCard
+                    class="rounded-t-none"
+                    :id="`advisories-panel-${classification}`"
+                    role="tabpanel"
+                    :aria-labelledby="`advisories-tab-${classification}`"
+                >
+                    <div v-if="hasAdvisoriesInTab" class="flex flex-col gap-3 lg:flex-row lg:items-center">
+                        <BaseSearchInput
+                            v-model="search"
+                            label="Search advisories"
+                            placeholder="Search advisories…"
+                            class="lg:max-w-sm"
                         />
-                        <p v-else class="mt-4 text-sm text-gray-500">
-                            Showing {{ totalItems }} {{ classificationLabel }}
-                            {{ totalItems === 1 ? 'advisory' : 'advisories' }}
-                        </p>
-                    </template>
-                </div>
-            </PageCard>
+                        <BaseSelect v-model="severity" :options="severityOptions" label="Severity" class="lg:w-48" />
+                        <BaseSelect v-model="status" :options="statusOptions" label="Status" class="lg:w-48" />
+                        <BaseSelect v-model="sort" :options="SORT_OPTIONS" label="Sort" class="lg:ml-auto lg:w-56" />
+                    </div>
+
+                    <div :class="['transition-opacity', isFetching && 'opacity-60']" :aria-busy="isFetching">
+                        <BaseTableEmptyState v-if="loadFailed">
+                            <p class="text-base font-semibold text-gray-700">Could not load advisories</p>
+                            <p class="mt-1 text-sm text-gray-400">Something went wrong while loading these results.</p>
+                            <BaseButton color="gray" size="md" class="mt-4" @click="pageQuery.refetch()">
+                                Try again
+                            </BaseButton>
+                        </BaseTableEmptyState>
+
+                        <EmptyState
+                            v-else-if="!hasAdvisoriesInTab && classification === 'open'"
+                            :icon="ClipboardDocumentCheckIcon"
+                            :contained="false"
+                        >
+                            <template #heading>No active advisories</template>
+                            <template #description>Resolved advisories are available in the history.</template>
+                            <template v-if="counts.resolved > 0" #actions>
+                                <BaseButton color="gray" size="md" @click="classification = 'resolved'">
+                                    View resolved advisories
+                                </BaseButton>
+                            </template>
+                        </EmptyState>
+
+                        <EmptyState
+                            v-else-if="!hasAdvisoriesInTab"
+                            :icon="ClipboardDocumentCheckIcon"
+                            :contained="false"
+                        >
+                            <template #heading>No resolved advisories</template>
+                            <template #description>Advisories will appear here once they have been resolved.</template>
+                        </EmptyState>
+
+                        <BaseTableEmptyState v-else-if="advisories.length === 0">
+                            <p class="text-base font-semibold text-gray-700">No advisories match your search</p>
+                            <p class="mt-1 text-sm text-gray-400">Try a different search or clear the filters.</p>
+                            <BaseButton v-if="isFiltered" color="gray" size="md" class="mt-4" @click="clearFilters">
+                                Clear filters
+                            </BaseButton>
+                        </BaseTableEmptyState>
+
+                        <template v-else>
+                            <AdvisoriesTable :advisories="advisories" />
+
+                            <Pagination
+                                v-if="lastPage > 1"
+                                class="-mx-6 mt-4"
+                                :current-page="currentPage"
+                                :last-page="lastPage"
+                                :from-item="fromItem"
+                                :to-item="toItem"
+                                :total-items="totalItems"
+                                :loading-page="loadingPage"
+                                @fetchPreviousPage="fetchPage(currentPage - 1)"
+                                @fetchNextPage="fetchPage(currentPage + 1)"
+                                @fetchPage="fetchPage"
+                            />
+                            <p v-else class="mt-4 text-sm text-gray-500">
+                                Showing {{ totalItems }} {{ classificationLabel }}
+                                {{ totalItems === 1 ? 'advisory' : 'advisories' }}
+                            </p>
+                        </template>
+                    </div>
+                </PageCard>
+            </div>
         </template>
 
         <EmptyState v-else :icon="ClipboardDocumentCheckIcon">
