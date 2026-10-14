@@ -41,7 +41,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 
 /**
- * Selects each advisory's `last_updated_at`: the date of its latest update, or when it was created if it has none.
+ * Selects each advisory's `last_updated_at`: the date of its latest public (non-internal) update, or when it was
+ * created if it has none.
  */
 class WithLastUpdatedAt
 {
@@ -61,6 +62,6 @@ class WithLastUpdatedAt
 
     public static function expression(): string
     {
-        return '(coalesce((select max(advisory_updates.date) from advisory_updates where advisory_updates.advisory_id = advisories.id), advisories.created_at))';
+        return '(coalesce((select max(advisory_updates.date) from advisory_updates where advisory_updates.advisory_id = advisories.id and advisory_updates.internal = false), advisories.created_at))';
     }
 }

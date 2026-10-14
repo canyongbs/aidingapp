@@ -50,7 +50,7 @@ class ShowAdvisoryController extends Controller
                 'severity',
                 'status',
                 'assignedDepartment',
-                'advisoryUpdates' => fn ($query) => $query->orderByDesc('date')->orderByDesc('created_at'),
+                'advisoryUpdates' => fn ($query) => $query->where('internal', false)->orderByDesc('date')->orderByDesc('created_at'),
             ])
             ->findOrFail($advisory);
 
