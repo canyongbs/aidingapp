@@ -44,6 +44,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use App\Models\Tag;
+use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -64,7 +65,9 @@ use Filament\Tables\Filters\Indicator;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 
 class ListKnowledgeBaseItems extends ListRecords
 {
@@ -137,10 +140,34 @@ class ListKnowledgeBaseItems extends ListRecords
                     ->relationship('status', 'name')
                     ->multiple()
                     ->preload(),
-                SelectFilter::make('category')
-                    ->relationship('category', 'name')
-                    ->multiple()
-                    ->preload(),
+                Filter::make('category')
+                    ->label('Category')
+                    ->schema([
+                        // Workaround for codewithdennis/filament-select-tree v4.2.3, which drops
+                        // orphaned records (a child whose parent is excluded, e.g. soft-deleted)
+                        // when promoting them to the root. Build the tree ourselves via
+                        // getTreeUsing() instead of query(); revert once the fix is released:
+                        // https://github.com/CodeWithDennis/filament-select-tree/pull/221
+                        SelectTree::make('categories')
+                            ->label('Category')
+                            ->getTreeUsing(fn (): array => static::buildCategoryTreeOptions())
+                            ->enableBranchNode()
+                            ->multiple()
+                            ->searchable()
+                            ->placeholder('All'),
+                    ])
+                    ->query(fn (Builder $query, array $data): Builder => $query->when(
+                        ! empty($data['categories']),
+                        fn (Builder $query) => $query->whereIn('category_id', $data['categories'])
+                    ))
+                    ->indicateUsing(
+                        fn (array $data): ?string => empty($data['categories'])
+                            ? null
+                            : 'Category: ' . KnowledgeBaseCategory::query()
+                                ->whereIn('id', $data['categories'])
+                                ->pluck('name')
+                                ->implode(', ')
+                    ),
                 Filter::make('public')
                     ->schema([
                         ToggleButtons::make('value')
@@ -281,6 +308,38 @@ class ListKnowledgeBaseItems extends ListRecords
             ->defaultSort('updated_at', 'desc');
     }
 
+    /**
+     * Build the nested option tree a `SelectTree` expects from the self-referencing
+     * (parent/child) `KnowledgeBaseCategory` model, so managed subcategories are shown
+     * instead of a flat list.
+     *
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
+     */
+    public static function buildCategoryTreeOptions(): array
+    {
+        $records = KnowledgeBaseCategory::query()
+            ->orderBy('sort')
+            ->get();
+
+        $presentKeys = $records
+            ->map(fn (KnowledgeBaseCategory $record): string => (string) $record->getKey())
+            ->flip()
+            ->all();
+
+        $recordsByParent = $records
+            ->groupBy(function (KnowledgeBaseCategory $record) use ($presentKeys): string {
+                $parentKey = (string) $record->parent_id;
+
+                // Promote records whose parent is absent from the result set (e.g. a
+                // soft-deleted parent category) to the root so their still-active
+                // descendants remain reachable instead of being stranded under a key
+                // the recursion never visits.
+                return isset($presentKeys[$parentKey]) ? $parentKey : '';
+            });
+
+        return static::buildCategoryTreeNodes($recordsByParent, '');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
@@ -291,5 +350,25 @@ class ListKnowledgeBaseItems extends ListRecords
                 ->slideOver()
                 ->successRedirectUrl(fn (Model $record): string => KnowledgeBaseItemResource::getUrl('edit', ['record' => $record])),
         ];
+    }
+
+    /**
+     * @param  Collection<int|string, EloquentCollection<int, KnowledgeBaseCategory>>  $recordsByParent
+     *
+     * @return array<int, array{name: string, value: string, children: array<int, mixed>}>
+     */
+    protected static function buildCategoryTreeNodes(
+        Collection $recordsByParent,
+        string $parentKey,
+    ): array {
+        return $recordsByParent
+            ->get($parentKey, collect())
+            ->map(fn (KnowledgeBaseCategory $record): array => [
+                'name' => $record->name,
+                'value' => $record->getKey(),
+                'children' => static::buildCategoryTreeNodes($recordsByParent, (string) $record->getKey()),
+            ])
+            ->values()
+            ->all();
     }
 }
