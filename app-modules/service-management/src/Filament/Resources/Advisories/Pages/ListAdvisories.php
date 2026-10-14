@@ -41,10 +41,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
-use Filament\Actions\EditAction;
-use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\ColorColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -60,9 +57,10 @@ class ListAdvisories extends ListRecords
                     ->label('Title')
                     ->searchable()
                     ->sortable(),
-                ColorColumn::make('severity.rgb_color')
+                TextColumn::make('severity.name')
                     ->label('Severity')
-                    ->tooltip(fn (Advisory $record) => $record->severity->name),
+                    ->badge()
+                    ->color(fn (Advisory $record): string => $record->severity->color->value),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -72,10 +70,9 @@ class ListAdvisories extends ListRecords
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordActions([
-                ViewAction::make(),
-                EditAction::make(),
-            ])
+            ->recordUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
+                ? AdvisoryResource::getUrl('view', ['record' => $record])
+                : null)
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()

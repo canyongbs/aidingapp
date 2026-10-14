@@ -87,6 +87,16 @@ test('The correct details are displayed on the ViewContact page', function () {
         ->assertSee('Acme Inc');
 });
 
+test('The primary information sections are organized into tabs on the ViewContact page', function () {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertSuccessful()
+        ->assertSeeInOrder(['Demographic', 'Contact', 'Employment', 'Academic', 'Address', 'Affiliation', 'System']);
+});
+
 test('ViewContact renders successfully when optional fields have no value', function () {
     asSuperAdmin();
 

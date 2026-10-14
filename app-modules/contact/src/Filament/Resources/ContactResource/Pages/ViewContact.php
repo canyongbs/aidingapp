@@ -50,6 +50,7 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
+use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 
@@ -66,136 +67,161 @@ class ViewContact extends ViewRecord
         return $schema
             ->components([
                 ContactEmailHealthCallout::make($contact),
-                Section::make('Demographic Information')
-                    ->key('demographicInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editDemographicInformation', 'Demographic Information')
-                            ->schema(ContactFormSchema::demographicInformationFields()),
-                    ])
-                    ->schema([
-                        TextEntry::make('first_name')
-                            ->label('First Name'),
-                        TextEntry::make('last_name')
-                            ->label('Last Name'),
-                        TextEntry::make(Contact::displayNameKey())
-                            ->label('Full Name'),
-                        TextEntry::make('preferred')
-                            ->label('Preferred Name'),
-                        TextEntry::make('presence_status')
-                            ->label('Presence')
-                            ->visible(fn (): bool => ContactTrackingFeature::active())
-                            ->state(fn (Contact $record) => $record->presenceStatus())
-                            ->badge()
-                            ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
-                            ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
-                        TextEntry::make('type.name')
-                            ->label('Type'),
-                    ])
-                    ->columns(2),
-                Section::make('Contact Information')
-                    ->key('contactInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editContactInformation', 'Contact Information')
-                            ->schema(ContactFormSchema::contactInformationFields(ignoreRecord: true)),
-                    ])
-                    ->schema([
-                        TextEntry::make('email')
-                            ->label('Email'),
-                        TextEntry::make('mobile')
-                            ->label('Mobile'),
-                        TextEntry::make('phone')
-                            ->label('Phone'),
-                    ])
-                    ->columns(2),
-                Section::make('Employment Information')
-                    ->key('employmentInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editEmploymentInformation', 'Employment Information')
-                            ->schema(ContactFormSchema::employmentInformationFields()),
-                    ])
-                    ->schema([
-                        TextEntry::make('job_title')
-                            ->label('Job Title'),
-                        TextEntry::make('employee_id')
-                            ->label('Employee ID'),
-                        TextEntry::make('work_number')
-                            ->label('Work Number'),
-                        TextEntry::make('work_extension')
-                            ->label('Work Extension'),
-                    ])
-                    ->columns(2),
-                Section::make('Academic Information')
-                    ->key('academicInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editAcademicInformation', 'Academic Information')
-                            ->schema(ContactFormSchema::academicInformationFields()),
-                    ])
-                    ->schema([
-                        TextEntry::make('student_id')
-                            ->label('Student ID'),
-                        TextEntry::make('school')
-                            ->label('School'),
-                        TextEntry::make('academic_department')
-                            ->label('Academic Department'),
-                        TextEntry::make('program')
-                            ->label('Program'),
-                    ])
-                    ->columns(2),
-                Section::make('Address Information')
-                    ->key('addressInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editAddressInformation', 'Address Information')
-                            ->schema(ContactFormSchema::addressInformationFields()),
-                    ])
-                    ->schema([
-                        TextEntry::make('address')
-                            ->label('Address'),
-                        TextEntry::make('address_2')
-                            ->label('Address 2'),
-                        TextEntry::make('city')
-                            ->label('City'),
-                        TextEntry::make('state')
-                            ->label('State'),
-                        TextEntry::make('postal')
-                            ->label('Postal'),
-                        TextEntry::make('country')
-                            ->label('Country'),
-                    ])
-                    ->columns(2),
-                Section::make('Customer Information')
-                    ->key('customerInformation')
-                    ->headerActions([
-                        self::sectionEditAction('editCustomerInformation', 'Customer Information')
-                            ->schema(ContactFormSchema::customerInformationFields()),
-                    ])
-                    ->schema([
-                        TextEntry::make('organization.name')
-                            ->label('Organization'),
-                    ])
-                    ->columns(2),
-                Section::make('Engagement Restrictions')
-                    ->key('engagementRestrictions')
-                    ->headerActions([
-                        self::sectionEditAction('editEngagementRestrictions', 'Engagement Restrictions')
-                            ->schema(ContactFormSchema::engagementRestrictionsFields()),
-                    ])
-                    ->schema([
-                        IconEntry::make('email_bounce')
-                            ->label('Email Bounce')
-                            ->boolean(),
-                    ])
-                    ->columns(2),
-                Section::make('System Information')
-                    ->schema([
-                        TextEntry::make('created_at')
-                            ->label('Created At')
-                            ->dateTime(),
-                        TextEntry::make('updated_at')
-                            ->label('Updated At')
-                            ->dateTime(),
-                    ])
-                    ->columns(2),
+                Tabs::make('Primary Information')
+                    ->columnSpanFull()
+                    ->tabs([
+                        Tab::make('Demographic')
+                            ->schema([
+                                Section::make('Demographic Information')
+                                    ->key('demographicInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editDemographicInformation', 'Demographic Information')
+                                            ->schema(ContactFormSchema::demographicInformationFields()),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('first_name')
+                                            ->label('First Name'),
+                                        TextEntry::make('last_name')
+                                            ->label('Last Name'),
+                                        TextEntry::make(Contact::displayNameKey())
+                                            ->label('Full Name'),
+                                        TextEntry::make('preferred')
+                                            ->label('Preferred Name'),
+                                        TextEntry::make('presence_status')
+                                            ->label('Presence')
+                                            ->visible(fn (): bool => ContactTrackingFeature::active())
+                                            ->state(fn (Contact $record) => $record->presenceStatus())
+                                            ->badge()
+                                            ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
+                                            ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
+                                            ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
+                                        TextEntry::make('type.name')
+                                            ->label('Type'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('Contact')
+                            ->schema([
+                                Section::make('Contact Information')
+                                    ->key('contactInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editContactInformation', 'Contact Information')
+                                            ->schema(ContactFormSchema::contactInformationFields(ignoreRecord: true)),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('email')
+                                            ->label('Email'),
+                                        TextEntry::make('mobile')
+                                            ->label('Mobile'),
+                                        TextEntry::make('phone')
+                                            ->label('Phone'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('Employment')
+                            ->schema([
+                                Section::make('Employment Information')
+                                    ->key('employmentInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editEmploymentInformation', 'Employment Information')
+                                            ->schema(ContactFormSchema::employmentInformationFields()),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('job_title')
+                                            ->label('Job Title'),
+                                        TextEntry::make('employee_id')
+                                            ->label('Employee ID'),
+                                        TextEntry::make('work_number')
+                                            ->label('Work Number'),
+                                        TextEntry::make('work_extension')
+                                            ->label('Work Extension'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('Academic')
+                            ->schema([
+                                Section::make('Academic Information')
+                                    ->key('academicInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editAcademicInformation', 'Academic Information')
+                                            ->schema(ContactFormSchema::academicInformationFields()),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('student_id')
+                                            ->label('Student ID'),
+                                        TextEntry::make('school')
+                                            ->label('School'),
+                                        TextEntry::make('academic_department')
+                                            ->label('Academic Department'),
+                                        TextEntry::make('program')
+                                            ->label('Program'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('Address')
+                            ->schema([
+                                Section::make('Address Information')
+                                    ->key('addressInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editAddressInformation', 'Address Information')
+                                            ->schema(ContactFormSchema::addressInformationFields()),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('address')
+                                            ->label('Address'),
+                                        TextEntry::make('address_2')
+                                            ->label('Address 2'),
+                                        TextEntry::make('city')
+                                            ->label('City'),
+                                        TextEntry::make('state')
+                                            ->label('State'),
+                                        TextEntry::make('postal')
+                                            ->label('Postal'),
+                                        TextEntry::make('country')
+                                            ->label('Country'),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('Affiliation')
+                            ->schema([
+                                Section::make('Customer Information')
+                                    ->key('customerInformation')
+                                    ->headerActions([
+                                        self::sectionEditAction('editCustomerInformation', 'Customer Information')
+                                            ->schema(ContactFormSchema::customerInformationFields()),
+                                    ])
+                                    ->schema([
+                                        TextEntry::make('organization.name')
+                                            ->label('Organization'),
+                                    ])
+                                    ->columns(2),
+                                Section::make('Engagement Restrictions')
+                                    ->key('engagementRestrictions')
+                                    ->headerActions([
+                                        self::sectionEditAction('editEngagementRestrictions', 'Engagement Restrictions')
+                                            ->schema(ContactFormSchema::engagementRestrictionsFields()),
+                                    ])
+                                    ->schema([
+                                        IconEntry::make('email_bounce')
+                                            ->label('Email Bounce')
+                                            ->boolean(),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                        Tab::make('System')
+                            ->schema([
+                                Section::make('System Information')
+                                    ->schema([
+                                        TextEntry::make('created_at')
+                                            ->label('Created At')
+                                            ->dateTime(),
+                                        TextEntry::make('updated_at')
+                                            ->label('Updated At')
+                                            ->dateTime(),
+                                    ])
+                                    ->columns(2),
+                            ]),
+                    ]),
                 Tabs::make()
                     ->columnSpanFull()
                     ->tabs(ContactInfolist::tabs($contact, static::class)),
