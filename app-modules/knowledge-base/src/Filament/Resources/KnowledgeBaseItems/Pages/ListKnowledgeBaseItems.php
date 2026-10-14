@@ -145,6 +145,11 @@ class ListKnowledgeBaseItems extends ListRecords
                 Filter::make('category')
                     ->label('Category')
                     ->schema([
+                        // Workaround for codewithdennis/filament-select-tree v4.2.3, which drops
+                        // orphaned records (a child whose parent is excluded, e.g. soft-deleted)
+                        // when promoting them to the root. Build the tree ourselves via
+                        // getTreeUsing() instead of query(); revert once the fix is released:
+                        // https://github.com/CodeWithDennis/filament-select-tree/pull/221
                         SelectTree::make('categories')
                             ->label('Category')
                             ->getTreeUsing(fn (): array => static::buildCategoryTreeOptions())
@@ -299,7 +304,6 @@ class ListKnowledgeBaseItems extends ListRecords
             ->orderBy('sort')
             ->get();
 
-        // Keyed by key for O(1) `isset()` lookups below, avoiding an O(n) scan per record.
         $presentKeys = $records
             ->map(fn (KnowledgeBaseCategory $record): string => (string) $record->getKey())
             ->flip()

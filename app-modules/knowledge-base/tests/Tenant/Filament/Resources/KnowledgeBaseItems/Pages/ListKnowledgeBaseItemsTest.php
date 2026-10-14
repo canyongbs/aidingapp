@@ -228,18 +228,20 @@ it('nests child categories beneath their parent in sort order in the category fi
         'name' => 'Hardware',
     ])->create();
 
-    // `sort` and alphabetical name order disagree here: ordering by name would put
-    // Printers before Scanners, so asserting Scanners first proves the tree uses `sort`.
-    $firstChild = KnowledgeBaseCategory::factory()->state([
-        'name' => 'Scanners',
-        'parent_id' => $parentCategory->getKey(),
-        'sort' => 1,
-    ])->create();
-
+    // Both alphabetical name order and creation order disagree with `sort` here:
+    // Printers is created first and sorts before Scanners by name, yet has the higher
+    // `sort`. Asserting Scanners first therefore proves the tree orders by `sort`
+    // rather than falling back to name or insertion order.
     $secondChild = KnowledgeBaseCategory::factory()->state([
         'name' => 'Printers',
         'parent_id' => $parentCategory->getKey(),
         'sort' => 2,
+    ])->create();
+
+    $firstChild = KnowledgeBaseCategory::factory()->state([
+        'name' => 'Scanners',
+        'parent_id' => $parentCategory->getKey(),
+        'sort' => 1,
     ])->create();
 
     $tree = ListKnowledgeBaseItems::buildCategoryTreeOptions();
