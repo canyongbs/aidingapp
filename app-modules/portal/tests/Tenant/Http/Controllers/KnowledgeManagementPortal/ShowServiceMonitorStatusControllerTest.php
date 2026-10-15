@@ -44,8 +44,8 @@ use App\Settings\LicenseSettings;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\travelTo;
 
 beforeEach(function () {
     $settings = app(PortalSettings::class);
@@ -58,7 +58,8 @@ beforeEach(function () {
 });
 
 it('displays the service monitor data', function () {
-    freezeTime();
+    // Midday, so checks a few hours old still land in today's history bucket.
+    travelTo(today()->setTime(12, 0));
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
         'name' => 'Customer Website',
