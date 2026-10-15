@@ -50,9 +50,9 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('editStatus action is visible for manager department member with update permission', function () {
@@ -80,7 +80,7 @@ test('editStatus action is visible for manager department member with update per
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -112,7 +112,7 @@ test('editStatus action is hidden for user without update permission', function 
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -144,7 +144,7 @@ test('editStatus action is hidden for a department auditor who is not a manager 
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -172,7 +172,7 @@ test('editStatus action is hidden for a direct auditor user who is not a manager
 
     actingAs($user);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -208,7 +208,7 @@ test('editStatus action is gated with proper feature access control', function (
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])->assertForbidden();
 
@@ -219,7 +219,7 @@ test('editStatus action is gated with proper feature access control', function (
         'classification' => SystemServiceRequestClassification::InProgress,
     ]);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -256,7 +256,7 @@ test('editStatus action is gated with proper feature access control for direct u
 
     actingAs($user);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])->assertForbidden();
 
@@ -267,7 +267,7 @@ test('editStatus action is gated with proper feature access control for direct u
         'classification' => SystemServiceRequestClassification::InProgress,
     ]);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -288,7 +288,7 @@ test('editStatus requires status_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editStatus')->schemaComponent('status.name'), data: [
@@ -310,7 +310,7 @@ test('can update the service request status', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editStatus')->schemaComponent('status.name'), data: [
@@ -339,7 +339,7 @@ test('editStatus action is visible and can update away from a soft-deleted statu
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -401,7 +401,7 @@ test('send feedback email if service request is closed', function () {
         'classification' => SystemServiceRequestClassification::Closed,
     ]);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editStatus')->schemaComponent('status.name'), data: [
@@ -466,7 +466,7 @@ test('send feedback email if service request is closed for direct user manager',
         'classification' => SystemServiceRequestClassification::Closed,
     ]);
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editStatus')->schemaComponent('status.name'), data: [

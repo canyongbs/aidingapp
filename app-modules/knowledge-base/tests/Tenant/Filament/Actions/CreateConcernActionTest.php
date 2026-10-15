@@ -38,9 +38,9 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ViewKnow
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Actions\RequestFactories\CreateConcernActionRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('is gated by proper access control', function () {
@@ -54,13 +54,13 @@ it('is gated by proper access control', function () {
 
     actingAs($user);
 
-    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertActionVisible('raiseConcern');
 
     $user->revokePermissionTo('knowledge_base_item.view-any');
     $user->refresh();
 
-    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
+    Livewire::test(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertForbidden();
 });
 
@@ -71,7 +71,7 @@ it('can create a concern properly', function () {
 
     $data = CreateConcernActionRequestFactory::new()->create();
 
-    livewire(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getKey()])
+    Livewire::test(ViewKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getKey()])
         ->callAction('raiseConcern', [
             'description' => $data['description'],
         ]);

@@ -41,9 +41,9 @@ use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesTable;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('returns all knowledge base articles without filters', function () {
     $status = KnowledgeBaseStatus::factory()->create();
@@ -54,7 +54,7 @@ it('returns all knowledge base articles without filters', function () {
         'category_id' => $category->id,
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table',
         'pageFilters' => [],
     ])
@@ -76,7 +76,7 @@ it('filters articles by category from page filter', function () {
         'category_id' => $categoryB->id,
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-filtered',
         'pageFilters' => [
             'categories' => [$categoryA->id],
@@ -87,7 +87,7 @@ it('filters articles by category from page filter', function () {
 });
 
 it('has an export action', function () {
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-export',
         'pageFilters' => [],
     ])->assertTableActionExists(ExportAction::class);
@@ -98,7 +98,7 @@ it('can start an export and send a notification', function () {
 
     actingAs(User::factory()->create());
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-export-notification',
         'pageFilters' => [],
     ])
@@ -121,7 +121,7 @@ it('filters records by status using the table-level status filter', function () 
         'category_id' => $category->id,
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-status-filter',
         'pageFilters' => [],
     ])
@@ -148,7 +148,7 @@ it('filters records by category using the table-level category filter', function
         'category_id' => $categoryB->id,
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-category-filter',
         'pageFilters' => [],
     ])
@@ -176,7 +176,7 @@ it('filters records by public using the table-level public filter', function () 
         'public' => false,
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-public-filter',
         'pageFilters' => [],
     ])
@@ -204,7 +204,7 @@ it('filters records by created_at using the table-level created after filter', f
         'created_at' => now()->subDays(10),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-created-at-filter',
         'pageFilters' => [],
     ])
@@ -229,7 +229,7 @@ it('defaults to sorting by updated_at in descending order', function () {
         'updated_at' => now()->subDays(10),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-default-sort-views',
         'pageFilters' => [],
     ])
@@ -254,7 +254,7 @@ it('allows sorting records by portal_view_count descending, overriding the defau
         'updated_at' => now(),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-default-sort-tiebreaker',
         'pageFilters' => [],
     ])
@@ -280,7 +280,7 @@ it('allows sorting records by updated_at ascending, overriding the default updat
         'updated_at' => now(),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-sort-updated-at-asc',
         'pageFilters' => [],
     ])
@@ -305,7 +305,7 @@ it('filters records by updated_at using the table-level updated after filter', f
         'updated_at' => now()->subDays(10),
     ])->create();
 
-    livewire(KnowledgeBaseArticlesTable::class, [
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-updated-at-filter',
         'pageFilters' => [],
     ])

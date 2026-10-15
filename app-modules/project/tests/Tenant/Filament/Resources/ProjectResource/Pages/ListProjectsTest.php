@@ -47,11 +47,11 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function () {
@@ -113,7 +113,7 @@ it('can list records', function () {
 
     $records = Project::factory()->count(5)->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
@@ -126,7 +126,7 @@ it('does not list archived projects', function () {
     $archivedProject = Project::factory()->create();
     $archivedProject->archive();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$activeProject])
         ->assertCanNotSeeTableRecords([$archivedProject])
         ->assertSuccessful();
@@ -145,7 +145,7 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
 
     $project = Project::factory()->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
@@ -154,31 +154,31 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
     $secondUser->givePermissionTo('project.view-any');
     $secondUser->givePermissionTo('project.*.view');
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->managerUsers()->attach($secondUser->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->managerUsers()->detach($secondUser->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->auditorUsers()->attach($secondUser->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->auditorUsers()->detach($secondUser->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
@@ -188,25 +188,25 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
 
     $project->managerDepartments()->attach($department->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->managerDepartments()->detach($department->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanNotSeeTableRecords([$project])
         ->assertSuccessful();
 
     $project->auditorDepartments()->attach($department->getKey());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 
     asSuperAdmin();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertSuccessful();
 });
@@ -220,13 +220,13 @@ it('only shows archive actions to a user with the project.delete permission', fu
 
     $project = Project::factory()->for($user, 'createdBy')->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertActionHidden(TestAction::make('archive')->table($project))
         ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('project.*.delete');
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertActionVisible(TestAction::make('archive')->table($project))
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());
 });
@@ -238,7 +238,7 @@ it('can archive a project from the list row action', function () {
 
     expect($project->isArchived())->toBeFalse();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->callAction(TestAction::make('archive')->table($project))
         ->assertNotified();
@@ -259,7 +259,7 @@ it('can archive multiple projects from the list bulk action', function () {
 
     $projects->each(fn (Project $project) => expect($project->isArchived())->toBeFalse());
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->selectTableRecords($projects->modelKeys())
         ->callAction(TestAction::make('archive')->table()->bulk());
@@ -280,7 +280,7 @@ it('does not show the archive row action to an auditor who is neither a manager 
         ->hasAttached($user, relationship: 'auditorUsers')
         ->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$project])
         ->assertActionHidden(TestAction::make('archive')->table($project));
 });
@@ -314,7 +314,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         )
         ->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->assertCanSeeTableRecords([$project])
         ->assertTableColumnExists('name', fn (Column $column): bool => $column->getLabel() === 'Project Name')
@@ -352,7 +352,7 @@ it('shows N/A when a project has no managers, no department, or no start date', 
         'start_date' => null,
     ]);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->assertCanSeeTableRecords([$project])
         ->assertTableColumnStateSet('department.name', null, $project)
@@ -394,22 +394,22 @@ it('can search projects by project name, manager name, and department name', fun
 
     $notMatching = Project::factory()->create(['name' => 'Completely Different']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('onboarding revamp')
         ->assertCanSeeTableRecords([$matchingByName])
         ->assertCanNotSeeTableRecords([$matchingByManager, $notMatching]);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('jordan searchable')
         ->assertCanSeeTableRecords([$matchingByManager])
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('searchable department')
         ->assertCanSeeTableRecords([$matchingByDepartment])
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('taylor delegate')
         ->assertCanSeeTableRecords([$matchingByDepartmentManager])
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
@@ -423,7 +423,7 @@ it('caps the manager avatars it renders but keeps every manager searchable', fun
         ->hasAttached(User::factory()->state(['name' => 'Wilhelmina Ashgrove']), relationship: 'managerUsers')
         ->create(['name' => 'Crowded Project']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->assertTableColumnExists(
             'managers',
@@ -432,7 +432,7 @@ it('caps the manager avatars it renders but keeps every manager searchable', fun
         )
         ->assertSeeHtml('+20');
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('Wilhelmina Ashgrove')
         ->assertCanSeeTableRecords([$project]);
 });
@@ -449,7 +449,7 @@ it('shows the same managers on the list as the project dashboard', function () {
         ->hasAttached($department, relationship: 'managerDepartments')
         ->create();
 
-    $dashboardManagers = livewire(ProjectAccessWidget::class, ['record' => $project])
+    $dashboardManagers = Livewire::test(ProjectAccessWidget::class, ['record' => $project])
         ->instance()
         ->managers()
         ->pluck('id')
@@ -459,7 +459,7 @@ it('shows the same managers on the list as the project dashboard', function () {
 
     expect($dashboardManagers)->toHaveCount(4);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertTableColumnExists(
             'managers',
             fn (Column $column): bool => $column->getState()->pluck('id')->sort()->values()->all() === $dashboardManagers,
@@ -488,13 +488,13 @@ it('shows the same progress on the list as the project dashboard', function () {
         )
         ->create();
 
-    $dashboardProgress = livewire(ProjectDashboardHeaderWidget::class, ['record' => $project])
+    $dashboardProgress = Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
         ->instance()
         ->getProgress();
 
     expect($dashboardProgress)->toBe(25);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertTableColumnStateSet('progress', $dashboardProgress, $project);
 });
 
@@ -507,7 +507,7 @@ it('ranks a project named Test above a project managed by someone named Test', f
 
     $namedTest = Project::factory()->create(['name' => 'Test']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('Test')
         ->assertCanSeeTableRecords([$namedTest, $managedByTest], inOrder: true);
 });
@@ -525,7 +525,7 @@ it('ranks project name matches above manager matches, and manager matches above 
 
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('Test')
         ->assertCanSeeTableRecords(
             [$matchingByName, $matchingByManager, $matchingByDepartment],
@@ -542,7 +542,7 @@ it('ranks project name matches first when the search words are given in another 
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Onboarding Manager']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('Manager Casey')
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
@@ -556,7 +556,7 @@ it('ranks project name matches first when the search is a quoted phrase', functi
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Manager Report']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('"Casey Manager"')
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
@@ -566,7 +566,7 @@ it('does not fail when the search contains no searchable words', function () {
 
     Project::factory()->create(['name' => 'Alpha']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('""')
         ->assertSuccessful();
 });
@@ -580,7 +580,7 @@ it('sorts by the selected column instead of search relevance when a sort is appl
         ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Zulu Project']);
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->searchTable('Test')
         ->sortTable('name', 'desc')
         ->assertCanSeeTableRecords([$matchingByManager, $matchingByName], inOrder: true);
@@ -595,7 +595,7 @@ it('can filter projects by department', function () {
     $projectInDepartment = Project::factory()->for($department)->create();
     $projectInOtherDepartment = Project::factory()->for($otherDepartment)->create();
 
-    livewire(ListProjects::class)
+    Livewire::test(ListProjects::class)
         ->assertCanSeeTableRecords([$projectInDepartment, $projectInOtherDepartment])
         ->filterTable('department', [$department->getKey()])
         ->assertCanSeeTableRecords([$projectInDepartment])

@@ -41,8 +41,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Carbon\CarbonImmutable;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('shows the assignment date on one line and the time on a separate line without duplication', function () {
@@ -69,7 +69,7 @@ it('shows the assignment date on one line and the time on a separate line withou
     $expectedTime = $localAssignedAt->format('g:i a (T)');
     $combined = $localAssignedAt->format('M j, Y g:i a (T)');
 
-    livewire(AssignmentHistoryRelationManager::class, [
+    Livewire::test(AssignmentHistoryRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])

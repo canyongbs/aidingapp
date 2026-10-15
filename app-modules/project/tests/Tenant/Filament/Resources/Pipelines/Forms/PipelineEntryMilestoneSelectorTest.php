@@ -40,8 +40,8 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
 use Filament\Tables\Table;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -54,7 +54,7 @@ it('excludes archived milestones from the related-milestones picker', function (
     $archived = ProjectMilestone::factory()->for($project)->create();
     $archived->archive();
 
-    $component = livewire(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();
+    $component = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])->instance();
 
     $table = PipelineEntryMilestonesTable::configure(
         Table::make($component)->arguments(['projectId' => $project->getKey()]),

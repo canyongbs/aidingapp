@@ -40,10 +40,10 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseStatuses\RequestFactories\CreateKnowledgeBaseStatusRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 // TODO: Write CreateKnowledgeBaseStatus tests
@@ -61,7 +61,7 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
             KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -74,7 +74,7 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
 
     $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -101,7 +101,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
             KnowledgeBaseStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
@@ -115,7 +115,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
 
     $request = collect(CreateKnowledgeBaseStatusRequestFactory::new()->create());
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -134,7 +134,7 @@ test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate n
 
     actingAs($user);
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->fillForm(['name' => 'published'])
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -151,7 +151,7 @@ test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status
 
     actingAs($user);
 
-    livewire(CreateKnowledgeBaseStatus::class)
+    Livewire::test(CreateKnowledgeBaseStatus::class)
         ->fillForm(['name' => 'Published'])
         ->call('create')
         ->assertHasNoFormErrors();

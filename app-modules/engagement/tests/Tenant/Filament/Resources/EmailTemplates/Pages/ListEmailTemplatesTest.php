@@ -38,21 +38,21 @@ use AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages\ListEmailTempla
 use AidingApp\Engagement\Models\EmailTemplate;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(ListEmailTemplates::class)->assertForbidden();
+    Livewire::test(ListEmailTemplates::class)->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ListEmailTemplates::class)->assertOk();
+    Livewire::test(ListEmailTemplates::class)->assertOk();
 });
 
 it('only shows the bulk delete action to a user with the settings.delete permission', function () {
@@ -64,11 +64,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListEmailTemplates::class)
+    Livewire::test(ListEmailTemplates::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListEmailTemplates::class)
+    Livewire::test(ListEmailTemplates::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

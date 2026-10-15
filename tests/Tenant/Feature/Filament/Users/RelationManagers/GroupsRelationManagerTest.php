@@ -42,8 +42,8 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can associate multiple groups with a user', function () {
@@ -52,7 +52,7 @@ it('can associate multiple groups with a user', function () {
     $user = User::factory()->create();
     $groups = Group::factory()->count(3)->create();
 
-    livewire(GroupsRelationManager::class, [
+    Livewire::test(GroupsRelationManager::class, [
         'ownerRecord' => $user,
         'pageClass' => EditUser::class,
     ])
@@ -72,7 +72,7 @@ it('can detach a group from a user', function () {
     $group = Group::factory()->create();
     $user->groups()->attach($group);
 
-    livewire(GroupsRelationManager::class, [
+    Livewire::test(GroupsRelationManager::class, [
         'ownerRecord' => $user,
         'pageClass' => EditUser::class,
     ])
@@ -88,7 +88,7 @@ it('excludes archived groups from the associate groups selection', function () {
     $activeGroup = Group::factory()->create();
     $archivedGroup = Group::factory()->create(['archived_at' => now()]);
 
-    $component = livewire(GroupsRelationManager::class, [
+    $component = Livewire::test(GroupsRelationManager::class, [
         'ownerRecord' => $user,
         'pageClass' => EditUser::class,
     ]);

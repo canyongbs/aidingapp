@@ -38,10 +38,10 @@ use App\Filament\Pages\ManageNotificationSettings;
 use App\Models\User;
 use App\Settings\NotificationSettings;
 use CanyonGBS\Common\Enums\Color;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the manage notification settings page', function () {
@@ -68,7 +68,7 @@ it('requires proper permissions to access', function () {
 it('validates the inputs', function () {
     asSuperAdmin();
 
-    livewire(ManageNotificationSettings::class)
+    Livewire::test(ManageNotificationSettings::class)
         ->fillForm(['from_name' => str_repeat('a', 151)])
         ->call('save')
         ->assertHasFormErrors(['from_name' => 'max']);
@@ -81,13 +81,13 @@ it('loads existing data into the form', function () {
     $settings->from_name = 'Existing From Name';
     $settings->save();
 
-    livewire(ManageNotificationSettings::class)->assertSchemaStateSet(['from_name' => 'Existing From Name']);
+    Livewire::test(ManageNotificationSettings::class)->assertSchemaStateSet(['from_name' => 'Existing From Name']);
 });
 
 it('can update the notification settings', function () {
     asSuperAdmin();
 
-    livewire(ManageNotificationSettings::class)
+    Livewire::test(ManageNotificationSettings::class)
         ->fillForm([
             'from_name' => 'New From Name',
             'primary_color' => Color::Blue->value,
@@ -109,7 +109,7 @@ it('requires proper permissions to update settings', function () {
 
     $settings = app(NotificationSettings::class);
 
-    livewire(ManageNotificationSettings::class)
+    Livewire::test(ManageNotificationSettings::class)
         ->fillForm([
             'from_name' => 'New From Name',
             'primary_color' => Color::Blue->value,
@@ -121,7 +121,7 @@ it('requires proper permissions to update settings', function () {
 
     $user->givePermissionTo('settings.*.update');
 
-    livewire(ManageNotificationSettings::class)
+    Livewire::test(ManageNotificationSettings::class)
         ->fillForm([
             'from_name' => 'New From Name',
             'primary_color' => Color::Blue->value,

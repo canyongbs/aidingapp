@@ -43,11 +43,11 @@ use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 test('ListAdvisories is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -103,7 +103,7 @@ test('can list records', function () {
 
     $records = Advisory::factory()->count(5)->create();
 
-    livewire(ListAdvisories::class)
+    Livewire::test(ListAdvisories::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
@@ -119,7 +119,7 @@ test('bulk delete Advisories', function () {
 
     $advisories = Advisory::factory()->count(10)->create();
 
-    livewire(ListAdvisories::class)
+    Livewire::test(ListAdvisories::class)
         ->callTableBulkAction(DeleteBulkAction::class, $advisories);
 
     foreach ($advisories as $advisory) {
@@ -136,12 +136,12 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
 
     actingAs($user);
 
-    livewire(ListAdvisories::class)
+    Livewire::test(ListAdvisories::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('advisory.*.delete');
 
-    livewire(ListAdvisories::class)
+    Livewire::test(ListAdvisories::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
@@ -154,7 +154,7 @@ it('links each row to the advisory view page', function () {
 
     $advisory = Advisory::factory()->create();
 
-    $url = livewire(ListAdvisories::class)
+    $url = Livewire::test(ListAdvisories::class)
         ->instance()
         ->getTable()
         ->getRecordUrl($advisory);
@@ -171,7 +171,7 @@ it('does not link a row when the user cannot view the advisory', function () {
 
     $advisory = Advisory::factory()->create();
 
-    $url = livewire(ListAdvisories::class)
+    $url = Livewire::test(ListAdvisories::class)
         ->instance()
         ->getTable()
         ->getRecordUrl($advisory);
@@ -190,7 +190,7 @@ it('renders the severity column as a badge using the severity color', function (
         ->for(AdvisorySeverity::factory()->state(['color' => Color::Red]), 'severity')
         ->create();
 
-    $column = livewire(ListAdvisories::class)
+    $column = Livewire::test(ListAdvisories::class)
         ->instance()
         ->getTable()
         ->getColumn('severity.name')

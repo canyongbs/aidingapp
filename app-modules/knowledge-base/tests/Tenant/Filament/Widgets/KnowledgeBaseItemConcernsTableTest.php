@@ -38,8 +38,8 @@ use AidingApp\KnowledgeBase\Enums\ConcernStatus;
 use AidingApp\KnowledgeBase\Filament\Widgets\KnowledgeBaseItemConcernsTable;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('returns all new concerns for a given knowledge base item by default', function () {
@@ -65,7 +65,7 @@ it('returns all new concerns for a given knowledge base item by default', functi
         ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->create();
 
-    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+    Livewire::test(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
         ->assertCanSeeTableRecords($newConcerns)
         ->assertCanNotSeeTableRecords($archivedConcerns->merge($resolvedConcerns));
 });
@@ -93,7 +93,7 @@ it('can filter concerns by status', function () {
         ->for($knowledgeBaseItem, 'knowledgeBaseItem')
         ->create();
 
-    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+    Livewire::test(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
         ->filterTable('status', ConcernStatus::Archived->value)
         ->assertCanSeeTableRecords($archivedConcerns)
         ->assertCanNotSeeTableRecords($newConcerns->merge($resolvedConcerns))
@@ -107,7 +107,7 @@ it('can change the status of a concern properly', function () {
 
     $concern = KnowledgeBaseItemConcern::factory()->create(['status' => ConcernStatus::New]);
 
-    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $concern->knowledgeBaseItem])
+    Livewire::test(KnowledgeBaseItemConcernsTable::class, ['record' => $concern->knowledgeBaseItem])
         ->callTableAction('changeConcernStatus', $concern->getKey(), ['status' => ConcernStatus::Resolved])
         ->assertHasNoErrors();
 

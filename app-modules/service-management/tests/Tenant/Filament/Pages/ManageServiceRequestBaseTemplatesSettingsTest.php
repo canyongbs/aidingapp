@@ -45,10 +45,10 @@ use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\DB;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('it prevents access when the user does not have permission', function () {
@@ -99,7 +99,7 @@ test('it leaves existing templates untouched when saving without changes', funct
         'ai_instructions' => $attributes[2],
     ]));
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -117,7 +117,7 @@ test('it leaves existing templates untouched when saving without changes', funct
 test('it does not create empty templates when nothing has been filled in', function () {
     asSuperAdmin();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -133,7 +133,7 @@ test('it deletes a template that is left with no example subject, body, or ai in
         'ai_instructions' => null,
     ]);
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->fillForm([
             "templates.{$existing->type->value}.{$existing->role->value}.subject" => null,
             "templates.{$existing->type->value}.{$existing->role->value}.body" => null,
@@ -153,7 +153,7 @@ test('it keeps a template with ai instructions when the example subject and body
         'ai_instructions' => 'Keep it friendly.',
     ]);
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->fillForm([
             "templates.{$existing->type->value}.{$existing->role->value}.subject" => null,
             "templates.{$existing->type->value}.{$existing->role->value}.body" => null,
@@ -201,7 +201,7 @@ test('it saves the example subject and body without touching ai instructions', f
         ],
     ];
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->fillForm([
             "templates.{$existing->type->value}.{$existing->role->value}.subject" => $subject,
             "templates.{$existing->type->value}.{$existing->role->value}.body" => $body,
@@ -251,7 +251,7 @@ test('it persists example subject/body and ai instructions correctly when saved 
         ],
     ];
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->fillForm([
             "templates.{$type->value}.{$role->value}.subject" => $subject,
             "templates.{$type->value}.{$role->value}.body" => $body,
@@ -268,7 +268,7 @@ test('it persists example subject/body and ai instructions correctly when saved 
     expect($template->body)->toEqual($body);
     expect($template->ai_instructions)->toBeNull();
 
-    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+    Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
         ->fillForm([
             'is_enabled' => true,
             "templates.{$type->value}.{$role->value}.ai_instructions" => 'Be concise and friendly.',
@@ -296,7 +296,7 @@ test('it applies base templates to all service request types by default', functi
         ServiceRequestType::factory()->create(),
     ];
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates')
         ->assertHasNoFormErrors();
 
@@ -349,7 +349,7 @@ test('it does not double encode the subject and body when applying base template
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates')
         ->assertHasNoFormErrors();
 
@@ -387,7 +387,7 @@ test('it converts literal merge tags when applying base templates', function () 
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates')
         ->assertHasNoFormErrors();
 
@@ -430,7 +430,7 @@ test('it applies base templates only to the selected service request types', fun
     $selectedType = ServiceRequestType::factory()->create();
     $otherType = ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates', data: [
             'apply_to' => 'select',
             'service_request_type_ids' => [$selectedType->getKey()],
@@ -456,7 +456,7 @@ test('it requires at least one selected service request type when applying to a 
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
     ]);
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates', data: [
             'apply_to' => 'select',
             'service_request_type_ids' => [],
@@ -483,7 +483,7 @@ test('it warns when there are no base templates with content to apply', function
 
     ServiceRequestType::factory()->create();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates')
         ->assertNotified('No base templates to apply');
 
@@ -500,7 +500,7 @@ test('it warns when there are no service request types to apply templates to', f
 
     expect(ServiceRequestType::query()->exists())->toBeFalse();
 
-    livewire(ManageServiceRequestBaseTemplatesSettings::class)
+    Livewire::test(ManageServiceRequestBaseTemplatesSettings::class)
         ->callAction('applyBaseTemplates')
         ->assertNotified('No service request types found');
 

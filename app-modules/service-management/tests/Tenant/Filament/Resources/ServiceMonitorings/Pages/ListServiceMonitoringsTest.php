@@ -41,11 +41,11 @@ use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Support\Icons\Heroicon;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('is gated with proper access control', function () {
@@ -79,7 +79,7 @@ test('can list records', function () {
 
     $records = ServiceMonitoringTarget::factory()->count(5)->create();
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
@@ -90,7 +90,7 @@ test('bulk delete ServiceMonitorings', function () {
 
     $serviceMonitoringTargets = ServiceMonitoringTarget::factory()->count(10)->create();
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->callTableBulkAction(DeleteBulkAction::class, $serviceMonitoringTargets);
 
     foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
@@ -107,12 +107,12 @@ it('only shows the bulk delete action to a user with the service_monitoring.dele
 
     actingAs($user);
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('service_monitoring.*.delete');
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
@@ -121,7 +121,7 @@ test('a confidential service monitoring is still listed for an admin', function 
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertCanSeeTableRecords([$serviceMonitoringTarget])
         ->assertSuccessful();
 });
@@ -136,14 +136,14 @@ test('a confidential service monitoring is hidden from the list for a non-grante
     $user->givePermissionTo('service_monitoring.*.view');
     actingAs($user);
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertCanSeeTableRecords([$publicTarget])
         ->assertCanNotSeeTableRecords([$confidentialTarget])
         ->assertSuccessful();
 
     $confidentialTarget->confidentialUsers()->attach($user->getKey());
 
-    livewire(ListServiceMonitorings::class)
+    Livewire::test(ListServiceMonitorings::class)
         ->assertCanSeeTableRecords([$publicTarget, $confidentialTarget])
         ->assertSuccessful();
 });
@@ -154,7 +154,7 @@ test('the name column shows a lock icon and tooltip only for confidential servic
     $publicTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
     $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->create();
 
-    $column = livewire(ListServiceMonitorings::class)
+    $column = Livewire::test(ListServiceMonitorings::class)
         ->instance()
         ->getTable()
         ->getColumn('name');

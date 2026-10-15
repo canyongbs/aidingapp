@@ -41,9 +41,9 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\EditOrganizationRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('Edit Organization is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -56,7 +56,7 @@ test('Edit Organization is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->assertForbidden();
@@ -70,7 +70,7 @@ test('Edit Organization is gated with proper access control', function () {
                 'record' => $organization,
             ])
         )->assertSuccessful();
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->assertSuccessful();
@@ -87,7 +87,7 @@ test('Edit Organization Record', function () {
 
     $request = collect(EditOrganizationRequestFactory::new()->create());
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->set('data.domains', null)
@@ -131,7 +131,7 @@ test('validating that domain is required', function () {
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -161,7 +161,7 @@ test('validating that distinct domain is allowed', function () {
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -200,7 +200,7 @@ test('if the domain is already in use then not be used second time.', function (
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -231,7 +231,7 @@ test('check if the provided domain is invalid', function (string $domain) {
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -275,7 +275,7 @@ test('check if the provided domain is valid', function (string $domain) {
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -305,7 +305,7 @@ test('the organization name must be unique among other non-trashed organizations
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->fillForm(['name' => 'Acme Corporation'])
@@ -327,7 +327,7 @@ test('an organization can keep its own name when editing', function () {
 
     actingAs($user);
 
-    livewire(EditOrganization::class, [
+    Livewire::test(EditOrganization::class, [
         'record' => $organization->getRouteKey(),
     ])
         ->set('data.domains', null)

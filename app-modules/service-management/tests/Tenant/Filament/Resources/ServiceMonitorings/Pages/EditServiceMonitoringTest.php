@@ -51,11 +51,11 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
 use Illuminate\Support\Facades\Config;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('EditServiceMonitoring is gated with proper access control', function () {
@@ -75,7 +75,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertForbidden();
@@ -95,7 +95,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
 
     $request = collect(ServiceMonitoringTargetRequestFactory::new()->create());
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -117,7 +117,7 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
 
     $request = ServiceMonitoringTargetRequestFactory::new($data)->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm($request)
@@ -317,7 +317,7 @@ test('EditServiceMonitoring can update a service monitor with basic auth', funct
 
     $request = ServiceMonitoringTargetRequestFactory::new()->basicAuth()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm($request)
@@ -341,7 +341,7 @@ test('EditServiceMonitoring hides auth username and password fields until basic 
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaComponentHidden('auth_username')
@@ -360,7 +360,7 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
         'auth_password' => 'existing-password',
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaStateSet([
@@ -387,7 +387,7 @@ test('EditServiceMonitoring computes the max latency toggle from whether max_lat
         ->apiEndpoint()
         ->create(['max_latency_ms' => 2000]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $enabledTarget->getRouteKey(),
     ])->assertSchemaStateSet(['is_max_latency_enabled' => true]);
 
@@ -395,7 +395,7 @@ test('EditServiceMonitoring computes the max latency toggle from whether max_lat
         ->apiEndpoint()
         ->create(['max_latency_ms' => null]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $disabledTarget->getRouteKey(),
     ])->assertSchemaStateSet(['is_max_latency_enabled' => false]);
 });
@@ -407,7 +407,7 @@ test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is
         ->apiEndpoint()
         ->create(['max_latency_ms' => 2000]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaStateSet(['is_max_latency_enabled' => true])
@@ -424,7 +424,7 @@ test('EditServiceMonitoring hides API endpoint fields until the API endpoint mon
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaComponentVisible('follow_redirection')
@@ -445,7 +445,7 @@ test('EditServiceMonitoring defaults successful_status_codes to 200 when changin
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm(['monitor_type' => MonitorType::ApiEndpoint])
@@ -459,7 +459,7 @@ test('EditServiceMonitoring preserves successful_status_codes when reselecting t
         'successful_status_codes' => [201, 204],
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm(['monitor_type' => MonitorType::Availability])
@@ -472,7 +472,7 @@ test('EditServiceMonitoring shows follow_redirection for every monitor type', fu
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm(['monitor_type' => MonitorType::Availability])
@@ -488,7 +488,7 @@ test('EditServiceMonitoring hides the max latency input until the maximum latenc
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaComponentHidden('max_latency_ms')
@@ -501,7 +501,7 @@ test('EditServiceMonitoring hides the request body fields when the HTTP method d
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['http_method' => HttpMethod::Get]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaComponentHidden('request_body')
@@ -528,7 +528,7 @@ test('EditServiceMonitoring can update a service monitor with an API endpoint mo
         ])
         ->create();
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm($request)
@@ -555,7 +555,7 @@ test('EditServiceMonitoring hydrates keyword values as comma-separated text', fu
         'should_not_contain' => ['test 3', 'test 4'],
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaStateSet([
@@ -571,7 +571,7 @@ test('EditServiceMonitoring deduplicates keyword values case-insensitively', fun
         'monitor_type' => MonitorType::KeywordMatch,
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm([
@@ -591,7 +591,7 @@ test('EditServiceMonitoring restores quotes for ambiguous keyword values', funct
         'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])->assertSchemaStateSet([
         'should_contain' => 'test1, test 2, "test 3, "test 4"", ""test 5, test 6""',
@@ -607,7 +607,7 @@ test('EditServiceMonitoring appends new keyword values to existing lists', funct
         'should_not_contain' => ['test 2'],
     ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->fillForm([
@@ -634,7 +634,7 @@ test('EditServiceMonitoring hydrates report channels from persisted flags', func
             ...$attributes,
         ]);
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSchemaStateSet([
@@ -674,14 +674,14 @@ test('delete action visible with proper access control', function () {
     $user->givePermissionTo('service_monitoring.view-any');
     $user->givePermissionTo('service_monitoring.*.update');
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
     $user->givePermissionTo('service_monitoring.*.delete');
 
-    livewire(EditServiceMonitoring::class, [
+    Livewire::test(EditServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);
@@ -718,7 +718,7 @@ test('it will validate multiple valid forms of URL and IP Address', function () 
     foreach ($validUrls as $url) {
         $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
 
-        livewire(EditServiceMonitoring::class, [
+        Livewire::test(EditServiceMonitoring::class, [
             'record' => $serviceMonitoringTarget->getRouteKey(),
         ])
             ->fillForm($request)
@@ -729,7 +729,7 @@ test('it will validate multiple valid forms of URL and IP Address', function () 
     foreach ($invalidUrls as $url) {
         $request = ServiceMonitoringTarget::factory()->make(['domain' => $url])->toArray();
 
-        livewire(EditServiceMonitoring::class, [
+        Livewire::test(EditServiceMonitoring::class, [
             'record' => $serviceMonitoringTarget->getRouteKey(),
         ])
             ->fillForm($request)
@@ -752,7 +752,7 @@ test('user UserSelect does not show admin users in options by default on EditSer
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
@@ -772,7 +772,7 @@ test('user UserSelect shows a pre-selected admin user so they can be deselected 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
     $serviceMonitoringTarget->users()->attach($adminUser);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
@@ -792,7 +792,7 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));
@@ -813,7 +813,7 @@ test('daily report_users UserSelect does not show admin users in options by defa
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             $options = $field->getOptions();
@@ -843,7 +843,7 @@ test('daily report_users UserSelect shows a pre-selected admin user so they can 
         ]);
     $configuration->reportUsers()->attach($adminUser->getKey());
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
             return array_key_exists($adminUser->getKey(), $field->getOptions());
@@ -863,7 +863,7 @@ test('daily report_users UserSelect shows all users when filter_admins_from_sele
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('report_configurations.daily.report_users', function (UserSelect $field) use ($adminUser): bool {
             return array_key_exists($adminUser->getKey(), $field->getOptions());
@@ -887,7 +887,7 @@ test('a daily report user who is an admin is still saved when editing', function
         ]);
     $configuration->reportUsers()->attach($adminReportUser->getKey());
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -908,7 +908,7 @@ test('EditServiceMonitoring updates report configurations for multiple frequenci
 
     $newUser = User::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'report_configurations' => [
                 'daily' => [
@@ -939,7 +939,7 @@ test('EditServiceMonitoring keeps a deactivated frequency\'s recipients instead 
         ->create(['frequency' => ServiceMonitoringReportFrequency::Daily])
         ->reportUsers()->attach($reportUser->getKey());
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'report_configurations' => [
                 'daily' => [
@@ -964,7 +964,7 @@ test('turning off confidentiality clears previously granted users, departments, 
     $grantedDepartment = Department::factory()->create();
     $grantedContact = Contact::factory()->create();
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'is_confidential' => true,
             'confidentialUsers' => [$grantedUser->getKey()],
@@ -978,7 +978,7 @@ test('turning off confidentiality clears previously granted users, departments, 
         ->and($serviceMonitoringTarget->confidentialDepartments()->count())->toBe(1)
         ->and($serviceMonitoringTarget->confidentialContacts()->count())->toBe(1);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'is_confidential' => false,
         ])
@@ -995,7 +995,7 @@ test('the confidential users, departments, and contacts fields are only visible 
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSchemaComponentHidden('confidentialUsers')
         ->assertSchemaComponentHidden('confidentialDepartments')
         ->assertSchemaComponentHidden('confidentialContacts')
@@ -1011,7 +1011,7 @@ test('a service monitor cannot be made confidential while a notification recipie
     $notifiedUser = User::factory()->create();
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'user' => [$notifiedUser->getKey()],
             'is_confidential' => true,
@@ -1031,7 +1031,7 @@ test('the creator on the notification list satisfies the confidential access rul
         ->for($creator, 'createdBy')
         ->create(['is_confidential' => false]);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'user' => [$creator->getKey()],
             'is_confidential' => true,
@@ -1051,7 +1051,7 @@ test('a notification recipient covered by a granted department satisfies the con
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm([
             'user' => [$notifiedUser->getKey()],
             'is_confidential' => true,
@@ -1074,7 +1074,7 @@ test('marking a legacy service monitor confidential backfills the editor as its 
     $editor->givePermissionTo('service_monitoring.*.update');
     actingAs($editor);
 
-    livewire(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->fillForm(['is_confidential' => true])
         ->call('save')
         ->assertHasNoFormErrors();

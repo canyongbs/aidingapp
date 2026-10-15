@@ -39,10 +39,10 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\Crea
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisorySeverityRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -54,7 +54,7 @@ test('CreateAdvisorySeverity is gated with proper access control', function () {
             AdvisorySeverityResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateAdvisorySeverity::class)
+    Livewire::test(CreateAdvisorySeverity::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -67,7 +67,7 @@ test('CreateAdvisorySeverity is gated with proper access control', function () {
 
     $request = AdvisorySeverityRequestFactory::new()->create();
 
-    livewire(CreateAdvisorySeverity::class)
+    Livewire::test(CreateAdvisorySeverity::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -82,7 +82,7 @@ test('CreateAdvisorySeverity validates the inputs', function ($data, $errors) {
 
     $request = AdvisorySeverityRequestFactory::new($data)->create();
 
-    livewire(CreateAdvisorySeverity::class)
+    Livewire::test(CreateAdvisorySeverity::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);

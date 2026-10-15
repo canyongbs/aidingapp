@@ -58,9 +58,9 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -150,19 +150,19 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(Sla::class)->assertForbidden();
+    Livewire::test(Sla::class)->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    livewire(Sla::class)->assertForbidden();
+    Livewire::test(Sla::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::Sla->value,
         'user_id' => $user->getKey(),
     ]);
 
-    livewire(Sla::class)->assertOk();
+    Livewire::test(Sla::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -176,14 +176,14 @@ it('grants access to a user belonging to a department that has been granted acce
 
     actingAs($user);
 
-    livewire(Sla::class)->assertForbidden();
+    Livewire::test(Sla::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
         'report_key' => ReportAccessKey::Sla->value,
         'department_id' => $department->getKey(),
     ]);
 
-    livewire(Sla::class)->assertOk();
+    Livewire::test(Sla::class)->assertOk();
 });
 
 it('renders the report filters', function () {
@@ -193,7 +193,7 @@ it('renders the report filters', function () {
 
     actingAs($user);
 
-    livewire(Sla::class)
+    Livewire::test(Sla::class)
         ->assertOk()
         ->assertSet('filters.startDate', now()->subMonths(12)->startOfDay()->toDateTimeString())
         ->assertSet('filters.endDate', now()->endOfDay()->toDateTimeString())
@@ -214,14 +214,14 @@ it('renders every SLA widget on the page', function () {
 
     makeSlaServiceRequest($priority, $status, ServiceRequestCategory::Incident, breaching: true);
 
-    livewire(Sla::class)->assertOk();
+    Livewire::test(Sla::class)->assertOk();
 
-    livewire(SlaStats::class, ['cacheTag' => 'render-stats', 'pageFilters' => []])->assertOk();
-    livewire(SlaComplianceOverTimeLineChart::class, ['cacheTag' => 'render-line', 'pageFilters' => []])->assertOk();
-    livewire(ResponseSlaByClassificationDonutChart::class, ['cacheTag' => 'render-response', 'pageFilters' => []])->assertOk();
-    livewire(ResolutionSlaByClassificationDonutChart::class, ['cacheTag' => 'render-resolution', 'pageFilters' => []])->assertOk();
-    livewire(SlaPerformanceByAgentTable::class, ['cacheTag' => 'render-agent', 'pageFilters' => []])->assertOk();
-    livewire(SlaBreachesByServiceRequestTypeTable::class, ['cacheTag' => 'render-type', 'pageFilters' => []])->assertOk();
+    Livewire::test(SlaStats::class, ['cacheTag' => 'render-stats', 'pageFilters' => []])->assertOk();
+    Livewire::test(SlaComplianceOverTimeLineChart::class, ['cacheTag' => 'render-line', 'pageFilters' => []])->assertOk();
+    Livewire::test(ResponseSlaByClassificationDonutChart::class, ['cacheTag' => 'render-response', 'pageFilters' => []])->assertOk();
+    Livewire::test(ResolutionSlaByClassificationDonutChart::class, ['cacheTag' => 'render-resolution', 'pageFilters' => []])->assertOk();
+    Livewire::test(SlaPerformanceByAgentTable::class, ['cacheTag' => 'render-agent', 'pageFilters' => []])->assertOk();
+    Livewire::test(SlaBreachesByServiceRequestTypeTable::class, ['cacheTag' => 'render-type', 'pageFilters' => []])->assertOk();
 });
 
 it('computes the SLA stats for the filtered service requests', function () {

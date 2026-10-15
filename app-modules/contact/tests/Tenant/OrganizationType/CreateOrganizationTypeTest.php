@@ -42,10 +42,10 @@ use AidingApp\Contact\Tests\Tenant\OrganizationType\RequestFactories\CreateOrgan
 use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 test('Create Organization Type is gated with proper access control', function () {
@@ -56,7 +56,7 @@ test('Create Organization Type is gated with proper access control', function ()
             OrganizationTypeResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateOrganizationType::class)
+    Livewire::test(CreateOrganizationType::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -67,7 +67,7 @@ test('Create Organization Type is gated with proper access control', function ()
             OrganizationTypeResource::getUrl('create')
         )->assertSuccessful();
 
-    livewire(CreateOrganizationType::class)
+    Livewire::test(CreateOrganizationType::class)
         ->assertSuccessful();
 });
 
@@ -84,7 +84,7 @@ test('Create New Organization Type', function () {
 
     $request = collect(CreateOrganizationTypeRequestFactory::new()->create());
 
-    livewire(CreateOrganizationType::class)
+    Livewire::test(CreateOrganizationType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -104,7 +104,7 @@ test('the organization type name must be unique among non-trashed types', functi
 
     actingAs($user);
 
-    livewire(CreateOrganizationType::class)
+    Livewire::test(CreateOrganizationType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -122,7 +122,7 @@ test('the organization type name uniqueness check is case-insensitive', function
 
     actingAs($user);
 
-    livewire(CreateOrganizationType::class)
+    Livewire::test(CreateOrganizationType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -142,7 +142,7 @@ test('does not apply the unique form rule when the feature is disabled', functio
 
     actingAs($user);
 
-    expect(fn () => livewire(CreateOrganizationType::class)
+    expect(fn () => Livewire::test(CreateOrganizationType::class)
         ->fillForm($request->toArray())
         ->call('create'))
         ->toThrow(UniqueConstraintViolationException::class);

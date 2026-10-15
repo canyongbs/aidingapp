@@ -39,10 +39,10 @@ use AidingApp\ContractManagement\Models\Contract;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -79,11 +79,11 @@ it('only shows the bulk delete action to a user with the contract.delete permiss
 
     actingAs($user);
 
-    livewire(ListContracts::class)
+    Livewire::test(ListContracts::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('contract.*.delete');
 
-    livewire(ListContracts::class)
+    Livewire::test(ListContracts::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

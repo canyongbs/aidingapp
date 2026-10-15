@@ -40,10 +40,10 @@ use AidingApp\ServiceManagement\Filament\Pages\ManageServiceRequestNotificationA
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('it prevents access when the user does not have permission', function () {
@@ -94,7 +94,7 @@ test('it saves is_enabled, ai_prompt, and ai instructions without touching the e
         ],
     ];
 
-    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+    Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
         ->fillForm([
             'is_enabled' => true,
             'ai_prompt' => $aiPrompt,
@@ -128,7 +128,7 @@ test('it leaves existing templates untouched when saving without changes', funct
         'ai_instructions' => $attributes[2],
     ]));
 
-    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+    Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
         ->fillForm(['is_enabled' => true])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -147,7 +147,7 @@ test('it leaves existing templates untouched when saving without changes', funct
 test('it does not create empty templates when no ai instructions have been filled in', function () {
     asSuperAdmin();
 
-    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+    Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
         ->fillForm(['is_enabled' => true])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -167,7 +167,7 @@ test('it keeps a template with an example subject and body when the ai instructi
     $originalSubject = $existing->subject;
     $originalBody = $existing->body;
 
-    livewire(ManageServiceRequestNotificationAutomationSettings::class)
+    Livewire::test(ManageServiceRequestNotificationAutomationSettings::class)
         ->fillForm([
             'is_enabled' => true,
             "templates.{$existing->type->value}.{$existing->role->value}.ai_instructions" => '',

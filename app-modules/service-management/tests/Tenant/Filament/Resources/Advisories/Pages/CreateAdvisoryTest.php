@@ -39,10 +39,10 @@ use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\CreateAdviso
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -54,7 +54,7 @@ test('CreateAdvisory is gated with proper access control', function () {
             AdvisoryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateAdvisory::class)
+    Livewire::test(CreateAdvisory::class)
         ->assertForbidden();
 
     $user->givePermissionTo('advisory.view-any');
@@ -67,7 +67,7 @@ test('CreateAdvisory is gated with proper access control', function () {
 
     $request = AdvisoryRequestFactory::new()->create();
 
-    livewire(CreateAdvisory::class)
+    Livewire::test(CreateAdvisory::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -82,7 +82,7 @@ test('CreateAdvisory validates the inputs', function ($data, $errors) {
 
     $request = AdvisoryRequestFactory::new($data)->create();
 
-    livewire(CreateAdvisory::class)
+    Livewire::test(CreateAdvisory::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);

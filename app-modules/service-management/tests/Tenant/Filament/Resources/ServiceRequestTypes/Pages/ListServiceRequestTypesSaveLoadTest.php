@@ -39,8 +39,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Lis
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Illuminate\Support\Facades\Event;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -56,7 +56,7 @@ it('loads hierarchical data', function () {
     $type1 = ServiceRequestType::factory()->hasAttached($root, relationship: 'categories')->create(['name' => 'Type 1', 'sort' => 1]);
     $type2 = ServiceRequestType::factory()->hasAttached($child, relationship: 'categories')->create(['name' => 'Type 2', 'sort' => 1]);
 
-    $component = livewire(ListServiceRequestTypes::class);
+    $component = Livewire::test(ListServiceRequestTypes::class);
 
     $component->assertSuccessful();
 
@@ -75,7 +75,7 @@ it('loads hierarchical data', function () {
 it('moves a type into an area another user just created', function () {
     $type = ServiceRequestType::factory()->create(['name' => 'Movable', 'sort' => 1]);
 
-    $component = livewire(ListServiceRequestTypes::class);
+    $component = Livewire::test(ListServiceRequestTypes::class);
 
     $newCategory = ServiceRequestTypeCategory::factory()->create(['name' => 'New Cat']);
 
@@ -90,7 +90,7 @@ it('moves type from one existing category to another existing category', functio
 
     $type = ServiceRequestType::factory()->hasAttached($catA, relationship: 'categories')->create(['name' => 'ToMove', 'sort' => 1]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type->getKey(), $catA->getKey(), $catB->getKey(), [$type->getKey()]);
 
     expect($type->fresh()->categoryIds())->toBe([$catB->id]);

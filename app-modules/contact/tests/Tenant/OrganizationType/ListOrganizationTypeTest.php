@@ -40,9 +40,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\OrganizationType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('List OrganizationType is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -69,11 +69,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListOrganizationTypes::class)
+    Livewire::test(ListOrganizationTypes::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListOrganizationTypes::class)
+    Livewire::test(ListOrganizationTypes::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
