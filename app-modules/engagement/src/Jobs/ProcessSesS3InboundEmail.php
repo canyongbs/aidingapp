@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -561,7 +562,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 );
 
                 foreach ($parser->getAttachments() as $attachment) {
-                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact);
+                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact, ServiceRequestFileUploadType::RequestSubmission);
                 }
             });
         });
@@ -808,6 +809,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         Attachment $attachment,
         string $collection,
         ?Contact $createdBy = null,
+        ?ServiceRequestFileUploadType $uploadType = null,
     ): void {
         try {
             $fileName = $attachment->getFilename();
@@ -831,6 +833,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             if ($createdBy !== null) {
                 $fileAdder->createdBy($createdBy);
+            }
+
+            if (filled($uploadType)) {
+                $fileAdder->withCustomProperties([
+                    ServiceRequestFileUploadType::CUSTOM_PROPERTY => $uploadType->value,
+                ]);
             }
 
             $fileAdder->toMediaCollection($collection);

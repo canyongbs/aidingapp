@@ -39,7 +39,11 @@ namespace AidingApp\ServiceManagement\Filament\Widgets;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Actions\RecordServiceRequestFileDeletionHistory;
 use AidingApp\ServiceManagement\Actions\RecordServiceRequestFileUploadHistory;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
+use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Media;
 use App\Models\User;
 use App\Settings\DisplaySettings;
@@ -80,13 +84,25 @@ class ServiceRequestMediaTable extends TableWidget
         $modelType = $this->record->getMorphClass();
         $modelId = $this->record->getKey();
         $collectionName = $this->collectionName;
+        $isShowingUploadType = ServiceRequestFileUploadTypeFeature::active() && ($this->record instanceof ServiceRequest);
+        $isListingServiceRequestUpdateFiles = $isShowingUploadType && auth()->user()->can('viewAny', ServiceRequestUpdate::class);
 
         return $table
             ->query(
                 Media::query()
-                    ->where('model_type', $modelType)
-                    ->where('model_id', $modelId)
-                    ->where('collection_name', $collectionName)
+                    ->where(function (Builder $query) use ($modelType, $modelId, $collectionName, $isListingServiceRequestUpdateFiles): void {
+                        $query->where(fn (Builder $query) => $query
+                            ->where('model_type', $modelType)
+                            ->where('model_id', $modelId)
+                            ->where('collection_name', $collectionName));
+
+                        if ($isListingServiceRequestUpdateFiles) {
+                            $query->orWhere(fn (Builder $query) => $query
+                                ->where('model_type', (new ServiceRequestUpdate())->getMorphClass())
+                                ->whereIn('model_id', ServiceRequestUpdate::query()->select('id')->where('service_request_id', $modelId))
+                                ->where('collection_name', 'uploads'));
+                        }
+                    })
                     ->with('createdBy')
             )
             ->columns([
@@ -130,6 +146,12 @@ class ServiceRequestMediaTable extends TableWidget
                             }
                         )
                     ),
+
+                TextColumn::make('upload_type')
+                    ->label('Update Type')
+                    ->badge()
+                    ->state(fn (Media $record): ?ServiceRequestFileUploadType => ServiceRequestFileUploadType::fromMedia($record))
+                    ->visible($isShowingUploadType),
 
                 TextColumn::make('created_at')
                     ->label('Date')
@@ -200,11 +222,18 @@ class ServiceRequestMediaTable extends TableWidget
                 $path = $data['file'];
 
                 try {
-                    $media = $this->record
+                    $fileAdder = $this->record
                         ->addMediaFromDisk($path, 's3')
                         ->usingName(pathinfo($path, PATHINFO_FILENAME))
-                        ->usingFileName(basename($path))
-                        ->toMediaCollection($collectionName);
+                        ->usingFileName(basename($path));
+
+                    if ($this->record instanceof ServiceRequest) {
+                        $fileAdder->withCustomProperties([
+                            ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::StaffUpload->value,
+                        ]);
+                    }
+
+                    $media = $fileAdder->toMediaCollection($collectionName);
                 } catch (FileCannotBeAdded $exception) {
                     Storage::disk('s3')->delete($path);
 
@@ -247,6 +276,7 @@ class ServiceRequestMediaTable extends TableWidget
             ->color('danger')
             ->requiresConfirmation()
             ->authorize(fn (): bool => auth()->user()->can('update', $this->record))
+            ->visible(fn (Media $record): bool => ($record->model_type === $this->record->getMorphClass()) && ($record->model_id === $this->record->getKey()))
             ->action(function (Media $record): void {
                 $fileName = $record->file_name;
 
