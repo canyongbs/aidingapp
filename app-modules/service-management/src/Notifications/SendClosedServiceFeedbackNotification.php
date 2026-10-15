@@ -96,7 +96,7 @@ class SendClosedServiceFeedbackNotification extends Notification implements Shou
             return false;
         }
 
-        return $this->isReminder || ! $serviceRequest->feedback()->exists();
+        return ! $serviceRequest->feedback()->exists();
     }
 
     public function toMail(object $notifiable): MailMessage

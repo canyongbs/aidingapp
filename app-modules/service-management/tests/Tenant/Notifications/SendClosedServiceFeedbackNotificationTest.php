@@ -90,7 +90,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 
-    it('sends a reminder even when feedback already exists, as long as the service request is still closed', function () {
+    it('does not send a reminder when feedback was already submitted', function () {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -101,7 +101,7 @@ describe('shouldSend', function () {
 
         $notification = (new SendClosedServiceFeedbackNotification($serviceRequest, null))->asReminder();
 
-        expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeTrue();
+        expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 
     it('does not send when the respondent changed after the notification was queued', function () {
