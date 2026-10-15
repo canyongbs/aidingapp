@@ -39,10 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignmentHistoryRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\CreatedByRelationManager;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestConversationsRelationManager;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\ServiceRequestInfolist;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Livewire\ServiceRequestUpdates;
@@ -53,7 +49,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Enums\Feature;
-use App\Filament\Concerns\FiltersManagersFromGroups;
 use App\Settings\DisplaySettings;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
@@ -68,19 +63,19 @@ use Livewire\Attributes\Url;
 
 class ViewServiceRequest extends ViewRecord
 {
-    use FiltersManagersFromGroups;
     use ServiceRequestLocked;
 
     protected static string $resource = ServiceRequestResource::class;
 
     #[Url]
-    public ?string $tab = null;
+    public ?string $tab = ServiceRequestTab::Request->value;
 
-    public function mount(int | string $record): void
+    public function content(Schema $schema): Schema
     {
-        parent::mount($record);
-
-        $this->tab = (ServiceRequestTab::tryFrom($this->tab ?? '') ?? ServiceRequestTab::default())->value;
+        return $schema
+            ->components([
+                $this->getInfolistContentComponent(),
+            ]);
     }
 
     public function infolist(Schema $schema): Schema
@@ -91,14 +86,12 @@ class ViewServiceRequest extends ViewRecord
                 Tabs::make()
                     ->columnSpanFull()
                     ->livewireProperty('tab')
-                    ->tabs([
+                    ->tabs(array_filter([
                         ServiceRequestTab::Request->value => Tab::make(ServiceRequestTab::Request->getLabel())
                             ->schema(ServiceRequestInfolist::detailSections()),
                         ServiceRequestTab::Files->value => Tab::make(ServiceRequestTab::Files->getLabel())
                             ->schema([ServiceRequestInfolist::filesSection()]),
-                        ServiceRequestTab::Assignments->value => Tab::make(ServiceRequestTab::Assignments->getLabel())
-                            ->visible(fn (ServiceRequest $record): bool => filled($this->assignmentRelationManagers($record)))
-                            ->schema(fn (ServiceRequest $record): array => $this->assignmentRelationManagers($record)),
+                        ServiceRequestTab::Assignments->value => $this->getRelationManagerTabComponent(ServiceRequestTab::Assignments->value),
                         ServiceRequestTab::Updates->value => Tab::make(ServiceRequestTab::Updates->getLabel())
                             ->visible(fn (): bool => auth()->user()->can('viewAny', ServiceRequestUpdate::class))
                             ->schema([
@@ -109,14 +102,8 @@ class ViewServiceRequest extends ViewRecord
                         ServiceRequestTab::Feedback->value => Tab::make(ServiceRequestTab::Feedback->getLabel())
                             ->visible(fn (ServiceRequest $record): bool => $this->canViewFeedback($record))
                             ->schema($this->feedbackTabSchema()),
-                        ServiceRequestTab::Chats->value => Tab::make(ServiceRequestTab::Chats->getLabel())
-                            ->visible(fn (ServiceRequest $record): bool => ServiceRequestConversationsRelationManager::canViewForRecord($record, static::class))
-                            ->schema([
-                                Livewire::make(ServiceRequestConversationsRelationManager::class, fn (ServiceRequest $record): array => [
-                                    'ownerRecord' => $record,
-                                    'pageClass' => static::class,
-                                ])->key(ServiceRequestConversationsRelationManager::class),
-                            ]),
+                        ServiceRequestTab::Chats->value => $this->getRelationManagerTabComponent(ServiceRequestTab::Chats->value)
+                            ?->label(ServiceRequestTab::Chats->getLabel()),
                         ServiceRequestTab::Timeline->value => Tab::make(ServiceRequestTab::Timeline->getLabel())
                             ->visible(fn (): bool => $this->canViewTimeline())
                             ->schema([
@@ -127,7 +114,7 @@ class ViewServiceRequest extends ViewRecord
                                     'noMoreRecordsMessage' => "You have reached the end of this service request's timeline.",
                                 ])->key(TimelineList::class),
                             ]),
-                    ]),
+                    ])),
             ]);
     }
 
@@ -169,26 +156,6 @@ class ViewServiceRequest extends ViewRecord
                 ])
                 ->columns(1),
         ];
-    }
-
-    /**
-     * @return array<Livewire>
-     */
-    private function assignmentRelationManagers(ServiceRequest $record): array
-    {
-        return collect([
-            AssignedToRelationManager::class,
-            AssignmentHistoryRelationManager::class,
-            CreatedByRelationManager::class,
-        ])
-            ->map(fn (string $relationManager): string|\Filament\Resources\RelationManagers\RelationManagerConfiguration|\Filament\Resources\RelationManagers\RelationGroup|null => self::filterRelationManagers($relationManager, $record))
-            ->filter()
-            ->map(fn (string $relationManager): Livewire => Livewire::make($relationManager, [
-                'ownerRecord' => $record,
-                'pageClass' => static::class,
-            ])->key($relationManager))
-            ->values()
-            ->all();
     }
 
     private function canViewFeedback(ServiceRequest $record): bool
