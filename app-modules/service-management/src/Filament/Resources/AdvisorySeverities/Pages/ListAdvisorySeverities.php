@@ -67,7 +67,7 @@ class ListAdvisorySeverities extends ListRecords
                     ->label('Color'),
             ])
             ->when(AdvisorySeveritySortFeature::active(), fn (Table $table): Table => $table
-                ->description('Drag severities to rank them from highest (top) to lowest (bottom). The portal uses this ranking to sort advisories by severity.')
+                ->description('Severities are ranked from highest (top) to lowest (bottom). The portal sorts advisories by this ranking.')
                 ->defaultSort('sort')
                 ->reorderable('sort'))
             ->recordActions([

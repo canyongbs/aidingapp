@@ -72,7 +72,6 @@ class AdvisoryDetailData extends Data
             departmentName: $advisory->assignedDepartment?->name,
             updates: $advisory->advisoryUpdates
                 ->map(fn (AdvisoryUpdate $advisoryUpdate): AdvisoryUpdateData => AdvisoryUpdateData::fromModel($advisoryUpdate))
-                ->values()
                 ->all(),
         );
     }

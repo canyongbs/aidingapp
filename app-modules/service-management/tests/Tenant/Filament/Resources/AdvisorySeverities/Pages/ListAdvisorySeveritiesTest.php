@@ -190,6 +190,19 @@ describe('ranking', function () {
             ->and($critical->refresh()->sort)->toBe(2);
     });
 
+    it('cannot rank severities without permission to update them', function () {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        actingAs(User::factory()->create()->givePermissionTo('settings.view-any'));
+
+        livewire(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(2)
+            ->and($critical->refresh()->sort)->toBe(1);
+    });
+
     it('does not reorder severities when `AdvisorySeveritySortFeature` is inactive', function () {
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
