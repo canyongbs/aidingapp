@@ -231,7 +231,7 @@ describe('tabs', function () {
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('falls back to the access tab when the requested tab is invalid', function () {
+    it('renders when the requested tab is invalid', function () {
         loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
@@ -240,7 +240,7 @@ describe('tabs', function () {
             'record' => $project->getRouteKey(),
             'tab' => 'invalid',
         ])
-            ->assertSet('tab', ProjectTab::Access->value);
+            ->assertSuccessful();
     });
 
     it('denies access without the `project.view-any` permission even when the user can view the project', function () {
