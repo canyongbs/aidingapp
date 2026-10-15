@@ -199,3 +199,16 @@ it('renders the severity column as a badge using the severity color', function (
     expect($column->isBadge())->toBeTrue()
         ->and($column->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
+
+it('can sort advisories by severity rank', function () {
+    actingAs(User::factory()->create()->givePermissionTo('advisory.view-any'));
+
+    $minorAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 2]), 'severity')->create();
+    $criticalAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 1]), 'severity')->create();
+
+    livewire(ListAdvisories::class)
+        ->sortTable('severity.name')
+        ->assertCanSeeTableRecords([$criticalAdvisory, $minorAdvisory], inOrder: true)
+        ->sortTable('severity.name', 'desc')
+        ->assertCanSeeTableRecords([$minorAdvisory, $criticalAdvisory], inOrder: true);
+});

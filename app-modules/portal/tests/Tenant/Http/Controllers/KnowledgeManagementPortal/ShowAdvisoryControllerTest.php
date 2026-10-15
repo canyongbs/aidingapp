@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Str;
 
@@ -130,5 +131,13 @@ describe('authorization', function () {
         auth()->logout();
 
         getJson(route('api.portal.advisories.show', ['advisory' => Advisory::factory()->create()]))->assertUnauthorized();
+    });
+
+    it('denies access without the advisory management add-on', function () {
+        $licenseSettings = app(LicenseSettings::class);
+        $licenseSettings->data->addons->advisoryManagement = false;
+        $licenseSettings->save();
+
+        getJson(route('api.portal.advisories.show', ['advisory' => Advisory::factory()->create()]))->assertForbidden();
     });
 });

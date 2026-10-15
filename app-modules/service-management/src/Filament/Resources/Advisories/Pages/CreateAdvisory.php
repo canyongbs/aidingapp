@@ -37,11 +37,13 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Database\Eloquent\Builder;
 
 class CreateAdvisory extends CreateRecord
 {
@@ -66,7 +68,7 @@ class CreateAdvisory extends CreateRecord
                     ->preload()
                     ->required()
                     ->searchable()
-                    ->relationship('severity', 'name'),
+                    ->relationship('severity', 'name', fn (Builder $query) => $query->tap(new RankedAdvisorySeverities())),
                 Select::make('status_id')
                     ->label('Status')
                     ->required()

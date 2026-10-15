@@ -38,19 +38,23 @@ namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Portal\DataTransferObjects\AdvisoryDetailData;
 use AidingApp\ServiceManagement\Models\Advisory;
-use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Http\JsonResponse;
+use Symfony\Component\HttpFoundation\Response;
 
-class ShowAdvisoryController extends Controller
+class ShowAdvisoryController
 {
     public function __invoke(string $advisory): JsonResponse
     {
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
+
         $advisory = Advisory::query()
             ->with([
                 'severity',
                 'status',
                 'assignedDepartment',
-                'advisoryUpdates' => fn ($query) => $query->where('internal', false)->orderByDesc('date')->orderByDesc('created_at'),
+                'advisoryUpdates' => fn (Relation $query): Relation => $query->where('internal', false)->latest('date')->latest(),
             ])
             ->findOrFail($advisory);
 

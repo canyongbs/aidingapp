@@ -44,19 +44,23 @@ use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
-use App\Features\AdvisorySeveritySortFeature;
-use App\Http\Controllers\Controller;
+use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
-class AdvisoryController extends Controller
+class AdvisoryController
 {
     public function __invoke(Request $request): JsonResponse
     {
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
+
         $validated = $request->validate([
             'classification' => ['nullable', Rule::enum(SystemAdvisoryStatusClassification::class)],
             'search' => ['nullable', 'string', 'max:255'],
@@ -81,15 +85,15 @@ class AdvisoryController extends Controller
                 $pattern = '%' . addcslashes(Str::lower($search), '%_\\') . '%';
 
                 $query->where(fn (Builder $query): Builder => $query
-                    ->whereRaw('lower(advisories.title) like ?', [$pattern])
-                    ->orWhereRaw('lower(advisories.description) like ?', [$pattern])
+                    ->where(new Expression('lower(advisories.title)'), 'like', $pattern)
+                    ->orWhere(new Expression('lower(advisories.description)'), 'like', $pattern)
                     ->orWhereHas('assignedDepartment', fn (Builder $query): Builder => $query
-                        ->whereRaw('lower(departments.name) like ?', [$pattern]))
+                        ->where(new Expression('lower(departments.name)'), 'like', $pattern))
                     ->orWhereHas('advisoryUpdates', fn (Builder $query): Builder => $query
                         ->where('advisory_updates.internal', false)
                         ->where(fn (Builder $query): Builder => $query
-                            ->whereRaw('lower(advisory_updates.title) like ?', [$pattern])
-                            ->orWhereRaw('lower(advisory_updates.update) like ?', [$pattern]))));
+                            ->where(new Expression('lower(advisory_updates.title)'), 'like', $pattern)
+                            ->orWhere(new Expression('lower(advisory_updates.update)'), 'like', $pattern))));
             })
             ->tap(fn (Builder $query) => $sort->apply($query))
             ->paginate(10);
@@ -108,12 +112,12 @@ class AdvisoryController extends Controller
             ],
             'counts' => $this->countByClassification(),
             'severities' => AdvisorySeverity::query()
-                ->when(AdvisorySeveritySortFeature::active(), fn (Builder $query): Builder => $query->orderBy('sort'))
-                ->orderBy('name')
+                ->tap(new RankedAdvisorySeverities())
                 ->get()
                 ->map(fn (AdvisorySeverity $severity): AdvisorySeverityData => AdvisorySeverityData::fromModel($severity))
                 ->all(),
             'statuses' => AdvisoryStatus::query()
+                ->where('classification', $classification)
                 ->orderBy('name')
                 ->get()
                 ->map(fn (AdvisoryStatus $status): AdvisoryStatusData => AdvisoryStatusData::fromModel($status))

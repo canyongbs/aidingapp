@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
 use App\Features\AdvisorySeveritySortFeature;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Carbon;
 
 use function Pest\Laravel\actingAs;
@@ -131,6 +132,16 @@ it('returns the severity options ranked from highest to lowest', function () {
     expect($severityIds->all())->toBe([$critical->getKey(), $minor->getKey()]);
 });
 
+it('returns the status options for the requested classification', function () {
+    AdvisoryStatus::factory()->open()->create();
+    $resolvedStatus = AdvisoryStatus::factory()->resolved()->create();
+
+    getJson(route('api.portal.advisories', ['classification' => 'resolved']))
+        ->assertOk()
+        ->assertJsonCount(1, 'statuses')
+        ->assertJsonPath('statuses.0.id', $resolvedStatus->getKey());
+});
+
 it('can search advisories', function (Advisory $matchingAdvisory) {
     Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
 
@@ -160,6 +171,17 @@ it('ignores internal updates when resolving the last updated date', function () 
 
     $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
     AdvisoryUpdate::factory()->internal()->for($advisory, 'advisory')->create(['date' => $createdAt->copy()->addHour()]);
+
+    getJson(route('api.portal.advisories'))
+        ->assertOk()
+        ->assertJsonPath('data.0.last_updated_at', '2026-10-08T07:00:00+00:00');
+});
+
+it('does not resolve the last updated date to before the advisory was created', function () {
+    $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
+
+    $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
+    AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create(['date' => $createdAt->copy()->subDay()]);
 
     getJson(route('api.portal.advisories'))
         ->assertOk()
@@ -292,5 +314,13 @@ describe('authorization', function () {
         auth()->logout();
 
         getJson(route('api.portal.advisories'))->assertUnauthorized();
+    });
+
+    it('denies access without the advisory management add-on', function () {
+        $licenseSettings = app(LicenseSettings::class);
+        $licenseSettings->data->addons->advisoryManagement = false;
+        $licenseSettings->save();
+
+        getJson(route('api.portal.advisories'))->assertForbidden();
     });
 });

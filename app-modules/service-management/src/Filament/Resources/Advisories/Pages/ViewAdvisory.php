@@ -42,6 +42,7 @@ use AidingApp\ServiceManagement\Filament\Tables\DepartmentsTable;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TableSelect;
@@ -114,7 +115,7 @@ class ViewAdvisory extends ViewRecord
                                 ToggleButtons::make('severity_id')
                                     ->label('Severity')
                                     ->inline()
-                                    ->options(fn (): array => AdvisorySeverity::query()->orderBy('name')->pluck('name', 'id')->all())
+                                    ->options(fn (): array => AdvisorySeverity::query()->tap(new RankedAdvisorySeverities())->pluck('name', 'id')->all())
                                     ->exists((new AdvisorySeverity())->getTable(), 'id')
                                     ->required()
                                     ->columnSpanFull(),
