@@ -36,51 +36,108 @@
 
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
+use AidingApp\Portal\DataTransferObjects\AdvisoryData;
+use AidingApp\Portal\DataTransferObjects\AdvisorySeverityData;
+use AidingApp\Portal\DataTransferObjects\AdvisoryStatusData;
+use AidingApp\Portal\Enums\AdvisorySort;
+use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\Advisory;
-use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\AdvisoryStatus;
+use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
+use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
+use App\Settings\LicenseSettings;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdvisoryController
 {
     public function __invoke(Request $request): JsonResponse
     {
-        $perPage = $request->get('per_page', 15);
-        $advisories = Advisory::with([
-            'severity',
-            'advisoryUpdates' => fn ($query) => $query->orderByDesc('date'),
-            'status',
-        ])->orderBy('created_at', 'desc')->paginate($perPage);
+        abort_unless(resolve(LicenseSettings::class)->data?->addons->advisoryManagement, Response::HTTP_FORBIDDEN);
 
-        return response()->json(['data' => $advisories->through(
-            fn (Advisory $advisory): array => [
-                ...$advisory->toArray(),
-                ...$this->serializeTimestamps($advisory),
-                'advisory_updates' => $advisory->advisoryUpdates
-                    ->map(fn (AdvisoryUpdate $advisoryUpdate): array => [
-                        ...$advisoryUpdate->toArray(),
-                        ...$this->serializeTimestamps($advisoryUpdate),
-                        'date' => $advisoryUpdate->date->toIso8601String(),
-                    ])
-                    ->all(),
-            ]
-        )]);
+        $validated = $request->validate([
+            'classification' => ['nullable', Rule::enum(SystemAdvisoryStatusClassification::class)],
+            'search' => ['nullable', 'string', 'max:255'],
+            'severity' => ['nullable', 'uuid'],
+            'status' => ['nullable', 'uuid'],
+            'sort' => ['nullable', Rule::enum(AdvisorySort::class)],
+        ]);
+
+        $classification = SystemAdvisoryStatusClassification::tryFrom($validated['classification'] ?? '') ?? SystemAdvisoryStatusClassification::Open;
+        $search = $validated['search'] ?? null;
+        $severityId = $validated['severity'] ?? null;
+        $statusId = $validated['status'] ?? null;
+        $sort = AdvisorySort::tryFrom($validated['sort'] ?? '') ?? AdvisorySort::HighestSeverity;
+
+        $advisories = Advisory::query()
+            ->with(['severity', 'status'])
+            ->tap(new WithLastUpdatedAt())
+            ->whereHas('status', fn (Builder $query): Builder => $query->where('classification', $classification))
+            ->when(filled($severityId), fn (Builder $query): Builder => $query->where('advisories.severity_id', $severityId))
+            ->when(filled($statusId), fn (Builder $query): Builder => $query->where('advisories.status_id', $statusId))
+            ->when(filled($search), function (Builder $query) use ($search): void {
+                $pattern = '%' . addcslashes(Str::lower($search), '%_\\') . '%';
+
+                $query->where(fn (Builder $query): Builder => $query
+                    ->where(new Expression('lower(advisories.title)'), 'like', $pattern)
+                    ->orWhere(new Expression('lower(advisories.description)'), 'like', $pattern)
+                    ->orWhereHas('assignedDepartment', fn (Builder $query): Builder => $query
+                        ->where(new Expression('lower(departments.name)'), 'like', $pattern))
+                    ->orWhereHas('advisoryUpdates', fn (Builder $query): Builder => $query
+                        ->where('advisory_updates.internal', false)
+                        ->where(fn (Builder $query): Builder => $query
+                            ->where(new Expression('lower(advisory_updates.title)'), 'like', $pattern)
+                            ->orWhere(new Expression('lower(advisory_updates.update)'), 'like', $pattern))));
+            })
+            ->tap(fn (Builder $query) => $sort->apply($query))
+            ->paginate(10);
+
+        $advisories->through(fn (Advisory $advisory): AdvisoryData => AdvisoryData::fromModel($advisory));
+
+        return response()->json([
+            'data' => $advisories->items(),
+            'meta' => [
+                'current_page' => $advisories->currentPage(),
+                'last_page' => $advisories->lastPage(),
+                'from' => $advisories->firstItem() ?? 0,
+                'to' => $advisories->lastItem() ?? 0,
+                'total' => $advisories->total(),
+                'per_page' => $advisories->perPage(),
+            ],
+            'counts' => $this->countByClassification(),
+            'severities' => AdvisorySeverity::query()
+                ->tap(new RankedAdvisorySeverities())
+                ->get()
+                ->map(fn (AdvisorySeverity $severity): AdvisorySeverityData => AdvisorySeverityData::fromModel($severity))
+                ->all(),
+            'statuses' => AdvisoryStatus::query()
+                ->where('classification', $classification)
+                ->orderBy('name')
+                ->get()
+                ->map(fn (AdvisoryStatus $status): AdvisoryStatusData => AdvisoryStatusData::fromModel($status))
+                ->all(),
+        ]);
     }
 
     /**
-     * Re-serialize the timestamps as ISO-8601 instants.
+     * Counts every advisory in each status classification, regardless of any search or filter.
      *
-     * `BaseModel::serializeDate()` emits `Y-m-d H:i:s`, which carries no offset. JavaScript reads an
-     * offset-less string as local time, so the portal would render the stored UTC clock time without
-     * converting it. Every other portal controller sends `toIso8601String()` for the same reason.
-     *
-     * @return array{created_at: string|null, updated_at: string|null}
+     * @return array<string, int>
      */
-    private function serializeTimestamps(Advisory | AdvisoryUpdate $record): array
+    protected function countByClassification(): array
     {
-        return [
-            'created_at' => $record->created_at?->toIso8601String(),
-            'updated_at' => $record->updated_at?->toIso8601String(),
-        ];
+        return collect(SystemAdvisoryStatusClassification::cases())
+            ->mapWithKeys(fn (SystemAdvisoryStatusClassification $classification): array => [
+                $classification->value => Advisory::query()
+                    ->whereHas('status', fn (Builder $query): Builder => $query->where('classification', $classification))
+                    ->count(),
+            ])
+            ->all();
     }
 }

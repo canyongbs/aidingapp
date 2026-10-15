@@ -41,6 +41,14 @@
             type: String,
             required: true,
         },
+        label: {
+            type: String,
+            default: 'Asset filter tabs',
+        },
+        idPrefix: {
+            type: String,
+            default: 'assets',
+        },
     });
 
     const emit = defineEmits(['update:modelValue']);
@@ -48,14 +56,14 @@
 
 <template>
     <div class="mb-2 border-b border-gray-200">
-        <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
+        <ul class="flex flex-wrap -mb-px" role="tablist" :aria-label="label">
             <li v-for="tab in tabs" :key="tab.key" role="presentation">
                 <button
                     type="button"
                     role="tab"
-                    :id="`assets-tab-${tab.key}`"
+                    :id="`${idPrefix}-tab-${tab.key}`"
                     :aria-selected="modelValue === tab.key"
-                    :aria-controls="`assets-panel-${tab.key}`"
+                    :aria-controls="`${idPrefix}-panel-${tab.key}`"
                     @click="emit('update:modelValue', tab.key)"
                     :class="[
                         'inline-flex items-center whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold leading-5 transition-colors',

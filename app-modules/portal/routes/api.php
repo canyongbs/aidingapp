@@ -56,6 +56,7 @@ use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\KnowledgeManagem
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\LicenseManagementPortalController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ServiceRequestTypesController;
+use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowAdvisoryController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowPortalProjectController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\ShowServiceMonitorStatusController;
 use AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal\StoreKnowledgeBaseArticleVoteController;
@@ -173,6 +174,10 @@ Route::prefix('api')
                 Route::get('/advisories', AdvisoryController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('advisories');
+                Route::get('/advisories/{advisory}', ShowAdvisoryController::class)
+                    ->middleware(['auth:sanctum'])
+                    ->whereUuid('advisory')
+                    ->name('advisories.show');
                 Route::get('/status', ServiceMonitorStatusController::class)
                     ->middleware(['auth:sanctum'])
                     ->name('status');
