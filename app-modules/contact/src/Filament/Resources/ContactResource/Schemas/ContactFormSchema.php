@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use App\Filament\Forms\Components\AddressInput;
-use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\TextInput;
@@ -76,9 +75,6 @@ class ContactFormSchema
                 ->columns(2),
             Section::make('Customer Information')
                 ->schema(self::customerInformationFields())
-                ->columns(2),
-            Section::make('Engagement Restrictions')
-                ->schema(self::engagementRestrictionsFields())
                 ->columns(2),
         ];
     }
@@ -263,19 +259,6 @@ class ContactFormSchema
                 ->relationship('organization')
                 ->tableConfiguration(OrganizationsTable::class)
                 ->columnSpanFull(),
-        ];
-    }
-
-    /**
-     * @return array<int, Component>
-     */
-    public static function engagementRestrictionsFields(): array
-    {
-        return [
-            Radio::make('email_bounce')
-                ->label('Email Bounce')
-                ->default(false)
-                ->boolean(),
         ];
     }
 }

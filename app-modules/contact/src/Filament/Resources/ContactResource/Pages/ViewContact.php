@@ -45,7 +45,6 @@ use App\Features\ContactTrackingFeature;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
-use Filament\Infolists\Components\IconEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -193,18 +192,6 @@ class ViewContact extends ViewRecord
                                     ->schema([
                                         TextEntry::make('organization.name')
                                             ->label('Organization'),
-                                    ])
-                                    ->columns(2),
-                                Section::make('Engagement Restrictions')
-                                    ->key('engagementRestrictions')
-                                    ->headerActions([
-                                        self::sectionEditAction('editEngagementRestrictions', 'Engagement Restrictions')
-                                            ->schema(ContactFormSchema::engagementRestrictionsFields()),
-                                    ])
-                                    ->schema([
-                                        IconEntry::make('email_bounce')
-                                            ->label('Email Bounce')
-                                            ->boolean(),
                                     ])
                                     ->columns(2),
                             ]),
