@@ -738,7 +738,7 @@ describe('ServiceRequest', function () {
             ->addMedia(UploadedFile::fake()->image('other.png'))
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -763,7 +763,7 @@ describe('ServiceRequest', function () {
 
         actingAs(User::factory()->create());
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -790,7 +790,7 @@ describe('ServiceRequest', function () {
             ->addMedia(UploadedFile::fake()->image('update.png'))
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -812,7 +812,7 @@ describe('ServiceRequest', function () {
             ->addMedia(UploadedFile::fake()->image('attachment.png'))
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -829,7 +829,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -858,7 +858,7 @@ describe('ServiceRequest', function () {
             ->addMedia(UploadedFile::fake()->image('attachment.png'))
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -1156,7 +1156,7 @@ describe('ServiceRequestUpdate', function () {
     test('does not show the update type column', function () {
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => ServiceRequestUpdate::factory()->create(),
             'collectionName' => 'uploads',
         ])
@@ -1174,7 +1174,7 @@ describe('ServiceRequestUpdate', function () {
             ]))
             ->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
