@@ -36,8 +36,10 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -46,6 +48,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Testing\TestResponse;
 
@@ -255,4 +258,43 @@ it('rejects password fields owned by another contact', function () use ($postAss
 
     expect(ServiceRequest::query()->exists())->toBeFalse()
         ->and($secret->refresh()->related_id)->toBeNull();
+});
+
+it('records files submitted through upload fields as request submissions uploaded by the contact', function () {
+    Storage::fake('s3');
+
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Screenshot',
+        'type' => UploadFormFieldBlock::type(),
+        'is_required' => false,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+    $path = 'tmp/' . Str::uuid() . '.png';
+    Storage::disk('s3')->put($path, UploadedFile::fake()->image('screenshot.png')->getContent());
+
+    postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant upload test',
+        'description' => 'Upload fields are supported.',
+        'custom_fields' => [
+            $field->getKey() => [
+                ['path' => $path, 'originalFileName' => 'screenshot.png'],
+            ],
+        ],
+    ])->assertOk();
+
+    $media = ServiceRequest::query()->sole()->getFirstMedia('uploads');
+
+    expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::RequestSubmission)
+        ->and($media->createdBy->is($contact))->toBeTrue();
 });
