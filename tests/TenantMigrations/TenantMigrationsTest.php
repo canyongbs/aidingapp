@@ -34,6 +34,8 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Authorization\Models\Permission;
+use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
@@ -44,6 +46,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 
 //describe('2025_01_01_165527_tmp_data_do_a_thing', function () {
 //    it('properly changed the data', function () {
@@ -108,6 +111,75 @@ describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments
                 'deleted_at' => null,
                 'status' => 'active',
             ]);
+        });
+    });
+});
+
+describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function () {
+    it('deletes the retired Role Group and interaction.import permissions and their emptied groups without touching unrelated permissions', function () {
+        isolatedMigration('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function () {
+            $roleGroupPermissionNames = [
+                'role_group.view-any',
+                'role_group.create',
+                'role_group.*.view',
+                'role_group.*.update',
+                'role_group.*.delete',
+                'role_group.*.restore',
+                'role_group.*.force-delete',
+            ];
+
+            $retiredPermissionNames = [...$roleGroupPermissionNames, 'interaction.import'];
+
+            // Simulate the orphaned data left behind by the removed Role Group feature and the Interaction module cleanup that missed `interaction.import`.
+            $roleGroupGroup = PermissionGroup::create(['name' => 'Role Group']);
+            $interactionGroup = PermissionGroup::create(['name' => 'Interaction']);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($roleGroupPermissionNames as $name) {
+                    Permission::factory()->create([
+                        'name' => $name,
+                        'guard_name' => $guard,
+                        'group_id' => $roleGroupGroup->getKey(),
+                    ]);
+                }
+
+                Permission::factory()->create([
+                    'name' => 'interaction.import',
+                    'guard_name' => $guard,
+                    'group_id' => $interactionGroup->getKey(),
+                ]);
+            }
+
+            // Run the migration
+            $migrate = Artisan::call('migrate', ['--path' => 'database/migrations/2026_10_15_101455_delete_role_group_and_interaction_import_permissions.php']);
+            // Confirm migration ran successfully
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredPermissionNames as $name) {
+                    assertDatabaseMissing('permissions', [
+                        'name' => $name,
+                        'guard_name' => $guard,
+                    ]);
+                }
+            }
+
+            assertDatabaseMissing('permission_groups', ['name' => 'Role Group']);
+            assertDatabaseMissing('permission_groups', ['name' => 'Interaction']);
+
+            // Unrelated permissions seeded by earlier migrations must survive the cleanup.
+            assertDatabaseHas('permissions', ['name' => 'role.view-any', 'guard_name' => 'web']);
+            assertDatabaseHas('permission_groups', ['name' => 'Role']);
+
+            // Confirm the rollback restores the deleted permissions without duplicating any.
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'database/migrations/2026_10_15_101455_delete_role_group_and_interaction_import_permissions.php']);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            foreach (['web', 'api'] as $guard) {
+                foreach ($retiredPermissionNames as $name) {
+                    expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
+                }
+            }
         });
     });
 });
