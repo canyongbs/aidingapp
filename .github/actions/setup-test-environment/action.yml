@@ -51,9 +51,16 @@ runs:
           shell: bash
           run: |
               for container in redis postgres; do
-                until docker inspect --format='{{.State.Health.Status}}' "${container}" | grep -q healthy; do
-                  sleep 2
+                for _ in $(seq 1 60); do
+                  status=$(docker inspect --format='{{.State.Health.Status}}' "${container}")
+                  [[ "${status}" == healthy || "${status}" == unhealthy ]] && break
+                  sleep 1
                 done
+                if [[ "${status}" != healthy ]]; then
+                  docker logs "${container}"
+                  echo "::error::${container} is ${status} instead of healthy."
+                  exit 1
+                fi
               done
 
         - name: Create tenant database
