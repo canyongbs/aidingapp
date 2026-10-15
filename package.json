@@ -33,7 +33,7 @@
         "flatpickr": "^4.6.9",
         "jquery": "^3.2",
         "laravel-echo": "^1.14.0",
-        "postcss": "^8.5.28",
+        "postcss": "^8.5.29",
         "postcss-import": "^16.2.0",
         "prettier": "^3.9.9",
         "prettier-plugin-blade": "^2.1.21",
@@ -44,7 +44,7 @@
         "tailwindcss": "^4.1.18",
         "typescript": "^5.9.3",
         "vue-signature-pad": "^3.0.2",
-        "vue-tsc": "^3.3.11"
+        "vue-tsc": "^3.3.12"
     },
     "type": "module",
     "dependencies": {
@@ -73,7 +73,7 @@
         "sortablejs": "^1.15.0",
         "tailwindcss-primeui": "^0.6.1",
         "tippy.js": "^6.3.7",
-        "vite": "^8.3.1",
+        "vite": "^8.3.3",
         "vue": "^3.5.43",
         "vue-filepond": "^7.0.4",
         "vue-router": "^4.2.5"
