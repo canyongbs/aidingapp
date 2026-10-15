@@ -52,7 +52,6 @@ class CreateContactRequestFactory extends RequestFactory
             'preferred' => $this->faker->firstName(),
             'email' => $this->faker->email(),
             'mobile' => $this->faker->e164PhoneNumber(),
-            'email_bounce' => intval($this->faker->boolean()),
             'phone' => $this->faker->e164PhoneNumber(),
             'job_title' => $this->faker->jobTitle(),
             'employee_id' => (string) $this->faker->unique()->numberBetween(10000, 99999),

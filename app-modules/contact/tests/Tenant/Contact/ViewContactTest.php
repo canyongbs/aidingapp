@@ -334,28 +334,6 @@ describe('section edit actions', function () {
             ->organization_id->toEqual($organization->getKey());
     });
 
-    test('the engagement restrictions section can be updated', function () {
-        $user = User::factory()->create();
-        $user->givePermissionTo('contact.view-any');
-        $user->givePermissionTo('contact.*.view');
-        $user->givePermissionTo('contact.*.update');
-
-        actingAs($user);
-
-        $contact = Contact::factory()->create(['email_bounce' => false]);
-
-        livewire(ViewContact::class, [
-            'record' => $contact->getRouteKey(),
-        ])
-            ->callAction(TestAction::make('editEngagementRestrictions')->schemaComponent('engagementRestrictions'), data: [
-                'email_bounce' => true,
-            ])
-            ->assertHasNoFormErrors();
-
-        expect($contact->fresh())
-            ->email_bounce->toBeTrue();
-    });
-
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function () {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
