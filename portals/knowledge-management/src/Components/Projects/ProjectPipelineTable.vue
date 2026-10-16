@@ -33,33 +33,47 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import { ChartPieIcon } from '@heroicons/vue/20/solid';
     import { ClipboardDocumentIcon, InboxIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableEmptyState from '../ui/BaseTableEmptyState.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
 
     defineProps({
         groups: {
             type: Array,
             required: true,
         },
+        loading: {
+            type: Boolean,
+            default: false,
+        },
     });
 </script>
 
 <template>
-    <BaseTableEmptyState v-if="groups.length === 0">
-        <template #heading>No pipeline tasks</template>
-        <template #description>There are no tasks to display for this pipeline yet.</template>
-    </BaseTableEmptyState>
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
+        </template>
 
-    <BaseTable v-else>
+        <template v-if="groups.length === 0" #empty>
+            <EmptyState role="status" :icon="InboxIcon" :contained="false">
+                <template #heading>No pipeline tasks</template>
+                <template #description>There are no tasks to display for this pipeline yet.</template>
+            </EmptyState>
+        </template>
+
+        <template v-if="$slots.footer && groups.length > 0" #footer>
+            <slot name="footer" />
+        </template>
+
         <BaseTableHeader>
             <tr>
                 <BaseTableHeaderCell class="w-64">Task Name</BaseTableHeaderCell>

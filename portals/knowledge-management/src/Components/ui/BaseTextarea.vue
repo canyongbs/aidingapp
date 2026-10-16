@@ -48,7 +48,7 @@
         :rows="rows"
         :placeholder="placeholder"
         :required="required"
-        class="w-full resize-y rounded-[var(--rounding-md)] border border-gray-300 p-3 text-sm focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
+        class="w-full resize-y rounded-md border-0 bg-white p-3 text-sm text-gray-950 shadow-sm ring-1 ring-inset ring-gray-950/10 outline-none focus:ring-2 focus:ring-brand-600"
         @input="$emit('update:modelValue', $event.target.value)"
     />
 </template>

@@ -32,9 +32,9 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseStatCard from '@common/BaseStatCard.vue';
     import { CalendarDaysIcon, CalendarIcon, ChartBarIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
-    import BaseCard from '../ui/BaseCard.vue';
     import { formatUptimePercentage } from './serviceMonitorStatuses.js';
 
     defineProps({
@@ -55,22 +55,13 @@
 
 <template>
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5">
-        <BaseCard v-for="period in periods" :key="period.key" class="flex items-center gap-4">
-            <span
-                class="flex size-11 shrink-0 items-center justify-center rounded-[var(--rounding-md)] bg-[rgba(var(--primary-50),1)] text-[rgba(var(--primary-500),1)]"
-                aria-hidden="true"
-            >
-                <component :is="period.icon" class="size-5 stroke-2" />
-            </span>
-            <div class="min-w-0">
-                <p class="text-xs font-semibold text-gray-500">{{ period.label }}</p>
-                <p
-                    class="mt-1 text-2xl font-semibold leading-none tabular-nums text-gray-900"
-                    :title="uptimePercentages[period.key] === null ? 'Not enough monitoring history yet' : undefined"
-                >
-                    {{ formatUptimePercentage(uptimePercentages[period.key]) }}
-                </p>
-            </div>
-        </BaseCard>
+        <BaseStatCard
+            v-for="period in periods"
+            :key="period.key"
+            :label="period.label"
+            :value="formatUptimePercentage(uptimePercentages[period.key])"
+            :icon="period.icon"
+            :value-title="uptimePercentages[period.key] === null ? 'Not enough monitoring history yet' : null"
+        />
     </div>
 </template>

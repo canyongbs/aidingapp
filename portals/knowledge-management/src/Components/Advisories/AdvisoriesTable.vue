@@ -33,33 +33,51 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
-    import { ChevronRightIcon } from '@heroicons/vue/20/solid';
+    import BaseButton from '@common/BaseButton.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableCellText from '@common/BaseTableCellText.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
+    import { ArrowRightIcon } from '@heroicons/vue/16/solid';
     import formatDateTime from '../../Services/FormatDateTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
-    import { getSeverityDotClass, getStatusBadgeColor } from './advisoryPresentation.js';
+    import { getStatusColor } from './advisoryPresentation.js';
 
     defineProps({
         advisories: {
             type: Array,
             required: true,
         },
+        loading: {
+            type: Boolean,
+            default: false,
+        },
     });
 </script>
 
 <template>
-    <BaseTable>
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
+        </template>
+
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
+        </template>
+
+        <template v-if="$slots.footer" #footer>
+            <slot name="footer" />
+        </template>
+
         <BaseTableHeader>
             <tr>
                 <BaseTableHeaderCell class="w-full min-w-72">Advisory</BaseTableHeaderCell>
                 <BaseTableHeaderCell class="w-44">Severity</BaseTableHeaderCell>
                 <BaseTableHeaderCell class="w-44">Status</BaseTableHeaderCell>
                 <BaseTableHeaderCell class="w-48 whitespace-nowrap">Last updated</BaseTableHeaderCell>
-                <BaseTableHeaderCell class="w-14">
+                <BaseTableHeaderCell>
                     <span class="sr-only">Actions</span>
                 </BaseTableHeaderCell>
             </tr>
@@ -67,28 +85,18 @@
         <BaseTableBody>
             <BaseTableRow v-for="(advisory, idx) in advisories" :key="advisory.id" :delay="idx * 30">
                 <BaseTableCell>
-                    <router-link
-                        :to="{ name: 'view-advisory', params: { advisoryId: advisory.id } }"
-                        class="text-sm font-semibold text-brand-600 hover:text-brand-700 hover:underline focus-visible:underline focus-visible:outline-none"
-                    >
-                        {{ advisory.title }}
-                    </router-link>
-                    <p class="mt-0.5 line-clamp-2 text-sm text-pretty text-gray-500">{{ advisory.description }}</p>
+                    <BaseTableCellText :text="advisory.title" :sub-text="advisory.description" :sub-text-lines="2" />
                 </BaseTableCell>
 
                 <BaseTableCell class="whitespace-nowrap">
-                    <span v-if="advisory.severity" class="inline-flex items-center gap-2 text-sm text-gray-900">
-                        <span
-                            :class="['size-2.5 shrink-0 rounded-full', getSeverityDotClass(advisory.severity)]"
-                            aria-hidden="true"
-                        />
+                    <BaseBadge v-if="advisory.severity" :color="advisory.severity.color">
                         {{ advisory.severity.name }}
-                    </span>
+                    </BaseBadge>
                     <span v-else class="text-sm text-gray-400">—</span>
                 </BaseTableCell>
 
                 <BaseTableCell class="whitespace-nowrap">
-                    <BaseBadge v-if="advisory.status" :color="getStatusBadgeColor(advisory.status)">
+                    <BaseBadge v-if="advisory.status" :color="getStatusColor(advisory.status)">
                         {{ advisory.status.name }}
                     </BaseBadge>
                 </BaseTableCell>
@@ -102,14 +110,19 @@
                     </time>
                 </BaseTableCell>
 
-                <BaseTableCell class="text-right align-middle">
-                    <router-link
+                <BaseTableCell class="text-right">
+                    <BaseButton
+                        tag="router-link"
                         :to="{ name: 'view-advisory', params: { advisoryId: advisory.id } }"
-                        class="inline-flex rounded-md p-1 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600"
+                        color="gray"
+                        size="sm"
+                        :icon="ArrowRightIcon"
+                        icon-position="after"
+                        class="whitespace-nowrap"
                     >
-                        <ChevronRightIcon class="size-5" aria-hidden="true" />
-                        <span class="sr-only">View {{ advisory.title }}</span>
-                    </router-link>
+                        View
+                        <span class="sr-only">{{ advisory.title }}</span>
+                    </BaseButton>
                 </BaseTableCell>
             </BaseTableRow>
         </BaseTableBody>

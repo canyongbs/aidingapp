@@ -42,21 +42,15 @@ import {
 } from '@heroicons/vue/24/outline';
 
 /**
- * Presentation of each service monitor status returned by the API.
+ * Each service monitor status returned by the API, mapped to its label, tone (for callouts), colour name (for badges and
+ * status swatches), icon and copy. Components own the classes for each tone and colour.
  */
 const STATUSES = {
     operational: {
         label: 'Operational',
         tone: 'success',
+        color: 'green',
         icon: CheckIcon,
-        barClass: 'bg-green-500',
-        textClass: 'text-green-700',
-        bannerClass: 'border-green-200 bg-green-50',
-        bannerTitleClass: 'text-green-800',
-        iconClass: 'bg-green-500 text-white',
-        noteClass: 'border-green-200 bg-green-50 text-green-950',
-        noteIconClass: 'text-green-600',
-        noteTextClass: 'text-green-800',
         description: 'This monitor is operating normally with no known issues.',
         noteTitle: 'Service healthy',
         noteDescription:
@@ -65,15 +59,8 @@ const STATUSES = {
     degraded: {
         label: 'Degraded',
         tone: 'warning',
+        color: 'orange',
         icon: ExclamationTriangleIcon,
-        barClass: 'bg-orange-400',
-        textClass: 'text-orange-700',
-        bannerClass: 'border-orange-200 bg-orange-50',
-        bannerTitleClass: 'text-orange-800',
-        iconClass: 'bg-orange-400 text-white',
-        noteClass: 'border-orange-200 bg-orange-50 text-orange-950',
-        noteIconClass: 'text-orange-600',
-        noteTextClass: 'text-orange-800',
         description: 'This monitor is reachable, but some checks failed within the last 24 hours.',
         noteTitle: 'Service degraded',
         noteDescription:
@@ -82,15 +69,8 @@ const STATUSES = {
     outage: {
         label: 'Outage',
         tone: 'danger',
+        color: 'red',
         icon: XMarkIcon,
-        barClass: 'bg-red-500',
-        textClass: 'text-red-700',
-        bannerClass: 'border-red-200 bg-red-50',
-        bannerTitleClass: 'text-red-800',
-        iconClass: 'bg-red-500 text-white',
-        noteClass: 'border-red-200 bg-red-50 text-red-950',
-        noteIconClass: 'text-red-600',
-        noteTextClass: 'text-red-800',
         description: 'The most recent check of this monitor failed, so the service may be unavailable.',
         noteTitle: 'Service unavailable',
         noteDescription:
@@ -99,15 +79,8 @@ const STATUSES = {
     unknown: {
         label: 'No data',
         tone: 'neutral',
+        color: 'gray',
         icon: ClockIcon,
-        barClass: 'bg-gray-200',
-        textClass: 'text-gray-600',
-        bannerClass: 'border-gray-200 bg-white',
-        bannerTitleClass: 'text-gray-900',
-        iconClass: 'bg-gray-100 text-gray-500',
-        noteClass: 'border-gray-200 bg-white text-gray-950',
-        noteIconClass: 'text-gray-400',
-        noteTextClass: 'text-gray-600',
         description: "This monitor hasn't completed its first check yet.",
         noteTitle: 'Awaiting data',
         noteDescription: 'Status information will appear here once this monitor has been checked.',

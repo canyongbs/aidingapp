@@ -33,20 +33,21 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableCellText from '@common/BaseTableCellText.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableLoadingState from '@common/BaseTableLoadingState.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { defineEmits, defineProps } from 'vue';
+    import { ComputerDesktopIcon } from '@heroicons/vue/24/outline';
+    import { computed, defineEmits, defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableCellText from '../ui/BaseTableCellText.vue';
-    import BaseTableEmptyState from '../ui/BaseTableEmptyState.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableLoadingState from '../ui/BaseTableLoadingState.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
 
-    defineProps({
+    const props = defineProps({
         assets: {
             type: Array,
             required: true,
@@ -85,6 +86,17 @@
         },
     });
 
+    const EMPTY_STATES = {
+        returned: { heading: 'No returned assets', description: 'No assets have been returned yet.' },
+        checked_out: {
+            heading: 'No assets currently checked out',
+            description: "You don't currently have any assets checked out.",
+        },
+        all: { heading: 'No assets found', description: 'No assets have been assigned to your account.' },
+    };
+
+    const emptyState = computed(() => EMPTY_STATES[props.activeFilter] ?? EMPTY_STATES.all);
+
     const emit = defineEmits(['fetchPage']);
 
     function serialDisplay(asset) {
@@ -104,86 +116,75 @@
             class="mt-1"
         />
 
-        <BaseTableEmptyState v-else-if="assets.length === 0" key="empty" class="mt-1">
-            <template v-if="activeFilter === 'returned'">
-                <p class="text-base font-semibold text-gray-700">No returned assets</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been returned yet.</p>
-            </template>
-            <template v-else-if="activeFilter === 'checked_out'">
-                <p class="text-base font-semibold text-gray-700">No assets currently checked out</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">
-                    You don't currently have any assets checked out.
-                </p>
-            </template>
-            <template v-else>
-                <p class="text-base font-semibold text-gray-700">No assets found</p>
-                <p class="mt-1 text-sm text-gray-400 max-w-xs mx-auto">No assets have been assigned to your account.</p>
-            </template>
-        </BaseTableEmptyState>
-
-        <div
+        <BaseTable
             v-else
             key="table"
             :id="`assets-panel-${activeFilter}`"
             :aria-labelledby="`assets-tab-${activeFilter}`"
             role="tabpanel"
             aria-live="polite"
-            class="mt-1"
+            :loading="loadingPage !== null"
         >
-            <BaseTable>
-                <BaseTableHeader>
-                    <tr>
-                        <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Type</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Status</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
-                        <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
-                    </tr>
-                </BaseTableHeader>
-                <BaseTableBody>
-                    <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
-                        <BaseTableCell>
-                            <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
-                        </BaseTableCell>
+            <template v-if="assets.length === 0" #empty>
+                <EmptyState role="status" :icon="ComputerDesktopIcon" :contained="false">
+                    <template #heading>{{ emptyState.heading }}</template>
+                    <template #description>{{ emptyState.description }}</template>
+                </EmptyState>
+            </template>
 
-                        <BaseTableCell class="text-sm text-gray-600">
-                            {{ item.asset?.type?.name ?? '—' }}
-                        </BaseTableCell>
+            <template v-if="assets.length > 0" #footer>
+                <Pagination
+                    :current-page="currentPage"
+                    :last-page="lastPage"
+                    :from-item="fromItem"
+                    :to-item="toItem"
+                    :total-items="totalItems"
+                    :loading-page="loadingPage"
+                    @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
+                    @fetchNextPage="emit('fetchPage', currentPage + 1)"
+                    @fetchPage="emit('fetchPage', $event)"
+                />
+            </template>
 
-                        <BaseTableCell>
-                            <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
-                        </BaseTableCell>
+            <BaseTableHeader>
+                <tr>
+                    <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Type</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Status</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
+                    <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
+                </tr>
+            </BaseTableHeader>
+            <BaseTableBody>
+                <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
+                    <BaseTableCell>
+                        <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
+                    </BaseTableCell>
 
-                        <BaseTableCell>
-                            <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
-                            <BaseBadge v-else color="warning">Checked Out</BaseBadge>
-                        </BaseTableCell>
+                    <BaseTableCell class="text-sm text-gray-600">
+                        {{ item.asset?.type?.name ?? '—' }}
+                    </BaseTableCell>
 
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ formatDateTime(item.checked_out_at) ?? '—' }}
-                        </BaseTableCell>
+                    <BaseTableCell>
+                        <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
+                    </BaseTableCell>
 
-                        <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                            {{ formatDateTime(item.checked_in_at) ?? '' }}
-                        </BaseTableCell>
-                    </BaseTableRow>
-                </BaseTableBody>
-            </BaseTable>
+                    <BaseTableCell>
+                        <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
+                        <BaseBadge v-else color="warning">Checked Out</BaseBadge>
+                    </BaseTableCell>
 
-            <Pagination
-                v-if="lastPage > 1"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
-                @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
-                @fetchNextPage="emit('fetchPage', currentPage + 1)"
-                @fetchPage="emit('fetchPage', $event)"
-            />
-        </div>
+                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                        {{ formatDateTime(item.checked_out_at) ?? '—' }}
+                    </BaseTableCell>
+
+                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                        {{ formatDateTime(item.checked_in_at) ?? '' }}
+                    </BaseTableCell>
+                </BaseTableRow>
+            </BaseTableBody>
+        </BaseTable>
     </Transition>
 </template>
 

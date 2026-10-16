@@ -33,6 +33,12 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
@@ -40,12 +46,6 @@
     import { useRoute } from 'vue-router';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
-    import BaseTable from '../Components/ui/BaseTable.vue';
-    import BaseTableBody from '../Components/ui/BaseTableBody.vue';
-    import BaseTableCell from '../Components/ui/BaseTableCell.vue';
-    import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../Components/ui/BaseTableRow.vue';
     import { apiGet, apiPost, getApiBaseUrl } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
     import { useServiceRequestData } from './loaders.js';
@@ -177,10 +177,7 @@
 
         <!-- Error notices -->
         <template v-if="authorizationError">
-            <div
-                v-if="authorizationError"
-                class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
+            <div v-if="authorizationError" class="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
                 {{ authorizationError }}
             </div>
         </template>

@@ -33,7 +33,6 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import BaseCard from './BaseCard.vue';
 
     const props = defineProps({
         label: {
@@ -63,7 +62,7 @@
 </script>
 
 <template>
-    <BaseCard :bg="toneConfig.bg">
+    <div :class="['rounded-lg p-5 shadow-sm ring-1 ring-gray-950/5', toneConfig.bg]">
         <div class="flex items-start justify-between gap-3">
             <div>
                 <p class="mb-1 text-xs font-semibold" :class="toneConfig.labelColor">{{ label }}</p>
@@ -73,5 +72,5 @@
             </div>
             <slot name="icon" />
         </div>
-    </BaseCard>
+    </div>
 </template>

@@ -32,16 +32,29 @@
 </COPYRIGHT>
 -->
 <script setup>
-    defineProps({
-        scope: {
+    import { computed, defineProps } from 'vue';
+    import { getStatus } from './serviceMonitorStatuses.js';
+
+    const props = defineProps({
+        status: {
             type: String,
-            default: 'col',
+            required: true,
         },
     });
+
+    /**
+     * The fill for each status colour, used by the history bars, legends and status counts.
+     */
+    const COLOR_CLASSES = {
+        green: 'bg-green-500',
+        orange: 'bg-orange-400',
+        red: 'bg-red-500',
+        gray: 'bg-gray-200',
+    };
+
+    const colorClass = computed(() => COLOR_CLASSES[getStatus(props.status).color] ?? COLOR_CLASSES.gray);
 </script>
 
 <template>
-    <th :scope="scope" class="px-4 py-3 text-xs font-semibold text-gray-500">
-        <slot />
-    </th>
+    <span :class="colorClass" />
 </template>

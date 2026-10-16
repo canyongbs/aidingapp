@@ -34,10 +34,9 @@
 <script setup>
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
+    import Tabs from '@common/portal/Tabs.vue';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
-    import AssetFilterTabs from '../Components/Assets/AssetFilterTabs.vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
     import { apiGet } from '../Services/api.js';
@@ -51,9 +50,9 @@
     const currentPage = ref(1);
 
     const tabs = computed(() => [
-        { key: 'all', label: 'All' },
-        { key: 'checked_out', label: 'Checked Out' },
-        { key: 'returned', label: 'Returned' },
+        { value: 'all', label: 'All' },
+        { value: 'checked_out', label: 'Checked Out' },
+        { value: 'returned', label: 'Returned' },
     ]);
 
     const pageQuery = useQuery({
@@ -116,10 +115,10 @@
             <Breadcrumbs :currentCrumb="'Assets'" />
         </template>
 
-        <PageCard>
-            <AssetStatCards :counts="counts" />
+        <AssetStatCards :counts="counts" />
 
-            <AssetFilterTabs v-model="activeFilter" :tabs="tabs" />
+        <div class="flex flex-col gap-y-4">
+            <Tabs v-model="activeFilter" :tabs="tabs" label="Asset filter tabs" id-prefix="assets" />
 
             <AssetTable
                 :assets="assets"
@@ -133,6 +132,6 @@
                 :total-items="totalItems"
                 @fetchPage="fetchPage"
             />
-        </PageCard>
+        </div>
     </Page>
 </template>
