@@ -512,7 +512,7 @@ it('displays the full category path as the title description', function () {
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($quickStartGuides, 'category')->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnHasDescription('title', 'Networking > Wifi > Quick Start Guides', $knowledgeBaseItem);
 });
 
@@ -523,7 +523,7 @@ it('displays only the category name as the title description for a top-level cat
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($networking, 'category')->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnHasDescription('title', 'Networking', $knowledgeBaseItem);
 });
 
@@ -532,7 +532,7 @@ it('does not display a title description when the article has no category', func
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->state(['category_id' => null])->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnHasDescription('title', null, $knowledgeBaseItem);
 });
 
