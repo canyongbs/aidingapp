@@ -33,16 +33,17 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableCellText from '@common/BaseTableCellText.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import { ArrowRightIcon } from '@heroicons/vue/16/solid';
+    import { FolderIcon } from '@heroicons/vue/24/outline';
     import formatDateTime from '../../Services/FormatDateTime.js';
-    import BaseTable from '../ui/BaseTable.vue';
-    import BaseTableBody from '../ui/BaseTableBody.vue';
-    import BaseTableCell from '../ui/BaseTableCell.vue';
-    import BaseTableCellText from '../ui/BaseTableCellText.vue';
-    import BaseTableEmptyState from '../ui/BaseTableEmptyState.vue';
-    import BaseTableHeader from '../ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../ui/BaseTableRow.vue';
 
     defineProps({
         projects: {
@@ -53,12 +54,18 @@
 </script>
 
 <template>
-    <BaseTableEmptyState v-if="projects.length === 0">
-        <template #heading>No projects to display</template>
-        <template #description>You don't currently have visibility into any projects.</template>
-    </BaseTableEmptyState>
+    <BaseTable>
+        <template v-if="projects.length === 0" #empty>
+            <EmptyState role="status" :icon="FolderIcon" :contained="false">
+                <template #heading>No projects to display</template>
+                <template #description>You don't currently have visibility into any projects.</template>
+            </EmptyState>
+        </template>
 
-    <BaseTable v-else>
+        <template v-if="$slots.footer && projects.length > 0" #footer>
+            <slot name="footer" />
+        </template>
+
         <BaseTableHeader>
             <tr>
                 <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>

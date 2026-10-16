@@ -33,29 +33,29 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import BaseCallout from '@common/BaseCallout.vue';
+    import BaseCalloutMeta from '@common/BaseCalloutMeta.vue';
+    import BaseInputError from '@common/BaseInputError.vue';
+    import BaseSection from '@common/BaseSection.vue';
+    import BaseSelect from '@common/BaseSelect.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { ChartBarIcon } from '@heroicons/vue/24/outline';
+    import { ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/vue/24/solid';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import ServiceMonitorDetailsCard from '../Components/ServiceMonitors/ServiceMonitorDetailsCard.vue';
-    import ServiceMonitorHealthNote from '../Components/ServiceMonitors/ServiceMonitorHealthNote.vue';
     import {
         DEFAULT_HISTORY_PERIOD,
         HISTORY_PERIOD_OPTIONS,
         getHistoryPeriod,
     } from '../Components/ServiceMonitors/serviceMonitorHistory.js';
     import ServiceMonitorHistoryChart from '../Components/ServiceMonitors/ServiceMonitorHistoryChart.vue';
-    import ServiceMonitorStatusBanner from '../Components/ServiceMonitors/ServiceMonitorStatusBanner.vue';
-    import ServiceMonitorStatusBannerMeta from '../Components/ServiceMonitors/ServiceMonitorStatusBannerMeta.vue';
     import { getStatus } from '../Components/ServiceMonitors/serviceMonitorStatuses.js';
     import ServiceMonitorUptimeCards from '../Components/ServiceMonitors/ServiceMonitorUptimeCards.vue';
-    import BaseCard from '../Components/ui/BaseCard.vue';
-    import BaseInputError from '../Components/ui/BaseInputError.vue';
-    import BaseSelect from '../Components/ui/BaseSelect.vue';
     import { useNow } from '../Composables/useNow.js';
     import { apiGet } from '../Services/api.js';
     import formatDateTime, { resolveTimezone } from '../Services/FormatDateTime.js';
@@ -135,13 +135,14 @@
             </BaseButton>
         </div>
 
-        <ServiceMonitorStatusBanner
-            :status="monitor.status"
+        <BaseCallout
+            :tone="statusConfig.tone"
+            :icon="statusConfig.icon"
             :title="statusConfig.label"
             :description="statusConfig.description"
         >
             <template #meta>
-                <ServiceMonitorStatusBannerMeta label="Last checked">
+                <BaseCalloutMeta label="Last checked">
                     <time
                         v-if="monitor.last_checked_at"
                         :datetime="monitor.last_checked_at"
@@ -150,25 +151,23 @@
                         {{ formatRelativeTime(monitor.last_checked_at, now) }}
                     </time>
                     <template v-else>Never</template>
-                </ServiceMonitorStatusBannerMeta>
-                <ServiceMonitorStatusBannerMeta label="Monitoring every">
+                </BaseCalloutMeta>
+                <BaseCalloutMeta label="Monitoring every">
                     {{ monitor.frequency_label }}
-                </ServiceMonitorStatusBannerMeta>
+                </BaseCalloutMeta>
             </template>
-        </ServiceMonitorStatusBanner>
+        </BaseCallout>
 
         <ServiceMonitorUptimeCards :uptime-percentages="monitor.uptime_percentages" />
 
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-3">
-            <BaseCard class="min-w-0 lg:col-span-2">
-                <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div class="flex gap-3">
-                        <ChartBarIcon class="size-6 shrink-0 text-gray-700" aria-hidden="true" />
-                        <div>
-                            <h2 class="text-base font-semibold text-gray-900">{{ historyPeriodConfig.heading }}</h2>
-                            <p class="text-sm text-gray-500">{{ historyPeriodConfig.description }}</p>
-                        </div>
-                    </div>
+            <BaseSection
+                :heading="historyPeriodConfig.heading"
+                :description="historyPeriodConfig.description"
+                :icon="ChartBarIcon"
+                class="min-w-0 lg:col-span-2"
+            >
+                <template #actions>
                     <div>
                         <BaseSelect
                             :model-value="period"
@@ -182,20 +181,26 @@
                             :errors="['Could not load that period. Showing the last loaded data instead.']"
                         />
                     </div>
-                </div>
+                </template>
 
                 <ServiceMonitorHistoryChart
-                    class="mt-8"
                     :history="monitor.history"
                     :period="monitor.history_period"
                     :loading="isFetchingHistory"
                 />
-            </BaseCard>
+            </BaseSection>
 
             <ServiceMonitorDetailsCard :monitor="monitor" />
         </div>
 
-        <ServiceMonitorHealthNote :status="monitor.status" />
+        <BaseCallout
+            role="note"
+            size="sm"
+            :tone="statusConfig.tone"
+            :icon="monitor.status === 'operational' ? ShieldCheckIcon : ShieldExclamationIcon"
+            :title="statusConfig.noteTitle"
+            :description="statusConfig.noteDescription"
+        />
     </Page>
 
     <Page v-else>

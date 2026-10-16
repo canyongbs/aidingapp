@@ -35,6 +35,7 @@
     import { computed } from 'vue';
     import { describeBucket } from './serviceMonitorHistory.js';
     import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
+    import ServiceMonitorStatusSwatch from './ServiceMonitorStatusSwatch.vue';
 
     const props = defineProps({
         history: {
@@ -55,10 +56,11 @@
 
 <template>
     <div class="flex h-6 items-stretch gap-px" role="img" :aria-label="summary">
-        <span
+        <ServiceMonitorStatusSwatch
             v-for="bucket in history"
             :key="bucket.starts_at"
-            :class="['w-[3px] rounded-[1px]', getStatus(bucket.status).barClass]"
+            :status="bucket.status"
+            class="w-[3px] rounded-[1px]"
             :title="describeBucket(bucket, 'past_month')"
         />
     </div>

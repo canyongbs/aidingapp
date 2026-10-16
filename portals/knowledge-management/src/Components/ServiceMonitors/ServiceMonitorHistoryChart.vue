@@ -35,6 +35,7 @@
     import { computed, ref } from 'vue';
     import { describeBucket, formatBucketStart, getHistoryPeriod } from './serviceMonitorHistory.js';
     import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
+    import ServiceMonitorStatusSwatch from './ServiceMonitorStatusSwatch.vue';
 
     const props = defineProps({
         history: {
@@ -63,7 +64,7 @@
             key: bucket.starts_at,
             index,
             height: Math.max(bucket.uptime_percentage ?? 0, MINIMUM_BAR_HEIGHT),
-            barClass: getStatus(bucket.status).barClass,
+            status: bucket.status,
             description: describeBucket(bucket, props.period),
             axisLabel:
                 index % periodConfig.value.axisLabelEvery === 0
@@ -122,7 +123,7 @@
                     <li
                         v-for="bar in bars"
                         :key="bar.key"
-                        class="flex h-full min-w-0 flex-1 items-end rounded-t-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(var(--primary-500),1)]"
+                        class="flex h-full min-w-0 flex-1 items-end rounded-t-sm focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-500"
                         tabindex="0"
                         :aria-label="bar.description"
                         @mouseenter="activeIndex = bar.index"
@@ -130,10 +131,10 @@
                         @focus="activeIndex = bar.index"
                         @blur="activeIndex = null"
                     >
-                        <span
+                        <ServiceMonitorStatusSwatch
+                            :status="bar.status"
                             :class="[
                                 'block w-full rounded-t-sm transition-[height,opacity] duration-300',
-                                bar.barClass,
                                 activeBar && activeBar.index !== bar.index && 'opacity-60',
                             ]"
                             :style="{ height: `${bar.height}%` }"
@@ -144,7 +145,7 @@
                 <div
                     v-if="activeBar"
                     role="tooltip"
-                    class="pointer-events-none absolute -top-2 z-10 whitespace-nowrap rounded-[var(--rounding-md)] bg-gray-900 px-2.5 py-1.5 text-xs text-white shadow-lg"
+                    class="pointer-events-none absolute -top-2 z-10 whitespace-nowrap rounded-md bg-gray-900 px-2.5 py-1.5 text-xs text-white shadow-lg"
                     :style="tooltipStyle"
                 >
                     {{ activeBar.description }}
@@ -168,7 +169,7 @@
 
         <ul class="mt-5 flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm text-gray-700" aria-label="Legend">
             <li v-for="item in legend" :key="item.status" class="inline-flex items-center gap-2">
-                <span :class="['size-2.5 rounded-full', item.barClass]" aria-hidden="true" />
+                <ServiceMonitorStatusSwatch :status="item.status" class="size-2.5 rounded-full" aria-hidden="true" />
                 {{ item.label }}
             </li>
         </ul>

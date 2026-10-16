@@ -34,7 +34,6 @@
 <script setup>
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
@@ -89,21 +88,20 @@
             <Breadcrumbs :currentCrumb="'Projects'" />
         </template>
 
-        <PageCard>
-            <ProjectsTable :projects="projects" />
-
-            <Pagination
-                v-if="lastPage > 1"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
-                @fetchPreviousPage="fetchPage(currentPage - 1)"
-                @fetchNextPage="fetchPage(currentPage + 1)"
-                @fetchPage="fetchPage"
-            />
-        </PageCard>
+        <ProjectsTable :projects="projects">
+            <template #footer>
+                <Pagination
+                    :current-page="currentPage"
+                    :last-page="lastPage"
+                    :from-item="fromItem"
+                    :to-item="toItem"
+                    :total-items="totalItems"
+                    :loading-page="loadingPage"
+                    @fetchPreviousPage="fetchPage(currentPage - 1)"
+                    @fetchNextPage="fetchPage(currentPage + 1)"
+                    @fetchPage="fetchPage"
+                />
+            </template>
+        </ProjectsTable>
     </Page>
 </template>

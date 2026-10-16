@@ -33,12 +33,12 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import BaseCallout from '@common/BaseCallout.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { InformationCircleIcon } from '@heroicons/vue/20/solid';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import PipelineSelect from '../Components/Projects/PipelineSelect.vue';
@@ -130,38 +130,33 @@
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="currentCrumb" />
         </template>
 
-        <div
+        <BaseCallout
             role="note"
-            class="flex items-start gap-3 rounded-[var(--rounding-md)] border border-blue-200 bg-blue-50 px-4 py-3 text-blue-950"
-        >
-            <InformationCircleIcon class="mt-0.5 size-5 shrink-0 text-blue-600" aria-hidden="true" />
-            <div class="grid gap-1">
-                <p class="text-sm font-semibold">About milestone progress</p>
-                <p class="text-sm text-pretty text-blue-800">
-                    Milestone progress represents all work required to complete the milestone. Internal tasks may
-                    contribute to progress even when they are not visible in the portal.
-                </p>
-            </div>
-        </div>
+            size="sm"
+            tone="info"
+            title="About milestone progress"
+            description="Milestone progress represents all work required to complete the milestone. Internal tasks may contribute to progress even when they are not visible in the portal."
+        />
 
-        <PageCard>
-            <PipelineSelect v-if="pipelines.length > 1" v-model="selectedPipelineId" :pipelines="pipelines" />
+        <ProjectPipelineTable :groups="displayedPipeline?.groups ?? []" :loading="loadingPage !== null">
+            <template v-if="pipelines.length > 1" #toolbar>
+                <PipelineSelect v-model="selectedPipelineId" :pipelines="pipelines" />
+            </template>
 
-            <ProjectPipelineTable :groups="displayedPipeline?.groups ?? []" />
-
-            <Pagination
-                v-if="lastPage > 1"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
-                @fetchPreviousPage="fetchPage(currentPage - 1)"
-                @fetchNextPage="fetchPage(currentPage + 1)"
-                @fetchPage="fetchPage"
-            />
-        </PageCard>
+            <template #footer>
+                <Pagination
+                    :current-page="currentPage"
+                    :last-page="lastPage"
+                    :from-item="fromItem"
+                    :to-item="toItem"
+                    :total-items="totalItems"
+                    :loading-page="loadingPage"
+                    @fetchPreviousPage="fetchPage(currentPage - 1)"
+                    @fetchNextPage="fetchPage(currentPage + 1)"
+                    @fetchPage="fetchPage"
+                />
+            </template>
+        </ProjectPipelineTable>
     </Page>
 
     <Page v-else>

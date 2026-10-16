@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseSelect from '@common/BaseSelect.vue';
     import { computed } from 'vue';
-    import BaseSelect from '../ui/BaseSelect.vue';
 
     const props = defineProps({
         modelValue: {

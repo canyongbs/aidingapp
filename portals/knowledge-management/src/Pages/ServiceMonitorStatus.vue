@@ -33,19 +33,19 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import BaseCallout from '@common/BaseCallout.vue';
+    import BaseCalloutMeta from '@common/BaseCalloutMeta.vue';
+    import BaseSearchInput from '@common/BaseSearchInput.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { SignalIcon } from '@heroicons/vue/24/outline';
+    import { ExclamationTriangleIcon, MagnifyingGlassIcon, SignalIcon } from '@heroicons/vue/24/outline';
     import { useQuery } from '@pinia/colada';
-    import { computed, onUnmounted, ref, watch } from 'vue';
+    import { computed, ref, watch } from 'vue';
     import ServiceMonitorsTable from '../Components/ServiceMonitors/ServiceMonitorsTable.vue';
-    import ServiceMonitorStatusBanner from '../Components/ServiceMonitors/ServiceMonitorStatusBanner.vue';
-    import ServiceMonitorStatusBannerMeta from '../Components/ServiceMonitors/ServiceMonitorStatusBannerMeta.vue';
     import ServiceMonitorStatusCounts from '../Components/ServiceMonitors/ServiceMonitorStatusCounts.vue';
-    import BaseSearchInput from '../Components/ui/BaseSearchInput.vue';
-    import BaseTableEmptyState from '../Components/ui/BaseTableEmptyState.vue';
+    import { getStatus } from '../Components/ServiceMonitors/serviceMonitorStatuses.js';
     import { useNow } from '../Composables/useNow.js';
     import { apiGet } from '../Services/api.js';
     import formatDateTime, { resolveTimezone } from '../Services/FormatDateTime.js';
@@ -61,21 +61,10 @@
 
     const currentPage = ref(1);
     const search = ref('');
-    const appliedSearch = ref('');
     const sort = ref(DEFAULT_SORT);
     const direction = ref(DEFAULT_DIRECTION);
 
-    let searchTimeout = null;
-
-    watch(search, (value) => {
-        clearTimeout(searchTimeout);
-
-        searchTimeout = setTimeout(() => {
-            appliedSearch.value = value.trim();
-        }, 300);
-    });
-
-    onUnmounted(() => clearTimeout(searchTimeout));
+    const appliedSearch = computed(() => search.value.trim());
 
     watch([appliedSearch, sort, direction], () => {
         currentPage.value = 1;
@@ -126,6 +115,7 @@
 
     const monitors = computed(() => shownEnvelope.value?.data ?? []);
     const summary = computed(() => shownEnvelope.value?.summary ?? null);
+    const summaryStatus = computed(() => getStatus(summary.value?.status));
     const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
     const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
     const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
@@ -194,62 +184,72 @@
         </template>
 
         <template v-if="summary && summary.total_count > 0">
-            <ServiceMonitorStatusBanner
-                :status="summary.status"
+            <BaseCallout
+                :tone="summaryStatus.tone"
+                :icon="summaryStatus.icon"
                 :title="summaryCopy.title"
                 :description="summaryCopy.description"
             >
                 <template v-if="summary.last_checked_at" #meta>
-                    <ServiceMonitorStatusBannerMeta label="Last updated">
+                    <BaseCalloutMeta label="Last updated">
                         <time :datetime="summary.last_checked_at">{{ formatDateTime(summary.last_checked_at) }}</time>
-                    </ServiceMonitorStatusBannerMeta>
+                    </BaseCalloutMeta>
                 </template>
-            </ServiceMonitorStatusBanner>
+            </BaseCallout>
 
-            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <ServiceMonitorStatusCounts :total-count="summary.total_count" :status-counts="summary.status_counts" />
-                <BaseSearchInput
-                    v-model="search"
-                    label="Search monitors"
-                    placeholder="Search monitors…"
-                    class="md:max-w-xs"
-                />
-            </div>
+            <ServiceMonitorsTable
+                :monitors="monitors"
+                :sort="sort"
+                :direction="direction"
+                :now="now"
+                :loading="isFetching"
+                @sort="toggleSort"
+            >
+                <template #toolbar>
+                    <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                        <ServiceMonitorStatusCounts
+                            :total-count="summary.total_count"
+                            :status-counts="summary.status_counts"
+                        />
+                        <BaseSearchInput
+                            v-model="search"
+                            :debounce="300"
+                            label="Search monitors"
+                            placeholder="Search monitors…"
+                            class="md:max-w-xs"
+                        />
+                    </div>
+                </template>
 
-            <div :class="['transition-opacity', isFetching && 'opacity-60']" :aria-busy="isFetching">
-                <BaseTableEmptyState v-if="loadFailed">
-                    <p class="text-base font-semibold text-gray-700">Could not load monitors</p>
-                    <p class="mt-1 text-sm text-gray-400">Something went wrong while loading these results.</p>
-                    <BaseButton color="gray" size="md" class="mt-4" @click="pageQuery.refetch()">Try again</BaseButton>
-                </BaseTableEmptyState>
+                <template v-if="loadFailed || monitors.length === 0" #empty>
+                    <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
+                        <template #heading>Could not load monitors</template>
+                        <template #description>Something went wrong while loading these results.</template>
+                        <template #actions>
+                            <BaseButton color="gray" size="md" @click="pageQuery.refetch()">Try again</BaseButton>
+                        </template>
+                    </EmptyState>
 
-                <BaseTableEmptyState v-else-if="monitors.length === 0">
-                    <p class="text-base font-semibold text-gray-700">No monitors match your search</p>
-                    <p class="mt-1 text-sm text-gray-400">Try searching for a different name or description.</p>
-                </BaseTableEmptyState>
+                    <EmptyState role="status" v-else :icon="MagnifyingGlassIcon" :contained="false">
+                        <template #heading>No monitors match your search</template>
+                        <template #description>Try searching for a different name or description.</template>
+                    </EmptyState>
+                </template>
 
-                <ServiceMonitorsTable
-                    v-else
-                    :monitors="monitors"
-                    :sort="sort"
-                    :direction="direction"
-                    :now="now"
-                    @sort="toggleSort"
-                />
-            </div>
-
-            <Pagination
-                v-if="!loadFailed && lastPage > 1"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                :loading-page="loadingPage"
-                @fetchPreviousPage="fetchPage(currentPage - 1)"
-                @fetchNextPage="fetchPage(currentPage + 1)"
-                @fetchPage="fetchPage"
-            />
+                <template v-if="!loadFailed && monitors.length > 0" #footer>
+                    <Pagination
+                        :current-page="currentPage"
+                        :last-page="lastPage"
+                        :from-item="fromItem"
+                        :to-item="toItem"
+                        :total-items="totalItems"
+                        :loading-page="loadingPage"
+                        @fetchPreviousPage="fetchPage(currentPage - 1)"
+                        @fetchNextPage="fetchPage(currentPage + 1)"
+                        @fetchPage="fetchPage"
+                    />
+                </template>
+            </ServiceMonitorsTable>
         </template>
 
         <EmptyState v-else :icon="SignalIcon">

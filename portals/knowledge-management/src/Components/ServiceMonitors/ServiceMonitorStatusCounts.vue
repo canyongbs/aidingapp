@@ -34,6 +34,7 @@
 <script setup>
     import { computed } from 'vue';
     import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
+    import ServiceMonitorStatusSwatch from './ServiceMonitorStatusSwatch.vue';
 
     const props = defineProps({
         totalCount: {
@@ -58,7 +59,7 @@
 <template>
     <ul class="flex flex-wrap items-center gap-x-2 gap-y-1" aria-label="Monitors by status">
         <li
-            class="inline-flex items-center gap-2 rounded-[var(--rounding-md)] bg-[rgba(var(--primary-50),1)] px-3 py-1.5 text-sm font-semibold text-[rgba(var(--primary-700),1)]"
+            class="inline-flex items-center gap-2 rounded-md bg-brand-50 px-3 py-1.5 text-sm font-semibold text-brand-700"
         >
             All monitors
             <span class="tabular-nums">{{ totalCount }}</span>
@@ -68,7 +69,7 @@
             :key="item.status"
             class="inline-flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700"
         >
-            <span :class="['size-2 rounded-full', item.barClass]" aria-hidden="true" />
+            <ServiceMonitorStatusSwatch :status="item.status" class="size-2 rounded-full" aria-hidden="true" />
             {{ item.label }}
             <span class="font-semibold tabular-nums text-gray-900">{{ item.count }}</span>
         </li>

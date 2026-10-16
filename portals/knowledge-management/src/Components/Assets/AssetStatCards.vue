@@ -48,8 +48,8 @@
             label: 'Total',
             value: props.counts.total,
             tone: 'neutral',
-            iconBg: 'bg-[rgba(var(--primary-50),1)]',
-            iconColor: 'text-[rgba(var(--primary-500),1)]',
+            iconBg: 'bg-brand-50',
+            iconColor: 'text-brand-500',
             iconPath:
                 'M20.25 7.5l-.625 10.632a2.25 2.25 0 01-2.247 2.118H6.622a2.25 2.25 0 01-2.247-2.118L3.75 7.5M10 11.25h4M3.375 7.5h17.25c.621 0 1.125-.504 1.125-1.125v-1.5c0-.621-.504-1.125-1.125-1.125H3.375c-.621 0-1.125.504-1.125 1.125v1.5c0 .621.504 1.125 1.125 1.125z',
         },
@@ -76,22 +76,10 @@
 </script>
 
 <template>
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-2">
-        <BaseStatCard
-            v-for="card in cards"
-            :key="card.key"
-            :label="card.label"
-            :value="card.value"
-            :tone="card.tone"
-            class="transition-colors hover:border-gray-300"
-        >
+    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <BaseStatCard v-for="card in cards" :key="card.key" :label="card.label" :value="card.value" :tone="card.tone">
             <template #icon>
-                <span
-                    :class="[
-                        'flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[var(--rounding-md)]',
-                        card.iconBg,
-                    ]"
-                >
+                <span :class="['flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-md', card.iconBg]">
                     <svg
                         :class="['h-5 w-5', card.iconColor]"
                         fill="none"

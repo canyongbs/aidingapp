@@ -32,44 +32,6 @@
 </COPYRIGHT>
 */
 
-/**
- * The dot shown beside each severity, keyed by the severity's admin-chosen color.
- */
-const SEVERITY_DOT_CLASSES = {
-    black: 'bg-gray-950',
-    'light-gray': 'bg-gray-300',
-    gray: 'bg-gray-400',
-    'dark-gray': 'bg-gray-700',
-    red: 'bg-red-500',
-    orange: 'bg-orange-500',
-    amber: 'bg-amber-500',
-    yellow: 'bg-yellow-400',
-    lime: 'bg-lime-500',
-    green: 'bg-green-500',
-    emerald: 'bg-emerald-500',
-    teal: 'bg-teal-500',
-    cyan: 'bg-cyan-500',
-    sky: 'bg-sky-500',
-    blue: 'bg-blue-500',
-    navy: 'bg-blue-900',
-    indigo: 'bg-indigo-500',
-    violet: 'bg-violet-500',
-    purple: 'bg-purple-500',
-    fuchsia: 'bg-fuchsia-500',
-    pink: 'bg-pink-500',
-    rose: 'bg-rose-500',
-};
-
-/**
- * Severity colors that `BaseBadge` has no palette for, mapped to the closest one it has.
- */
-const SEVERITY_BADGE_COLOR_FALLBACKS = {
-    black: 'gray',
-    'light-gray': 'gray',
-    'dark-gray': 'gray',
-    navy: 'blue',
-};
-
 export const SORT_OPTIONS = [
     { value: 'highest_severity', label: 'Highest severity first' },
     { value: 'lowest_severity', label: 'Lowest severity first' },
@@ -77,14 +39,9 @@ export const SORT_OPTIONS = [
 
 export const DEFAULT_SORT = SORT_OPTIONS[0].value;
 
-export function getSeverityDotClass(severity) {
-    return SEVERITY_DOT_CLASSES[severity?.color] ?? 'bg-gray-400';
-}
-
-export function getSeverityBadgeColor(severity) {
-    return SEVERITY_BADGE_COLOR_FALLBACKS[severity?.color] ?? severity?.color ?? 'gray';
-}
-
-export function getStatusBadgeColor(status) {
+/**
+ * The badge colour for an advisory status, by whether it is still active or has been resolved.
+ */
+export function getStatusColor(status) {
     return status?.classification === 'resolved' ? 'success' : 'blue';
 }

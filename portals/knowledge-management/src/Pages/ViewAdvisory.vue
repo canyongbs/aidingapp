@@ -34,15 +34,15 @@
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
     import BaseButton from '@common/BaseButton.vue';
+    import BaseSection from '@common/BaseSection.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
-    import { ArrowLeftIcon, ExclamationTriangleIcon } from '@heroicons/vue/16/solid';
+    import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { computed } from 'vue';
-    import { getSeverityBadgeColor, getStatusBadgeColor } from '../Components/Advisories/advisoryPresentation.js';
+    import { getStatusColor } from '../Components/Advisories/advisoryPresentation.js';
     import AdvisoryUpdatesTimeline from '../Components/Advisories/AdvisoryUpdatesTimeline.vue';
-    import BaseCard from '../Components/ui/BaseCard.vue';
     import { useAdvisoryData } from './loaders.js';
 
     const { data: envelope } = useAdvisoryData();
@@ -68,11 +68,7 @@
                 <div v-if="advisory.severity" class="flex flex-col gap-1.5">
                     <dt class="text-xs font-medium text-white/75">Severity</dt>
                     <dd>
-                        <BaseBadge
-                            :color="getSeverityBadgeColor(advisory.severity)"
-                            :icon="ExclamationTriangleIcon"
-                            size="md"
-                        >
+                        <BaseBadge :color="advisory.severity.color" size="md">
                             {{ advisory.severity.name }}
                         </BaseBadge>
                     </dd>
@@ -80,7 +76,7 @@
                 <div v-if="advisory.status" class="flex flex-col gap-1.5">
                     <dt class="text-xs font-medium text-white/75">Status</dt>
                     <dd>
-                        <BaseBadge :color="getStatusBadgeColor(advisory.status)" size="md">
+                        <BaseBadge :color="getStatusColor(advisory.status)" size="md">
                             {{ advisory.status.name }}
                         </BaseBadge>
                     </dd>
@@ -94,17 +90,14 @@
             </BaseButton>
         </div>
 
-        <BaseCard>
-            <h2 class="text-base font-semibold text-gray-900">Description</h2>
-            <p class="mt-2 whitespace-pre-line break-words text-sm text-gray-700">{{ advisory.description }}</p>
-        </BaseCard>
+        <BaseSection heading="Description">
+            <p class="whitespace-pre-line break-words text-sm text-gray-700">{{ advisory.description }}</p>
+        </BaseSection>
 
-        <BaseCard>
-            <h2 class="text-base font-semibold text-gray-900">Updates</h2>
-
-            <AdvisoryUpdatesTimeline v-if="advisory.updates.length > 0" :updates="advisory.updates" class="mt-5" />
-            <p v-else class="mt-2 text-sm text-gray-500">There are no updates for this advisory yet.</p>
-        </BaseCard>
+        <BaseSection heading="Updates">
+            <AdvisoryUpdatesTimeline v-if="advisory.updates.length > 0" :updates="advisory.updates" />
+            <p v-else class="text-sm text-gray-500">There are no updates for this advisory yet.</p>
+        </BaseSection>
     </Page>
 
     <Page v-else>
