@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
+    import { computed, defineEmits, defineProps } from 'vue';
     import BaseSelect from '../ui/BaseSelect.vue';
 
     const props = defineProps({

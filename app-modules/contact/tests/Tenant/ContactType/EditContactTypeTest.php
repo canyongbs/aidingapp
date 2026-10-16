@@ -41,10 +41,10 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\EditContactTypeRequestFactory;
 use App\Models\User;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
@@ -61,7 +61,7 @@ test('A successful action on the EditContactType page', function () {
 
     $editRequest = EditContactTypeRequestFactory::new()->create();
 
-    livewire(EditContactType::class, [
+    Livewire::test(EditContactType::class, [
         'record' => $contactType->getRouteKey(),
     ])
         ->assertFormSet([
@@ -81,7 +81,7 @@ test('EditContactType requires valid data', function (EditContactTypeRequestFact
 
     $contactType = ContactType::factory()->create();
 
-    livewire(EditContactType::class, [
+    Livewire::test(EditContactType::class, [
         'record' => $contactType->getRouteKey(),
     ])
         ->assertFormSet([
@@ -116,7 +116,7 @@ test('EditContactType is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditContactType::class, [
+    Livewire::test(EditContactType::class, [
         'record' => $contactType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -133,7 +133,7 @@ test('EditContactType is gated with proper access control', function () {
 
     $request = collect(EditContactTypeRequestFactory::new()->create());
 
-    livewire(EditContactType::class, [
+    Livewire::test(EditContactType::class, [
         'record' => $contactType->getRouteKey(),
     ])
         ->fillForm($request->toArray())

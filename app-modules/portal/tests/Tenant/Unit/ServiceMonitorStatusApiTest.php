@@ -47,6 +47,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\get;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\travelTo;
 
 test('returns all service monitoring targets with latest history when portal is enabled', function () {
     $settings = app(PortalSettings::class);
@@ -123,7 +124,8 @@ function getServiceMonitorStatuses(array $query = []): TestResponse
 }
 
 it('lists service monitors with their status, uptime, and daily history', function () {
-    freezeTime();
+    // Midday, so checks a few minutes old still land in today's history bucket.
+    travelTo(today()->setTime(12, 0));
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
         'name' => 'Customer Website',

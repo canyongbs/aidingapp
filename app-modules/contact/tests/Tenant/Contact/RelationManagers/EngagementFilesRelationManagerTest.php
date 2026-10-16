@@ -39,9 +39,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('only shows the files bulk delete action to a user with the engagement_file delete permission', function () {
     $user = User::factory()
@@ -52,7 +52,7 @@ test('only shows the files bulk delete action to a user with the engagement_file
 
     $contact = Contact::factory()->create();
 
-    livewire(EngagementFilesRelationManager::class, [
+    Livewire::test(EngagementFilesRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -60,7 +60,7 @@ test('only shows the files bulk delete action to a user with the engagement_file
 
     $user->givePermissionTo('engagement_file.*.delete');
 
-    livewire(EngagementFilesRelationManager::class, [
+    Livewire::test(EngagementFilesRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])

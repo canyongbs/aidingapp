@@ -41,8 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-
-use function Pest\Livewire\livewire;
+use Livewire\Livewire;
 
 it('returns all service request types information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -91,7 +90,7 @@ it('returns all service request types information created in given time range', 
         'endDate' => $endDate->toDateString(),
     ];
 
-    livewire(ServiceRequestTypesTable::class, [
+    Livewire::test(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-table',
         'pageFilters' => $filters,
     ])
@@ -126,7 +125,7 @@ it('returns all service request types when no date filters are applied', functio
         'created_at' => now()->subMonths(2),
     ])->create();
 
-    livewire(ServiceRequestTypesTable::class, [
+    Livewire::test(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-table-no-filters',
         'pageFilters' => [],
     ])
@@ -156,7 +155,7 @@ it('shows correct incident and request counts per type', function () {
         'category' => ServiceRequestCategory::Request,
     ])->create();
 
-    livewire(ServiceRequestTypesTable::class, [
+    Livewire::test(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-incident-request-counts',
         'pageFilters' => [],
     ])
@@ -204,7 +203,7 @@ it('applies date filters consistently to total, incident, and request counts', f
         'created_at' => now()->subDays(30),
     ])->create();
 
-    livewire(ServiceRequestTypesTable::class, [
+    Livewire::test(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-date-filter-invariant',
         'pageFilters' => [
             'startDate' => $startDate->toDateString(),

@@ -41,12 +41,12 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 test('ListAdvisorySeverities is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -102,7 +102,7 @@ test('can list records', function () {
 
     $records = AdvisorySeverity::factory()->count(5)->create();
 
-    livewire(ListAdvisorySeverities::class)
+    Livewire::test(ListAdvisorySeverities::class)
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
@@ -118,7 +118,7 @@ test('bulk delete AdvisorySeverities', function () {
 
     $advisorySeverities = AdvisorySeverity::factory()->count(10)->create();
 
-    livewire(ListAdvisorySeverities::class)
+    Livewire::test(ListAdvisorySeverities::class)
         ->callTableBulkAction(DeleteBulkAction::class, $advisorySeverities);
 
     foreach ($advisorySeverities as $advisorySeverity) {
@@ -139,7 +139,7 @@ test('prevent deletion of AdvisorySeverity if it has associated Advisories', fun
         ->count(2)
         ->create();
 
-    livewire(ListAdvisorySeverities::class)
+    Livewire::test(ListAdvisorySeverities::class)
         ->callTableBulkAction(DeleteBulkAction::class, $advisorySeverities);
 
     foreach ($advisorySeverities as $advisorySeverity) {
@@ -156,11 +156,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListAdvisorySeverities::class)
+    Livewire::test(ListAdvisorySeverities::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListAdvisorySeverities::class)
+    Livewire::test(ListAdvisorySeverities::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('editDescription action is visible for manager department member with update permission', function () {
@@ -73,7 +73,7 @@ test('editDescription action is visible for manager department member with updat
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -105,7 +105,7 @@ test('editDescription action is hidden for user without update permission', func
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -121,7 +121,7 @@ test('editDescription requires close_details to be a string', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editDescription')->schemaComponent('request.description::section'), data: [
@@ -139,7 +139,7 @@ test('can update the service request description', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editDescription')->schemaComponent('request.description::section'), data: [
@@ -161,7 +161,7 @@ test('can clear the service request description', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editDescription')->schemaComponent('request.description::section'), data: [

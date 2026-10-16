@@ -34,6 +34,7 @@
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
     import { ArrowRightIcon } from '@heroicons/vue/16/solid';
+    import { defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';

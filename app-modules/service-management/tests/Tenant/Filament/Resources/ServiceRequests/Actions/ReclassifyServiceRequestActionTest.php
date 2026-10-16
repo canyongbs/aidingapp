@@ -51,9 +51,9 @@ use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Notifications\Notification;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 // Authorization
@@ -83,7 +83,7 @@ test('reclassify action is visible for manager department member with update per
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -115,7 +115,7 @@ test('reclassify action is hidden for user without update permission', function 
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -147,7 +147,7 @@ test('reclassify action is hidden on closed service requests', function () {
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -168,7 +168,7 @@ test('reclassify requires type_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -196,7 +196,7 @@ test('reclassify requires priority_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -228,7 +228,7 @@ test('reclassify requires assignment_method', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -260,7 +260,7 @@ test('reclassify with override but missing assign_to produces validation error',
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -289,7 +289,7 @@ test('type options exclude the current service request type', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
@@ -333,7 +333,7 @@ test('type options exclude archived service request types', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
@@ -384,7 +384,7 @@ test('override assign_to only lists eligible managers for selected type', functi
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
@@ -426,7 +426,7 @@ test('selecting a new type auto-selects priority with matching name', function (
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
@@ -457,7 +457,7 @@ test('selecting a new type clears priority when no matching name exists', functi
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->mountAction('reclassify')
@@ -493,7 +493,7 @@ test('reclassify with default assignment updates priority_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -538,7 +538,7 @@ test('reclassify with override assignment creates manual assignment to selected 
 
     actingAs($actor->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -605,7 +605,7 @@ test('reclassify marks the existing active assignment inactive instead of deleti
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -663,7 +663,7 @@ test('reclassify records an `Assignment Removed` history entry when it leaves th
 
     expect($removalHistories())->toBeEmpty();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -718,7 +718,7 @@ test('reclassify does not record an `Assignment Removed` history entry when it r
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -769,7 +769,7 @@ test('reclassify with default assignment invokes the correct assigner class', fu
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -822,7 +822,7 @@ test('reclassify with individual assignment end-to-end assigns correct user', fu
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -871,7 +871,7 @@ test('reclassify rolls back changes on failure and shows error notification', fu
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [
@@ -914,7 +914,7 @@ test('reclassify shows success notification on completion', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction('reclassify', data: [

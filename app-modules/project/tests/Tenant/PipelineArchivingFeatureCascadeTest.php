@@ -41,8 +41,8 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('archives a milestone once it has no remaining non-archived linked task', function () {
@@ -174,7 +174,7 @@ it('rolls back the whole cascade when a child archive fails through the switcher
     });
 
     try {
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->call('archivePipelineFromSwitcher', $pipeline->getKey());
     } catch (Throwable) {
         // Expected: the forced failure propagates out of the transaction.

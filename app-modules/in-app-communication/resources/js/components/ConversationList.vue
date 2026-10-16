@@ -42,7 +42,7 @@
         UserIcon,
     } from '@heroicons/vue/24/outline';
     import axios from 'axios';
-    import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import { computed, defineEmits, defineExpose, defineProps, onMounted, onUnmounted, ref } from 'vue';
     import ConversationListItem from './ConversationListItem.vue';
     import ServiceRequestConversationQueue from './ServiceRequestConversationQueue.vue';
     import EmptyState from './ui/EmptyState.vue';

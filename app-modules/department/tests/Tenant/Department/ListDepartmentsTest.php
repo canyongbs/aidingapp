@@ -39,9 +39,9 @@ use AidingApp\Department\Filament\Resources\Departments\Pages\ListDepartments;
 use AidingApp\Department\Models\Department;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // Permission Tests
 
@@ -70,11 +70,11 @@ it('only shows the bulk delete action to a user with the department.delete permi
 
     actingAs($user);
 
-    livewire(ListDepartments::class)
+    Livewire::test(ListDepartments::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('department.*.delete');
 
-    livewire(ListDepartments::class)
+    Livewire::test(ListDepartments::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

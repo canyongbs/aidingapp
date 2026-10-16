@@ -38,9 +38,9 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ListOrganiza
 use AidingApp\Contact\Models\Organization;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('only shows the bulk delete action to a user with the organization.delete permission', function () {
     Organization::factory(15)->create();
@@ -51,12 +51,12 @@ it('only shows the bulk delete action to a user with the organization.delete per
 
     actingAs($user);
 
-    livewire(ListOrganizations::class)
+    Livewire::test(ListOrganizations::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('organization.*.delete');
 
-    livewire(ListOrganizations::class)
+    Livewire::test(ListOrganizations::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
@@ -67,13 +67,13 @@ it('only shows the import and export actions to a user with the `organization.im
 
     actingAs($user);
 
-    livewire(ListOrganizations::class)
+    Livewire::test(ListOrganizations::class)
         ->assertActionHidden('import')
         ->assertActionHidden('export');
 
     $user->givePermissionTo('organization.import');
 
-    livewire(ListOrganizations::class)
+    Livewire::test(ListOrganizations::class)
         ->assertActionVisible('import')
         ->assertActionVisible('export');
 });

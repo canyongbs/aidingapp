@@ -39,10 +39,10 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Lis
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use Illuminate\Support\Facades\Event;
+use Livewire\Livewire;
 
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -57,7 +57,7 @@ it('files a type under another area', function () {
 
     $type = ServiceRequestType::factory()->hasAttached($catA, ['sort' => 1], 'categories')->create(['name' => 'Shared', 'sort' => 1]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('addTypeToCategory', $type->getKey(), $catB->getKey());
 
     expect($type->fresh()->categories->pluck('id')->sort()->values()->all())
@@ -72,7 +72,7 @@ it('stores a distinct per-area sort on each membership', function () {
     ServiceRequestType::factory()->hasAttached($catB, ['sort' => 1], 'categories')->create(['name' => 'Other', 'sort' => 1]);
 
     // In A the shared type stays first; in B it is added after "Other".
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('addTypeToCategory', $shared->getKey(), $catB->getKey());
 
     $shared = $shared->fresh();
@@ -91,7 +91,7 @@ it('detaches a single membership when a type is removed from one of its areas', 
         $catB->id => ['sort' => 1],
     ]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('removeTypeFromCategory', $type->getKey(), $catB->getKey());
 
     expect($type->fresh()->categories->pluck('id')->all())->toBe([$catA->id]);
@@ -102,7 +102,7 @@ it('does not remove a type from its only area', function () {
 
     $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('removeTypeFromCategory', $type->getKey(), $category->getKey())
         ->assertNotified('Unable to save changes');
 
@@ -114,7 +114,7 @@ it('uncategorizes a type moved out of its only area', function () {
 
     $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create(['name' => 'Loose', 'sort' => 1]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type->getKey(), $category->getKey(), null, [$type->getKey()]);
 
     expect($type->fresh()->categories)->toBeEmpty();
@@ -130,7 +130,7 @@ it('does not uncategorize a type filed under several areas', function () {
         $catB->id => ['sort' => 1],
     ]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type->getKey(), $catA->getKey(), null, [$type->getKey()])
         ->assertNotified('Unable to save changes');
 
@@ -147,7 +147,7 @@ it('keeps a shared type when one of its areas is deleted', function () {
         $catB->id => ['sort' => 1],
     ]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('deleteCategory', $catB->getKey());
 
     assertNotSoftDeleted($type);
@@ -166,7 +166,7 @@ it('orders types within a category by their per-area sort when reading the tree'
     $category->types()->attach($second->id, ['sort' => 2]);
     $category->types()->attach($first->id, ['sort' => 1]);
 
-    $data = livewire(ListServiceRequestTypes::class)
+    $data = Livewire::test(ListServiceRequestTypes::class)
         ->instance()
         ->getHierarchicalData();
 
@@ -180,7 +180,7 @@ it('orders types within a category by their per-area sort when reading the tree'
 });
 
 it('creates an uncategorized type with no memberships', function () {
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'Loner');
 
     $type = ServiceRequestType::query()->where('name', 'Loner')->firstOrFail();
@@ -194,7 +194,7 @@ it('stores the per-area sort for a newly created type', function () {
     ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create(['name' => 'First', 'sort' => 1]);
     ServiceRequestType::factory()->hasAttached($category, ['sort' => 2], 'categories')->create(['name' => 'Second', 'sort' => 2]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'Brand New', $category->getKey());
 
     $type = ServiceRequestType::query()->where('name', 'Brand New')->firstOrFail();

@@ -40,9 +40,9 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Servic
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestStatus page', function () {
@@ -130,7 +130,7 @@ it('displays the edit action and not the lock when the service request status is
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequestStatus::class, [
+    Livewire::test(ViewServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertDontSeeHtml('data-identifier="service_request_type_system_protected"')
@@ -145,7 +145,7 @@ it('displays the lock icon rather than the edit action when the service request 
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequestStatus::class, [
+    Livewire::test(ViewServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertSeeHtml('data-identifier="service_request_type_system_protected"')

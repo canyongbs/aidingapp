@@ -45,7 +45,7 @@
         WrenchScrewdriverIcon,
     } from '@heroicons/vue/24/outline';
     import { storeToRefs } from 'pinia';
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { computed, defineProps, onMounted, onUnmounted, ref, watch } from 'vue';
     import { RouterView, useRoute, useRouter } from 'vue-router';
     import { useIsDataLoading } from 'vue-router/experimental';
     import BootScreen from './Components/BootScreen.vue';

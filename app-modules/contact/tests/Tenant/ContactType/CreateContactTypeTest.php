@@ -41,10 +41,10 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\CreateContactTypeRequestFactory;
 use App\Models\User;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
@@ -58,7 +58,7 @@ test('A successful action on the CreateContactType page', function () {
 
     $request = CreateContactTypeRequestFactory::new()->create();
 
-    livewire(CreateContactType::class)
+    Livewire::test(CreateContactType::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -71,7 +71,7 @@ test('A successful action on the CreateContactType page', function () {
 test('CreateContactType requires valid data', function (CreateContactTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
-    livewire(CreateContactType::class)
+    Livewire::test(CreateContactType::class)
         ->fillForm(CreateContactTypeRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -96,7 +96,7 @@ test('CreateContactType is gated with proper access control', function () {
             ContactTypeResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateContactType::class)
+    Livewire::test(CreateContactType::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -109,7 +109,7 @@ test('CreateContactType is gated with proper access control', function () {
 
     $request = collect(CreateContactTypeRequestFactory::new()->create());
 
-    livewire(CreateContactType::class)
+    Livewire::test(CreateContactType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

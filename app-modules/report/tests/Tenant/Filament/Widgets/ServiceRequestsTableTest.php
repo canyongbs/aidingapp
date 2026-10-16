@@ -45,9 +45,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('returns all service requests information created in given time range', function () {
     $startDate = now()->subDays(10);
@@ -105,7 +105,7 @@ it('returns all service requests information created in given time range', funct
         'endDate' => $endDate->toDateString(),
     ];
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table',
         'pageFilters' => $filters,
     ])
@@ -147,7 +147,7 @@ it('returns all service requests when no date filters are applied', function () 
         'respondent_id' => Contact::factory(),
     ])->create();
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-no-filters',
         'pageFilters' => [],
     ])
@@ -159,7 +159,7 @@ it('returns all service requests when no date filters are applied', function () 
 });
 
 it('has table an export action', function () {
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export',
         'pageFilters' => [],
     ])->assertTableActionExists(ExportAction::class);
@@ -170,7 +170,7 @@ it('can start an export and send a notification', function () {
 
     actingAs(User::factory()->create());
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export-notification',
         'pageFilters' => [],
     ])
@@ -200,7 +200,7 @@ it('filters records by category using the table-level category filter', function
         'respondent_id' => Contact::factory(),
     ])->create();
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-category-filter',
         'pageFilters' => [],
     ])

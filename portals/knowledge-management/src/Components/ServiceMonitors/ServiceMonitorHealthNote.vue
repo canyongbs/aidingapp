@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/vue/24/solid';
-    import { computed } from 'vue';
+    import { computed, defineProps } from 'vue';
     import { getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({

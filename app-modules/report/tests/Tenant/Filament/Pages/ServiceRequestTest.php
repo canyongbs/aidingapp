@@ -58,9 +58,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 /**
  * Enable the Service Management addon and grant the given user access to the
@@ -87,19 +87,19 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(ServiceRequests::class)->assertForbidden();
+    Livewire::test(ServiceRequests::class)->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    livewire(ServiceRequests::class)->assertForbidden();
+    Livewire::test(ServiceRequests::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::ServiceRequests->value,
         'user_id' => $user->getKey(),
     ]);
 
-    livewire(ServiceRequests::class)->assertOk();
+    Livewire::test(ServiceRequests::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -113,14 +113,14 @@ it('grants access to a user belonging to a department that has been granted acce
 
     actingAs($user);
 
-    livewire(ServiceRequests::class)->assertForbidden();
+    Livewire::test(ServiceRequests::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
         'report_key' => ReportAccessKey::ServiceRequests->value,
         'department_id' => $department->getKey(),
     ]);
 
-    livewire(ServiceRequests::class)->assertOk();
+    Livewire::test(ServiceRequests::class)->assertOk();
 });
 
 it('renders the service request types filter and quick-load controls', function () {
@@ -130,7 +130,7 @@ it('renders the service request types filter and quick-load controls', function 
 
     actingAs($user);
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->assertOk()
         ->assertSee('Service Request Types')
         ->assertSee('My Affiliated Types')
@@ -347,7 +347,7 @@ it('resolves every type the user manages or audits as an affiliated type', funct
 
     $unaffiliatedType = ServiceRequestType::factory()->create();
 
-    $ids = livewire(ServiceRequests::class)->instance()->getAffiliatedServiceRequestTypeIds();
+    $ids = Livewire::test(ServiceRequests::class)->instance()->getAffiliatedServiceRequestTypeIds();
 
     expect($ids)
         ->toEqualCanonicalizing([
@@ -380,7 +380,7 @@ it('populates the filter with affiliated types via the My Affiliated Types actio
 
     ServiceRequestType::factory()->create();
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
 });
@@ -394,7 +394,7 @@ it('warns instead of changing the filter when the user has no affiliated types',
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->set('filters.serviceRequestTypes', [$type->getKey()])
         ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertNotified('You are not a manager or auditor of any Service Request Types')
@@ -411,11 +411,11 @@ it('keeps the types selected by the My Affiliated Types action when the page is 
     $affiliatedType = ServiceRequestType::factory()->create();
     $affiliatedType->managerUsers()->attach($user);
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->callAction(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->assertSet('filters.serviceRequestTypes', [$affiliatedType->getKey()]);
 });
 
@@ -428,12 +428,12 @@ it('keeps the filter empty when the page is revisited after the Clear action', f
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->set('filters.serviceRequestTypes', [$type->getKey()])
         ->callAction(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', []);
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->assertSet('filters.serviceRequestTypes', []);
 });
 
@@ -446,7 +446,7 @@ it('disables clear action until at least one type is selected', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->assertActionDisabled(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->set('filters.serviceRequestTypes', [$type->getKey()])
         ->assertActionEnabled(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'));
@@ -461,7 +461,7 @@ it('clears the selected types via the Clear action', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ServiceRequests::class)
+    Livewire::test(ServiceRequests::class)
         ->set('filters.serviceRequestTypes', [$type->getKey()])
         ->callAction(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', 'filtersForm'))
         ->assertSet('filters.serviceRequestTypes', []);
@@ -490,14 +490,14 @@ it('filters the service requests table by the selected types', function () {
         'respondent_id' => Contact::factory(),
     ])->create();
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-type-filter',
         'pageFilters' => ['serviceRequestTypes' => [$typeA->getKey()]],
     ])
         ->assertCanSeeTableRecords(collect([$requestA]))
         ->assertCanNotSeeTableRecords(collect([$requestB]));
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-type-filter-all',
         'pageFilters' => [],
     ])
@@ -508,7 +508,7 @@ it('filters the request types table by the selected types', function () {
     $typeA = ServiceRequestType::factory()->create(['name' => 'Type A']);
     $typeB = ServiceRequestType::factory()->create(['name' => 'Type B']);
 
-    livewire(ServiceRequestTypesTable::class, [
+    Livewire::test(ServiceRequestTypesTable::class, [
         'cacheTag' => 'test-service-request-types-table-type-filter',
         'pageFilters' => ['serviceRequestTypes' => [$typeA->getKey()]],
     ])

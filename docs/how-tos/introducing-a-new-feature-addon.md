@@ -151,7 +151,7 @@ This guide covers gating features behind addon toggles tied to the account subsc
     });
     ```
 
-    `tests/TestCase.php`: Both the `createTenant` function and the `refreshTenantTestingEnvironment` will need to be updated:
+    `tests/TestCase.php`: The `createTenant` function will need to be updated:
 
     ```php
     new LicenseAddonsData(

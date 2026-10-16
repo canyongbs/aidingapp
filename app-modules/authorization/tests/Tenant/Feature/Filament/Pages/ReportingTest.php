@@ -42,10 +42,10 @@ use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 
 it('cannot be accessed by a user without the reporting permission', function () {
     $user = User::factory()->create();
@@ -84,7 +84,7 @@ it('always lists reports that require no feature addon', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertCanSeeTableRecords([
             ReportAccessKey::AiSupportAssistant->value,
             ReportAccessKey::AiClarification->value,
@@ -111,13 +111,13 @@ it('only lists a report when the required feature addon is enabled for the tenan
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertCanNotSeeTableRecords([$case->value]);
 
     $enableReport($settings);
     $settings->save();
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertCanSeeTableRecords([$case->value]);
 })->with([
     ReportAccessKey::ServiceRequests->value => [
@@ -175,7 +175,7 @@ it('can search reports by name', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->searchTable(ReportAccessKey::Projects->getName())
         ->assertCanSeeTableRecords([ReportAccessKey::Projects->value])
         ->assertCanNotSeeTableRecords([ReportAccessKey::AiSupportAssistant->value]);
@@ -187,7 +187,7 @@ it('can filter reports by category', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->filterTable('category', ReportAccessKey::AiSupportAssistant->getCategory())
         ->assertCanSeeTableRecords([ReportAccessKey::AiSupportAssistant->value])
         ->assertCanNotSeeTableRecords([ReportAccessKey::Projects->value]);
@@ -200,7 +200,7 @@ it('manage report action is visible with appropriate permissions', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertActionVisible(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value));
 });
 
@@ -210,7 +210,7 @@ it('can not manage report action without appropriate permissions', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertActionHidden(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value));
 });
 
@@ -223,7 +223,7 @@ it('assigns users to a report through the manage action', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
             'users' => [$assignedUser->getKey()],
             'departments' => [],
@@ -247,7 +247,7 @@ it('assigns departments to a report through the manage action', function () {
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
             'users' => [],
             'departments' => [$department->getKey()],
@@ -276,7 +276,7 @@ it('removes access that is no longer selected when managing a report', function 
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->callAction(TestAction::make('manage')->table(ReportAccessKey::AiSupportAssistant->value), [
             'users' => [],
             'departments' => [],
@@ -316,7 +316,7 @@ it('bulk manage assignments action is visible for user with update permission', 
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertTableBulkActionVisible('manageReportAssignments');
 });
 
@@ -326,7 +326,7 @@ it('bulk manage assignments action is not visible for user without update permis
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->assertTableBulkActionHidden('manageReportAssignments');
 });
 
@@ -346,7 +346,7 @@ it('bulk manage assignments action adds users and departments to selected report
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->callTableBulkAction('manageReportAssignments', [ReportAccessKey::AiSupportAssistant->value], [
             'users' => [$newUser->getKey()],
             'departments' => [$department->getKey()],
@@ -398,7 +398,7 @@ it('bulk manage assignments action replaces users and departments when sync is e
 
     actingAs($user);
 
-    livewire(Reporting::class)
+    Livewire::test(Reporting::class)
         ->callTableBulkAction('manageReportAssignments', [ReportAccessKey::AiSupportAssistant->value], [
             'users' => [$newUser->getKey()],
             'departments' => [$newDepartment->getKey()],

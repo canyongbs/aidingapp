@@ -42,10 +42,10 @@ use AidingApp\Contact\Tests\Tenant\OrganizationIndustry\RequestFactories\CreateO
 use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 test('Create Organization Industry is gated with proper access control', function () {
@@ -56,7 +56,7 @@ test('Create Organization Industry is gated with proper access control', functio
             OrganizationIndustryResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateOrganizationIndustry::class)
+    Livewire::test(CreateOrganizationIndustry::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -77,7 +77,7 @@ test('Create New Organization Industry', function () {
 
     $request = collect(CreateOrganizationIndustryRequestFactory::new()->create());
 
-    livewire(CreateOrganizationIndustry::class)
+    Livewire::test(CreateOrganizationIndustry::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -97,7 +97,7 @@ test('the organization industry name must be unique among non-trashed industries
 
     actingAs($user);
 
-    livewire(CreateOrganizationIndustry::class)
+    Livewire::test(CreateOrganizationIndustry::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -115,7 +115,7 @@ test('the organization industry name uniqueness check is case-insensitive', func
 
     actingAs($user);
 
-    livewire(CreateOrganizationIndustry::class)
+    Livewire::test(CreateOrganizationIndustry::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -135,7 +135,7 @@ test('does not apply the unique form rule when the feature is disabled', functio
 
     actingAs($user);
 
-    expect(fn () => livewire(CreateOrganizationIndustry::class)
+    expect(fn () => Livewire::test(CreateOrganizationIndustry::class)
         ->fillForm($request->toArray())
         ->call('create'))
         ->toThrow(UniqueConstraintViolationException::class);

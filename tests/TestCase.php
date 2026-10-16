@@ -41,7 +41,6 @@ use App\DataTransferObjects\LicenseManagement\LicenseAddonsData;
 use App\DataTransferObjects\LicenseManagement\LicenseData;
 use App\DataTransferObjects\LicenseManagement\LicenseLimitsData;
 use App\DataTransferObjects\LicenseManagement\LicenseSubscriptionData;
-use App\Jobs\UpdateTenantLicenseData;
 use App\Models\Authenticatable;
 use App\Models\Tenant;
 use App\Multitenancy\Actions\CreateTenant;
@@ -57,6 +56,7 @@ use Illuminate\Support\Facades\ParallelTesting;
 use Spatie\Multitenancy\Concerns\UsesMultitenancyConfig;
 use Spatie\Permission\PermissionRegistrar;
 use Tests\Concerns\LoadsFixtures;
+use Tests\Concerns\RefreshesDatabaseFromSnapshot;
 
 abstract class TestCase extends BaseTestCase
 {
@@ -65,6 +65,7 @@ abstract class TestCase extends BaseTestCase
     use LoadsFixtures;
     use UsesMultitenancyConfig;
     use RefreshDatabase;
+    use RefreshesDatabaseFromSnapshot;
 
     protected function setUp(): void
     {
@@ -81,13 +82,26 @@ abstract class TestCase extends BaseTestCase
             ...$this->migrateFreshUsing(),
         ]);
 
-        $tenantDatabase = ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant';
-
         $this->createTenant(
             name: 'Test Tenant',
             domain: 'test.aidingapp.local',
-            database: $tenantDatabase,
+            database: $this->tenantTestingDatabaseName(),
         );
+
+        $this->snapshotDatabase($this->tenantTestingDatabaseName(), $this->landlordDatabaseConnectionName());
+    }
+
+    /**
+     * For tests that cannot wrap the tenant database in a transaction, as switching tenants reconnects it.
+     */
+    protected function restoreTenantTestingEnvironment(): void
+    {
+        $this->restoreDatabaseFromSnapshot($this->tenantTestingDatabaseName(), $this->landlordDatabaseConnectionName());
+    }
+
+    protected function tenantTestingDatabaseName(): string
+    {
+        return ParallelTesting::token() ? 'testing_tenant_test_' . ParallelTesting::token() : 'testing_tenant';
     }
 
     protected function beginDatabaseTransactionOnConnection(string $name): void
@@ -196,56 +210,5 @@ abstract class TestCase extends BaseTestCase
         });
 
         return $tenant;
-    }
-
-    protected function refreshTenantTestingEnvironment(?Tenant $tenant = null): void
-    {
-        $tenant ??= Tenant::firstOrFail();
-
-        $tenant->execute(function () use ($tenant) {
-            $this->artisan('migrate:fresh', [
-                '--database' => $this->tenantDatabaseConnectionName(),
-                ...$this->migrateFreshUsing(),
-            ]);
-
-            Role::query()->firstOrCreate([
-                'name' => Authenticatable::SUPER_ADMIN_ROLE,
-                'guard_name' => 'web',
-            ]);
-
-            dispatch_sync(new UpdateTenantLicenseData(
-                $tenant,
-                new LicenseData(
-                    updatedAt: now(),
-                    subscription: new LicenseSubscriptionData(
-                        clientName: 'Jane Smith',
-                        partnerName: 'Fake Edu Tech',
-                        clientPo: 'abc123',
-                        partnerPo: 'def456',
-                        startDate: now(),
-                        endDate: now()->addYear(),
-                    ),
-                    limits: new LicenseLimitsData(
-                        emails: 1000,
-                        resetDate: now()->format('m-d'),
-                    ),
-                    addons: new LicenseAddonsData(
-                        onlineForms: true,
-                        serviceManagement: true,
-                        knowledgeManagement: true,
-                        realtimeChat: true,
-                        mobileApps: true,
-                        changeManagement: true,
-                        assetManagement: true,
-                        feedbackManagement: true,
-                        contractManagement: true,
-                        licenseManagement: true,
-                        projectManagement: true,
-                        advisoryManagement: true,
-                        serviceMonitoring: true,
-                    )
-                )
-            ));
-        });
     }
 }

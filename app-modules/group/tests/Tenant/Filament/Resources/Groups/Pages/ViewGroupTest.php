@@ -38,10 +38,10 @@ use AidingApp\Group\Filament\Resources\Groups\GroupResource;
 use AidingApp\Group\Filament\Resources\Groups\Pages\ViewGroup;
 use AidingApp\Group\Models\Group;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the view group page', function () {
@@ -55,7 +55,7 @@ it('displays the group data', function () {
     asSuperAdmin();
     $group = Group::factory()->create();
 
-    livewire(ViewGroup::class, ['record' => $group->getRouteKey()])
+    Livewire::test(ViewGroup::class, ['record' => $group->getRouteKey()])
         ->assertSchemaStateSet([
             'name' => $group->name,
             'description' => $group->description,

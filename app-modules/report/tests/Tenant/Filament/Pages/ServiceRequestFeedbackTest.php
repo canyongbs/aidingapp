@@ -41,9 +41,9 @@ use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -55,24 +55,24 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(ServiceRequestFeedback::class)->assertForbidden();
+    Livewire::test(ServiceRequestFeedback::class)->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    livewire(ServiceRequestFeedback::class)->assertForbidden();
+    Livewire::test(ServiceRequestFeedback::class)->assertForbidden();
 
     $settings->data->addons->feedbackManagement = true;
     $settings->save();
 
-    livewire(ServiceRequestFeedback::class)->assertForbidden();
+    Livewire::test(ServiceRequestFeedback::class)->assertForbidden();
 
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::ServiceRequestFeedback->value,
         'user_id' => $user->getKey(),
     ]);
 
-    livewire(ServiceRequestFeedback::class)->assertOk();
+    Livewire::test(ServiceRequestFeedback::class)->assertOk();
 });
 
 it('grants access to a user belonging to a department that has been granted access', function () {
@@ -87,12 +87,12 @@ it('grants access to a user belonging to a department that has been granted acce
 
     actingAs($user);
 
-    livewire(ServiceRequestFeedback::class)->assertForbidden();
+    Livewire::test(ServiceRequestFeedback::class)->assertForbidden();
 
     ReportDepartmentAccess::factory()->create([
         'report_key' => ReportAccessKey::ServiceRequestFeedback->value,
         'department_id' => $department->getKey(),
     ]);
 
-    livewire(ServiceRequestFeedback::class)->assertOk();
+    Livewire::test(ServiceRequestFeedback::class)->assertOk();
 });

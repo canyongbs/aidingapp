@@ -45,9 +45,9 @@ use Filament\Actions\AssociateAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 
 // TODO: Write EditKnowledgeBaseCategory tests
@@ -69,7 +69,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
             ])
         )->assertForbidden();
 
-    livewire(EditKnowledgeBaseCategory::class, [
+    Livewire::test(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->assertForbidden();
@@ -86,7 +86,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
 
     $request = collect(EditKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(EditKnowledgeBaseCategory::class, [
+    Livewire::test(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -117,7 +117,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
             ])
         )->assertForbidden();
 
-    livewire(EditKnowledgeBaseCategory::class, [
+    Livewire::test(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->assertForbidden();
@@ -135,7 +135,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
 
     $request = collect(EditKnowledgeBaseCategoryRequestFactory::new()->create());
 
-    livewire(EditKnowledgeBaseCategory::class, [
+    Livewire::test(EditKnowledgeBaseCategory::class, [
         'record' => $knowledgeBaseCategory->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -160,7 +160,7 @@ test('can create subcategory', function () {
         'parent_id' => $knowledgeBaseCategory->getKey(),
     ])->make();
 
-    livewire(SubCategoriesRelationManager::class, [
+    Livewire::test(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
@@ -192,7 +192,7 @@ test('exclude already attached subcategories in search', function () {
 
     $newknowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
 
-    livewire(SubCategoriesRelationManager::class, [
+    Livewire::test(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
@@ -219,7 +219,7 @@ test('can attach subcategories into categories', function () {
     expect($knowledgeBaseCategory->subCategories)
         ->toBeEmpty();
 
-    livewire(SubCategoriesRelationManager::class, [
+    Livewire::test(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
@@ -248,7 +248,7 @@ test('only shows the subcategories bulk delete action to a user with the setting
         ->state(['parent_id' => $knowledgeBaseCategory->getKey()])
         ->create();
 
-    livewire(SubCategoriesRelationManager::class, [
+    Livewire::test(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
@@ -256,7 +256,7 @@ test('only shows the subcategories bulk delete action to a user with the setting
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(SubCategoriesRelationManager::class, [
+    Livewire::test(SubCategoriesRelationManager::class, [
         'ownerRecord' => $knowledgeBaseCategory,
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])

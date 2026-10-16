@@ -42,9 +42,9 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can list manager users', function () {
@@ -56,7 +56,7 @@ it('can list manager users', function () {
 
     $project->managerUsers()->attach($managers->pluck('id'));
 
-    livewire(ManagerUsersRelationManager::class, [
+    Livewire::test(ManagerUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
@@ -70,7 +70,7 @@ it('can attach a manager user to a project', function () {
 
     $manager = User::factory()->create();
 
-    livewire(ManagerUsersRelationManager::class, [
+    Livewire::test(ManagerUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
@@ -91,7 +91,7 @@ it('can detach a manager user from a project', function () {
 
     $project->managerUsers()->attach($manager->getKey());
 
-    livewire(ManagerUsersRelationManager::class, [
+    Livewire::test(ManagerUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
@@ -110,7 +110,7 @@ it('can bulk detach manager users from a project', function () {
 
     $project->managerUsers()->attach($managers->pluck('id'));
 
-    livewire(ManagerUsersRelationManager::class, [
+    Livewire::test(ManagerUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageManagers::class,
     ])
@@ -129,7 +129,7 @@ describe('authorization', function () {
 
         $manager = User::factory()->create();
 
-        livewire(ManagerUsersRelationManager::class, [
+        Livewire::test(ManagerUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
@@ -155,7 +155,7 @@ describe('authorization', function () {
 
         $manager = User::factory()->create();
 
-        livewire(ManagerUsersRelationManager::class, [
+        Livewire::test(ManagerUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
@@ -183,7 +183,7 @@ describe('authorization', function () {
 
         $manager = User::factory()->create();
 
-        livewire(ManagerUsersRelationManager::class, [
+        Livewire::test(ManagerUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
@@ -206,7 +206,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(ManagerUsersRelationManager::class, [
+        Livewire::test(ManagerUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])
@@ -224,7 +224,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(ManagerUsersRelationManager::class, [
+        Livewire::test(ManagerUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageManagers::class,
         ])

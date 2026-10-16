@@ -43,9 +43,9 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can list auditor departments', function () {
@@ -57,7 +57,7 @@ it('can list auditor departments', function () {
 
     $project->auditorDepartments()->attach($departments->pluck('id'));
 
-    livewire(AuditorDepartmentsRelationManager::class, [
+    Livewire::test(AuditorDepartmentsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -71,7 +71,7 @@ it('can attach an auditor department to a project', function () {
 
     $department = Department::factory()->create();
 
-    livewire(AuditorDepartmentsRelationManager::class, [
+    Livewire::test(AuditorDepartmentsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -92,7 +92,7 @@ it('can detach an auditor department from a project', function () {
 
     $project->auditorDepartments()->attach($department->getKey());
 
-    livewire(AuditorDepartmentsRelationManager::class, [
+    Livewire::test(AuditorDepartmentsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -111,7 +111,7 @@ it('can bulk detach auditor departments from a project', function () {
 
     $project->auditorDepartments()->attach($departments->pluck('id'));
 
-    livewire(AuditorDepartmentsRelationManager::class, [
+    Livewire::test(AuditorDepartmentsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -130,7 +130,7 @@ describe('authorization', function () {
 
         $department = Department::factory()->create();
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -156,7 +156,7 @@ describe('authorization', function () {
 
         $department = Department::factory()->create();
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -188,7 +188,7 @@ describe('authorization', function () {
 
         $newDepartment = Department::factory()->create();
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -218,7 +218,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -235,7 +235,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -253,7 +253,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(AuditorDepartmentsRelationManager::class, [
+        Livewire::test(AuditorDepartmentsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])

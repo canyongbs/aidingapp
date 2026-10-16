@@ -43,9 +43,9 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can list guest organizations', function () {
@@ -57,7 +57,7 @@ it('can list guest organizations', function () {
 
     $project->guestOrganizations()->attach($organizations->pluck('id'));
 
-    livewire(GuestOrganizationsRelationManager::class, [
+    Livewire::test(GuestOrganizationsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -71,7 +71,7 @@ it('can attach a guest organization to a project', function () {
 
     $organization = Organization::factory()->create();
 
-    livewire(GuestOrganizationsRelationManager::class, [
+    Livewire::test(GuestOrganizationsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -92,7 +92,7 @@ it('can detach a guest organization from a project', function () {
 
     $project->guestOrganizations()->attach($organization->getKey());
 
-    livewire(GuestOrganizationsRelationManager::class, [
+    Livewire::test(GuestOrganizationsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -111,7 +111,7 @@ it('can bulk detach guest organizations from a project', function () {
 
     $project->guestOrganizations()->attach($organizations->pluck('id'));
 
-    livewire(GuestOrganizationsRelationManager::class, [
+    Livewire::test(GuestOrganizationsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -130,7 +130,7 @@ describe('authorization', function () {
 
         $organization = Organization::factory()->create();
 
-        livewire(GuestOrganizationsRelationManager::class, [
+        Livewire::test(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -156,7 +156,7 @@ describe('authorization', function () {
 
         $organization = Organization::factory()->create();
 
-        livewire(GuestOrganizationsRelationManager::class, [
+        Livewire::test(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -184,7 +184,7 @@ describe('authorization', function () {
 
         $organization = Organization::factory()->create();
 
-        livewire(GuestOrganizationsRelationManager::class, [
+        Livewire::test(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -207,7 +207,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(GuestOrganizationsRelationManager::class, [
+        Livewire::test(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -225,7 +225,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(GuestOrganizationsRelationManager::class, [
+        Livewire::test(GuestOrganizationsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])

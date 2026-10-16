@@ -42,12 +42,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 function allNotificationSettings(bool $enabled = false): array
@@ -110,7 +110,7 @@ test('A successful action on the EditServiceRequestTypeNotifications page', func
         )
         ->assertSuccessful();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->call('save')
@@ -138,7 +138,7 @@ test('form is pre-filled with enabled preferences loaded from the pivot table', 
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertSet('data.settings.is_managers_service_request_created_email_enabled', true)
@@ -158,7 +158,7 @@ test('form is pre-filled with assigned manager preferences loaded from the pivot
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertSet('data.settings.is_assigned_managers_service_request_assigned_email_enabled', true);
@@ -169,7 +169,7 @@ test('saving creates a new preference row for a single combination', function ()
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -194,7 +194,7 @@ test('saving upserts all visible matrix combinations into the pivot table', func
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm(['settings' => allNotificationSettings(enabled: true)])
@@ -248,7 +248,7 @@ test('saving updates an existing enabled preference to disabled', function () {
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -281,7 +281,7 @@ test('saving updates an existing disabled preference to enabled', function () {
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -306,7 +306,7 @@ test('survey response email preference is only stored for the customer role', fu
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm(['settings' => allNotificationSettings(enabled: true)])
@@ -343,7 +343,7 @@ test('survey response notification channel is never written to the pivot table f
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm(['settings' => allNotificationSettings(enabled: true)])
@@ -373,7 +373,7 @@ test('EditServiceRequestTypeNotifications is gated with proper access control', 
         )
         ->assertForbidden();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -389,7 +389,7 @@ test('EditServiceRequestTypeNotifications is gated with proper access control', 
         )
         ->assertSuccessful();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -431,7 +431,7 @@ test('EditServiceRequestTypeNotifications is gated with proper feature access co
         )
         ->assertForbidden();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -448,7 +448,7 @@ test('EditServiceRequestTypeNotifications is gated with proper feature access co
         )
         ->assertSuccessful();
 
-    livewire(EditServiceRequestTypeNotifications::class, [
+    Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([

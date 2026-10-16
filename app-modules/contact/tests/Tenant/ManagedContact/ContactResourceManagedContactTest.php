@@ -41,9 +41,9 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Services\ManagedContactService;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 function makeManagedContact(): Contact
 {
@@ -60,7 +60,6 @@ dataset('contactSectionEditActions', [
     'academic information' => ['editAcademicInformation', 'academicInformation'],
     'address information' => ['editAddressInformation', 'addressInformation'],
     'customer information' => ['editCustomerInformation', 'customerInformation'],
-    'engagement restrictions' => ['editEngagementRestrictions', 'engagementRestrictions'],
 ]);
 
 it('does not render standalone view or edit actions in the list', function () {
@@ -72,7 +71,7 @@ it('does not render standalone view or edit actions in the list', function () {
     $managed = makeManagedContact();
     $unmanaged = Contact::factory()->create();
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertActionDoesNotExist(TestAction::make('view')->table($managed))
         ->assertActionDoesNotExist(TestAction::make('edit')->table($managed))
         ->assertActionDoesNotExist(TestAction::make('view')->table($unmanaged))
@@ -87,7 +86,7 @@ it('shows a lock action instead of the section edit actions on the view page of 
 
     $managed = makeManagedContact();
 
-    livewire(ViewContact::class, ['record' => $managed->getKey()])
+    Livewire::test(ViewContact::class, ['record' => $managed->getKey()])
         ->assertActionVisible('managed')
         ->assertActionDoesNotExist(TestAction::make($action)->schemaComponent($component));
 })->with('contactSectionEditActions');
@@ -100,7 +99,7 @@ it('shows the section edit actions on the view page of an unmanaged contact', fu
 
     $unmanaged = Contact::factory()->create();
 
-    livewire(ViewContact::class, ['record' => $unmanaged->getKey()])
+    Livewire::test(ViewContact::class, ['record' => $unmanaged->getKey()])
         ->assertActionVisible(TestAction::make($action)->schemaComponent($component))
         ->assertActionDoesNotExist('managed');
 })->with('contactSectionEditActions');

@@ -40,9 +40,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // TODO: Write ListKnowledgeBaseStatuses tests
 //test('The correct details are displayed on the ListKnowledgeBaseStatuses page', function () {});
@@ -102,11 +102,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListKnowledgeBaseStatuses::class)
+    Livewire::test(ListKnowledgeBaseStatuses::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListKnowledgeBaseStatuses::class)
+    Livewire::test(ListKnowledgeBaseStatuses::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

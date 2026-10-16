@@ -39,8 +39,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Ser
 use AidingApp\ServiceManagement\Models\ServiceRequestNotificationAutomationEmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Settings\ServiceRequestNotificationAutomationSettings;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('fill with AI action is hidden when settings are disabled', function () {
@@ -57,7 +57,7 @@ test('fill with AI action is hidden when settings are disabled', function () {
 
     asSuperAdmin();
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
         'type' => ServiceRequestEmailTemplateType::Created,
     ])
@@ -73,7 +73,7 @@ test('fill with AI action is disabled when no AI templates exist for the event t
 
     asSuperAdmin();
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
         'type' => ServiceRequestEmailTemplateType::Created,
     ])
@@ -95,7 +95,7 @@ test('fill with AI action is enabled when feature is enabled and AI templates ex
 
     asSuperAdmin();
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
         'type' => ServiceRequestEmailTemplateType::Created,
     ])

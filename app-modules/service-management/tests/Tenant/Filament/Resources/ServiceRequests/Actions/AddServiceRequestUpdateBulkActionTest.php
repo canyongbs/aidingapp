@@ -44,9 +44,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -65,7 +65,7 @@ test('it can add updates to multiple service requests as super admin', function 
         assertCount(0, $serviceRequest->serviceRequestUpdates);
     });
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('addServiceRequestUpdate')
@@ -117,7 +117,7 @@ test('it can add updates to multiple service requests for user directly assigned
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('addServiceRequestUpdate')
@@ -172,7 +172,7 @@ test('it can add updates to multiple service requests for user belonging to a ma
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('addServiceRequestUpdate')
@@ -210,7 +210,7 @@ test('it can add updates to multiple service requests for user belonging to a ma
     $user->givePermissionTo('service_request_update.create');
     actingAs($user);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
             'update' => 'Test Update',
             'internal' => true,
@@ -240,7 +240,7 @@ test('it cannot add updates to service requests for user who is not a manager', 
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
             'update' => 'Test Update',
@@ -272,7 +272,7 @@ test('it cannot add updates to service requests for user without required permis
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->callTableBulkAction('addServiceRequestUpdate', $serviceRequests, [
             'update' => 'Test Update',

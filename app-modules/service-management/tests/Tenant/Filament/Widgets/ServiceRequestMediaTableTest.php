@@ -45,9 +45,9 @@ use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 describe('ServiceRequest', function () {
@@ -62,7 +62,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -82,7 +82,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('report.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -103,7 +103,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('Screenshot.jpg')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -125,7 +125,7 @@ describe('ServiceRequest', function () {
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -153,7 +153,7 @@ describe('ServiceRequest', function () {
         $media->createdBy()->associate($contact);
         $media->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -180,7 +180,7 @@ describe('ServiceRequest', function () {
         $annualReport = $allMedia->first(fn ($m) => $m->name === 'Annual-Report');
         $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -215,7 +215,7 @@ describe('ServiceRequest', function () {
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -256,7 +256,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -297,7 +297,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -338,7 +338,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -352,7 +352,7 @@ describe('ServiceRequest', function () {
 
         $serviceRequest = ServiceRequest::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -369,7 +369,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -381,7 +381,7 @@ describe('ServiceRequest', function () {
 
         $serviceRequest = ServiceRequest::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -401,7 +401,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -419,7 +419,7 @@ describe('ServiceRequest', function () {
 
         actingAs(User::factory()->create());
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -433,7 +433,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->closed(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -453,7 +453,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -505,7 +505,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -526,7 +526,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -554,7 +554,7 @@ describe('ServiceRequest', function () {
                 ->toMediaCollection('uploads');
         }
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -577,7 +577,7 @@ describe('ServiceRequest', function () {
                 ->toMediaCollection('uploads');
         }
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -606,7 +606,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -631,7 +631,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -662,7 +662,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        $component = livewire(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -692,7 +692,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('report.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -721,7 +721,7 @@ describe('ServiceRequestUpdate', function () {
             ->usingName('attachment')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -749,7 +749,7 @@ describe('ServiceRequestUpdate', function () {
         $media->createdBy()->associate($contact);
         $media->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -776,7 +776,7 @@ describe('ServiceRequestUpdate', function () {
         $meetingNotes = $allMedia->first(fn ($m) => $m->name === 'Meeting-Notes');
         $screenshot = $allMedia->first(fn ($m) => $m->name === 'screenshot');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -811,7 +811,7 @@ describe('ServiceRequestUpdate', function () {
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -852,7 +852,7 @@ describe('ServiceRequestUpdate', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -866,7 +866,7 @@ describe('ServiceRequestUpdate', function () {
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -883,7 +883,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -905,7 +905,7 @@ describe('ServiceRequestUpdate', function () {
             ->usingName('attachment')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -925,7 +925,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -948,7 +948,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -980,7 +980,7 @@ describe('ServiceRequestUpdate', function () {
             ->usingFileName('attachment.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])

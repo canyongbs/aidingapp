@@ -39,11 +39,11 @@ use AidingApp\Group\Filament\Resources\Groups\Pages\CreateGroup;
 use AidingApp\Group\Models\Group;
 use AidingApp\Group\Tests\Tenant\Filament\Resources\Groups\RequestFactories\GroupRequestFactory;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the create group page', function () {
@@ -59,7 +59,7 @@ it('can create a group', function () {
 
     $request = GroupRequestFactory::new()->create();
 
-    livewire(CreateGroup::class)
+    Livewire::test(CreateGroup::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors()
@@ -77,7 +77,7 @@ it('can create a group without a description', function () {
 
     $request = GroupRequestFactory::new()->state(['description' => null])->create();
 
-    livewire(CreateGroup::class)
+    Livewire::test(CreateGroup::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -93,7 +93,7 @@ it('can create a group with a soft deleted group name', function () {
 
     $request = GroupRequestFactory::new()->state(['name' => 'Student Success'])->create();
 
-    livewire(CreateGroup::class)
+    Livewire::test(CreateGroup::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -106,7 +106,7 @@ it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
 
     Group::factory()->create(['name' => 'Student Success']);
 
-    livewire(CreateGroup::class)
+    Livewire::test(CreateGroup::class)
         ->fillForm($data->create())
         ->call('create')
         ->assertHasFormErrors($errors);
