@@ -44,6 +44,7 @@
 
     import 'filepond-plugin-image-preview/dist/filepond-plugin-image-preview.min.css';
     import 'filepond/dist/filepond.min.css';
+    import { defineProps } from 'vue';
 
     const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 

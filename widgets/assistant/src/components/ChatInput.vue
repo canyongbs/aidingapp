@@ -34,7 +34,7 @@
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
     import { PaperAirplaneIcon } from '@heroicons/vue/16/solid';
-    import { nextTick, ref } from 'vue';
+    import { defineEmits, defineProps, nextTick, ref } from 'vue';
 
     const emit = defineEmits(['send', 'addFiles', 'removeFile']);
 

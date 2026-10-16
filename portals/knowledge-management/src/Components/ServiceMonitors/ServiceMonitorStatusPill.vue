@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
+    import { computed, defineProps } from 'vue';
     import BaseStatusPill from '../ui/BaseStatusPill.vue';
     import { getStatus } from './serviceMonitorStatuses.js';
 

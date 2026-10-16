@@ -34,7 +34,7 @@
 
 <script setup>
     import { ArrowLeftIcon, ShieldCheckIcon, UserGroupIcon, UserPlusIcon, XMarkIcon } from '@heroicons/vue/24/outline';
-    import { computed, ref } from 'vue';
+    import { computed, defineEmits, defineProps, ref } from 'vue';
     import { useConversations } from '../composables/useConversations';
     import AddParticipantsModal from './AddParticipantsModal.vue';
     import Avatar from './ui/Avatar.vue';

@@ -32,6 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { defineEmits, defineProps } from 'vue';
     import { useServiceRequestWizard } from '../composables/useServiceRequestWizard.js';
     import AiResolutionStep from './ServiceRequest/AiResolutionStep.vue';
     import CustomFieldsStep from './ServiceRequest/CustomFieldsStep.vue';

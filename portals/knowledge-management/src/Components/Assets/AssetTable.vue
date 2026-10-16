@@ -34,6 +34,7 @@
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { defineEmits, defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';
