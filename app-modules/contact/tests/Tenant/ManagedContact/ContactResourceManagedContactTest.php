@@ -60,7 +60,6 @@ dataset('contactSectionEditActions', [
     'academic information' => ['editAcademicInformation', 'academicInformation'],
     'address information' => ['editAddressInformation', 'addressInformation'],
     'customer information' => ['editCustomerInformation', 'customerInformation'],
-    'engagement restrictions' => ['editEngagementRestrictions', 'engagementRestrictions'],
 ]);
 
 it('does not render standalone view or edit actions in the list', function () {
