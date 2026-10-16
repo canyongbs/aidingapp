@@ -36,12 +36,12 @@
 
 namespace AidingApp\Report\Models;
 
+use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Database\Factories\ReportDepartmentAccessFactory;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use OwenIt\Auditing\Auditable as AuditableTrait;
 use OwenIt\Auditing\Contracts\Auditable;
 
 /**
