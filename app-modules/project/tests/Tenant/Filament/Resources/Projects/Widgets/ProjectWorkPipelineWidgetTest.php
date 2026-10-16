@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Pipeline;
@@ -42,6 +43,7 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
+use Filament\Tables\Columns\Column;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -231,6 +233,45 @@ describe('status filter', function () {
             ->filterTable('classification', [PipelineStageClassification::Complete->value])
             ->assertCanSeeTableRecords([$completeTask])
             ->assertCanNotSeeTableRecords([$planningTask]);
+    });
+});
+
+describe('columns', function () {
+    it('renders the assigned to column before the stage column', function () {
+        $project = Project::factory()->create();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
+            ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
+    });
+
+    it('renders the name of the user or contact assigned to a task', function (Closure $makeAssignee) {
+        $project = Project::factory()->create();
+        $pipeline = Pipeline::factory()->for($project)->create();
+        $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
+
+        [$assignee, $expectedName] = $makeAssignee();
+
+        $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+            'assigned_to_type' => $assignee->getMorphClass(),
+            'assigned_to_id' => $assignee->getKey(),
+        ]);
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->assertCanSeeTableRecords([$entry])
+            ->assertTableColumnStateSet('assignedTo', $expectedName, $entry);
+    })->with([
+        'user' => [fn (): array => [$user = User::factory()->create(['name' => 'Assigned User']), $user->name]],
+        'contact' => [fn (): array => [$contact = Contact::factory()->create(), $contact->full_name]],
+    ]);
+
+    it('hides the created by, assets, and tickets columns by default', function () {
+        $project = Project::factory()->create();
+
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+            ->assertTableColumnExists('createdBy.name', fn (Column $column): bool => $column->isToggledHiddenByDefault())
+            ->assertTableColumnExists('assets', fn (Column $column): bool => $column->isToggledHiddenByDefault())
+            ->assertTableColumnExists('serviceRequests', fn (Column $column): bool => $column->isToggledHiddenByDefault());
     });
 });
 
