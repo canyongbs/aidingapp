@@ -33,6 +33,7 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import { defineEmits, defineProps } from 'vue';
     import { useWidgetSignIn } from '../composables/useWidgetSignIn.js';
 
     const props = defineProps({

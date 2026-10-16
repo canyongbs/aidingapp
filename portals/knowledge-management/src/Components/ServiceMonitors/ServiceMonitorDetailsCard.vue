@@ -34,7 +34,7 @@
 <script setup>
     import { ArrowTopRightOnSquareIcon } from '@heroicons/vue/16/solid';
     import { ClockIcon, Cog6ToothIcon, LinkIcon, Square3Stack3DIcon } from '@heroicons/vue/24/outline';
-    import { computed } from 'vue';
+    import { computed, defineProps } from 'vue';
     import BaseCard from '../ui/BaseCard.vue';
 
     const props = defineProps({

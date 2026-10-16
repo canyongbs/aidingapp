@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/vue/16/solid';
+    import { defineEmits, defineProps } from 'vue';
     import ServiceRequestCategoryTree from './ServiceRequestCategoryTree.vue';
 
     defineProps({

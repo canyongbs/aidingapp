@@ -34,7 +34,7 @@
 
 <script setup>
     import { ChatBubbleLeftRightIcon, HashtagIcon, UserIcon } from '@heroicons/vue/24/outline';
-    import { computed, ref, watch } from 'vue';
+    import { computed, defineEmits, defineProps, ref, watch } from 'vue';
     import { useConversations } from '../composables/useConversations';
     import BaseButton from './ui/BaseButton.vue';
     import BaseInput from './ui/BaseInput.vue';

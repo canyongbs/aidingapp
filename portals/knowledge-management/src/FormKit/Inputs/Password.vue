@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { createMessage } from '@formkit/core';
-    import { inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
+    import { defineProps, inject, nextTick, onBeforeUnmount, onMounted, ref } from 'vue';
     import { apiPostUrl } from '../../Services/api.js';
     import { passwordStorageKey } from '../passwordStorage.js';
 

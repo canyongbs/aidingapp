@@ -35,6 +35,7 @@
     import BaseBadge from '@common/BaseBadge.vue';
     import { ChartPieIcon } from '@heroicons/vue/20/solid';
     import { ClipboardDocumentIcon, InboxIcon } from '@heroicons/vue/24/outline';
+    import { defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
     import BaseTable from '../ui/BaseTable.vue';
     import BaseTableBody from '../ui/BaseTableBody.vue';

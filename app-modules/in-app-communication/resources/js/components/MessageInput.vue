@@ -39,7 +39,7 @@
     import StarterKit from '@tiptap/starter-kit';
     import { EditorContent, useEditor, VueRenderer } from '@tiptap/vue-3';
     import tippy from 'tippy.js';
-    import { computed, onBeforeUnmount, ref, watch } from 'vue';
+    import { computed, defineEmits, defineProps, onBeforeUnmount, ref, watch } from 'vue';
     import { cleanTipTapContent } from '../utils/helpers';
     import { mentionClasses } from '../utils/mention-classes';
     import MentionList from './MentionList.vue';

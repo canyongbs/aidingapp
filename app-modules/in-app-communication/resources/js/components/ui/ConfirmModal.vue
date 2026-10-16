@@ -34,6 +34,7 @@
 
 <script setup>
     import { ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+    import { defineEmits, defineProps } from 'vue';
     import BaseButton from './BaseButton.vue';
     import BaseModal from './BaseModal.vue';
 
