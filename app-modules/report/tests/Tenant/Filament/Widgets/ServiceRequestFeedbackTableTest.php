@@ -39,8 +39,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-
-use function Pest\Livewire\livewire;
+use Livewire\Livewire;
 
 it('returns service request feedbacks within the given date range', function () {
     $startDate = now()->subDays(10);
@@ -76,7 +75,7 @@ it('returns service request feedbacks within the given date range', function () 
         'endDate' => $endDate->toDateString(),
     ];
 
-    livewire(ServiceRequestFeedbackTable::class, [
+    Livewire::test(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
         'pageFilters' => $filters,
     ])
@@ -135,7 +134,7 @@ it('filters service request feedbacks by date and type', function () {
         'serviceRequestTypes' => [$typeA->id],
     ];
 
-    livewire(ServiceRequestFeedbackTable::class, [
+    Livewire::test(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
         'pageFilters' => $filters,
     ])
@@ -148,7 +147,7 @@ it('filters service request feedbacks by date and type', function () {
         'endDate' => $endDate->toDateString(),
     ];
 
-    livewire(ServiceRequestFeedbackTable::class, [
+    Livewire::test(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
         'pageFilters' => $filters,
     ])
@@ -156,7 +155,7 @@ it('filters service request feedbacks by date and type', function () {
         ->assertSee($feedbackTwo->serviceRequest->service_request_number)
         ->assertDontSee($feedbackThree->serviceRequest->service_request_number);
 
-    livewire(ServiceRequestFeedbackTable::class, [
+    Livewire::test(ServiceRequestFeedbackTable::class, [
         'cacheTag' => 'report-service-request-feedback',
         'pageFilters' => [],
     ])

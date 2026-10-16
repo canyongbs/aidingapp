@@ -42,9 +42,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('displays the open and total service request counts', function () {
     actingAs(
@@ -66,7 +66,7 @@ it('displays the open and total service request counts', function () {
         'status_id' => $closedStatus->getKey(),
     ]);
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertSeeText('2 Open')
         ->assertSeeText('3 Total');
 });
@@ -78,7 +78,7 @@ it('displays 0 open and 0 total when the contact has no service requests', funct
 
     Contact::factory()->create();
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertSeeText('0 Open')
         ->assertSeeText('0 Total');
 });
@@ -93,7 +93,7 @@ it('only displays populated identifiers', function () {
         'student_id' => null,
     ]);
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertSeeText('Employee ID:')
         ->assertSeeText('EMP-777')
         ->assertDontSeeText('Student ID:');
@@ -108,7 +108,7 @@ it('only displays the organization when one is associated', function () {
 
     Contact::factory()->for($organization, 'organization')->create();
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertSeeText('Acme University');
 });
 
@@ -119,7 +119,7 @@ it('links the contact name to the view page', function () {
 
     $contact = Contact::factory()->create();
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertSee(ContactResource::getUrl('view', ['record' => $contact]));
 });
 
@@ -130,7 +130,7 @@ it('does not render standalone view or edit actions', function () {
 
     $contact = Contact::factory()->create();
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertActionDoesNotExist(TestAction::make('view')->table($contact))
         ->assertActionDoesNotExist(TestAction::make('edit')->table($contact));
 });
@@ -144,11 +144,11 @@ it('only shows the bulk delete action to a user with the contact.delete permissi
 
     actingAs($user);
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('contact.*.delete');
 
-    livewire(ListContacts::class)
+    Livewire::test(ListContacts::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

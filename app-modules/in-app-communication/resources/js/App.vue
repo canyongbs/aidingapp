@@ -34,7 +34,7 @@
 
 <script setup>
     import { ArrowLeftIcon, ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/24/outline';
-    import { computed, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { computed, defineProps, onMounted, onUnmounted, ref, watch } from 'vue';
     import ConversationHeader from './components/ConversationHeader.vue';
     import ConversationList from './components/ConversationList.vue';
     import FindChannelsModal from './components/FindChannelsModal.vue';

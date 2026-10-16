@@ -37,10 +37,10 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use App\Models\User;
 use App\Services\AwsGeoPlacesService;
 use Illuminate\Support\Facades\Exceptions;
+use Livewire\Livewire;
 use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('does not query the address suggestion service for searches shorter than three characters', function () {
     actingAs(
@@ -54,7 +54,7 @@ it('does not query the address suggestion service for searches shorter than thre
         $mock->shouldNotReceive('autocompleteComponents');
     });
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->call('callSchemaComponentMethod', 'form.address', 'getSearchResultsForJs', ['ab'])
         ->assertReturned([]);
 });
@@ -76,7 +76,7 @@ it('returns no suggestions and notifies the user when the address suggestion ser
             ->andThrow(new Exception('AWS GeoPlaces is unavailable'));
     });
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->call('callSchemaComponentMethod', 'form.address', 'getSearchResultsForJs', ['123 Main'])
         ->assertNotified('Failed to fetch address suggestions')
         ->assertReturned([]);
@@ -91,7 +91,7 @@ it('limits the address to 255 characters', function () {
             ->givePermissionTo('contact.view-any', 'contact.create')
     );
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->fillForm([
             'first_name' => 'Jane',
             'last_name' => 'Doe',

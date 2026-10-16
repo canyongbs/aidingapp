@@ -35,7 +35,7 @@
     import BaseButton from '@common/BaseButton.vue';
     import { FormKitSchema } from '@formkit/vue';
     import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
-    import { computed, provide, ref, watch } from 'vue';
+    import { computed, defineEmits, defineExpose, defineProps, provide, ref, watch } from 'vue';
     import { createPasswordStorageCoordinator, passwordStorageKey } from '../../FormKit/passwordStorage.js';
 
     const props = defineProps({

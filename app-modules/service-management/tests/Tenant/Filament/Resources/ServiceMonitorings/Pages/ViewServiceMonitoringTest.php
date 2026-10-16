@@ -45,10 +45,10 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('ViewServiceMonitoring is gated with proper access control', function () {
@@ -143,7 +143,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         ->assertSee($reportDepartment->name)
         ->assertSee($reportContact->full_name);
 
-    livewire(ViewServiceMonitoring::class, [
+    Livewire::test(ViewServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -254,7 +254,7 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
 
     asSuperAdmin();
 
-    livewire(ViewServiceMonitoring::class, [
+    Livewire::test(ViewServiceMonitoring::class, [
         'record' => $apiEndpointMonitor->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -280,7 +280,7 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
         'monitor_type' => MonitorType::Availability,
     ]);
 
-    livewire(ViewServiceMonitoring::class, [
+    Livewire::test(ViewServiceMonitoring::class, [
         'record' => $availabilityMonitor->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -306,7 +306,7 @@ test('Reset Monitoring button resets monitoring', function () {
     expect($serviceMonitoringTarget->histories()->count())
         ->toBe(1);
 
-    livewire(ViewServiceMonitoring::class, [
+    Livewire::test(ViewServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSuccessful()

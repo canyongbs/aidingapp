@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewAdvisory page', function () {
@@ -99,7 +99,7 @@ test('the Tracking Details status refreshes when an advisory update changes the 
         'status_id' => $originalStatus->getKey(),
     ]);
 
-    $component = livewire(ViewAdvisory::class, [
+    $component = Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -138,14 +138,14 @@ test('the Properties section edit action is gated with proper access control', f
     $user->givePermissionTo('advisory.view-any');
     $user->givePermissionTo('advisory.*.view');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionDoesNotExist(TestAction::make('editProperties')->schemaComponent('properties'));
 
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionVisible(TestAction::make('editProperties')->schemaComponent('properties'));
@@ -162,7 +162,7 @@ test('the Properties section can be updated', function () {
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editProperties')->schemaComponent('properties'), data: [
@@ -187,7 +187,7 @@ test('the Properties section validates the inputs', function () {
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editProperties')->schemaComponent('properties'), data: [
@@ -210,14 +210,14 @@ test('the Tracking Details section edit action is gated with proper access contr
     $user->givePermissionTo('advisory.view-any');
     $user->givePermissionTo('advisory.*.view');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionDoesNotExist(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'));
 
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionVisible(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'));
@@ -237,7 +237,7 @@ test('the Tracking Details section can be updated', function () {
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'), data: [
@@ -271,7 +271,7 @@ test('the Status entry reflects the new value immediately after updating the Tra
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'), data: [
@@ -304,7 +304,7 @@ test('the Tracking Details section validates the inputs', function ($overrides, 
         'status_id' => $status->getKey(),
     ], $overrides);
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'), data: $data)
@@ -338,14 +338,14 @@ test('the Assignment section edit action is gated with proper access control', f
     $user->givePermissionTo('advisory.view-any');
     $user->givePermissionTo('advisory.*.view');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionDoesNotExist(TestAction::make('editAssignment')->schemaComponent('assignment'));
 
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertActionVisible(TestAction::make('editAssignment')->schemaComponent('assignment'));
@@ -364,7 +364,7 @@ test('the Assignment section can be updated', function () {
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editAssignment')->schemaComponent('assignment'), data: [
@@ -386,7 +386,7 @@ test('the Assignment section validates the department exists', function () {
     $user->givePermissionTo('advisory.*.view');
     $user->givePermissionTo('advisory.*.update');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->callAction(TestAction::make('editAssignment')->schemaComponent('assignment'), data: [
@@ -407,7 +407,7 @@ test('the advisory updates are only embedded for users who can view them', funct
     $user->givePermissionTo('advisory.view-any');
     $user->givePermissionTo('advisory.*.view');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -415,7 +415,7 @@ test('the advisory updates are only embedded for users who can view them', funct
 
     $user->givePermissionTo('advisory_update.view-any');
 
-    livewire(ViewAdvisory::class, [
+    Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
         ->assertSuccessful()

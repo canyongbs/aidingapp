@@ -41,8 +41,8 @@ use AidingApp\Project\Models\Project;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Support\Icons\Heroicon;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -55,7 +55,7 @@ it('hides archived pipelines', function () {
     $archived = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
     $archived->archive();
 
-    livewire(PipelinesRelationManager::class, [
+    Livewire::test(PipelinesRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManagePipelines::class,
     ])
@@ -67,7 +67,7 @@ it('archives a pipeline through the row action', function () {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create(['created_by_id' => auth()->id()]);
 
-    livewire(PipelinesRelationManager::class, [
+    Livewire::test(PipelinesRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManagePipelines::class,
     ])

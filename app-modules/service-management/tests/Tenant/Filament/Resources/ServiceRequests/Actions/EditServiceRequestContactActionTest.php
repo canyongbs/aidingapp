@@ -47,9 +47,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('editContact action is visible for manager department member with update permission', function () {
@@ -77,7 +77,7 @@ test('editContact action is visible for manager department member with update pe
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -109,7 +109,7 @@ test('editContact action is hidden for user without update permission', function
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -125,7 +125,7 @@ test('editContact requires respondent_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editContact')->schemaComponent('respondent'), data: [
@@ -143,7 +143,7 @@ test('editContact requires an existing contact', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editContact')->schemaComponent('respondent'), data: [
@@ -163,7 +163,7 @@ test('can update the service request customer contact', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editContact')->schemaComponent('respondent'), data: [
@@ -183,7 +183,7 @@ test('the customer contact selector table omits the unaffiliated placeholder and
     $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
     $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
 
-    livewire(TableSelectLivewireComponent::class, [
+    Livewire::test(TableSelectLivewireComponent::class, [
         'tableConfiguration' => base64_encode(ServiceRequestContactsTable::class),
     ])
         ->assertCanSeeTableRecords([$contactWithOrganization, $contactWithoutOrganization])

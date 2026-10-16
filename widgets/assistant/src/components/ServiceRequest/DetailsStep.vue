@@ -34,7 +34,7 @@
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
     import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
-    import { computed, provide, ref, toRaw } from 'vue';
+    import { computed, defineEmits, defineProps, provide, ref, toRaw } from 'vue';
 
     const props = defineProps({
         selectedType: { type: Object, required: true },

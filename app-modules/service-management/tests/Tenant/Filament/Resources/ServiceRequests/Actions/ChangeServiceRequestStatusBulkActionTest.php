@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('it can change status of multiple service requests as super admin', function () {
@@ -60,7 +60,7 @@ test('it can change status of multiple service requests as super admin', functio
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('changeServiceRequestStatus')
@@ -100,7 +100,7 @@ test('it can change status of multiple service requests for user directly assign
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('changeServiceRequestStatus')
@@ -144,7 +144,7 @@ test('it can change status of multiple service requests for user belonging to a 
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->assertCountTableRecords($serviceRequests->count())
         ->assertTableBulkActionExists('changeServiceRequestStatus')
@@ -182,7 +182,7 @@ test('it can change status of multiple service requests for user belonging to a 
     $user->givePermissionTo('service_request.*.update');
     actingAs($user);
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
             'statusId' => $newStatus->getKey(),
         ])
@@ -214,7 +214,7 @@ test('it cannot change status of service requests for user who is not a manager'
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
             'statusId' => $newStatus->getKey(),
@@ -241,7 +241,7 @@ test('it cannot change status of closed service requests', function () {
         ->count(3)
         ->create();
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
             'statusId' => $newStatus->getKey(),
@@ -276,7 +276,7 @@ test('it cannot change status of service requests without required permissions',
 
     actingAs($user->refresh());
 
-    livewire(ListServiceRequests::class)
+    Livewire::test(ListServiceRequests::class)
         ->assertSuccessful()
         ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
             'statusId' => $newStatus->getKey(),
@@ -300,7 +300,7 @@ describe('archiving', function () {
             ->count(2)
             ->create();
 
-        livewire(ListServiceRequests::class)
+        Livewire::test(ListServiceRequests::class)
             ->assertSuccessful()
             ->callTableBulkAction('changeServiceRequestStatus', $serviceRequests, [
                 'statusId' => $archivedStatus->getKey(),

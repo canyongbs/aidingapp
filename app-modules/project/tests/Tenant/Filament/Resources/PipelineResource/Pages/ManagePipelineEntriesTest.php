@@ -40,10 +40,10 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission', function () {
@@ -157,7 +157,7 @@ it('can switch to a different pipeline within the same project via the select pi
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ManagePipelineEntries::class, [
+    Livewire::test(ManagePipelineEntries::class, [
         'record' => $pipelineOne->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -183,7 +183,7 @@ it('rejects switching to a pipeline that does not belong to the project', functi
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ManagePipelineEntries::class, [
+    Livewire::test(ManagePipelineEntries::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -200,7 +200,7 @@ it('hides the pipeline resource sub navigation', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    $component = livewire(ManagePipelineEntries::class, [
+    $component = Livewire::test(ManagePipelineEntries::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])->instance();

@@ -40,13 +40,13 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\EditProjectRequestFactory;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function () {
@@ -180,7 +180,7 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
 
     $request = EditProjectRequestFactory::new($data)->create();
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->fillForm($request)
@@ -244,7 +244,7 @@ it('can edit a record', function () {
 
     $request = EditProjectRequestFactory::new()->create();
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->fillForm($request)
@@ -279,7 +279,7 @@ it('can edit a record with target completion date', function () {
 
     $request = EditProjectRequestFactory::new()->withTargetCompletionDate()->create();
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->fillForm($request)
@@ -304,7 +304,7 @@ it('clears target_completion_date when switching to indefinite', function () {
         'target_completion_date' => '2026-12-31',
     ]);
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->assertFormSet([
@@ -331,7 +331,7 @@ it('hydrates target_completion_date_type to set when record has target_completio
         'target_completion_date' => '2026-12-31',
     ]);
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->assertFormFieldExists('target_completion_date_type')
@@ -357,7 +357,7 @@ it('can archive a project from the header action', function () {
 
     expect($project->isArchived())->toBeFalse();
 
-    livewire(EditProject::class, [
+    Livewire::test(EditProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->callAction(TestAction::make('archive'))

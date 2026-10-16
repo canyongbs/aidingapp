@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
+    import { computed, defineProps } from 'vue';
     import { describeBucket } from './serviceMonitorHistory.js';
     import { STATUS_ORDER, getStatus } from './serviceMonitorStatuses.js';
 

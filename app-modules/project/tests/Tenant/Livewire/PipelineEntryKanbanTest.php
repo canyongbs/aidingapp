@@ -46,11 +46,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertModelMissing;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('renders entry cards with their name on the kanban board', function () {
@@ -66,7 +66,7 @@ it('renders entry cards with their name on the kanban board', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee($entry->name);
 });
 
@@ -88,7 +88,7 @@ it('renders stage name with card count in the stage header', function () {
         'pipeline_stage_id' => $secondStage->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee($firstStage->name)
         ->assertSee($secondStage->name)
         ->assertSee('2')
@@ -121,7 +121,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
         'due' => $due,
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee('Modern Card Task')
         ->assertSee('Milestone:')
         ->assertSee('Assets:')
@@ -157,7 +157,7 @@ it('hides archived tasks from the kanban board', function () {
     ]);
     $archived->archive();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee($active->name)
         ->assertDontSee($archived->name);
 });
@@ -173,7 +173,7 @@ it('renders stages in order sequence on the kanban board', function () {
     $first = PipelineStage::factory()->for($pipeline)->create(['name' => 'First Stage', 'order' => 1]);
     $second = PipelineStage::factory()->for($pipeline)->create(['name' => 'Second Stage', 'order' => 2]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSeeInOrder([$first->name, $second->name, $third->name]);
 });
 
@@ -187,7 +187,7 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
 
     [$firstStage, $secondStage] = $pipeline->stages;
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Second Column Entry',
         ], arguments: ['stage' => $secondStage->getKey()])
@@ -210,7 +210,7 @@ it('persists a start date for a pipeline entry created from a stage column', fun
     $stage = $pipeline->stages->sole();
     $startDate = Carbon::parse('2026-08-09 09:30:00');
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Started Task',
             'start_date' => $startDate->toDateTimeString(),
@@ -241,7 +241,7 @@ it('hides the add entry action without pipeline update permission', function () 
 
     expect($user->can('update', $pipeline))->toBeFalse();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionHidden('addEntry')
         ->assertDontSeeHtml('addEntry');
 });
@@ -256,7 +256,7 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
 
     $otherStage = PipelineStage::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
             'name' => 'Invalid Stage Entry',
         ], arguments: ['stage' => $otherStage->getKey()])
@@ -277,7 +277,7 @@ it('can move a pipeline entry between stages belonging to the pipeline', functio
 
     $entry = PipelineEntry::factory()->create(['pipeline_stage_id' => $fromStage->getKey()]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->call('movedEntry', $pipeline->getKey(), $entry->getKey(), $fromStage->getKey(), $toStage->getKey());
 
     expect($entry->fresh()->pipeline_stage_id)->toBe($toStage->getKey());
@@ -304,7 +304,7 @@ it('denies moving a pipeline entry without pipeline update permission', function
     $user->givePermissionTo('pipeline.*.view');
     $user->refresh();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->call('movedEntry', $pipeline->getKey(), $entry->getKey(), $fromStage->getKey(), $toStage->getKey())
         ->assertForbidden();
 
@@ -327,7 +327,7 @@ it('disables kanban drag and drop for users without pipeline update permission',
     $user->givePermissionTo('pipeline.*.view');
     $user->refresh();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee('kanban($wire, false)');
 });
 
@@ -339,7 +339,7 @@ it('enables kanban drag and drop for users with pipeline update permission', fun
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee('kanban($wire, true)');
 });
 
@@ -356,7 +356,7 @@ it('rejects moving a pipeline entry into a stage that does not belong to the pip
 
     $entry = PipelineEntry::factory()->create(['pipeline_stage_id' => $fromStage->getKey()]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->call('movedEntry', $pipeline->getKey(), $entry->getKey(), $fromStage->getKey(), $otherStage->getKey());
 
     expect($entry->fresh()->pipeline_stage_id)->toBe($fromStage->getKey());
@@ -375,7 +375,7 @@ it('rejects moving a pipeline entry that does not belong to the pipeline', funct
     $otherEntry = PipelineEntry::factory()->create();
     $originalStageId = $otherEntry->pipeline_stage_id;
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->call('movedEntry', $pipeline->getKey(), $otherEntry->getKey(), $originalStageId, $toStage->getKey());
 
     expect($otherEntry->fresh()->pipeline_stage_id)->toBe($originalStageId);
@@ -400,7 +400,7 @@ it('can view a pipeline entry through the slide over modal', function () {
         'start_date' => $startDate,
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('viewPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('viewPipelineEntry')
         ->assertSchemaStateSet([
@@ -425,7 +425,7 @@ it('hides the view action without pipeline view permission', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionHidden('viewPipelineEntry');
 });
 
@@ -442,7 +442,7 @@ it('can edit a pipeline entry through the slide over modal', function () {
         'description' => 'Original description.',
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('editPipelineEntry')
         ->setActionData([
@@ -474,7 +474,7 @@ it('archives a pipeline entry through the slide-over modal', function () {
 
     expect($entry->isArchived())->toBeFalse();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
         ->callMountedAction()
@@ -499,7 +499,7 @@ it('notifies when archiving a pipeline entry is cancelled', function () {
     PipelineEntry::archiving(fn (): bool => false);
 
     try {
-        livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+        Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
             ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
             ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
             ->callMountedAction()
@@ -529,7 +529,7 @@ it('persists related milestone, assets, and service requests when edited through
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->setActionData([
             'project_milestone_id' => $milestone->getKey(),
@@ -565,7 +565,7 @@ it('fails to edit a pipeline entry that belongs to a different pipeline', functi
         'pipeline_stage_id' => $otherPipeline->stages->first()->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()]);
 })->throws(ModelNotFoundException::class);
 
@@ -591,7 +591,7 @@ it('preserves related milestone, assets, and service requests when edited withou
     $entry->assets()->sync([$asset->getKey()]);
     $entry->serviceRequests()->sync([$serviceRequest->getKey()]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('editPipelineEntry')
         ->assertActionDataSet([
@@ -631,7 +631,7 @@ it('clears related milestone, assets, and service requests when the type is set 
     $entry->assets()->sync([$asset->getKey()]);
     $entry->serviceRequests()->sync([$serviceRequest->getKey()]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->assertActionMounted('editPipelineEntry')
         ->assertActionDataSet([
@@ -666,7 +666,7 @@ it('can remove a pipeline entry', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('removePipelineEntry', arguments: ['entry' => $entry->getKey()])
         ->assertHasNoActionErrors()
         ->assertNotified('Pipeline task removed successfully');
@@ -693,7 +693,7 @@ it('fails to remove a pipeline entry that belongs to a different pipeline', func
         'pipeline_stage_id' => $otherPipeline->stages->first()->getKey(),
     ]);
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('removePipelineEntry', arguments: ['entry' => $entry->getKey()]);
 })->throws(ModelNotFoundException::class);
 
@@ -719,7 +719,7 @@ it('hides the remove action without pipeline update permission', function () {
 
     expect($user->can('update', $pipeline))->toBeFalse();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionHidden('removePipelineEntry');
 });
 
@@ -748,7 +748,7 @@ it('mounts the edit pipeline entry action from the card title with pipeline upda
 
     expect($user->can('update', $pipeline))->toBeTrue();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionVisible('editPipelineEntry')
         ->assertSeeHtml('editPipelineEntry')
         ->assertDontSeeHtml('viewPipelineEntry')
@@ -778,7 +778,7 @@ it('mounts the view pipeline entry action from the card title without pipeline u
 
     expect($user->can('update', $pipeline))->toBeFalse();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionHidden('editPipelineEntry')
         ->assertSeeHtml('viewPipelineEntry')
         ->assertDontSeeHtml('editPipelineEntry')
@@ -805,7 +805,7 @@ it('eager loads the milestone relation instead of lazy loading it per card', fun
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    $component = livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    $component = Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertSee($milestone->title)
         ->instance();
 

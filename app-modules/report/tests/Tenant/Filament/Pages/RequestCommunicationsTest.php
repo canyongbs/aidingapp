@@ -45,9 +45,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 function grantRequestCommunicationsReportAccess(User $user): void
 {
@@ -98,7 +98,7 @@ it('displays the selected service request type communication configuration', fun
         'body' => richContent('The request is ready for review.'),
     ]);
 
-    livewire(RequestCommunications::class)
+    Livewire::test(RequestCommunications::class)
         ->set('filters.serviceRequestType', $serviceRequestType->getKey())
         ->assertSee('Notifications and Alerts')
         ->assertSet('notificationSettings.is_managers_service_request_created_email_enabled', true)
@@ -116,7 +116,7 @@ it('renders Filament email-template tabs for each event type', function () {
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(RequestCommunications::class)
+    Livewire::test(RequestCommunications::class)
         ->set('filters.serviceRequestType', $serviceRequestType->getKey())
         ->assertSee('Created')
         ->assertSee('Assigned')
@@ -138,7 +138,7 @@ describe('authorization', function () {
 
         actingAs(User::factory()->create(['timezone' => 'UTC']));
 
-        livewire(RequestCommunications::class)->assertForbidden();
+        Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
     it('denies access without an assignment to the report', function () {
@@ -148,7 +148,7 @@ describe('authorization', function () {
 
         actingAs(User::factory()->create(['timezone' => 'UTC']));
 
-        livewire(RequestCommunications::class)->assertForbidden();
+        Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
     it('allows access with an assignment to the report', function () {
@@ -156,6 +156,6 @@ describe('authorization', function () {
         grantRequestCommunicationsReportAccess($user);
         actingAs($user);
 
-        livewire(RequestCommunications::class)->assertOk();
+        Livewire::test(RequestCommunications::class)->assertOk();
     });
 });

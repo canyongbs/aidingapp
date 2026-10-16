@@ -49,13 +49,13 @@ use Filament\Actions\Testing\TestAction;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
+use Livewire\Livewire;
 use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertSoftDeleted;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -100,7 +100,7 @@ it('lists updates with their authors, visibility, and attachments', function () 
         'created_by_type' => $serviceRequest->getMorphClass(),
     ]);
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSuccessful()
         ->assertSeeText('3 updates')
         ->assertSeeTextInOrder(['Bethany Emory', 'Customer', 'I am still unable to access the service.', 'browser-console-log.txt'])
@@ -123,7 +123,7 @@ it('shows the latest updates first and loads earlier updates on request', functi
         ]);
     }
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSeeText('51 updates')
         ->assertSeeText('Show earlier updates')
         ->assertSeeText('Update number 51.')
@@ -136,7 +136,7 @@ it('shows the latest updates first and loads earlier updates on request', functi
 it('polls for updates added after the feed loads', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $component = livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSeeHtml('wire:poll.15s')
         ->assertDontSeeText('A reply from the portal.');
 
@@ -159,7 +159,7 @@ it('displays update times in the user timezone', function () {
         'created_at' => CarbonImmutable::create(2026, 10, 5, 17, 7, 0, 'UTC'),
     ]);
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSeeText('October 5, 2026 · MDT')
         ->assertSeeText('11:07 am')
         ->assertSeeHtml('title="Oct 5, 2026 11:07 am (MDT)"');
@@ -180,7 +180,7 @@ it('displays update times in the system timezone when the user has none', functi
         'created_at' => CarbonImmutable::create(2026, 10, 5, 17, 7, 0, 'UTC'),
     ]);
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSeeText('October 6, 2026 · JST')
         ->assertSeeText('2:07 am');
 });
@@ -191,7 +191,7 @@ it('can create an update', function (bool $isInternal) {
 
     assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'We are looking into this.']);
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->fillForm([
             'update' => 'We are looking into this.',
             'internal' => (int) $isInternal,
@@ -222,7 +222,7 @@ it('attaches uploaded files to the update', function () {
 
     $serviceRequest = openServiceRequest();
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->fillForm([
             'update' => 'Here is the log.',
             'uploads' => [UploadedFile::fake()->createWithContent('browser-console-log.txt', 'Console output')],
@@ -242,7 +242,7 @@ it('drafts an update with AI', function () {
         $mock->shouldReceive('execute')->once()->andReturn('Drafted update content.');
     });
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->callAction(TestAction::make('draftWithAi')->schemaComponent('update'), data: [
             'instructions' => 'Ask for a screenshot.',
         ])
@@ -253,7 +253,7 @@ it('drafts an update with AI', function () {
 it('validates the inputs', function (array $data, array $errors) {
     $serviceRequest = openServiceRequest();
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->fillForm($data)
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -266,7 +266,7 @@ it('hides the composer when the service request is closed', function () {
         ->for(ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Closed]), 'status')
         ->create();
 
-    livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSeeText('This service request is closed')
         ->assertDontSeeText('Send update')
         ->fillForm(['update' => 'Too late.'])
@@ -280,7 +280,7 @@ describe('deletion', function () {
     it('can delete an update', function () {
         $update = ServiceRequestUpdate::factory()->create();
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $update->serviceRequest])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $update->serviceRequest])
             ->callAction(TestAction::make('deleteUpdate')->arguments(['update' => $update->getKey()]));
 
         assertSoftDeleted($update);
@@ -290,7 +290,7 @@ describe('deletion', function () {
         $serviceRequest = ServiceRequest::factory()->create();
         $otherUpdate = ServiceRequestUpdate::factory()->create();
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
             ->assertActionHidden(TestAction::make('deleteUpdate')->arguments(['update' => $otherUpdate->getKey()]));
 
         expect($otherUpdate->refresh()->trashed())->toBeFalse();
@@ -301,7 +301,7 @@ describe('authorization', function () {
     it('denies access without the `service_request_update.view-any` permission', function () {
         actingAs(User::factory()->create());
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => ServiceRequest::factory()->create()])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => ServiceRequest::factory()->create()])
             ->assertForbidden();
     });
 
@@ -312,7 +312,7 @@ describe('authorization', function () {
 
         $serviceRequest = openServiceRequest();
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
             ->assertDontSeeText('Send update')
             ->fillForm(['update' => 'Unauthorized update.'])
             ->call('create')
@@ -330,7 +330,7 @@ describe('authorization', function () {
         $originalStatusId = $serviceRequest->status_id;
         $status = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
             ->assertFormFieldHidden('status_id')
             ->fillForm([
                 'update' => 'Update from a non-manager.',
@@ -351,7 +351,7 @@ describe('authorization', function () {
 
         $update = ServiceRequestUpdate::factory()->create();
 
-        livewire(ServiceRequestUpdates::class, ['serviceRequest' => $update->serviceRequest])
+        Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $update->serviceRequest])
             ->assertActionHidden(TestAction::make('deleteUpdate')->arguments(['update' => $update->getKey()]));
     });
 });

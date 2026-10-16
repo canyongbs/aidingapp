@@ -42,8 +42,8 @@ use AidingApp\ServiceManagement\Models\Sla;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the relation manager on the edit page', function () {
@@ -55,7 +55,7 @@ it('can render the relation manager on the edit page', function () {
         'resolution_seconds' => 7200,
     ]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -77,7 +77,7 @@ it('lists priorities associated with the SLA', function () {
     $unassociatedPriority = ServiceRequestPriority::factory()
         ->create(['sla_id' => null]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -104,7 +104,7 @@ it('displays the correct columns for each priority', function () {
         'order' => 1,
     ]);
 
-    $component = livewire(ServiceRequestPrioritiesRelationManager::class, [
+    $component = Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ]);
@@ -129,7 +129,7 @@ it('has the associate action available', function () {
         'resolution_seconds' => 7200,
     ]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -147,7 +147,7 @@ it('can associate a single priority to the SLA', function () {
 
     $priority = ServiceRequestPriority::factory()->create(['sla_id' => null]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -179,7 +179,7 @@ it('can associate multiple priorities to the SLA', function () {
             'type_id' => $type->getKey(),
         ]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -216,7 +216,7 @@ it('can associate priorities from different types to the SLA', function () {
         'type_id' => $typeB->getKey(),
     ]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -245,7 +245,7 @@ it('can dissociate a priority from the SLA', function () {
         'sla_id' => $sla->getKey(),
     ]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])
@@ -270,7 +270,7 @@ it('can bulk dissociate priorities from the SLA', function () {
         ->count(3)
         ->create(['sla_id' => $sla->getKey()]);
 
-    livewire(ServiceRequestPrioritiesRelationManager::class, [
+    Livewire::test(ServiceRequestPrioritiesRelationManager::class, [
         'ownerRecord' => $sla,
         'pageClass' => EditSla::class,
     ])

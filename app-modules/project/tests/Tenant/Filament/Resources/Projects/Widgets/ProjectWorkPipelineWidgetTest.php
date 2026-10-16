@@ -42,9 +42,9 @@ use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -57,7 +57,7 @@ it('defaults the widget to the oldest non-archived pipeline', function () {
     $newer = Pipeline::factory()->for($project)->create();
     $oldest->archive();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertSet('selectedPipelineId', $newer->getKey());
 });
 
@@ -66,7 +66,7 @@ it('archives the checked pipeline and cascades to its tasks', function () {
     $active = Pipeline::factory()->for($project)->create();
     $other = Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->call('archivePipelineFromSwitcher', $other->getKey());
 
     expect($other->refresh()->isArchived())->toBeTrue()
@@ -78,7 +78,7 @@ it('archives the checked pipeline through the switcher footer archive action', f
     $active = Pipeline::factory()->for($project)->create();
     $other = Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->mountAction('selectPipeline')
         ->setActionData(['pipeline_id' => $active->getKey()])
         ->mountAction('archivePipeline')
@@ -94,7 +94,7 @@ it('keeps the switcher modal open after archiving when other pipelines remain', 
     $active = Pipeline::factory()->for($project)->create();
     Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->mountAction('selectPipeline')
         ->setActionData(['pipeline_id' => $active->getKey()])
         ->mountAction('archivePipeline')
@@ -106,7 +106,7 @@ it('closes the switcher modal after archiving the last remaining pipeline', func
     $project = Project::factory()->create();
     $only = Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->mountAction('selectPipeline')
         ->setActionData(['pipeline_id' => $only->getKey()])
         ->mountAction('archivePipeline')
@@ -119,7 +119,7 @@ it('re-selects the oldest remaining pipeline after archiving the active one', fu
     $active = Pipeline::factory()->for($project)->create();
     $next = Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertSet('selectedPipelineId', $active->getKey())
         ->call('archivePipelineFromSwitcher', $active->getKey())
         ->assertSet('selectedPipelineId', $next->getKey());
@@ -129,7 +129,7 @@ it('clears the selection when the last pipeline is archived', function () {
     $project = Project::factory()->create();
     $only = Pipeline::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->call('archivePipelineFromSwitcher', $only->getKey())
         ->assertSet('selectedPipelineId', null);
 });
@@ -149,7 +149,7 @@ it('excludes archived tasks from the pipeline board', function () {
     ]);
     $archived->archive();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertCanSeeTableRecords([$active])
         ->assertCanNotSeeTableRecords([$archived]);
 });
@@ -167,7 +167,7 @@ it('renders a task as having no associated milestone when its milestone has been
 
     $milestone->delete();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertCanSeeTableRecords([$entry])
         ->assertSee('No Associated Milestone')
         ->assertSee('Progress: 0%')
@@ -183,7 +183,7 @@ it('calculates progress for unassociated pipeline tasks', function () {
         'project_milestone_id' => null,
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->filterTable('classification', [PipelineStageClassification::Complete->value])
         ->assertSee('No Associated Milestone')
         ->assertSee('Progress: 100%');
@@ -195,7 +195,7 @@ it('does not provide a row-level edit action because task editing is accessed th
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
     $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->assertTableActionDoesNotExist('edit', record: $entry);
 });
 
@@ -212,7 +212,7 @@ describe('status filter', function () {
         $inProgressTask = PipelineEntry::factory()->for($inProgressStage, 'pipelineStage')->create();
         $completeTask = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->assertCanSeeTableRecords([$planningTask, $inProgressTask])
             ->assertCanNotSeeTableRecords([$completeTask]);
     });
@@ -227,7 +227,7 @@ describe('status filter', function () {
         $planningTask = PipelineEntry::factory()->for($planningStage, 'pipelineStage')->create();
         $completeTask = PipelineEntry::factory()->for($completeStage, 'pipelineStage')->create();
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->filterTable('classification', [PipelineStageClassification::Complete->value])
             ->assertCanSeeTableRecords([$completeTask])
             ->assertCanNotSeeTableRecords([$planningTask]);
@@ -242,7 +242,7 @@ it('archives a pipeline task from its slide-over modal', function () {
 
     expect($entry->isArchived())->toBeFalse();
 
-    livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+    Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
         ->mountAction(['editPipelineEntry', 'archivePipelineEntry'])
         ->callMountedAction()
@@ -262,7 +262,7 @@ describe('archive authorization', function () {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->call('archivePipelineFromSwitcher', $pipeline->getKey());
 
         expect($pipeline->refresh()->isArchived())->toBeFalse();
@@ -277,7 +277,7 @@ describe('archive authorization', function () {
         $project = Project::factory()->create();
         Pipeline::factory()->for($project)->create();
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->mountAction('selectPipeline')
             ->assertActionHidden('archivePipeline');
     });
@@ -297,7 +297,7 @@ describe('task access authorization', function () {
 
         actingAs($auditor);
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->callTableColumnAction('name', $entry)
             ->assertActionMounted('viewPipelineEntry')
             ->assertSchemaStateSet(['name' => 'View-only task'])
@@ -318,7 +318,7 @@ describe('task access authorization', function () {
 
         actingAs($manager);
 
-        livewire(ProjectWorkPipelineWidget::class, ['record' => $project])
+        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->callTableColumnAction('name', $entry)
             ->assertActionMounted('editPipelineEntry')
             ->setActionData(['description' => 'Updated description.'])

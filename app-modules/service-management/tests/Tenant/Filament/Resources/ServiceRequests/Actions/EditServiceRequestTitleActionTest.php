@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('editTitle action is visible for manager department member with update permission', function () {
@@ -73,7 +73,7 @@ test('editTitle action is visible for manager department member with update perm
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -105,7 +105,7 @@ test('editTitle action is hidden for user without update permission', function (
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -121,7 +121,7 @@ test('editTitle requires title', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTitle')->schemaComponent('request.title::section'), data: [
@@ -139,7 +139,7 @@ test('editTitle limits title to 255 characters', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTitle')->schemaComponent('request.title::section'), data: [
@@ -157,7 +157,7 @@ test('can update the service request title', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editTitle')->schemaComponent('request.title::section'), data: [

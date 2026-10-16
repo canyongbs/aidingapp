@@ -33,7 +33,7 @@
 -->
 
 <script setup>
-    import { computed, ref, watch } from 'vue';
+    import { computed, defineExpose, defineProps, ref, watch } from 'vue';
     import Avatar from './ui/Avatar.vue';
 
     const props = defineProps({

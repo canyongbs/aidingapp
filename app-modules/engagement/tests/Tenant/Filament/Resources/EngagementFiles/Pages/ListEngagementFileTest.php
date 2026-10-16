@@ -39,9 +39,9 @@ use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\ListEngagement
 use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // TODO: Add tests for the ListEngagementFiles
 //test('The correct details are displayed on the ListEngagementFiles page', function () {});
@@ -75,11 +75,11 @@ test('only shows the bulk delete action to a user with the engagement_file delet
 
     actingAs($user);
 
-    livewire(ListEngagementFiles::class)
+    Livewire::test(ListEngagementFiles::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('engagement_file.*.delete');
 
-    livewire(ListEngagementFiles::class)
+    Livewire::test(ListEngagementFiles::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

@@ -35,7 +35,7 @@
 <script setup>
     import { HashtagIcon, MagnifyingGlassIcon, UserGroupIcon } from '@heroicons/vue/24/outline';
     import { useDebounceFn } from '@vueuse/core';
-    import { onMounted, ref, watch } from 'vue';
+    import { defineEmits, defineProps, onMounted, ref, watch } from 'vue';
     import { useConversations } from '../composables/useConversations';
     import BaseButton from './ui/BaseButton.vue';
     import BaseInput from './ui/BaseInput.vue';

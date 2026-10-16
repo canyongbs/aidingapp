@@ -40,12 +40,12 @@ use AidingApp\Authorization\Models\Role;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 dataset('admins', [
@@ -67,7 +67,7 @@ describe('deletion', function () {
 
         $role = Role::factory()->create();
 
-        livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->callAction(DeleteAction::class)
             ->assertRedirect(RoleResource::getUrl('index'));
 
@@ -123,7 +123,7 @@ describe('authorization', function () {
 
         $role = Role::factory()->create();
 
-        livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->assertActionVisible(DeleteAction::class);
     });
 
@@ -134,7 +134,7 @@ describe('authorization', function () {
 
         $role = Role::factory()->create();
 
-        livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->assertActionHidden(DeleteAction::class);
     });
 
@@ -145,7 +145,7 @@ describe('authorization', function () {
 
         $role = Role::factory()->create();
 
-        livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->call('mountAction', 'delete')
             ->call('callMountedAction');
 
@@ -163,7 +163,7 @@ describe('authorization', function () {
         get(RoleResource::getUrl('edit', ['record' => $role]))
             ->assertForbidden();
 
-        livewire(EditRole::class, ['record' => $role->getRouteKey()])
+        Livewire::test(EditRole::class, ['record' => $role->getRouteKey()])
             ->assertForbidden();
 
         expect($admin->can('update', $role))->toBeFalse()

@@ -42,10 +42,10 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceReque
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestPriorityRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertSoftDeleted;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('A successful action on the ManageServiceRequestTypePriorities page', function () {
@@ -65,7 +65,7 @@ it('enables customer defined priorities when no default priority is configured',
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertSchemaStateSet([
@@ -83,7 +83,7 @@ it('configures a default priority when customer defined priorities are disabled'
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -101,7 +101,7 @@ it('requires a default priority when customer defined priorities are disabled', 
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -119,7 +119,7 @@ it('can create a service request priority', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('create', data: $createRequest)
@@ -145,7 +145,7 @@ it('can edit a service request priority', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('edit', record: $priority, data: $editRequest)
@@ -163,7 +163,7 @@ it('can delete a service request priority', function () {
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('delete', record: $priority->getKey())
@@ -183,7 +183,7 @@ it('cannot delete a service request priority configured as its type default', fu
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertTableActionHidden('delete', $priority);
@@ -196,7 +196,7 @@ it('validates required fields when creating a service request priority', functio
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('create', data: $data)
@@ -217,7 +217,7 @@ it('validates unique name scoped to type when creating a service request priorit
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('create', data: [
@@ -236,7 +236,7 @@ it('validates required fields when editing a service request priority', function
 
     asSuperAdmin();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->callTableAction('edit', record: $priority, data: ['name' => null])
@@ -255,7 +255,7 @@ test('ManageServiceRequestTypePriorities is gated with proper access control', f
             ])
         )->assertForbidden();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -294,7 +294,7 @@ test('ManageServiceRequestTypePriorities is gated with proper feature access con
             ])
         )->assertForbidden();
 
-    livewire(ManageServiceRequestTypePriorities::class, [
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();

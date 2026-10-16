@@ -43,9 +43,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('editPriority action is visible for manager department member with update permission', function () {
@@ -73,7 +73,7 @@ test('editPriority action is visible for manager department member with update p
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -105,7 +105,7 @@ test('editPriority action is hidden for user without update permission', functio
 
     actingAs($user->refresh());
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -122,7 +122,7 @@ test('editPriority action is hidden when the service request has no priority', f
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -147,7 +147,7 @@ test('editPriority action is visible when the service request priority is soft-d
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -168,7 +168,7 @@ test('editPriority requires priority_id', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
@@ -195,7 +195,7 @@ test('editPriority rejects a priority belonging to a different service request t
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
@@ -226,7 +226,7 @@ test('can update the service request priority', function () {
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [
@@ -260,7 +260,7 @@ test('can update the service request priority away from a soft-deleted priority'
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequest::class, [
+    Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->callAction(TestAction::make('editPriority')->schemaComponent('priority.name'), data: [

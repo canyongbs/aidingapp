@@ -43,8 +43,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('renders the timeline records for the given record', function () {
@@ -56,7 +56,7 @@ it('renders the timeline records for the given record', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create(['update' => 'A distinctive timeline entry']);
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -69,7 +69,7 @@ it('shows the empty state message when there is nothing to timeline', function (
 
     $serviceRequest = ServiceRequest::factory()->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
         'emptyStateMessage' => 'Nothing has happened yet.',
@@ -88,7 +88,7 @@ it('loads one page of records at a time and flags that more remain', function ()
         ->count(7)
         ->create();
 
-    $component = livewire(TimelineList::class, [
+    $component = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])->assertSuccessful();
@@ -110,7 +110,7 @@ it('refuses to open a record from another entity timeline', function () {
         ->for($otherServiceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -127,7 +127,7 @@ it('refuses to open a record of a type this timeline does not display', function
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestAssignment::class],
     ])
@@ -144,7 +144,7 @@ it('returns a 404 when the view action is mounted without a record', function ()
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -161,7 +161,7 @@ it('keeps the opened record selected when more timeline records are loaded', fun
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -181,7 +181,7 @@ it('opens the slide over for a timeline record', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -199,7 +199,7 @@ it('opens the slide over for a soft-deleted timeline record', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    $component = livewire(TimelineList::class, [
+    $component = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ]);
@@ -230,7 +230,7 @@ describe('related people', function () {
 
         expect($performer->refresh()->trashed())->toBeTrue();
 
-        livewire(TimelineList::class, [
+        Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
         ])
@@ -247,7 +247,7 @@ describe('related people', function () {
             'checked_out_by_id' => Str::uuid()->toString(),
         ]);
 
-        livewire(TimelineList::class, [
+        Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
         ])
@@ -270,7 +270,7 @@ describe('related people', function () {
 
         expect($creator->refresh()->trashed())->toBeTrue();
 
-        livewire(TimelineList::class, [
+        Livewire::test(TimelineList::class, [
             'record' => $contact,
             'modelsToTimeline' => [Engagement::class],
         ])

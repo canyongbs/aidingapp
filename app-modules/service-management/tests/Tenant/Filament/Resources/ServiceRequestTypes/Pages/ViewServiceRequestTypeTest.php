@@ -41,9 +41,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewServiceRequestType page', function () {
@@ -76,7 +76,7 @@ test('The ViewServiceRequestType page lists every area the type belongs to', fun
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequestType::class, [
+    Livewire::test(ViewServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertOk()
@@ -90,7 +90,7 @@ test('The ViewServiceRequestType page shows a placeholder when the type has no a
 
     asSuperAdmin();
 
-    livewire(ViewServiceRequestType::class, [
+    Livewire::test(ViewServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertOk()

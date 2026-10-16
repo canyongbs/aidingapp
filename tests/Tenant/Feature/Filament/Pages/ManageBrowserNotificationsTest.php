@@ -36,9 +36,9 @@
 
 use App\Filament\Pages\ManageBrowserNotifications;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 beforeEach(function () {
     config()->set('webpush.vapid.subject', 'mailto:test@example.com');
@@ -51,11 +51,11 @@ it('is not accessible when desktop notifications are not configured', function (
 
     actingAs(User::factory()->create());
 
-    livewire(ManageBrowserNotifications::class)->assertForbidden();
+    Livewire::test(ManageBrowserNotifications::class)->assertForbidden();
 });
 
 it('renders the desktop notifications management page when configured', function () {
     actingAs(User::factory()->create());
 
-    livewire(ManageBrowserNotifications::class)->assertOk();
+    Livewire::test(ManageBrowserNotifications::class)->assertOk();
 });

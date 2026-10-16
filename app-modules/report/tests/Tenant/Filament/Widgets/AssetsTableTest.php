@@ -46,9 +46,9 @@ use AidingApp\Report\Filament\Widgets\AssetsTable;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('displays all assets with correct information', function () {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
@@ -96,7 +96,7 @@ it('displays all assets with correct information', function () {
         ->state(['name' => 'Retired Desktop 002', 'created_at' => now()->subDays(10)])
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table',
     ])
         ->assertCanSeeTableRecords(collect([
@@ -142,7 +142,7 @@ it('displays correct deployment status for assets', function () {
         ->state(['name' => 'Bench Stock Asset'])
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-deployment',
     ])
         ->assertCanSeeTableRecords(collect([
@@ -179,7 +179,7 @@ it('filters assets by name', function () {
         ->state(['name' => 'Desktop001'])
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-name-filter',
     ])
         ->filterTable('name', ['Laptop001'])
@@ -204,7 +204,7 @@ it('filters assets by type', function () {
         ->for($status, 'status')
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-type-filter',
     ])
         ->filterTable('type', [$laptopType->id])
@@ -229,7 +229,7 @@ it('filters assets by status', function () {
         ->for($retiredStatus, 'status')
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-status-filter',
     ])
         ->filterTable('status', [$availableStatus->id])
@@ -269,7 +269,7 @@ it('filters assets by deployment status', function () {
         ->for($status, 'status')
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-deployment-filter',
     ])
         ->filterTable('deployment_status', ['Maintenance'])
@@ -301,7 +301,7 @@ it('shows assets ordered by created date descending', function () {
         ->state(['name' => 'Asset Newest', 'created_at' => now()->subDay()])
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-ordering',
     ])
         ->assertCanSeeTableRecords(collect([$assetNewest, $assetMiddle, $assetOldest]), inOrder: true);
@@ -339,7 +339,7 @@ it('handles multiple deployment status filters simultaneously', function () {
         ->for($status, 'status')
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-multiple-deployment-filter',
     ])
         ->filterTable('deployment_status', ['Maintenance', 'Checked Out'])
@@ -361,7 +361,7 @@ it('handles completed maintenance activities correctly for bench stock', functio
         )
         ->create();
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-completed-maintenance',
     ])
         ->assertCanSeeTableRecords(collect([$asset]))
@@ -389,7 +389,7 @@ it('handles checked-in assets correctly for bench stock', function () {
         ->create();
     $checkOut->update(['asset_check_in_id' => $checkIn->id]);
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-checked-in',
     ])
         ->assertCanSeeTableRecords(collect([$asset]))
@@ -397,7 +397,7 @@ it('handles checked-in assets correctly for bench stock', function () {
 });
 
 it('has table an export action', function () {
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-export',
     ])->assertTableActionExists(ExportAction::class);
 });
@@ -407,7 +407,7 @@ it('can start an export and send a notification', function () {
 
     actingAs(User::factory()->create());
 
-    livewire(AssetsTable::class, [
+    Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-export-notification',
     ])
         ->callTableAction(ExportAction::class)

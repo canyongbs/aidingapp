@@ -39,9 +39,9 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItemConcern;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('is gated by proper access control', function () {
@@ -55,11 +55,11 @@ it('is gated by proper access control', function () {
 
     actingAs($user);
 
-    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+    Livewire::test(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
         ->assertActionHidden([TestAction::make('changeConcernStatus')->table()]);
 
     $user->givePermissionTo('knowledge_base_item.*.update');
 
-    livewire(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
+    Livewire::test(KnowledgeBaseItemConcernsTable::class, ['record' => $knowledgeBaseItem])
         ->assertActionVisible([TestAction::make('changeConcernStatus')->table()]);
 });

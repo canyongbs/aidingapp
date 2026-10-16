@@ -39,24 +39,24 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\TextInput;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
 it('renders successfully with no record', function () {
     asSuperAdmin();
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->assertSuccessful();
 });
 
 it('does not show an email health hint icon on the email field', function () {
     asSuperAdmin();
 
-    $component = livewire(CreateContact::class)
+    $component = Livewire::test(CreateContact::class)
         ->assertSuccessful();
 
     $emailField = $component->instance()
@@ -83,7 +83,7 @@ test('CreateContact is gated with proper access control', function () {
             ContactResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->assertForbidden();
 
     $user->givePermissionTo('contact.view-any');
@@ -98,7 +98,7 @@ test('CreateContact is gated with proper access control', function () {
         'created_by_id' => $user->id,
     ]));
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -122,7 +122,7 @@ test('CreateContact rejects a duplicate email case-insensitively', function () {
 
     actingAs($user);
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['email']);
@@ -144,7 +144,7 @@ test('CreateContact allows reusing a soft-deleted contact email', function () {
 
     actingAs($user);
 
-    livewire(CreateContact::class)
+    Livewire::test(CreateContact::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ChatBubbleLeftRightIcon, ChevronDownIcon } from '@heroicons/vue/24/outline';
+    import { defineEmits, defineProps } from 'vue';
 
     const props = defineProps({
         isOpen: { type: Boolean, default: false },

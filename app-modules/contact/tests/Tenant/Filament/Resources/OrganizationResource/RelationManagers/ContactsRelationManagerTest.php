@@ -39,9 +39,9 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\C
 use AidingApp\Contact\Models\Organization;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('only shows the associate contact action to a user with the organization.update permission', function () {
     $organization = Organization::factory()->create();
@@ -52,7 +52,7 @@ it('only shows the associate contact action to a user with the organization.upda
 
     actingAs($user);
 
-    livewire(ContactsRelationManager::class, [
+    Livewire::test(ContactsRelationManager::class, [
         'ownerRecord' => $organization,
         'pageClass' => ManageContacts::class,
     ])
@@ -60,7 +60,7 @@ it('only shows the associate contact action to a user with the organization.upda
 
     $user->givePermissionTo('organization.*.update');
 
-    livewire(ContactsRelationManager::class, [
+    Livewire::test(ContactsRelationManager::class, [
         'ownerRecord' => $organization,
         'pageClass' => ManageContacts::class,
     ])

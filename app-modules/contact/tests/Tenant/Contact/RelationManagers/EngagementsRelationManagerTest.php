@@ -44,9 +44,9 @@ use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Collection;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 /**
@@ -89,7 +89,7 @@ it('disables the `engage` header action with the bounced tooltip for a bounced o
 
     $contact = Contact::factory()->bounced()->create();
 
-    $component = livewire(EngagementsRelationManager::class, [
+    $component = Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -106,7 +106,7 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
 
     $contact = Contact::factory()->create(['email_bounce' => false]);
 
-    $component = livewire(EngagementsRelationManager::class, [
+    $component = Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -129,7 +129,7 @@ describe('email direction filtering by permission', function () {
 
         $emails = seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -148,7 +148,7 @@ describe('email direction filtering by permission', function () {
 
         $emails = seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -168,7 +168,7 @@ describe('email direction filtering by permission', function () {
 
         $emails = seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])

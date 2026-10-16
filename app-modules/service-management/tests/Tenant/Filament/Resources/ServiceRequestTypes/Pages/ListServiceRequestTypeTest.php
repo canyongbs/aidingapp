@@ -48,12 +48,12 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -114,7 +114,7 @@ it('loads hierarchical data', function () {
     $type1 = ServiceRequestType::factory()->hasAttached($root, relationship: 'categories')->create(['name' => 'Type 1', 'sort' => 1]);
     $type2 = ServiceRequestType::factory()->hasAttached($child, relationship: 'categories')->create(['name' => 'Type 2', 'sort' => 1]);
 
-    $component = livewire(ListServiceRequestTypes::class);
+    $component = Livewire::test(ListServiceRequestTypes::class);
 
     $component->assertSuccessful();
 
@@ -136,7 +136,7 @@ it('creates an area and tells other viewers', function () {
 
     assertDatabaseMissing(ServiceRequestTypeCategory::class, ['name' => 'Brand New']);
 
-    $component = livewire(ListServiceRequestTypes::class)
+    $component = Livewire::test(ListServiceRequestTypes::class)
         ->call('createCategory', '  Brand New  ');
 
     $category = ServiceRequestTypeCategory::query()->where('name', 'Brand New')->firstOrFail();
@@ -158,7 +158,7 @@ it('creates a child area', function () {
 
     $parent = ServiceRequestTypeCategory::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createCategory', 'Child', $parent->getKey());
 
     expect(ServiceRequestTypeCategory::query()->where('name', 'Child')->firstOrFail()->parent_id)->toBe($parent->getKey());
@@ -170,7 +170,7 @@ it('does not nest areas more than two levels deep', function () {
     $root = ServiceRequestTypeCategory::factory()->create();
     $child = ServiceRequestTypeCategory::factory()->create(['parent_id' => $root->getKey()]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createCategory', 'Grandchild', $child->getKey())
         ->assertReturned(fn (array $result): bool => $result['saved'] === false)
         ->assertNotified('Unable to save changes');
@@ -184,7 +184,7 @@ it('reports an area that another user has deleted', function () {
     $category = ServiceRequestTypeCategory::factory()->create();
     $category->delete();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'Orphan', $category->getKey())
         ->assertReturned(fn (array $result): bool => $result['saved'] === false)
         ->assertNotified('Unable to save changes');
@@ -198,7 +198,7 @@ it('creates a type in an area with default priorities', function () {
     $category = ServiceRequestTypeCategory::factory()->create();
     $existing = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'Brand New Type', $category->getKey());
 
     $type = ServiceRequestType::query()->where('name', 'Brand New Type')->firstOrFail();
@@ -213,7 +213,7 @@ it('does not create a type with a name already in use', function () {
 
     ServiceRequestType::factory()->create(['name' => 'Existing']);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'existing')
         ->assertReturned(fn (array $result): bool => $result['saved'] === false)
         ->assertNotified('Unable to save changes');
@@ -230,7 +230,7 @@ it('restores an archived type into an area', function () {
     $type = ServiceRequestType::factory()->hasAttached($oldCategory, ['sort' => 1], 'categories')->create();
     $type->archive();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('restoreArchivedType', $type->getKey(), $newCategory->getKey());
 
     $type->refresh();
@@ -244,7 +244,7 @@ it('renames an area', function () {
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Old Cat']);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('renameCategory', $category->getKey(), 'New Cat Name');
 
     expect($category->refresh()->name)->toBe('New Cat Name');
@@ -255,7 +255,7 @@ it('renames a type', function () {
 
     $type = ServiceRequestType::factory()->create(['name' => 'Old Type']);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('renameType', $type->getKey(), 'New Type Name');
 
     expect($type->refresh()->name)->toBe('New Type Name');
@@ -267,7 +267,7 @@ it('does not rename a type to a name already in use', function () {
     ServiceRequestType::factory()->create(['name' => 'Taken']);
     $type = ServiceRequestType::factory()->create(['name' => 'Original']);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('renameType', $type->getKey(), 'Taken')
         ->assertNotified('Unable to save changes');
 
@@ -279,7 +279,7 @@ it('deletes a type without service requests', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('deleteType', $type->getKey());
 
     assertSoftDeleted($type);
@@ -292,7 +292,7 @@ it('prevents deleting a type when service requests exist', function () {
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
     ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('deleteType', $type->getKey())
         ->assertNotified('Unable to save changes');
 
@@ -306,7 +306,7 @@ it('archives a type with service requests', function () {
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
     ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('archiveType', $type->getKey());
 
     expect($type->refresh()->isArchived())->toBeTrue();
@@ -317,7 +317,7 @@ it('does not archive a type without service requests', function () {
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('archiveType', $type->getKey())
         ->assertNotified('Unable to save changes');
 
@@ -331,7 +331,7 @@ it('deletes an area with its child areas and the types filed only within them', 
     $child = ServiceRequestTypeCategory::factory()->create(['parent_id' => $category->getKey()]);
     $type = ServiceRequestType::factory()->hasAttached($child, ['sort' => 1], 'categories')->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('deleteCategory', $category->getKey());
 
     assertSoftDeleted($category);
@@ -348,7 +348,7 @@ it('prevents deleting an area when its child areas have service requests', funct
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
     ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('deleteCategory', $category->getKey())
         ->assertNotified('Unable to save changes');
 
@@ -363,7 +363,7 @@ it('moves an area under another area and orders its new siblings', function () {
     $sibling = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parent->getKey(), 'sort' => 1]);
     $moved = ServiceRequestTypeCategory::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveCategory', $moved->getKey(), $parent->getKey(), [$moved->getKey(), $sibling->getKey()]);
 
     expect($moved->refresh()->parent_id)->toBe($parent->getKey())
@@ -377,7 +377,7 @@ it('moves a child area to the top level and orders the top-level areas', functio
     $parent = ServiceRequestTypeCategory::factory()->create(['sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parent->getKey(), 'sort' => 1]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveCategory', $child->getKey(), null, [$child->getKey(), $parent->getKey()]);
 
     expect($child->refresh()->parent_id)->toBeNull()
@@ -392,7 +392,7 @@ it('does not move an area with child areas under another area', function () {
     $moved = ServiceRequestTypeCategory::factory()->create();
     ServiceRequestTypeCategory::factory()->create(['parent_id' => $moved->getKey()]);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveCategory', $moved->getKey(), $target->getKey(), [$moved->getKey()])
         ->assertNotified('Unable to save changes');
 
@@ -409,7 +409,7 @@ it('reorders types within an area, keeping unmentioned types after the requested
     $type3 = ServiceRequestType::factory()->hasAttached($category, ['sort' => 3], 'categories')->create();
 
     // Another user added `$type3` after this client last loaded the tree, so it is not in the order.
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type2->getKey(), $category->getKey(), $category->getKey(), [$type2->getKey(), $type1->getKey()]);
 
     expect($category->types()->pluck('service_request_types.id')->all())
@@ -423,7 +423,7 @@ it('moves a type from one area to another', function () {
     $to = ServiceRequestTypeCategory::factory()->create();
     $type = ServiceRequestType::factory()->hasAttached($from, ['sort' => 1], 'categories')->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type->getKey(), $from->getKey(), $to->getKey(), [$type->getKey()]);
 
     expect($type->refresh()->categories->pluck('id')->all())->toBe([$to->getKey()]);
@@ -435,7 +435,7 @@ it('moves an uncategorized type into an area', function () {
     $category = ServiceRequestTypeCategory::factory()->create();
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->call('moveType', $type->getKey(), null, $category->getKey(), [$type->getKey()]);
 
     expect($type->refresh()->categories->pluck('id')->all())->toBe([$category->getKey()]);
@@ -447,7 +447,7 @@ it('restricts a service request type visibility via the manage visibility action
     $type = ServiceRequestType::factory()->create();
     $contactType = ContactType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->callAction(
             'manageVisibility',
             data: [
@@ -475,7 +475,7 @@ it('restricts a service request area visibility via the manage visibility action
     $category = ServiceRequestTypeCategory::factory()->create();
     $contactType = ContactType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->callAction(
             'manageVisibility',
             data: [
@@ -500,7 +500,7 @@ it('requires at least one contact type when restricting visibility', function ()
 
     $type = ServiceRequestType::factory()->create();
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->callAction(
             'manageVisibility',
             data: [
@@ -524,7 +524,7 @@ it('clears a visibility restriction and detaches contact types', function () {
     $type = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
     $type->restrictedToContactTypes()->attach($contactType);
 
-    livewire(ListServiceRequestTypes::class)
+    Livewire::test(ListServiceRequestTypes::class)
         ->callAction(
             'manageVisibility',
             data: [
@@ -552,7 +552,7 @@ it('shows a type under every category it belongs to in the hierarchical data', f
     $type = ServiceRequestType::factory()->create(['name' => 'Shared', 'sort' => 1]);
     $type->categories()->attach([$categoryA->id, $categoryB->id]);
 
-    $data = livewire(ListServiceRequestTypes::class)->instance()->getHierarchicalData();
+    $data = Livewire::test(ListServiceRequestTypes::class)->instance()->getHierarchicalData();
 
     $categoryAData = collect($data['categories'])->firstWhere('id', $categoryA->id);
     $categoryBData = collect($data['categories'])->firstWhere('id', $categoryB->id);
@@ -568,7 +568,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call($method, ...$arguments)
             ->assertForbidden();
 
@@ -591,7 +591,7 @@ describe('authorization', function () {
     it('does not create a type without the `settings.create` permission', function () {
         actingAs(builderEditor());
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('createType', 'Unauthorized Type')
             ->assertReturned(fn (array $result): bool => $result['saved'] === false)
             ->assertNotified('Unable to save changes');
@@ -604,7 +604,7 @@ describe('authorization', function () {
 
         $type = ServiceRequestType::factory()->create();
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('deleteType', $type->getKey())
             ->assertNotified('Unable to save changes');
 
@@ -618,7 +618,7 @@ describe('authorization', function () {
         $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
         ServiceRequest::factory()->create(['priority_id' => $priority->id]);
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('archiveType', $type->getKey())
             ->assertNotified('Unable to save changes');
 
@@ -631,7 +631,7 @@ describe('authorization', function () {
         $type = ServiceRequestType::factory()->create();
         $type->archive();
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('restoreArchivedType', $type->getKey())
             ->assertNotified('Unable to save changes');
 
@@ -644,7 +644,7 @@ describe('authorization', function () {
         $category = ServiceRequestTypeCategory::factory()->create();
         $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('deleteCategory', $category->getKey())
             ->assertNotified('Unable to save changes');
 
@@ -658,7 +658,7 @@ describe('authorization', function () {
         $category = ServiceRequestTypeCategory::factory()->create();
         $type = ServiceRequestType::factory()->create();
 
-        livewire(ListServiceRequestTypes::class)
+        Livewire::test(ListServiceRequestTypes::class)
             ->call('createCategory', 'Editor Area')
             ->call('moveType', $type->getKey(), null, $category->getKey(), [$type->getKey()]);
 
