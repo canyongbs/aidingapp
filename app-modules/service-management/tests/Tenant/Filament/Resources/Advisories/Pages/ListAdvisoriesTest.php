@@ -348,7 +348,7 @@ test('creating an advisory keeps a user who cannot view it on the list page', fu
 test('the create advisory modal defaults the assigned department to the current user department', function () {
     $department = Department::factory()->create();
 
-    $user = User::factory()->create(['department_id' => $department->getKey()]);
+    $user = User::factory()->for($department)->create();
 
     actingAs($user);
 

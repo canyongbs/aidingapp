@@ -71,9 +71,7 @@ class ListAdvisories extends ListRecords
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                ? AdvisoryResource::getUrl('view', ['record' => $record])
-                : null)
+            ->recordUrl($this->advisoryViewUrl(...))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -87,9 +85,7 @@ class ListAdvisories extends ListRecords
         return [
             CreateAction::make()
                 ->slideOver()
-                ->successRedirectUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                    ? AdvisoryResource::getUrl('view', ['record' => $record])
-                    : null)
+                ->successRedirectUrl($this->advisoryViewUrl(...))
                 ->fillForm(fn (): array => [
                     'assigned_department_id' => auth()->user()?->department?->getKey(),
                 ])
@@ -99,5 +95,12 @@ class ListAdvisories extends ListRecords
                     AdvisoryForm::assignmentSection(),
                 ]),
         ];
+    }
+
+    protected function advisoryViewUrl(Advisory $record): ?string
+    {
+        return AdvisoryResource::can('view', $record)
+            ? AdvisoryResource::getUrl('view', ['record' => $record])
+            : null;
     }
 }

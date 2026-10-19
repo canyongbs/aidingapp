@@ -69,7 +69,7 @@ class AdvisoryForm
     /**
      * @return array<int, Field>
      */
-    public static function propertiesComponents(): array
+    private static function propertiesComponents(): array
     {
         return [
             TextInput::make('title')
@@ -90,7 +90,7 @@ class AdvisoryForm
     /**
      * @return array<int, Field>
      */
-    public static function trackingComponents(): array
+    private static function trackingComponents(): array
     {
         return [
             ToggleButtons::make('severity_id')
@@ -113,7 +113,7 @@ class AdvisoryForm
     /**
      * @return array<int, Field>
      */
-    public static function assignmentComponents(): array
+    private static function assignmentComponents(): array
     {
         return [
             TableSelect::make('assigned_department_id')
