@@ -2058,24 +2058,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ServiceRequestTypeAssignmentsIndividualUserMustBeAManager.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/ViewServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Spatie\\\\Image\\\\Drivers\\\\ImageDriver\\:\\:keepOriginalImageFormat\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
