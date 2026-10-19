@@ -42,12 +42,11 @@ use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\actingAs;
 
-function employeeSelfServiceUrl(): string
-{
+$employeeSelfServiceUrl = function (): string {
     return URL::temporarySignedRoute('employee-self-service', now()->addHour());
-}
+};
 
-it('logs the managed contact into the portal and redirects', function () {
+it('logs the managed contact into the portal and redirects', function () use ($employeeSelfServiceUrl) {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -55,13 +54,13 @@ it('logs the managed contact into the portal and redirects', function () {
     $contact = app(ManagedContactService::class)->enable($user, $type->getKey());
 
     actingAs($user)
-        ->get(employeeSelfServiceUrl())
+        ->get($employeeSelfServiceUrl())
         ->assertRedirect(route('portal.show'));
 
     expect(Auth::guard('contact')->id())->toBe($contact->getKey());
 });
 
-it('does not rotate the csrf token shared with the admin panel', function () {
+it('does not rotate the csrf token shared with the admin panel', function () use ($employeeSelfServiceUrl) {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -75,18 +74,18 @@ it('does not rotate the csrf token shared with the admin panel', function () {
     expect($token)->not->toBeEmpty();
 
     actingAs($user)
-        ->get(employeeSelfServiceUrl())
+        ->get($employeeSelfServiceUrl())
         ->assertRedirect(route('portal.show'));
 
     expect(session()->token())->toBe($token)
         ->and(Auth::guard('contact')->check())->toBeTrue();
 });
 
-it('forbids a user without a managed contact', function () {
+it('forbids a user without a managed contact', function () use ($employeeSelfServiceUrl) {
     $user = User::factory()->create();
 
     actingAs($user)
-        ->get(employeeSelfServiceUrl())
+        ->get($employeeSelfServiceUrl())
         ->assertForbidden();
 });
 

@@ -47,6 +47,27 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
+/**
+ * @return array<string, mixed>
+ */
+$customFormContent = function (string $label = 'Your name'): array {
+    return [
+        'type' => 'doc',
+        'content' => [
+            [
+                'type' => 'customBlock',
+                'attrs' => [
+                    'id' => TextInputFormFieldBlock::type(),
+                    'config' => [
+                        'label' => $label,
+                        'isRequired' => true,
+                    ],
+                ],
+            ],
+        ],
+    ];
+};
+
 beforeEach(function () {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
@@ -77,7 +98,7 @@ it('is forbidden for users without the required permissions', function () {
     ])->assertForbidden();
 });
 
-it('creates a form for a type that does not have one yet', function () {
+it('creates a form for a type that does not have one yet', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -88,7 +109,7 @@ it('creates a form for a type that does not have one yet', function () {
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent())
+        ->set('data.content', $customFormContent())
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -98,7 +119,7 @@ it('creates a form for a type that does not have one yet', function () {
         ->and($type->form->fields()->count())->toBe(1);
 });
 
-it('edits the form in place when it has no submissions', function () {
+it('edits the form in place when it has no submissions', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -109,7 +130,7 @@ it('edits the form in place when it has no submissions', function () {
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('Updated label'))
+        ->set('data.content', $customFormContent('Updated label'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -120,7 +141,7 @@ it('edits the form in place when it has no submissions', function () {
         ->and($type->form->fields()->where('label', 'Updated label')->exists())->toBeTrue();
 });
 
-it('archives the current form and creates a new version when submissions exist', function () {
+it('archives the current form and creates a new version when submissions exist', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -133,7 +154,7 @@ it('archives the current form and creates a new version when submissions exist',
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('New version field'))
+        ->set('data.content', $customFormContent('New version field'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -147,7 +168,7 @@ it('archives the current form and creates a new version when submissions exist',
         ->and($type->form->fields()->where('label', 'New version field')->exists())->toBeTrue();
 });
 
-it('creates a new version when a non-submitted submission exists so its field references are preserved', function () {
+it('creates a new version when a non-submitted submission exists so its field references are preserved', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -161,7 +182,7 @@ it('creates a new version when a non-submitted submission exists so its field re
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('New version field'))
+        ->set('data.content', $customFormContent('New version field'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -172,7 +193,7 @@ it('creates a new version when a non-submitted submission exists so its field re
         ->and($type->form->getKey())->not()->toBe($form->getKey());
 });
 
-it('only ever has one active form per type after repeated edits with submissions', function () {
+it('only ever has one active form per type after repeated edits with submissions', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -182,7 +203,7 @@ it('only ever has one active form per type after repeated edits with submissions
             'record' => $type->getKey(),
         ])
             ->set('data.is_wizard', false)
-            ->set('data.content', customFormContent($label))
+            ->set('data.content', $customFormContent($label))
             ->call('save')
             ->assertHasNoFormErrors();
 
@@ -197,14 +218,14 @@ it('only ever has one active form per type after repeated edits with submissions
     )->toBe(1);
 });
 
-it('keeps prior submissions rendering against their archived form version', function () {
+it('keeps prior submissions rendering against their archived form version', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
         ->for($type, 'type')
-        ->state(['content' => customFormContent('Old field')])
+        ->state(['content' => $customFormContent('Old field')])
         ->create();
 
     $submission = $form->submissions()->create(['submitted_at' => now()]);
@@ -213,7 +234,7 @@ it('keeps prior submissions rendering against their archived form version', func
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('Brand new field'))
+        ->set('data.content', $customFormContent('Brand new field'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -224,7 +245,7 @@ it('keeps prior submissions rendering against their archived form version', func
         ->and($submission->submissible->isArchived())->toBeTrue();
 });
 
-it('preserves the field responses of a prior submission after a version bump', function () {
+it('preserves the field responses of a prior submission after a version bump', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -233,7 +254,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('Old field'))
+        ->set('data.content', $customFormContent('Old field'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -251,7 +272,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent('New field'))
+        ->set('data.content', $customFormContent('New field'))
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -266,7 +287,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         ->and($submission->fields()->first()->pivot->getAttribute('response'))->toBe('Jane Doe');
 });
 
-it('saves the description', function () {
+it('saves the description', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -276,7 +297,7 @@ it('saves the description', function () {
     ])
         ->set('data.description', 'How to request access.')
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent())
+        ->set('data.content', $customFormContent())
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -285,7 +306,7 @@ it('saves the description', function () {
     expect($type->form->description)->toBe('How to request access.');
 });
 
-it('saves the is_first_step_combined toggle', function () {
+it('saves the is_first_step_combined toggle', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -294,7 +315,7 @@ it('saves the is_first_step_combined toggle', function () {
         'record' => $type->getKey(),
     ])
         ->set('data.is_wizard', false)
-        ->set('data.content', customFormContent())
+        ->set('data.content', $customFormContent())
         ->set('data.is_first_step_combined', true)
         ->call('save')
         ->assertHasNoFormErrors();
@@ -319,7 +340,7 @@ it('hydrates the is_first_step_combined toggle from an existing form', function 
         ->assertSet('data.is_first_step_combined', true);
 });
 
-it('stores steps and clears top-level content for a multi-step form', function () {
+it('stores steps and clears top-level content for a multi-step form', function () use ($customFormContent) {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -331,7 +352,7 @@ it('stores steps and clears top-level content for a multi-step form', function (
         ->set('data.steps', [
             [
                 'label' => 'Step One',
-                'content' => customFormContent('Step field'),
+                'content' => $customFormContent('Step field'),
             ],
         ])
         ->call('save')
@@ -344,25 +365,3 @@ it('stores steps and clears top-level content for a multi-step form', function (
         ->and($type->form->steps()->count())->toBe(1)
         ->and($type->form->steps()->first()->label)->toBe('Step One');
 });
-
-/**
- * @return array<string, mixed>
- */
-function customFormContent(string $label = 'Your name'): array
-{
-    return [
-        'type' => 'doc',
-        'content' => [
-            [
-                'type' => 'customBlock',
-                'attrs' => [
-                    'id' => TextInputFormFieldBlock::type(),
-                    'config' => [
-                        'label' => $label,
-                        'isRequired' => true,
-                    ],
-                ],
-            ],
-        ],
-    ];
-}

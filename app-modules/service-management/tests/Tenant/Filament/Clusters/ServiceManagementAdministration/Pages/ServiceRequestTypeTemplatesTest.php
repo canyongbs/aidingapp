@@ -52,10 +52,9 @@ use function Tests\asSuperAdmin;
 /**
  * @return array<string, mixed>
  */
-function serviceRequestTypeTemplatesDoc(string $text): array
-{
+$serviceRequestTypeTemplatesDoc = function (string $text): array {
     return ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]]]];
-}
+};
 
 test('it prevents access when the user does not have permission', function () {
     actingAs(User::factory()->create());
@@ -78,7 +77,7 @@ test('it allows access for a user with permission', function () {
         ->assertSuccessful();
 });
 
-test('it saves the override flag and custom template content', function () {
+test('it saves the override flag and custom template content', function () use ($serviceRequestTypeTemplatesDoc) {
     asSuperAdmin();
 
     expect(app(ServiceRequestNotificationAutomationSettings::class)->use_custom_templates)->toBeFalse();
@@ -86,8 +85,8 @@ test('it saves the override flag and custom template content', function () {
     Livewire::test(ServiceRequestTypeTemplates::class)
         ->fillForm([
             'use_custom_templates' => true,
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => serviceRequestTypeTemplatesDoc('Hello'),
-            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => serviceRequestTypeTemplatesDoc('Body'),
+            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.subject' => $serviceRequestTypeTemplatesDoc('Hello'),
+            'templates.' . ServiceRequestEmailTemplateType::Created->value . '.' . ServiceRequestTypeEmailTemplateRole::Customer->value . '.body' => $serviceRequestTypeTemplatesDoc('Body'),
         ])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -99,25 +98,25 @@ test('it saves the override flag and custom template content', function () {
         ->where('role', ServiceRequestTypeEmailTemplateRole::Customer)
         ->firstOrFail();
 
-    expect($template->subject)->toEqual(serviceRequestTypeTemplatesDoc('Hello'));
-    expect($template->body)->toEqual(serviceRequestTypeTemplatesDoc('Body'));
+    expect($template->subject)->toEqual($serviceRequestTypeTemplatesDoc('Hello'));
+    expect($template->body)->toEqual($serviceRequestTypeTemplatesDoc('Body'));
 });
 
-test('can preload basic templates when the override toggle is turned on', function () {
+test('can preload basic templates when the override toggle is turned on', function () use ($serviceRequestTypeTemplatesDoc) {
     asSuperAdmin();
 
     $baseTemplate = ServiceRequestNotificationAutomationEmailTemplate::factory()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
-        'subject' => serviceRequestTypeTemplatesDoc('Base subject'),
-        'body' => serviceRequestTypeTemplatesDoc('Base body'),
+        'subject' => $serviceRequestTypeTemplatesDoc('Base subject'),
+        'body' => $serviceRequestTypeTemplatesDoc('Base body'),
     ]);
 
     ServiceRequestCustomEmailTemplate::factory()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-        'subject' => serviceRequestTypeTemplatesDoc('Stale subject'),
-        'body' => serviceRequestTypeTemplatesDoc('Stale body'),
+        'subject' => $serviceRequestTypeTemplatesDoc('Stale subject'),
+        'body' => $serviceRequestTypeTemplatesDoc('Stale body'),
     ]);
 
     Livewire::test(ServiceRequestTypeTemplates::class)
@@ -169,7 +168,7 @@ test('it saves the preload new service request types setting', function () {
     expect(app(ServiceRequestNotificationAutomationSettings::class)->preload_new_service_request_types)->toBeFalse();
 });
 
-test('it deletes a custom template when its subject and body are cleared', function () {
+test('it deletes a custom template when its subject and body are cleared', function () use ($serviceRequestTypeTemplatesDoc) {
     asSuperAdmin();
 
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
@@ -179,8 +178,8 @@ test('it deletes a custom template when its subject and body are cleared', funct
     $existing = ServiceRequestCustomEmailTemplate::query()->create([
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Customer,
-        'subject' => serviceRequestTypeTemplatesDoc('Existing'),
-        'body' => serviceRequestTypeTemplatesDoc('Existing body'),
+        'subject' => $serviceRequestTypeTemplatesDoc('Existing'),
+        'body' => $serviceRequestTypeTemplatesDoc('Existing body'),
     ]);
 
     Livewire::test(ServiceRequestTypeTemplates::class)

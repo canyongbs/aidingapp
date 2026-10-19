@@ -50,6 +50,19 @@ use function Pest\Laravel\getJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @return TestResponse<Response>
+ */
+$widgetFormRequestAsContact = function (Contact $contact, ServiceRequestType $type): TestResponse {
+    $contact->createToken('assistant-widget-access-token');
+    actingAs($contact, 'contact');
+
+    return getJson(
+        route('widgets.assistant.api.service-request-form', ['type' => $type]),
+        ['Origin' => config('app.url')],
+    );
+};
+
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
@@ -57,22 +70,7 @@ beforeEach(function () {
     $portalSettings->save();
 });
 
-/**
- * @return TestResponse<Response>
- */
-function widgetFormRequestAsContact(Contact $contact, ServiceRequestType $type): TestResponse
-{
-    $contact->createToken('assistant-widget-access-token');
-
-    actingAs($contact, 'contact');
-
-    return getJson(
-        route('widgets.assistant.api.service-request-form', ['type' => $type]),
-        ['Origin' => config('app.url')],
-    );
-}
-
-it('blocks widget contacts of a non-matching contact type from loading a restricted type form', function () {
+it('blocks widget contacts of a non-matching contact type from loading a restricted type form', function () use ($widgetFormRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -81,11 +79,11 @@ it('blocks widget contacts of a non-matching contact type from loading a restric
 
     $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 
-    widgetFormRequestAsContact($contact, $restrictedType)
+    $widgetFormRequestAsContact($contact, $restrictedType)
         ->assertNotFound();
 });
 
-it('allows widget contacts of a matching contact type to load a restricted type form', function () {
+it('allows widget contacts of a matching contact type to load a restricted type form', function () use ($widgetFormRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -93,11 +91,11 @@ it('allows widget contacts of a matching contact type to load a restricted type 
 
     $contact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
 
-    widgetFormRequestAsContact($contact, $restrictedType)
+    $widgetFormRequestAsContact($contact, $restrictedType)
         ->assertOk();
 });
 
-it('includes secure password fields in assistant forms', function () {
+it('includes secure password fields in assistant forms', function () use ($widgetFormRequestAsContact) {
     $type = ServiceRequestType::factory()->create();
     $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
     $step = new ServiceRequestFormStep([
@@ -130,7 +128,7 @@ it('includes secure password fields in assistant forms', function () {
     ]);
     $step->save();
 
-    widgetFormRequestAsContact(Contact::factory()->create(), $type)
+    $widgetFormRequestAsContact(Contact::factory()->create(), $type)
         ->assertOk()
         ->assertJsonFragment([
             '$formkit' => 'password',
@@ -139,7 +137,7 @@ it('includes secure password fields in assistant forms', function () {
         ]);
 });
 
-it('blocks a widget type nested under a restricted area from a non-matching contact', function () {
+it('blocks a widget type nested under a restricted area from a non-matching contact', function () use ($widgetFormRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -153,6 +151,6 @@ it('blocks a widget type nested under a restricted area from a non-matching cont
 
     $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 
-    widgetFormRequestAsContact($contact, $type)
+    $widgetFormRequestAsContact($contact, $type)
         ->assertNotFound();
 });

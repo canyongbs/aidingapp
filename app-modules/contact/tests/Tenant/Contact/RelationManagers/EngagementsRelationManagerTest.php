@@ -56,20 +56,17 @@ use function Tests\asSuperAdmin;
  *
  * @return array{outbound: Collection<int, Engagement>, inbound: Collection<int, EngagementResponse>}
  */
-function seedContactEmails(Contact $contact): array
-{
+$seedContactEmails = function (Contact $contact): array {
     $outbound = Engagement::factory()->count(2)
         ->state([
             'recipient_id' => $contact->getKey(),
             'recipient_type' => $contact->getMorphClass(),
         ])->createQuietly();
-
     $inbound = EngagementResponse::factory()->count(3)
         ->state([
             'sender_id' => $contact->getKey(),
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
-
     $outbound->each(function (Engagement $engagement): void {
         assert($engagement->recipient instanceof Model);
 
@@ -77,7 +74,6 @@ function seedContactEmails(Contact $contact): array
             new TimelineableRecordCreated($engagement->recipient, $engagement),
         );
     });
-
     $inbound->each(function (EngagementResponse $response): void {
         app(AddRecordToTimeline::class)->handle(
             new TimelineableRecordCreated($response->sender, $response),
@@ -85,7 +81,7 @@ function seedContactEmails(Contact $contact): array
     });
 
     return ['outbound' => $outbound, 'inbound' => $inbound];
-}
+};
 
 it('disables the `engage` header action with the bounced tooltip for a bounced owner contact', function () {
     asSuperAdmin();
@@ -121,8 +117,8 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
         ->and($action->getTooltip())->toBeNull();
 });
 
-describe('email direction filtering by permission', function () {
-    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () {
+describe('email direction filtering by permission', function () use ($seedContactEmails) {
+    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement.view-any');
 
@@ -130,7 +126,7 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
         Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
@@ -141,7 +137,7 @@ describe('email direction filtering by permission', function () {
             ->assertCanNotSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
     });
 
-    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () {
+    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement_response.view-any');
 
@@ -149,7 +145,7 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
         Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
@@ -160,7 +156,7 @@ describe('email direction filtering by permission', function () {
             ->assertCanNotSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
     });
 
-    it('shows both directions to a user with both engagement permissions', function () {
+    it('shows both directions to a user with both engagement permissions', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement.view-any');
         $user->givePermissionTo('engagement_response.view-any');
@@ -169,7 +165,7 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
         Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,

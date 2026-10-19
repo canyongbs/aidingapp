@@ -53,10 +53,8 @@ use function Tests\asSuperAdmin;
 /**
  * @return array<string, mixed>
  */
-function allNotificationSettings(bool $enabled = false): array
-{
+$allNotificationSettings = function (bool $enabled = false): array {
     $settings = [];
-
     $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
 
     foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
@@ -84,15 +82,14 @@ function allNotificationSettings(bool $enabled = false): array
     }
 
     return $settings;
-}
+};
 
 /**
  * Counts how many preference rows should exist when all visible checkboxes are saved.
  * SurveyResponse contributes exactly 1 row (Customer × Email); all other SurveyResponse
  * combinations are excluded by the blade $shouldShow logic.
  */
-function expectedTotalPreferenceCount(): int
-{
+$expectedTotalPreferenceCount = function (): int {
     $roles = count(ServiceRequestTypeEmailTemplateRole::cases());
     $nonSurveyEvents = count(ServiceRequestEmailTemplateType::cases()) - 1;
     $channels = count(ServiceRequestNotificationChannel::cases());
@@ -100,7 +97,7 @@ function expectedTotalPreferenceCount(): int
     $surveyTotal = 1;
 
     return $nonSurveyTotal + $surveyTotal;
-}
+};
 
 test('A successful action on the EditServiceRequestTypeNotifications page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -192,7 +189,7 @@ test('saving creates a new preference row for a single combination', function ()
     ]);
 });
 
-test('saving upserts all visible matrix combinations into the pivot table', function () {
+test('saving upserts all visible matrix combinations into the pivot table', function () use ($allNotificationSettings, $expectedTotalPreferenceCount) {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -200,11 +197,11 @@ test('saving upserts all visible matrix combinations into the pivot table', func
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseCount('service_request_type_email_preference', expectedTotalPreferenceCount());
+    assertDatabaseCount('service_request_type_email_preference', $expectedTotalPreferenceCount());
 
     $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
 
@@ -304,7 +301,7 @@ test('saving updates an existing disabled preference to enabled', function () {
     ]);
 });
 
-test('survey response email preference is only stored for the customer role', function () {
+test('survey response email preference is only stored for the customer role', function () use ($allNotificationSettings) {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -312,7 +309,7 @@ test('survey response email preference is only stored for the customer role', fu
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -341,7 +338,7 @@ test('survey response email preference is only stored for the customer role', fu
     }
 });
 
-test('survey response notification channel is never written to the pivot table for any role', function () {
+test('survey response notification channel is never written to the pivot table for any role', function () use ($allNotificationSettings) {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -349,7 +346,7 @@ test('survey response notification channel is never written to the pivot table f
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 

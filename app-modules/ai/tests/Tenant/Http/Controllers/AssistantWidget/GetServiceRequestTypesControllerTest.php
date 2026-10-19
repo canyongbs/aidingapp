@@ -47,6 +47,27 @@ use function Pest\Laravel\getJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @return TestResponse<Response>
+ */
+$authenticatedWidgetRequest = function (string $url): TestResponse {
+    $contact = Contact::factory()->create();
+    $contact->createToken('assistant-widget-access-token');
+    actingAs($contact, 'contact');
+
+    return getJson($url, ['Origin' => config('app.url')]);
+};
+
+/**
+ * @return TestResponse<Response>
+ */
+$widgetRequestAsContact = function (Contact $contact, string $url): TestResponse {
+    $contact->createToken('assistant-widget-access-token');
+    actingAs($contact, 'contact');
+
+    return getJson($url, ['Origin' => config('app.url')]);
+};
+
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
@@ -54,32 +75,7 @@ beforeEach(function () {
     $portalSettings->save();
 });
 
-/**
- * @return TestResponse<Response>
- */
-function authenticatedWidgetRequest(string $url): TestResponse
-{
-    $contact = Contact::factory()->create();
-    $contact->createToken('assistant-widget-access-token');
-
-    actingAs($contact, 'contact');
-
-    return getJson($url, ['Origin' => config('app.url')]);
-}
-
-/**
- * @return TestResponse<Response>
- */
-function widgetRequestAsContact(Contact $contact, string $url): TestResponse
-{
-    $contact->createToken('assistant-widget-access-token');
-
-    actingAs($contact, 'contact');
-
-    return getJson($url, ['Origin' => config('app.url')]);
-}
-
-it('returns a configured default priority for a service request type', function () {
+it('returns a configured default priority for a service request type', function () use ($authenticatedWidgetRequest) {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()
         ->for($type, 'type')
@@ -87,7 +83,7 @@ it('returns a configured default priority for a service request type', function 
 
     $type->update(['default_priority_id' => $priority->getKey()]);
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -95,13 +91,13 @@ it('returns a configured default priority for a service request type', function 
         ->toBe($priority->getKey());
 });
 
-it('does not return categories that have no service request types', function () {
+it('does not return categories that have no service request types', function () use ($authenticatedWidgetRequest) {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithType, relationship: 'categories')->create();
 
     $emptyCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -111,12 +107,12 @@ it('does not return categories that have no service request types', function () 
         ->and($categoryIds)->not()->toContain($emptyCategory->id);
 });
 
-it('returns a parent category when a child category has types', function () {
+it('returns a parent category when a child category has types', function () use ($authenticatedWidgetRequest) {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
     ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create();
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -125,11 +121,11 @@ it('returns a parent category when a child category has types', function () {
     expect($categoryIds)->toContain($parentCategory->id);
 });
 
-it('does not return a parent category when all child categories are empty', function () {
+it('does not return a parent category when all child categories are empty', function () use ($authenticatedWidgetRequest) {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -138,7 +134,7 @@ it('does not return a parent category when all child categories are empty', func
     expect($categoryIds)->not()->toContain($parentCategory->id);
 });
 
-it('does not return archived service request types as part of a category', function () {
+it('does not return archived service request types as part of a category', function () use ($authenticatedWidgetRequest) {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithOnlyArchivedType, relationship: 'categories')->create([
         'archived_at' => now(),
@@ -147,7 +143,7 @@ it('does not return archived service request types as part of a category', funct
     $categoryWithActiveType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithActiveType, relationship: 'categories')->create();
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -157,7 +153,7 @@ it('does not return archived service request types as part of a category', funct
         ->and($categoryIds)->not()->toContain($categoryWithOnlyArchivedType->id);
 });
 
-it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () {
+it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () use ($widgetRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -168,7 +164,7 @@ it('hides visibility restricted top level types from widget contacts of a non-ma
 
     $contact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 
-    $response = widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
+    $response = $widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -178,7 +174,7 @@ it('hides visibility restricted top level types from widget contacts of a non-ma
         ->and($typeIds)->not()->toContain($restrictedType->id);
 });
 
-it('shows visibility restricted types to widget contacts of a matching contact type', function () {
+it('shows visibility restricted types to widget contacts of a matching contact type', function () use ($widgetRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -186,7 +182,7 @@ it('shows visibility restricted types to widget contacts of a matching contact t
 
     $contact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
 
-    $response = widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
+    $response = $widgetRequestAsContact($contact, route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -195,7 +191,7 @@ it('shows visibility restricted types to widget contacts of a matching contact t
     expect($typeIds)->toContain($restrictedType->id);
 });
 
-it('hides the entire subtree of a visibility restricted area from non-matching widget contacts', function () {
+it('hides the entire subtree of a visibility restricted area from non-matching widget contacts', function () use ($widgetRequestAsContact) {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -208,7 +204,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
 
     $nonMatchingContact = Contact::factory()->create(['type_id' => $otherContactType->id]);
 
-    $hiddenResponse = widgetRequestAsContact($nonMatchingContact, route('widgets.assistant.api.service-request-types'));
+    $hiddenResponse = $widgetRequestAsContact($nonMatchingContact, route('widgets.assistant.api.service-request-types'));
 
     $hiddenResponse->assertOk();
 
@@ -217,7 +213,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
 
     $matchingContact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
 
-    $visibleResponse = widgetRequestAsContact($matchingContact, route('widgets.assistant.api.service-request-types'));
+    $visibleResponse = $widgetRequestAsContact($matchingContact, route('widgets.assistant.api.service-request-types'));
 
     $visibleResponse->assertOk();
 
@@ -225,14 +221,14 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
         ->toContain($restrictedCategory->id);
 });
 
-it('lists a type under every category it belongs to', function () {
+it('lists a type under every category it belongs to', function () use ($authenticatedWidgetRequest) {
     $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
     $type = ServiceRequestType::factory()->create();
     $type->categories()->attach([$categoryA->id, $categoryB->id]);
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 
@@ -247,7 +243,7 @@ it('lists a type under every category it belongs to', function () {
         ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
-it('orders types within a category by their per-area sort rather than the global sort', function () {
+it('orders types within a category by their per-area sort rather than the global sort', function () use ($authenticatedWidgetRequest) {
     $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
     $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);
@@ -257,7 +253,7 @@ it('orders types within a category by their per-area sort rather than the global
     $category->types()->attach($first->id, ['sort' => 2]);
     $category->types()->attach($second->id, ['sort' => 1]);
 
-    $response = authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
+    $response = $authenticatedWidgetRequest(route('widgets.assistant.api.service-request-types'));
 
     $response->assertOk();
 

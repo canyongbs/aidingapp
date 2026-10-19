@@ -64,17 +64,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-function loginAsUserWithProjectViewPermissions(): User
-{
+$loginAsUserWithProjectViewPermissions = function (): User {
     $user = User::factory()->create();
-
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
-
     actingAs($user);
 
     return $user;
-}
+};
 
 it('cannot render without proper permission', function () {
     $user = User::factory()->create();
@@ -89,8 +86,8 @@ it('cannot render without proper permission', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission', function () {
-    loginAsUserWithProjectViewPermissions();
+it('can render with proper permission', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -100,8 +97,8 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
-it('cannot render an archived project', function () {
-    loginAsUserWithProjectViewPermissions();
+it('cannot render an archived project', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
     $project->archive();
@@ -201,8 +198,8 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
         ->assertSuccessful();
 });
 
-it('can view a record', function () {
-    loginAsUserWithProjectViewPermissions();
+it('can view a record', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -212,9 +209,9 @@ it('can view a record', function () {
         ->assertHasNoErrors();
 });
 
-describe('tabs', function () {
-    it('shows each tab the user can view', function (ProjectTab $tab) {
-        loginAsUserWithProjectViewPermissions();
+describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
+    it('shows each tab the user can view', function (ProjectTab $tab) use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 
@@ -222,8 +219,8 @@ describe('tabs', function () {
             ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
-    it('defaults to the access tab when no tab is requested', function () {
-        loginAsUserWithProjectViewPermissions();
+    it('defaults to the access tab when no tab is requested', function () use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 
@@ -231,8 +228,8 @@ describe('tabs', function () {
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('falls back to the access tab when the requested tab is invalid', function () {
-        loginAsUserWithProjectViewPermissions();
+    it('falls back to the access tab when the requested tab is invalid', function () use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 

@@ -47,20 +47,12 @@ use function Pest\Laravel\postJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
-beforeEach(function () {
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->ai_support_assistant = true;
-    $settings->save();
-});
-
 /**
  * @param array<string, mixed> $body
  *
  * @return TestResponse<Response>
  */
-function assistantAuthenticate(PortalAuthentication $authentication, array $body): TestResponse
-{
+$assistantAuthenticate = function (PortalAuthentication $authentication, array $body): TestResponse {
     $url = URL::signedRoute(
         name: 'widgets.assistant.api.authenticate',
         parameters: ['authentication' => $authentication],
@@ -68,9 +60,16 @@ function assistantAuthenticate(PortalAuthentication $authentication, array $body
     );
 
     return postJson($url, $body, ['Origin' => config('app.url')]);
-}
+};
 
-test('it authenticates the contact when the code is valid', function () {
+beforeEach(function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->ai_support_assistant = true;
+    $settings->save();
+});
+
+test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 123456;
@@ -83,7 +82,7 @@ test('it authenticates the contact when the code is valid', function () {
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $response = assistantAuthenticate($authentication, ['code' => $plainCode]);
+    $response = $assistantAuthenticate($authentication, ['code' => $plainCode]);
 
     $response
         ->assertOk()
@@ -93,7 +92,7 @@ test('it authenticates the contact when the code is valid', function () {
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns a validation error when the code is invalid', function () {
+test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -104,14 +103,14 @@ test('it returns a validation error when the code is invalid', function () {
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    assistantAuthenticate($authentication, ['code' => 999999])
+    $assistantAuthenticate($authentication, ['code' => 999999])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code']);
 
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it returns expired when the authentication has expired', function () {
+test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 445566;
@@ -124,14 +123,14 @@ test('it returns expired when the authentication has expired', function () {
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    assistantAuthenticate($authentication, ['code' => $plainCode])
+    $assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
         ->assertJsonPath('is_expired', true);
 
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;
@@ -145,12 +144,12 @@ test('it locks the authentication after too many invalid code attempts and rejec
     $authentication->save();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
-        assistantAuthenticate($authentication, ['code' => 999999])
+        $assistantAuthenticate($authentication, ['code' => 999999])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['code' => 'The provided code is invalid.']);
     }
 
-    assistantAuthenticate($authentication, ['code' => $plainCode])
+    $assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code' => 'Too many invalid attempts. Please request a new code.']);
 

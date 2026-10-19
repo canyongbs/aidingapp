@@ -53,7 +53,7 @@ return static function (RectorConfig $rectorConfig): void {
     ]);
 
     $rectorConfig->sets([
-      CommonSetList::COMMON,
+        CommonSetList::COMMON,
     ]);
 
     $rectorConfig->rule(AddInteractsWithMediaUseTagRector::class);

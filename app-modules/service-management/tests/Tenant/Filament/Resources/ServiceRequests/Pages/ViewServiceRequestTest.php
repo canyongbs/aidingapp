@@ -83,15 +83,12 @@ use function Tests\richContentText;
 /**
  * A Service Request the given user may view, because they manage its type.
  */
-function serviceRequestManagedBy(User $user): ServiceRequest
-{
+$serviceRequestManagedBy = function (User $user): ServiceRequest {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
-
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerUsers()->attach($user);
 
@@ -101,18 +98,14 @@ function serviceRequestManagedBy(User $user): ServiceRequest
             'priority'
         )
         ->create();
-}
+};
 
 /**
  * A Service Request whose type controls whether feedback collection is enabled.
  *
  * @param  array<string, mixed>  $attributes
  */
-function serviceRequestWithFeedbackCollection(
-    bool $enabled = true,
-    SystemServiceRequestClassification $classification = SystemServiceRequestClassification::Closed,
-    array $attributes = [],
-): ServiceRequest {
+$serviceRequestWithFeedbackCollection = function (bool $enabled = true, SystemServiceRequestClassification $classification = SystemServiceRequestClassification::Closed, array $attributes = []): ServiceRequest {
     $type = ServiceRequestType::factory()->create([
         'has_enabled_feedback_collection' => $enabled,
     ]);
@@ -121,7 +114,7 @@ function serviceRequestWithFeedbackCollection(
         ->for(ServiceRequestStatus::factory()->state(['classification' => $classification]), 'status')
         ->for(ServiceRequestPriority::factory()->for($type, 'type'), 'priority')
         ->create($attributes);
-}
+};
 
 test('The correct details are displayed on the ViewServiceRequest page', function () {
     $serviceRequest = ServiceRequest::factory()->create();
@@ -457,7 +450,7 @@ test('ViewServiceRequest page displays the uploaded files on the files tab', fun
         ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });
 
-describe('tabs', function () {
+describe('tabs', function () use ($serviceRequestManagedBy) {
     it('opens on the request tab', function () {
         asSuperAdmin();
 
@@ -595,11 +588,11 @@ describe('tabs', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li//a'))->not()->toContain('Service Request Reassigned');
     });
 
-    it('shows a new assignment on the timeline', function () {
+    it('shows a new assignment on the timeline', function () use ($serviceRequestManagedBy) {
         $manager = User::factory()->create([
             'name' => 'Jane Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -613,11 +606,11 @@ describe('tabs', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 
-    it('shows a soft-deleted assignment on the timeline', function () {
+    it('shows a soft-deleted assignment on the timeline', function () use ($serviceRequestManagedBy) {
         $manager = User::factory()->create([
             'name' => 'Jane Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -637,11 +630,11 @@ describe('tabs', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 
-    it('shows a fallback entry for an assignment that was permanently deleted', function () {
+    it('shows a fallback entry for an assignment that was permanently deleted', function () use ($serviceRequestManagedBy) {
         $manager = User::factory()->create([
             'name' => 'Jane Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -661,11 +654,11 @@ describe('tabs', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Jane Doe');
     });
 
-    it('shows a removed assignment on the timeline', function () {
+    it('shows a removed assignment on the timeline', function () use ($serviceRequestManagedBy) {
         $manager = User::factory()->create([
             'name' => 'Jane Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         $actor = User::factory()->create([
             'name' => 'John Smith',
@@ -863,14 +856,14 @@ describe('tabs', function () {
     });
 });
 
-describe('password fields', function () {
-    it('shows the reveal control inline to the assigned manager', function () {
+describe('password fields', function () use ($serviceRequestManagedBy) {
+    it('shows the reveal control inline to the assigned manager', function () use ($serviceRequestManagedBy) {
         $assignedManager = user(permissions: [
             'service_request.view-any',
             'service_request.*.view',
             'service_request.*.update',
         ]);
-        $serviceRequest = serviceRequestManagedBy($assignedManager);
+        $serviceRequest = $serviceRequestManagedBy($assignedManager);
         $serviceRequest->secret_key = Crypt::encryptString(
             'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
         );
@@ -987,11 +980,11 @@ describe('password fields', function () {
     });
 });
 
-describe('feedback tab', function () {
-    it('shows the csat and nps answers when feedback has been submitted', function () {
+describe('feedback tab', function () use ($serviceRequestWithFeedbackCollection) {
+    it('shows the csat and nps answers when feedback has been submitted', function () use ($serviceRequestWithFeedbackCollection) {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection();
+        $serviceRequest = $serviceRequestWithFeedbackCollection();
 
         ServiceRequestFeedback::factory()
             ->for($serviceRequest, 'serviceRequest')
@@ -1009,10 +1002,10 @@ describe('feedback tab', function () {
             ->assertSchemaComponentHidden('feedback.feedback_notice');
     });
 
-    it('explains that feedback is disabled for the service request type', function () {
+    it('explains that feedback is disabled for the service request type', function () use ($serviceRequestWithFeedbackCollection) {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(enabled: false);
+        $serviceRequest = $serviceRequestWithFeedbackCollection(enabled: false);
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
@@ -1020,10 +1013,10 @@ describe('feedback tab', function () {
             ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.type_feedback_disabled'));
     });
 
-    it('explains that the service request is not closed yet', function () {
+    it('explains that the service request is not closed yet', function () use ($serviceRequestWithFeedbackCollection) {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(
+        $serviceRequest = $serviceRequestWithFeedbackCollection(
             classification: SystemServiceRequestClassification::Open,
         );
 
@@ -1033,7 +1026,7 @@ describe('feedback tab', function () {
             ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.not_closed'));
     });
 
-    it('explains that no survey was ever sent', function () {
+    it('explains that no survey was ever sent', function () use ($serviceRequestWithFeedbackCollection) {
         // Disable the feature before creating the Service Request so the observer does not
         // dispatch SendClosedServiceFeedbackNotification, which would set survey_sent_at.
         // This replicates a Service Request closed before feedback management was enabled.
@@ -1041,7 +1034,7 @@ describe('feedback tab', function () {
         $settings->data->addons->feedbackManagement = false;
         $settings->save();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection();
+        $serviceRequest = $serviceRequestWithFeedbackCollection();
 
         $settings->data->addons->feedbackManagement = true;
         $settings->save();
@@ -1054,10 +1047,10 @@ describe('feedback tab', function () {
             ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.no_survey_sent'));
     });
 
-    it('reports when the survey was sent', function () {
+    it('reports when the survey was sent', function () use ($serviceRequestWithFeedbackCollection) {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(attributes: [
+        $serviceRequest = $serviceRequestWithFeedbackCollection(attributes: [
             'survey_sent_at' => now(),
             'reminder_sent_at' => null,
         ]);
@@ -1072,10 +1065,10 @@ describe('feedback tab', function () {
             ->not()->toContain('Feedback survey reminder sent at');
     });
 
-    it('reports when the reminder was sent', function () {
+    it('reports when the reminder was sent', function () use ($serviceRequestWithFeedbackCollection) {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(attributes: [
+        $serviceRequest = $serviceRequestWithFeedbackCollection(attributes: [
             'survey_sent_at' => now()->subDay(),
             'reminder_sent_at' => now(),
         ]);
@@ -1090,7 +1083,7 @@ describe('feedback tab', function () {
     });
 });
 
-describe('authorization', function () {
+describe('authorization', function () use ($serviceRequestManagedBy) {
     it('hides the feedback tab when the `FeedbackManagement` feature is disabled', function () {
         asSuperAdmin();
 
@@ -1123,8 +1116,8 @@ describe('authorization', function () {
             ->assertSchemaComponentHidden(ServiceRequestTab::Chats->value);
     });
 
-    it('hides the updates tab from a user who cannot view service request updates', function () {
-        $serviceRequest = serviceRequestManagedBy($user = User::factory()->create());
+    it('hides the updates tab from a user who cannot view service request updates', function () use ($serviceRequestManagedBy) {
+        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
 
         actingAs($user);
 
@@ -1137,8 +1130,8 @@ describe('authorization', function () {
             ->assertSchemaComponentVisible(ServiceRequestTab::Updates->value);
     });
 
-    it('hides the assignments tab from a user who cannot view any of its relation managers', function () {
-        $serviceRequest = serviceRequestManagedBy($user = User::factory()->create());
+    it('hides the assignments tab from a user who cannot view any of its relation managers', function () use ($serviceRequestManagedBy) {
+        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
 
         actingAs($user);
 

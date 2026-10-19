@@ -48,6 +48,17 @@ use function Pest\Laravel\postJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @param array<string, mixed> $body
+ *
+ * @return TestResponse<Response>
+ */
+$requestAssistantAuthentication = function (array $body): TestResponse {
+    $url = URL::signedRoute(name: 'widgets.assistant.api.authenticate.request', absolute: false);
+
+    return postJson($url, $body, ['Origin' => config('app.url')]);
+};
+
 beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
@@ -55,26 +66,14 @@ beforeEach(function () {
     $settings->save();
 });
 
-/**
- * @param array<string, mixed> $body
- *
- * @return TestResponse<Response>
- */
-function requestAssistantAuthentication(array $body): TestResponse
-{
-    $url = URL::signedRoute(name: 'widgets.assistant.api.authenticate.request', absolute: false);
-
-    return postJson($url, $body, ['Origin' => config('app.url')]);
-}
-
-test('it sends assistant authentication for an existing contact', function () {
+test('it sends assistant authentication for an existing contact', function () use ($requestAssistantAuthentication) {
     Notification::fake();
 
     $contact = Contact::factory()->create([
         'email' => 'contact@example.com',
     ]);
 
-    $response = requestAssistantAuthentication(['email' => $contact->email]);
+    $response = $requestAssistantAuthentication(['email' => $contact->email]);
 
     $response
         ->assertOk()
@@ -87,14 +86,14 @@ test('it sends assistant authentication for an existing contact', function () {
     Notification::assertSentOnDemand(AuthenticatePortalNotification::class);
 });
 
-test('it resolves an existing contact when the email case differs', function () {
+test('it resolves an existing contact when the email case differs', function () use ($requestAssistantAuthentication) {
     Notification::fake();
 
     $contact = Contact::factory()->create([
         'email' => 'Contact@Example.com',
     ]);
 
-    $response = requestAssistantAuthentication(['email' => 'contact@example.com']);
+    $response = $requestAssistantAuthentication(['email' => 'contact@example.com']);
 
     $response
         ->assertOk()
@@ -105,36 +104,36 @@ test('it resolves an existing contact when the email case differs', function () 
     expect($authentication?->educatable_id)->toBe($contact->getKey());
 });
 
-test('it returns a validation error when no contact matches the email', function () {
-    $response = requestAssistantAuthentication(['email' => 'missing@example.com']);
+test('it returns a validation error when no contact matches the email', function () use ($requestAssistantAuthentication) {
+    $response = $requestAssistantAuthentication(['email' => 'missing@example.com']);
 
     $response
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
 });
 
-test('it throttles repeated assistant authentication requests for the same contact', function () {
+test('it throttles repeated assistant authentication requests for the same contact', function () use ($requestAssistantAuthentication) {
     $contact = Contact::factory()->create([
         'email' => 'contact@example.com',
     ]);
 
-    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+    $requestAssistantAuthentication(['email' => $contact->email])->assertOk();
 
-    requestAssistantAuthentication(['email' => $contact->email])
+    $requestAssistantAuthentication(['email' => $contact->email])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['email']);
 
     expect(PortalAuthentication::query()->count())->toBe(1);
 });
 
-test('it invalidates a contact\'s prior authentication when a new assistant code is requested', function () {
+test('it invalidates a contact\'s prior authentication when a new assistant code is requested', function () use ($requestAssistantAuthentication) {
     Notification::fake();
 
     $contact = Contact::factory()->create([
         'email' => 'contact@example.com',
     ]);
 
-    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+    $requestAssistantAuthentication(['email' => $contact->email])->assertOk();
 
     $firstAuthentication = PortalAuthentication::query()->latest('id')->first();
 
@@ -143,7 +142,7 @@ test('it invalidates a contact\'s prior authentication when a new assistant code
     // Clear the per-target mint cooldown so a second request is allowed.
     RateLimiter::clear(app(AuthenticationCodeRateLimiter::class)->codeRequestKey($contact, 'assistant-widget'));
 
-    requestAssistantAuthentication(['email' => $contact->email])->assertOk();
+    $requestAssistantAuthentication(['email' => $contact->email])->assertOk();
 
     $authentications = PortalAuthentication::query()->where('educatable_id', $contact->getKey())->get();
 
