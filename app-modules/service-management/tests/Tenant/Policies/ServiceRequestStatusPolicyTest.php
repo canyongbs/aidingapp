@@ -54,6 +54,7 @@ function referenceServiceRequestStatus(string $reference, ServiceRequestStatus $
         'a trashed service request type' => tap(ServiceRequestType::factory()->for($status, 'automatedStatus')->create())->delete(),
         'status periods' => ServiceRequestStatusPeriod::factory()->for($status, 'status')->create(),
         'service request assignments' => createServiceRequestAssignmentForStatus($status),
+        default => throw new InvalidArgumentException("Unknown service request status reference: {$reference}"),
     };
 }
 

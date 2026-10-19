@@ -102,7 +102,7 @@ it('renders the preview page for an authenticated user', function () {
 
     $previewEntryUrl = route('service-request-forms.preview-entry', ['serviceRequestForm' => $form]);
 
-    actingAs($user)
+    $response = actingAs($user)
         ->get(route('service-request-forms.preview', ['serviceRequestForm' => $form]))
         ->assertSuccessful()
         // Correct view is used
@@ -112,10 +112,12 @@ it('renders the preview page for an authenticated user', function () {
         // The widget JS URL is built from the manifest's file entry
         ->assertViewHas('widgetJsUrl', url('widgets/service-requests/forms') . '/assets/widget-abc123.js')
         // The preview-entry URL is passed so the embed knows where to fetch schema
-        ->assertViewHas('previewEntryUrl', $previewEntryUrl)
-        // The embed element is rendered with preview="true" so the widget blocks submission
-        ->assertSee('service-request-form-embed', escape: false)
-        ->assertSee('preview="true"', escape: false)
-        // The entry-url attribute points to the preview-entry endpoint
-        ->assertSee('entry-url="' . $previewEntryUrl . '"', escape: false);
+        ->assertViewHas('previewEntryUrl', $previewEntryUrl);
+
+    $html = $response->getContent();
+
+    assert(is_string($html));
+
+    expect(\Tests\htmlText($html, '//service-request-form-embed/@preview'))->toBe('true')
+        ->and(\Tests\htmlText($html, '//service-request-form-embed/@entry-url'))->toBe($previewEntryUrl);
 });

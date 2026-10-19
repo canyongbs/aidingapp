@@ -62,6 +62,9 @@ class TestDatabaseNotification extends Notification implements ShouldQueue
             ->content('This is a test email');
     }
 
+    /**
+     * @return array<string, string>
+     */
     public function toDatabase(object $notifiable): array
     {
         return FilamentNotification::make()

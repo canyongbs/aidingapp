@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
-it('successfully dispatches', function ($frequency) {
+it('successfully dispatches', function (ServiceMonitoringFrequency $frequency) {
     Queue::fake();
 
     $numJobs = rand(1, 10);
@@ -62,7 +62,7 @@ it('successfully dispatches', function ($frequency) {
         ]
     );
 
-it('does not dispatch when serviceMonitoring addon is disabled', function ($frequency) {
+it('does not dispatch when serviceMonitoring addon is disabled', function (ServiceMonitoringFrequency $frequency) {
     Queue::fake();
 
     $settings = app(LicenseSettings::class);

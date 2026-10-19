@@ -45,7 +45,7 @@ class CreateServiceRequestPriorityRequestFactory extends RequestFactory
     {
         return [
             'name' => $this->faker->unique()->company(),
-            'order' => ServiceRequestPriority::orderBy('order', 'desc')->first()?->order + 1 ?? 1,
+            'order' => (ServiceRequestPriority::orderBy('order', 'desc')->first()->order ?? 0) + 1,
         ];
     }
 }

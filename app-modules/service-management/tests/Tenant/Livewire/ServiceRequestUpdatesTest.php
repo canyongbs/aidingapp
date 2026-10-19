@@ -56,6 +56,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertSoftDeleted;
+use function Pest\Laravel\mock;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -100,14 +101,20 @@ it('lists updates with their authors, visibility, and attachments', function () 
         'created_by_type' => $serviceRequest->getMorphClass(),
     ]);
 
-    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->assertSuccessful()
-        ->assertSeeText('3 updates')
-        ->assertSeeTextInOrder(['Bethany Emory', 'Customer', 'I am still unable to access the service.', 'browser-console-log.txt'])
-        ->assertSeeTextInOrder(['Cameron Zimny', 'Service Provider', 'Internal · Staff only', 'Escalating to the application team for review.'])
-        ->assertSeeTextInOrder(['AI Assistant', 'AI', 'Proposed Resolution', 'Try removing the saved profile.'])
-        ->assertSeeHtml('ui-avatars.com/api/?name=B+E')
-        ->assertSeeHtml(Vite::asset('resources/images/canyon-ai-headshot.jpg'));
+        ->assertViewHas('updatesCount', 3);
+
+    expect(\Tests\htmlText($component->html(), '//li[.//a[normalize-space()="Bethany Emory"]]'))
+        ->toContain('Bethany Emory', 'Customer', 'I am still unable to access the service.', 'browser-console-log.txt')
+        ->and(\Tests\htmlText($component->html(), '//li[.//a[normalize-space()="Cameron Zimny"]]'))
+        ->toContain('Cameron Zimny', 'Service Provider', 'Internal · Staff only', 'Escalating to the application team for review.')
+        ->and(\Tests\htmlText($component->html(), '//li[.//span[normalize-space()="AI Assistant"]]'))
+        ->toContain('AI Assistant', 'AI', 'Proposed Resolution', 'Try removing the saved profile.')
+        ->and(\Tests\htmlText($component->html(), '//li[.//a[normalize-space()="Bethany Emory"]]//img/@src'))
+        ->toContain('ui-avatars.com/api/?name=B+E')
+        ->and(\Tests\htmlText($component->html(), '//img[@alt="AI Assistant"]/@src'))
+        ->toBe(Vite::asset('resources/images/canyon-ai-headshot.jpg'));
 });
 
 it('shows the latest updates first and loads earlier updates on request', function () {
@@ -167,7 +174,7 @@ it('displays update times in the user timezone', function () {
 
 it('displays update times in the system timezone when the user has none', function () {
     $user = User::factory()->create();
-    $user->timezone = null;
+    $user->setAttribute('timezone', null);
     asSuperAdmin($user);
 
     $settings = app(DisplaySettings::class);
@@ -238,7 +245,7 @@ it('attaches uploaded files to the update', function () {
 it('drafts an update with AI', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $this->mock(CompletePrompt::class, function (MockInterface $mock) {
+    mock(CompletePrompt::class, function (MockInterface $mock) {
         $mock->shouldReceive('execute')->once()->andReturn('Drafted update content.');
     });
 

@@ -108,20 +108,10 @@ it('builds expected report statistics and incident summary in the mail payload',
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'External Status API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
-    [$localStart, $localEnd] = match ($frequency) {
-        ServiceMonitoringReportFrequency::Daily => [
-            now()->copy()->subDay()->startOfDay(),
-            now()->copy()->subDay()->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Weekly => [
-            now()->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
-            now()->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Monthly => [
-            now()->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-            now()->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
-        ],
-    };
+    [$localStart, $localEnd] = [
+        now()->copy()->subDay()->startOfDay(),
+        now()->copy()->subDay()->endOfDay(),
+    ];
 
     createHistoryAt($target, true, 0.50, $localStart->copy()->addHours(1)->utc());
     createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
@@ -149,20 +139,10 @@ it('uses tenant display timezone boundaries for daily reports', function () {
 
     $localNow = now()->setTimezone('America/New_York');
 
-    [$localStart, $localEnd] = match ($frequency) {
-        ServiceMonitoringReportFrequency::Daily => [
-            $localNow->copy()->subDay()->startOfDay(),
-            $localNow->copy()->subDay()->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Weekly => [
-            $localNow->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
-            $localNow->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Monthly => [
-            $localNow->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-            $localNow->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
-        ],
-    };
+    [$localStart, $localEnd] = [
+        $localNow->copy()->subDay()->startOfDay(),
+        $localNow->copy()->subDay()->endOfDay(),
+    ];
 
     createHistoryAt($target, true, 0.50, $localStart->copy()->utc());
     createHistoryAt($target, false, 1.50, $localEnd->copy()->utc());

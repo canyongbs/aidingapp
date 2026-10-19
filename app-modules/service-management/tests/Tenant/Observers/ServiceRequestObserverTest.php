@@ -139,7 +139,7 @@ describe('Created → Customer', function () {
             ->for($openStatus, 'status')
             ->create();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function (SendEducatableServiceRequestOpenedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -202,7 +202,7 @@ describe('Closed → Customer', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function (SendEducatableServiceRequestClosedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -225,7 +225,7 @@ describe('Closed → Customer', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function (SendEducatableServiceRequestClosedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -248,7 +248,7 @@ describe('Closed → Customer', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function (SendEducatableServiceRequestClosedNotification $notification) {
             return $notification->delay === 60;
         });
     });
@@ -308,7 +308,7 @@ describe('Closed → Manager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -337,7 +337,7 @@ describe('Closed → Manager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -386,7 +386,7 @@ describe('Closed → Manager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -412,7 +412,7 @@ describe('Closed → Manager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($manager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -451,7 +451,7 @@ describe('Closed → Auditor', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -476,7 +476,7 @@ describe('Closed → Auditor', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -525,7 +525,7 @@ describe('Closed → Auditor', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -551,7 +551,7 @@ describe('Closed → Auditor', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($auditor, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -592,7 +592,7 @@ describe('Closed → AssignedManager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) use ($template) {
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -623,7 +623,7 @@ describe('Closed → AssignedManager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -685,7 +685,7 @@ describe('Closed → AssignedManager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -718,7 +718,7 @@ describe('Closed → AssignedManager', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestClosed::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -768,7 +768,7 @@ describe('Closed → Deduplication', function () {
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($otherManager, ServiceRequestClosed::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($otherManager, ServiceRequestClosed::class, function (ServiceRequestClosed $notification) use ($managerTemplate) {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });
@@ -870,7 +870,7 @@ describe('Closed → Feedback', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function (SendClosedServiceFeedbackNotification $notification) {
             return $notification->delay === 120;
         });
     });
@@ -926,7 +926,7 @@ describe('Closed → Feedback', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function (SendClosedServiceFeedbackNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -952,7 +952,7 @@ describe('Closed → Feedback', function () {
         $serviceRequest->status()->associate($closedStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function (SendClosedServiceFeedbackNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -1028,7 +1028,7 @@ describe('StatusChange → Customer', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestStatusChangeNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestStatusChangeNotification::class, function (SendEducatableServiceRequestStatusChangeNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -1051,7 +1051,7 @@ describe('StatusChange → Customer', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestStatusChangeNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestStatusChangeNotification::class, function (SendEducatableServiceRequestStatusChangeNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -1111,7 +1111,7 @@ describe('StatusChange → Manager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -1136,7 +1136,7 @@ describe('StatusChange → Manager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -1185,7 +1185,7 @@ describe('StatusChange → Manager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1211,7 +1211,7 @@ describe('StatusChange → Manager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1250,7 +1250,7 @@ describe('StatusChange → Auditor', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -1275,7 +1275,7 @@ describe('StatusChange → Auditor', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -1324,7 +1324,7 @@ describe('StatusChange → Auditor', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1350,7 +1350,7 @@ describe('StatusChange → Auditor', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($auditor, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1391,7 +1391,7 @@ describe('StatusChange → AssignedManager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) use ($template) {
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -1422,7 +1422,7 @@ describe('StatusChange → AssignedManager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -1484,7 +1484,7 @@ describe('StatusChange → AssignedManager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1517,7 +1517,7 @@ describe('StatusChange → AssignedManager', function () {
         $serviceRequest->status()->associate($inProgressStatus);
         $serviceRequest->save();
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestStatusChanged::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -1567,7 +1567,7 @@ describe('StatusChange → Deduplication', function () {
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($otherManager, ServiceRequestStatusChanged::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($otherManager, ServiceRequestStatusChanged::class, function (ServiceRequestStatusChanged $notification) use ($managerTemplate) {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });

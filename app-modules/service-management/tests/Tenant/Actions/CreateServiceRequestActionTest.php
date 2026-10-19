@@ -83,7 +83,7 @@ describe('Customer', function () {
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function (SendEducatableServiceRequestOpenedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -100,7 +100,7 @@ describe('Customer', function () {
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function (SendEducatableServiceRequestOpenedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -113,7 +113,7 @@ describe('Customer', function () {
 
         $serviceRequest = createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestOpenedNotification::class, function (SendEducatableServiceRequestOpenedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -126,7 +126,7 @@ describe('Customer', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertNothingSentTo(Contact::first(), SendEducatableServiceRequestOpenedNotification::class);
+        Notification::assertNotSentTo(Contact::first(), SendEducatableServiceRequestOpenedNotification::class);
     });
 
     it('does not send customer created notification when status is not Open', function () {
@@ -138,7 +138,7 @@ describe('Customer', function () {
         $status = ServiceRequestStatus::factory()->inProgress()->create();
         createServiceRequestViaAction($type, $status);
 
-        Notification::assertNothingSentTo(Contact::first(), SendEducatableServiceRequestOpenedNotification::class);
+        Notification::assertNotSentTo(Contact::first(), SendEducatableServiceRequestOpenedNotification::class);
     });
 });
 
@@ -166,7 +166,7 @@ describe('Manager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($manager, ServiceRequestCreated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -186,7 +186,7 @@ describe('Manager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($manager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -216,7 +216,7 @@ describe('Manager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($manager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -232,7 +232,7 @@ describe('Manager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertNotSentTo($manager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -262,7 +262,7 @@ describe('Auditor', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -282,7 +282,7 @@ describe('Auditor', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -312,7 +312,7 @@ describe('Auditor', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -328,7 +328,7 @@ describe('Auditor', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertNotSentTo($auditor, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -357,7 +357,7 @@ describe('AssignedManager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -380,7 +380,7 @@ describe('AssignedManager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -399,7 +399,7 @@ describe('AssignedManager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === MailChannel::class;
         });
     });
@@ -418,7 +418,7 @@ describe('AssignedManager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -437,7 +437,7 @@ describe('AssignedManager', function () {
 
         createServiceRequestViaAction($type);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestCreated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -476,7 +476,7 @@ describe('Deduplication', function () {
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($nonAssignedManager, ServiceRequestCreated::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($nonAssignedManager, ServiceRequestCreated::class, function (ServiceRequestCreated $notification) use ($managerTemplate) {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });

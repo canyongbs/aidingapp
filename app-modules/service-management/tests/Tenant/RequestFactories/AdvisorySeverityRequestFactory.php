@@ -44,7 +44,7 @@ class AdvisorySeverityRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(10),
+            'name' => fake()->word(),
             'color' => fake()->randomElement(
                 collect(Color::cases())->reject(fn (Color $color): bool => $color->isShade())->values()
             ),
