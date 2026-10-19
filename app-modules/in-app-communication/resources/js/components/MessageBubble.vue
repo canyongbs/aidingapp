@@ -38,7 +38,7 @@
     import { generateHTML } from '@tiptap/html';
     import StarterKit from '@tiptap/starter-kit';
     import DOMPurify from 'dompurify';
-    import { computed } from 'vue';
+    import { computed, defineEmits, defineProps } from 'vue';
     import { SafeLink } from '../extensions/SafeLink';
     import { cleanTipTapContent } from '../utils/helpers';
     import { mentionClasses } from '../utils/mention-classes';

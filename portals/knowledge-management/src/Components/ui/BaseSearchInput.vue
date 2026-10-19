@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { MagnifyingGlassIcon } from '@heroicons/vue/20/solid';
+    import { defineEmits, defineProps } from 'vue';
 
     defineProps({
         modelValue: {

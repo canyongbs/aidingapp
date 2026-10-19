@@ -73,7 +73,7 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit properties')
                             ->slideOver()
-                            ->schema(AdvisoryForm::propertiesComponents()),
+                            ->schema([AdvisoryForm::propertiesSection()]),
                     ])
                     ->schema([
                         TextEntry::make('title')
@@ -90,7 +90,7 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit tracking details')
                             ->slideOver()
-                            ->schema(AdvisoryForm::trackingComponents())
+                            ->schema([AdvisoryForm::trackingSection()])
                             ->after(fn (Advisory $record) => $record->refresh()),
                     ])
                     ->schema([
@@ -111,7 +111,7 @@ class ViewAdvisory extends ViewRecord
                             ->label('Edit')
                             ->modalHeading('Edit assignment')
                             ->slideOver()
-                            ->schema(AdvisoryForm::assignmentComponents()),
+                            ->schema([AdvisoryForm::assignmentSection()]),
                     ])
                     ->schema([
                         TextEntry::make('assignedDepartment.name')

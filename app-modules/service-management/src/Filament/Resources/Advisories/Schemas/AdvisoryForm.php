@@ -44,13 +44,32 @@ use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Section;
 
 class AdvisoryForm
 {
+    public static function propertiesSection(): Section
+    {
+        return Section::make('Properties')
+            ->schema(self::propertiesComponents());
+    }
+
+    public static function trackingSection(): Section
+    {
+        return Section::make('Tracking Details')
+            ->schema(self::trackingComponents());
+    }
+
+    public static function assignmentSection(): Section
+    {
+        return Section::make('Assignment')
+            ->schema(self::assignmentComponents());
+    }
+
     /**
      * @return array<int, Field>
      */
-    public static function propertiesComponents(): array
+    private static function propertiesComponents(): array
     {
         return [
             TextInput::make('title')
@@ -71,7 +90,7 @@ class AdvisoryForm
     /**
      * @return array<int, Field>
      */
-    public static function trackingComponents(): array
+    private static function trackingComponents(): array
     {
         return [
             ToggleButtons::make('severity_id')
@@ -94,14 +113,13 @@ class AdvisoryForm
     /**
      * @return array<int, Field>
      */
-    public static function assignmentComponents(): array
+    private static function assignmentComponents(): array
     {
         return [
             TableSelect::make('assigned_department_id')
                 ->label('Department')
                 ->relationship('assignedDepartment')
                 ->tableConfiguration(DepartmentsTable::class)
-                ->default(auth()->user()?->department?->getKey())
                 ->columnSpanFull(),
         ];
     }

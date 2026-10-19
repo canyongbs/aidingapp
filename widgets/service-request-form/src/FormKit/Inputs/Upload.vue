@@ -41,6 +41,7 @@
 
     import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
     import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
+    import { defineProps } from 'vue';
 
     const FilePond = vueFilePond(FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 

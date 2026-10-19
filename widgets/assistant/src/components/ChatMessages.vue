@@ -33,7 +33,7 @@
 -->
 <script setup>
     import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/16/solid';
-    import { nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
+    import { defineEmits, defineProps, nextTick, onMounted, onUnmounted, ref, watch } from 'vue';
     import ChatMessage from './ChatMessage.vue';
 
     const props = defineProps({

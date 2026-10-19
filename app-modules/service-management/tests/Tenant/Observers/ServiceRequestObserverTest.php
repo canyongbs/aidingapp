@@ -230,6 +230,29 @@ describe('Closed → Customer', function () {
         });
     });
 
+    it('delays the customer closed notification by 60 seconds', function () {
+        Notification::fake();
+
+        $type = ServiceRequestType::factory()->create();
+        enablePreference($type, ServiceRequestEmailTemplateType::Closed, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestClosedNotification::class, function ($notification) {
+            return $notification->delay === 60;
+        });
+    });
+
     it('does not send customer closed notification when preference is disabled', function () {
         Notification::fake();
 
@@ -825,6 +848,33 @@ describe('Closed → Deduplication', function () {
 });
 
 describe('Closed → Feedback', function () {
+    it('delays the feedback notification by 120 seconds', function () {
+        Notification::fake();
+
+        $user = User::factory()->create();
+        actingAs($user);
+        Gate::define('feature-feedback-management', fn () => true);
+
+        $type = ServiceRequestType::factory()->create(['has_enabled_feedback_collection' => true]);
+        enablePreference($type, ServiceRequestEmailTemplateType::SurveyResponse, ServiceRequestTypeEmailTemplateRole::Customer, ServiceRequestNotificationChannel::Email);
+
+        $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+        $openStatus = ServiceRequestStatus::factory()->open()->create();
+        $closedStatus = ServiceRequestStatus::factory()->closed()->create();
+
+        $serviceRequest = ServiceRequest::factory()
+            ->for($priority, 'priority')
+            ->for($openStatus, 'status')
+            ->create();
+
+        $serviceRequest->status()->associate($closedStatus);
+        $serviceRequest->save();
+
+        Notification::assertSentTo($serviceRequest->respondent, SendClosedServiceFeedbackNotification::class, function ($notification) {
+            return $notification->delay === 120;
+        });
+    });
+
     it('sends feedback notification when preference is enabled and has_enabled_feedback_collection is true', function () {
         Notification::fake();
 

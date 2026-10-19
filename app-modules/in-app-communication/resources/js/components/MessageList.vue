@@ -34,7 +34,7 @@
 
 <script setup>
     import { ArrowTopRightOnSquareIcon, ChatBubbleLeftEllipsisIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
-    import { computed, nextTick, onMounted, ref, watch } from 'vue';
+    import { computed, defineEmits, defineProps, nextTick, onMounted, ref, watch } from 'vue';
     import MessageBubble from './MessageBubble.vue';
     import TypingIndicator from './TypingIndicator.vue';
     import LoadingSpinner from './ui/LoadingSpinner.vue';

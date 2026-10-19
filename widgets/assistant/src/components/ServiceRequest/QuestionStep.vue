@@ -37,7 +37,7 @@
     import { FormKitSchema } from '@formkit/vue';
     import { ArrowLeftIcon, ArrowRightIcon } from '@heroicons/vue/16/solid';
     import axios from 'axios';
-    import { onMounted, ref } from 'vue';
+    import { defineEmits, defineExpose, defineProps, onMounted, ref } from 'vue';
     import { getAuthHeaders } from '../../utils/token.js';
 
     const props = defineProps({

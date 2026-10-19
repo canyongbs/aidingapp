@@ -43,7 +43,6 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Schemas\Components\Section;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -72,9 +71,7 @@ class ListAdvisories extends ListRecords
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                ? AdvisoryResource::getUrl('view', ['record' => $record])
-                : null)
+            ->recordUrl($this->advisoryViewUrl(...))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -88,17 +85,22 @@ class ListAdvisories extends ListRecords
         return [
             CreateAction::make()
                 ->slideOver()
-                ->successRedirectUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                    ? AdvisoryResource::getUrl('view', ['record' => $record])
-                    : null)
+                ->successRedirectUrl($this->advisoryViewUrl(...))
+                ->fillForm(fn (): array => [
+                    'assigned_department_id' => auth()->user()?->department?->getKey(),
+                ])
                 ->schema([
-                    Section::make('Properties')
-                        ->schema(AdvisoryForm::propertiesComponents()),
-                    Section::make('Tracking Details')
-                        ->schema(AdvisoryForm::trackingComponents()),
-                    Section::make('Assignment')
-                        ->schema(AdvisoryForm::assignmentComponents()),
+                    AdvisoryForm::propertiesSection(),
+                    AdvisoryForm::trackingSection(),
+                    AdvisoryForm::assignmentSection(),
                 ]),
         ];
+    }
+
+    protected function advisoryViewUrl(Advisory $record): ?string
+    {
+        return AdvisoryResource::can('view', $record)
+            ? AdvisoryResource::getUrl('view', ['record' => $record])
+            : null;
     }
 }

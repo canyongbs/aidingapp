@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { CalendarDaysIcon, CalendarIcon, ChartBarIcon } from '@heroicons/vue/24/outline';
+    import { defineProps } from 'vue';
     import BaseCard from '../ui/BaseCard.vue';
     import { formatUptimePercentage } from './serviceMonitorStatuses.js';
 
