@@ -321,7 +321,7 @@ test('Attaches password secrets to a service request created for a contact', fun
     $field->submissible()->associate($form);
     $field->save();
 
-    $form->content = [
+    $form->setAttribute('content', [
         'type' => 'doc',
         'content' => [[
             'type' => 'customBlock',
@@ -334,7 +334,7 @@ test('Attaches password secrets to a service request created for a contact', fun
                 ],
             ],
         ]],
-    ];
+    ]);
     $form->save();
 
     $secret = Secret::factory()
@@ -343,7 +343,7 @@ test('Attaches password secrets to a service request created for a contact', fun
 
     Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->callTableAction('create', data: [
             'status_id' => $status->getKey(),
@@ -614,7 +614,7 @@ describe('archiving', function () {
 
         Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->assertCanSeeTableRecords([$serviceRequest])
             ->mountTableAction('edit', $serviceRequest)
@@ -641,7 +641,7 @@ describe('archiving', function () {
 
         Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->mountTableAction('create')
             ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($activeStatus, $archivedStatus): bool {

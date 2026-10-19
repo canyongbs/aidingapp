@@ -177,8 +177,8 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($m) => $m->name === 'Annual-Report');
-        $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($mock) => $mock->name === 'Annual-Report');
+        $invoice = $allMedia->first(fn ($mock) => $mock->name === 'invoice');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -210,8 +210,8 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
@@ -352,12 +352,15 @@ describe('ServiceRequest', function () {
 
         $serviceRequest = ServiceRequest::factory()->create();
 
-        Livewire::test(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
             ->assertSuccessful()
-            ->assertSeeText('No uploads');
+            ->assertCountTableRecords(0);
+
+        expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-ta-empty-state-heading")]'))
+            ->toBe('No uploads');
     });
 
     // Authorization
@@ -459,7 +462,7 @@ describe('ServiceRequest', function () {
         ])
             ->assertTableActionHidden('delete', record: $media);
 
-        expect(Media::find($media->getKey()))->not->toBeNull();
+        expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
     test('a partner admin is granted a registered permission ability via the gate bypass but is still denied by a record-level policy restriction', function () {
@@ -586,7 +589,7 @@ describe('ServiceRequest', function () {
             ]);
 
         expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(6)
-            ->and($serviceRequest->fresh()->getMedia('uploads')->pluck('name'))->not->toContain('report-7');
+            ->and($serviceRequest->fresh()->getMedia('uploads')->pluck('name'))->not()->toContain('report-7');
 
         $history = ServiceRequestHistory::where('service_request_id', $serviceRequest->getKey())
             ->get()
@@ -644,7 +647,7 @@ describe('ServiceRequest', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileUploadedEvent());
 
-        expect($history)->not->toBeNull()
+        expect($history)->not()->toBeNull()
             ->and($history->uploadedFileName())->toBe('report.pdf')
             ->and($history->eventTitle())->toBe('File Uploaded');
     });
@@ -703,7 +706,7 @@ describe('ServiceRequest', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
 
-        expect($history)->not->toBeNull()
+        expect($history)->not()->toBeNull()
             ->and($history->deletedFileName())->toBe('report.png')
             ->and($history->eventTitle())->toBe('File Deleted');
     });
@@ -773,8 +776,8 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $meetingNotes = $allMedia->first(fn ($m) => $m->name === 'Meeting-Notes');
-        $screenshot = $allMedia->first(fn ($m) => $m->name === 'screenshot');
+        $meetingNotes = $allMedia->first(fn ($mock) => $mock->name === 'Meeting-Notes');
+        $screenshot = $allMedia->first(fn ($mock) => $mock->name === 'screenshot');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -806,8 +809,8 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
@@ -866,12 +869,15 @@ describe('ServiceRequestUpdate', function () {
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
-        Livewire::test(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
             ->assertSuccessful()
-            ->assertSeeText('No uploads');
+            ->assertCountTableRecords(0);
+
+        expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-ta-empty-state-heading")]'))
+            ->toBe('No uploads');
     });
 
     test('uploadFile action is hidden for an admin when the parent service request is closed', function () {
@@ -911,7 +917,7 @@ describe('ServiceRequestUpdate', function () {
         ])
             ->assertTableActionHidden('delete', record: $media);
 
-        expect(Media::find($media->getKey()))->not->toBeNull();
+        expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
     test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {

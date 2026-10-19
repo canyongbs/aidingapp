@@ -37,6 +37,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -179,12 +180,14 @@ test('ViewUser displays Created At and Updated At in the acting user\'s configur
 
     $record = User::factory()->create();
     $record->timestamps = false;
-    $record->created_at = '2026-01-15 12:00:00';
+    $record->created_at = Carbon::parse('2026-01-15 12:00:00');
     $record->save();
 
-    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
-        ->assertSuccessful()
-        ->assertSee('Jan 15, 2026')
-        ->assertSee('7:00 am (EST)')
-        ->assertSee('fi-datetime-description', false);
+    $component = Livewire::test(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/parent::*'))
+        ->toContain('Jan 15, 2026', '7:00 am (EST)')
+        ->and(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/@class'))
+        ->toContain('fi-datetime-description');
 });

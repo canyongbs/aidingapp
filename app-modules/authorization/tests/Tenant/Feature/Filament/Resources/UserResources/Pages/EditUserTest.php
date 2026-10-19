@@ -350,7 +350,7 @@ test('delete action visible with proper access control', function () {
         ->assertActionVisible(DeleteAction::class);
 });
 
-test('EditUser validates the inputs', function ($data, $errors) {
+test('EditUser validates the inputs', function (array $data, array $errors) {
     $user = User::factory()->create();
 
     actingAs($user);

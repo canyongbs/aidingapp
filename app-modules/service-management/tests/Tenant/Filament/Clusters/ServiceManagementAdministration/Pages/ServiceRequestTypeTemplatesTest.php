@@ -49,6 +49,9 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
+/**
+ * @return array<string, mixed>
+ */
 function serviceRequestTypeTemplatesDoc(string $text): array
 {
     return ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $text]]]]];

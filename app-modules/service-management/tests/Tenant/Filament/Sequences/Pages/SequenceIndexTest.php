@@ -50,8 +50,10 @@ test('the sequences list page can be rendered with auth', function () {
 
     $user->givePermissionTo('settings.view-any');
 
-    actingAs($user)
+    $response = actingAs($user)
         ->get('service-management-administration/sequence')
-        ->assertOk()
-        ->assertSee('Coming Soon!');
+        ->assertOk();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//main'))
+        ->toContain('Coming Soon!');
 });

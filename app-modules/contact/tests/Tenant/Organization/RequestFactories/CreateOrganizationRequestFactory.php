@@ -56,7 +56,7 @@ class CreateOrganizationRequestFactory extends RequestFactory
             'number_of_employees' => fake()->randomNumber(),
             'address' => fake()->address(),
             'city' => fake()->city(),
-            'state' => fake()->state(),
+            'state' => fake()->format('state'),
             'postalcode' => fake()->postcode(),
             'country' => fake()->country(),
             'linkedin_url' => fake()->url(),

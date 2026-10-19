@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('CreateAdvisoryStatus requires valid data', function ($data, $errors) {
+test('CreateAdvisoryStatus requires valid data', function (AdvisoryStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $advisoryStatus = AdvisoryStatusRequestFactory::new($data)->create();

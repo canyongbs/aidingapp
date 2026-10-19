@@ -44,6 +44,7 @@ use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -70,6 +71,8 @@ function seedContactEmails(Contact $contact): array
         ])->createQuietly();
 
     $outbound->each(function (Engagement $engagement): void {
+        assert($engagement->recipient instanceof Model);
+
         app(AddRecordToTimeline::class)->handle(
             new TimelineableRecordCreated($engagement->recipient, $engagement),
         );
@@ -97,7 +100,7 @@ it('disables the `engage` header action with the bounced tooltip for a bounced o
 
     $action = $component->instance()->getTable()->getAction('engage');
 
-    expect($action)->not->toBeNull()
+    expect($action)->not()->toBeNull()
         ->and($action->getTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
 });
 
@@ -114,7 +117,7 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
 
     $action = $component->instance()->getTable()->getAction('engage');
 
-    expect($action)->not->toBeNull()
+    expect($action)->not()->toBeNull()
         ->and($action->getTooltip())->toBeNull();
 });
 

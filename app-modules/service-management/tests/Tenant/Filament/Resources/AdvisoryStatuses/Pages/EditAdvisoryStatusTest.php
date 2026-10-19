@@ -85,7 +85,7 @@ test('EditAdvisoryStatus is gated with proper access control', function () {
         ->and($advisoryStatus->fresh()->classification)->toEqual($request->get('classification'));
 });
 
-test('EditAdvisoryStatus validates the inputs', function ($data, $errors) {
+test('EditAdvisoryStatus validates the inputs', function (AdvisoryStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $advisoryStatus = AdvisoryStatus::factory()->create();

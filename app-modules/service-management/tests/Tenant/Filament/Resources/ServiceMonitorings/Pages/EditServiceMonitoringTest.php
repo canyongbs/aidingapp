@@ -110,7 +110,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
         ->and($serviceMonitoringTarget->frequency)->toEqual($request->get('frequency'));
 });
 
-test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
+test('EditServiceMonitoring validates the inputs', function (ServiceMonitoringTargetRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();

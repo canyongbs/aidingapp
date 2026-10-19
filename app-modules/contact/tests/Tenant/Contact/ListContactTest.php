@@ -42,6 +42,7 @@ use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Queue;
 use Livewire\Livewire;
 
@@ -99,14 +100,16 @@ test('can list records of engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function ($response) {
+    $engagements->each(function (Engagement $response) {
+        assert($response->recipient instanceof Model);
+
         $event = new TimelineableRecordCreated($response->recipient, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function ($response) {
+    $engagementResponses->each(function (EngagementResponse $response) {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 
@@ -150,14 +153,16 @@ test('can filter engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function ($response) {
+    $engagements->each(function (Engagement $response) {
+        assert($response->recipient instanceof Model);
+
         $event = new TimelineableRecordCreated($response->recipient, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function ($response) {
+    $engagementResponses->each(function (EngagementResponse $response) {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 

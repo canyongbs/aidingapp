@@ -259,7 +259,7 @@ test('creating an advisory from the list page modal is gated by the advisory man
     assertDatabaseHas(Advisory::class, $request);
 });
 
-test('the create advisory modal validates the inputs', function ($data, $errors) {
+test('the create advisory modal validates the inputs', function (AdvisoryRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $request = AdvisoryRequestFactory::new($data)->create();

@@ -38,10 +38,12 @@ use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use Mockery\MockInterface;
 
+use function Pest\Laravel\mock;
+
 it('delegates organization matching when a contact is created', function () {
     $contact = Contact::factory()->make();
 
-    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+    mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
         $mock->shouldReceive('__invoke')
             ->once()
             ->with($contact);
@@ -53,7 +55,7 @@ it('delegates organization matching when a contact is created', function () {
 it('delegates organization matching when a contact is updated', function () {
     $contact = Contact::factory()->createQuietly();
 
-    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+    mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
         $mock->shouldReceive('__invoke')
             ->once()
             ->with($contact);

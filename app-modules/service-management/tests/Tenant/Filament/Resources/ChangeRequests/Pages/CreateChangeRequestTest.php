@@ -93,7 +93,7 @@ test('CreateChangeRequest calculates end_time from start_time and duration and s
         ->firstOrFail();
 
     assertDatabaseHas(ChangeRequest::class, [
-        'id' => $changeRequest?->getKey(),
+        'id' => $changeRequest->getKey(),
         'title' => 'Database Migration Rollout',
         'change_request_type_id' => $changeRequestType->getKey(),
     ]);

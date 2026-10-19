@@ -46,7 +46,7 @@ test('Audit logs are only created if the Model is not set to be excluded from Au
 
     $auditSettings = resolve(AuditSettings::class);
 
-    $auditSettings->audited_models_exclude = [$serviceRequest->getMorphClass()];
+    $auditSettings->audited_models_exclude = [$serviceRequest->getMorphClass() => $serviceRequest->getMorphClass()];
 
     $auditSettings->save();
 
