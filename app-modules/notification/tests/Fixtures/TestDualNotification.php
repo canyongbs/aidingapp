@@ -63,7 +63,7 @@ class TestDualNotification extends Notification implements ShouldQueue
     }
 
     /**
-     * @return array<string, string>
+    * @return array<string, mixed>
      */
     public function toDatabase(object $notifiable): array
     {
