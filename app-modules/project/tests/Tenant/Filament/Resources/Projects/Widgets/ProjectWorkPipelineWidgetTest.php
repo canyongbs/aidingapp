@@ -240,9 +240,13 @@ describe('columns', function () {
     it('renders the assigned to column before the stage column', function () {
         $project = Project::factory()->create();
 
-        Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
+        $widget = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
             ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
             ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
+
+            $columns = array_keys($widget->instance()->getTable()->getColumns());
+        expect(array_search('assignedTo', $columns, true))
+            ->toBeLessThan(array_search('pipelineStage.name', $columns, true));
     });
 
     it('renders the name of the user or contact assigned to a task', function (Closure $makeAssignee) {
