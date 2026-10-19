@@ -90,9 +90,7 @@ it('uploads files with parsing results while excluding files that have none', fu
     expect($service->areFilesReady([$fileWithResults, $blankFile]))
         ->toBeFalse();
 
-    expect($fileWithResults->openAiVectorStore)
-        ->vector_store_file_id->toBe($fileId)
-        ->vector_store_id->toBe($vectorStoreId);
+    expect($fileWithResults->openAiVectorStore->vector_store_file_id)->toBe($fileId)->and($fileWithResults->openAiVectorStore->vector_store_id)->toBe($vectorStoreId);
 
     expect($blankFile->openAiVectorStore)
         ->toBeNull();

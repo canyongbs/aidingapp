@@ -49,8 +49,8 @@ use function Tests\asSuperAdmin;
 
 it('formats the related milestone label with its task count and completion percentage', function (int $tasksCount, int $completedTasksCount, string $expected) {
     $milestone = ProjectMilestone::factory()->make(['title' => 'Wash the Car']);
-    $milestone->tasks_count = $tasksCount;
-    $milestone->completed_tasks_count = $completedTasksCount;
+    $milestone->setAttribute('tasks_count', $tasksCount);
+    $milestone->setAttribute('completed_tasks_count', $completedTasksCount);
 
     expect(PipelineEntryForm::milestoneLabel($milestone))->toBe($expected);
 })->with([
@@ -127,7 +127,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
                     $buildTheHouse->getKey() => 'Build the House (0 Tasks) 0% Complete',
                     $buildTheSolution->getKey() => 'Build the Solution (2 Tasks) 50% Complete',
                     $washTheCar->getKey() => 'Wash the Car (4 Tasks) 25% Complete',
-                ])->and($options)->not->toHaveKey($otherProjectMilestone->getKey());
+                ])->and($options)->not()->toHaveKey($otherProjectMilestone->getKey());
 
                 return $select->isSearchable()
                     && $select->isPreloaded()

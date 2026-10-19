@@ -55,27 +55,23 @@ it('renders the timeline records for the given record', function () {
     $update = ServiceRequestUpdate::factory()
         ->for($serviceRequest, 'serviceRequest')
         ->create(['update' => 'A distinctive timeline entry']);
-
-    Livewire::test(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
-    ])
-        ->assertSuccessful()
-        ->assertSee($update->update);
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain($update->update);
 });
 
 it('shows the empty state message when there is nothing to timeline', function () {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
-
-    Livewire::test(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
         'emptyStateMessage' => 'Nothing has happened yet.',
-    ])
-        ->assertSuccessful()
-        ->assertSee('Nothing has happened yet.');
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//div[contains(@class, "border-dashed")]/span'))->toContain('Nothing has happened yet.');
 });
 
 it('loads one page of records at a time and flags that more remain', function () {
@@ -93,8 +89,12 @@ it('loads one page of records at a time and flags that more remain', function ()
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])->assertSuccessful();
 
-    expect($component->get('timelineRecords'))->toHaveCount(5)
-        ->and($component->get('hasMorePages'))->toBeTrue();
+    $instance = $component->instance();
+
+    assert($instance instanceof TimelineList);
+
+    expect($instance->timelineRecords)->toHaveCount(5)
+        ->and($instance->hasMorePages)->toBeTrue();
 
     $component->call('loadTimelineRecords')
         ->assertSuccessful();
@@ -229,14 +229,12 @@ describe('related people', function () {
         $performer->delete();
 
         expect($performer->refresh()->trashed())->toBeTrue();
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe')
-            ->assertDontSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Deleted user');
     });
 
     it('shows `Deleted user` when the person no longer exists', function () {
@@ -246,13 +244,11 @@ describe('related people', function () {
             'checked_out_by_type' => (new User())->getMorphClass(),
             'checked_out_by_id' => Str::uuid()->toString(),
         ]);
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Deleted user');
     });
 
     it('shows the soft-deleted creator of an engagement by name', function () {
@@ -269,12 +265,10 @@ describe('related people', function () {
         $creator->delete();
 
         expect($creator->refresh()->trashed())->toBeTrue();
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $contact,
             'modelsToTimeline' => [Engagement::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 });

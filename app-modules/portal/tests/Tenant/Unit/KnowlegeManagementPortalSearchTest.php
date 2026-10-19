@@ -61,8 +61,8 @@ function normalizeKnowledgeBasePublicIds(array $response): array
 test('search will not work if Knowledge Management Portal is not enabled.', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
     $response = post($url);
-    $response->assertStatus(403);
-    $response->assertSee('Knowledge Management Portal is not enabled.');
+    $response->assertForbidden()
+        ->assertJsonPath('error', 'The Knowledge Management Portal is not enabled.');
 });
 
 test('search will work if Knowledge Management Portal is enabled.', function () {

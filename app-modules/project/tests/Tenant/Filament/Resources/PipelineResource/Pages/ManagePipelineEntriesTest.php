@@ -84,12 +84,14 @@ it('renders the kanban board', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Drag pipeline task here');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//*[@data-stage]//*[contains(@class, "border-dashed")]'))
+        ->toContain('Drag pipeline task here');
 });
 
 it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
@@ -119,12 +121,14 @@ it('shows a back to project link', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Back to Project');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//a[normalize-space()="Back to Project"]'))
+        ->toBe('Back to Project');
 });
 
 it('shows the selected pipeline name on the pipeline switcher trigger', function () {
@@ -136,12 +140,14 @@ it('shows the selected pipeline name on the pipeline switcher trigger', function
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create(['name' => 'Onboarding Pipeline']);
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Onboarding Pipeline');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//button'))
+        ->toContain('Onboarding Pipeline');
 });
 
 it('can switch to a different pipeline within the same project via the select pipeline action', function () {

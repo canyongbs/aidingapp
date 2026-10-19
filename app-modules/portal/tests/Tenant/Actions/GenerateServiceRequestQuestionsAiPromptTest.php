@@ -74,5 +74,5 @@ it('excludes password fields from the clarification questions prompt', function 
     );
 
     expect($prompt)->toContain('Visible response', 'Visible answer')
-        ->not->toContain('Private credential', $secretId);
+        ->not()->toContain('Private credential', $secretId);
 });

@@ -257,15 +257,19 @@ it('can archive multiple projects from the list bulk action', function () {
 
     $projects = Project::factory()->count(3)->create();
 
-    $projects->each(fn (Project $project) => expect($project->isArchived())->toBeFalse());
+    $projects->each(function (Project $project): void {
+        expect($project->isArchived())->toBeFalse();
+    });
 
     Livewire::test(ListProjects::class)
         ->assertSuccessful()
         ->selectTableRecords($projects->modelKeys())
         ->callAction(TestAction::make('archive')->table()->bulk());
 
-    $projects->each(fn (Project $project) => expect($project->refresh()->isArchived())->toBeTrue()
-        ->and($project->trashed())->toBeFalse());
+    $projects->each(function (Project $project): void {
+        expect($project->refresh()->isArchived())->toBeTrue()
+            ->and($project->trashed())->toBeFalse();
+    });
 });
 
 it('does not show the archive row action to an auditor who is neither a manager nor the creator', function () {

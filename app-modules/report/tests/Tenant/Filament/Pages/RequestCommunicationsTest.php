@@ -61,6 +61,9 @@ function grantRequestCommunicationsReportAccess(User $user): void
     ]);
 }
 
+/**
+ * @return array<string, mixed>
+ */
 function richContent(string $content): array
 {
     return [

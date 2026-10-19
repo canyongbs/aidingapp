@@ -63,7 +63,7 @@ it('only returns categories that have at least one public article', function () 
 
     $response->assertOk();
 
-    $slugs = collect($response->json())->pluck('slug');
+    $slugs = $response->collect()->pluck('slug');
 
     expect($slugs)->toContain($categoryWithPublicArticle->slug)
         ->and($slugs)->not->toContain($categoryWithPrivateArticle->slug)

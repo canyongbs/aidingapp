@@ -124,8 +124,10 @@ it('displays correct pipeline details', function () {
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Test Pipeline Name')
-        ->assertSee('Test Pipeline Description');
+        ->assertSchemaStateSet([
+            'name' => 'Test Pipeline Name',
+            'description' => 'Test Pipeline Description',
+        ]);
 });
 
 it('displays pipeline with multiple stages', function () {
@@ -156,10 +158,11 @@ it('displays pipeline with multiple stages', function () {
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Customer Journey')
-        ->assertSee('Track customer progress')
-        ->assertSee('Initial Contact')
-        ->assertSee('Follow Up');
+        ->assertSchemaStateSet([
+            'name' => 'Customer Journey',
+            'description' => 'Track customer progress',
+            'stages' => $pipeline->stages()->get(),
+        ]);
 });
 
 it('can access pipeline from project context', function () {

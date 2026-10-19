@@ -469,7 +469,7 @@ it('only returns agents with active assignments in the assigned agent filter opt
 
     expect($page->getAssignedAgentOptions())
         ->toHaveKey((string) $activeAgent->getKey(), 'Active Agent')
-        ->not->toHaveKey((string) $inactiveAgent->getKey());
+        ->not()->toHaveKey((string) $inactiveAgent->getKey());
 });
 
 it('respects the selected service request types in the SLA stats', function () {

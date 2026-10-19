@@ -95,7 +95,7 @@ test('advisory updates are ordered by date', function () {
 
     $response->assertStatus(200);
 
-    $updateIds = collect($response->json('data.data.0.advisory_updates'))->pluck('id');
+    $updateIds = $response->collect('data.data.0.advisory_updates')->pluck('id');
 
     expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
 });

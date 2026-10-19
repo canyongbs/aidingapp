@@ -59,7 +59,7 @@ it('returns parent categories ordered by sort on the portal', function () {
 
     $response->assertOk();
 
-    $names = collect($response->json())->pluck('name')->toArray();
+    $names = $response->collect()->pluck('name')->toArray();
 
     expect($names)->toBe(['Apple', 'Mango', 'Zebra']);
 });
@@ -75,7 +75,7 @@ it('returns sub categories ordered by sort on the portal', function () {
 
     $response->assertOk();
 
-    $subNames = collect($response->json('category.subCategories'))->pluck('name')->toArray();
+    $subNames = $response->collect('category.subCategories')->pluck('name')->toArray();
 
     expect($subNames)->toBe(['Apple Sub', 'Mango Sub', 'Zebra Sub']);
 });

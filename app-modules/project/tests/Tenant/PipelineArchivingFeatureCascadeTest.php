@@ -94,7 +94,9 @@ it('archives all of a pipeline\'s tasks when the pipeline is archived', function
 
     $pipeline->archive();
 
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+    $entries->each(function (PipelineEntry $entry): void {
+        expect($entry->refresh()->isArchived())->toBeTrue();
+    });
 });
 
 it('archives a milestone linked only to tasks in the archived pipeline', function () {
@@ -128,7 +130,9 @@ it('archives a pipeline\'s stages when the pipeline is archived', function () {
 
     $pipeline->archive();
 
-    $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeTrue());
+    $stages->each(function (PipelineStage $stage): void {
+        expect($stage->refresh()->isArchived())->toBeTrue();
+    });
 });
 
 it('archives a stage\'s non-archived tasks when the stage is archived', function () {
@@ -152,7 +156,9 @@ it('archives a stage\'s non-archived tasks when the stage is archived', function
     $stage->archive();
 
     expect($stage->refresh()->isArchived())->toBeTrue();
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+    $entries->each(function (PipelineEntry $entry): void {
+        expect($entry->refresh()->isArchived())->toBeTrue();
+    });
     expect($preArchived->refresh()->isArchived())->toBeTrue();
 });
 

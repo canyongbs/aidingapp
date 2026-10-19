@@ -75,5 +75,5 @@ it('excludes password fields from the AI resolution prompt', function () {
     );
 
     expect($prompt)->toContain('Visible response', 'Visible answer')
-        ->not->toContain('Private credential', $secretId);
+        ->not()->toContain('Private credential', $secretId);
 });

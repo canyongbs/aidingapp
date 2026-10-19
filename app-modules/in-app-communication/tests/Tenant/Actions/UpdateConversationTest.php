@@ -112,7 +112,7 @@ it('broadcasts `ConversationUpdated` event when name is updated', function () {
         name: 'New Name',
     );
 
-    Event::assertDispatched(ConversationUpdated::class, function ($event) use ($conversation) {
+    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation) {
         return $event->conversation->is($conversation) && $event->conversation->name === 'New Name';
     });
 });
@@ -127,7 +127,7 @@ it('broadcasts `ConversationUpdated` event when privacy is updated', function ()
         isPrivate: false,
     );
 
-    Event::assertDispatched(ConversationUpdated::class, function ($event) use ($conversation) {
+    Event::assertDispatched(ConversationUpdated::class, function (ConversationUpdated $event) use ($conversation) {
         return $event->conversation->is($conversation) && $event->conversation->is_private === false;
     });
 });
