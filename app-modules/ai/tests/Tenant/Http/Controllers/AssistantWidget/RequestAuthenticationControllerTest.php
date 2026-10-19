@@ -46,6 +46,8 @@ use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\postJson;
 
+use Symfony\Component\HttpFoundation\Response;
+
 beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
@@ -53,6 +55,11 @@ beforeEach(function () {
     $settings->save();
 });
 
+/**
+ * @param array<string, mixed> $body
+ *
+ * @return TestResponse<Response>
+ */
 function requestAssistantAuthentication(array $body): TestResponse
 {
     $url = URL::signedRoute(name: 'widgets.assistant.api.authenticate.request', absolute: false);
@@ -131,7 +138,7 @@ test('it invalidates a contact\'s prior authentication when a new assistant code
 
     $firstAuthentication = PortalAuthentication::query()->latest('id')->first();
 
-    expect($firstAuthentication)->not->toBeNull();
+    expect($firstAuthentication)->not()->toBeNull();
 
     // Clear the per-target mint cooldown so a second request is allowed.
     RateLimiter::clear(app(AuthenticationCodeRateLimiter::class)->codeRequestKey($contact, 'assistant-widget'));
@@ -141,5 +148,5 @@ test('it invalidates a contact\'s prior authentication when a new assistant code
     $authentications = PortalAuthentication::query()->where('educatable_id', $contact->getKey())->get();
 
     expect($authentications)->toHaveCount(1)
-        ->and($authentications->first()->id)->not->toBe($firstAuthentication?->id);
+        ->and($authentications->first()->id)->not()->toBe($firstAuthentication?->id);
 });

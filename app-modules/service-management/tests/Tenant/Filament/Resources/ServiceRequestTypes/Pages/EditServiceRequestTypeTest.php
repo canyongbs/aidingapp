@@ -75,7 +75,7 @@ test('A successful action on the EditServiceRequestType page', function () {
     assertEquals($editRequest['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType requires valid data', function ($data, $errors) {
+test('EditServiceRequestType requires valid data', function (EditServiceRequestTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();

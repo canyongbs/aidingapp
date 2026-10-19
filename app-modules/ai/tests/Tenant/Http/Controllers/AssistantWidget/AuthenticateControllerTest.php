@@ -45,6 +45,8 @@ use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\postJson;
 
+use Symfony\Component\HttpFoundation\Response;
+
 beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
@@ -52,6 +54,11 @@ beforeEach(function () {
     $settings->save();
 });
 
+/**
+ * @param array<string, mixed> $body
+ *
+ * @return TestResponse<Response>
+ */
 function assistantAuthenticate(PortalAuthentication $authentication, array $body): TestResponse
 {
     $url = URL::signedRoute(
@@ -70,7 +77,7 @@ test('it authenticates the contact when the code is valid', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -82,7 +89,7 @@ test('it authenticates the contact when the code is valid', function () {
         ->assertOk()
         ->assertJsonPath('success', true);
 
-    expect($response->json('token'))->not->toBeEmpty()
+    expect($response->json('token'))->not()->toBeEmpty()
         ->and(auth('contact')->check())->toBeTrue();
 });
 
@@ -91,7 +98,7 @@ test('it returns a validation error when the code is invalid', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(112233),
+        'code' => Hash::make((string) 112233),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -111,7 +118,7 @@ test('it returns expired when the authentication has expired', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now()->subDay()->subMinute(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -131,7 +138,7 @@ test('it locks the authentication after too many invalid code attempts and rejec
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);

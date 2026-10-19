@@ -45,6 +45,8 @@ use Illuminate\Testing\TestResponse;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
+use Symfony\Component\HttpFoundation\Response;
+
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
@@ -52,6 +54,9 @@ beforeEach(function () {
     $portalSettings->save();
 });
 
+/**
+ * @return TestResponse<Response>
+ */
 function authenticatedWidgetRequest(string $url): TestResponse
 {
     $contact = Contact::factory()->create();
@@ -62,6 +67,9 @@ function authenticatedWidgetRequest(string $url): TestResponse
     return getJson($url, ['Origin' => config('app.url')]);
 }
 
+/**
+ * @return TestResponse<Response>
+ */
 function widgetRequestAsContact(Contact $contact, string $url): TestResponse
 {
     $contact->createToken('assistant-widget-access-token');
@@ -83,7 +91,7 @@ it('returns a configured default priority for a service request type', function 
 
     $response->assertOk();
 
-    expect(collect($response->json('types'))->firstWhere('id', $type->getKey())['default_priority_id'])
+    expect($response->collect('types')->firstWhere('id', $type->getKey())['default_priority_id'])
         ->toBe($priority->getKey());
 });
 
@@ -97,10 +105,10 @@ it('does not return categories that have no service request types', function () 
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($categoryWithType->id)
-        ->and($categoryIds)->not->toContain($emptyCategory->id);
+        ->and($categoryIds)->not()->toContain($emptyCategory->id);
 });
 
 it('returns a parent category when a child category has types', function () {
@@ -112,7 +120,7 @@ it('returns a parent category when a child category has types', function () {
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($parentCategory->id);
 });
@@ -125,9 +133,9 @@ it('does not return a parent category when all child categories are empty', func
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
-    expect($categoryIds)->not->toContain($parentCategory->id);
+    expect($categoryIds)->not()->toContain($parentCategory->id);
 });
 
 it('does not return archived service request types as part of a category', function () {
@@ -143,10 +151,10 @@ it('does not return archived service request types as part of a category', funct
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($categoryWithActiveType->id)
-        ->and($categoryIds)->not->toContain($categoryWithOnlyArchivedType->id);
+        ->and($categoryIds)->not()->toContain($categoryWithOnlyArchivedType->id);
 });
 
 it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () {
@@ -164,10 +172,10 @@ it('hides visibility restricted top level types from widget contacts of a non-ma
 
     $response->assertOk();
 
-    $typeIds = collect($response->json('types'))->pluck('id');
+    $typeIds = $response->collect('types')->pluck('id');
 
     expect($typeIds)->toContain($visibleType->id)
-        ->and($typeIds)->not->toContain($restrictedType->id);
+        ->and($typeIds)->not()->toContain($restrictedType->id);
 });
 
 it('shows visibility restricted types to widget contacts of a matching contact type', function () {
@@ -182,7 +190,7 @@ it('shows visibility restricted types to widget contacts of a matching contact t
 
     $response->assertOk();
 
-    $typeIds = collect($response->json('types'))->pluck('id');
+    $typeIds = $response->collect('types')->pluck('id');
 
     expect($typeIds)->toContain($restrictedType->id);
 });
@@ -204,8 +212,8 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
 
     $hiddenResponse->assertOk();
 
-    expect(collect($hiddenResponse->json('categories'))->pluck('id'))
-        ->not->toContain($restrictedCategory->id);
+    expect($hiddenResponse->collect('categories')->pluck('id'))
+        ->not()->toContain($restrictedCategory->id);
 
     $matchingContact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
 
@@ -213,7 +221,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
 
     $visibleResponse->assertOk();
 
-    expect(collect($visibleResponse->json('categories'))->pluck('id'))
+    expect($visibleResponse->collect('categories')->pluck('id'))
         ->toContain($restrictedCategory->id);
 });
 
@@ -228,13 +236,15 @@ it('lists a type under every category it belongs to', function () {
 
     $response->assertOk();
 
-    $categories = collect($response->json('categories'));
+    $categories = $response->collect('categories');
 
-    $categoryAData = $categories->firstWhere('id', $categoryA->id);
-    $categoryBData = $categories->firstWhere('id', $categoryB->id);
+    $firstCategoryData = $categories->firstWhere('id', $categoryA->id);
+    $secondCategoryData = $categories->firstWhere('id', $categoryB->id);
+    assert(is_array($firstCategoryData['types']));
+    assert(is_array($secondCategoryData['types']));
 
-    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
-        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+    expect(collect($firstCategoryData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
 it('orders types within a category by their per-area sort rather than the global sort', function () {
@@ -251,7 +261,8 @@ it('orders types within a category by their per-area sort rather than the global
 
     $response->assertOk();
 
-    $categoryData = collect($response->json('categories'))->firstWhere('id', $category->id);
+    $categoryData = $response->collect('categories')->firstWhere('id', $category->id);
+    assert(is_array($categoryData['types']));
 
     expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
 });

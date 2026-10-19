@@ -43,7 +43,11 @@ use Illuminate\Testing\TestResponse;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+use Symfony\Component\HttpFoundation\Response;
+
+$manifestOriginalContents = null;
+
+beforeEach(function () use (&$manifestOriginalContents) {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->ai_support_assistant = true;
@@ -51,8 +55,7 @@ beforeEach(function () {
 
     $manifestPath = public_path('storage/widgets/assistant/.vite/manifest.json');
 
-    $this->manifestPath = $manifestPath;
-    $this->manifestOriginalContents = File::exists($manifestPath) ? File::get($manifestPath) : null;
+    $manifestOriginalContents = File::exists($manifestPath) ? File::get($manifestPath) : null;
 
     File::ensureDirectoryExists(dirname($manifestPath));
     File::put($manifestPath, json_encode([
@@ -65,16 +68,21 @@ beforeEach(function () {
     ]));
 });
 
-afterEach(function () {
-    if ($this->manifestOriginalContents === null) {
-        File::delete($this->manifestPath);
+afterEach(function () use (&$manifestOriginalContents) {
+    $manifestPath = public_path('storage/widgets/assistant/.vite/manifest.json');
+
+    if ($manifestOriginalContents === null) {
+        File::delete($manifestPath);
 
         return;
     }
 
-    File::put($this->manifestPath, $this->manifestOriginalContents);
+    File::put($manifestPath, $manifestOriginalContents);
 });
 
+/**
+ * @return TestResponse<Response>
+ */
 function getWidgetConfig(): TestResponse
 {
     return getJson(route('widgets.assistant.api.config'), ['Origin' => config('app.url')]);
@@ -94,7 +102,7 @@ it('exposes service management when the license addon and portal setting are ena
     $response->assertOk()
         ->assertJson(['portal_service_management' => true]);
 
-    expect($response->json('service_request_types_url'))->not->toBeNull();
+    expect($response->json('service_request_types_url'))->not()->toBeNull();
 });
 
 it('does not expose service management when the license addon is disabled', function () {
@@ -152,5 +160,5 @@ it('exposes service management for an authenticated contact when the license add
     $response->assertOk()
         ->assertJson(['portal_service_management' => true]);
 
-    expect($response->json('service_request_types_url'))->not->toBeNull();
+    expect($response->json('service_request_types_url'))->not()->toBeNull();
 });

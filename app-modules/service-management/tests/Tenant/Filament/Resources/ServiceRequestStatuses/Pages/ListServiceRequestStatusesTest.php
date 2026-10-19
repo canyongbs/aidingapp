@@ -46,6 +46,7 @@ use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travel;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListServiceRequestStatuses page', function () {
@@ -204,14 +205,18 @@ describe('archiving', function () {
 
         $statuses = ServiceRequestStatus::factory()->count(3)->create();
 
-        $statuses->each(fn (ServiceRequestStatus $status) => expect($status->isArchived())->toBeFalse());
+        $statuses->each(function (ServiceRequestStatus $status): void {
+            expect($status->isArchived())->toBeFalse();
+        });
 
         Livewire::test(ListServiceRequestStatuses::class)
             ->selectTableRecords($statuses->modelKeys())
             ->callAction(TestAction::make('archive')->table()->bulk());
 
-        $statuses->each(fn (ServiceRequestStatus $status) => expect($status->refresh()->isArchived())->toBeTrue()
-            ->and($status->trashed())->toBeFalse());
+        $statuses->each(function (ServiceRequestStatus $status): void {
+            expect($status->refresh()->isArchived())->toBeTrue()
+                ->and($status->trashed())->toBeFalse();
+        });
     });
 
     it('does not archive a system protected service request status through the bulk action', function () {
@@ -252,7 +257,7 @@ describe('archiving', function () {
 
         $originalArchivedAt = $archived->archived_at;
 
-        $this->travel(1)->minutes();
+        travel(1)->minutes();
 
         Livewire::test(ListServiceRequestStatuses::class)
             ->filterTable('archived', false)
@@ -290,7 +295,7 @@ describe('archiving', function () {
             ->mountAction(TestAction::make('archive')->table()->bulk());
 
         expect($component->instance()->getMountedAction()->getModalDescription())
-            ->not->toContain('automatic status changes');
+            ->not()->toContain('automatic status changes');
     });
 
     it('does not offer the bulk delete action', function () {

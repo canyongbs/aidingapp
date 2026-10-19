@@ -130,12 +130,14 @@ it('links each conversation to its transcript', function () {
         ->finished()
         ->create();
 
-    Livewire::test(ServiceRequestConversationsRelationManager::class, [
+    $component = Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
-        ->assertSuccessful()
-        ->assertSeeHtml(ServiceRequestResource::getUrl('view-live-chat-transcript', [
+        ->assertSuccessful();
+
+    expect($component->instance()->getTable()->getRecordUrl($conversation))
+        ->toBe(ServiceRequestResource::getUrl('view-live-chat-transcript', [
             'record' => $serviceRequest,
             'conversation' => $conversation,
         ]));

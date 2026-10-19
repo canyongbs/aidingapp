@@ -173,6 +173,7 @@ it('orders types within a category by their per-area sort when reading the tree'
     $types = $data['categories'][0]['types'];
 
     expect(array_column($types, 'id'))->toBe([$first->id, $second->id]);
+    assert(is_array($types));
 
     // The emitted sort reflects the per-area pivot sort, not the type's global sort.
     expect(collect($types)->firstWhere('id', $first->id)['sort'])->toBe(1)

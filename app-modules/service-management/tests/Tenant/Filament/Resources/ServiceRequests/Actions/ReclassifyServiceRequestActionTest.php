@@ -50,7 +50,9 @@ use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -295,7 +297,7 @@ test('type options exclude the current service request type', function () {
         ->mountAction('reclassify')
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($currentType, $otherType): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -339,7 +341,7 @@ test('type options exclude archived service request types', function () {
         ->mountAction('reclassify')
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($archivedType, $activeType): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -392,7 +394,7 @@ test('override assign_to only lists eligible managers for selected type', functi
             'type_id' => $newType->getKey(),
             'assignment_method' => 'override',
         ])
-        ->assertFormFieldExists('assign_to', function ($field) use ($eligibleDirectManager, $eligibleDepartmentManager, $ineligibleUser): bool {
+        ->assertFormFieldExists('assign_to', function (Select $field) use ($eligibleDirectManager, $eligibleDepartmentManager, $ineligibleUser): bool {
             $options = $field->getOptions();
 
             return isset($options[$eligibleDirectManager->getKey()])
@@ -560,7 +562,7 @@ test('reclassify with override assignment creates manual assignment to selected 
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->first();
 
-    expect($assignment)->not->toBeNull();
+    expect($assignment)->not()->toBeNull();
     expect($assignment->user_id)->toBe($eligibleAgent->getKey());
     expect($assignment->assigned_by_id)->toBe($actor->getKey());
     expect($assignment->assigned_by_type)->toBe((new User())->getMorphClass());

@@ -75,7 +75,7 @@ test('global search is gated with proper feature access control', function () {
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe('SR-FEATURE');
+    expect($results->first()->getAttribute('service_request_number'))->toBe('SR-FEATURE');
 });
 
 test('global search is gated with proper feature access control for direct user manager', function () {
@@ -103,7 +103,7 @@ test('global search is gated with proper feature access control for direct user 
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe('SR-FEATURE-USER');
+    expect($results->first()->getAttribute('service_request_number'))->toBe('SR-FEATURE-USER');
 });
 
 test('global search returns service requests for managers of service request type', function () {
@@ -133,7 +133,7 @@ test('global search returns service requests for managers of service request typ
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+    expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
 test('global search returns service requests for direct user managers of service request type', function () {
@@ -160,7 +160,7 @@ test('global search returns service requests for direct user managers of service
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+    expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
 test('global search returns service requests for auditors of service request type', function () {
@@ -190,7 +190,7 @@ test('global search returns service requests for auditors of service request typ
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+    expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
 test('global search returns service requests for direct user auditors of service request type', function () {
@@ -217,7 +217,7 @@ test('global search returns service requests for direct user auditors of service
     $results = $query->get();
 
     expect($results)->toHaveCount(1);
-    expect($results->first()->service_request_number)->toBe($serviceRequest->service_request_number);
+    expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
 test('global search does not return service requests for non-managers/auditors', function () {
@@ -406,7 +406,7 @@ test('global search URL points to view page', function () {
     $url = ServiceRequestResource::getGlobalSearchResultUrl($serviceRequest);
 
     expect($url)->toContain('/service-requests/' . $serviceRequest->getKey());
-    expect($url)->not->toContain('/edit');
+    expect($url)->not()->toContain('/edit');
 });
 
 test('global search URL points to view page for direct user manager', function () {
@@ -432,7 +432,7 @@ test('global search URL points to view page for direct user manager', function (
     $url = ServiceRequestResource::getGlobalSearchResultUrl($serviceRequest);
 
     expect($url)->toContain('/service-requests/' . $serviceRequest->getKey());
-    expect($url)->not->toContain('/edit');
+    expect($url)->not()->toContain('/edit');
 });
 
 test('globally searchable attributes include service request number and title', function () {

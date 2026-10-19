@@ -144,7 +144,11 @@ it('creates an area and tells other viewers', function () {
     expect($category->parent_id)->toBeNull();
 
     $component->assertReturned(
-        fn (array $result): bool => $result['saved'] && collect($result['tree']['categories'])->pluck('id')->contains($category->getKey()),
+        function (array $result) use ($category): bool {
+            assert(is_array($result['tree']['categories']));
+
+            return $result['saved'] && collect($result['tree']['categories'])->pluck('id')->contains($category->getKey());
+        },
     );
 
     Event::assertDispatched(
@@ -553,12 +557,15 @@ it('shows a type under every category it belongs to in the hierarchical data', f
     $type->categories()->attach([$categoryA->id, $categoryB->id]);
 
     $data = Livewire::test(ListServiceRequestTypes::class)->instance()->getHierarchicalData();
+    assert(is_array($data['categories']));
 
-    $categoryAData = collect($data['categories'])->firstWhere('id', $categoryA->id);
-    $categoryBData = collect($data['categories'])->firstWhere('id', $categoryB->id);
+    $firstCategoryData = collect($data['categories'])->firstWhere('id', $categoryA->id);
+    $secondCategoryData = collect($data['categories'])->firstWhere('id', $categoryB->id);
+    assert(is_array($firstCategoryData['types']));
+    assert(is_array($secondCategoryData['types']));
 
-    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
-        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+    expect(collect($firstCategoryData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
 describe('authorization', function () {

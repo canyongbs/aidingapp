@@ -48,6 +48,8 @@ use Illuminate\Testing\TestResponse;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
+use Symfony\Component\HttpFoundation\Response;
+
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
@@ -55,6 +57,9 @@ beforeEach(function () {
     $portalSettings->save();
 });
 
+/**
+ * @return TestResponse<Response>
+ */
 function widgetFormRequestAsContact(Contact $contact, ServiceRequestType $type): TestResponse
 {
     $contact->createToken('assistant-widget-access-token');
@@ -113,7 +118,7 @@ it('includes secure password fields in assistant forms', function () {
     $field->step()->associate($step);
     $field->save();
 
-    $step->content = [
+    $step->setAttribute('content', [
         'type' => 'doc',
         'content' => [[
             'type' => 'customBlock',
@@ -122,7 +127,7 @@ it('includes secure password fields in assistant forms', function () {
                 'config' => ['fieldId' => $field->getKey()],
             ],
         ]],
-    ];
+    ]);
     $step->save();
 
     widgetFormRequestAsContact(Contact::factory()->create(), $type)

@@ -50,6 +50,9 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Tests\asSuperAdmin;
 
+/**
+ * @return array<string, mixed>
+ */
 function allNotificationSettings(bool $enabled = false): array
 {
     $settings = [];

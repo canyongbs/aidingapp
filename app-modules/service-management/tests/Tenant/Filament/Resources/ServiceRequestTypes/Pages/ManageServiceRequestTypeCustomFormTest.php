@@ -94,7 +94,7 @@ it('creates a form for a type that does not have one yet', function () {
 
     $type->unsetRelation('form');
 
-    expect($type->form)->not->toBeNull()
+    expect($type->form)->not()->toBeNull()
         ->and($type->form->fields()->count())->toBe(1);
 });
 
@@ -142,8 +142,8 @@ it('archives the current form and creates a new version when submissions exist',
 
     expect($form->isArchived())->toBeTrue()
         ->and($form->trashed())->toBeFalse()
-        ->and($type->form)->not->toBeNull()
-        ->and($type->form->getKey())->not->toBe($form->getKey())
+        ->and($type->form)->not()->toBeNull()
+        ->and($type->form->getKey())->not()->toBe($form->getKey())
         ->and($type->form->fields()->where('label', 'New version field')->exists())->toBeTrue();
 });
 
@@ -169,7 +169,7 @@ it('creates a new version when a non-submitted submission exists so its field re
     $type->unsetRelation('form');
 
     expect($form->isArchived())->toBeTrue()
-        ->and($type->form->getKey())->not->toBe($form->getKey());
+        ->and($type->form->getKey())->not()->toBe($form->getKey());
 });
 
 it('only ever has one active form per type after repeated edits with submissions', function () {
@@ -219,7 +219,7 @@ it('keeps prior submissions rendering against their archived form version', func
 
     $submission->refresh();
 
-    expect($submission->submissible)->not->toBeNull()
+    expect($submission->submissible)->not()->toBeNull()
         ->and($submission->submissible->getKey())->toBe($form->getKey())
         ->and($submission->submissible->isArchived())->toBeTrue();
 });
@@ -259,11 +259,11 @@ it('preserves the field responses of a prior submission after a version bump', f
     $submission->refresh();
 
     expect($oldForm->fresh()->isArchived())->toBeTrue()
-        ->and($type->form->getKey())->not->toBe($oldForm->getKey())
-        ->and(ServiceRequestFormField::find($oldField->getKey()))->not->toBeNull()
+        ->and($type->form->getKey())->not()->toBe($oldForm->getKey())
+        ->and(ServiceRequestFormField::find($oldField->getKey()))->not()->toBeNull()
         ->and($submission->submissible->getKey())->toBe($oldForm->getKey())
         ->and($submission->fields()->first()->getKey())->toBe($oldField->getKey())
-        ->and($submission->fields()->first()->pivot->response)->toBe('Jane Doe');
+        ->and($submission->fields()->first()->pivot->getAttribute('response'))->toBe('Jane Doe');
 });
 
 it('saves the description', function () {
@@ -345,6 +345,9 @@ it('stores steps and clears top-level content for a multi-step form', function (
         ->and($type->form->steps()->first()->label)->toBe('Step One');
 });
 
+/**
+ * @return array<string, mixed>
+ */
 function customFormContent(string $label = 'Your name'): array
 {
     return [

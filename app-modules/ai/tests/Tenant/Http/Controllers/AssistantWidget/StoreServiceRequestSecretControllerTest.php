@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Models\Secret;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\postJson;
 
 beforeEach(function () {
     $settings = app(PortalSettings::class);
@@ -67,7 +68,7 @@ it('stores encrypted assistant secrets authored by the contact', function () {
 });
 
 it('denies unauthenticated assistant secret storage', function () {
-    $this->postJson(
+    postJson(
         route('widgets.assistant.api.service-request.store-secret'),
         ['value' => 'service-request-password'],
         ['Origin' => config('app.url')],

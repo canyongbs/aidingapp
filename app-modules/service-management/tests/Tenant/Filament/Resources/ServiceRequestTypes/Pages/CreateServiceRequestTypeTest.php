@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequestType page', function () {
     assertDatabaseHas(ServiceRequestType::class, $editRequest);
 });
 
-test('CreateServiceRequestType requires valid data', function ($data, $errors) {
+test('CreateServiceRequestType requires valid data', function (CreateServiceRequestTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     Livewire::test(CreateServiceRequestType::class)

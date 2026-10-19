@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
     assertDatabaseHas(ServiceRequestStatus::class, $request);
 });
 
-test('CreateServiceRequestStatus requires valid data', function ($data, $errors) {
+test('CreateServiceRequestStatus requires valid data', function (CreateServiceRequestStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     ServiceRequestStatus::query()->truncate();

@@ -140,7 +140,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     assertEquals($directManager->getKey(), $serviceRequestType->fresh()->assignment_type_individual_id);
 });
 
-test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, $errors) {
+test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();

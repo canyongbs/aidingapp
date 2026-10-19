@@ -84,7 +84,7 @@ test('A successful action on the EditServiceRequestStatus page', function () {
     assertEquals($editRequest['color'], $serviceRequestStatus->fresh()->color);
 });
 
-test('EditServiceRequestStatus requires valid data', function ($data, $errors) {
+test('EditServiceRequestStatus requires valid data', function (EditServiceRequestStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
@@ -382,7 +382,7 @@ describe('archiving', function () {
         ])->mountAction(TestAction::make('archive'));
 
         expect($component->instance()->getMountedAction()->getModalDescription())
-            ->not->toContain('automatic status changes');
+            ->not()->toContain('automatic status changes');
     });
 
     it('does not offer the delete action', function () {
