@@ -45,6 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
+use function Tests\htmlText;
 
 it('can render with proper permission', function () {
     $user = User::factory()->create();
@@ -153,7 +154,7 @@ it('displays pipeline with multiple stages', function () {
         'order' => 2,
     ]);
 
-    Livewire::test(ViewPipeline::class, [
+    $component = Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -163,6 +164,9 @@ it('displays pipeline with multiple stages', function () {
             'description' => 'Track customer progress',
             'stages' => $pipeline->stages()->get(),
         ]);
+
+    expect(htmlText($component->html(), '//*[contains(concat(" ", normalize-space(@class), " "), " fi-in-entry ")][.//*[@role="term" and normalize-space()="Other stages"]]'))
+        ->toContain('Initial Contact', 'Follow Up');
 });
 
 it('can access pipeline from project context', function () {
