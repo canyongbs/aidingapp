@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,7 +48,6 @@ class ServiceRequestTypesTable
         return $table
             ->query(fn (): Builder => ServiceRequestType::query())
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

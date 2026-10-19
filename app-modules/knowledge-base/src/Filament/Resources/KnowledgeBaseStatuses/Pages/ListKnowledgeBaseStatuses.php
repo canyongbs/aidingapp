@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseStatuses\KnowledgeBaseStatusResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -55,7 +54,6 @@ class ListKnowledgeBaseStatuses extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

@@ -65,11 +65,6 @@ test('The correct details are displayed on the ListContactTypes page', function 
     $contactTypes->each(
         fn (ContactType $contactType) => $component
             ->assertTableColumnStateSet(
-                'id',
-                $contactType->id,
-                $contactType
-            )
-            ->assertTableColumnStateSet(
                 'name',
                 $contactType->name,
                 $contactType

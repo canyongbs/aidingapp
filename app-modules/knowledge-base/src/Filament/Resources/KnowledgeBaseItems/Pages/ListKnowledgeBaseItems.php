@@ -41,7 +41,6 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\TagsForClass;
 use App\Models\Tag;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -84,7 +83,6 @@ class ListKnowledgeBaseItems extends ListRecords
                 'votes as helpful_votes_count' => fn (Builder $query) => $query->where('is_helpful', true),
             ])->with(['managers', 'concerns']))
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('title')
                     ->label('Title')
                     ->searchable(query: function (Builder $query, string $search): Builder {

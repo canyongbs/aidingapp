@@ -37,7 +37,6 @@
 namespace AidingApp\LicenseManagement\Filament\Resources\Products\Pages;
 
 use AidingApp\LicenseManagement\Filament\Resources\Products\ProductResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -56,7 +55,6 @@ class ListProducts extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Product Name')
                     ->searchable()

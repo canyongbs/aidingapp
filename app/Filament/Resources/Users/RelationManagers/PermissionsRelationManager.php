@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\Users\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Schema;
@@ -67,7 +66,6 @@ class PermissionsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('group.name')
                     ->sortable(),
                 TextColumn::make('name'),

@@ -50,7 +50,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -94,7 +93,6 @@ class ListServiceRequests extends ListRecords
                     return $query->tap(new AccessibleServiceRequests($user));
                 }))
             ->columns([
-                IdColumn::make(),
                 ViewColumn::make('service_request_number')
                     ->label('Service Request #')
                     ->view('filament.tables.columns.service-request.number')

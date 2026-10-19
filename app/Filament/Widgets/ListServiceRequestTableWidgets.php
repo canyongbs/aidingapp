@@ -42,7 +42,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
@@ -74,7 +73,6 @@ class ListServiceRequestTableWidgets extends BaseWidget
                 ])
             )
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
                     ->searchable(['service_request_number', 'title'])

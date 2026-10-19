@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementResponses\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EngagementResponses\EngagementResponseResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
@@ -51,7 +50,6 @@ class ListEngagementResponses extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('content'),
             ])
             ->recordActions([

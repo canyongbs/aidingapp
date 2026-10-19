@@ -37,7 +37,6 @@
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use AidingApp\Authorization\Models\Role;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Rules\OnlySuperAdminMayAssignAdminRoles;
@@ -77,7 +76,6 @@ class RolesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name'),
                 TextColumn::make('guard_name'),
             ])

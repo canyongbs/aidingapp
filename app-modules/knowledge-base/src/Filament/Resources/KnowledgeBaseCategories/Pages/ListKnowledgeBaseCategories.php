@@ -37,7 +37,6 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages;
 
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\KnowledgeBaseCategoryResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -60,7 +59,6 @@ class ListKnowledgeBaseCategories extends ListRecords
                 fn (Builder $query) => $query->doesntHave('parentCategory')
             )
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

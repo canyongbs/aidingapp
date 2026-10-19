@@ -36,7 +36,6 @@
 
 namespace AidingApp\Department\Filament\Resources\Departments\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Closure;
@@ -69,7 +68,6 @@ class UsersRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name'),
                 TextColumn::make('email'),
             ])

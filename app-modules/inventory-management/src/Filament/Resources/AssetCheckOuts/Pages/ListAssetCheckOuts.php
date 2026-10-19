@@ -40,7 +40,6 @@ use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\AssetCheckOutResource;
 use AidingApp\InventoryManagement\Filament\Resources\Assets\AssetResource;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
@@ -55,7 +54,6 @@ class ListAssetCheckOuts extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('asset.name')
                     ->url(fn ($record) => AssetResource::getUrl('view', ['record' => $record->asset]))
                     ->color('primary')

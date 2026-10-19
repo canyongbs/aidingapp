@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
@@ -126,7 +125,6 @@ class ManageServiceRequestTypePriorities extends ManageRelatedRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

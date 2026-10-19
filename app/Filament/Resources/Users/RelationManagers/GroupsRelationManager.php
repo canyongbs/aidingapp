@@ -37,7 +37,6 @@
 namespace App\Filament\Resources\Users\RelationManagers;
 
 use AidingApp\Group\Models\Group;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\AttachAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DetachAction;
@@ -57,7 +56,6 @@ class GroupsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

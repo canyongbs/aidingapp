@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectFile;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -74,7 +73,6 @@ class ProjectFilesWidget extends TableWidget
             ->paginated([5, 10, 25])
             ->defaultPaginationPageOption(5)
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('description'),
                 IconColumn::make('media')
                     ->tooltip(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {

@@ -36,7 +36,6 @@
 
 namespace App\Filament\Resources\SystemUsers\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\SystemUser;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
@@ -73,7 +72,6 @@ class PermissionsRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('group.name')
                     ->sortable(),
                 TextColumn::make('name'),

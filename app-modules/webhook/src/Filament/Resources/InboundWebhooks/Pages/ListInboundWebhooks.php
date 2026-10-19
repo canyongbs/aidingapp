@@ -37,7 +37,6 @@
 namespace AidingApp\Webhook\Filament\Resources\InboundWebhooks\Pages;
 
 use AidingApp\Webhook\Filament\Resources\InboundWebhooks\InboundWebhookResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
@@ -51,7 +50,6 @@ class ListInboundWebhooks extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('source')
                     ->label('Source'),
                 TextColumn::make('event'),

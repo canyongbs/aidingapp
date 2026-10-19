@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Tables;
 
 use AidingApp\Contact\Models\Organization;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -50,7 +49,6 @@ class OrganizationsTable
         return $table
             ->query(fn (): Builder => Organization::query())
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Organization Name')
                     ->searchable()

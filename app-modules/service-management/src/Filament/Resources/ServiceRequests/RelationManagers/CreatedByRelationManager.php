@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers;
 
 use App\Filament\Resources\Users\UserResource;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\User;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
@@ -66,7 +65,6 @@ class CreatedByRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name'),
             ])

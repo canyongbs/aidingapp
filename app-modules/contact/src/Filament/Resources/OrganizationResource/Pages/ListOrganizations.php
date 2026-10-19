@@ -40,7 +40,6 @@ use AidingApp\Contact\Filament\Exports\OrganizationExporter;
 use AidingApp\Contact\Filament\Resources\OrganizationResource;
 use AidingApp\Contact\Imports\OrganizationImporter;
 use AidingApp\Contact\Models\Organization;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -60,7 +59,6 @@ class ListOrganizations extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Organization Name')
                     ->searchable()

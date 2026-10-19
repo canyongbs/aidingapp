@@ -36,7 +36,6 @@
 
 namespace AidingApp\Contact\Filament\Resources\ContactResource\RelationManagers;
 
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -70,7 +69,6 @@ class EngagementResponsesRelationManager extends RelationManager
             ->heading('Email')
             ->recordTitleAttribute('id')
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('content'),
                 TextColumn::make('sent_at')
                     ->dateTime(),

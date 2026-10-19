@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -55,7 +54,6 @@ class ListEngagementFiles extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('description')
                     ->label('Description')
                     ->searchable()

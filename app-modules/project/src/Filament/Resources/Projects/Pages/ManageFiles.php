@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -124,7 +123,6 @@ class ManageFiles extends ManageRelatedRecords
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('description'),
                 IconColumn::make('media')
                     ->tooltip(fn ($record) => match ($record->getMedia('file')?->first()?->mime_type) {

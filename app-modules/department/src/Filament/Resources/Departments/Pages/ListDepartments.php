@@ -37,7 +37,6 @@
 namespace AidingApp\Department\Filament\Resources\Departments\Pages;
 
 use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -56,7 +55,6 @@ class ListDepartments extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->sortable(),
                 TextColumn::make('description')

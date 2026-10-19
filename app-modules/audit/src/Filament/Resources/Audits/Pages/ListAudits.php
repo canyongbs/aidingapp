@@ -38,7 +38,6 @@ namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 
 use AidingApp\Audit\Actions\Finders\AuditableModels;
 use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\SystemUser;
 use App\Models\User;
 use Filament\Actions\ViewAction;
@@ -57,7 +56,6 @@ class ListAudits extends ListRecords
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query->with(['changeAgent']))
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('auditable_type')
                     ->label('Auditable')
                     ->sortable(),

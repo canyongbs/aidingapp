@@ -38,7 +38,6 @@ namespace App\Filament\Widgets;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Models\Contact;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -72,7 +71,6 @@ class RecentContactsList extends BaseWidget
                 Contact::latest()->limit(5)
             )
             ->columns([
-                IdColumn::make(),
                 TextColumn::make(Contact::displayNameKey())
                     ->label('Name'),
                 TextColumn::make('email'),

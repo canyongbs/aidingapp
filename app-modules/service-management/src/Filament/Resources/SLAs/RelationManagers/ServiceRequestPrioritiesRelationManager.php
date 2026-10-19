@@ -39,7 +39,6 @@ namespace AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Filament\Tables\ServiceRequestPrioritiesTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\DissociateAction;
 use Filament\Actions\DissociateBulkAction;
@@ -59,7 +58,6 @@ class ServiceRequestPrioritiesRelationManager extends RelationManager
         return $table
             ->inverseRelationship('sla')
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('type.name')
                     ->url(fn (ServiceRequestPriority $record): string => ServiceRequestTypeResource::getUrl('edit', ['record' => $record->type]))
                     ->searchable(),

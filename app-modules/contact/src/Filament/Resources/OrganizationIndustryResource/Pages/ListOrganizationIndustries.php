@@ -37,7 +37,6 @@
 namespace AidingApp\Contact\Filament\Resources\OrganizationIndustryResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\OrganizationIndustryResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -56,7 +55,6 @@ class ListOrganizationIndustries extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

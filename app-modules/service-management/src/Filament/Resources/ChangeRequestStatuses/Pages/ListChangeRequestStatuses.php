@@ -37,7 +37,6 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -56,7 +55,6 @@ class ListChangeRequestStatuses extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable(),

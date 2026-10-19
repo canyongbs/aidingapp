@@ -37,7 +37,6 @@
 namespace AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers;
 
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteAction;
@@ -69,7 +68,6 @@ class EngagementFilesRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('description')
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('description'),
                 SpatieMediaLibraryImageColumn::make('file')
                     ->collection('file')

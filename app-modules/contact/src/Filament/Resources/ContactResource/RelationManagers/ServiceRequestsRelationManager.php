@@ -52,7 +52,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\CreateAction;
@@ -190,7 +189,6 @@ class ServiceRequestsRelationManager extends RelationManager
                 });
             })
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
                     ->searchable()

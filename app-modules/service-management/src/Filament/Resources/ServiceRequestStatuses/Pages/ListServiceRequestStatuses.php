@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Actions\DescribeAutomatedStatusUsage;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\Actions\UnarchiveServiceRequestStatusAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestStatuses\ServiceRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
-use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -61,7 +60,6 @@ class ListServiceRequestStatuses extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->formatStateUsing(fn (ServiceRequestStatus $record, string $state): string => $record->isArchived()

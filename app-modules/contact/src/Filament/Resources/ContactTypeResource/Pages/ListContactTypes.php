@@ -38,7 +38,6 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -57,7 +56,6 @@ class ListContactTypes extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()

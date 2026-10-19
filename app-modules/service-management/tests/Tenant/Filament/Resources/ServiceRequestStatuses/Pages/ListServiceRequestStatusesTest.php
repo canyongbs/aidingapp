@@ -69,11 +69,6 @@ test('The correct details are displayed on the ListServiceRequestStatuses page',
     $serviceRequestStatuses->each(
         fn (ServiceRequestStatus $serviceRequestType) => $component
             ->assertTableColumnStateSet(
-                'id',
-                $serviceRequestType->id,
-                $serviceRequestType
-            )
-            ->assertTableColumnStateSet(
                 'name',
                 $serviceRequestType->name,
                 $serviceRequestType

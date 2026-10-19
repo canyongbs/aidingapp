@@ -39,7 +39,6 @@ namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
-use App\Filament\Tables\Columns\IdColumn;
 use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
@@ -60,7 +59,6 @@ class ListProjects extends ListRecords
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('name')
                     ->label('Project Name')
                     ->limit(80)

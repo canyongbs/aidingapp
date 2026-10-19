@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Enums\SystemAdvisoryStatusClassification;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
-use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -90,7 +89,6 @@ class AdvisoryUpdatesRelationManager extends RelationManager
 
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('title')
                     ->label('Title')
                     ->description(fn (AdvisoryUpdate $record): string => $record->update)

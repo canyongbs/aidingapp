@@ -39,7 +39,6 @@ namespace App\Filament\Widgets;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
-use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSearch;
 use App\Models\Scopes\EducatableSort;
 use Filament\Actions\ViewAction;
@@ -69,7 +68,6 @@ class MyServiceRequests extends BaseWidget
                     ->limit(5)
             )
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('service_request_number')
                     ->label('Service Request #')
                     ->searchable()

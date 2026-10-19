@@ -40,7 +40,6 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\EditServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ViewServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
-use App\Filament\Tables\Columns\IdColumn;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -103,7 +102,6 @@ class ServiceRequestUpdateResource extends Resource
     {
         return $table
             ->columns([
-                IdColumn::make(),
                 TextColumn::make('serviceRequest.respondent.full')
                     ->label('Related To')
                     ->sortable(query: function (Builder $query, string $direction, ServiceRequestUpdate $record): Builder {
