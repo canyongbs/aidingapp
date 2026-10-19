@@ -244,7 +244,7 @@ describe('columns', function () {
             ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
             ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
 
-            $columns = array_keys($widget->instance()->getTable()->getColumns());
+        $columns = array_keys($widget->instance()->getTable()->getColumns());
         expect(array_search('assignedTo', $columns, true))
             ->toBeLessThan(array_search('pipelineStage.name', $columns, true));
     });
