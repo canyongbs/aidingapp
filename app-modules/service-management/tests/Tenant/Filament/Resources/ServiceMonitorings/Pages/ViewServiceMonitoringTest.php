@@ -45,6 +45,9 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\XPath;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -122,6 +125,9 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSuccessful()
+        ->assertSchemaComponentVisible('reportConfigurations.weekly.email')
+        ->assertSchemaComponentHidden('reportConfigurations.daily.email')
+        ->assertSchemaComponentHidden('reportConfigurations.monthly.email')
         ->assertSchemaStateSet([
             'name' => $serviceMonitoringTarget->name,
             'description' => $serviceMonitoringTarget->description,
@@ -204,11 +210,17 @@ test('keyword match values with punctuation retain clear boundaries', function (
 
     asSuperAdmin();
 
-    Livewire::test(ViewServiceMonitoring::class, ['record' => $keywordMonitor->getRouteKey()])
+    $component = Livewire::test(ViewServiceMonitoring::class, ['record' => $keywordMonitor->getRouteKey()])
         ->assertSuccessful()
         ->assertSchemaStateSet([
             'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
         ]);
+
+    $document = HTMLDocument::createFromString($component->html(), LIBXML_NOERROR | \Dom\HTML_NO_DEFAULT_NS);
+    $items = (new XPath($document))->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-in-entry ")][.//*[@role="term" and normalize-space()="Should Contain"]]//li');
+
+    expect(array_map(fn (Node $item): string => trim($item->textContent), iterator_to_array($items)))
+        ->toBe(['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"']);
 });
 
 test('API endpoint fields are displayed only for API endpoint monitors', function () {
