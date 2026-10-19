@@ -36,7 +36,6 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories;
 
-use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\CreateAdvisory;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ViewAdvisory;
 use AidingApp\ServiceManagement\Models\Advisory;
@@ -64,7 +63,6 @@ class AdvisoryResource extends Resource
     {
         return [
             'index' => ListAdvisories::route('/'),
-            'create' => CreateAdvisory::route('/create'),
             'view' => ViewAdvisory::route('/{record}'),
         ];
     }

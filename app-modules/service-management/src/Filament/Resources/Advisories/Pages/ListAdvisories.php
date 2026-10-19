@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -70,9 +71,7 @@ class ListAdvisories extends ListRecords
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                ? AdvisoryResource::getUrl('view', ['record' => $record])
-                : null)
+            ->recordUrl($this->advisoryViewUrl(...))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -84,7 +83,24 @@ class ListAdvisories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->slideOver()
+                ->successRedirectUrl($this->advisoryViewUrl(...))
+                ->fillForm(fn (): array => [
+                    'assigned_department_id' => auth()->user()?->department?->getKey(),
+                ])
+                ->schema([
+                    AdvisoryForm::propertiesSection(),
+                    AdvisoryForm::trackingSection(),
+                    AdvisoryForm::assignmentSection(),
+                ]),
         ];
+    }
+
+    protected function advisoryViewUrl(Advisory $record): ?string
+    {
+        return AdvisoryResource::can('view', $record)
+            ? AdvisoryResource::getUrl('view', ['record' => $record])
+            : null;
     }
 }
