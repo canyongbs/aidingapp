@@ -44,6 +44,11 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use App\Actions\Paths\ModulePath;
 use App\Models\User;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\XPath;
+use Filament\Infolists\Components\Entry;
+use Filament\Schemas\Contracts\HasSchemas;
 use Illuminate\Foundation\Testing\TestCase;
 
 use function Pest\Laravel\actingAs;
@@ -95,6 +100,39 @@ function richContentWith(array $nodes): array
 function richContentText(string $text): array
 {
     return richContentWith([['type' => 'text', 'text' => $text]]);
+}
+
+function htmlText(string $html, string $expression): string
+{
+    $document = HTMLDocument::createFromString($html, LIBXML_NOERROR | \Dom\HTML_NO_DEFAULT_NS);
+    $nodes = (new XPath($document))->query($expression);
+
+    return trim(preg_replace('/\s+/u', ' ', implode(' ', array_map(
+        fn (Node $node): string => $node->textContent,
+        iterator_to_array($nodes),
+    ))) ?? '');
+}
+
+/**
+ * @param list<string> $names
+ *
+ * @return array<string, mixed>
+ */
+function infolistState(HasSchemas $component, array $names): array
+{
+    $schema = $component->getSchema('infolist');
+
+    assert($schema !== null);
+
+    $state = [];
+
+    foreach ($schema->getFlatComponents(withActions: false, withHidden: true) as $entry) {
+        if (($entry instanceof Entry) && in_array($entry->getName(), $names, true)) {
+            $state[$entry->getName()] = $entry->getState();
+        }
+    }
+
+    return $state;
 }
 
 function enablePreference(

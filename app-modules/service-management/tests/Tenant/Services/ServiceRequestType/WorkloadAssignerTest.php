@@ -68,7 +68,7 @@ test('workload assigner assigns to user with fewest active requests', function (
 
     // Give the first two users 2 active assignments each
     foreach ($users->take(2) as $user) {
-        for ($i = 0; $i < 2; $i++) {
+        for ($index = 0; $index < 2; $index++) {
             $existingRequest = ServiceRequest::factory()->state([
                 'status_id' => ServiceRequestStatus::factory()->create([
                     'classification' => SystemServiceRequestClassification::Open,

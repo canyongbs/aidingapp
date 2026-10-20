@@ -107,6 +107,7 @@ describe('Unit-level customizeOutboundMail', function () {
         $mailArray = $mailMessage->toArray();
 
         $bodyRef = '[REF:' . $serviceRequest->service_request_number . ']';
+        assert(is_array($mailArray['introLines'] ?? []));
 
         expect(collect($mailArray['introLines'] ?? [])->merge($mailArray['outroLines'] ?? []))
             ->toContain($bodyRef);

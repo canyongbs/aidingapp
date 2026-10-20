@@ -297,7 +297,7 @@ it('dispatches job for valid stale drafts', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function ($job) use ($draft) {
+    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft) {
         return $job->uniqueId() === $draft->getKey();
     });
 });
@@ -341,7 +341,7 @@ it('dispatches job for stale draft with old form submission', function () {
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
-    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function ($job) use ($draft) {
+    Queue::assertPushed(AutoSubmitStaleDraftServiceRequest::class, function (AutoSubmitStaleDraftServiceRequest $job) use ($draft) {
         return $job->uniqueId() === $draft->getKey();
     });
 });

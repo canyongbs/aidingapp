@@ -114,6 +114,9 @@ it('denies a secret to a manager who is not assigned to the service request', fu
     $assignedManager = user(permissions: ['service_request.*.update']);
     $secret = revealableSecretFor($assignedManager);
     $otherManager = user(permissions: ['service_request.*.update']);
+
+    assert($secret->related instanceof ServiceRequest);
+
     $secret->related->priority->type->managerUsers()->attach($otherManager);
 
     actingAs($otherManager);

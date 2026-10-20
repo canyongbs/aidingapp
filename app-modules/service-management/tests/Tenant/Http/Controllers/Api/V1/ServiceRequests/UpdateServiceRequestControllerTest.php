@@ -147,7 +147,7 @@ it('updates a service request with an assignment', function () {
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->first();
 
-    expect($assignment)->not->toBeNull();
+    expect($assignment)->not()->toBeNull();
     expect($assignment->assigned_by_id)->toBe($user->id);
     expect($assignment->assigned_by_type)->toBe($user->getMorphClass());
 });
@@ -205,10 +205,10 @@ it('returns correct service request fields after update', function (string $resp
 
     expect($response['data'][$responseKey])->toBe($getExpected($serviceRequest->fresh()));
 })->with([
-    '`id`' => ['id', fn (ServiceRequest $sr) => $sr->id],
-    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $sr) => $sr->service_request_number],
-    '`title`' => ['title', fn (ServiceRequest $sr) => $sr->title],
-    '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
+    '`id`' => ['id', fn (ServiceRequest $serviceRequest) => $serviceRequest->id],
+    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $serviceRequest) => $serviceRequest->service_request_number],
+    '`title`' => ['title', fn (ServiceRequest $serviceRequest) => $serviceRequest->title],
+    '`category`' => ['category', fn (ServiceRequest $serviceRequest) => $serviceRequest->category->value],
 ]);
 
 it('updates close_details', function () {
