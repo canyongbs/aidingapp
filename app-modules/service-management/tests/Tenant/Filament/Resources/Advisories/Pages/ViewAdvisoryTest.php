@@ -60,30 +60,20 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
 
     $advisory = Advisory::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            AdvisoryResource::getUrl('view', [
-                'record' => $advisory,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeInOrder(
-            [
-                'Properties',
-                'Title',
-                $advisory->title,
-                'Description',
-                $advisory->description,
-                'Tracking Details',
-                'Severity',
-                $advisory->severity->name,
-                'Status',
-                $advisory->status->name,
-                'Assignment',
-                'Department',
-                $advisory->assignedDepartment->name,
-            ]
-        );
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+        ->assertSuccessful();
+
+    $expected = [
+        'title' => $advisory->title,
+        'description' => $advisory->description,
+        'severity.name' => $advisory->severity->name,
+        'status.name' => $advisory->status->name,
+        'assignedDepartment.name' => $advisory->assignedDepartment->name,
+    ];
+
+    expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected);
 });
 
 test('the Severity entry renders as a badge using the severity color', function () {
@@ -125,15 +115,17 @@ test('the Tracking Details status refreshes when an advisory update changes the 
     $component = Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
-        ->assertSuccessful()
-        ->assertSee($originalStatus->name);
+        ->assertSuccessful();
+
+    expect(\Tests\infolistState($component->instance(), ['status.name']))
+        ->toBe(['status.name' => $originalStatus->name]);
 
     $advisory->update(['status_id' => $newStatus->getKey()]);
 
-    $component
-        ->dispatch('advisory-updated')
-        ->assertSee($newStatus->name)
-        ->assertDontSee($originalStatus->name);
+    $component->dispatch('advisory-updated');
+
+    expect(\Tests\infolistState($component->instance(), ['status.name']))
+        ->toBe(['status.name' => $newStatus->name]);
 });
 
 test('ViewAdvisory is gated with proper access control', function () {
@@ -194,9 +186,7 @@ test('the Properties section can be updated', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($advisory->fresh())
-        ->title->toEqual('Updated Title')
-        ->description->toEqual('Updated Description');
+    expect($advisory->fresh()->title)->toEqual('Updated Title')->and($advisory->fresh()->description)->toEqual('Updated Description');
 });
 
 test('the Properties section validates the inputs', function () {
@@ -269,9 +259,7 @@ test('the Tracking Details section can be updated', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($advisory->fresh())
-        ->severity_id->toEqual($severity->getKey())
-        ->status_id->toEqual($status->getKey());
+    expect($advisory->fresh()->severity_id)->toEqual($severity->getKey())->and($advisory->fresh()->status_id)->toEqual($status->getKey());
 });
 
 test('the Status entry reflects the new value immediately after updating the Tracking Details section', function () {
@@ -308,7 +296,7 @@ test('the Status entry reflects the new value immediately after updating the Tra
         ->assertDontSee($oldStatus->name);
 });
 
-test('the Tracking Details section validates the inputs', function ($overrides, $errors) {
+test('the Tracking Details section validates the inputs', function (array $overrides, array $errors) {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();

@@ -202,7 +202,7 @@ test('CreateUser does not send the set password notification to an external user
     Notification::assertNotSentTo($created, SetPasswordNotification::class);
 });
 
-test('CreateUser validates the inputs', function ($data, $errors) {
+test('CreateUser validates the inputs', function (array $data, array $errors) {
     asSuperAdmin();
 
     $request = User::factory()->state($data)->make()->toArray();

@@ -92,8 +92,8 @@ test('EditChangeRequest recalculates end_time from start_time and duration and s
 
     $changeRequest->refresh();
 
-    expect($changeRequest->start_time?->toDateTimeString())->toEqual($startTime)
-        ->and($changeRequest->end_time?->toDateTimeString())->toEqual($expectedEndTime);
+    expect($changeRequest->start_time->toDateTimeString())->toEqual($startTime)
+        ->and($changeRequest->end_time->toDateTimeString())->toEqual($expectedEndTime);
 });
 
 test('EditChangeRequest hydrates duration from existing start_time and end_time', function () {

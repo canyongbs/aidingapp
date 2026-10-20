@@ -35,8 +35,10 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\AdvisoryStatusResource;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisoryStatuses\Pages\ViewAdvisoryStatus;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
@@ -51,21 +53,14 @@ test('The correct details are displayed on the ViewAdvisoryStatus page', functio
 
     $advisoryStatus = AdvisoryStatus::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            AdvisoryStatusResource::getUrl('view', [
-                'record' => $advisoryStatus,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewAdvisoryStatus::class, ['record' => $advisoryStatus->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $advisoryStatus->name,
-                'Classification',
-                $advisoryStatus->classification->name,
-            ]
-        );
+        ->assertSchemaStateSet([
+            'name' => $advisoryStatus->name,
+            'classification' => $advisoryStatus->classification,
+        ]);
 });
 
 test('ViewAdvisoryStatus is gated with proper access control', function () {

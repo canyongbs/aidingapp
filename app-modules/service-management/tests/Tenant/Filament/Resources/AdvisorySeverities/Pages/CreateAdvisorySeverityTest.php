@@ -77,7 +77,7 @@ test('CreateAdvisorySeverity is gated with proper access control', function () {
     assertDatabaseHas(AdvisorySeverity::class, $request);
 });
 
-test('CreateAdvisorySeverity validates the inputs', function ($data, $errors) {
+test('CreateAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $request = AdvisorySeverityRequestFactory::new($data)->create();

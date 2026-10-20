@@ -407,10 +407,7 @@ test('submitting the view or edit advisory update action updates the advisory up
         ])
         ->assertHasNoActionErrors();
 
-    expect($advisoryUpdate->refresh())
-        ->title->toBe('An updated title')
-        ->update->toBe('An updated update')
-        ->internal->toBeTrue();
+    expect($advisoryUpdate->refresh()->title)->toBe('An updated title')->and($advisoryUpdate->refresh()->update)->toBe('An updated update')->and($advisoryUpdate->refresh()->internal)->toBeTrue();
 
     expect($advisory->refresh()->status_id)->toBe($newStatus->getKey());
 });

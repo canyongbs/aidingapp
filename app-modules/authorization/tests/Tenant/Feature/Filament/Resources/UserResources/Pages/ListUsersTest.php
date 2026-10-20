@@ -43,6 +43,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Contracts\Support\Htmlable;
 use Lab404\Impersonate\Services\ImpersonateManager;
@@ -319,7 +320,7 @@ it('excludes archived groups from the bulk assign groups selection', function ()
     assert($groupsSelect instanceof Select);
 
     expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
-    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
+    expect($groupsSelect->getOptions())->not()->toHaveKey($archivedGroup->getKey());
 });
 
 it('can search users by name', function () {
@@ -423,7 +424,7 @@ describe('service details column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('1 Service Area');
     });
 
@@ -445,8 +446,8 @@ describe('service details column', function () {
 
         expect($tooltip)->toBeInstanceOf(Htmlable::class)
             ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
-            ->and($tooltip->toHtml())->not->toContain('<script>')
-            ->and($tooltip->toHtml())->not->toContain('<b>');
+            ->and($tooltip->toHtml())->not()->toContain('<script>')
+            ->and($tooltip->toHtml())->not()->toContain('<b>');
     });
 
     it('matches scoped service areas from direct, department, and group assignments without double counting', function () {
@@ -542,7 +543,7 @@ describe('associations column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('VIP');
     });
 

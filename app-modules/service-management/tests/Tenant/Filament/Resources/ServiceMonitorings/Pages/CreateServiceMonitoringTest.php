@@ -93,7 +93,7 @@ test('CreateServiceMonitoring is gated with proper access control', function () 
     assertDatabaseHas(ServiceMonitoringTarget::class, $request);
 });
 
-test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
+test('CreateServiceMonitoring validates the inputs', function (ServiceMonitoringTargetRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new($data)->create();
@@ -499,14 +499,14 @@ test('CreateServiceMonitor with notification group User or Department', function
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    expect($serviceMonitoringTarget->departments())->exists()->toBeFalse();
-    expect($serviceMonitoringTarget->users())->exists()->toBeFalse();
+    expect($serviceMonitoringTarget->departments()->exists())->toBeFalse();
+    expect($serviceMonitoringTarget->users()->exists())->toBeFalse();
 
     $serviceMonitoringTarget->departments()->attach(Department::factory()->create());
     $serviceMonitoringTarget->users()->attach(User::factory()->create());
 
-    expect($serviceMonitoringTarget->departments())->exists()->toBeTrue();
-    expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
+    expect($serviceMonitoringTarget->departments()->exists())->toBeTrue();
+    expect($serviceMonitoringTarget->users()->exists())->toBeTrue();
 });
 
 test('it will validate multiple valid forms of URL and IP Address', function () {

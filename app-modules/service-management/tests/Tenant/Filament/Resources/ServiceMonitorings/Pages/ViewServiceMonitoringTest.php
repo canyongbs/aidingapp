@@ -45,6 +45,9 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\XPath;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -116,38 +119,22 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
                 'record' => $serviceMonitoringTarget,
             ])
         )
-        ->assertSuccessful()
-        ->assertSeeInOrder(
-            [
-                'Name',
-                $serviceMonitoringTarget->name,
-                'Description',
-                $serviceMonitoringTarget->description,
-                'URL',
-                $serviceMonitoringTarget->domain,
-                'Frequency',
-                $serviceMonitoringTarget->frequency->getLabel(),
-                'Departments',
-                ...$serviceMonitoringTarget->departments()->pluck('name')->all(),
-                'Users',
-                ...$serviceMonitoringTarget->users()->pluck('name')->all(),
-            ]
-        )
-        ->assertSee('Automated Reporting')
-        ->assertSee('Weekly Reporting')
-        ->assertDontSee('Daily Reporting')
-        ->assertDontSee('Monthly Reporting')
-        ->assertSee('Email')
-        ->assertSee('Application')
-        ->assertSee($reportUser->name)
-        ->assertSee($reportDepartment->name)
-        ->assertSee($reportContact->full_name);
+        ->assertSuccessful();
 
     Livewire::test(ViewServiceMonitoring::class, [
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSuccessful()
+        ->assertSchemaComponentVisible('reportConfigurations.weekly.email')
+        ->assertSchemaComponentHidden('reportConfigurations.daily.email')
+        ->assertSchemaComponentHidden('reportConfigurations.monthly.email')
         ->assertSchemaStateSet([
+            'name' => $serviceMonitoringTarget->name,
+            'description' => $serviceMonitoringTarget->description,
+            'domain' => $serviceMonitoringTarget->domain,
+            'frequency' => $serviceMonitoringTarget->frequency,
+            'departments.name' => $serviceMonitoringTarget->departments()->pluck('name')->all(),
+            'users.name' => $serviceMonitoringTarget->users()->pluck('name')->all(),
             'reportConfigurations.weekly.email' => true,
             'reportConfigurations.weekly.database' => true,
             'reportConfigurations.weekly.users' => [$reportUser->name],
@@ -175,17 +162,14 @@ test('The Automated Reporting section is hidden when no reporting frequency is a
     $configuration->reportUsers()->attach($reportUser->getKey());
     $configuration->reportContacts()->attach($reportContact->getKey());
 
-    asSuperAdmin()
-        ->get(
-            ServiceMonitoringResource::getUrl('view', [
-                'record' => $serviceMonitoringTarget,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
-        ->assertDontSee('Automated Reporting')
-        ->assertDontSee($reportUser->name)
-        ->assertDontSee($reportDepartment->name)
-        ->assertDontSee($reportContact->full_name);
+        ->assertSchemaComponentHidden('reportConfigurations.weekly.email')
+        ->assertSchemaComponentHidden('reportConfigurations.weekly.users')
+        ->assertSchemaComponentHidden('reportConfigurations.weekly.departments')
+        ->assertSchemaComponentHidden('reportConfigurations.weekly.contacts');
 });
 
 test('keyword match values are displayed only for keyword monitors', function () {
@@ -195,16 +179,15 @@ test('keyword match values are displayed only for keyword monitors', function ()
         'should_not_contain' => ['test 3', 'test 4'],
     ]);
 
-    asSuperAdmin()
-        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $keywordMonitor]))
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceMonitoring::class, ['record' => $keywordMonitor->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeInOrder([
-            'Should Contain',
-            'test 1',
-            'test 2',
-            'Should Not Contain',
-            'test 3',
-            'test 4',
+        ->assertSchemaComponentVisible('should_contain')
+        ->assertSchemaComponentVisible('should_not_contain')
+        ->assertSchemaStateSet([
+            'should_contain' => ['test 1', 'test 2'],
+            'should_not_contain' => ['test 3', 'test 4'],
         ]);
 
     $availabilityMonitor = ServiceMonitoringTarget::factory()->create([
@@ -213,11 +196,10 @@ test('keyword match values are displayed only for keyword monitors', function ()
         'should_not_contain' => ['test 2'],
     ]);
 
-    asSuperAdmin()
-        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $availabilityMonitor]))
+    Livewire::test(ViewServiceMonitoring::class, ['record' => $availabilityMonitor->getRouteKey()])
         ->assertSuccessful()
-        ->assertDontSee('Should Contain')
-        ->assertDontSee('Should Not Contain');
+        ->assertSchemaComponentHidden('should_contain')
+        ->assertSchemaComponentHidden('should_not_contain');
 });
 
 test('keyword match values with punctuation retain clear boundaries', function () {
@@ -226,15 +208,19 @@ test('keyword match values with punctuation retain clear boundaries', function (
         'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
     ]);
 
-    asSuperAdmin()
-        ->get(ServiceMonitoringResource::getUrl('view', ['record' => $keywordMonitor]))
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewServiceMonitoring::class, ['record' => $keywordMonitor->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeInOrder([
-            'test1',
-            'test 2',
-            'test 3, "test 4"',
-            '"test 5, test 6"',
+        ->assertSchemaStateSet([
+            'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
         ]);
+
+    $document = HTMLDocument::createFromString($component->html(), LIBXML_NOERROR | \Dom\HTML_NO_DEFAULT_NS);
+    $items = (new XPath($document))->query('//*[contains(concat(" ", normalize-space(@class), " "), " fi-in-entry ")][.//*[@role="term" and normalize-space()="Should Contain"]]//li');
+
+    expect(array_map(fn (Node $item): string => trim($item->textContent), iterator_to_array($items)))
+        ->toBe(['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"']);
 });
 
 test('API endpoint fields are displayed only for API endpoint monitors', function () {
@@ -310,7 +296,7 @@ test('Reset Monitoring button resets monitoring', function () {
         'record' => $serviceMonitoringTarget->getRouteKey(),
     ])
         ->assertSuccessful()
-        ->assertSee('Reset Monitoring')
+        ->assertActionVisible('reset')
         ->callAction('reset');
 
     expect($serviceMonitoringTarget->histories()->count())

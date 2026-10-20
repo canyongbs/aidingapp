@@ -83,7 +83,7 @@ test('EditAdvisorySeverity is gated with proper access control', function () {
     expect($advisorySeverity->fresh()->name)->toEqual($request->get('name'));
 });
 
-test('EditAdvisorySeverity validates the inputs', function ($data, $errors) {
+test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors) {
     $user = User::factory()->create();
 
     actingAs($user);
