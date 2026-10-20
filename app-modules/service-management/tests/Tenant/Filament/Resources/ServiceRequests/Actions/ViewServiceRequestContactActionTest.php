@@ -49,6 +49,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Features\SupportTesting\Testable;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -84,7 +85,7 @@ function actingAsServiceRequestViewer(string ...$extraPermissions): ServiceReque
     return $serviceRequest;
 }
 
-function mountViewContact(ServiceRequest $serviceRequest)
+function mountViewContact(ServiceRequest $serviceRequest): Testable
 {
     return Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
@@ -218,7 +219,6 @@ test('viewContact shows scoped engagement files when the user has permission', f
     $serviceRequest = actingAsServiceRequestViewer('engagement_file.view-any');
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
 
     $engagementFile = EngagementFile::factory()->create(['description' => 'Scoped Test File Description']);
     $contact->engagementFiles()->attach($engagementFile);
@@ -232,7 +232,6 @@ test('viewContact hides the Files tab for a user without permission', function (
     $serviceRequest = actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
 
     $engagementFile = EngagementFile::factory()->create(['description' => 'Scoped Test File Description']);
     $contact->engagementFiles()->attach($engagementFile);
@@ -248,7 +247,6 @@ test('viewContact shows scoped engagement timeline entries when the user has per
     $serviceRequest = actingAsServiceRequestViewer('engagement.view-any');
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
 
     Engagement::factory()->create([
         'recipient_type' => $contact->getMorphClass(),
@@ -264,7 +262,6 @@ test('viewContact hides the Emails tab for a user without permission', function 
     $serviceRequest = actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
 
     Engagement::factory()->create([
         'recipient_type' => $contact->getMorphClass(),
@@ -282,7 +279,6 @@ test('viewContact shows the email health callout for a bounced respondent contac
     $serviceRequest = actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
     $contact->update(['email_bounce' => true]);
 
     mountViewContact($serviceRequest)
@@ -293,7 +289,6 @@ test('viewContact hides the email health callout for a healthy respondent contac
     $serviceRequest = actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
-    assert($contact instanceof Contact);
     $contact->update(['email_bounce' => false]);
 
     mountViewContact($serviceRequest)
@@ -310,8 +305,6 @@ test('viewContact shows the full contact details for the service request respond
     ])->create();
 
     $contact = $serviceRequest->respondent;
-
-    assert($contact instanceof Contact);
 
     asSuperAdmin();
 

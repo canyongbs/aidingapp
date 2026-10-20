@@ -48,23 +48,15 @@ use function Tests\asSuperAdmin;
 test('The correct details are displayed on the ViewServiceRequestStatus page', function () {
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestStatusResource::getUrl('view', [
-                'record' => $serviceRequestStatus,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceRequestStatus::class, ['record' => $serviceRequestStatus->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $serviceRequestStatus->name,
-                'Color',
-                $serviceRequestStatus->color->getLabel(),
-                'Sort Order',
-                $serviceRequestStatus->sort,
-            ]
-        );
+        ->assertSchemaStateSet([
+            'name' => $serviceRequestStatus->name,
+            'color' => $serviceRequestStatus->color,
+            'sort' => $serviceRequestStatus->sort,
+        ]);
 });
 
 // Permission Tests

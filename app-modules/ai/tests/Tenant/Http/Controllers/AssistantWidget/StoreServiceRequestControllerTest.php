@@ -47,9 +47,12 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+
+use Symfony\Component\HttpFoundation\Response;
 
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
@@ -63,7 +66,12 @@ beforeEach(function () {
     );
 });
 
-function postAssistantServiceRequest(Contact $contact, ServiceRequestType $type, array $data)
+/**
+ * @param array<string, mixed> $data
+ *
+ * @return TestResponse<Response>
+ */
+function postAssistantServiceRequest(Contact $contact, ServiceRequestType $type, array $data): TestResponse
 {
     $contact->createToken('assistant-widget-access-token');
 
@@ -211,7 +219,7 @@ it('securely attaches password fields submitted by assistant clients', function 
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($submittedField->pivot->response)->toBe($secret->getKey())
+        ->and($submittedField->pivot->getAttribute('response'))->toBe($secret->getKey())
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');
 });

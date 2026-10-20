@@ -49,19 +49,11 @@ use function Tests\asSuperAdmin;
 test('The correct details are displayed on the ViewServiceRequestType page', function () {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestTypeResource::getUrl('view', [
-                'record' => $serviceRequestType,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceRequestType::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $serviceRequestType->name,
-            ]
-        );
+        ->assertSchemaStateSet(['name' => $serviceRequestType->name]);
 });
 
 test('The ViewServiceRequestType page lists every area the type belongs to', function () {

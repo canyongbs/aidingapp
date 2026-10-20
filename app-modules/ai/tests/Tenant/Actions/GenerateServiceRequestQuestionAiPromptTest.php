@@ -76,5 +76,5 @@ it('excludes password fields from the assistant clarification prompt', function 
     );
 
     expect($prompt)->toContain('Visible response', 'Visible answer')
-        ->not->toContain('Private credential', $secretId);
+        ->not()->toContain('Private credential', $secretId);
 });

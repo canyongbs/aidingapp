@@ -57,6 +57,7 @@ use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 
@@ -121,11 +122,11 @@ it('omits the unaffiliated placeholder from the contact option label and include
         ->getSchema('form')
         ->getComponent(fn ($component): bool => $component instanceof Select && $component->getName() === 'respondent_id');
 
-    expect($field)->not->toBeNull()
+    expect($field)->not()->toBeNull()
         ->and($field->getOptionLabelFromRecord($contactWithOrganization))
         ->toContain('Acme University')
         ->and($field->getOptionLabelFromRecord($contactWithoutOrganization))
-        ->not->toContain('Unaffiliated');
+        ->not()->toContain('Unaffiliated');
 });
 
 it('securely stores password fields on staff-created service requests', function () {
@@ -144,7 +145,7 @@ it('securely stores password fields on staff-created service requests', function
     $field->submissible()->associate($form);
     $field->save();
 
-    $form->content = [
+    $form->setAttribute('content', [
         'type' => 'doc',
         'content' => [[
             'type' => 'customBlock',
@@ -157,7 +158,7 @@ it('securely stores password fields on staff-created service requests', function
                 ],
             ],
         ]],
-    ];
+    ]);
     $form->save();
 
     $request = CreateServiceRequestRequestFactory::new()->create([
@@ -199,14 +200,14 @@ it('securely stores password fields on staff-created service requests', function
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($submittedField->pivot->response)->toBe($secret->getKey())
-        ->and($submittedField->pivot->response)->not->toBe('service-request-password')
+        ->and($submittedField->pivot->getAttribute('response'))->toBe($secret->getKey())
+        ->and($submittedField->pivot->getAttribute('response'))->not()->toBe('service-request-password')
         ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');
 });
 
-test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {
+test('CreateServiceRequest requires valid data', function (CreateServiceRequestRequestFactory $data, array $errors, ?Closure $setup = null) {
     if ($setup) {
         $setup();
     }
@@ -558,7 +559,7 @@ test('displays only service request types managed by the current user', function
     Livewire::test(CreateServiceRequest::class)
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -601,7 +602,7 @@ test('displays only service request types where current user is a direct manager
     Livewire::test(CreateServiceRequest::class)
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -731,7 +732,7 @@ test('validate service requests type if user is manager of any service request t
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($department) {
+    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($department) {
         $serviceRequest->managerDepartments()->attach($department);
     });
 
@@ -769,7 +770,7 @@ test('validate service requests type if user is direct manager of any service re
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($user) {
+    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($user) {
         $serviceRequest->managerUsers()->attach($user);
     });
 

@@ -188,7 +188,9 @@ test('it can change status of multiple service requests for user belonging to a 
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(fn (ServiceRequest $serviceRequest) => expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey()));
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus): void {
+        expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
+    });
 });
 
 test('it cannot change status of service requests for user who is not a manager', function () {
@@ -308,7 +310,9 @@ describe('archiving', function () {
             ->assertHasTableBulkActionErrors(['statusId']);
 
         $serviceRequests->each(
-            fn (ServiceRequest $serviceRequest) => expect($serviceRequest->fresh()->status_id)->toBe($openStatus->getKey())
+            function (ServiceRequest $serviceRequest) use ($openStatus): void {
+                expect($serviceRequest->fresh()->status_id)->toBe($openStatus->getKey());
+            }
         );
     });
 });

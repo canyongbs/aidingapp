@@ -60,8 +60,8 @@ test('it can bulk delete service requests as super admin', function () {
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
@@ -96,8 +96,8 @@ test('it can bulk delete service requests as a department manager', function () 
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
@@ -128,8 +128,8 @@ test('it can bulk delete service requests as a direct user manager', function ()
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
@@ -149,7 +149,7 @@ test('it cannot bulk delete service requests the user does not manage', function
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->not->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->not()->toBeNull();
     }
 });
