@@ -84,7 +84,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
     assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
-test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
+test('EditServiceRequestUpdate requires valid data', function (EditServiceRequestUpdateRequestFactory $data, array $errors) {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,

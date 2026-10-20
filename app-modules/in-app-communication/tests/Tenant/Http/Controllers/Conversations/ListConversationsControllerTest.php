@@ -177,12 +177,12 @@ it('respects the limit parameter', function () {
 it('can paginate through conversations using cursor', function () {
     $user = User::factory()->create();
 
-    for ($i = 0; $i < 5; $i++) {
+    for ($index = 0; $index < 5; $index++) {
         $conversation = Conversation::factory()->channel()->create();
         ConversationParticipant::factory()->create([
             'conversation_id' => $conversation->getKey(),
             'participant_id' => $user->getKey(),
-            'last_activity_at' => now()->subMinutes($i),
+            'last_activity_at' => now()->subMinutes($index),
         ]);
     }
 
@@ -193,7 +193,7 @@ it('can paginate through conversations using cursor', function () {
         ->assertJsonPath('has_more', true);
 
     $nextCursor = $response->json('next_cursor');
-    expect($nextCursor)->not->toBeNull();
+    expect($nextCursor)->not()->toBeNull();
 
     $response = actingAs($user)
         ->getJson(route('in-app-communication.conversations.index', ['limit' => 2, 'cursor' => $nextCursor]))

@@ -62,5 +62,5 @@ it('has many milestones', function () {
 
     expect($pipeline->milestones->pluck('id')->sort()->values()->all())
         ->toBe($milestones->pluck('id')->sort()->values()->all())
-        ->not->toContain($otherMilestone->id);
+        ->not()->toContain($otherMilestone->id);
 });

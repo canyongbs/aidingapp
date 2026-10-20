@@ -103,13 +103,14 @@ test('it marks media image as not broken when file exists on disk', function () 
 
     Http::fake();
 
-    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
     $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
             ->andReturn([$media->uuid]);
     });
+
+    assert($mock instanceof CheckKnowledgeBaseArticleImagesJob);
 
     invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
 
@@ -134,13 +135,14 @@ test('it detects broken media image when uuid has no matching media record', fun
 
     Http::fake();
 
-    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
     $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($missingUuid) {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
             ->andReturn([$missingUuid]);
     });
+
+    assert($mock instanceof CheckKnowledgeBaseArticleImagesJob);
 
     invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
 
@@ -170,13 +172,14 @@ test('it detects broken media image when file is missing from disk', function ()
 
     Http::fake();
 
-    /** @var CheckKnowledgeBaseArticleImagesJob $mock */
     $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
             ->andReturn([$media->uuid]);
     });
+
+    assert($mock instanceof CheckKnowledgeBaseArticleImagesJob);
 
     invade($mock)->knowledgeBaseItem = $knowledgeBaseItem;
 

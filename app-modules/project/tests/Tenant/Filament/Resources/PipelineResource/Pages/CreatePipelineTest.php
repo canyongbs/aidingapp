@@ -66,7 +66,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can validate create pipeline inputs', function ($data, $errors) {
+it('can validate create pipeline inputs', function (CreatePipelineRequestFactory $data, array $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 

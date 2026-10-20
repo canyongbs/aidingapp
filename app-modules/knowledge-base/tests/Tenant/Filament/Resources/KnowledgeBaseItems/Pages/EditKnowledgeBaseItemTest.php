@@ -215,7 +215,7 @@ test('managers UserSelect shows all users including admins when withoutAdminFilt
         ->withoutAdminFilter()
         ->relationship('managers', 'name');
 
-    expect(invade($field)->filterAdmins)->toBeFalse();
+    expect(invade($field)->__get('filterAdmins'))->toBeFalse();
 });
 
 test('file attachments can be uploaded and saved on the edit page', function () {

@@ -132,9 +132,9 @@ it('renders the service request types filter and quick-load controls', function 
 
     Livewire::test(ServiceRequests::class)
         ->assertOk()
-        ->assertSee('Service Request Types')
-        ->assertSee('My Affiliated Types')
-        ->assertSee('Clear');
+        ->assertFormFieldExists('serviceRequestTypes', form: 'filtersForm')
+        ->assertActionVisible(TestAction::make('loadAffiliatedServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', schema: 'filtersForm'))
+        ->assertActionVisible(TestAction::make('clearServiceRequestTypes')->schemaComponent('serviceRequestTypeActions', schema: 'filtersForm'));
 });
 
 it('groups the type options by the service catalog hierarchy', function () {
@@ -168,7 +168,11 @@ it('groups the type options by the service catalog hierarchy', function () {
     $childNode = collect($parentNode['children'] ?? [])->first(fn (array $node): bool => $node['value'] === 'category_' . $childCategory->getKey());
     expect($childNode)->toBeArray();
 
-    $typeNode = collect($childNode['children'] ?? [])->first(fn (array $node): bool => $node['value'] === $categorisedType->getKey());
+    $children = $childNode['children'] ?? [];
+
+    assert(is_array($children));
+
+    $typeNode = collect($children)->first(fn (array $node): bool => $node['value'] === $categorisedType->getKey());
     expect($typeNode)
         ->toBeArray()
         ->toHaveKey('value', $categorisedType->getKey())
@@ -272,7 +276,7 @@ it('excludes archived types from the filter options', function () {
 
     // Flatten the tree to get all type IDs
     $flattenedIds = collect($tree)
-        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'] ?? [])->map(fn (array $child): string => $child['value'])->values()->all()])
+        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'])->map(fn (array $child): string => $child['value'])->values()->all()])
         ->flatten()
         ->filter(fn (string $value): bool => ! str_starts_with($value, 'category_'))
         ->values()
@@ -280,8 +284,8 @@ it('excludes archived types from the filter options', function () {
 
     expect($flattenedIds)
         ->toContain($activeType->getKey())
-        ->not->toContain($archivedType->getKey())
-        ->not->toContain($deletedType->getKey());
+        ->not()->toContain($archivedType->getKey())
+        ->not()->toContain($deletedType->getKey());
 });
 
 it('keeps archived types available to the service requests list filter', function () {
@@ -291,7 +295,7 @@ it('keeps archived types available to the service requests list filter', functio
     $archivedType->archive();
 
     $flattenedIds = collect(ListServiceRequests::buildTypeTreeOptions())
-        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'] ?? [])->map(fn (array $child): string => $child['value'])->values()->all()])
+        ->map(fn (array $node): array => [$node['value'], ...collect($node['children'])->map(fn (array $child): string => $child['value'])->values()->all()])
         ->flatten()
         ->reject(fn (string $value): bool => str_starts_with($value, 'category_'))
         ->values()
@@ -358,10 +362,10 @@ it('resolves every type the user manages or audits as an affiliated type', funct
             $managerGroupType->getKey(),
             $auditorGroupType->getKey(),
         ])
-        ->not->toContain($archivedUserAffiliatedType->getKey())
-        ->not->toContain($archivedDepartmentAffiliatedType->getKey())
-        ->not->toContain($deletedAffiliatedType->getKey())
-        ->not->toContain($unaffiliatedType->getKey());
+        ->not()->toContain($archivedUserAffiliatedType->getKey())
+        ->not()->toContain($archivedDepartmentAffiliatedType->getKey())
+        ->not()->toContain($deletedAffiliatedType->getKey())
+        ->not()->toContain($unaffiliatedType->getKey());
 });
 
 it('populates the filter with affiliated types via the My Affiliated Types action', function () {

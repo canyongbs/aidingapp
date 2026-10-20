@@ -918,108 +918,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/in-app-communication/src/Actions/GetUserConversations.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$participant_id\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/AddParticipantTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$event of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/AddParticipantTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$ephemeral_period\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/CreateConversationTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$is_private\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/CreateConversationTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$name\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/CreateConversationTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<mixed\\>\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/GetUserConversationsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<mixed\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/GetUserConversationsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Contracts\\\\Pagination\\\\CursorPaginator\\<int, AidingApp\\\\InAppCommunication\\\\Models\\\\Conversation\\>\\:\\:pluck\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/GetUserConversationsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$participant_id\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/JoinChannelTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$event of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/MarkConversationAsReadTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$author_id\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/SendMessageTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$event of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/SendMessageTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$event of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/UpdateConversationTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<mixed\\>\\:\\:\\$is_manager\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/UpdateParticipantRoleTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<mixed\\>\\:\\:\\$is_pinned\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 4,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/UpdateParticipantSettingsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<mixed\\>\\:\\:\\$notification_preference\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Actions/UpdateParticipantSettingsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$i" is shorter than minimum length of 3 characters\\.$#',
-    'identifier' => 'MeliorStan.shortVariable',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/in-app-communication/tests/Tenant/Http/Controllers/Conversations/ListConversationsControllerTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\IntegrationAwsSesEventHandling\\\\DataTransferObjects\\\\SesBounceData\\:\\:__construct\\(\\) has parameter \\$bouncedRecipients with generic class Spatie\\\\LaravelData\\\\DataCollection but does not specify its types\\: TKey, TValue$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -1074,22 +972,10 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/src/Http/Controllers/AwsSesInboundWebhookController.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\PendingCalls\\\\TestCall\\:\\:expectExceptionMessage\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-aws-ses-event-handling/tests/Tenant/Unit/SesConfigurationSetTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Avoid direct request IP accessors \\(ip\\(\\), ips\\(\\), getClientIp\\(\\), getClientIps\\(\\)\\)\\. Use CanyonGBS\\\\Common\\\\Support\\\\ClientIp\\:\\:resolve\\(\\) instead so client IP resolution remains Cloudflare and ALB aware\\.$#',
     'identifier' => 'Common.useClientIpResolver',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/integration-google-recaptcha/src/Rules/RecaptchaTokenValid.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Mixins\\\\Expectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\>\\:\\:\\$vector_store_id\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/integration-open-ai/tests/Tenant/Feature/Services/OpenAiGptTestServiceTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Faker\\\\Generator\\:\\:catchPhrase\\(\\)\\.$#',
@@ -1204,24 +1090,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/knowledge-base/src/Models/KnowledgeBaseItem.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^PHPDoc tag @var with type AidingApp\\\\KnowledgeBase\\\\Jobs\\\\CheckKnowledgeBaseArticleImagesJob is not subtype of native type Mockery\\\\MockInterface\\.$#',
-    'identifier' => 'varTag.nativeType',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/knowledge-base/tests/Tenant/Filament/Jobs/CheckKnowledgeBaseArticleImagesJobTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Cannot call method pluck\\(\\) on array\\<int, string\\>\\|Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Expectations\\\\EachExpectation\\<array\\<int, string\\>\\|string\\>\\|Pest\\\\Expectations\\\\HigherOrderExpectation\\<Pest\\\\Expectation\\<array\\<int, string\\>\\|string\\>, array\\<int, string\\>\\|string\\|null\\>\\|Pest\\\\Expectations\\\\OppositeExpectation\\<array\\<int, string\\>\\|string\\>\\|string\\.$#',
-    'identifier' => 'method.nonObject',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/tests/Tenant/Filament/Resources/KnowledgeBaseCategories/Pages/EditKnowledgeBaseCategoryTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to protected property Spatie\\\\Invade\\\\Invader\\<App\\\\Filament\\\\Forms\\\\Components\\\\UserSelect\\>\\:\\:\\$filterAdmins\\.$#',
-    'identifier' => 'property.protected',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/tests/Tenant/Filament/Resources/KnowledgeBaseItems/Pages/EditKnowledgeBaseItemTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Parameter \\#2 \\$guardName of method Illuminate\\\\Database\\\\Migrations\\\\Migration@anonymous/app\\-modules/license\\-management/database/migrations/2024_11_21_194048_data_seed_permissions_for_product_license_module\\.php\\:42\\:\\:deletePermissions\\(\\) expects string, array\\<string\\> given\\.$#',
@@ -1434,234 +1302,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Settings/SettingsProperties/PortalSettingsProperty.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<string\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Actions/GenerateAiResolutionPromptTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function serviceRequestFormStepContent\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Actions/GenerateServiceRequestFormTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<string\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Actions/GenerateServiceRequestQuestionsAiPromptTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/GetServiceRequestFormControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/GetServiceRequestFormControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$value of static method Illuminate\\\\Support\\\\Facades\\\\Hash\\:\\:make\\(\\) expects string, int given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 7,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalAuthenticateControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalCategoryControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalCategoryControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalCategorySortTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalCategorySortTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$value of static method Illuminate\\\\Support\\\\Facades\\\\Hash\\:\\:make\\(\\) expects string, int given\\.$#',
-    'identifier' => 'argument.type',
-    'count' => 7,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/KnowledgeManagementPortalRegisterControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 21,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/ServiceRequestTypesControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 21,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/ServiceRequestTypesControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$categoryAData" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.variableNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/ServiceRequestTypesControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Variable name "\\$categoryBData" is not in camelCase\\.$#',
-    'identifier' => 'MeliorStan.variableNameNotCamelCase',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/ServiceRequestTypesControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\PendingCalls\\\\TestCall\\:\\:\\$contact\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/ShowServiceMonitorStatusControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Pest\\\\PendingCalls\\\\TestCall\\:\\:postJson\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Http/Controllers/KnowledgeManagementPortal/StoreServiceRequestSecretControllerTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/AdvisoryApiTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/AdvisoryApiTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/KnowlegeManagementPortalSearchTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function getServiceMonitorStatuses\\(\\) return type with generic class Illuminate\\\\Testing\\\\TestResponse does not specify its types\\: TResponse$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/ServiceMonitorStatusApiTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/ServiceMonitorStatusApiTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/tests/Tenant/Unit/ServiceMonitorStatusApiTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/CreatePipelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/CreatePipelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/EditPipelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/EditPipelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/ManagePipelineEntriesTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 6,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/PipelineResource/Pages/ViewPipelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Project\\\\Models\\\\ProjectMilestone\\:\\:\\$completed_tasks_count\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/Pipelines/Forms/PipelineEntryFormTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Project\\\\Models\\\\ProjectMilestone\\:\\:\\$tasks_count\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/Pipelines/Forms/PipelineEntryFormTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Anonymous function should return Pest\\\\Mixins\\\\Expectation\\<bool\\|null\\> but returns Pest\\\\Mixins\\\\Expectation\\<bool\\|null\\>\\.$#',
-    'identifier' => 'return.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/ListProjectsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/ManageFilesTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/Filament/Resources/ProjectResource/Pages/ManageFilesTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Anonymous function should return Pest\\\\Mixins\\\\Expectation\\<bool\\|null\\> but returns Pest\\\\Mixins\\\\Expectation\\<bool\\|null\\>\\.$#',
-    'identifier' => 'return.type',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/PipelineArchivingFeatureCascadeTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:\\$id\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/PipelineEntryRelationshipsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function expect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/PipelineEntryRelationshipsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, mixed\\>\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/project/tests/Tenant/PipelineRelationshipsTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
     'identifier' => 'Common.noStrtolower',
     'count' => 1,
@@ -1690,54 +1330,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.noStrtolower',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsTable.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Function richContent\\(\\) return type has no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/RequestCommunicationsTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<int, mixed\\>\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<mixed\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 3,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Offset \'children\' on array\\{name\\: string, value\\: string, children\\: array\\<int, mixed\\>\\} on left side of \\?\\? always exists and is not nullable\\.$#',
-    'identifier' => 'nullCoalesce.offset',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TKey in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function collect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/ServiceRequestTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Access to an undefined property Pest\\\\Mixins\\\\Expectation\\<array\\<string, string\\>\\|null\\>\\:\\:\\$not\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/tests/Tenant/Filament/Pages/SlaTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AcceptServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
@@ -2466,24 +2058,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Rules/ServiceRequestTypeAssignmentsIndividualUserMustBeAManager.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Parameter \\#1 \\$data of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Parameter \\#2 \\$errors of anonymous function has no typehint\\.$#',
-    'identifier' => 'MeliorStan.closureParameterMissingTypehint',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/EditServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/tests/Tenant/Filament/Resources/ServiceRequestUpdates/Pages/ViewServiceRequestUpdateTest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Call to an undefined method Spatie\\\\Image\\\\Drivers\\\\ImageDriver\\:\\:keepOriginalImageFormat\\(\\)\\.$#',
     'identifier' => 'method.notFound',
     'count' => 1,
@@ -2524,36 +2098,6 @@ $ignoreErrors[] = [
     'identifier' => 'Common.noLocalModelScope',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/timeline/src/Models/Timeline.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:engagementResponses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Tenant/Listeners/AddRecordToTimelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:engagementResponses\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Tenant/Listeners/RemoveRecordFromTimelineTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid assertSee\\(\\) and its alternatives\\: they only prove the text appears somewhere in the rendered output, not that it appears where the test actually expects it, so they can pass even when the feature under test is broken\\. Prefer a more precise assertion \\(e\\.g\\. asserting component/view state, a scoped selector, or the specific structure produced\\)\\. If you are certain you specifically need this assertion, add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noAssertSee\\)\\.$#',
-    'identifier' => 'Common.noAssertSee',
-    'count' => 6,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Tenant/Livewire/TimelineListTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TAndValue in call to method Pest\\\\Expectation\\<mixed\\>\\:\\:and\\(\\)$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Tenant/Livewire/TimelineListTest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Unable to resolve the template type TValue in call to function expect$#',
-    'identifier' => 'argument.templateType',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/timeline/tests/Tenant/Livewire/TimelineListTest.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\Webhook\\\\Actions\\\\StoreInboundWebhook" defines disallowed public method "handle"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',

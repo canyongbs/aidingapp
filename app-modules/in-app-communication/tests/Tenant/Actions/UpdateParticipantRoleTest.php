@@ -58,9 +58,7 @@ it('promotes a participant to manager', function () {
         isManager: true,
     );
 
-    expect($participant)
-        ->not->toBeNull()
-        ->is_manager->toBeTrue();
+    expect($participant)->not()->toBeNull()->and($participant->is_manager)->toBeTrue();
 });
 
 it('demotes a manager to regular participant when other managers exist', function () {
@@ -84,9 +82,7 @@ it('demotes a manager to regular participant when other managers exist', functio
         isManager: false,
     );
 
-    expect($participant)
-        ->not->toBeNull()
-        ->is_manager->toBeFalse();
+    expect($participant)->not()->toBeNull()->and($participant->is_manager)->toBeFalse();
 });
 
 it('returns null when participant does not exist', function () {
@@ -144,7 +140,5 @@ it('allows setting manager to true when already a manager', function () {
         isManager: true,
     );
 
-    expect($participant)
-        ->not->toBeNull()
-        ->is_manager->toBeTrue();
+    expect($participant)->not()->toBeNull()->and($participant->is_manager)->toBeTrue();
 });

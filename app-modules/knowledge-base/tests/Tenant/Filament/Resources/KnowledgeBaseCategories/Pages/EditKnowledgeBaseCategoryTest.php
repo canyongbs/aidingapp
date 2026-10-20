@@ -228,10 +228,7 @@ test('can attach subcategories into categories', function () {
             data: ['recordId' => $knowledgeBaseSubCategory->getKey()]
         )->assertSuccessful();
 
-    expect($knowledgeBaseCategory->refresh())
-        ->subCategories
-        ->pluck('id')
-        ->toContain($knowledgeBaseSubCategory->getKey());
+    expect($knowledgeBaseCategory->refresh()->subCategories->pluck('id'))->toContain($knowledgeBaseSubCategory->getKey());
 });
 
 test('only shows the subcategories bulk delete action to a user with the settings delete permission', function () {

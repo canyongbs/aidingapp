@@ -35,11 +35,13 @@
 */
 
 use AidingApp\Department\Models\Department;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\Pages\ViewServiceRequestUpdate;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestUpdates\ServiceRequestUpdateResource;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
@@ -47,24 +49,18 @@ use function Tests\asSuperAdmin;
 test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestUpdateResource::getUrl('view', [
-                'record' => $serviceRequestUpdate,
-                'service_request' => $serviceRequestUpdate->service_request_id,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceRequestUpdate::class, [
+        'record' => $serviceRequestUpdate->getRouteKey(),
+        'parentRecord' => $serviceRequestUpdate->serviceRequest,
+    ])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Service Request',
-                $serviceRequestUpdate->serviceRequest->service_request_number,
-                'Internal',
-                // TODO: Figure out how to check whether this internal value the check or the X icon
-                'Update',
-                $serviceRequestUpdate->update,
-            ]
-        );
+        ->assertSchemaStateSet([
+            'serviceRequest.service_request_number' => $serviceRequestUpdate->serviceRequest->service_request_number,
+            'internal' => $serviceRequestUpdate->internal,
+            'update' => $serviceRequestUpdate->update,
+        ]);
 });
 
 // Permission Tests

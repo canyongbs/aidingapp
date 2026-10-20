@@ -45,6 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
+use function Tests\htmlText;
 
 it('can render with proper permission', function () {
     $user = User::factory()->create();
@@ -124,8 +125,10 @@ it('displays correct pipeline details', function () {
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Test Pipeline Name')
-        ->assertSee('Test Pipeline Description');
+        ->assertSchemaStateSet([
+            'name' => 'Test Pipeline Name',
+            'description' => 'Test Pipeline Description',
+        ]);
 });
 
 it('displays pipeline with multiple stages', function () {
@@ -151,15 +154,19 @@ it('displays pipeline with multiple stages', function () {
         'order' => 2,
     ]);
 
-    Livewire::test(ViewPipeline::class, [
+    $component = Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Customer Journey')
-        ->assertSee('Track customer progress')
-        ->assertSee('Initial Contact')
-        ->assertSee('Follow Up');
+        ->assertSchemaStateSet([
+            'name' => 'Customer Journey',
+            'description' => 'Track customer progress',
+            'stages' => $pipeline->stages()->get(),
+        ]);
+
+    expect(htmlText($component->html(), '//*[contains(concat(" ", normalize-space(@class), " "), " fi-in-entry ")][.//*[@role="term" and normalize-space()="Other stages"]]'))
+        ->toContain('Initial Contact', 'Follow Up');
 });
 
 it('can access pipeline from project context', function () {

@@ -49,6 +49,8 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\travelTo;
 
+use Symfony\Component\HttpFoundation\Response;
+
 test('returns all service monitoring targets with latest history when portal is enabled', function () {
     $settings = app(PortalSettings::class);
 
@@ -111,6 +113,8 @@ test('excludes confidential service monitoring targets unless the contact is gra
 
 /**
  * @param array<string, mixed> $query
+ *
+ * @return TestResponse<Response>
  */
 function getServiceMonitorStatuses(array $query = []): TestResponse
 {
@@ -238,7 +242,7 @@ it('can sort by column', function (string $sort, string $direction, array $expec
 
     $response = getServiceMonitorStatuses(['sort' => $sort, 'direction' => $direction])->assertOk();
 
-    expect(collect($response->json('data'))->pluck('name')->all())->toBe($expectedOrder);
+    expect($response->collect('data')->pluck('name')->all())->toBe($expectedOrder);
 })->with([
     'name ascending' => ['name', 'asc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
     'name descending' => ['name', 'desc', ['Delta', 'Charlie', 'Bravo', 'Alpha']],

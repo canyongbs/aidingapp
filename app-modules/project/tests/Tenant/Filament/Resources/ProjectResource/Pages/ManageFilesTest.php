@@ -154,7 +154,7 @@ it('can sort files by created by', function () {
         ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
 });
 
-it('can validate create files inputs', function ($data, $errors) {
+it('can validate create files inputs', function (array $data, string $errors) {
     asSuperAdmin();
     Storage::fake('s3');
 

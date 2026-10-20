@@ -144,7 +144,7 @@ it('builds a nested breadcrumb ancestor trail for the navigated category', funct
     $response->assertOk();
 
     expect($response->json('category.id'))->toBe($child->id)
-        ->and(collect($response->json('category.ancestors'))->pluck('id')->all())->toBe([$parent->id]);
+        ->and($response->collect('category.ancestors')->pluck('id')->all())->toBe([$parent->id]);
 });
 
 it('allows loading the form when the type is reachable via any authorized category path', function () {

@@ -64,7 +64,7 @@ it('can assign a pipeline entry to a user', function () {
     ]);
 
     expect($entry->assignedTo)->toBeInstanceOf(User::class);
-    expect($entry->assignedTo->id)->toBe($user->id);
+    expect($entry->assignedTo->getKey())->toBe($user->id);
     expect($entry->assigned_to_type)->toBe('user');
 });
 
@@ -85,7 +85,7 @@ it('can assign a pipeline entry to a contact', function () {
     ]);
 
     expect($entry->assignedTo)->toBeInstanceOf(Contact::class);
-    expect($entry->assignedTo->id)->toBe($contact->id);
+    expect($entry->assignedTo->getKey())->toBe($contact->id);
     expect($entry->assigned_to_type)->toBe('contact');
 });
 

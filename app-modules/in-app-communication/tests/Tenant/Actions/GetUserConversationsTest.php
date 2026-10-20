@@ -50,9 +50,9 @@ it('returns only confidential conversations when asked for them', function () {
 
     $results = app(GetUserConversations::class)(user: $user, confidential: true);
 
-    expect($results->pluck('id')->all())
+    expect(collect($results->items())->pluck('id')->all())
         ->toContain($confidential->getKey())
-        ->not->toContain($ordinary->getKey());
+        ->not()->toContain($ordinary->getKey());
 });
 
 it('excludes confidential conversations when asked to', function () {
@@ -66,9 +66,9 @@ it('excludes confidential conversations when asked to', function () {
 
     $results = app(GetUserConversations::class)(user: $user, confidential: false);
 
-    expect($results->pluck('id')->all())
+    expect(collect($results->items())->pluck('id')->all())
         ->toContain($ordinary->getKey())
-        ->not->toContain($confidential->getKey());
+        ->not()->toContain($confidential->getKey());
 });
 
 it('returns both when no confidentiality filter is given', function () {
@@ -82,7 +82,7 @@ it('returns both when no confidentiality filter is given', function () {
 
     $results = app(GetUserConversations::class)(user: $user);
 
-    expect($results->pluck('id')->all())
+    expect(collect($results->items())->pluck('id')->all())
         ->toContain($confidential->getKey())
         ->toContain($ordinary->getKey());
 });
@@ -100,5 +100,5 @@ it('applies the confidentiality filter to pinned conversations', function () {
 
     expect($pinned->pluck('id')->all())
         ->toContain($confidential->getKey())
-        ->not->toContain($ordinary->getKey());
+        ->not()->toContain($ordinary->getKey());
 });

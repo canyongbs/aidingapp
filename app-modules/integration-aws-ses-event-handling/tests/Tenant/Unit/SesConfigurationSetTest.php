@@ -63,7 +63,7 @@ it('Does not send the message if configuration_set is set in settings but is not
     Event::assertNotDispatched(
         fn (MessageSent $event) => $event->message->getHeaders()->get('X-SES-CONFIGURATION-SET')->getBody() === $configurationSet
     );
-})->expectExceptionMessage('The X-SES-CONFIGURATION-SET and X-SES-MESSAGE-TAGS headers were not set, please check your configuration.');
+})->throws('The X-SES-CONFIGURATION-SET and X-SES-MESSAGE-TAGS headers were not set, please check your configuration.');
 
 it('The configuration set headers are present and emails are sent if configuration_set is set in setting', function () {
     Event::fake(MessageSent::class);

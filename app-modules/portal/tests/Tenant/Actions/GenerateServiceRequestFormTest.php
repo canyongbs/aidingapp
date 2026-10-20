@@ -40,6 +40,9 @@ use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceR
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
+/**
+ * @return array<string, mixed>
+ */
 function serviceRequestFormStepContent(string $label): array
 {
     return [

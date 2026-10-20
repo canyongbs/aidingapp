@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
@@ -52,9 +53,7 @@ beforeEach(function () {
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
-    $this->contact = Contact::factory()->create();
-
-    actingAs($this->contact);
+    actingAs(Contact::factory()->create());
 });
 
 it('displays the service monitor data', function () {
@@ -152,7 +151,7 @@ describe('authorization', function () {
         getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
             ->assertNotFound();
 
-        $serviceMonitoringTarget->confidentialContacts()->attach($this->contact);
+        $serviceMonitoringTarget->confidentialContacts()->attach(Auth::id());
 
         getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
             ->assertOk();

@@ -60,10 +60,7 @@ it('allows user to join a public channel', function () {
 
     assertDatabaseCount(ConversationParticipant::class, 1);
 
-    expect($participant)
-        ->conversation_id->toBe($conversation->getKey())
-        ->participant_id->toBe($user->getKey())
-        ->is_manager->toBeFalse();
+    expect($participant->conversation_id)->toBe($conversation->getKey())->and($participant->participant_id)->toBe($user->getKey())->and($participant->is_manager)->toBeFalse();
 });
 
 it('throws exception when joining a private channel', function () {
