@@ -43,8 +43,7 @@ use Filament\Actions\Exports\Models\Export;
 /**
  * @return array<int, mixed>
  */
-function exportUserRow(User $user): array
-{
+$exportUserRow = function (User $user): array {
     $columnMap = [
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
@@ -70,7 +69,6 @@ function exportUserRow(User $user): array
         'department.name' => 'Department',
         'roles' => 'Assigned Role',
     ];
-
     $exporter = new UserExporter(
         export: new Export(),
         columnMap: $columnMap,
@@ -78,9 +76,9 @@ function exportUserRow(User $user): array
     );
 
     return $exporter($user);
-}
+};
 
-it('exports all user fields, the department name, and roles joined with a pipe', function () {
+it('exports all user fields, the department name, and roles joined with a pipe', function () use ($exportUserRow) {
     $department = Department::factory()->create(['name' => 'Engineering']);
     Role::factory()->create(['name' => 'Manager', 'guard_name' => 'web']);
     Role::factory()->create(['name' => 'Advisor', 'guard_name' => 'web']);
@@ -101,7 +99,7 @@ it('exports all user fields, the department name, and roles joined with a pipe',
 
     $user->syncRoles(['Manager', 'Advisor']);
 
-    $row = exportUserRow($user);
+    $row = $exportUserRow($user);
 
     expect($row[0])->toBe('Jonathan')
         ->and($row[1])->toBe('Smith')
@@ -119,14 +117,14 @@ it('exports all user fields, the department name, and roles joined with a pipe',
         ->toContain('Advisor');
 });
 
-it('exports is_external as true for external users', function () {
+it('exports is_external as true for external users', function () use ($exportUserRow) {
     $user = User::factory()->create(['is_external' => true]);
 
-    expect(exportUserRow($user)[6])->toBe('true');
+    expect($exportUserRow($user)[6])->toBe('true');
 });
 
-it('exports a blank roles value when the user has no web-guard roles', function () {
+it('exports a blank roles value when the user has no web-guard roles', function () use ($exportUserRow) {
     $user = User::factory()->create();
 
-    expect(blank(exportUserRow($user)[22]))->toBeTrue();
+    expect(blank($exportUserRow($user)[22]))->toBeTrue();
 });

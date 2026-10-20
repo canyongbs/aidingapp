@@ -39,28 +39,26 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use Illuminate\Notifications\AnonymousNotifiable;
 
-function makeIneligibleContactNotification(?string $bcc): IneligibleContactSesS3InboundEmailServiceRequestNotification
-{
+$makeIneligibleContactNotification = function (?string $bcc): IneligibleContactSesS3InboundEmailServiceRequestNotification {
     $serviceRequestType = ServiceRequestType::factory()->create([
         'email_automatic_creation_bcc' => $bcc,
     ]);
-
     $serviceRequestTypeDomain = TenantServiceRequestTypeDomain::factory()->make([
         'service_request_type_id' => $serviceRequestType->getKey(),
     ]);
 
     return new IneligibleContactSesS3InboundEmailServiceRequestNotification($serviceRequestTypeDomain, 'Original message');
-}
+};
 
-it('bccs the service request type bcc address when one is configured', function () {
-    $mailMessage = makeIneligibleContactNotification('bcc@example.com')
+it('bccs the service request type bcc address when one is configured', function () use ($makeIneligibleContactNotification) {
+    $mailMessage = $makeIneligibleContactNotification('bcc@example.com')
         ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
 
     expect($mailMessage->bcc)->toBe([['bcc@example.com', null]]);
 });
 
-it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) {
-    $mailMessage = makeIneligibleContactNotification($bcc)
+it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) use ($makeIneligibleContactNotification) {
+    $mailMessage = $makeIneligibleContactNotification($bcc)
         ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
 
     expect($mailMessage->bcc)->toBeEmpty();

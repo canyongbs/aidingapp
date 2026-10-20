@@ -58,8 +58,7 @@ use function Tests\enablePreference;
  * Builds a Service Request Type configured to auto-assign to $manager via the Individual assigner,
  * optionally with an automated status change target.
  */
-function individualAutoAssignType(User $manager, ?ServiceRequestStatus $automatedStatus = null): ServiceRequestType
-{
+$individualAutoAssignType = function (User $manager, ?ServiceRequestStatus $automatedStatus = null): ServiceRequestType {
     return ServiceRequestType::factory()
         ->hasAttached($manager, relationship: 'managerUsers')
         ->state([
@@ -68,17 +67,16 @@ function individualAutoAssignType(User $manager, ?ServiceRequestStatus $automate
             'automated_status_id' => $automatedStatus?->getKey(),
         ])
         ->create();
-}
+};
 
-function serviceRequestForType(ServiceRequestType $type, ServiceRequestStatus $status): ServiceRequest
-{
+$serviceRequestForType = function (ServiceRequestType $type, ServiceRequestStatus $status): ServiceRequest {
     return ServiceRequest::factory()->state([
         'status_id' => $status->getKey(),
         'priority_id' => ServiceRequestPriority::factory()->create([
             'type_id' => $type->getKey(),
         ])->getKey(),
     ])->create();
-}
+};
 
 test('individual assigner assigns to configured user via department manager', function () {
     asSuperAdmin();
@@ -198,37 +196,37 @@ test('individual assigner does not assign when no individual is configured', fun
     expect($serviceRequest->assignments()->count())->toBe(0);
 });
 
-describe('automated status change on assignment', function () {
-    it('sets the request status when auto-assigning and the toggle is on', function () {
+describe('automated status change on assignment', function () use ($individualAutoAssignType, $serviceRequestForType) {
+    it('sets the request status when auto-assigning and the toggle is on', function () use ($individualAutoAssignType, $serviceRequestForType) {
         asSuperAdmin();
 
         $manager = User::factory()->create();
         $target = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
         ]);
-        $type = individualAutoAssignType($manager, $target);
+        $type = $individualAutoAssignType($manager, $target);
         $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = serviceRequestForType($type, $open);
+        $serviceRequest = $serviceRequestForType($type, $open);
 
         app(IndividualAssigner::class)->execute($serviceRequest);
 
         expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
     });
 
-    it('does not change the status when no automated status is configured', function () {
+    it('does not change the status when no automated status is configured', function () use ($individualAutoAssignType, $serviceRequestForType) {
         asSuperAdmin();
 
         $manager = User::factory()->create();
-        $type = individualAutoAssignType($manager);
+        $type = $individualAutoAssignType($manager);
         $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = serviceRequestForType($type, $open);
+        $serviceRequest = $serviceRequestForType($type, $open);
 
         app(IndividualAssigner::class)->execute($serviceRequest);
 
         expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
     });
 
-    it('sends status change notifications for the automated change (send as normal)', function () {
+    it('sends status change notifications for the automated change (send as normal)', function () use ($individualAutoAssignType, $serviceRequestForType) {
         Notification::fake();
 
         asSuperAdmin();
@@ -237,17 +235,17 @@ describe('automated status change on assignment', function () {
         $target = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
         ]);
-        $type = individualAutoAssignType($manager, $target);
+        $type = $individualAutoAssignType($manager, $target);
         enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
         $open = ServiceRequestStatus::factory()->open()->create();
-        $serviceRequest = serviceRequestForType($type, $open);
+        $serviceRequest = $serviceRequestForType($type, $open);
 
         app(IndividualAssigner::class)->execute($serviceRequest);
 
         Notification::assertSentTo($manager, ServiceRequestStatusChanged::class);
     });
 
-    it('does not send a duplicate notification when the request is already at the target status', function () {
+    it('does not send a duplicate notification when the request is already at the target status', function () use ($individualAutoAssignType, $serviceRequestForType) {
         Notification::fake();
 
         asSuperAdmin();
@@ -256,9 +254,9 @@ describe('automated status change on assignment', function () {
         $target = ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::InProgress,
         ]);
-        $type = individualAutoAssignType($manager, $target);
+        $type = $individualAutoAssignType($manager, $target);
         enablePreference($type, ServiceRequestEmailTemplateType::StatusChange, ServiceRequestTypeEmailTemplateRole::Manager, ServiceRequestNotificationChannel::Notification);
-        $serviceRequest = serviceRequestForType($type, $target);
+        $serviceRequest = $serviceRequestForType($type, $target);
 
         app(IndividualAssigner::class)->execute($serviceRequest);
 

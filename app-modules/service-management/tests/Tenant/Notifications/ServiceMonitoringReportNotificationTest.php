@@ -44,6 +44,18 @@ use App\Models\User;
 use App\Settings\DisplaySettings;
 use Carbon\CarbonInterface;
 
+$createHistoryAt = function (ServiceMonitoringTarget $target, bool $succeeded, float $responseTime, CarbonInterface $createdAt): void {
+    $history = $target->histories()->create([
+        'response' => $succeeded ? 200 : 500,
+        'response_time' => $responseTime,
+        'succeeded' => $succeeded,
+    ]);
+    $history->forceFill([
+        'created_at' => $createdAt,
+        'updated_at' => $createdAt,
+    ])->saveQuietly();
+};
+
 it('routes notifications to the expected channels', function (string $channel, array $expectedChannels) {
     $target = ServiceMonitoringTarget::factory()->create();
 
@@ -104,7 +116,7 @@ it('returns N/A statistics when no checks exist in the reporting period for mail
         ->and($viewData['incidentSummary'])->toBe('No incidents were detected during this reporting period.');
 });
 
-it('builds expected report statistics and incident summary in the mail payload', function () {
+it('builds expected report statistics and incident summary in the mail payload', function () use ($createHistoryAt) {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'External Status API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -113,9 +125,9 @@ it('builds expected report statistics and incident summary in the mail payload',
         now()->copy()->subDay()->endOfDay(),
     ];
 
-    createHistoryAt($target, true, 0.50, $localStart->copy()->addHours(1)->utc());
-    createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
-    createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
+    $createHistoryAt($target, true, 0.50, $localStart->copy()->addHours(1)->utc());
+    $createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
+    $createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
 
     $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
@@ -130,7 +142,7 @@ it('builds expected report statistics and incident summary in the mail payload',
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
 });
 
-it('uses tenant display timezone boundaries for daily reports', function () {
+it('uses tenant display timezone boundaries for daily reports', function () use ($createHistoryAt) {
     app(DisplaySettings::class)->timezone = 'America/New_York';
     app(DisplaySettings::class)->save();
 
@@ -144,10 +156,10 @@ it('uses tenant display timezone boundaries for daily reports', function () {
         $localNow->copy()->subDay()->endOfDay(),
     ];
 
-    createHistoryAt($target, true, 0.50, $localStart->copy()->utc());
-    createHistoryAt($target, false, 1.50, $localEnd->copy()->utc());
-    createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
-    createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
+    $createHistoryAt($target, true, 0.50, $localStart->copy()->utc());
+    $createHistoryAt($target, false, 1.50, $localEnd->copy()->utc());
+    $createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
+    $createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
 
     $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
@@ -211,21 +223,3 @@ it('restores a notification through a real serialize/unserialize round trip', fu
         ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly)
         ->and($restored->channel)->toBe(MailChannel::class);
 });
-
-function createHistoryAt(
-    ServiceMonitoringTarget $target,
-    bool $succeeded,
-    float $responseTime,
-    CarbonInterface $createdAt,
-): void {
-    $history = $target->histories()->create([
-        'response' => $succeeded ? 200 : 500,
-        'response_time' => $responseTime,
-        'succeeded' => $succeeded,
-    ]);
-
-    $history->forceFill([
-        'created_at' => $createdAt,
-        'updated_at' => $createdAt,
-    ])->saveQuietly();
-}

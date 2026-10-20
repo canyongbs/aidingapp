@@ -41,18 +41,17 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-function serviceRequestDraft(): ServiceRequest
-{
+$serviceRequestDraft = function (): ServiceRequest {
     $type = ServiceRequestType::factory()->create();
 
     return ServiceRequest::factory()->create([
         'is_draft' => true,
         'priority_id' => ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()])->getKey(),
     ]);
-}
+};
 
-describe('archiving', function () {
-    it('does not submit a draft into an archived status', function () {
+describe('archiving', function () use ($serviceRequestDraft) {
+    it('does not submit a draft into an archived status', function () use ($serviceRequestDraft) {
         ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
         ]);
@@ -61,7 +60,7 @@ describe('archiving', function () {
             'classification' => SystemServiceRequestClassification::Waiting,
         ]);
 
-        $draft = serviceRequestDraft();
+        $draft = $serviceRequestDraft();
 
         app(SubmitServiceRequestDraft::class)->execute(
             $draft,
@@ -72,12 +71,12 @@ describe('archiving', function () {
         expect($draft->fresh()->status_id)->toBe($selectableStatus->getKey());
     });
 
-    it('leaves the status unchanged when every status of the classification is archived', function () {
+    it('leaves the status unchanged when every status of the classification is archived', function () use ($serviceRequestDraft) {
         ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
         ]);
 
-        $draft = serviceRequestDraft();
+        $draft = $serviceRequestDraft();
 
         $originalStatusId = $draft->status_id;
 

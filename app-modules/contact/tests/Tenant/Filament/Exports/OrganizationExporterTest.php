@@ -43,8 +43,7 @@ use Filament\Actions\Exports\Models\Export;
 /**
  * @return array<int, mixed>
  */
-function exportOrganizationRow(Organization $organization): array
-{
+$exportOrganizationRow = function (Organization $organization): array {
     $columnMap = [
         'name' => 'Name',
         'email' => 'Email',
@@ -65,7 +64,6 @@ function exportOrganizationRow(Organization $organization): array
         'domains' => 'Domains',
         'is_contact_generation_enabled' => 'Automatically generate contact record on login',
     ];
-
     $exporter = new OrganizationExporter(
         export: new Export(),
         columnMap: $columnMap,
@@ -73,9 +71,9 @@ function exportOrganizationRow(Organization $organization): array
     );
 
     return $exporter($organization);
-}
+};
 
-it('exports all organization fields, the industry and type names, and domains joined with a pipe', function () {
+it('exports all organization fields, the industry and type names, and domains joined with a pipe', function () use ($exportOrganizationRow) {
     $industry = OrganizationIndustry::factory()->create(['name' => 'Technology']);
     $type = OrganizationType::factory()->create(['name' => 'Partner']);
 
@@ -94,7 +92,7 @@ it('exports all organization fields, the industry and type names, and domains jo
             'is_contact_generation_enabled' => true,
         ]);
 
-    $row = exportOrganizationRow($organization);
+    $row = $exportOrganizationRow($organization);
 
     expect($row[0])->toBe('Acme Corporation')
         ->and($row[1])->toBe('info@acme.com')
@@ -106,26 +104,26 @@ it('exports all organization fields, the industry and type names, and domains jo
         ->and($row[17])->toBe('true');
 });
 
-it('exports a blank domains value when the organization has no domains', function () {
+it('exports a blank domains value when the organization has no domains', function () use ($exportOrganizationRow) {
     $organization = Organization::factory()->create(['domains' => []]);
 
-    expect(blank(exportOrganizationRow($organization)[16]))->toBeTrue();
+    expect(blank($exportOrganizationRow($organization)[16]))->toBeTrue();
 });
 
-it('exports a blank industry and type when the organization has none', function () {
+it('exports a blank industry and type when the organization has none', function () use ($exportOrganizationRow) {
     $organization = Organization::factory()->create([
         'industry_id' => null,
         'type_id' => null,
     ]);
 
-    $row = exportOrganizationRow($organization);
+    $row = $exportOrganizationRow($organization);
 
     expect(blank($row[4]))->toBeTrue()
         ->and(blank($row[5]))->toBeTrue();
 });
 
-it('exports is_contact_generation_enabled as false when disabled', function () {
+it('exports is_contact_generation_enabled as false when disabled', function () use ($exportOrganizationRow) {
     $organization = Organization::factory()->create(['is_contact_generation_enabled' => false]);
 
-    expect(exportOrganizationRow($organization)[17])->toBe('false');
+    expect($exportOrganizationRow($organization)[17])->toBe('false');
 });

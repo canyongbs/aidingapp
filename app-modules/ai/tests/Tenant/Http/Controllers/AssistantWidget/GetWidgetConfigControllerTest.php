@@ -46,6 +46,12 @@ use function Pest\Laravel\getJson;
 use Symfony\Component\HttpFoundation\Response;
 
 $manifestOriginalContents = null;
+/**
+ * @return TestResponse<Response>
+ */
+$getWidgetConfig = function (): TestResponse {
+    return getJson(route('widgets.assistant.api.config'), ['Origin' => config('app.url')]);
+};
 
 beforeEach(function () use (&$manifestOriginalContents) {
     $portalSettings = app(PortalSettings::class);
@@ -80,15 +86,7 @@ afterEach(function () use (&$manifestOriginalContents) {
     File::put($manifestPath, $manifestOriginalContents);
 });
 
-/**
- * @return TestResponse<Response>
- */
-function getWidgetConfig(): TestResponse
-{
-    return getJson(route('widgets.assistant.api.config'), ['Origin' => config('app.url')]);
-}
-
-it('exposes service management when the license addon and portal setting are enabled', function () {
+it('exposes service management when the license addon and portal setting are enabled', function () use ($getWidgetConfig) {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
@@ -97,7 +95,7 @@ it('exposes service management when the license addon and portal setting are ena
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $response = getWidgetConfig();
+    $response = $getWidgetConfig();
 
     $response->assertOk()
         ->assertJson(['portal_service_management' => true]);
@@ -105,7 +103,7 @@ it('exposes service management when the license addon and portal setting are ena
     expect($response->json('service_request_types_url'))->not()->toBeNull();
 });
 
-it('does not expose service management when the license addon is disabled', function () {
+it('does not expose service management when the license addon is disabled', function () use ($getWidgetConfig) {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
@@ -114,7 +112,7 @@ it('does not expose service management when the license addon is disabled', func
     $settings->data->addons->serviceManagement = false;
     $settings->save();
 
-    $response = getWidgetConfig();
+    $response = $getWidgetConfig();
 
     $response->assertOk()
         ->assertJson([
@@ -123,7 +121,7 @@ it('does not expose service management when the license addon is disabled', func
         ]);
 });
 
-it('does not expose service management when the portal setting is disabled', function () {
+it('does not expose service management when the portal setting is disabled', function () use ($getWidgetConfig) {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_service_management = false;
     $portalSettings->save();
@@ -132,7 +130,7 @@ it('does not expose service management when the portal setting is disabled', fun
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 
-    $response = getWidgetConfig();
+    $response = $getWidgetConfig();
 
     $response->assertOk()
         ->assertJson([
@@ -141,7 +139,7 @@ it('does not expose service management when the portal setting is disabled', fun
         ]);
 });
 
-it('exposes service management for an authenticated contact when the license addon and portal setting are enabled', function () {
+it('exposes service management for an authenticated contact when the license addon and portal setting are enabled', function () use ($getWidgetConfig) {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
@@ -155,7 +153,7 @@ it('exposes service management for an authenticated contact when the license add
 
     actingAs($contact, 'contact');
 
-    $response = getWidgetConfig();
+    $response = $getWidgetConfig();
 
     $response->assertOk()
         ->assertJson(['portal_service_management' => true]);

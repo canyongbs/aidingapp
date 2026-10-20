@@ -56,6 +56,13 @@ use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Tests\asSuperAdmin;
 
+$builderEditor = function (): User {
+    $user = User::factory()->create();
+    $user->givePermissionTo('settings.view-any', 'settings.*.update');
+
+    return $user;
+};
+
 beforeEach(function () {
     // Keep tests from broadcasting to the real websocket service.
     Event::fake([ServiceRequestTypeCatalogUpdated::class]);
@@ -568,7 +575,7 @@ it('shows a type under every category it belongs to in the hierarchical data', f
         ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
-describe('authorization', function () {
+describe('authorization', function () use ($builderEditor) {
     it('denies builder changes without the `settings.*.update` permission', function (string $method, array $arguments) {
         $user = User::factory()->create();
         $user->givePermissionTo('settings.view-any');
@@ -595,8 +602,8 @@ describe('authorization', function () {
         'archiveType' => fn () => ['archiveType', [(string) Str::uuid()]],
     ]);
 
-    it('does not create a type without the `settings.create` permission', function () {
-        actingAs(builderEditor());
+    it('does not create a type without the `settings.create` permission', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         Livewire::test(ListServiceRequestTypes::class)
             ->call('createType', 'Unauthorized Type')
@@ -606,8 +613,8 @@ describe('authorization', function () {
         assertDatabaseMissing(ServiceRequestType::class, ['name' => 'Unauthorized Type']);
     });
 
-    it('does not delete a type without the `settings.*.delete` permission', function () {
-        actingAs(builderEditor());
+    it('does not delete a type without the `settings.*.delete` permission', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
 
@@ -618,8 +625,8 @@ describe('authorization', function () {
         assertNotSoftDeleted($type);
     });
 
-    it('does not archive a type without the `settings.*.delete` permission', function () {
-        actingAs(builderEditor());
+    it('does not archive a type without the `settings.*.delete` permission', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
         $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->id]);
@@ -632,8 +639,8 @@ describe('authorization', function () {
         expect($type->refresh()->isArchived())->toBeFalse();
     });
 
-    it('does not restore an archived type without the `settings.*.restore` permission', function () {
-        actingAs(builderEditor());
+    it('does not restore an archived type without the `settings.*.restore` permission', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
         $type->archive();
@@ -645,8 +652,8 @@ describe('authorization', function () {
         expect($type->refresh()->isArchived())->toBeTrue();
     });
 
-    it('does not delete an area whose types would be deleted without the `settings.*.delete` permission', function () {
-        actingAs(builderEditor());
+    it('does not delete an area whose types would be deleted without the `settings.*.delete` permission', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         $category = ServiceRequestTypeCategory::factory()->create();
         $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
@@ -659,8 +666,8 @@ describe('authorization', function () {
         assertNotSoftDeleted($type);
     });
 
-    it('lets a user who can only update the builder change areas and type placements', function () {
-        actingAs(builderEditor());
+    it('lets a user who can only update the builder change areas and type placements', function () use ($builderEditor) {
+        actingAs($builderEditor());
 
         $category = ServiceRequestTypeCategory::factory()->create();
         $type = ServiceRequestType::factory()->create();
@@ -673,11 +680,3 @@ describe('authorization', function () {
             ->and($type->refresh()->categories->pluck('id')->all())->toBe([$category->getKey()]);
     });
 });
-
-function builderEditor(): User
-{
-    $user = User::factory()->create();
-    $user->givePermissionTo('settings.view-any', 'settings.*.update');
-
-    return $user;
-}

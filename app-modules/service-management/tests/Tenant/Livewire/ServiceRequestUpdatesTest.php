@@ -59,16 +59,15 @@ use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\mock;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
-    asSuperAdmin();
-});
-
-function openServiceRequest(): ServiceRequest
-{
+$openServiceRequest = function (): ServiceRequest {
     return ServiceRequest::factory()
         ->for(ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open]), 'status')
         ->create();
-}
+};
+
+beforeEach(function () {
+    asSuperAdmin();
+});
 
 it('lists updates with their authors, visibility, and attachments', function () {
     Storage::fake('s3');
@@ -192,8 +191,8 @@ it('displays update times in the system timezone when the user has none', functi
         ->assertSeeText('2:07 am');
 });
 
-it('can create an update', function (bool $isInternal) {
-    $serviceRequest = openServiceRequest();
+it('can create an update', function (bool $isInternal) use ($openServiceRequest) {
+    $serviceRequest = $openServiceRequest();
     $status = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
 
     assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'We are looking into this.']);
@@ -224,10 +223,10 @@ it('can create an update', function (bool $isInternal) {
     'internal' => true,
 ]);
 
-it('attaches uploaded files to the update', function () {
+it('attaches uploaded files to the update', function () use ($openServiceRequest) {
     Storage::fake('s3');
 
-    $serviceRequest = openServiceRequest();
+    $serviceRequest = $openServiceRequest();
 
     Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->fillForm([
@@ -257,8 +256,8 @@ it('drafts an update with AI', function () {
         ->assertSet('data.update', 'Drafted update content.');
 });
 
-it('validates the inputs', function (array $data, array $errors) {
-    $serviceRequest = openServiceRequest();
+it('validates the inputs', function (array $data, array $errors) use ($openServiceRequest) {
+    $serviceRequest = $openServiceRequest();
 
     Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
         ->fillForm($data)
@@ -304,7 +303,7 @@ describe('deletion', function () {
     });
 });
 
-describe('authorization', function () {
+describe('authorization', function () use ($openServiceRequest) {
     it('denies access without the `service_request_update.view-any` permission', function () {
         actingAs(User::factory()->create());
 
@@ -312,12 +311,12 @@ describe('authorization', function () {
             ->assertForbidden();
     });
 
-    it('does not create an update without the `service_request_update.create` permission', function () {
+    it('does not create an update without the `service_request_update.create` permission', function () use ($openServiceRequest) {
         $user = User::factory()->create();
         $user->givePermissionTo('service_request_update.view-any');
         actingAs($user);
 
-        $serviceRequest = openServiceRequest();
+        $serviceRequest = $openServiceRequest();
 
         Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
             ->assertDontSeeText('Send update')
@@ -328,12 +327,12 @@ describe('authorization', function () {
         assertDatabaseMissing(ServiceRequestUpdate::class, ['update' => 'Unauthorized update.']);
     });
 
-    it('does not change the status without permission to update the service request', function () {
+    it('does not change the status without permission to update the service request', function () use ($openServiceRequest) {
         $user = User::factory()->create();
         $user->givePermissionTo(['service_request_update.view-any', 'service_request_update.create']);
         actingAs($user);
 
-        $serviceRequest = openServiceRequest();
+        $serviceRequest = $openServiceRequest();
         $originalStatusId = $serviceRequest->status_id;
         $status = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
 

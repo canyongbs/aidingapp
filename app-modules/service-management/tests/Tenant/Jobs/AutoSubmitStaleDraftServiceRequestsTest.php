@@ -47,6 +47,21 @@ use Illuminate\Support\Str;
 use function Pest\Laravel\travelBack;
 use function Pest\Laravel\travelTo;
 
+$createValidStaleDraft = function (): ServiceRequest {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
+    travelTo(now()->subHours(2));
+    $draft = ServiceRequest::factory()->create([
+        'is_draft' => true,
+        'title' => 'Test Title',
+        'close_details' => 'Test Description',
+        'priority_id' => $priority->getKey(),
+    ]);
+    travelBack();
+
+    return $draft;
+};
+
 it('does nothing when no drafts exist', function () {
     Queue::fake();
 
@@ -290,10 +305,10 @@ it('does not dispatch job for drafts with recently added service request updates
     Queue::assertNotPushed(AutoSubmitStaleDraftServiceRequest::class);
 });
 
-it('dispatches job for valid stale drafts', function () {
+it('dispatches job for valid stale drafts', function () use ($createValidStaleDraft) {
     Queue::fake();
 
-    $draft = createValidStaleDraft();
+    $draft = $createValidStaleDraft();
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
@@ -302,11 +317,11 @@ it('dispatches job for valid stale drafts', function () {
     });
 });
 
-it('dispatches jobs for multiple valid stale drafts', function () {
+it('dispatches jobs for multiple valid stale drafts', function () use ($createValidStaleDraft) {
     Queue::fake();
 
-    $draft1 = createValidStaleDraft();
-    $draft2 = createValidStaleDraft();
+    $draft1 = $createValidStaleDraft();
+    $draft2 = $createValidStaleDraft();
 
     (new AutoSubmitStaleDraftServiceRequests())->handle();
 
@@ -345,22 +360,3 @@ it('dispatches job for stale draft with old form submission', function () {
         return $job->uniqueId() === $draft->getKey();
     });
 });
-
-function createValidStaleDraft(): ServiceRequest
-{
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    travelTo(now()->subHours(2));
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    travelBack();
-
-    return $draft;
-}

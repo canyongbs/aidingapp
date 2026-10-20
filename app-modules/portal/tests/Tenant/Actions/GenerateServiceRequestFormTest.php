@@ -43,8 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 /**
  * @return array<string, mixed>
  */
-function serviceRequestFormStepContent(string $label): array
-{
+$serviceRequestFormStepContent = function (string $label): array {
     return [
         'type' => 'doc',
         'content' => [
@@ -60,9 +59,9 @@ function serviceRequestFormStepContent(string $label): array
             ],
         ],
     ];
-}
+};
 
-it('keeps the default fields and custom content as separate steps by default', function () {
+it('keeps the default fields and custom content as separate steps by default', function () use ($serviceRequestFormStepContent) {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -72,7 +71,7 @@ it('keeps the default fields and custom content as separate steps by default', f
     $form->steps()->create([
         'label' => 'Details',
         'sort' => 0,
-        'content' => serviceRequestFormStepContent('Preferred name'),
+        'content' => $serviceRequestFormStepContent('Preferred name'),
     ]);
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -85,7 +84,7 @@ it('keeps the default fields and custom content as separate steps by default', f
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the caller does not opt in, even if the flag is set', function () {
+it('does not combine the first step when the caller does not opt in, even if the flag is set', function () use ($serviceRequestFormStepContent) {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -95,7 +94,7 @@ it('does not combine the first step when the caller does not opt in, even if the
     $form->steps()->create([
         'label' => 'Details',
         'sort' => 0,
-        'content' => serviceRequestFormStepContent('Preferred name'),
+        'content' => $serviceRequestFormStepContent('Preferred name'),
     ]);
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -108,7 +107,7 @@ it('does not combine the first step when the caller does not opt in, even if the
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the form has not opted in, even if the caller allows it', function () {
+it('does not combine the first step when the form has not opted in, even if the caller allows it', function () use ($serviceRequestFormStepContent) {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -118,7 +117,7 @@ it('does not combine the first step when the form has not opted in, even if the 
     $form->steps()->create([
         'label' => 'Details',
         'sort' => 0,
-        'content' => serviceRequestFormStepContent('Preferred name'),
+        'content' => $serviceRequestFormStepContent('Preferred name'),
     ]);
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -131,14 +130,14 @@ it('does not combine the first step when the form has not opted in, even if the 
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('combines the single custom step into the Main step when both the caller and form opt in', function () {
+it('combines the single custom step into the Main step when both the caller and form opt in', function () use ($serviceRequestFormStepContent) {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
         ->for($type, 'type')
         ->create([
             'is_first_step_combined' => true,
-            'content' => serviceRequestFormStepContent('Preferred name'),
+            'content' => $serviceRequestFormStepContent('Preferred name'),
         ]);
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
@@ -154,7 +153,7 @@ it('combines the single custom step into the Main step when both the caller and 
         ->and($mainContent[4]['attrs']['config']['label'])->toBe('Preferred name');
 });
 
-it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () {
+it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () use ($serviceRequestFormStepContent) {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -164,13 +163,13 @@ it('combines only the first step of a multi-step custom form into Main, keeping 
     $form->steps()->create([
         'label' => 'Step One',
         'sort' => 0,
-        'content' => serviceRequestFormStepContent('Preferred name'),
+        'content' => $serviceRequestFormStepContent('Preferred name'),
     ]);
 
     $form->steps()->create([
         'label' => 'Step Two',
         'sort' => 1,
-        'content' => serviceRequestFormStepContent('Emergency contact'),
+        'content' => $serviceRequestFormStepContent('Emergency contact'),
     ]);
 
     $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();

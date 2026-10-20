@@ -47,8 +47,7 @@ use function Pest\Laravel\post;
  *
  * @return array<string, mixed>
  */
-function normalizeKnowledgeBasePublicIds(array $response): array
-{
+$normalizeKnowledgeBasePublicIds = function (array $response): array {
     array_walk_recursive($response, function (mixed &$value, string $key): void {
         if ($key === 'publicId') {
             $value = '<public-id>';
@@ -56,7 +55,7 @@ function normalizeKnowledgeBasePublicIds(array $response): array
     });
 
     return $response;
-}
+};
 
 test('search will not work if Knowledge Management Portal is not enabled.', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
@@ -78,7 +77,7 @@ test('search will work if Knowledge Management Portal is enabled.', function () 
     $response->assertStatus(201);
 });
 
-test('categories and items are returned without filtering', function () {
+test('categories and items are returned without filtering', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -103,10 +102,10 @@ test('categories and items are returned without filtering', function () {
     $url = URL::signedRoute(name: 'api.portal.search', absolute: false);
     $response = post($url);
 
-    expect(normalizeKnowledgeBasePublicIds($response->json()))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response->json()))->toMatchSnapshot();
 });
 
-test('category should present in response', function () {
+test('category should present in response', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -123,7 +122,7 @@ test('category should present in response', function () {
 
     $response = $response->json();
 
-    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
 it('includes parent category metadata for subcategory search results', function () {
@@ -153,7 +152,7 @@ it('includes parent category metadata for subcategory search results', function 
         ->assertJsonPath('data.categories.0.parentCategory.publicId', $parentCategory->public_id);
 });
 
-test('filter featured articles', function () {
+test('filter featured articles', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -188,10 +187,10 @@ test('filter featured articles', function () {
 
     $response = $response->json();
 
-    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
-test('filter article based on selected tags', function () {
+test('filter article based on selected tags', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -235,10 +234,10 @@ test('filter article based on selected tags', function () {
 
     $response = $response->json();
 
-    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
-test('filter article and category based on searched keyword', function () {
+test('filter article and category based on searched keyword', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -288,10 +287,10 @@ test('filter article and category based on searched keyword', function () {
 
     $response = $response->json();
 
-    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
 
-test('filter most viewed articles', function () {
+test('filter most viewed articles', function () use ($normalizeKnowledgeBasePublicIds) {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -344,5 +343,5 @@ test('filter most viewed articles', function () {
 
     $response = $response->json();
 
-    expect(normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
+    expect($normalizeKnowledgeBasePublicIds($response))->toMatchSnapshot();
 });
