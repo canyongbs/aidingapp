@@ -39,6 +39,7 @@ use AidingApp\Engagement\Jobs\CreateBatchedEngagement;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Models\EngagementBatch;
 use AidingApp\Engagement\Notifications\EngagementNotification;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -59,15 +60,11 @@ it('will create and send an engagement immediately', function () {
 
     assertDatabaseCount(Engagement::class, 1);
 
-    expect(Engagement::first())
-        ->engagementBatch->is($engagementBatch)->toBeTrue()
-        ->user->is($engagementBatch->user)->toBeTrue()
-        ->recipient->is($recipient)->toBeTrue()
-        ->channel->toBe($engagementBatch->channel)
-        ->subject->toBe($engagementBatch->subject)
-        ->body->toMatchArray($engagementBatch->body)
-        ->scheduled_at->toBeNull()
-        ->dispatched_at->not->toBeNull();
+    $createdEngagement = Engagement::query()->sole();
+
+    assert($createdEngagement->recipient instanceof Model);
+
+    expect($createdEngagement->engagementBatch->is($engagementBatch))->toBeTrue()->and($createdEngagement->user->is($engagementBatch->user))->toBeTrue()->and($createdEngagement->recipient->is($recipient))->toBeTrue()->and($createdEngagement->channel)->toBe($engagementBatch->channel)->and($createdEngagement->subject)->toBe($engagementBatch->subject)->and($createdEngagement->body)->toMatchArray($engagementBatch->body)->and($createdEngagement->scheduled_at)->toBeNull()->and($createdEngagement->dispatched_at)->not()->toBeNull();
 
     Notification::assertSentTo(
         $recipient,
@@ -92,15 +89,11 @@ it('will create but not dispatch a scheduled engagement', function () {
 
     assertDatabaseCount(Engagement::class, 1);
 
-    expect(Engagement::first())
-        ->engagementBatch->is($engagementBatch)->toBeTrue()
-        ->user->is($engagementBatch->user)->toBeTrue()
-        ->recipient->is($recipient)->toBeTrue()
-        ->channel->toBe($engagementBatch->channel)
-        ->subject->toBe($engagementBatch->subject)
-        ->body->toMatchArray($engagementBatch->body)
-        ->scheduled_at->startOfSecond()->eq($engagementBatch->scheduled_at->startOfSecond())->toBeTrue()
-        ->dispatched_at->toBeNull();
+    $createdEngagement = Engagement::query()->sole();
+
+    assert($createdEngagement->recipient instanceof Model);
+
+    expect($createdEngagement->engagementBatch->is($engagementBatch))->toBeTrue()->and($createdEngagement->user->is($engagementBatch->user))->toBeTrue()->and($createdEngagement->recipient->is($recipient))->toBeTrue()->and($createdEngagement->channel)->toBe($engagementBatch->channel)->and($createdEngagement->subject)->toBe($engagementBatch->subject)->and($createdEngagement->body)->toMatchArray($engagementBatch->body)->and($createdEngagement->scheduled_at->startOfSecond()->eq($engagementBatch->scheduled_at->startOfSecond()))->toBeTrue()->and($createdEngagement->dispatched_at)->toBeNull();
 
     Notification::assertNotSentTo(
         $recipient,
@@ -122,10 +115,5 @@ it('has the notification rate limiting applied properly for email batched engage
     $limits = $limiter($job);
 
     /** @phpstan-ignore property.notFound */
-    expect($limits)
-        ->toHaveCount(1)
-        ->and($limits[0])
-        ->key->toEqual('mail')
-        ->maxAttempts->toEqual(14)
-        ->decaySeconds->toEqual(1);
+    expect($limits)->toHaveCount(1)->and($limits[0])->and($limits[0]->key)->toEqual('mail')->and($limits[0]->maxAttempts)->toEqual(14)->and($limits[0]->decaySeconds)->toEqual(1);
 });
