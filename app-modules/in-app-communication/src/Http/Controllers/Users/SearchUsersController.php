@@ -64,7 +64,7 @@ class SearchUsersController extends Controller
             searchTerm: $searchTerm ?: null,
         )->map(fn (User $user) => [
             'id' => $user->getKey(),
-            'name' => $user->name,
+            'name' => $user->full_name,
             'email' => $user->email,
             'avatar_url' => Filament::getUserAvatarUrl($user),
         ]);

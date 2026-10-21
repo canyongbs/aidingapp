@@ -51,6 +51,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use App\Enums\Feature;
 use App\Enums\ReportLibraryNavigationGroup;
 use App\Filament\Clusters\ReportLibrary;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use BackedEnum;
 use Filament\Forms\Components\DatePicker;
@@ -158,8 +159,9 @@ class Sla extends Dashboard
             ->whereIn('id', ServiceRequestAssignment::query()
                 ->where('status', ServiceRequestAssignmentStatus::Active)
                 ->select('user_id'))
-            ->orderBy('name')
-            ->pluck('name', 'id')
+            ->tap(new OrderByFullName())
+            ->get()
+            ->pluck('full_name', 'id')
             ->all();
     }
 

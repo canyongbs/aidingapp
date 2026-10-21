@@ -81,9 +81,9 @@ class EngagementsRelationManager extends RelationManager
                     ->tabs([
                         Tab::make('Content')
                             ->schema([
-                                TextEntry::make('user.name')
+                                TextEntry::make('user.full_name')
                                     ->label('Created By')
-                                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->name),
+                                    ->getStateUsing(fn (Timeline $record): string => $record->timelineable->user->full_name),
                                 Fieldset::make('Content')
                                     ->schema([
                                         TextEntry::make('subject')

@@ -137,7 +137,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
             'users.name' => $serviceMonitoringTarget->users()->pluck('name')->all(),
             'reportConfigurations.weekly.email' => true,
             'reportConfigurations.weekly.database' => true,
-            'reportConfigurations.weekly.users' => [$reportUser->name],
+            'reportConfigurations.weekly.users' => [$reportUser->full_name],
             'reportConfigurations.weekly.departments' => [$reportDepartment->name],
             'reportConfigurations.weekly.contacts' => [$reportContact->full_name],
         ]);

@@ -178,7 +178,6 @@ test('EditUser is gated with proper access control', function () {
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ])
         ->call('save')
@@ -186,7 +185,8 @@ test('EditUser is gated with proper access control', function () {
 
     assertDatabaseHas(User::class, [
         'id' => $record->getKey(),
-        'name' => 'Jordan Blake',
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 });
@@ -200,7 +200,6 @@ test('EditUser requires an email address', function () {
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
-            'name' => 'No Email',
             'email' => null,
         ])
         ->call('save')
@@ -216,7 +215,6 @@ test('EditUser rejects an invalid email address', function () {
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
-            'name' => 'Bad Email',
             'email' => 'not-an-email',
         ])
         ->call('save')
@@ -232,7 +230,6 @@ test('EditUser allows saving with its own unchanged email address', function () 
         ->fillForm([
             'first_name' => 'Still',
             'last_name' => 'Here',
-            'name' => 'Still Here',
             'email' => 'unchanged@example.com',
         ])
         ->call('save')
@@ -255,7 +252,6 @@ test('EditUser rejects a duplicate email belonging to another user case-insensit
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
-            'name' => 'Duplicate Email',
             'email' => 'Taken@Example.com',
         ])
         ->call('save')
@@ -273,14 +269,13 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function () 
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
-            'name' => 'Reuse Attempt',
             'email' => 'Archived@Example.com',
         ])
         ->call('save')
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser shows and requires first and last name fields when the full name feature is active', function () {
+test('EditUser shows and requires first and last name fields', function () {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -308,7 +303,6 @@ test('EditUser disables demographic and contact fields when editing an admin rec
     Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
-        ->assertFormFieldDisabled('name')
         ->assertFormFieldDisabled('job_title')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('is_external');

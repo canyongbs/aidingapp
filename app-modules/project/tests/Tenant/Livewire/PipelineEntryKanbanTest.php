@@ -106,7 +106,8 @@ it('renders modern card metadata with assignment and due tooltip', function () {
         ->create();
 
     $assignee = User::factory()->create([
-        'name' => 'Joe Licata',
+        'first_name' => 'Joe',
+        'last_name' => 'Licata',
     ]);
 
     $startDate = now()->subDay()->addHours(3);

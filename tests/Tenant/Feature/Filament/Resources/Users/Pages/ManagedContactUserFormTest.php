@@ -52,7 +52,6 @@ it('creates a linked managed contact when the toggle is enabled', function () {
         ->fillForm([
             'first_name' => 'Manny',
             'last_name' => 'Ged',
-            'name' => 'Manny Ged',
             'email' => 'manny@example.com',
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
@@ -78,7 +77,6 @@ it('does not create a managed contact when the toggle is disabled', function () 
         ->fillForm([
             'first_name' => 'Plain',
             'last_name' => 'User',
-            'name' => 'Plain User',
             'email' => 'plain@example.com',
             'is_managed_contact' => false,
         ])
@@ -97,7 +95,6 @@ it('requires a contact type when managed contact is enabled', function () {
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Type',
-            'name' => 'No Type',
             'email' => 'notype@example.com',
             'is_managed_contact' => true,
             'managed_contact_type_id' => null,
@@ -168,7 +165,6 @@ it('synchronizes edited user fields to the managed contact from the edit page', 
         ->fillForm([
             'first_name' => 'Edited',
             'last_name' => 'Person',
-            'name' => 'Edited Person',
             'preferred_name' => 'Eddie',
             'school' => null,
             'program' => 'Nursing',

@@ -74,7 +74,7 @@ it('lists updates with their authors, visibility, and attachments', function () 
 
     $serviceRequest = ServiceRequest::factory()->create();
     $customer = Contact::factory()->create(['full_name' => 'Bethany Emory']);
-    $agent = User::factory()->create(['name' => 'Cameron Zimny']);
+    $agent = User::factory()->create(['first_name' => 'Cameron', 'last_name' => 'Zimny']);
 
     $customerUpdate = ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create([
         'update' => 'I am still unable to access the service.',

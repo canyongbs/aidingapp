@@ -108,7 +108,7 @@ it('renders a contact update with no organization as Customer only, without an N
 it('renders a user update as Service Provider, unchanged', function () {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $user = User::factory()->state(['name' => 'Sam Staff'])->create();
+    $user = User::factory()->state(['first_name' => 'Sam', 'last_name' => 'Staff'])->create();
 
     ServiceRequestUpdate::factory()
         ->for($serviceRequest)

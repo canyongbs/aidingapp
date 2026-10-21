@@ -548,7 +548,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             'service request number' => fn () => $this->service_request_number,
             'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->created_at->format('M j, Y g:i a (T)'),
             'updated date' => fn () => ! is_null($timezone) ? $this->updated_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->updated_at->format('M j, Y g:i a (T)'),
-            'assigned staff name' => fn () => $this->assignedTo->user->name ?? 'Unassigned',
+            'assigned staff name' => fn () => $this->assignedTo->user->full_name ?? 'Unassigned',
             'status' => fn () => $this->status->name,
             'title' => fn () => $this->title,
             'type' => fn () => $this->priority->type->name,
@@ -577,7 +577,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         } else {
             $user = $recentUpdate->createdBy;
             assert($user instanceof User);
-            $creatorInfo = e($user->name) . ' - Service Provider';
+            $creatorInfo = e($user->full_name) . ' - Service Provider';
         }
 
         $updateDate = ! is_null($timezone) ? $recentUpdate->created_at->setTimeZone($timezone)->format('M j, Y \a\t g:i a (T)') : $recentUpdate->created_at->format('M j, Y \a\t g:i a (T)');

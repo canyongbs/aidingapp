@@ -40,10 +40,10 @@
 
 @if ($user && ! $user->trashed())
     <a class="primary font-semibold underline" href="{{ UserResource::getUrl('view', ['record' => $user]) }}">
-        {{ $user->name }}
+        {{ $user->full_name }}
     </a>
 @elseif ($user)
-    <span class="font-semibold italic">{{ $user->name }}</span>
+    <span class="font-semibold italic">{{ $user->full_name }}</span>
 @else
     <span class="font-semibold italic">Deleted user</span>
 @endif

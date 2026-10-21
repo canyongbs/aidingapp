@@ -95,7 +95,7 @@ class ConfidentialitySection
                         $set('confidentialContacts', []);
                     }),
                 UserSelect::make('confidentialUsers')
-                    ->relationship('confidentialUsers', 'name')
+                    ->relationship('confidentialUsers')
                     ->label('Users')
                     ->multiple()
                     ->preload()

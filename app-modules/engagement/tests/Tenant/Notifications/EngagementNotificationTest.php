@@ -66,7 +66,8 @@ it('uses the user name as from name when dynamic_engagements is enabled', functi
     $settings->save();
 
     $user = User::factory()->create([
-        'name' => 'Test Sender',
+        'first_name' => 'Test',
+        'last_name' => 'Sender',
     ]);
 
     $engagement = Engagement::factory()->email()->create([

@@ -46,7 +46,6 @@ it('creates a managed contact synchronized from the user', function () {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create([
-        'name' => 'Jane Doe',
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'jane@example.com',
@@ -73,7 +72,6 @@ it('synchronizes every supported field from the user to the managed contact', fu
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create([
-        'name' => 'Jane Doe',
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'preferred_name' => 'Janie',
@@ -133,7 +131,6 @@ it('updates the managed contact when any synchronized user field changes', funct
 })->with([
     'first name' => ['first_name', 'first_name'],
     'last name' => ['last_name', 'last_name'],
-    'full name' => ['name', 'full_name'],
     'preferred name' => ['preferred_name', 'preferred'],
     'mobile' => ['mobile', 'mobile'],
     'employee id' => ['employee_id', 'employee_id'],
@@ -245,12 +242,11 @@ it('synchronizes a stale managed contact from an already loaded user', function 
 it('synchronizes the managed contact when the user is updated', function () {
     $type = ContactType::factory()->create();
 
-    $user = User::factory()->create(['name' => 'Old Name', 'job_title' => 'Junior']);
+    $user = User::factory()->create(['first_name' => 'Old', 'last_name' => 'Name', 'job_title' => 'Junior']);
 
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
     $user->update([
-        'name' => 'Prof. New Name',
         'first_name' => 'New',
         'last_name' => 'Name',
         'job_title' => 'Senior',
@@ -261,7 +257,7 @@ it('synchronizes the managed contact when the user is updated', function () {
 
     $contact = $user->managedContact()->first();
 
-    expect($contact->full_name)->toBe('Prof. New Name')
+    expect($contact->full_name)->toBe('New Name')
         ->and($contact->first_name)->toBe('New')
         ->and($contact->last_name)->toBe('Name')
         ->and($contact->job_title)->toBe('Senior')
@@ -281,7 +277,6 @@ it('links and overrides an existing contact with the same email instead of dupli
     $originalTypeId = $existing->type_id;
 
     $user = User::factory()->create([
-        'name' => 'New Person',
         'first_name' => 'New',
         'last_name' => 'Person',
         'email' => 'match@example.com',
@@ -307,7 +302,6 @@ it('links an existing contact whose email differs only in case instead of duplic
     ]);
 
     $user = User::factory()->create([
-        'name' => 'New Person',
         'first_name' => 'New',
         'last_name' => 'Person',
         'email' => 'match@example.com',

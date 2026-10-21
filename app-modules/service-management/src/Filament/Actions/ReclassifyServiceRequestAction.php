@@ -44,6 +44,8 @@ use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\Action;
@@ -54,10 +56,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\HtmlString;
-use Illuminate\Support\Str;
 use Throwable;
 
 class ReclassifyServiceRequestAction extends Action
@@ -139,20 +139,21 @@ class ReclassifyServiceRequestAction extends Action
                             ->options(
                                 fn (Get $get): array => User::query()
                                     ->tap(new ManagesServiceRequestType((string) $get('type_id')))
-                                    ->orderBy('name')
+                                    ->tap(new OrderByFullName())
                                     ->limit(50)
-                                    ->pluck('name', 'id')
+                                    ->get()
+                                    ->pluck('full_name', 'id')
                                     ->all()
                             )
                             ->getSearchResultsUsing(fn (string $search, Get $get): array => User::query()
                                 ->tap(new ManagesServiceRequestType((string) $get('type_id')))
-                                ->when(filled($search), fn (Builder $query) => $query
-                                    ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%'))
-                                ->orderBy('name')
+                                ->when(filled($search), fn (Builder $query) => $query->tap(new WhereFullNameLike($search)))
+                                ->tap(new OrderByFullName())
                                 ->limit(50)
-                                ->pluck('name', 'id')
+                                ->get()
+                                ->pluck('full_name', 'id')
                                 ->all())
-                            ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->name),
+                            ->getOptionLabelUsing(fn ($value): ?string => User::find($value)?->full_name),
                     ]),
             ])
             ->action(function (array $data, ServiceRequest $record): void {

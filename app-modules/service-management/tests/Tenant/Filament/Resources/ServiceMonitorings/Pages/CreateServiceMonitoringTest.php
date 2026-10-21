@@ -569,8 +569,8 @@ test('user UserSelect does not show admin users in options by default on CreateS
     Livewire::test(CreateServiceMonitoring::class)
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
@@ -588,7 +588,7 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
     Livewire::test(CreateServiceMonitoring::class)
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 

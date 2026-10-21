@@ -122,9 +122,9 @@ class ServiceRequestFeedbackTable extends BaseWidget
                     ->getStateUsing(
                         fn (ServiceRequestFeedback $record) => $record->serviceRequest->respondent->{$record->serviceRequest->respondent::displayNameKey()}
                     ),
-                TextColumn::make('serviceRequest.assignedTo.user.name')
+                TextColumn::make('serviceRequest.assignedTo.user.full_name')
                     ->label('Assigned To')
-                    ->searchable()
+                    ->searchable(['first_name', 'last_name'])
                     ->badge(fn (ServiceRequestFeedback $record) => is_null($record->serviceRequest->assignedTo))
                     ->default('Unassigned'),
                 IconColumn::make('response_sla_compliance')

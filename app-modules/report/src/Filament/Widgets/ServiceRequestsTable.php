@@ -134,9 +134,9 @@ class ServiceRequestsTable extends BaseWidget
                     )
                     ->url(fn (ServiceRequest $record): string => ContactResource::getUrl('view', ['record' => $record->respondent]))
                     ->description(fn (ServiceRequest $record): ?string => $record->respondent->organization->name ?? null),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned To')
-                    ->searchable()
+                    ->searchable(['first_name', 'last_name'])
                     ->placeholder('Unassigned'),
                 TextColumn::make('created_at')
                     ->label('Date/Time Opened')

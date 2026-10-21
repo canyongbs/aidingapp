@@ -109,7 +109,7 @@ class ViewKnowledgeBaseItem extends ViewRecord
                                             ->label('Category'),
                                         TextEntry::make('managers')
                                             ->label('Managers')
-                                            ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('name')->join(', ')),
+                                            ->getStateUsing(fn (KnowledgeBaseItem $record) => $record->managers->pluck('full_name')->join(', ')),
                                     ]),
                                 Grid::make(3)
                                     ->schema([

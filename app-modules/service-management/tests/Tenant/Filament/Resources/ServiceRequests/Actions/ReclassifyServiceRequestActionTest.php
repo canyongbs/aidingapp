@@ -365,15 +365,15 @@ test('override assign_to only lists eligible managers for selected type', functi
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
-    $eligibleDirectManager = User::factory()->create(['name' => 'Eligible Direct']);
+    $eligibleDirectManager = User::factory()->create(['first_name' => 'Eligible', 'last_name' => 'Direct']);
     $newType->managerUsers()->attach($eligibleDirectManager);
 
-    $eligibleDepartmentManager = User::factory()->create(['name' => 'Eligible Department']);
+    $eligibleDepartmentManager = User::factory()->create(['first_name' => 'Eligible', 'last_name' => 'Department']);
     $department = Department::factory()->create();
     $eligibleDepartmentManager->department()->associate($department)->save();
     $newType->managerDepartments()->attach($department);
 
-    $ineligibleUser = User::factory()->create(['name' => 'Ineligible User']);
+    $ineligibleUser = User::factory()->create(['first_name' => 'Ineligible', 'last_name' => 'User']);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -641,7 +641,7 @@ test('reclassify records an `Assignment Removed` history entry when it leaves th
         'type_id' => $newType->getKey(),
     ]);
 
-    $previousAssignee = User::factory()->create(['name' => 'Jane Doe']);
+    $previousAssignee = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
     $originalType->managerUsers()->attach($previousAssignee);
 
     $serviceRequest = ServiceRequest::factory()->state([

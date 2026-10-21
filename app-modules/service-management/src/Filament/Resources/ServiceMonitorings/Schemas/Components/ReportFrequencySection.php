@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use App\Filament\Forms\Components\UserSelect;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
@@ -80,8 +81,9 @@ class ReportFrequencySection
                                             $query->orWhereIn('id', $alreadySelected);
                                         }
                                     }))
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
+                                    ->tap(new OrderByFullName())
+                                    ->get()
+                                    ->pluck('full_name', 'id')
                                     ->all();
                             }),
                         Select::make("{$prefix}.report_departments")

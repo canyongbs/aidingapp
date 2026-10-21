@@ -57,8 +57,8 @@ test('userApprovers UserSelect does not show admin users in options by default o
     Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
@@ -73,7 +73,7 @@ test('userApprovers UserSelect shows a pre-selected admin user so they can be de
     Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
@@ -88,6 +88,6 @@ test('userApprovers UserSelect shows all users when filter_admins_from_selection
     Livewire::test(EditChangeRequestType::class, ['record' => $changeRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('userApprovers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });

@@ -99,7 +99,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
 })->with([
     // responseKey, getExpected
     '`id`' => ['id', fn (User $user) => $user->id],
-    '`name`' => ['name', fn (User $user) => $user->name],
+    '`name`' => ['name', fn (User $user) => $user->full_name],
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 

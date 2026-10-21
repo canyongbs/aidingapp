@@ -36,10 +36,14 @@
 
 namespace App\Filament\Forms\Components;
 
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
+use App\Models\User;
 use Closure;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class UserSelect extends Select
 {
@@ -49,7 +53,7 @@ class UserSelect extends Select
     {
         parent::setUp();
 
-        $this->searchable(['name', 'email']);
+        $this->searchable(['first_name', 'last_name', 'email']);
     }
 
     public function withoutAdminFilter(): static
@@ -61,9 +65,9 @@ class UserSelect extends Select
 
     public function relationship(string|Closure|null $name = null, string|Closure|null $titleAttribute = null, ?Closure $modifyQueryUsing = null, bool $ignoreRecord = false): static
     {
-        return parent::relationship(
+        parent::relationship(
             $name,
-            $titleAttribute ?? 'name',
+            $titleAttribute ?? 'first_name',
             function (Builder $query, UserSelect $component) use ($modifyQueryUsing) {
                 if ($component->shouldFilterAdmins()) {
                     $alreadySelected = [];
@@ -94,11 +98,29 @@ class UserSelect extends Select
                     });
                 }
 
+                $query->tap(new OrderByFullName());
+
                 if ($modifyQueryUsing) {
                     $modifyQueryUsing($query);
                 }
             },
             $ignoreRecord,
+        );
+
+        return $this->getOptionLabelFromRecordUsing(fn (User $record): string => $record->full_name);
+    }
+
+    /**
+     * @param Builder<User> $query
+     *
+     * @return Builder<User>
+     */
+    public function applySearchConstraint(Builder $query, string $search): Builder
+    {
+        return $query->where(
+            fn (Builder $query) => $query
+                ->tap(new WhereFullNameLike($search))
+                ->orWhereRaw('LOWER(' . $query->qualifyColumn('email') . ') LIKE ?', ['%' . Str::lower($search) . '%']),
         );
     }
 

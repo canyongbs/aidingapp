@@ -215,8 +215,6 @@ class UserImporter extends Importer
         /** @var User $record */
         $record = $this->record;
         $record->is_external ??= true;
-
-        $record->name = trim("{$record->first_name} {$record->last_name}");
     }
 
     protected function afterSave(): void
