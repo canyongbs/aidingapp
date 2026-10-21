@@ -575,7 +575,7 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
         $aiPostedAt = $aiUpdate->created_at?->format('M j, Y \\a\\t g:i A');
 
         $customerName = $customer->full_name;
-        $agentName = $agent->name;
+        $agentName = $agent->full_name;
         $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful()->assertSeeLivewire(TimelineList::class);
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain("{$customerName} (Customer) posted the following update on {$customerPostedAt}:");
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain("{$agentName} (Agent) posted the following update on {$agentPostedAt}:");
