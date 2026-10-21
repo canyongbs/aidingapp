@@ -52,12 +52,56 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Crypt;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
+
+test('ServiceRequestsRelationManager hides the create and edit actions when read only while still listing records', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    $serviceRequest = ServiceRequest::factory()
+        ->state([
+            'respondent_id' => $contact->getKey(),
+        ])
+        ->create();
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+        'readOnly' => true,
+    ])
+        ->assertSuccessful()
+        ->assertCanSeeTableRecords([$serviceRequest])
+        ->assertActionHidden(TestAction::make('create')->table())
+        ->assertActionHidden(TestAction::make('edit')->table($serviceRequest))
+        ->assertActionVisible(TestAction::make('view')->table($serviceRequest));
+});
+
+test('ServiceRequestsRelationManager shows the create action when not read only', function () {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionVisible(TestAction::make('create')->table());
+});
 
 test('ServiceRequestsRelationManager can list service requests for a contact', function () {
     asSuperAdmin();

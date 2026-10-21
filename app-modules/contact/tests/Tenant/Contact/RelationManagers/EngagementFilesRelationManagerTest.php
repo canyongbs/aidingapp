@@ -42,6 +42,7 @@ use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Tests\asSuperAdmin;
 
 test('only shows the files bulk delete action to a user with the engagement_file delete permission', function () {
     $user = User::factory()
@@ -65,4 +66,33 @@ test('only shows the files bulk delete action to a user with the engagement_file
         'pageClass' => ViewContact::class,
     ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+test('hides the files create, edit and delete actions when read only while still listing files', function () {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    $component = Livewire::test(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+        'readOnly' => true,
+    ])
+        ->assertSuccessful()
+        ->assertActionHidden(TestAction::make('create')->table())
+        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+
+    expect($component->instance()->isReadOnly())->toBeTrue();
+});
+
+test('shows the files create action when not read only', function () {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(EngagementFilesRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->assertActionVisible(TestAction::make('create')->table());
 });

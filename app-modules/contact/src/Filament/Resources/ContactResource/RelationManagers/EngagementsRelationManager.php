@@ -45,6 +45,7 @@ use AidingApp\Notification\Enums\NotificationChannel;
 use AidingApp\Notification\Models\Contracts\CanBeNotified;
 use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Timeline\Models\Timeline;
+use App\Filament\Concerns\CanBeReadOnly;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
@@ -65,6 +66,8 @@ use Illuminate\Support\HtmlString;
 
 class EngagementsRelationManager extends RelationManager
 {
+    use CanBeReadOnly;
+
     protected static string $relationship = 'timeline';
 
     protected static ?string $title = 'Emails';
@@ -167,7 +170,7 @@ class EngagementsRelationManager extends RelationManager
 
         return $table
             ->emptyStateHeading('No emails.')
-            ->emptyStateDescription('Create an email to get started.')
+            ->emptyStateDescription($this->isReadOnly() ? null : 'Create an email to get started.')
             ->defaultSort('record_sortable_date', 'desc')
             ->modifyQueryUsing(fn (Builder $query) => $query->whereHasMorph('timelineable', [
                 ...($canAccessEngagements ? [Engagement::class] : []),
@@ -206,6 +209,7 @@ class EngagementsRelationManager extends RelationManager
 
                         return $recipients;
                     })
+                    ->visible(fn (): bool => ! $this->isReadOnly())
                     ->disabled(fn (SendEngagementAction $action): bool => ! self::resolveOwnerContact($action)->canReceiveEmail())
                     ->tooltip(fn (SendEngagementAction $action): ?string => self::resolveOwnerContact($action)->canReceiveEmail()
                         ? null

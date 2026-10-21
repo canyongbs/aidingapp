@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
+use App\Filament\Concerns\CanBeReadOnly;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -79,6 +80,8 @@ use Illuminate\Support\Str;
 
 class ServiceRequestsRelationManager extends RelationManager
 {
+    use CanBeReadOnly;
+
     protected static string $relationship = 'serviceRequests';
 
     public function form(Schema $schema): Schema
