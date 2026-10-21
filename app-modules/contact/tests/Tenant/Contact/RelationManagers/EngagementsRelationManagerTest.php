@@ -117,6 +117,23 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
         ->and($action->getTooltip())->toBeNull();
 });
 
+it('hides the `engage` header action when read only while still listing emails', function () use ($seedContactEmails) {
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    $emails = $seedContactEmails($contact);
+
+    Livewire::test(EngagementsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+        'readOnly' => true,
+    ])
+        ->assertSuccessful()
+        ->assertActionHidden(TestAction::make('engage')->table())
+        ->assertCanSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
+});
+
 describe('email direction filtering by permission', function () use ($seedContactEmails) {
     it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () use ($seedContactEmails) {
         $user = User::factory()->create();

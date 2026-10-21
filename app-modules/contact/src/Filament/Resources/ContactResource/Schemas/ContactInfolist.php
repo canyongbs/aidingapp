@@ -50,7 +50,7 @@ class ContactInfolist
     /**
      * @return array<Tab>
      */
-    public static function tabs(Contact $contact, string $pageClass): array
+    public static function tabs(Contact $contact, string $pageClass, bool $readOnly = false): array
     {
         // Relation managers enforce their own authorization on mount, and Tabs are not
         // lazy-loaded, so an inaccessible manager must be omitted here entirely rather
@@ -63,6 +63,7 @@ class ContactInfolist
                     Livewire::make(ServiceRequestsRelationManager::class, [
                         'ownerRecord' => $contact,
                         'pageClass' => $pageClass,
+                        'readOnly' => $readOnly,
                     ])->key(ServiceRequestsRelationManager::class),
                 ]);
         }
@@ -92,6 +93,7 @@ class ContactInfolist
                     Livewire::make(EngagementFilesRelationManager::class, [
                         'ownerRecord' => $contact,
                         'pageClass' => $pageClass,
+                        'readOnly' => $readOnly,
                     ])->key(EngagementFilesRelationManager::class),
                 ]);
         }
@@ -102,6 +104,7 @@ class ContactInfolist
                     Livewire::make(EngagementsRelationManager::class, [
                         'ownerRecord' => $contact,
                         'pageClass' => $pageClass,
+                        'readOnly' => $readOnly,
                     ])->key(EngagementsRelationManager::class),
                 ]);
         }
