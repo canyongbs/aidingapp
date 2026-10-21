@@ -222,7 +222,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             return 'Deleted user';
         }
 
-        return $actor->getAttribute('name') ?? $actor->getAttribute('full_name') ?? 'System';
+        return $actor->getAttribute('full_name') ?? $actor->getAttribute('name') ?? 'System';
     }
 
     public function snapshotStatus(): ?ServiceRequestStatus
