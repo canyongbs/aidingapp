@@ -94,7 +94,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     expect($response['data'][0][$responseKey])->toBe($getExpected($targetUser));
 })->with([
     '`id`' => ['id',    fn (User $user) => $user->id],
-    '`name`' => ['name',  fn (User $user) => $user->name],
+    '`name`' => ['name',  fn (User $user) => $user->full_name],
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
@@ -187,16 +187,16 @@ it('can filter users by name', function (): void {
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    $matchingUser = User::factory()->create(['name' => 'John Doe']);
-    User::factory()->create(['name' => 'Jane Smith']);
-    User::factory()->create(['name' => 'Alice Brown']);
+    $matchingUser = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+    User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Brown']);
 
     $response = getJson(route('api.v1.users.index', ['filter' => ['name' => 'John']], false));
     $response->assertOk();
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['id'])->toBe($matchingUser->id);
-    expect($response['data'][0]['name'])->toBe($matchingUser->name);
+    expect($response['data'][0]['name'])->toBe($matchingUser->full_name);
 });
 
 it('can filter users by department', function (): void {
@@ -227,7 +227,7 @@ it('can filter users by department', function (): void {
 });
 
 dataset('user_sorts', [
-    '`name`' => ['name',  ['name' => 'Alpha User'],          ['name' => 'Zulu User'],          'name',  'Alpha User',          'Zulu User'],
+    '`name`' => ['name',  ['first_name' => 'Alpha', 'last_name' => 'User'], ['first_name' => 'Zulu', 'last_name' => 'User'], 'name',  'Alpha User',          'Zulu User'],
     '`email`' => ['email', ['email' => 'alpha@example.com'],  ['email' => 'zulu@example.com'],  'email', 'alpha@example.com',  'zulu@example.com'],
 ]);
 

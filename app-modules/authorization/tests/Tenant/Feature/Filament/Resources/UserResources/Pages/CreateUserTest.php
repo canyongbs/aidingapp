@@ -68,19 +68,19 @@ test('CreateUser is gated with proper access control', function (): void {
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(User::class, [
-        'name' => 'Jordan Blake',
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 });
 
-test('CreateUser shows and requires first and last name fields when the full name feature is active', function (): void {
+test('CreateUser shows and requires first and last name fields', function () {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
@@ -105,7 +105,6 @@ test('CreateUser requires an email address', function (): void {
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
-            'name' => 'No Email',
             'email' => null,
         ])
         ->call('create')
@@ -119,7 +118,6 @@ test('CreateUser rejects an invalid email address', function (): void {
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
-            'name' => 'Bad Email',
             'email' => 'not-an-email',
         ])
         ->call('create')
@@ -135,7 +133,6 @@ test('CreateUser rejects a duplicate email case-insensitively', function (): voi
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
-            'name' => 'Duplicate Email',
             'email' => 'Taken@Example.com',
         ])
         ->call('create')
@@ -151,7 +148,6 @@ test('CreateUser rejects reusing a soft-deleted user email', function (): void {
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
-            'name' => 'Reuse Attempt',
             'email' => 'Archived@Example.com',
         ])
         ->call('create')
@@ -169,7 +165,6 @@ test('CreateUser sends the set password notification to a non-external user', fu
         ->fillForm([
             'first_name' => 'Internal',
             'last_name' => 'User',
-            'name' => 'Internal User',
             'email' => 'internal@example.com',
             'is_external' => false,
         ])
@@ -190,7 +185,6 @@ test('CreateUser does not send the set password notification to an external user
         ->fillForm([
             'first_name' => 'External',
             'last_name' => 'User',
-            'name' => 'External User',
             'email' => 'external@example.com',
             'is_external' => true,
         ])

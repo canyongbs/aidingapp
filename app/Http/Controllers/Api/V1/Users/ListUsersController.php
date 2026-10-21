@@ -37,11 +37,14 @@
 namespace App\Http\Controllers\Api\V1\Users;
 
 use App\Http\Resources\Api\V1\UserResource;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Dedoc\Scramble\Attributes\Example;
 use Dedoc\Scramble\Attributes\Group;
 use Dedoc\Scramble\Attributes\QueryParameter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Gate;
@@ -67,18 +70,20 @@ class ListUsersController
     {
         Gate::authorize('viewAny', User::class);
 
+        $sortByName = AllowedSort::callback('name', fn (Builder $query, bool $descending) => $query->tap(new OrderByFullName($descending ? 'desc' : 'asc')));
+
         return QueryBuilder::for(
             User::query()->tap(new WithoutAnyAdmin())->with(['roles', 'department', 'permissionsFromRoles'])
         )
             ->allowedFilters(
-                AllowedFilter::partial('name'),
+                AllowedFilter::callback('name', fn (Builder $query, string $value) => $query->tap(new WhereFullNameLike($value))),
                 AllowedFilter::partial('department', 'department.name'),
             )
             ->allowedSorts(
-                AllowedSort::field('name'),
+                $sortByName,
                 AllowedSort::field('email'),
             )
-            ->defaultSort(AllowedSort::field('name'))
+            ->defaultSort($sortByName)
             ->jsonPaginate()
             ->toResourceCollection(UserResource::class);
     }

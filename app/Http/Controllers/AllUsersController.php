@@ -59,7 +59,7 @@ class AllUsersController extends Controller
                         $users[] = [
                             'id' => $user->id,
                             'tenant_id' => $tenant->getKey(),
-                            'name' => $user->name,
+                            'name' => $user->full_name,
                             'job_title' => $user->job_title,
                             'department' => $departmentName,
                             'email' => $user->email,

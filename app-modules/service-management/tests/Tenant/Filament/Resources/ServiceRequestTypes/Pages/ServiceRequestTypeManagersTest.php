@@ -256,8 +256,8 @@ it('managerUsers UserSelect does not show admin users in options by default', fu
     Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
@@ -272,7 +272,7 @@ it('managerUsers UserSelect shows a pre-selected admin user so they can be desel
     Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
@@ -287,6 +287,6 @@ it('managerUsers UserSelect shows all users when filter_admins_from_selection co
     Livewire::test(ManageServiceRequestTypeManagers::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('managerUsers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });

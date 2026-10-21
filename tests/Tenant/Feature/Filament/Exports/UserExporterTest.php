@@ -47,7 +47,7 @@ $exportUserRow = function (User $user): array {
     $columnMap = [
         'first_name' => 'First Name',
         'last_name' => 'Last Name',
-        'name' => 'Full Name',
+        'full_name' => 'Full Name',
         'preferred_name' => 'Preferred Name',
         'email' => 'Email address',
         'job_title' => 'Job title',
@@ -88,7 +88,6 @@ it('exports all user fields, the department name, and roles joined with a pipe',
         ->create([
             'first_name' => 'Jonathan',
             'last_name' => 'Smith',
-            'name' => 'Jonathan Smith',
             'email' => 'jonathan@example.com',
             'job_title' => 'Advisor',
             'work_number' => '+1 555 123 4567',

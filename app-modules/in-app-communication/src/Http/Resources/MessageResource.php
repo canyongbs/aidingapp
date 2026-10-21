@@ -56,7 +56,7 @@ class MessageResource extends JsonResource
         $author = $this->author;
 
         $authorName = match (true) {
-            $author instanceof User => $author->name,
+            $author instanceof User => $author->full_name,
             $author instanceof Contact => $author->full_name,
             default => null,
         };

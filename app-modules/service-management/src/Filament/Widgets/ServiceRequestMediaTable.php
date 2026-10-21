@@ -45,6 +45,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Media;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use App\Settings\DisplaySettings;
 use Filament\Actions\Action;
@@ -135,7 +136,7 @@ class ServiceRequestMediaTable extends TableWidget
                                 $searchLower = strtolower($search);
 
                                 if ($type === User::class) {
-                                    $subQuery->whereRaw('LOWER(name) LIKE ?', ['%' . $searchLower . '%']);
+                                    $subQuery->tap(new WhereFullNameLike($search));
                                 } elseif ($type === Contact::class) {
                                     $subQuery->where(function (Builder $query) use ($searchLower): void {
                                         $query->whereRaw('LOWER(first_name) LIKE ?', ['%' . $searchLower . '%'])

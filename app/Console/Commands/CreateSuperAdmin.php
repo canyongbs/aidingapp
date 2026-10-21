@@ -97,7 +97,6 @@ class CreateSuperAdmin extends Command
 
         $userData['first_name'] = $validated['first_name'];
         $userData['last_name'] = $validated['last_name'];
-        $userData['name'] = trim("{$validated['first_name']} {$validated['last_name']}");
 
         $user = User::create($userData);
 

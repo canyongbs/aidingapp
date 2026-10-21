@@ -99,10 +99,10 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable()
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable(['first_name', 'last_name'])
                     ->toggleable(),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')

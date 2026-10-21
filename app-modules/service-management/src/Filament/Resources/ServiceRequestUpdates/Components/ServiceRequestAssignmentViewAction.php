@@ -68,7 +68,7 @@ class ServiceRequestAssignmentViewAction extends ViewAction
                         return 'Deleted user';
                     }
 
-                    return $user->name;
+                    return $user->full_name;
                 })
                 ->url(function (ServiceRequestAssignment $serviceRequestAssignment): ?string {
                     /** @var User|null $user */

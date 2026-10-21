@@ -275,7 +275,7 @@ it('increments `unread_count` for participants with Mentions preference only whe
                         'type' => 'mention',
                         'attrs' => [
                             'id' => $mentionedUser->getKey(),
-                            'label' => $mentionedUser->name,
+                            'label' => $mentionedUser->full_name,
                         ],
                     ],
                 ],

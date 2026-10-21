@@ -81,7 +81,7 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
     {
         $template = $this->emailTemplate;
         $timezone = $notifiable->getTimezone();
-        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone, recipientName: $notifiable->name);
+        $mergeData = $this->serviceRequest->getTemplateMergeData($timezone, recipientName: $notifiable->full_name);
 
         $subject = $template?->getSubject($mergeData)?->toHtml();
         $body = $template?->getBody(

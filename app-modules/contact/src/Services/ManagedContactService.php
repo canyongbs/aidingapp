@@ -48,7 +48,6 @@ class ManagedContactService
      * @var array<int, string>
      */
     public const SYNCED_USER_ATTRIBUTES = [
-        'name',
         'first_name',
         'last_name',
         'preferred_name',
@@ -161,7 +160,7 @@ class ManagedContactService
     protected function mapUserAttributes(User $user): array
     {
         $attributes = [
-            'full_name' => trim($user->name),
+            'full_name' => $user->full_name,
             'email' => $user->email,
             ...$this->mapNameAttributes($user),
         ];

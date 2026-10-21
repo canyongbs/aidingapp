@@ -139,7 +139,7 @@ it('updates a service request with an assignment', function (): void {
 
     expect($response['data']['assignee'])->toBe([
         'id' => $assigneeUser->id,
-        'name' => $assigneeUser->name,
+        'name' => $assigneeUser->full_name,
     ]);
 
     $assignment = ServiceRequestAssignment::where('service_request_id', $serviceRequest->id)

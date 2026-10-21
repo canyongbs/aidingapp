@@ -52,7 +52,6 @@ use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -66,22 +65,6 @@ class CreateUser extends CreateRecord
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set): void {
-            $firstName = trim($get('first_name'));
-
-            if (blank($firstName)) {
-                return;
-            }
-
-            $lastName = trim($get('last_name'));
-
-            if (blank($lastName)) {
-                return;
-            }
-
-            $set(User::displayNameKey(), "{$firstName} {$lastName}");
-        };
-
         return $schema
             ->components([
                 Section::make('Demographic Information')
@@ -89,26 +72,15 @@ class CreateUser extends CreateRecord
                         TextInput::make('first_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
+                            ->maxLength(255),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated(),
-
+                            ->maxLength(255),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),
                     ])
-
                     ->columns(2),
                 Section::make('Employment Information')
                     ->schema([

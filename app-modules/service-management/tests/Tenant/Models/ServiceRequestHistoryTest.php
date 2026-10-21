@@ -202,8 +202,8 @@ it('returns "System" as actorName when no actor is associated', function (): voi
     expect((new ServiceRequestHistory())->actorName())->toBe('System');
 });
 
-it('returns the User name as actorName when the actor is a User', function (): void {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+it('returns the User name as actorName when the actor is a User', function () {
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);
@@ -220,8 +220,8 @@ it('returns the Contact full_name as actorName when the actor is a Contact', fun
     expect($history->actorName())->toBe($contact->full_name);
 });
 
-it('returns the name of a soft-deleted User as actorName', function (): void {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+it('returns the name of a soft-deleted User as actorName', function () {
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);

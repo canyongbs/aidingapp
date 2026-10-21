@@ -528,7 +528,8 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
             'last_name' => 'Smith',
         ]);
         $agent = User::factory()->create([
-            'name' => 'Richard Down',
+            'first_name' => 'Richard',
+            'last_name' => 'Down',
         ]);
 
         $customerUpdateAt = CarbonImmutable::create(2026, 2, 3, 23, 35, 0, 'UTC');
@@ -589,7 +590,8 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
 
     it('shows a new assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
         $serviceRequest = $serviceRequestManagedBy($manager);
 
@@ -607,7 +609,8 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
 
     it('shows a soft-deleted assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
         $serviceRequest = $serviceRequestManagedBy($manager);
 
@@ -631,7 +634,8 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
 
     it('shows a fallback entry for an assignment that was permanently deleted', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
         $serviceRequest = $serviceRequestManagedBy($manager);
 
@@ -655,12 +659,14 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
 
     it('shows a removed assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
         $serviceRequest = $serviceRequestManagedBy($manager);
 
         $actor = User::factory()->create([
-            'name' => 'John Smith',
+            'first_name' => 'John',
+            'last_name' => 'Smith',
         ]);
         asSuperAdmin($actor);
 
@@ -801,7 +807,7 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
     it('resolves the submitter name for a user author, not just a contact', function (): void {
         asSuperAdmin();
 
-        $author = User::factory()->create(['name' => 'Dana Whitfield']);
+        $author = User::factory()->create(['first_name' => 'Dana', 'last_name' => 'Whitfield']);
 
         $form = ServiceRequestForm::factory()->create([
             'content' => richContentText('What do you need help with?'),

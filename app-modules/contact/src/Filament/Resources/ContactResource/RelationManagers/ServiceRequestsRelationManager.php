@@ -202,10 +202,10 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->label('Priority')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(['first_name', 'last_name'])
+                    ->sortable(['first_name', 'last_name']),
             ])
             ->filters([
                 SelectFilter::make('priority')

@@ -63,7 +63,7 @@ class EngagementFailedNotification extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $sender = $this->engagement->user;
-        $fromName = $sender->name ?? 'N/A';
+        $fromName = $sender->full_name ?? 'N/A';
         $fromEmail = $sender->email ?? 'N/A';
 
         $recipient = $this->engagement->recipient;
