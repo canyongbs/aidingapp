@@ -398,6 +398,20 @@ describe('email health', function () {
                 return true;
             });
     });
+
+    it('hides the email health callout as soon as a bounced contact\'s email is updated, without requiring a fresh page load', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->bounced()->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSchemaComponentVisible('email-health-callout')
+            ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
+                'email' => 'updated@example.com',
+            ])
+            ->assertHasNoFormErrors()
+            ->assertSchemaComponentHidden('email-health-callout');
+    });
 });
 
 describe('tabs', function () {
