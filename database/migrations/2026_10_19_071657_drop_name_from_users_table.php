@@ -58,13 +58,13 @@ return new class () extends Migration {
             UserFullNameFeature::deactivate();
 
             Schema::table('users', function (Blueprint $table) {
-                $table->string('name')->nullable();
+                $table->string('name', 511)->nullable();
             });
 
             DB::statement("UPDATE users SET name = TRIM(first_name || ' ' || last_name)");
 
             Schema::table('users', function (Blueprint $table) {
-                $table->string('name')->nullable(false)->change();
+                $table->string('name', 511)->nullable(false)->change();
             });
         });
     }
