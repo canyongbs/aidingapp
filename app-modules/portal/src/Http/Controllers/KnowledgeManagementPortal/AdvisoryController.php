@@ -48,7 +48,6 @@ use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use AidingApp\ServiceManagement\Models\Scopes\WithLastUpdatedAt;
 use App\Settings\LicenseSettings;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -85,15 +84,15 @@ class AdvisoryController
                 $pattern = '%' . addcslashes(Str::lower($search), '%_\\') . '%';
 
                 $query->where(fn (Builder $query): Builder => $query
-                    ->where(new Expression('lower(advisories.title)'), 'like', $pattern)
-                    ->orWhere(new Expression('lower(advisories.description)'), 'like', $pattern)
+                    ->whereRaw('lower(advisories.title) like ?', [$pattern])
+                    ->orWhereRaw('lower(advisories.description) like ?', [$pattern])
                     ->orWhereHas('assignedDepartment', fn (Builder $query): Builder => $query
-                        ->where(new Expression('lower(departments.name)'), 'like', $pattern))
+                        ->whereRaw('lower(departments.name) like ?', [$pattern]))
                     ->orWhereHas('advisoryUpdates', fn (Builder $query): Builder => $query
                         ->where('advisory_updates.internal', false)
                         ->where(fn (Builder $query): Builder => $query
-                            ->where(new Expression('lower(advisory_updates.title)'), 'like', $pattern)
-                            ->orWhere(new Expression('lower(advisory_updates.update)'), 'like', $pattern))));
+                            ->whereRaw('lower(advisory_updates.title) like ?', [$pattern])
+                            ->orWhereRaw('lower(advisory_updates.update) like ?', [$pattern]))));
             })
             ->tap(fn (Builder $query) => $sort->apply($query))
             ->paginate(10);
