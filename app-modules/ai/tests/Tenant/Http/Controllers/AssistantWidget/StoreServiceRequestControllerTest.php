@@ -50,6 +50,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
@@ -260,7 +262,7 @@ it('rejects password fields owned by another contact', function () use ($postAss
         ->and($secret->refresh()->related_id)->toBeNull();
 });
 
-it('records files submitted through upload fields as request submissions uploaded by the contact', function () {
+it('records files submitted through upload fields as request submissions uploaded by the contact', function () use ($postAssistantServiceRequest) {
     Storage::fake('s3');
 
     $type = ServiceRequestType::factory()->create();
@@ -283,7 +285,7 @@ it('records files submitted through upload fields as request submissions uploade
     $path = 'tmp/' . Str::uuid() . '.png';
     Storage::disk('s3')->put($path, UploadedFile::fake()->image('screenshot.png')->getContent());
 
-    postAssistantServiceRequest($contact, $type, [
+    $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant upload test',
         'description' => 'Upload fields are supported.',
         'custom_fields' => [

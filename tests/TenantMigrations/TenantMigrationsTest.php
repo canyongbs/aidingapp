@@ -38,9 +38,12 @@ use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Models\SystemUser;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -111,6 +114,66 @@ describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments
                 'deleted_at' => null,
                 'status' => 'active',
             ]);
+        });
+    });
+});
+
+// TODO: Cleanup Task (service-request-file-upload-type): delete this describe and the test within
+describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function () {
+    it('backfills the upload type of files attached directly to service requests and activates the feature flag', function () {
+        isolatedMigration('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function () {
+            $submittedAt = now()->subDay();
+            $serviceRequest = ServiceRequest::factory()->create(['created_at' => $submittedAt]);
+            $contact = Contact::factory()->create();
+            $user = User::factory()->create();
+            $systemUser = SystemUser::factory()->create();
+
+            $insertMedia = function (string $modelType, string $modelId, ?Model $createdBy, CarbonInterface $createdAt, array $customProperties = []): int {
+                return DB::table('media')->insertGetId([
+                    'model_type' => $modelType,
+                    'model_id' => $modelId,
+                    'uuid' => (string) Str::uuid(),
+                    'collection_name' => 'uploads',
+                    'name' => 'file',
+                    'file_name' => 'file.png',
+                    'disk' => 's3',
+                    'size' => 1,
+                    'manipulations' => '[]',
+                    'custom_properties' => json_encode($customProperties),
+                    'generated_conversions' => '[]',
+                    'responsive_images' => '[]',
+                    'created_by_type' => $createdBy?->getMorphClass(),
+                    'created_by_id' => $createdBy?->getKey(),
+                    'created_at' => $createdAt,
+                    'updated_at' => $createdAt,
+                ]);
+            };
+
+            $contactMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $contact, $submittedAt->copy()->addDays(5), ['custom_headers' => ['ContentType' => 'image/png']]);
+            $userMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $user, $submittedAt->copy()->addMinute());
+            $submittedWithinWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), null, $submittedAt->copy()->addMinutes(10));
+            $submittedAfterWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), null, $submittedAt->copy()->addMinutes(11));
+            $systemUserWithinWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $systemUser, $submittedAt->copy()->addMinute());
+            $systemUserAfterWindowMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $systemUser, $submittedAt->copy()->addHour());
+            $alreadyRecordedMediaId = $insertMedia('service_request', $serviceRequest->getKey(), $contact, $submittedAt, ['upload_type' => 'staff_upload']);
+            $serviceRequestUpdateMediaId = $insertMedia('service_request_update', (string) Str::uuid(), $contact, $submittedAt);
+
+            expect(ServiceRequestFileUploadTypeFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/service-management/database/migrations/2026_10_15_081432_tmp_backfill_service_request_media_upload_type.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $customProperties = fn (int $mediaId): array => json_decode(DB::table('media')->where('id', $mediaId)->value('custom_properties'), associative: true);
+
+            expect($customProperties($contactMediaId))->toEqual(['upload_type' => 'request_submission', 'custom_headers' => ['ContentType' => 'image/png']])
+                ->and($customProperties($userMediaId))->toEqual(['upload_type' => 'staff_upload'])
+                ->and($customProperties($submittedWithinWindowMediaId))->toEqual(['upload_type' => 'request_submission'])
+                ->and($customProperties($submittedAfterWindowMediaId))->toEqual(['upload_type' => 'staff_upload'])
+                ->and($customProperties($systemUserWithinWindowMediaId))->toEqual(['upload_type' => 'request_submission'])
+                ->and($customProperties($systemUserAfterWindowMediaId))->toEqual(['upload_type' => 'staff_upload'])
+                ->and($customProperties($alreadyRecordedMediaId))->toEqual(['upload_type' => 'staff_upload'])
+                ->and($customProperties($serviceRequestUpdateMediaId))->toEqual([])
+                ->and(ServiceRequestFileUploadTypeFeature::active())->toBeTrue();
         });
     });
 });
