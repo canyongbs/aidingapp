@@ -60,7 +60,7 @@ it('lists the active advisories by default', function () {
     $activeAdvisories = Advisory::factory()->count(2)->for(AdvisoryStatus::factory()->open(), 'status')->create();
     $resolvedAdvisory = Advisory::factory()->for(AdvisoryStatus::factory()->resolved(), 'status')->create();
 
-    $ids = collect(getJson(route('api.portal.advisories'))->assertOk()->json('data'))->pluck('id');
+    $ids = getJson(route('api.portal.advisories'))->assertOk()->collect('data')->pluck('id');
 
     expect($ids->sort()->values()->all())->toBe($activeAdvisories->pluck('id')->sort()->values()->all())
         ->and($ids)->not->toContain($resolvedAdvisory->getKey());
@@ -106,7 +106,7 @@ it('resolves the last updated date from the latest update', function () {
 
     $advisoryWithoutUpdates = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
 
-    $lastUpdatedAt = collect(getJson(route('api.portal.advisories'))->assertOk()->json('data'))
+    $lastUpdatedAt = getJson(route('api.portal.advisories'))->assertOk()->collect('data')
         ->pluck('last_updated_at', 'id');
 
     expect($lastUpdatedAt[$advisoryWithUpdates->getKey()])->toBe('2026-10-08T09:00:00+00:00')
@@ -127,7 +127,7 @@ it('returns the severity options ranked from highest to lowest', function () {
     $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
     $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
 
-    $severityIds = collect(getJson(route('api.portal.advisories'))->assertOk()->json('severities'))->pluck('id');
+    $severityIds = getJson(route('api.portal.advisories'))->assertOk()->collect('severities')->pluck('id');
 
     expect($severityIds->all())->toBe([$critical->getKey(), $minor->getKey()]);
 });
@@ -265,46 +265,54 @@ it('validates the inputs', function (array $parameters, string $error) {
 ]);
 
 describe('sorting', function () {
-    beforeEach(function () {
+    $createAdvisories = function (): array {
         $status = AdvisoryStatus::factory()->open()->create();
 
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
 
-        $this->criticalAdvisory = Advisory::factory()->for($status, 'status')->for($critical, 'severity')->create(['created_at' => now()->subDays(3)]);
-        $this->recentMinorAdvisory = Advisory::factory()->for($status, 'status')->for($minor, 'severity')->create(['created_at' => now()->subDay()]);
-        $this->olderMinorAdvisory = Advisory::factory()->for($status, 'status')->for($minor, 'severity')->create(['created_at' => now()->subDays(2)]);
-    });
+        return [
+            Advisory::factory()->for($status, 'status')->for($critical, 'severity')->create(['created_at' => now()->subDays(3)]),
+            Advisory::factory()->for($status, 'status')->for($minor, 'severity')->create(['created_at' => now()->subDay()]),
+            Advisory::factory()->for($status, 'status')->for($minor, 'severity')->create(['created_at' => now()->subDays(2)]),
+        ];
+    };
 
-    it('sorts advisories by the highest severity first by default', function () {
-        $ids = collect(getJson(route('api.portal.advisories'))->assertOk()->json('data'))->pluck('id');
+    it('sorts advisories by the highest severity first by default', function () use ($createAdvisories) {
+        [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
+
+        $ids = getJson(route('api.portal.advisories'))->assertOk()->collect('data')->pluck('id');
 
         expect($ids->all())->toBe([
-            $this->criticalAdvisory->getKey(),
-            $this->recentMinorAdvisory->getKey(),
-            $this->olderMinorAdvisory->getKey(),
+            $criticalAdvisory->getKey(),
+            $recentMinorAdvisory->getKey(),
+            $olderMinorAdvisory->getKey(),
         ]);
     });
 
-    it('can sort advisories by the lowest severity first', function () {
-        $ids = collect(getJson(route('api.portal.advisories', ['sort' => 'lowest_severity']))->assertOk()->json('data'))->pluck('id');
+    it('can sort advisories by the lowest severity first', function () use ($createAdvisories) {
+        [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
+
+        $ids = getJson(route('api.portal.advisories', ['sort' => 'lowest_severity']))->assertOk()->collect('data')->pluck('id');
 
         expect($ids->all())->toBe([
-            $this->recentMinorAdvisory->getKey(),
-            $this->olderMinorAdvisory->getKey(),
-            $this->criticalAdvisory->getKey(),
+            $recentMinorAdvisory->getKey(),
+            $olderMinorAdvisory->getKey(),
+            $criticalAdvisory->getKey(),
         ]);
     });
 
-    it('sorts advisories by the most recently updated when `AdvisorySeveritySortFeature` is inactive', function () {
+    it('sorts advisories by the most recently updated when `AdvisorySeveritySortFeature` is inactive', function () use ($createAdvisories) {
+        [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
+
         AdvisorySeveritySortFeature::deactivate();
 
-        $ids = collect(getJson(route('api.portal.advisories'))->assertOk()->json('data'))->pluck('id');
+        $ids = getJson(route('api.portal.advisories'))->assertOk()->collect('data')->pluck('id');
 
         expect($ids->all())->toBe([
-            $this->recentMinorAdvisory->getKey(),
-            $this->olderMinorAdvisory->getKey(),
-            $this->criticalAdvisory->getKey(),
+            $recentMinorAdvisory->getKey(),
+            $olderMinorAdvisory->getKey(),
+            $criticalAdvisory->getKey(),
         ]);
     });
 });
