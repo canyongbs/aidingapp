@@ -52,8 +52,8 @@ test('ViewAudit shows the full name of a User change agent', function () {
     $agent = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Blake']);
 
     $audit = Audit::factory()->create([
-        'user_type' => $agent->getMorphClass(),
-        'user_id' => $agent->getKey(),
+        'change_agent_type' => $agent->getMorphClass(),
+        'change_agent_id' => $agent->getKey(),
     ]);
 
     actingAs($viewer);
@@ -70,8 +70,8 @@ test('ViewAudit shows the name of a SystemUser change agent', function () {
     $integration = SystemUser::factory()->create(['name' => 'Integration Service']);
 
     $audit = Audit::factory()->create([
-        'user_type' => $integration->getMorphClass(),
-        'user_id' => $integration->getKey(),
+        'change_agent_type' => $integration->getMorphClass(),
+        'change_agent_id' => $integration->getKey(),
     ]);
 
     actingAs($viewer);
