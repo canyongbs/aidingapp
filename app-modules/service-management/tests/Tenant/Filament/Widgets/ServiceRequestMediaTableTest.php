@@ -35,11 +35,13 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Authenticatable;
 use App\Models\Media;
 use App\Models\User;
@@ -710,6 +712,163 @@ describe('ServiceRequest', function () {
             ->and($history->deletedFileName())->toBe('report.png')
             ->and($history->eventTitle())->toBe('File Deleted');
     });
+
+    test('lists files attached to the updates of the service request', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->for($serviceRequest)->create();
+        $serviceRequestUpdateMedia = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateInlineMedia = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('signature.png'))
+            ->toMediaCollection('inline_attachments');
+
+        $deletedServiceRequestUpdate = ServiceRequestUpdate::factory()->for($serviceRequest)->create();
+        $deletedServiceRequestUpdateMedia = $deletedServiceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('deleted.png'))
+            ->toMediaCollection('uploads');
+        $deletedServiceRequestUpdate->delete();
+
+        $otherServiceRequestUpdateMedia = ServiceRequestUpdate::factory()->create()
+            ->addMedia(UploadedFile::fake()->image('other.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia, $serviceRequestUpdateMedia])
+            ->assertCanNotSeeTableRecords([
+                $serviceRequestUpdateInlineMedia,
+                $deletedServiceRequestUpdateMedia,
+                $otherServiceRequestUpdateMedia,
+            ]);
+    });
+
+    test('does not list files attached to the updates of the service request for a user who cannot view service request updates', function () {
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        actingAs(User::factory()->create());
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia])
+            ->assertCanNotSeeTableRecords([$serviceRequestUpdateMedia])
+            ->assertTableColumnVisible('upload_type');
+    });
+
+    test('shows the update type of each file', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $staffUploadMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('staff.png'))
+            ->withCustomProperties([ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::StaffUpload->value])
+            ->toMediaCollection('uploads');
+        $requestSubmissionMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('submission.png'))
+            ->withCustomProperties([ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::RequestSubmission->value])
+            ->toMediaCollection('uploads');
+        $updateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('update.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableColumnVisible('upload_type')
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::StaffUpload, record: $staffUploadMedia)
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::RequestSubmission, record: $requestSubmissionMedia)
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::Update, record: $updateMedia);
+    });
+
+    test('delete action is hidden for a file attached to an update of the service request', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+        $media = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionVisible('download', record: $media)
+            ->assertTableActionHidden('delete', record: $media);
+    });
+
+    test('uploading a file records it as a staff upload', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('report.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $media = $serviceRequest->fresh()->getFirstMedia('uploads');
+
+        expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::StaffUpload);
+    });
+
+    test('does not list files attached to the updates of the service request when the feature flag is inactive', function () {
+        ServiceRequestFileUploadTypeFeature::deactivate();
+
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia])
+            ->assertCanNotSeeTableRecords([$serviceRequestUpdateMedia])
+            ->assertTableColumnHidden('upload_type');
+    });
 });
 
 describe('ServiceRequestUpdate', function () {
@@ -998,5 +1157,38 @@ describe('ServiceRequestUpdate', function () {
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
 
         expect($history)->toBeNull();
+    });
+
+    test('does not show the update type column', function () {
+        asSuperAdmin();
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => ServiceRequestUpdate::factory()->create(),
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableColumnHidden('upload_type');
+    });
+
+    test('uploading a file to a service request update does not record an upload type', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()
+            ->for(ServiceRequest::factory()->state([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ]))
+            ->create();
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('attachment.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        expect($serviceRequestUpdate->fresh()->getFirstMedia('uploads')->hasCustomProperty(ServiceRequestFileUploadType::CUSTOM_PROPERTY))->toBeFalse();
     });
 });

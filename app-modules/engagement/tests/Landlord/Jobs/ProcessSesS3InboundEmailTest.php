@@ -49,6 +49,7 @@ use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
@@ -1380,7 +1381,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sets createdBy on media attachments', function () {
+    it('sets createdBy and records media attachments as request submissions', function () {
         $tenant = Tenant::query()->firstOrFail();
 
         [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
@@ -1457,7 +1458,8 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         foreach ($media as $item) {
             expect($item->created_by_id)->toBe($contact->getKey())
-                ->and($item->created_by_type)->toBe($contact->getMorphClass());
+                ->and($item->created_by_type)->toBe($contact->getMorphClass())
+                ->and(ServiceRequestFileUploadType::fromMedia($item))->toBe(ServiceRequestFileUploadType::RequestSubmission);
         }
 
         $filesystem->assertMissing('s3_email');
@@ -2759,7 +2761,7 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sets createdBy on media attachments for SR reply', function () {
+    it('sets createdBy and does not record an upload type on media attachments for SR reply', function () {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
         $tenant = Tenant::query()->firstOrFail();
@@ -2832,7 +2834,8 @@ describe('Service request reply threading', function () {
 
             foreach ($media as $item) {
                 expect($item->created_by_id)->toBe($contact->getKey())
-                    ->and($item->created_by_type)->toBe($contact->getMorphClass());
+                    ->and($item->created_by_type)->toBe($contact->getMorphClass())
+                    ->and($item->hasCustomProperty(ServiceRequestFileUploadType::CUSTOM_PROPERTY))->toBeFalse();
             }
         });
 
