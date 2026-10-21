@@ -46,11 +46,11 @@ use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
@@ -67,7 +67,7 @@ test('A successful action on the EditServiceRequestStatus page', function () {
 
     $editRequest = EditServiceRequestStatusRequestFactory::new()->create();
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertFormSet([
@@ -84,12 +84,12 @@ test('A successful action on the EditServiceRequestStatus page', function () {
     assertEquals($editRequest['color'], $serviceRequestStatus->fresh()->color);
 });
 
-test('EditServiceRequestStatus requires valid data', function ($data, $errors) {
+test('EditServiceRequestStatus requires valid data', function (EditServiceRequestStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertFormSet([
@@ -125,7 +125,7 @@ test('EditServiceRequestStatus is gated with proper access control', function ()
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -142,7 +142,7 @@ test('EditServiceRequestStatus is gated with proper access control', function ()
 
     $request = collect(EditServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -173,7 +173,7 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->assertForbidden();
@@ -191,7 +191,7 @@ test('EditServiceRequestStatus is gated with proper feature access control', fun
 
     $request = collect(EditServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -267,7 +267,7 @@ test('EditServiceRequestStatus prevents renaming to a case-insensitive duplicate
     ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
     $serviceRequestStatus = ServiceRequestStatus::factory()->create(['name' => 'Draft']);
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->fillForm(['name' => 'backlog'])
@@ -282,7 +282,7 @@ test('EditServiceRequestStatus allows saving a status without changing its name'
 
     $serviceRequestStatus = ServiceRequestStatus::factory()->create(['name' => 'Draft']);
 
-    livewire(EditServiceRequestStatus::class, [
+    Livewire::test(EditServiceRequestStatus::class, [
         'record' => $serviceRequestStatus->getRouteKey(),
     ])
         ->fillForm(['name' => 'Draft'])
@@ -298,7 +298,7 @@ describe('archiving', function () {
 
         expect($serviceRequestStatus->isArchived())->toBeFalse();
 
-        livewire(EditServiceRequestStatus::class, [
+        Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->callAction(TestAction::make('archive'))
@@ -315,7 +315,7 @@ describe('archiving', function () {
 
         expect($serviceRequestStatus->isArchived())->toBeTrue();
 
-        livewire(EditServiceRequestStatus::class, [
+        Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->callAction(TestAction::make('unarchive'))
@@ -340,7 +340,7 @@ describe('archiving', function () {
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->archived()->create();
 
-        livewire(EditServiceRequestStatus::class, [
+        Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->assertActionHidden(TestAction::make('archive'));
@@ -351,7 +351,7 @@ describe('archiving', function () {
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
 
-        livewire(EditServiceRequestStatus::class, [
+        Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->assertActionHidden(TestAction::make('unarchive'));
@@ -364,7 +364,7 @@ describe('archiving', function () {
 
         ServiceRequestType::factory()->for($serviceRequestStatus, 'automatedStatus')->create(['name' => 'VPN Access Request']);
 
-        $component = livewire(EditServiceRequestStatus::class, [
+        $component = Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])->mountAction(TestAction::make('archive'));
 
@@ -377,12 +377,12 @@ describe('archiving', function () {
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->create();
 
-        $component = livewire(EditServiceRequestStatus::class, [
+        $component = Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])->mountAction(TestAction::make('archive'));
 
         expect($component->instance()->getMountedAction()->getModalDescription())
-            ->not->toContain('automatic status changes');
+            ->not()->toContain('automatic status changes');
     });
 
     it('does not offer the delete action', function () {
@@ -390,7 +390,7 @@ describe('archiving', function () {
 
         $serviceRequestStatus = ServiceRequestStatus::factory()->open()->create();
 
-        livewire(EditServiceRequestStatus::class, [
+        Livewire::test(EditServiceRequestStatus::class, [
             'record' => $serviceRequestStatus->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('delete'));

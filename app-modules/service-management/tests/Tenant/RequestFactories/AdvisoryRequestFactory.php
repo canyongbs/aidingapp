@@ -46,7 +46,7 @@ class AdvisoryRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'title' => fake()->word(20),
+            'title' => fake()->word(),
             'description' => fake()->paragraph(),
             'severity_id' => AdvisorySeverity::factory(),
             'status_id' => AdvisoryStatus::factory(),

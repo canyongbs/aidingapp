@@ -44,7 +44,7 @@ class AdvisoryStatusRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(10),
+            'name' => fake()->word(),
             'classification' => fake()->randomElement(SystemAdvisoryStatusClassification::cases()),
         ];
     }

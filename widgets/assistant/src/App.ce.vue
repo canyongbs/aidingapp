@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { onMounted, onUnmounted, ref } from 'vue';
+    import { defineProps, onMounted, onUnmounted, ref } from 'vue';
     import ChatPanel from './components/ChatPanel.vue';
     import ChatToggleButton from './components/ChatToggleButton.vue';
     import { setToken } from './utils/token.js';

@@ -58,23 +58,20 @@ use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Repeater;
 use Illuminate\Auth\Access\Events\GateEvaluated;
 use Illuminate\Support\Facades\Event;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
-function loginAsUserWithProjectViewPermissions(): User
-{
+$loginAsUserWithProjectViewPermissions = function (): User {
     $user = User::factory()->create();
-
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
-
     actingAs($user);
 
     return $user;
-}
+};
 
 it('cannot render without proper permission', function () {
     $user = User::factory()->create();
@@ -89,8 +86,8 @@ it('cannot render without proper permission', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission', function () {
-    loginAsUserWithProjectViewPermissions();
+it('can render with proper permission', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
@@ -100,8 +97,8 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
-it('cannot render an archived project', function () {
-    loginAsUserWithProjectViewPermissions();
+it('cannot render an archived project', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
     $project->archive();
@@ -201,42 +198,42 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
         ->assertSuccessful();
 });
 
-it('can view a record', function () {
-    loginAsUserWithProjectViewPermissions();
+it('can view a record', function () use ($loginAsUserWithProjectViewPermissions) {
+    $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
 
-    livewire(ViewProject::class, [
+    Livewire::test(ViewProject::class, [
         'record' => $project->getRouteKey(),
     ])
         ->assertHasNoErrors();
 });
 
-describe('tabs', function () {
-    it('shows each tab the user can view', function (ProjectTab $tab) {
-        loginAsUserWithProjectViewPermissions();
+describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
+    it('shows each tab the user can view', function (ProjectTab $tab) use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
+        Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
             ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
-    it('defaults to the access tab when no tab is requested', function () {
-        loginAsUserWithProjectViewPermissions();
+    it('defaults to the access tab when no tab is requested', function () use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 
-        livewire(ViewProject::class, ['record' => $project->getRouteKey()])
+        Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('falls back to the access tab when the requested tab is invalid', function () {
-        loginAsUserWithProjectViewPermissions();
+    it('falls back to the access tab when the requested tab is invalid', function () use ($loginAsUserWithProjectViewPermissions) {
+        $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
 
-        livewire(ViewProject::class, [
+        Livewire::test(ViewProject::class, [
             'record' => $project->getRouteKey(),
             'tab' => 'invalid',
         ])
@@ -304,7 +301,7 @@ it('can render the project access widget and mount the manage access action', fu
 
     $project = Project::factory()->create();
 
-    livewire(ProjectAccessWidget::class, [
+    Livewire::test(ProjectAccessWidget::class, [
         'record' => $project,
     ])
         ->assertActionExists('manageAccess')
@@ -325,7 +322,7 @@ it('can list pipeline entries in the project work pipeline widget', function () 
         ->count(3)
         ->create(['pipeline_stage_id' => $pipeline->stages->sole()->getKey()]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertCanSeeTableRecords($entries);
@@ -345,7 +342,7 @@ it('hides archived pipeline entries in the project work pipeline widget', functi
     $archived = PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
     $archived->archive();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertCanSeeTableRecords([$active])
@@ -363,7 +360,7 @@ it('can create a milestone through the project milestones widget create action',
 
     $milestone = ProjectMilestone::factory()->for($project)->make();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callTableAction('createMilestone', data: [
@@ -384,7 +381,7 @@ it('hides the create milestone action when the project has no pipeline', functio
 
     $project = Project::factory()->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionHidden('createMilestone');
@@ -406,7 +403,7 @@ it('shows the create milestone action to users who can update the project', func
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionVisible('createMilestone');
@@ -426,7 +423,7 @@ it('hides the create milestone action from users who cannot update the project',
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionHidden('createMilestone');
@@ -442,7 +439,7 @@ it('auto-selects the first pipeline on mount in the project work pipeline widget
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSet('selectedPipelineId', $pipeline->getKey());
@@ -471,7 +468,7 @@ it('only shows pipeline entries that belong to the selected pipeline', function 
         'pipeline_stage_id' => $pipelineB->stages->first()->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction('selectPipeline', data: ['pipeline_id' => $pipelineA->getKey()])
@@ -495,7 +492,7 @@ it('displays a pipeline entry start date in the project work pipeline widget', f
         'start_date' => '2026-08-09 09:30:00',
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableColumnStateSet('start_date', $entry->start_date, $entry);
@@ -514,7 +511,7 @@ it('displays a pipeline entry created by and customer visibility in the project 
         'is_visible_to_guests' => true,
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableColumnStateSet('createdBy.name', $entry->createdBy->name, $entry)
@@ -536,7 +533,7 @@ it('can switch the selected pipeline through the select pipeline action', functi
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertActionExists('selectPipeline')
@@ -563,7 +560,7 @@ it('rejects selecting a pipeline that belongs to another project', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction('selectPipeline', data: [
@@ -590,7 +587,7 @@ it('rejects selecting an archived pipeline', function () {
 
     $archivedPipeline->archive();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction('selectPipeline', data: [
@@ -607,7 +604,7 @@ it('can create a pipeline through the create pipeline action', function () {
 
     $project = Project::factory()->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertActionExists('createPipeline')
@@ -646,7 +643,7 @@ it('can create a pipeline entry through the widget header create action', functi
 
     PipelineEntry::factory()->create(['pipeline_stage_id' => $stage->getKey()]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callTableAction('createEntry', data: [
@@ -684,7 +681,7 @@ it('displays milestone progress from completed pipeline tasks', function () {
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSee($milestone->title)
@@ -709,7 +706,7 @@ it('groups unassigned pipeline tasks after milestone groups', function () {
         'pipeline_stage_id' => $pipeline->stages->first()->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSeeInOrder([$milestone->title, 'No Associated Milestone']);
@@ -729,7 +726,7 @@ it('shows a manage milestone action when the user can manage the project', funct
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSeeHtml("wire:click=\"mountAction('manageMilestone', { milestone: '{$milestone->getKey()}' })\"")
@@ -755,7 +752,7 @@ it('does not show a manage milestone action when the user cannot manage the proj
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSee($milestone->title)
@@ -780,7 +777,7 @@ it('renders the milestone title as plain text and denies the manage milestone ac
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSee($milestone->title)
@@ -801,7 +798,7 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSeeHtml("aria-label=\"{$milestone->title}\"");
@@ -842,7 +839,7 @@ it('does not re-authorize milestone updates per milestone group row', function (
         }
     });
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ]);
 
@@ -863,7 +860,7 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction([
@@ -882,7 +879,7 @@ it('shows the delete milestone action to users who can manage the project', func
     $project = Project::factory()->create();
     $milestone = ProjectMilestone::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertActionVisible([
@@ -901,7 +898,7 @@ it('hides the delete milestone action from users who cannot manage the project',
     $project = Project::factory()->create();
     $milestone = ProjectMilestone::factory()->for($project)->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertActionHidden([
@@ -924,7 +921,7 @@ it('does not show a soft-deleted milestone as a phantom empty group after the ta
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction([
@@ -945,7 +942,7 @@ it('shows milestones that have no pipeline tasks as an empty group', function ()
         ->create();
     $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSee($milestone->title)
@@ -974,7 +971,7 @@ it('only shows empty milestones that belong to the selected pipeline', function 
         'title' => 'Other Pipeline Milestone',
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction('selectPipeline', data: ['pipeline_id' => $selectedPipeline->getKey()])
@@ -998,7 +995,7 @@ it('disables the name column click for placeholder rows but keeps it clickable f
     ]);
     $milestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableColumnHasExtraAttributes('name', ['class' => 'ps-6 underline'], $entry)
@@ -1018,7 +1015,7 @@ it('shows the inbox icon for milestone placeholder rows and the clipboard icon f
     ]);
     $milestone = ProjectMilestone::factory()->for($project)->create();
 
-    $livewire = livewire(ProjectWorkPipelineWidget::class, [
+    $livewire = Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ]);
 
@@ -1046,7 +1043,7 @@ it('does not show an archived or soft-deleted milestone as an empty group', func
     $deletedMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Deleted Milestone']);
     $deletedMilestone->delete();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertDontSee('Archived Milestone')
@@ -1068,7 +1065,7 @@ it('keeps placeholder milestone rows visible when the classification filter excl
 
     $emptyMilestone = ProjectMilestone::factory()->for($project)->create(['title' => 'Empty Milestone']);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->filterTable('classification', PipelineStageClassification::Planning)
@@ -1091,7 +1088,7 @@ it('updates a milestone from the manage slide-over', function () {
         'project_milestone_id' => $milestone->getKey(),
     ]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->callAction(
@@ -1125,7 +1122,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
     $entry->assets()->sync([$asset->id]);
     $entry->serviceRequests()->sync([$serviceRequest->id]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()])
@@ -1156,7 +1153,7 @@ it('shows the header create entry action once a pipeline is selected even withou
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionVisible('createEntry')
@@ -1175,7 +1172,7 @@ it('shows the header create entry action when the pipeline has a milestone but n
 
     ProjectMilestone::factory()->create(['project_id' => $project->getKey()]);
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionVisible('createEntry');
@@ -1186,7 +1183,7 @@ it('shows the empty state when the project has no pipelines', function () {
 
     $project = Project::factory()->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertSet('selectedPipelineId', null)
@@ -1204,7 +1201,7 @@ it('shows the kanban header action once a pipeline is selected and links to the 
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionVisible('kanban')
@@ -1219,7 +1216,7 @@ it('hides the kanban header action when the project has no pipelines', function 
 
     $project = Project::factory()->create();
 
-    livewire(ProjectWorkPipelineWidget::class, [
+    Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionHidden('kanban');
@@ -1232,7 +1229,7 @@ it('can list files in the project files widget', function () {
 
     $files = ProjectFile::factory()->count(3)->for($project)->create();
 
-    livewire(ProjectFilesWidget::class, [
+    Livewire::test(ProjectFilesWidget::class, [
         'record' => $project,
     ])
         ->assertCanSeeTableRecords($files);
@@ -1249,7 +1246,7 @@ it('shows the manage files action to users who can update the project', function
 
     actingAs($manager);
 
-    livewire(ProjectFilesWidget::class, [
+    Livewire::test(ProjectFilesWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionVisible('manageFiles');
@@ -1264,7 +1261,7 @@ it('hides the manage files action from users who cannot update the project', fun
 
     $project = Project::factory()->create();
 
-    livewire(ProjectFilesWidget::class, [
+    Livewire::test(ProjectFilesWidget::class, [
         'record' => $project,
     ])
         ->assertTableActionHidden('manageFiles');
@@ -1280,7 +1277,7 @@ it('calculates progress as 0 when the project has no pipeline entries', function
         ->has(PipelineStage::factory()->count(2), 'stages')
         ->create();
 
-    livewire(ProjectDashboardHeaderWidget::class, [
+    Livewire::test(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
         ->assertActionDoesNotExist('manageAccess')
@@ -1305,7 +1302,7 @@ it('calculates progress as the percentage of pipeline entries with a complete st
     PipelineEntry::factory()->count(3)->create(['pipeline_stage_id' => $planningStage->getKey()]);
     PipelineEntry::factory()->count(1)->create(['pipeline_stage_id' => $completeStage->getKey()]);
 
-    livewire(ProjectDashboardHeaderWidget::class, [
+    Livewire::test(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
         ->assertSee('Progress: 25%');
@@ -1329,7 +1326,7 @@ it('only counts pipeline entries belonging to the given project when calculating
     ]);
     PipelineEntry::factory()->count(5)->create(['pipeline_stage_id' => $otherPlanningStage->getKey()]);
 
-    livewire(ProjectDashboardHeaderWidget::class, [
+    Livewire::test(ProjectDashboardHeaderWidget::class, [
         'record' => $project,
     ])
         ->assertSee('Progress: 100%');

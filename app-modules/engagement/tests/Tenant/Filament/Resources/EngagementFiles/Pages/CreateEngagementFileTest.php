@@ -36,9 +36,9 @@
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\EngagementFileResource;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\Pages\CreateEngagementFile;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // TODO: Add tests for the CreateEngagementFile
 //test('A successful action on the CreateEngagementFile page', function () {});
@@ -55,7 +55,7 @@ test('CreateEngagementFile is gated with proper access control', function () {
             EngagementFileResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateEngagementFile::class)
+    Livewire::test(CreateEngagementFile::class)
         ->assertForbidden();
 
     $user->givePermissionTo('engagement_file.view-any');
@@ -70,7 +70,7 @@ test('CreateEngagementFile is gated with proper access control', function () {
 
     //$request = collect(CreateEngagementFileRequestFactory::new()->create());
     //
-    //livewire(EngagementFileResource\Pages\CreateEngagementFile::class)
+    //Livewire::test(EngagementFileResource\Pages\CreateEngagementFile::class)
     //    ->fillForm($request->toArray())
     //    ->call('create')
     //    ->assertHasNoFormErrors();

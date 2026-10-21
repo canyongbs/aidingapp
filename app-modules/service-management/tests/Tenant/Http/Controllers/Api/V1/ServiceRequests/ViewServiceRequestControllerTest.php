@@ -101,11 +101,11 @@ it('returns correct service request fields', function (string $responseKey, Clos
     expect($response['data'][$responseKey])->toBe($getExpected($serviceRequest));
 })->with([
     // responseKey, getExpected
-    '`id`' => ['id', fn (ServiceRequest $sr) => $sr->id],
-    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $sr) => $sr->service_request_number],
-    '`title`' => ['title', fn (ServiceRequest $sr) => $sr->title],
-    '`close_details`' => ['close_details', fn (ServiceRequest $sr) => $sr->close_details],
-    '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
+    '`id`' => ['id', fn (ServiceRequest $serviceRequest) => $serviceRequest->id],
+    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $serviceRequest) => $serviceRequest->service_request_number],
+    '`title`' => ['title', fn (ServiceRequest $serviceRequest) => $serviceRequest->title],
+    '`close_details`' => ['close_details', fn (ServiceRequest $serviceRequest) => $serviceRequest->close_details],
+    '`category`' => ['category', fn (ServiceRequest $serviceRequest) => $serviceRequest->category->value],
 ]);
 
 it('returns correct status relationship structure', function () {

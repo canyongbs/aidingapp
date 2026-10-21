@@ -43,9 +43,9 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can list guest contacts', function () {
@@ -57,7 +57,7 @@ it('can list guest contacts', function () {
 
     $project->guestContacts()->attach($contacts->pluck('id'));
 
-    livewire(GuestContactsRelationManager::class, [
+    Livewire::test(GuestContactsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -71,7 +71,7 @@ it('can attach a guest contact to a project', function () {
 
     $contact = Contact::factory()->create();
 
-    livewire(GuestContactsRelationManager::class, [
+    Livewire::test(GuestContactsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -92,7 +92,7 @@ it('can detach a guest contact from a project', function () {
 
     $project->guestContacts()->attach($contact->getKey());
 
-    livewire(GuestContactsRelationManager::class, [
+    Livewire::test(GuestContactsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -111,7 +111,7 @@ it('can bulk detach guest contacts from a project', function () {
 
     $project->guestContacts()->attach($contacts->pluck('id'));
 
-    livewire(GuestContactsRelationManager::class, [
+    Livewire::test(GuestContactsRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageGuests::class,
     ])
@@ -130,7 +130,7 @@ describe('authorization', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(GuestContactsRelationManager::class, [
+        Livewire::test(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -156,7 +156,7 @@ describe('authorization', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(GuestContactsRelationManager::class, [
+        Livewire::test(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -184,7 +184,7 @@ describe('authorization', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(GuestContactsRelationManager::class, [
+        Livewire::test(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -207,7 +207,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(GuestContactsRelationManager::class, [
+        Livewire::test(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])
@@ -225,7 +225,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(GuestContactsRelationManager::class, [
+        Livewire::test(GuestContactsRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageGuests::class,
         ])

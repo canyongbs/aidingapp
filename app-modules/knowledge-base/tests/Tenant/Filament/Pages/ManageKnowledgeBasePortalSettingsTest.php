@@ -39,9 +39,9 @@ use AidingApp\KnowledgeBase\Filament\Pages\ManageKnowledgeBasePortalSettings;
 use AidingApp\KnowledgeBase\Settings\KnowledgeBasePortalSettings;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $settings = app(LicenseSettings::class);
@@ -52,17 +52,17 @@ it('is gated with proper access control', function () {
 
     actingAs($user);
 
-    livewire(ManageKnowledgeBasePortalSettings::class)->assertForbidden();
+    Livewire::test(ManageKnowledgeBasePortalSettings::class)->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ManageKnowledgeBasePortalSettings::class)->assertForbidden();
+    Livewire::test(ManageKnowledgeBasePortalSettings::class)->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
     $settings->save();
 
-    livewire(ManageKnowledgeBasePortalSettings::class)->assertOk();
+    Livewire::test(ManageKnowledgeBasePortalSettings::class)->assertOk();
 });
 
 it('updates the category tab order', function () {
@@ -75,7 +75,7 @@ it('updates the category tab order', function () {
 
     actingAs($user);
 
-    livewire(ManageKnowledgeBasePortalSettings::class)
+    Livewire::test(ManageKnowledgeBasePortalSettings::class)
         ->fillForm(['category_tab_order' => KnowledgeBaseCategoryTabOrder::FeaturedMostViewedAllArticles->value])
         ->call('save')
         ->assertHasNoFormErrors();
@@ -94,7 +94,7 @@ it('disables the form for users without update permission', function () {
 
     actingAs($user);
 
-    livewire(ManageKnowledgeBasePortalSettings::class)
+    Livewire::test(ManageKnowledgeBasePortalSettings::class)
         ->assertOk()
         ->assertFormFieldIsDisabled('category_tab_order');
 });

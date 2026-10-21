@@ -41,24 +41,24 @@ use AidingApp\ServiceManagement\Enums\ServiceMonitoringFrequency;
 use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\getJson;
+use function Pest\Laravel\travelTo;
 
 beforeEach(function () {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 
-    $this->contact = Contact::factory()->create();
-
-    actingAs($this->contact);
+    actingAs(Contact::factory()->create());
 });
 
 it('displays the service monitor data', function () {
-    freezeTime();
+    // Midday, so checks a few hours old still land in today's history bucket.
+    travelTo(today()->setTime(12, 0));
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
         'name' => 'Customer Website',
@@ -151,7 +151,7 @@ describe('authorization', function () {
         getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
             ->assertNotFound();
 
-        $serviceMonitoringTarget->confidentialContacts()->attach($this->contact);
+        $serviceMonitoringTarget->confidentialContacts()->attach(Auth::id());
 
         getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
             ->assertOk();

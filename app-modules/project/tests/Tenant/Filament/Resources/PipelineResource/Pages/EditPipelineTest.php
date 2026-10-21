@@ -41,10 +41,10 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\EditPipelineRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render with proper permission.', function () {
@@ -61,7 +61,7 @@ it('can render with proper permission.', function () {
             'description' => 'Test pipeline description',
         ])->create();
 
-    livewire(EditPipeline::class, [
+    Livewire::test(EditPipeline::class, [
         'record' => $pipeline->getKey(),
         'parentRecord' => $project,
     ])
@@ -74,14 +74,14 @@ it('can render with proper permission.', function () {
     $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
 
-    livewire(EditPipeline::class, [
+    Livewire::test(EditPipeline::class, [
         'record' => $pipeline->getKey(),
         'parentRecord' => $project,
     ])
         ->assertSuccessful();
 });
 
-it('can validate edit pipeline inputs', function ($data, $errors) {
+it('can validate edit pipeline inputs', function (EditPipelineRequestFactory $data, array $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -93,7 +93,7 @@ it('can validate edit pipeline inputs', function ($data, $errors) {
 
     $request = EditPipelineRequestFactory::new($data)->create();
 
-    livewire(EditPipeline::class, [
+    Livewire::test(EditPipeline::class, [
         'record' => $pipeline->getKey(),
         'parentRecord' => $project,
     ])
@@ -137,7 +137,7 @@ it('can edit pipelines', function () {
 
     $requestData = EditPipelineRequestFactory::new()->create();
 
-    livewire(EditPipeline::class, [
+    Livewire::test(EditPipeline::class, [
         'record' => $pipeline->getKey(),
         'parentRecord' => $project,
     ])
@@ -171,7 +171,7 @@ it('can delete pipelines', function () {
         ->for($project)
         ->create();
 
-    livewire(EditPipeline::class, [
+    Livewire::test(EditPipeline::class, [
         'record' => $pipeline->getKey(),
         'parentRecord' => $project,
     ])

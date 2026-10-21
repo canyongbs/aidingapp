@@ -46,10 +46,10 @@ use AidingApp\Project\Notifications\PipelineEntryAssignedToUserNotification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 /**
@@ -57,12 +57,11 @@ use function Tests\asSuperAdmin;
  *
  * @return array<string, mixed>
  */
-function baseKanbanEntryData(string $name = 'Test Entry'): array
-{
+$baseKanbanEntryData = function (string $name = 'Test Entry'): array {
     return [
         'name' => $name,
     ];
-}
+};
 
 it('can render create pipeline entry with proper permission', function () {
     $user = User::factory()->create();
@@ -82,11 +81,11 @@ it('can render create pipeline entry with proper permission', function () {
     $user->givePermissionTo('pipeline.*.update');
     $user->refresh();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->assertActionVisible('addEntry');
 });
 
-it('can create a pipeline entry via the kanban add entry action', function () {
+it('can create a pipeline entry via the kanban add entry action', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -96,9 +95,9 @@ it('can create a pipeline entry via the kanban add entry action', function () {
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Kanban Entry'),
+            ...$baseKanbanEntryData('Kanban Entry'),
         ], arguments: ['stage' => $stage->id])
         ->assertHasNoActionErrors();
 
@@ -108,7 +107,7 @@ it('can create a pipeline entry via the kanban add entry action', function () {
     ]);
 });
 
-it('can create a kanban entry with description and due date', function () {
+it('can create a kanban entry with description and due date', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -119,9 +118,9 @@ it('can create a kanban entry with description and due date', function () {
     $stage = $pipeline->stages->first();
     $due = now()->addDays(5)->toDateTimeString();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Entry With Details'),
+            ...$baseKanbanEntryData('Entry With Details'),
             'description' => 'Kanban description.',
             'due' => $due,
         ], arguments: ['stage' => $stage->id])
@@ -134,7 +133,7 @@ it('can create a kanban entry with description and due date', function () {
     ]);
 });
 
-it('can create a kanban entry with an assigned user', function () {
+it('can create a kanban entry with an assigned user', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -145,9 +144,9 @@ it('can create a kanban entry with an assigned user', function () {
     $stage = $pipeline->stages->first();
     $user = User::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Assigned Kanban Entry'),
+            ...$baseKanbanEntryData('Assigned Kanban Entry'),
             'assigned_to_type' => 'user',
             'assigned_to_id' => $user->id,
         ], arguments: ['stage' => $stage->id])
@@ -160,7 +159,7 @@ it('can create a kanban entry with an assigned user', function () {
     ]);
 });
 
-it('can create a kanban entry with an assigned contact', function () {
+it('can create a kanban entry with an assigned contact', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -171,9 +170,9 @@ it('can create a kanban entry with an assigned contact', function () {
     $stage = $pipeline->stages->first();
     $contact = Contact::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Assigned Contact Kanban Entry'),
+            ...$baseKanbanEntryData('Assigned Contact Kanban Entry'),
             'assigned_to_type' => 'contact',
             'assigned_to_id' => $contact->id,
         ], arguments: ['stage' => $stage->id])
@@ -187,7 +186,7 @@ it('can create a kanban entry with an assigned contact', function () {
     ]);
 });
 
-it('can create a kanban entry with no assigned user', function () {
+it('can create a kanban entry with no assigned user', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -197,9 +196,9 @@ it('can create a kanban entry with no assigned user', function () {
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Unassigned Kanban Entry'),
+            ...$baseKanbanEntryData('Unassigned Kanban Entry'),
             'assigned_to_type' => null,
             'assigned_to_id' => null,
         ], arguments: ['stage' => $stage->id])
@@ -212,7 +211,7 @@ it('can create a kanban entry with no assigned user', function () {
     ]);
 });
 
-it('persists related milestones, assets, and service requests via the kanban add entry action', function () {
+it('persists related milestones, assets, and service requests via the kanban add entry action', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -227,9 +226,9 @@ it('persists related milestones, assets, and service requests via the kanban add
     $asset = Asset::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Related Kanban Entry'),
+            ...$baseKanbanEntryData('Related Kanban Entry'),
             'project_milestone_id' => $milestone->id,
             'assets' => [$asset->id],
             'serviceRequests' => [$serviceRequest->id],
@@ -243,7 +242,7 @@ it('persists related milestones, assets, and service requests via the kanban add
     expect($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->id]);
 });
 
-it('requires a name when creating a kanban entry', function () {
+it('requires a name when creating a kanban entry', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -253,15 +252,15 @@ it('requires a name when creating a kanban entry', function () {
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData(),
+            ...$baseKanbanEntryData(),
             'name' => null,
         ], arguments: ['stage' => $stage->id])
         ->assertHasActionErrors(['name' => 'required']);
 });
 
-it('validates assigned_to_id must be a valid user id in the kanban action', function () {
+it('validates assigned_to_id must be a valid user id in the kanban action', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -271,16 +270,16 @@ it('validates assigned_to_id must be a valid user id in the kanban action', func
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Bad User'),
+            ...$baseKanbanEntryData('Bad User'),
             'assigned_to_type' => 'user',
             'assigned_to_id' => (string) str()->uuid(),
         ], arguments: ['stage' => $stage->id])
         ->assertHasActionErrors(['assigned_to_id']);
 });
 
-it('validates assigned_to_id must be a valid contact id in the kanban action', function () {
+it('validates assigned_to_id must be a valid contact id in the kanban action', function () use ($baseKanbanEntryData) {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -290,16 +289,16 @@ it('validates assigned_to_id must be a valid contact id in the kanban action', f
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Bad Contact'),
+            ...$baseKanbanEntryData('Bad Contact'),
             'assigned_to_type' => 'contact',
             'assigned_to_id' => (string) str()->uuid(),
         ], arguments: ['stage' => $stage->id])
         ->assertHasActionErrors(['assigned_to_id']);
 });
 
-it('sends notification when creating a kanban entry with an assigned user', function () {
+it('sends notification when creating a kanban entry with an assigned user', function () use ($baseKanbanEntryData) {
     Notification::fake();
 
     asSuperAdmin();
@@ -312,9 +311,9 @@ it('sends notification when creating a kanban entry with an assigned user', func
     $stage = $pipeline->stages->first();
     $user = User::factory()->create();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Notified Entry'),
+            ...$baseKanbanEntryData('Notified Entry'),
             'assigned_to_type' => 'user',
             'assigned_to_id' => $user->id,
         ], arguments: ['stage' => $stage->id])
@@ -323,7 +322,7 @@ it('sends notification when creating a kanban entry with an assigned user', func
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when creating a kanban entry with no assigned user', function () {
+it('does not send notification when creating a kanban entry with no assigned user', function () use ($baseKanbanEntryData) {
     Notification::fake();
 
     asSuperAdmin();
@@ -335,9 +334,9 @@ it('does not send notification when creating a kanban entry with no assigned use
 
     $stage = $pipeline->stages->first();
 
-    livewire(PipelineEntryKanban::class, ['pipeline' => $pipeline])
+    Livewire::test(PipelineEntryKanban::class, ['pipeline' => $pipeline])
         ->callAction('addEntry', data: [
-            ...baseKanbanEntryData('Silent Entry'),
+            ...$baseKanbanEntryData('Silent Entry'),
             'assigned_to_type' => null,
             'assigned_to_id' => null,
         ], arguments: ['stage' => $stage->id])

@@ -166,7 +166,7 @@ it('broadcasts `UnreadCountUpdated` event', function () {
         user: $user,
     );
 
-    Event::assertDispatched(UnreadCountUpdated::class, function ($event) use ($conversation, $user) {
+    Event::assertDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($conversation, $user) {
         return $event->userId === $user->getKey()
             && $event->conversationId === $conversation->getKey()
             && $event->unreadCount === 0;

@@ -46,10 +46,10 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Toggle;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
@@ -66,7 +66,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
 
     $editRequest = EditServiceRequestTypeAssignmentsRequestFactory::new()->withRandomTypeNotIncludingIndividual()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
@@ -102,7 +102,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
         ->withIndividualId($managerDepartment)
         ->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($editRequest)
@@ -126,7 +126,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
         )
         ->assertSuccessful();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm([
@@ -140,12 +140,12 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     assertEquals($directManager->getKey(), $serviceRequestType->fresh()->assignment_type_individual_id);
 });
 
-test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, $errors) {
+test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($data->create())
@@ -176,7 +176,7 @@ test('EditServiceRequestTypeAssignments is gated with proper access control', fu
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -193,7 +193,7 @@ test('EditServiceRequestTypeAssignments is gated with proper access control', fu
 
     $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->withRandomTypeNotIncludingIndividual()->create());
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -224,7 +224,7 @@ test('EditServiceRequestTypeAssignments is gated with proper feature access cont
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -242,7 +242,7 @@ test('EditServiceRequestTypeAssignments is gated with proper feature access cont
 
     $request = collect(EditServiceRequestTypeAssignmentsRequestFactory::new()->withRandomTypeNotIncludingIndividual()->create());
 
-    livewire(EditServiceRequestTypeAssignments::class, [
+    Livewire::test(EditServiceRequestTypeAssignments::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -257,7 +257,7 @@ test('the automated status change toggle is hidden when assignment type is None'
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm(['assignment_type' => ServiceRequestTypeAssignmentTypes::None->value])
         ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isHidden());
 });
@@ -267,7 +267,7 @@ test('the automated status change toggle is visible for an automated assignment 
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm(['assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value])
         ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isVisible());
 });
@@ -277,7 +277,7 @@ test('the status picker is required when the automated status change toggle is o
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
             'is_automated_status_change_enabled' => true,
@@ -297,7 +297,7 @@ test('the status picker pre-fills with the default open status when the toggle i
     $openStatus = ServiceRequestStatus::factory()->open()->create(['sort' => $lowestSort - 1]);
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
             'is_automated_status_change_enabled' => true,
@@ -311,7 +311,7 @@ test('the status picker is hidden when assignment type is switched back to None 
     $status = ServiceRequestStatus::factory()->open()->create();
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
             'is_automated_status_change_enabled' => true,
@@ -327,7 +327,7 @@ test('it persists the automated status change configuration', function () {
     $status = ServiceRequestStatus::factory()->open()->create();
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
             'is_automated_status_change_enabled' => true,
@@ -349,7 +349,7 @@ test('the automated status change toggle is on when loading a type with an autom
         'automated_status_id' => $status->getKey(),
     ]);
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertFormSet([
             'is_automated_status_change_enabled' => true,
             'automated_status_id' => $status->getKey(),
@@ -367,7 +367,7 @@ test('saving with the automated status change toggle off nulls the automated_sta
 
     expect($serviceRequestType->automated_status_id)->toBe($status->getKey());
 
-    livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+    Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
         ->fillForm([
             'assignment_type' => ServiceRequestTypeAssignmentTypes::RoundRobin->value,
             'is_automated_status_change_enabled' => false,
@@ -387,7 +387,7 @@ describe('archiving', function () {
 
         $serviceRequestType = ServiceRequestType::factory()->create();
 
-        livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
             ->assertFormFieldExists('automated_status_id', function (Select $field) use ($activeStatus, $archivedStatus): bool {
                 $optionIds = collect($field->getOptions())
                     ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())
@@ -407,7 +407,7 @@ describe('archiving', function () {
             ->for($archivedStatus, 'automatedStatus')
             ->create();
 
-        livewire(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
+        Livewire::test(EditServiceRequestTypeAssignments::class, ['record' => $serviceRequestType->getRouteKey()])
             ->assertFormFieldExists('automated_status_id', function (Select $field) use ($archivedStatus): bool {
                 $optionIds = collect($field->getOptions())
                     ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())

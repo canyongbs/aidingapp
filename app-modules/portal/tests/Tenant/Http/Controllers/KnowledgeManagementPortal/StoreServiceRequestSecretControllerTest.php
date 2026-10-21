@@ -41,6 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\postJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
@@ -64,14 +65,14 @@ it('stores an encrypted secret and returns only its id', function () {
 
     $secret = Secret::query()->findOrFail($response->json('id'));
 
-    expect($secret->value)->not->toBe('service-request-password')
+    expect($secret->value)->not()->toBe('service-request-password')
         ->and(Crypt::decryptString($secret->value))->toBe('service-request-password')
         ->and($secret->author->is($contact))->toBeTrue()
         ->and($secret->related_id)->toBeNull();
 });
 
 it('denies unauthenticated secret storage', function () {
-    $this->postJson(
+    postJson(
         route('api.portal.service-request.store-secret'),
         ['value' => 'service-request-password'],
     )->assertUnauthorized();
@@ -169,7 +170,7 @@ it('does not replace a secret owned by another contact', function () {
         ],
     )->assertUnprocessable();
 
-    expect($secret->fresh())->not->toBeNull()
+    expect($secret->fresh())->not()->toBeNull()
         ->and(Secret::query()->count())->toBe(1);
 });
 
@@ -188,7 +189,7 @@ it('does not replace a secret that is already attached', function () {
         ],
     )->assertUnprocessable();
 
-    expect($secret->fresh())->not->toBeNull()
+    expect($secret->fresh())->not()->toBeNull()
         ->and(Secret::query()->count())->toBe(1);
 });
 

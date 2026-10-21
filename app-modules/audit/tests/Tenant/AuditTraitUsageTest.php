@@ -34,20 +34,21 @@
 </COPYRIGHT>
 */
 
-test('app')
-    ->expect('App\Models')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->and('AidingApp\ServiceManagement')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->and('AidingApp\Audit')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->ignoring('AidingApp\Audit\Models\Concerns\Auditable')
-    ->and('AidingApp\Authorization')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->and('AidingApp\Engagement')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->and('AidingApp\KnowledgeBase')
-    ->not->toUse('OwenIt\Auditing\Auditable')
-    ->and('AidingApp\Contact')
-    ->not->toUse('OwenIt\Auditing\Auditable');
+arch('app', function () {
+    expect('App\Models')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->and('AidingApp\ServiceManagement')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->and('AidingApp\Audit')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->ignoring('AidingApp\Audit\Models\Concerns\Auditable')
+        ->and('AidingApp\Authorization')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->and('AidingApp\Engagement')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->and('AidingApp\KnowledgeBase')
+        ->not()->toUse('OwenIt\Auditing\Auditable')
+        ->and('AidingApp\Contact')
+        ->not()->toUse('OwenIt\Auditing\Auditable');
+});

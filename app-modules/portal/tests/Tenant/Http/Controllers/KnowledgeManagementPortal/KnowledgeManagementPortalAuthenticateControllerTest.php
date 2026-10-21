@@ -64,7 +64,7 @@ test('it returns expired and creates guest session when authentication is expire
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now()->subDay()->subMinute(),
     ]);
 
@@ -93,7 +93,7 @@ test('it reuses existing guest session for expired authentication', function () 
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now()->subDay()->subMinute(),
     ]);
 
@@ -123,7 +123,7 @@ test('it authenticates contact and clears guest session when code is valid', fun
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -148,7 +148,7 @@ test('it authenticates contact and clears guest session when code is valid', fun
         ->assertJsonPath('assistant_widget_config_url', null)
         ->assertSessionMissing('guest_id');
 
-    expect($response->json('token'))->not->toBeEmpty()
+    expect($response->json('token'))->not()->toBeEmpty()
         ->and(auth('contact')->check())->toBeTrue();
 });
 
@@ -159,7 +159,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -179,7 +179,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
 
     $token = session()->token();
 
-    expect($token)->not->toBeEmpty();
+    expect($token)->not()->toBeEmpty();
 
     withHeader('Referer', 'https://' . $host)
         ->postJson($url, ['code' => $plainCode])
@@ -194,7 +194,7 @@ test('it returns validation error when code is invalid', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(112233),
+        'code' => Hash::make((string) 112233),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -220,7 +220,7 @@ test('it returns validation error when code is missing', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(445566),
+        'code' => Hash::make((string) 445566),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
@@ -246,7 +246,7 @@ test('it locks the authentication after too many invalid code attempts and rejec
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);

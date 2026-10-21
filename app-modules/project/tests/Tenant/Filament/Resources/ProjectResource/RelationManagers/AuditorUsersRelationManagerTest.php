@@ -42,9 +42,9 @@ use Filament\Actions\AttachAction;
 use Filament\Actions\DetachAction;
 use Filament\Actions\DetachBulkAction;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can list auditor users', function () {
@@ -56,7 +56,7 @@ it('can list auditor users', function () {
 
     $project->auditorUsers()->attach($auditors->pluck('id'));
 
-    livewire(AuditorUsersRelationManager::class, [
+    Livewire::test(AuditorUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -70,7 +70,7 @@ it('can attach an auditor user to a project', function () {
 
     $auditor = User::factory()->create();
 
-    livewire(AuditorUsersRelationManager::class, [
+    Livewire::test(AuditorUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -91,7 +91,7 @@ it('can detach an auditor user from a project', function () {
 
     $project->auditorUsers()->attach($auditor->getKey());
 
-    livewire(AuditorUsersRelationManager::class, [
+    Livewire::test(AuditorUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -110,7 +110,7 @@ it('can bulk detach auditor users from a project', function () {
 
     $project->auditorUsers()->attach($auditors->pluck('id'));
 
-    livewire(AuditorUsersRelationManager::class, [
+    Livewire::test(AuditorUsersRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManageAuditors::class,
     ])
@@ -129,7 +129,7 @@ describe('authorization', function () {
 
         $auditor = User::factory()->create();
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -155,7 +155,7 @@ describe('authorization', function () {
 
         $auditor = User::factory()->create();
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -183,7 +183,7 @@ describe('authorization', function () {
 
         $auditor = User::factory()->create();
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -209,7 +209,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -226,7 +226,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])
@@ -244,7 +244,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(AuditorUsersRelationManager::class, [
+        Livewire::test(AuditorUsersRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManageAuditors::class,
         ])

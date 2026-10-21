@@ -57,13 +57,14 @@ use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Crypt;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\postJson;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -76,7 +77,7 @@ test('A successful action on the CreateServiceRequest page', function () {
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create());
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -115,17 +116,17 @@ it('omits the unaffiliated placeholder from the contact option label and include
     $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
     $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
 
-    $field = livewire(CreateServiceRequest::class)
+    $field = Livewire::test(CreateServiceRequest::class)
         ->assertSuccessful()
         ->instance()
         ->getSchema('form')
         ->getComponent(fn ($component): bool => $component instanceof Select && $component->getName() === 'respondent_id');
 
-    expect($field)->not->toBeNull()
+    expect($field)->not()->toBeNull()
         ->and($field->getOptionLabelFromRecord($contactWithOrganization))
         ->toContain('Acme University')
         ->and($field->getOptionLabelFromRecord($contactWithoutOrganization))
-        ->not->toContain('Unaffiliated');
+        ->not()->toContain('Unaffiliated');
 });
 
 it('securely stores password fields on staff-created service requests', function () {
@@ -144,7 +145,7 @@ it('securely stores password fields on staff-created service requests', function
     $field->submissible()->associate($form);
     $field->save();
 
-    $form->content = [
+    $form->setAttribute('content', [
         'type' => 'doc',
         'content' => [[
             'type' => 'customBlock',
@@ -157,7 +158,7 @@ it('securely stores password fields on staff-created service requests', function
                 ],
             ],
         ]],
-    ];
+    ]);
     $form->save();
 
     $request = CreateServiceRequestRequestFactory::new()->create([
@@ -175,7 +176,7 @@ it('securely stores password fields on staff-created service requests', function
         ->assertOk()
         ->json('id');
 
-    $component = livewire(CreateServiceRequest::class)
+    $component = Livewire::test(CreateServiceRequest::class)
         ->set('data.type_id', $type->getKey())
         ->fillForm($request);
 
@@ -199,14 +200,14 @@ it('securely stores password fields on staff-created service requests', function
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($submittedField->pivot->response)->toBe($secret->getKey())
-        ->and($submittedField->pivot->response)->not->toBe('service-request-password')
+        ->and($submittedField->pivot->getAttribute('response'))->toBe($secret->getKey())
+        ->and($submittedField->pivot->getAttribute('response'))->not()->toBe('service-request-password')
         ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');
 });
 
-test('CreateServiceRequest requires valid data', function ($data, $errors, $setup = null) {
+test('CreateServiceRequest requires valid data', function (CreateServiceRequestRequestFactory $data, array $errors, ?Closure $setup = null) {
     if ($setup) {
         $setup();
     }
@@ -215,7 +216,7 @@ test('CreateServiceRequest requires valid data', function ($data, $errors, $setu
 
     $request = collect(CreateServiceRequestRequestFactory::new($data)->create());
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -244,7 +245,7 @@ test('type afterStateUpdated sets category from default_category', function () {
         'default_category' => ServiceRequestCategory::Incident,
     ]);
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm([
             'type_id' => $serviceRequestType->getKey(),
         ])
@@ -263,7 +264,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
             ServiceRequestResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertForbidden();
 
     $user->givePermissionTo('service_request.view-any');
@@ -292,7 +293,7 @@ test('CreateServiceRequest is gated with proper access control', function () {
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -330,7 +331,7 @@ test('CreateServiceRequest is gated with proper access control via direct user m
             ServiceRequestResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertForbidden();
 
     $user->givePermissionTo('service_request.view-any');
@@ -353,7 +354,7 @@ test('CreateServiceRequest is gated with proper access control via direct user m
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -406,7 +407,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
@@ -428,7 +429,7 @@ test('CreateServiceRequest is gated with proper feature access control', functio
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -458,7 +459,7 @@ test('CreateServiceRequest is gated with proper feature access control via direc
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.create');
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
@@ -480,7 +481,7 @@ test('CreateServiceRequest is gated with proper feature access control via direc
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -520,7 +521,7 @@ test('cannot create service requests if user is manager of any service request t
 
     $settings->save();
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertForbidden();
 
     actingAs($user)
@@ -555,10 +556,10 @@ test('displays only service request types managed by the current user', function
 
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -598,10 +599,10 @@ test('displays only service request types where current user is a direct manager
 
     $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->create();
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($serviceRequestTypesWithManagers, $serviceRequestTypesWithoutManagers): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -653,7 +654,7 @@ test('create service requests if user is manager of any service request type', f
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -692,7 +693,7 @@ test('create service requests if user is direct manager of any service request t
         ])->getKey(),
     ]));
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -731,13 +732,13 @@ test('validate service requests type if user is manager of any service request t
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($department) {
+    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($department) {
         $serviceRequest->managerDepartments()->attach($department);
     });
 
     $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -769,13 +770,13 @@ test('validate service requests type if user is direct manager of any service re
 
     $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
 
-    $serviceRequestTypesWithManagers->each(function ($serviceRequest) use ($user) {
+    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($user) {
         $serviceRequest->managerUsers()->attach($user);
     });
 
     $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
 
-    livewire(CreateServiceRequest::class)
+    Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
@@ -794,7 +795,7 @@ describe('archiving', function () {
         $activeStatus = ServiceRequestStatus::factory()->create();
         $archivedStatus = ServiceRequestStatus::factory()->archived()->create();
 
-        livewire(CreateServiceRequest::class)
+        Livewire::test(CreateServiceRequest::class)
             ->assertFormFieldExists('status_id', function (Select $field) use ($activeStatus, $archivedStatus): bool {
                 $optionIds = collect($field->getOptions())
                     ->flatMap(fn (mixed $group): array => collect($group)->keys()->all())

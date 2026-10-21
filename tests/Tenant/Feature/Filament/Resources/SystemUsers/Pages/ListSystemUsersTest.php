@@ -38,9 +38,9 @@ use App\Filament\Resources\SystemUsers\Pages\ListSystemUsers;
 use App\Models\SystemUser;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('only shows the bulk delete action to a user with the system_user.delete permission', function () {
     SystemUser::factory(15)->create();
@@ -51,11 +51,11 @@ it('only shows the bulk delete action to a user with the system_user.delete perm
 
     actingAs($user);
 
-    livewire(ListSystemUsers::class)
+    Livewire::test(ListSystemUsers::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('system_user.*.delete');
 
-    livewire(ListSystemUsers::class)
+    Livewire::test(ListSystemUsers::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

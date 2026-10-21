@@ -59,10 +59,7 @@ it('adds a participant to a channel conversation', function () {
 
     assertDatabaseCount(ConversationParticipant::class, 1);
 
-    expect($participant)
-        ->conversation_id->toBe($conversation->getKey())
-        ->participant_id->toBe($user->getKey())
-        ->is_manager->toBeFalse();
+    expect($participant->conversation_id)->toBe($conversation->getKey())->and($participant->participant_id)->toBe($user->getKey())->and($participant->is_manager)->toBeFalse();
 });
 
 it('adds a participant as a manager when specified', function () {
@@ -75,8 +72,7 @@ it('adds a participant as a manager when specified', function () {
         isManager: true,
     );
 
-    expect($participant)
-        ->is_manager->toBeTrue();
+    expect($participant->is_manager)->toBeTrue();
 });
 
 it('returns existing participant if already in conversation', function () {
@@ -121,7 +117,7 @@ it('sets `last_activity_at` when adding a participant', function () {
         user: $user,
     );
 
-    expect($participant->last_activity_at)->not->toBeNull();
+    expect($participant->last_activity_at)->not()->toBeNull();
 });
 
 it('broadcasts `ParticipantAdded` event when adding participant to public channel', function () {
@@ -135,7 +131,7 @@ it('broadcasts `ParticipantAdded` event when adding participant to public channe
         user: $user,
     );
 
-    Event::assertDispatched(ParticipantAdded::class, function ($event) use ($conversation, $user) {
+    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user) {
         return $event->participant->conversation_id === $conversation->getKey()
             && $event->participant->participant_id === $user->getKey();
     });
@@ -152,7 +148,7 @@ it('broadcasts `ParticipantAdded` event when adding participant to private chann
         user: $user,
     );
 
-    Event::assertDispatched(ParticipantAdded::class, function ($event) use ($conversation, $user) {
+    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user) {
         return $event->participant->conversation_id === $conversation->getKey()
             && $event->participant->participant_id === $user->getKey();
     });

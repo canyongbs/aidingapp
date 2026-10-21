@@ -59,10 +59,10 @@ it('does not return categories that have no service request types', function () 
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($categoryWithType->id)
-        ->and($categoryIds)->not->toContain($emptyCategory->id);
+        ->and($categoryIds)->not()->toContain($emptyCategory->id);
 });
 
 it('returns a category with a child category that has types', function () {
@@ -74,7 +74,7 @@ it('returns a category with a child category that has types', function () {
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($parentCategory->id);
 });
@@ -87,9 +87,9 @@ it('does not return a parent category when all child categories are empty', func
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
-    expect($categoryIds)->not->toContain($parentCategory->id);
+    expect($categoryIds)->not()->toContain($parentCategory->id);
 });
 
 it('does not return archived service request types as part of a category', function () {
@@ -105,10 +105,10 @@ it('does not return archived service request types as part of a category', funct
 
     $response->assertOk();
 
-    $categoryIds = collect($response->json('categories'))->pluck('id');
+    $categoryIds = $response->collect('categories')->pluck('id');
 
     expect($categoryIds)->toContain($categoryWithActiveType->id)
-        ->and($categoryIds)->not->toContain($categoryWithOnlyArchivedType->id);
+        ->and($categoryIds)->not()->toContain($categoryWithOnlyArchivedType->id);
 });
 
 it('hides visibility restricted top level types from guests', function () {
@@ -121,10 +121,10 @@ it('hides visibility restricted top level types from guests', function () {
 
     $response->assertOk();
 
-    $typeIds = collect($response->json('types'))->pluck('id');
+    $typeIds = $response->collect('types')->pluck('id');
 
     expect($typeIds)->toContain($visibleType->id)
-        ->and($typeIds)->not->toContain($restrictedType->id);
+        ->and($typeIds)->not()->toContain($restrictedType->id);
 });
 
 it('hides visibility restricted types from contacts of a non-matching contact type', function () {
@@ -141,9 +141,9 @@ it('hides visibility restricted types from contacts of a non-matching contact ty
 
     $response->assertOk();
 
-    $typeIds = collect($response->json('types'))->pluck('id');
+    $typeIds = $response->collect('types')->pluck('id');
 
-    expect($typeIds)->not->toContain($restrictedType->id);
+    expect($typeIds)->not()->toContain($restrictedType->id);
 });
 
 it('shows visibility restricted types to contacts of a matching contact type', function () {
@@ -159,7 +159,7 @@ it('shows visibility restricted types to contacts of a matching contact type', f
 
     $response->assertOk();
 
-    $typeIds = collect($response->json('types'))->pluck('id');
+    $typeIds = $response->collect('types')->pluck('id');
 
     expect($typeIds)->toContain($restrictedType->id);
 });
@@ -182,8 +182,8 @@ it('hides the entire subtree of a visibility restricted area from non-matching c
 
     $hiddenResponse->assertOk();
 
-    expect(collect($hiddenResponse->json('categories'))->pluck('id'))
-        ->not->toContain($restrictedCategory->id);
+    expect($hiddenResponse->collect('categories')->pluck('id'))
+        ->not()->toContain($restrictedCategory->id);
 
     $matchingContact = Contact::factory()->create(['type_id' => $allowedContactType->id]);
 
@@ -192,7 +192,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching c
 
     $visibleResponse->assertOk();
 
-    expect(collect($visibleResponse->json('categories'))->pluck('id'))
+    expect($visibleResponse->collect('categories')->pluck('id'))
         ->toContain($restrictedCategory->id);
 });
 
@@ -207,17 +207,19 @@ it('lists a type under every category it belongs to', function () {
 
     $response->assertOk();
 
-    $categories = collect($response->json('categories'));
+    $categories = $response->collect('categories');
 
-    $categoryAData = $categories->firstWhere('id', $categoryA->id);
-    $categoryBData = $categories->firstWhere('id', $categoryB->id);
+    $firstCategoryData = $categories->firstWhere('id', $categoryA->id);
+    $secondCategoryData = $categories->firstWhere('id', $categoryB->id);
+    assert(is_array($firstCategoryData['types']));
+    assert(is_array($secondCategoryData['types']));
 
-    expect(collect($categoryAData['types'])->pluck('id'))->toContain($type->id)
-        ->and(collect($categoryBData['types'])->pluck('id'))->toContain($type->id);
+    expect(collect($firstCategoryData['types'])->pluck('id'))->toContain($type->id)
+        ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 
     // Each placement reports the category it is nested under.
-    expect(collect($categoryAData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
-        ->and(collect($categoryBData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
+    expect(collect($firstCategoryData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryA->id)
+        ->and(collect($secondCategoryData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
 });
 
 it('shows a type under an authorized category path and hides it under a restricted one', function () {
@@ -241,12 +243,13 @@ it('shows a type under an authorized category path and hides it under a restrict
 
     $response->assertOk();
 
-    $categories = collect($response->json('categories'));
+    $categories = $response->collect('categories');
 
     expect($categories->pluck('id'))->toContain($openCategory->id)
-        ->and($categories->pluck('id'))->not->toContain($restrictedCategory->id);
+        ->and($categories->pluck('id'))->not()->toContain($restrictedCategory->id);
 
     $openData = $categories->firstWhere('id', $openCategory->id);
+    assert(is_array($openData['types']));
 
     expect(collect($openData['types'])->pluck('id'))->toContain($type->id);
 });
@@ -265,7 +268,8 @@ it('orders types within a category by their per-area sort rather than the global
 
     $response->assertOk();
 
-    $categoryData = collect($response->json('categories'))->firstWhere('id', $category->id);
+    $categoryData = $response->collect('categories')->firstWhere('id', $category->id);
+    assert(is_array($categoryData['types']));
 
     expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
 });
@@ -288,7 +292,9 @@ it('orders the same type differently in each area it belongs to', function () {
 
     $response->assertOk();
 
-    $categories = collect($response->json('categories'));
+    $categories = $response->collect('categories');
+    assert(is_array($categories->firstWhere('id', $categoryA->id)['types']));
+    assert(is_array($categories->firstWhere('id', $categoryB->id)['types']));
 
     expect(collect($categories->firstWhere('id', $categoryA->id)['types'])->pluck('id')->all())
         ->toBe([$shared->id, $other->id])

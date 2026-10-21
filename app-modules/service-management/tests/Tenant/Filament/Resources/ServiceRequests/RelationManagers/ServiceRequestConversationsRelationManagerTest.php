@@ -40,8 +40,8 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceReques
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestConversation;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('lists the finished conversations for the service request', function () {
@@ -54,7 +54,7 @@ it('lists the finished conversations for the service request', function () {
         ->finished()
         ->create();
 
-    livewire(ServiceRequestConversationsRelationManager::class, [
+    Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -71,7 +71,7 @@ it('does not list conversations that have not finished', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(ServiceRequestConversationsRelationManager::class, [
+    Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -89,7 +89,7 @@ it('does not list conversations belonging to another service request', function 
         ->finished()
         ->create();
 
-    livewire(ServiceRequestConversationsRelationManager::class, [
+    Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -112,7 +112,7 @@ it('sorts the most recently finished conversation first', function () {
         ->finished()
         ->create(['finished_at' => now()->subDay()]);
 
-    livewire(ServiceRequestConversationsRelationManager::class, [
+    Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -130,12 +130,14 @@ it('links each conversation to its transcript', function () {
         ->finished()
         ->create();
 
-    livewire(ServiceRequestConversationsRelationManager::class, [
+    $component = Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
-        ->assertSuccessful()
-        ->assertSeeHtml(ServiceRequestResource::getUrl('view-live-chat-transcript', [
+        ->assertSuccessful();
+
+    expect($component->instance()->getTable()->getRecordUrl($conversation))
+        ->toBe(ServiceRequestResource::getUrl('view-live-chat-transcript', [
             'record' => $serviceRequest,
             'conversation' => $conversation,
         ]));

@@ -88,7 +88,7 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -108,7 +108,7 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -124,7 +124,7 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -185,7 +185,7 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -208,7 +208,7 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -244,7 +244,7 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -263,7 +263,7 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -282,7 +282,7 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === MailChannel::class;
         });
     });
@@ -315,7 +315,7 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -334,7 +334,7 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -370,7 +370,7 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -389,7 +389,7 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -408,7 +408,7 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === MailChannel::class;
         });
     });
@@ -436,7 +436,7 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -454,7 +454,7 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -473,7 +473,7 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === MailChannel::class;
         });
     });
@@ -491,7 +491,7 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -510,7 +510,7 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -547,7 +547,7 @@ describe('Deduplication', function () {
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($otherManager, ServiceRequestUpdated::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($otherManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($managerTemplate) {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });

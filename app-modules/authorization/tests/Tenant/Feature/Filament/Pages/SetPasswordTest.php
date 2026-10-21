@@ -37,10 +37,10 @@
 use AidingApp\Authorization\Filament\Pages\Auth\SetPassword;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertGuest;
-use function Pest\Livewire\livewire;
 
 it('sets the user\'s password', function () {
     $user = User::factory()->create([
@@ -49,7 +49,7 @@ it('sets the user\'s password', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->fillForm([
             'password' => $password = Str::random(),
             'passwordConfirmation' => $password,
@@ -75,7 +75,7 @@ it('redirects if the user already has a password', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->assertRedirect();
 });
 
@@ -84,7 +84,7 @@ it('redirects if the user is external', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->assertRedirect();
 });
 
@@ -95,7 +95,7 @@ test('`password` is required', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->fillForm([
             'password' => null,
         ])
@@ -111,7 +111,7 @@ test('`passwordConfirmation` is required', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->fillForm([
             'passwordConfirmation' => null,
         ])
@@ -127,7 +127,7 @@ test('`password` is the same as `passwordConfirmation`', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->fillForm([
             'password' => Str::random(),
             'passwordConfirmation' => Str::random(),
@@ -144,7 +144,7 @@ it('does not redirect if the password is not set', function () {
 
     actingAs($user);
 
-    livewire(SetPassword::class)
+    Livewire::test(SetPassword::class)
         ->assertOk()
         ->assertNoRedirect();
 });

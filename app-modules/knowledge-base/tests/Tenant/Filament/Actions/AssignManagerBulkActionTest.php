@@ -38,9 +38,9 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\Pages\ListKnow
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('is gated by proper access control', function () {
@@ -53,12 +53,12 @@ it('is gated by proper access control', function () {
 
     actingAs($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableBulkActionHidden('bulkManagers');
 
     $user->givePermissionTo('knowledge_base_item.*.update');
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableBulkActionVisible('bulkManagers');
 });
 
@@ -69,7 +69,7 @@ it('can bulk assign managers to items', function () {
 
     $items = KnowledgeBaseItem::factory(5)->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->selectTableRecords($items->pluck('id')->toArray())
         ->callAction(
             TestAction::make('bulkManagers')->table()->bulk(),
@@ -97,7 +97,7 @@ it('can bulk assign managers to items without removing previously assigned manag
         $item->managers()->attach($oldManager->id);
     });
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->selectTableRecords($items->pluck('id')->toArray())
         ->callAction(
             TestAction::make('bulkManagers')->table()->bulk(),
@@ -125,7 +125,7 @@ it('can bulk assign managers to items with removing previously assigned managers
         $item->managers()->attach($oldManager->id);
     });
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->selectTableRecords($items->pluck('id')->toArray())
         ->callAction(
             TestAction::make('bulkManagers')->table()->bulk(),

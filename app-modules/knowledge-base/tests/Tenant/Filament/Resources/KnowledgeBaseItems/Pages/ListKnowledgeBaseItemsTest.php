@@ -45,10 +45,10 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 use function Tests\Helpers\testResourceRequiresPermissionForAccess;
 
@@ -129,7 +129,7 @@ test('Filter ListKnowledgeBaseItems with `status` filter', function () {
 
     $user->refresh();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($publishedKnowledgeBaseItems->merge($draftKnowledgeBaseItems)->merge($archivedKnowledgeBaseItems))
         ->filterTable('status', [$published, $draft])
         ->assertCanSeeTableRecords($publishedKnowledgeBaseItems->merge($draftKnowledgeBaseItems))
@@ -174,7 +174,7 @@ test('Filter ListKnowledgeBaseItems with `category` filter', function () {
 
     $user->refresh();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords(
             $softwareCategoryKnowledgeBaseItems
                 ->merge($passwordManagementKnowledgeBaseItems)
@@ -216,7 +216,7 @@ test('Filter ListKnowledgeBaseItems with `category` filter only matches the sele
 
     $user->refresh();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($parentCategoryKnowledgeBaseItems->merge($childCategoryKnowledgeBaseItems))
         ->filterTable('category', ['categories' => [$parentCategory->getKey()]])
         ->assertCanSeeTableRecords($parentCategoryKnowledgeBaseItems)
@@ -319,7 +319,7 @@ test('Filter ListKnowledgeBaseItems with `public` filter', function () {
 
     $user->refresh();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($knowledgeBaseItems)
         ->filterTable('public', ['value' => 1])
         ->assertCanSeeTableRecords($knowledgeBaseItems->where('public', $isPublic))
@@ -367,7 +367,7 @@ test('Filter ListKnowledgeBaseItems with `created after` filter', function () {
         ->state(['created_at' => now()->addDays(2)])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($knowledgeBaseItemsCreatedBefore->merge($knowledgeBaseItemsCreatedAfter))
         ->filterTable('created_at', [
             'created_after' => now(),
@@ -408,7 +408,7 @@ test('Filter ListKnowledgeBaseItems with `updated after` filter', function () {
         ->state(['updated_at' => now()->addDays(2)])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertCanSeeTableRecords($knowledgeBaseItemsUpdatedAtBefore->merge($knowledgeBaseItemsUpdatedAtAfter))
         ->filterTable('updated_at', [
             'updated_after' => now(),
@@ -440,7 +440,7 @@ test('SearchKnowledgeBaseItems by title', function () {
         ->state(['title' => 'Getting started with the app'])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->searchTable('reset your password')
         ->assertCanSeeTableRecords(collect([$matchingItem]))
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
@@ -493,10 +493,47 @@ test('SearchKnowledgeBaseItems by article body text', function () {
         ])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->searchTable('xylophone')
         ->assertCanSeeTableRecords(collect([$matchingItem]))
         ->assertCanNotSeeTableRecords(collect([$nonMatchingItem]));
+});
+
+it('displays the full category path as the title description', function () {
+    asSuperAdmin();
+
+    $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
+
+    $wifi = KnowledgeBaseCategory::factory()->state(['name' => 'Wifi'])->create();
+    $wifi->parentCategory()->associate($networking)->save();
+
+    $quickStartGuides = KnowledgeBaseCategory::factory()->state(['name' => 'Quick Start Guides'])->create();
+    $quickStartGuides->parentCategory()->associate($wifi)->save();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($quickStartGuides, 'category')->create();
+
+    Livewire::test(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', 'Networking > Wifi > Quick Start Guides', $knowledgeBaseItem);
+});
+
+it('displays only the category name as the title description for a top-level category', function () {
+    asSuperAdmin();
+
+    $networking = KnowledgeBaseCategory::factory()->state(['name' => 'Networking'])->create();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->for($networking, 'category')->create();
+
+    Livewire::test(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', 'Networking', $knowledgeBaseItem);
+});
+
+it('does not display a title description when the article has no category', function () {
+    asSuperAdmin();
+
+    $knowledgeBaseItem = KnowledgeBaseItem::factory()->state(['category_id' => null])->create();
+
+    Livewire::test(ListKnowledgeBaseItems::class)
+        ->assertTableColumnHasDescription('title', null, $knowledgeBaseItem);
 });
 
 test('Health column shows true when knowledge base item has title, article content, manager, and no unresolved concerns', function () {
@@ -520,7 +557,7 @@ test('Health column shows true when knowledge base item has title, article conte
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
@@ -543,7 +580,7 @@ test('Health column shows false when knowledge base item has empty title', funct
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -561,7 +598,7 @@ test('Health column shows false when knowledge base item has no article content'
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -584,7 +621,7 @@ test('Health column shows false when knowledge base item has empty doc article c
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -607,7 +644,7 @@ test('Health column shows false when knowledge base item article content has onl
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -626,7 +663,7 @@ test('Health column shows false when knowledge base item has no manager assigned
         ])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -654,7 +691,7 @@ test('Health column shows false when knowledge base item has unresolved concern 
         ->state(['status' => ConcernStatus::New])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -682,7 +719,7 @@ test('Health column shows true when knowledge base item has only resolved concer
         ->state(['status' => ConcernStatus::Resolved])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
@@ -710,7 +747,7 @@ test('Health column shows true when knowledge base item has only archived concer
         ->state(['status' => ConcernStatus::Archived])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', true, $knowledgeBaseItem);
 });
 
@@ -731,7 +768,7 @@ test('Health column shows false when multiple conditions fail simultaneously', f
         ->state(['status' => ConcernStatus::New])
         ->create();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -756,7 +793,7 @@ test('Health column shows false when broken links are detected', function () {
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -781,7 +818,7 @@ test('Health column shows false when broken images are detected', function () {
 
     $knowledgeBaseItem->managers()->attach($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableColumnStateSet('health', false, $knowledgeBaseItem);
 });
 
@@ -804,7 +841,7 @@ test('an authorised user can duplicate a knowledge base article', function () {
 
     actingAs($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->callTableAction('replicate', $knowledgeBaseItem, data: [
             'title' => $knowledgeBaseItem->title,
             'public' => $knowledgeBaseItem->public,
@@ -843,7 +880,7 @@ test('duplicating a knowledge base article is gated by the knowledge_base_item.c
 
     actingAs($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertTableActionHidden('replicate', $knowledgeBaseItem);
 });
 
@@ -856,11 +893,11 @@ it('only shows the bulk delete action to a user with the knowledge_base_item.del
 
     actingAs($user);
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('knowledge_base_item.*.delete');
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

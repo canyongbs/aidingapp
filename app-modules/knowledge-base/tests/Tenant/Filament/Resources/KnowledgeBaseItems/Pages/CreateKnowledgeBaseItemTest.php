@@ -43,10 +43,10 @@ use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Config;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 
 // TODO: Write CreateKnowledgeBaseItem tests
 //test('A successful action on the CreateKnowledgeBaseItem page', function () {});
@@ -62,18 +62,18 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
 
     $user->givePermissionTo('knowledge_base_item.view-any');
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertSuccessful()
         ->assertActionDisabled('create');
 
     $user->givePermissionTo('knowledge_base_item.create');
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertActionEnabled('create');
 
     $request = collect(CreateKnowledgeBaseItemRequestFactory::new()->create());
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
@@ -94,19 +94,19 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
     $user->givePermissionTo('knowledge_base_item.view-any');
     $user->givePermissionTo('knowledge_base_item.create');
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertForbidden();
 
     $settings->data->addons->knowledgeManagement = true;
 
     $settings->save();
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->assertSuccessful();
 
     $request = collect(CreateKnowledgeBaseItemRequestFactory::new()->create());
 
-    livewire(ListKnowledgeBaseItems::class)
+    Livewire::test(ListKnowledgeBaseItems::class)
         ->callAction('create', $request->toArray())
         ->assertHasNoActionErrors();
 
@@ -130,7 +130,7 @@ test('manager_ids UserSelect does not show admin users in options by default on 
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(CreateKnowledgeBaseItem::class)
+    Livewire::test(CreateKnowledgeBaseItem::class)
         ->assertSuccessful()
         ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
             return ! empty($field->getSearchResults($regularUser->name))
@@ -153,7 +153,7 @@ test('manager_ids UserSelect shows all users when filter_admins_from_selection c
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(CreateKnowledgeBaseItem::class)
+    Livewire::test(CreateKnowledgeBaseItem::class)
         ->assertSuccessful()
         ->assertFormFieldExists('manager_ids', function (UserSelect $field) use ($adminUser): bool {
             return ! empty($field->getSearchResults($adminUser->name));

@@ -44,7 +44,7 @@
     } from '@headlessui/vue';
     import { ArrowPathIcon, CheckIcon, ChevronUpDownIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import { useDebounceFn } from '@vueuse/core';
-    import { computed, ref, watch } from 'vue';
+    import { computed, defineEmits, defineProps, ref, watch } from 'vue';
     import api from '../services/api';
     import Avatar from './ui/Avatar.vue';
 

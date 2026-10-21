@@ -115,5 +115,5 @@ it('renders the converted merge tag with its value', function () {
 
     expect($template->getBody(['recipient name' => 'Jane Doe'])->toHtml())
         ->toContain('Jane Doe')
-        ->not->toContain('{{');
+        ->not()->toContain('{{');
 });

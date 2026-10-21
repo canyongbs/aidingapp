@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ChatBubbleLeftEllipsisIcon } from '@heroicons/vue/16/solid';
+    import { defineEmits, defineProps } from 'vue';
     import { useMarkdown } from '../composables/useMarkdown.js';
 
     const props = defineProps({

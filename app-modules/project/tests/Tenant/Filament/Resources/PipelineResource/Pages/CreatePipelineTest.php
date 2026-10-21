@@ -40,10 +40,10 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Tests\Tenant\Filament\Resources\PipelineResource\RequestFactory\CreatePipelineRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -54,7 +54,7 @@ it('can render with proper permission.', function () {
 
     $project = Project::factory()->create();
 
-    livewire(CreatePipeline::class, ['parentRecord' => $project])
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->assertForbidden();
 
     $user->givePermissionTo('project.view-any');
@@ -62,11 +62,11 @@ it('can render with proper permission.', function () {
     $user->givePermissionTo('project.*.update');
     $user->refresh();
 
-    livewire(CreatePipeline::class, ['parentRecord' => $project])
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->assertSuccessful();
 });
 
-it('can validate create pipeline inputs', function ($data, $errors) {
+it('can validate create pipeline inputs', function (CreatePipelineRequestFactory $data, array $errors) {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -74,7 +74,7 @@ it('can validate create pipeline inputs', function ($data, $errors) {
 
     $request = CreatePipelineRequestFactory::new($data)->create();
 
-    livewire(CreatePipeline::class, ['parentRecord' => $project])
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -107,7 +107,7 @@ it('can create pipelines', function () {
 
     $pipelineData = CreatePipelineRequestFactory::new()->create();
 
-    livewire(CreatePipeline::class, ['parentRecord' => $project])
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($pipelineData)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -134,7 +134,7 @@ it('defaults new pipeline stages to planning', function () {
         'stages' => [['name' => 'Stage One']],
     ];
 
-    livewire(CreatePipeline::class, ['parentRecord' => $project])
+    Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
         ->fillForm($pipelineData)
         ->call('create')
         ->assertHasNoFormErrors();

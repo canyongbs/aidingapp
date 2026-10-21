@@ -70,7 +70,7 @@ describe('Customer', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function (SendEducatableServiceRequestAssignedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -97,7 +97,7 @@ describe('Customer', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function (SendEducatableServiceRequestAssignedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
@@ -120,7 +120,7 @@ describe('Customer', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestAssignedNotification::class, function (SendEducatableServiceRequestAssignedNotification $notification) {
             return is_null($notification->emailTemplate);
         });
     });
@@ -180,7 +180,7 @@ describe('Manager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) use ($template) {
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -209,7 +209,7 @@ describe('Manager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -257,7 +257,7 @@ describe('Manager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -282,7 +282,7 @@ describe('Manager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertNotSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertNotSentTo($otherManager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -321,7 +321,7 @@ describe('Auditor', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -346,7 +346,7 @@ describe('Auditor', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -394,7 +394,7 @@ describe('Auditor', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -419,7 +419,7 @@ describe('Auditor', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertNotSentTo($auditor, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -452,7 +452,7 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) use ($template) {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
@@ -475,7 +475,7 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
@@ -498,7 +498,7 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === MailChannel::class;
         });
     });
@@ -521,7 +521,7 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -544,7 +544,7 @@ describe('AssignedManager', function () {
             'status' => ServiceRequestAssignmentStatus::Active,
         ]);
 
-        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) {
             return $notification->channel === DatabaseChannel::class;
         });
     });
@@ -586,7 +586,7 @@ describe('Deduplication', function () {
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($otherManager, ServiceRequestAssigned::class, function (ServiceRequestAssigned $notification) use ($managerTemplate) {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });

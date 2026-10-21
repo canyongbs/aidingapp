@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Engagement\Jobs\ProcessSesS3InboundEmail;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Storage;
@@ -46,8 +45,6 @@ it('moves a failed inbound email back out of the failed folder and queues it for
     Bus::fake();
 
     $filesystem = Storage::fake('s3-inbound-email');
-
-    assert($filesystem instanceof FilesystemAdapter);
 
     $filesystem->putFileAs('failed', UploadedFile::fake()->createWithContent('s3_email', 'raw'), 's3_email');
 
@@ -61,7 +58,7 @@ it('moves a failed inbound email back out of the failed folder and queues it for
 
     Bus::assertDispatched(
         ProcessSesS3InboundEmail::class,
-        fn (ProcessSesS3InboundEmail $job): bool => invade($job)->emailFilePath === 's3_email',
+        fn (ProcessSesS3InboundEmail $job): bool => invade($job)->__get('emailFilePath') === 's3_email',
     );
 });
 

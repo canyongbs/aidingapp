@@ -42,10 +42,11 @@ use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
 use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Queue;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 // TODO: Write ListContacts page test
 //test('The correct details are displayed on the ListContacts page', function () {});
@@ -99,21 +100,23 @@ test('can list records of engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function ($response) {
+    $engagements->each(function (Engagement $response) {
+        assert($response->recipient instanceof Model);
+
         $event = new TimelineableRecordCreated($response->recipient, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function ($response) {
+    $engagementResponses->each(function (EngagementResponse $response) {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    livewire(EngagementsRelationManager::class, [
+    Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -150,21 +153,23 @@ test('can filter engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function ($response) {
+    $engagements->each(function (Engagement $response) {
+        assert($response->recipient instanceof Model);
+
         $event = new TimelineableRecordCreated($response->recipient, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function ($response) {
+    $engagementResponses->each(function (EngagementResponse $response) {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 
         $listener->handle($event);
     });
 
-    livewire(EngagementsRelationManager::class, [
+    Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])

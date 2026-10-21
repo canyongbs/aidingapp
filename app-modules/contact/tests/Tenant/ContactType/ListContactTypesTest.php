@@ -40,9 +40,9 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ListContactTypes page', function () {
@@ -54,7 +54,7 @@ test('The correct details are displayed on the ListContactTypes page', function 
 
     asSuperAdmin();
 
-    $component = livewire(ListContactTypes::class);
+    $component = Livewire::test(ListContactTypes::class);
 
     $component
         ->assertSuccessful()
@@ -112,11 +112,11 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     actingAs($user);
 
-    livewire(ListContactTypes::class)
+    Livewire::test(ListContactTypes::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(ListContactTypes::class)
+    Livewire::test(ListContactTypes::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

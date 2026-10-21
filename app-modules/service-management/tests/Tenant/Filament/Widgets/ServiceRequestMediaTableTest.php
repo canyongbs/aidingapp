@@ -35,19 +35,21 @@
 */
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Filament\Widgets\ServiceRequestMediaTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestHistory;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
+use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\Authenticatable;
 use App\Models\Media;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 describe('ServiceRequest', function () {
@@ -62,7 +64,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -82,7 +84,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('report.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -103,7 +105,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('Screenshot.jpg')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -125,7 +127,7 @@ describe('ServiceRequest', function () {
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -153,7 +155,7 @@ describe('ServiceRequest', function () {
         $media->createdBy()->associate($contact);
         $media->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -177,10 +179,10 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($m) => $m->name === 'Annual-Report');
-        $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($mock) => $mock->name === 'Annual-Report');
+        $invoice = $allMedia->first(fn ($mock) => $mock->name === 'invoice');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -210,12 +212,12 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -256,7 +258,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -297,7 +299,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -338,7 +340,7 @@ describe('ServiceRequest', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -352,12 +354,15 @@ describe('ServiceRequest', function () {
 
         $serviceRequest = ServiceRequest::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
             ->assertSuccessful()
-            ->assertSeeText('No uploads');
+            ->assertCountTableRecords(0);
+
+        expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-ta-empty-state-heading")]'))
+            ->toBe('No uploads');
     });
 
     // Authorization
@@ -369,7 +374,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -381,7 +386,7 @@ describe('ServiceRequest', function () {
 
         $serviceRequest = ServiceRequest::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -401,7 +406,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -419,7 +424,7 @@ describe('ServiceRequest', function () {
 
         actingAs(User::factory()->create());
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -433,7 +438,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->closed(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -453,13 +458,13 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
             ->assertTableActionHidden('delete', record: $media);
 
-        expect(Media::find($media->getKey()))->not->toBeNull();
+        expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
     test('a partner admin is granted a registered permission ability via the gate bypass but is still denied by a record-level policy restriction', function () {
@@ -505,7 +510,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -526,7 +531,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -554,7 +559,7 @@ describe('ServiceRequest', function () {
                 ->toMediaCollection('uploads');
         }
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -577,7 +582,7 @@ describe('ServiceRequest', function () {
                 ->toMediaCollection('uploads');
         }
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -586,7 +591,7 @@ describe('ServiceRequest', function () {
             ]);
 
         expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(6)
-            ->and($serviceRequest->fresh()->getMedia('uploads')->pluck('name'))->not->toContain('report-7');
+            ->and($serviceRequest->fresh()->getMedia('uploads')->pluck('name'))->not()->toContain('report-7');
 
         $history = ServiceRequestHistory::where('service_request_id', $serviceRequest->getKey())
             ->get()
@@ -606,7 +611,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -631,7 +636,7 @@ describe('ServiceRequest', function () {
             'status_id' => ServiceRequestStatus::factory()->open(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -644,7 +649,7 @@ describe('ServiceRequest', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileUploadedEvent());
 
-        expect($history)->not->toBeNull()
+        expect($history)->not()->toBeNull()
             ->and($history->uploadedFileName())->toBe('report.pdf')
             ->and($history->eventTitle())->toBe('File Uploaded');
     });
@@ -662,7 +667,7 @@ describe('ServiceRequest', function () {
             ->usingName('report')
             ->toMediaCollection('uploads');
 
-        $component = livewire(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -692,7 +697,7 @@ describe('ServiceRequest', function () {
             ->usingFileName('report.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
@@ -703,9 +708,166 @@ describe('ServiceRequest', function () {
             ->get()
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
 
-        expect($history)->not->toBeNull()
+        expect($history)->not()->toBeNull()
             ->and($history->deletedFileName())->toBe('report.png')
             ->and($history->eventTitle())->toBe('File Deleted');
+    });
+
+    test('lists files attached to the updates of the service request', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()->for($serviceRequest)->create();
+        $serviceRequestUpdateMedia = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateInlineMedia = $serviceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('signature.png'))
+            ->toMediaCollection('inline_attachments');
+
+        $deletedServiceRequestUpdate = ServiceRequestUpdate::factory()->for($serviceRequest)->create();
+        $deletedServiceRequestUpdateMedia = $deletedServiceRequestUpdate
+            ->addMedia(UploadedFile::fake()->image('deleted.png'))
+            ->toMediaCollection('uploads');
+        $deletedServiceRequestUpdate->delete();
+
+        $otherServiceRequestUpdateMedia = ServiceRequestUpdate::factory()->create()
+            ->addMedia(UploadedFile::fake()->image('other.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia, $serviceRequestUpdateMedia])
+            ->assertCanNotSeeTableRecords([
+                $serviceRequestUpdateInlineMedia,
+                $deletedServiceRequestUpdateMedia,
+                $otherServiceRequestUpdateMedia,
+            ]);
+    });
+
+    test('does not list files attached to the updates of the service request for a user who cannot view service request updates', function () {
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        actingAs(User::factory()->create());
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia])
+            ->assertCanNotSeeTableRecords([$serviceRequestUpdateMedia])
+            ->assertTableColumnVisible('upload_type');
+    });
+
+    test('shows the update type of each file', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $staffUploadMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('staff.png'))
+            ->withCustomProperties([ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::StaffUpload->value])
+            ->toMediaCollection('uploads');
+        $requestSubmissionMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('submission.png'))
+            ->withCustomProperties([ServiceRequestFileUploadType::CUSTOM_PROPERTY => ServiceRequestFileUploadType::RequestSubmission->value])
+            ->toMediaCollection('uploads');
+        $updateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('update.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableColumnVisible('upload_type')
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::StaffUpload, record: $staffUploadMedia)
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::RequestSubmission, record: $requestSubmissionMedia)
+            ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::Update, record: $updateMedia);
+    });
+
+    test('delete action is hidden for a file attached to an update of the service request', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+        $media = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableActionVisible('download', record: $media)
+            ->assertTableActionHidden('delete', record: $media);
+    });
+
+    test('uploading a file records it as a staff upload', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create([
+            'status_id' => ServiceRequestStatus::factory()->open(),
+        ]);
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('report.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        $media = $serviceRequest->fresh()->getFirstMedia('uploads');
+
+        expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::StaffUpload);
+    });
+
+    test('does not list files attached to the updates of the service request when the feature flag is inactive', function () {
+        ServiceRequestFileUploadTypeFeature::deactivate();
+
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $serviceRequestMedia = $serviceRequest
+            ->addMedia(UploadedFile::fake()->image('report.png'))
+            ->toMediaCollection('uploads');
+        $serviceRequestUpdateMedia = ServiceRequestUpdate::factory()->for($serviceRequest)->create()
+            ->addMedia(UploadedFile::fake()->image('attachment.png'))
+            ->toMediaCollection('uploads');
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequest,
+            'collectionName' => 'uploads',
+        ])
+            ->assertCanSeeTableRecords([$serviceRequestMedia])
+            ->assertCanNotSeeTableRecords([$serviceRequestUpdateMedia])
+            ->assertTableColumnHidden('upload_type');
     });
 });
 
@@ -721,7 +883,7 @@ describe('ServiceRequestUpdate', function () {
             ->usingName('attachment')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -749,7 +911,7 @@ describe('ServiceRequestUpdate', function () {
         $media->createdBy()->associate($contact);
         $media->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -773,10 +935,10 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $meetingNotes = $allMedia->first(fn ($m) => $m->name === 'Meeting-Notes');
-        $screenshot = $allMedia->first(fn ($m) => $m->name === 'screenshot');
+        $meetingNotes = $allMedia->first(fn ($mock) => $mock->name === 'Meeting-Notes');
+        $screenshot = $allMedia->first(fn ($mock) => $mock->name === 'screenshot');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -806,12 +968,12 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($m) => $m->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($m) => $m->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -852,7 +1014,7 @@ describe('ServiceRequestUpdate', function () {
         $bobMedia->createdBy()->associate($contactBob);
         $bobMedia->save();
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -866,12 +1028,15 @@ describe('ServiceRequestUpdate', function () {
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
-        livewire(ServiceRequestMediaTable::class, [
+        $component = Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
             ->assertSuccessful()
-            ->assertSeeText('No uploads');
+            ->assertCountTableRecords(0);
+
+        expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-ta-empty-state-heading")]'))
+            ->toBe('No uploads');
     });
 
     test('uploadFile action is hidden for an admin when the parent service request is closed', function () {
@@ -883,7 +1048,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -905,13 +1070,13 @@ describe('ServiceRequestUpdate', function () {
             ->usingName('attachment')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
             ->assertTableActionHidden('delete', record: $media);
 
-        expect(Media::find($media->getKey()))->not->toBeNull();
+        expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
     test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
@@ -925,7 +1090,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -948,7 +1113,7 @@ describe('ServiceRequestUpdate', function () {
             ])->getKey(),
         ]);
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -980,7 +1145,7 @@ describe('ServiceRequestUpdate', function () {
             ->usingFileName('attachment.png')
             ->toMediaCollection('uploads');
 
-        livewire(ServiceRequestMediaTable::class, [
+        Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
             'collectionName' => 'uploads',
         ])
@@ -992,5 +1157,38 @@ describe('ServiceRequestUpdate', function () {
             ->first(fn (ServiceRequestHistory $history): bool => $history->isFileDeletedEvent());
 
         expect($history)->toBeNull();
+    });
+
+    test('does not show the update type column', function () {
+        asSuperAdmin();
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => ServiceRequestUpdate::factory()->create(),
+            'collectionName' => 'uploads',
+        ])
+            ->assertTableColumnHidden('upload_type');
+    });
+
+    test('uploading a file to a service request update does not record an upload type', function () {
+        asSuperAdmin();
+
+        Storage::fake('s3');
+
+        $serviceRequestUpdate = ServiceRequestUpdate::factory()
+            ->for(ServiceRequest::factory()->state([
+                'status_id' => ServiceRequestStatus::factory()->open(),
+            ]))
+            ->create();
+
+        Livewire::test(ServiceRequestMediaTable::class, [
+            'record' => $serviceRequestUpdate,
+            'collectionName' => 'uploads',
+        ])
+            ->callTableAction('uploadFile', data: [
+                'file' => UploadedFile::fake()->create('attachment.pdf', 100, 'application/pdf'),
+            ])
+            ->assertHasNoTableActionErrors();
+
+        expect($serviceRequestUpdate->fresh()->getFirstMedia('uploads')->hasCustomProperty(ServiceRequestFileUploadType::CUSTOM_PROPERTY))->toBeFalse();
     });
 });

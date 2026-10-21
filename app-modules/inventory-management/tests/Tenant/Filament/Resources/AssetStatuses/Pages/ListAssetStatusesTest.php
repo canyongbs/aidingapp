@@ -38,9 +38,9 @@ use AidingApp\InventoryManagement\Filament\Resources\AssetStatuses\Pages\ListAss
 use AidingApp\InventoryManagement\Models\AssetType;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('only shows the bulk delete action to a user with the asset_status.delete permission', function () {
     AssetType::factory(15)->create();
@@ -51,11 +51,11 @@ it('only shows the bulk delete action to a user with the asset_status.delete per
 
     actingAs($user);
 
-    livewire(ListAssetStatuses::class)
+    Livewire::test(ListAssetStatuses::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('asset_status.*.delete');
 
-    livewire(ListAssetStatuses::class)
+    Livewire::test(ListAssetStatuses::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });

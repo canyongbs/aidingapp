@@ -45,9 +45,9 @@ use App\Settings\LicenseSettings;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\ToggleButtons;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 beforeEach(function () {
@@ -67,7 +67,7 @@ test('the records are displayed on the AdvisoryUpdatesRelationManager', function
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -87,7 +87,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
 
     AdvisoryUpdate::factory()->for($advisory, 'advisory')->count(3)->create();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -95,7 +95,7 @@ test('only shows the updates bulk delete action to a user with the advisory_upda
 
     $user->givePermissionTo('advisory_update.*.delete');
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -111,7 +111,7 @@ test('the create action is hidden when the advisory is resolved', function () {
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -127,7 +127,7 @@ test('the create action is visible when the advisory is open', function () {
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -147,7 +147,7 @@ test('creating an advisory update updates the advisory status', function () {
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -177,7 +177,7 @@ test('creating an advisory update that resolves the advisory hides the create ac
 
     asSuperAdmin();
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    $component = Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -202,7 +202,7 @@ test('the create action opens in a slide over with the advisory status field lab
 
     asSuperAdmin();
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    $component = Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -229,7 +229,7 @@ test('the view or edit action opens in a slide over with the advisory status fie
 
     asSuperAdmin();
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    $component = Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -261,7 +261,7 @@ test('the view or edit action hides the status change guidance when the user can
 
     actingAs($user);
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -283,7 +283,7 @@ test('the create form date field defaults to now', function () {
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -302,7 +302,7 @@ test('the title column with a description replaces the update column', function 
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -324,7 +324,7 @@ test('clicking the title opens an editable modal when the user can update the ad
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -349,7 +349,7 @@ test('clicking the title opens a read-only modal when the user cannot update the
 
     actingAs($user);
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -373,7 +373,7 @@ test('a user cannot mount the view or edit advisory update action without the vi
 
     actingAs($user);
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -395,7 +395,7 @@ test('submitting the view or edit advisory update action updates the advisory up
 
     asSuperAdmin();
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -407,10 +407,7 @@ test('submitting the view or edit advisory update action updates the advisory up
         ])
         ->assertHasNoActionErrors();
 
-    expect($advisoryUpdate->refresh())
-        ->title->toBe('An updated title')
-        ->update->toBe('An updated update')
-        ->internal->toBeTrue();
+    expect($advisoryUpdate->refresh()->title)->toBe('An updated title')->and($advisoryUpdate->refresh()->update)->toBe('An updated update')->and($advisoryUpdate->refresh()->internal)->toBeTrue();
 
     expect($advisory->refresh()->status_id)->toBe($newStatus->getKey());
 });
@@ -430,7 +427,7 @@ test('submitting the view or edit advisory update action that resolves the advis
 
     asSuperAdmin();
 
-    $component = livewire(AdvisoryUpdatesRelationManager::class, [
+    $component = Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -461,7 +458,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
 
     actingAs($user);
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])
@@ -469,7 +466,7 @@ test('AdvisoryUpdatesRelationManager create action is gated with proper access c
 
     $user->givePermissionTo('advisory_update.create');
 
-    livewire(AdvisoryUpdatesRelationManager::class, [
+    Livewire::test(AdvisoryUpdatesRelationManager::class, [
         'ownerRecord' => $advisory,
         'pageClass' => ViewAdvisory::class,
     ])

@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
@@ -105,6 +106,9 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
     ]);
 
     $contact = $engagement->recipient;
+
+    assert($contact instanceof Contact);
+
     $contact->update(['email_bounce' => true]);
 
     expect($engagement->dispatched_at)->toBeNull();
@@ -113,7 +117,7 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
 
     $engagement->refresh();
 
-    expect($engagement->dispatched_at)->not->toBeNull();
+    expect($engagement->dispatched_at)->not()->toBeNull();
     expect($engagement->dispatch_failed_at)->toBeNull();
 
     $events = $engagement->latestEmailMessage->events;

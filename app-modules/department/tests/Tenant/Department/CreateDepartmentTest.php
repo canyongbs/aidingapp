@@ -38,10 +38,10 @@ use AidingApp\Department\Filament\Resources\Departments\DepartmentResource;
 use AidingApp\Department\Filament\Resources\Departments\Pages\CreateDepartment;
 use AidingApp\Department\Models\Department;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 
 // Permission Tests
@@ -54,7 +54,7 @@ test('CreateDepartment is gated with proper access control', function () {
             DepartmentResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateDepartment::class)
+    Livewire::test(CreateDepartment::class)
         ->assertForbidden();
 
     $user->givePermissionTo('department.view-any');
@@ -67,7 +67,7 @@ test('CreateDepartment is gated with proper access control', function () {
 
     $request = collect(Department::factory()->make());
 
-    livewire(CreateDepartment::class)
+    Livewire::test(CreateDepartment::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ref, watch } from 'vue';
+    import { defineEmits, defineProps, ref, watch } from 'vue';
     import { useAssistantChat } from '../composables/useAssistantChat.js';
     import ChatHeader from './ChatHeader.vue';
     import ChatInput from './ChatInput.vue';

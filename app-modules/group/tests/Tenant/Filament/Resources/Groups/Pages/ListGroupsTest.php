@@ -38,10 +38,10 @@ use AidingApp\Group\Filament\Resources\Groups\GroupResource;
 use AidingApp\Group\Filament\Resources\Groups\Pages\ListGroups;
 use AidingApp\Group\Models\Group;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('can render the list groups page', function () {
@@ -56,7 +56,7 @@ it('can list groups with their descriptions and member counts', function () {
     $group = Group::factory()->create(['description' => 'Peer mentoring cohort']);
     $group->users()->attach(User::factory()->count(2)->create());
 
-    livewire(ListGroups::class)
+    Livewire::test(ListGroups::class)
         ->assertCanSeeTableRecords([$group])
         ->assertTableColumnStateSet('users_count', 2, record: $group)
         ->assertSee('Peer mentoring cohort');
@@ -67,7 +67,7 @@ it('can render groups with a null description', function () {
 
     $group = Group::factory()->create(['description' => null]);
 
-    livewire(ListGroups::class)
+    Livewire::test(ListGroups::class)
         ->assertCanSeeTableRecords([$group])
         ->assertSuccessful();
 });
@@ -78,12 +78,12 @@ it('can search and sort groups by name', function () {
     $alpha = Group::factory()->create(['name' => 'Alpha']);
     $beta = Group::factory()->create(['name' => 'Beta']);
 
-    livewire(ListGroups::class)
+    Livewire::test(ListGroups::class)
         ->searchTable('Alpha')
         ->assertCanSeeTableRecords([$alpha])
         ->assertCanNotSeeTableRecords([$beta]);
 
-    livewire(ListGroups::class)
+    Livewire::test(ListGroups::class)
         ->sortTable('name')
         ->assertCanSeeTableRecords([$alpha, $beta], inOrder: true);
 });

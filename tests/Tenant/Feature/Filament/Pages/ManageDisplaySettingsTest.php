@@ -36,19 +36,19 @@
 
 use App\Filament\Pages\ManageDisplaySettings;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('is gated with proper access control', function () {
     $user = User::factory()->create();
 
     actingAs($user);
 
-    livewire(ManageDisplaySettings::class)->assertForbidden();
+    Livewire::test(ManageDisplaySettings::class)->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
     $user->refresh();
 
-    livewire(ManageDisplaySettings::class)->assertOk();
+    Livewire::test(ManageDisplaySettings::class)->assertOk();
 });

@@ -33,6 +33,7 @@
 -->
 <script setup>
     import { ChevronDownIcon } from '@heroicons/vue/16/solid';
+    import { defineEmits, defineProps } from 'vue';
 
     defineProps({
         modelValue: {

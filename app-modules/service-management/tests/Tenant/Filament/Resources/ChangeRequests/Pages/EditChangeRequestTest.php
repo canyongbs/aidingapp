@@ -40,8 +40,8 @@ use AidingApp\ServiceManagement\Models\ChangeRequest;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use Carbon\CarbonImmutable;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('EditChangeRequest end_time field is disabled', function () {
@@ -56,7 +56,7 @@ test('EditChangeRequest end_time field is disabled', function () {
         'change_request_type_id' => ChangeRequestType::factory()->create()->getKey(),
     ]);
 
-    livewire(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
+    Livewire::test(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldIsDisabled('end_time');
 });
@@ -77,7 +77,7 @@ test('EditChangeRequest recalculates end_time from start_time and duration and s
     $duration = 3;
     $expectedEndTime = CarbonImmutable::parse($startTime)->addMinutes($duration)->toDateTimeString();
 
-    livewire(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
+    Livewire::test(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
         ->fillForm([
             'start_time' => $startTime,
         ])
@@ -92,8 +92,8 @@ test('EditChangeRequest recalculates end_time from start_time and duration and s
 
     $changeRequest->refresh();
 
-    expect($changeRequest->start_time?->toDateTimeString())->toEqual($startTime)
-        ->and($changeRequest->end_time?->toDateTimeString())->toEqual($expectedEndTime);
+    expect($changeRequest->start_time->toDateTimeString())->toEqual($startTime)
+        ->and($changeRequest->end_time->toDateTimeString())->toEqual($expectedEndTime);
 });
 
 test('EditChangeRequest hydrates duration from existing start_time and end_time', function () {
@@ -113,7 +113,7 @@ test('EditChangeRequest hydrates duration from existing start_time and end_time'
         'end_time' => $endTime,
     ]);
 
-    livewire(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
+    Livewire::test(EditChangeRequest::class, ['record' => $changeRequest->getRouteKey()])
         ->assertSuccessful()
         ->assertFormSet([
             'duration' => 25,

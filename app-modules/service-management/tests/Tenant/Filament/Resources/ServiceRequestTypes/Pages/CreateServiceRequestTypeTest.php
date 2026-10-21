@@ -42,10 +42,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestTypeRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
@@ -59,7 +59,7 @@ test('A successful action on the CreateServiceRequestType page', function () {
 
     $editRequest = CreateServiceRequestTypeRequestFactory::new()->create();
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->fillForm($editRequest)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -69,10 +69,10 @@ test('A successful action on the CreateServiceRequestType page', function () {
     assertDatabaseHas(ServiceRequestType::class, $editRequest);
 });
 
-test('CreateServiceRequestType requires valid data', function ($data, $errors) {
+test('CreateServiceRequestType requires valid data', function (CreateServiceRequestTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->fillForm(CreateServiceRequestTypeRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -95,7 +95,7 @@ test('CreateServiceRequestType is gated with proper access control', function ()
             ServiceRequestTypeResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -108,7 +108,7 @@ test('CreateServiceRequestType is gated with proper access control', function ()
 
     $request = collect(CreateServiceRequestTypeRequestFactory::new()->create());
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -135,7 +135,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
             ServiceRequestTypeResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
@@ -149,7 +149,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 
     $request = collect(CreateServiceRequestTypeRequestFactory::new()->create());
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -162,7 +162,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
 test('CreateServiceRequestType is creating default_category when form saved', function () {
     asSuperAdmin();
 
-    livewire(CreateServiceRequestType::class)
+    Livewire::test(CreateServiceRequestType::class)
         ->fillForm([
             'name' => 'Test Type',
             'default_category' => ServiceRequestCategory::Incident->value,

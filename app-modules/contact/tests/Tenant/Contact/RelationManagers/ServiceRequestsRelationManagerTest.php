@@ -54,9 +54,9 @@ use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\Select;
 use Illuminate\Support\Facades\Crypt;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('ServiceRequestsRelationManager can list service requests for a contact', function () {
@@ -74,7 +74,7 @@ test('ServiceRequestsRelationManager can list service requests for a contact', f
         ])
         ->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -104,7 +104,7 @@ test('ServiceRequestsRelationManager filters service requests by priority', func
         'priority_id' => $priority2->getKey(),
     ])->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -135,7 +135,7 @@ test('ServiceRequestsRelationManager filters service requests by status', functi
         'status_id' => $status2->getKey(),
     ])->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -164,7 +164,7 @@ test('Only service request types managed by user department are available in typ
 
     actingAs($user);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -200,7 +200,7 @@ test('Only service request types where user is a direct manager are available in
 
     actingAs($user);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -230,7 +230,7 @@ test('Super admin can see all service request types', function () {
 
     $contact = Contact::factory()->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -256,7 +256,7 @@ test('Priority select is populated based on selected type', function () {
 
     $contact = Contact::factory()->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -280,7 +280,7 @@ test('Can create a service request for a contact', function () {
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->getKey()])->create();
     $status = ServiceRequestStatus::factory()->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -321,7 +321,7 @@ test('Attaches password secrets to a service request created for a contact', fun
     $field->submissible()->associate($form);
     $field->save();
 
-    $form->content = [
+    $form->setAttribute('content', [
         'type' => 'doc',
         'content' => [[
             'type' => 'customBlock',
@@ -334,16 +334,16 @@ test('Attaches password secrets to a service request created for a contact', fun
                 ],
             ],
         ]],
-    ];
+    ]);
     $form->save();
 
     $secret = Secret::factory()
         ->for($author, 'author')
         ->create(['value' => Crypt::encryptString('service-request-password')]);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
-        'pageClass' => ContactServiceManagement::class,
+        'pageClass' => ViewContact::class,
     ])
         ->callTableAction('create', data: [
             'status_id' => $status->getKey(),
@@ -376,7 +376,7 @@ test('Can view a service request', function () {
         'respondent_id' => $contact->getKey(),
     ])->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -400,7 +400,7 @@ test('Can edit a service request', function () {
 
     $newStatus = ServiceRequestStatus::factory()->inProgress()->create();
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -453,7 +453,7 @@ test('Non-super admin can only see service requests from managed or audited type
 
     actingAs($user);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -497,7 +497,7 @@ test('Non-super admin can only see service requests from directly managed or dir
 
     actingAs($user);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -538,7 +538,7 @@ test('Non-super admin can see service requests from group-managed and group-audi
 
     actingAs($user);
 
-    livewire(ServiceRequestsRelationManager::class, [
+    Livewire::test(ServiceRequestsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest]);
@@ -559,7 +559,7 @@ describe('feedback visibility', function () {
             ->for($contact, 'contact')
             ->create(['csat_answer' => 4, 'nps_answer' => 8]);
 
-        livewire(ServiceRequestsRelationManager::class, [
+        Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -585,7 +585,7 @@ describe('feedback visibility', function () {
         $settings->data->addons->feedbackManagement = false;
         $settings->save();
 
-        livewire(ServiceRequestsRelationManager::class, [
+        Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -612,9 +612,9 @@ describe('archiving', function () {
             ->for($contact, 'respondent')
             ->create(['status_id' => $archivedStatus->getKey()]);
 
-        livewire(ServiceRequestsRelationManager::class, [
+        Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->assertCanSeeTableRecords([$serviceRequest])
             ->mountTableAction('edit', $serviceRequest)
@@ -639,9 +639,9 @@ describe('archiving', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ServiceRequestsRelationManager::class, [
+        Livewire::test(ServiceRequestsRelationManager::class, [
             'ownerRecord' => $contact,
-            'pageClass' => ContactServiceManagement::class,
+            'pageClass' => ViewContact::class,
         ])
             ->mountTableAction('create')
             ->assertFormFieldExists('status_id', 'mountedActionSchema0', function (Select $select) use ($activeStatus, $archivedStatus): bool {

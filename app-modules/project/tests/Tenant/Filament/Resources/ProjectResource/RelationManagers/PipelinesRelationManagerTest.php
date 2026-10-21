@@ -45,9 +45,9 @@ use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Repeater;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -63,7 +63,7 @@ it('can list pipelines', function () {
         ->count(2)
         ->create();
 
-    livewire(PipelinesRelationManager::class, [
+    Livewire::test(PipelinesRelationManager::class, [
         'ownerRecord' => $project,
         'pageClass' => ManagePipelines::class,
     ])
@@ -78,7 +78,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->create();
 
-        livewire(PipelinesRelationManager::class, [
+        Livewire::test(PipelinesRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManagePipelines::class,
         ])
@@ -86,7 +86,7 @@ describe('authorization', function () {
 
         $pipelineData = CreatePipelineRequestFactory::new()->create();
 
-        livewire(CreatePipeline::class, ['parentRecord' => $project])
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
             ->fillForm($pipelineData)
             ->call('create')
             ->assertHasNoFormErrors();
@@ -111,7 +111,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(PipelinesRelationManager::class, [
+        Livewire::test(PipelinesRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManagePipelines::class,
         ])
@@ -119,7 +119,7 @@ describe('authorization', function () {
 
         $pipelineData = CreatePipelineRequestFactory::new()->create();
 
-        livewire(CreatePipeline::class, ['parentRecord' => $project])
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
             ->fillForm($pipelineData)
             ->call('create')
             ->assertHasNoFormErrors();
@@ -146,7 +146,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(PipelinesRelationManager::class, [
+        Livewire::test(PipelinesRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManagePipelines::class,
         ])
@@ -154,7 +154,7 @@ describe('authorization', function () {
 
         $pipelineData = CreatePipelineRequestFactory::new()->create();
 
-        livewire(CreatePipeline::class, ['parentRecord' => $project])
+        Livewire::test(CreatePipeline::class, ['parentRecord' => $project])
             ->fillForm($pipelineData)
             ->call('create')
             ->assertHasNoFormErrors();
@@ -176,7 +176,7 @@ describe('authorization', function () {
 
         $project = Project::factory()->for($user, 'createdBy')->create();
 
-        livewire(PipelinesRelationManager::class, [
+        Livewire::test(PipelinesRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManagePipelines::class,
         ])
@@ -195,7 +195,7 @@ describe('authorization', function () {
 
         actingAs($user);
 
-        livewire(PipelinesRelationManager::class, [
+        Livewire::test(PipelinesRelationManager::class, [
             'ownerRecord' => $project,
             'pageClass' => ManagePipelines::class,
         ])

@@ -42,11 +42,11 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceReque
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Illuminate\Validation\Rules\Enum;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -59,7 +59,7 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
 
     $request = CreateServiceRequestStatusRequestFactory::new()->create();
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasNoFormErrors();
@@ -69,12 +69,12 @@ test('A successful action on the CreateServiceRequestStatus page', function () {
     assertDatabaseHas(ServiceRequestStatus::class, $request);
 });
 
-test('CreateServiceRequestStatus requires valid data', function ($data, $errors) {
+test('CreateServiceRequestStatus requires valid data', function (CreateServiceRequestStatusRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     ServiceRequestStatus::query()->truncate();
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm(CreateServiceRequestStatusRequestFactory::new($data)->create())
         ->call('create')
         ->assertHasFormErrors($errors);
@@ -99,7 +99,7 @@ test('CreateServiceRequestStatus is gated with proper access control', function 
             ServiceRequestStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->assertForbidden();
 
     $user->givePermissionTo('settings.view-any');
@@ -112,7 +112,7 @@ test('CreateServiceRequestStatus is gated with proper access control', function 
 
     $request = collect(CreateServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -139,7 +139,7 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
             ServiceRequestStatusResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->assertForbidden();
 
     $settings->data->addons->serviceManagement = true;
@@ -153,7 +153,7 @@ test('CreateServiceRequestStatus is gated with proper feature access control', f
 
     $request = collect(CreateServiceRequestStatusRequestFactory::new()->create());
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -170,7 +170,7 @@ test('CreateServiceRequestStatus prevents creating a case-insensitive duplicate 
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog']);
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm(CreateServiceRequestStatusRequestFactory::new()->state(['name' => 'backlog'])->create())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -181,7 +181,7 @@ test('CreateServiceRequestStatus allows reusing the name of a soft deleted statu
 
     ServiceRequestStatus::factory()->create(['name' => 'Backlog'])->delete();
 
-    livewire(CreateServiceRequestStatus::class)
+    Livewire::test(CreateServiceRequestStatus::class)
         ->fillForm(CreateServiceRequestStatusRequestFactory::new()->state(['name' => 'Backlog'])->create())
         ->call('create')
         ->assertHasNoFormErrors();

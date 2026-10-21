@@ -47,7 +47,7 @@ class ServiceMonitoringTargetRequestFactory extends RequestFactory
     public function definition(): array
     {
         return [
-            'name' => fake()->word(10),
+            'name' => fake()->word(),
             'description' => fake()->paragraph(),
             'domain' => fake()->url(),
             'frequency' => fake()->randomElement(ServiceMonitoringFrequency::cases()),

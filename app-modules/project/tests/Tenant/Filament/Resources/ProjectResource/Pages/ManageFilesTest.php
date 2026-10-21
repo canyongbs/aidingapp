@@ -43,6 +43,7 @@ use App\Settings\LicenseSettings;
 use Illuminate\Database\Console\PruneCommand;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\artisan;
@@ -51,7 +52,6 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\assertModelExists;
 use function Pest\Laravel\assertModelMissing;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
@@ -115,7 +115,7 @@ it('can list files', function () {
 
     ProjectFile::factory()->count(5)->for($project)->create();
 
-    livewire(ManageFiles::class, [
+    Livewire::test(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
         ->assertCanSeeTableRecords($project->files);
@@ -147,21 +147,21 @@ it('can sort files by created by', function () {
         ->sortBy('created_by_id')
         ->values();
 
-    livewire(ManageFiles::class, [
+    Livewire::test(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
         ->sortTable('createdBy.name', 'asc')
         ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
 });
 
-it('can validate create files inputs', function ($data, $errors) {
+it('can validate create files inputs', function (array $data, string $errors) {
     asSuperAdmin();
     Storage::fake('s3');
 
     $project = Project::factory()->create();
     $file = ProjectFile::factory()->make($data);
 
-    livewire(ManageFiles::class, [
+    Livewire::test(ManageFiles::class, [
         'record' => $project->getKey(),
     ])
         ->callTableAction('create', data: $file->toArray())
@@ -183,7 +183,7 @@ it('can create files', function () {
     $project = Project::factory()->create();
     $fakeFile = UploadedFile::fake()->image(fake()->word . '.png');
 
-    livewire(ManageFiles::class, [
+    Livewire::test(ManageFiles::class, [
         'record' => $project->getKey(),
     ])
         ->callTableAction('create', data: [
@@ -213,7 +213,7 @@ it('can edit files', function () {
         'retention_date' => now()->addDays(7)->toDateString(),
     ]);
 
-    livewire(ManageFiles::class, [
+    Livewire::test(ManageFiles::class, [
         'record' => $project->getKey(),
     ])
         ->callTableAction('edit', record: $file->getKey(), data: $request->toArray())

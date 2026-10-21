@@ -37,9 +37,10 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
 
@@ -50,7 +51,7 @@ it('renders impersonate button for non super admin users when user is super admi
 
     $user = User::factory()->create();
 
-    livewire(ViewUser::class, [
+    Livewire::test(ViewUser::class, [
         'record' => $user->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -64,7 +65,7 @@ it('does not render impersonate button for super admin users at all', function (
     $user = User::factory()->create();
     asSuperAdmin($user);
 
-    livewire(ViewUser::class, [
+    Livewire::test(ViewUser::class, [
         'record' => $superAdmin->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -77,7 +78,7 @@ it('allows super admin user to impersonate', function () {
 
     $user = User::factory()->create();
 
-    livewire(ViewUser::class, [
+    Livewire::test(ViewUser::class, [
         'record' => $user->getRouteKey(),
     ])
         ->assertSuccessful()
@@ -97,7 +98,7 @@ test('ViewUser is gated with proper access control', function () {
             UserResource::getUrl('view', ['record' => $record])
         )->assertForbidden();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertForbidden();
 
     $user->givePermissionTo('user.view-any');
@@ -108,7 +109,7 @@ test('ViewUser is gated with proper access control', function () {
             UserResource::getUrl('view', ['record' => $record])
         )->assertSuccessful();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertSuccessful();
 });
 
@@ -122,7 +123,7 @@ test('ViewUser displays the record\'s current field values', function () {
         'email' => 'jordan.blake@example.com',
     ]);
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormSet([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
@@ -136,7 +137,7 @@ test('ViewUser shows first and last name fields when the full name feature is ac
 
     $record = User::factory()->create();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldIsVisible('first_name')
         ->assertFormFieldIsVisible('last_name');
 });
@@ -146,7 +147,7 @@ test('ViewUser disables all editable fields', function () {
 
     $record = User::factory()->create();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
         ->assertFormFieldDisabled('name')
@@ -160,7 +161,7 @@ test('ViewUser hides the Department section for admin records', function () {
     $record = User::factory()->create();
     $record->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldIsHidden('department_id');
 });
 
@@ -169,7 +170,7 @@ test('ViewUser shows the Department section for non-admin records', function () 
 
     $record = User::factory()->create();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
+    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldIsVisible('department_id');
 });
 
@@ -179,12 +180,14 @@ test('ViewUser displays Created At and Updated At in the acting user\'s configur
 
     $record = User::factory()->create();
     $record->timestamps = false;
-    $record->created_at = '2026-01-15 12:00:00';
+    $record->created_at = Carbon::parse('2026-01-15 12:00:00');
     $record->save();
 
-    livewire(ViewUser::class, ['record' => $record->getKey()])
-        ->assertSuccessful()
-        ->assertSee('Jan 15, 2026')
-        ->assertSee('7:00 am (EST)')
-        ->assertSee('fi-datetime-description', false);
+    $component = Livewire::test(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/parent::*'))
+        ->toContain('Jan 15, 2026', '7:00 am (EST)')
+        ->and(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/@class'))
+        ->toContain('fi-datetime-description');
 });

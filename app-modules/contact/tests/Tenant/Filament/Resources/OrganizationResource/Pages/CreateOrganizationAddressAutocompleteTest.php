@@ -36,9 +36,9 @@
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\CreateOrganization;
 use App\DataTransferObjects\AutocompletedAddress;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('populates the address fields when a suggestion is selected', function () {
     actingAs(
@@ -56,7 +56,7 @@ it('populates the address fields when a suggestion is selected', function () {
         label: '123 Main St, Austin, TX, 78701, US',
     );
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->call('callSchemaComponentMethod', 'form.address', 'reactOnItemSelectedFromJs', [[
             'value' => $address->label,
             'label' => $address->label,

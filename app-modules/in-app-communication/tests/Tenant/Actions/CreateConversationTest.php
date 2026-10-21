@@ -63,10 +63,7 @@ it('creates a direct message conversation between two users', function () {
     assertDatabaseCount(Conversation::class, 1);
     assertDatabaseCount(ConversationParticipant::class, 2);
 
-    expect($conversation)
-        ->type->toBe(ConversationType::Direct)
-        ->name->toBeNull()
-        ->created_by->toBe($creator->getKey());
+    expect($conversation->type)->toBe(ConversationType::Direct)->and($conversation->name)->toBeNull()->and($conversation->created_by)->toBe($creator->getKey());
 
     assertDatabaseHas(ConversationParticipant::class, [
         'conversation_id' => $conversation->getKey(),
@@ -122,11 +119,7 @@ it('creates a channel conversation with creator as manager', function () {
     assertDatabaseCount(Conversation::class, 1);
     assertDatabaseCount(ConversationParticipant::class, 3);
 
-    expect($conversation)
-        ->type->toBe(ConversationType::Channel)
-        ->name->toBe('Test Channel')
-        ->is_private->toBeTrue()
-        ->created_by->toBe($creator->getKey());
+    expect($conversation->type)->toBe(ConversationType::Channel)->and($conversation->name)->toBe('Test Channel')->and($conversation->is_private)->toBeTrue()->and($conversation->created_by)->toBe($creator->getKey());
 
     assertDatabaseHas(ConversationParticipant::class, [
         'conversation_id' => $conversation->getKey(),
@@ -158,8 +151,7 @@ it('creates a public channel when `isPrivate` is false', function () {
         isPrivate: false,
     );
 
-    expect($conversation)
-        ->is_private->toBeFalse();
+    expect($conversation->is_private)->toBeFalse();
 });
 
 it('does not duplicate the creator in participants if included in `participantIds`', function () {
@@ -203,9 +195,9 @@ it('sets `last_activity_at` for all participants when creating a conversation', 
         ->where('participant_id', $participant2->getKey())
         ->first();
 
-    expect($creatorParticipant->last_activity_at)->not->toBeNull();
-    expect($participant1Record->last_activity_at)->not->toBeNull();
-    expect($participant2Record->last_activity_at)->not->toBeNull();
+    expect($creatorParticipant->last_activity_at)->not()->toBeNull();
+    expect($participant1Record->last_activity_at)->not()->toBeNull();
+    expect($participant2Record->last_activity_at)->not()->toBeNull();
 });
 
 it('sets `last_activity_at` for direct message participants', function () {
@@ -228,8 +220,8 @@ it('sets `last_activity_at` for direct message participants', function () {
         ->where('participant_id', $participant->getKey())
         ->first();
 
-    expect($creatorParticipant->last_activity_at)->not->toBeNull();
-    expect($participantRecord->last_activity_at)->not->toBeNull();
+    expect($creatorParticipant->last_activity_at)->not()->toBeNull();
+    expect($participantRecord->last_activity_at)->not()->toBeNull();
 });
 
 it('creates a confidential channel with an ephemeral period', function () {
@@ -244,10 +236,7 @@ it('creates a confidential channel with an ephemeral period', function () {
         ephemeralPeriod: ConversationEphemeralPeriod::TwentyFourHours,
     );
 
-    expect($conversation)
-        ->is_confidential->toBeTrue()
-        ->ephemeral_period->toBe(ConversationEphemeralPeriod::TwentyFourHours)
-        ->is_private->toBeTrue();
+    expect($conversation->is_confidential)->toBeTrue()->and($conversation->ephemeral_period)->toBe(ConversationEphemeralPeriod::TwentyFourHours)->and($conversation->is_private)->toBeTrue();
 });
 
 it('forces a confidential channel to be private even when asked for a public one', function () {
@@ -262,9 +251,7 @@ it('forces a confidential channel to be private even when asked for a public one
         isConfidential: true,
     );
 
-    expect($conversation)
-        ->is_confidential->toBeTrue()
-        ->is_private->toBeTrue();
+    expect($conversation->is_confidential)->toBeTrue()->and($conversation->is_private)->toBeTrue();
 });
 
 it('ignores the ephemeral period when the channel is not confidential', function () {
@@ -279,9 +266,7 @@ it('ignores the ephemeral period when the channel is not confidential', function
         ephemeralPeriod: ConversationEphemeralPeriod::OneMinute,
     );
 
-    expect($conversation)
-        ->is_confidential->toBeFalse()
-        ->ephemeral_period->toBeNull();
+    expect($conversation->is_confidential)->toBeFalse()->and($conversation->ephemeral_period)->toBeNull();
 });
 
 it('does not make a direct message confidential', function () {
@@ -296,7 +281,5 @@ it('does not make a direct message confidential', function () {
         ephemeralPeriod: ConversationEphemeralPeriod::OneHour,
     );
 
-    expect($conversation)
-        ->is_confidential->toBeFalse()
-        ->ephemeral_period->toBeNull();
+    expect($conversation->is_confidential)->toBeFalse()->and($conversation->ephemeral_period)->toBeNull();
 });

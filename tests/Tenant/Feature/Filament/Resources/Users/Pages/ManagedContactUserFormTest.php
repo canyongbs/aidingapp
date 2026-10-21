@@ -39,8 +39,8 @@ use AidingApp\Contact\Services\ManagedContactService;
 use App\Filament\Resources\Users\Pages\CreateUser;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Models\User;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('creates a linked managed contact when the toggle is enabled', function () {
@@ -48,7 +48,7 @@ it('creates a linked managed contact when the toggle is enabled', function () {
 
     $type = ContactType::factory()->create();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Manny',
             'last_name' => 'Ged',
@@ -74,7 +74,7 @@ it('creates a linked managed contact when the toggle is enabled', function () {
 it('does not create a managed contact when the toggle is disabled', function () {
     asSuperAdmin();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Plain',
             'last_name' => 'User',
@@ -93,7 +93,7 @@ it('does not create a managed contact when the toggle is disabled', function () 
 it('requires a contact type when managed contact is enabled', function () {
     asSuperAdmin();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Type',
@@ -113,7 +113,7 @@ it('enables and then disables a managed contact from the edit page', function ()
 
     $user = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm([
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
@@ -123,7 +123,7 @@ it('enables and then disables a managed contact from the edit page', function ()
 
     expect($user->managedContact()->exists())->toBeTrue();
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm([
             'is_managed_contact' => false,
         ])
@@ -140,7 +140,7 @@ it('hydrates the managed contact toggle on the edit page', function () {
 
     $user = User::factory()->create();
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm([
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
@@ -148,7 +148,7 @@ it('hydrates the managed contact toggle on the edit page', function () {
         ->call('save')
         ->assertHasNoFormErrors();
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->assertFormSet([
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
@@ -164,7 +164,7 @@ it('synchronizes edited user fields to the managed contact from the edit page', 
 
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm([
             'first_name' => 'Edited',
             'last_name' => 'Person',
@@ -199,7 +199,7 @@ it('updates the managed contact type from the edit page', function () {
 
     app(ManagedContactService::class)->enable($user, $type->getKey());
 
-    livewire(EditUser::class, ['record' => $user->getKey()])
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
         ->fillForm([
             'is_managed_contact' => true,
             'managed_contact_type_id' => $newType->getKey(),

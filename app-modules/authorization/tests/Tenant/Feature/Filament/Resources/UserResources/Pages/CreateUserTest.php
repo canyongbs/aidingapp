@@ -39,10 +39,10 @@ use App\Filament\Resources\Users\UserResource;
 use App\Models\User;
 use App\Notifications\SetPasswordNotification;
 use Illuminate\Support\Facades\Notification;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('CreateUser is gated with proper access control', function () {
@@ -53,7 +53,7 @@ test('CreateUser is gated with proper access control', function () {
             UserResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->assertForbidden();
 
     $user->givePermissionTo('user.view-any');
@@ -64,7 +64,7 @@ test('CreateUser is gated with proper access control', function () {
             UserResource::getUrl('create')
         )->assertSuccessful();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
@@ -83,7 +83,7 @@ test('CreateUser is gated with proper access control', function () {
 test('CreateUser shows and requires first and last name fields when the full name feature is active', function () {
     asSuperAdmin();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->assertFormFieldIsVisible('first_name')
         ->assertFormFieldIsVisible('last_name')
         ->fillForm([
@@ -101,7 +101,7 @@ test('CreateUser shows and requires first and last name fields when the full nam
 test('CreateUser requires an email address', function () {
     asSuperAdmin();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
@@ -115,7 +115,7 @@ test('CreateUser requires an email address', function () {
 test('CreateUser rejects an invalid email address', function () {
     asSuperAdmin();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
@@ -131,7 +131,7 @@ test('CreateUser rejects a duplicate email case-insensitively', function () {
 
     User::factory()->create(['email' => 'taken@example.com']);
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
@@ -147,7 +147,7 @@ test('CreateUser rejects reusing a soft-deleted user email', function () {
 
     User::factory()->create(['email' => 'archived@example.com'])->delete();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
@@ -165,7 +165,7 @@ test('CreateUser sends the set password notification to a non-external user', fu
 
     Notification::fake();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Internal',
             'last_name' => 'User',
@@ -186,7 +186,7 @@ test('CreateUser does not send the set password notification to an external user
 
     Notification::fake();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'External',
             'last_name' => 'User',
@@ -202,12 +202,12 @@ test('CreateUser does not send the set password notification to an external user
     Notification::assertNotSentTo($created, SetPasswordNotification::class);
 });
 
-test('CreateUser validates the inputs', function ($data, $errors) {
+test('CreateUser validates the inputs', function (array $data, array $errors) {
     asSuperAdmin();
 
     $request = User::factory()->state($data)->make()->toArray();
 
-    livewire(CreateUser::class)
+    Livewire::test(CreateUser::class)
         ->fillForm($request)
         ->call('create')
         ->assertHasFormErrors($errors);

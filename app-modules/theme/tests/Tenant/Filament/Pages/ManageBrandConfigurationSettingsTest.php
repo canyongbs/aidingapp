@@ -37,10 +37,10 @@
 use AidingApp\Theme\Filament\Pages\ManageBrandConfigurationSettings;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('allows a super admin to access the branding page', function () {
@@ -53,7 +53,7 @@ it('allows a super admin to access the branding page', function () {
 it('can update the profile menu link and login and home target settings', function () {
     asSuperAdmin();
 
-    livewire(ManageBrandConfigurationSettings::class)
+    Livewire::test(ManageBrandConfigurationSettings::class)
         ->fillForm([
             'is_support_url_enabled' => true,
             'support_url' => 'https://example.com/support',
@@ -79,7 +79,7 @@ it('can update the profile menu link and login and home target settings', functi
 it('hides the support url input when the support toggle is disabled', function () {
     asSuperAdmin();
 
-    livewire(ManageBrandConfigurationSettings::class)
+    Livewire::test(ManageBrandConfigurationSettings::class)
         ->fillForm(['is_support_url_enabled' => true])
         ->assertFormFieldVisible('support_url')
         ->fillForm(['is_support_url_enabled' => false])
@@ -89,7 +89,7 @@ it('hides the support url input when the support toggle is disabled', function (
 it('hides the recent updates url input when the recent updates toggle is disabled', function () {
     asSuperAdmin();
 
-    livewire(ManageBrandConfigurationSettings::class)
+    Livewire::test(ManageBrandConfigurationSettings::class)
         ->fillForm(['is_recent_updates_url_enabled' => true])
         ->assertFormFieldVisible('recent_updates_url')
         ->fillForm(['is_recent_updates_url_enabled' => false])

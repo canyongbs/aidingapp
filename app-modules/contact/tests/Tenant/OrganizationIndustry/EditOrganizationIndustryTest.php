@@ -42,9 +42,9 @@ use AidingApp\Contact\Tests\Tenant\OrganizationIndustry\RequestFactories\EditOrg
 use App\Features\OrganizationTypeAndIndustryNameUniquenessFeature;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('Edit Organization Industry is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -57,7 +57,7 @@ test('Edit Organization Industry is gated with proper access control', function 
             ])
         )->assertForbidden();
 
-    livewire(EditOrganizationIndustry::class, [
+    Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->assertForbidden();
@@ -71,7 +71,7 @@ test('Edit Organization Industry is gated with proper access control', function 
                 'record' => $organizationIndustry,
             ])
         )->assertSuccessful();
-    livewire(EditOrganizationIndustry::class, [
+    Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->assertSuccessful();
@@ -87,7 +87,7 @@ test('Edit Organization Industry Record', function () {
 
     $request = collect(EditOrganizationIndustryRequestFactory::new()->create());
 
-    livewire(EditOrganizationIndustry::class, [
+    Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -110,7 +110,7 @@ test('the organization industry name must be unique among other non-trashed indu
 
     actingAs($user);
 
-    livewire(EditOrganizationIndustry::class, [
+    Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->fillForm(['name' => 'Technology'])
@@ -128,7 +128,7 @@ test('an organization industry can keep its own name when editing', function () 
 
     actingAs($user);
 
-    livewire(EditOrganizationIndustry::class, [
+    Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->fillForm(['name' => 'Technology'])
@@ -149,7 +149,7 @@ test('does not apply the unique form rule when the feature is disabled', functio
 
     actingAs($user);
 
-    expect(fn () => livewire(EditOrganizationIndustry::class, [
+    expect(fn () => Livewire::test(EditOrganizationIndustry::class, [
         'record' => $organizationIndustry->getRouteKey(),
     ])
         ->fillForm(['name' => 'Technology'])

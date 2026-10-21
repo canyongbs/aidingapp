@@ -53,7 +53,7 @@ use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('sends a notification if the response is not 200', function ($frequency) {
+it('sends a notification if the response is not 200', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(function () {
         return Http::response('Test', 500);
     });
@@ -81,7 +81,7 @@ it('sends a notification if the response is not 200', function ($frequency) {
         ]
     );
 
-it('does not send a notification if the response is 200', function ($frequency) {
+it('does not send a notification if the response is 200', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(function () {
         return Http::response('Test', 200);
     });
@@ -104,7 +104,7 @@ it('does not send a notification if the response is 200', function ($frequency) 
         ]
     );
 
-it('does not send a notification when all required keyword match values are present', function ($frequency) {
+it('does not send a notification when all required keyword match values are present', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Test 1 and Test 2'));
     Notification::fake();
 
@@ -130,7 +130,7 @@ it('does not send a notification when all required keyword match values are pres
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when any required keyword match value is missing', function ($frequency) {
+it('sends a notification when any required keyword match value is missing', function (ServiceMonitoringFrequency $frequency) {
     Http::fakeSequence()
         ->push('Test 1')
         ->push('Test 2');
@@ -156,7 +156,7 @@ it('sends a notification when any required keyword match value is missing', func
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a failure notification when both keyword match fields are empty', function ($frequency) {
+it('sends a failure notification when both keyword match fields are empty', function (ServiceMonitoringFrequency $frequency) {
     Http::preventStrayRequests();
     Notification::fake();
 
@@ -185,7 +185,7 @@ it('sends a failure notification when both keyword match fields are empty', func
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when a prohibited keyword match value is present', function ($frequency) {
+it('sends a notification when a prohibited keyword match value is present', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Test 1'));
     Notification::fake();
 
@@ -206,7 +206,7 @@ it('sends a notification when a prohibited keyword match value is present', func
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('does not send a notification when no prohibited keyword match values are present', function ($frequency) {
+it('does not send a notification when no prohibited keyword match values are present', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Test 3'));
     Notification::fake();
 
@@ -233,7 +233,7 @@ it('does not send a notification when no prohibited keyword match values are pre
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('passes when all required keyword match values are present and no prohibited values are present', function ($frequency) {
+it('passes when all required keyword match values are present and no prohibited values are present', function (ServiceMonitoringFrequency $frequency) {
     Http::fakeSequence()
         ->push('Test 1 and Test 2')
         ->push('Test 1')
@@ -271,7 +271,7 @@ it('passes when all required keyword match values are present and no prohibited 
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values case-insensitively and treats special characters literally', function ($frequency) {
+it('matches keyword values case-insensitively and treats special characters literally', function (ServiceMonitoringFrequency $frequency) {
     Http::fakeSequence()
         ->push('test 1 sign-in sign_in test, one . * ? ! ( ) [ ]')
         ->push('test 1 sign in sign_in test, one . * ? ! ( ) [ ]');
@@ -297,7 +297,7 @@ it('matches keyword values case-insensitively and treats special characters lite
     Notification::assertSentTo($user, ServiceMonitoringNotification::class);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('records each unique keyword match failure', function ($frequency) {
+it('records each unique keyword match failure', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Test 1 and Test 4'));
     Notification::fake();
 
@@ -330,7 +330,7 @@ it('records each unique keyword match failure', function ($frequency) {
         ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('sends a notification when a keyword match response has no readable body', function ($frequency) {
+it('sends a notification when a keyword match response has no readable body', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('', 200));
     Notification::fake();
 
@@ -356,7 +356,7 @@ it('sends a notification when a keyword match response has no readable body', fu
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across HTML tags', function ($frequency) {
+it('matches keyword values across HTML tags', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<html><body><p>Sign <strong>in</strong></p></body></html>'));
     Notification::fake();
 
@@ -382,7 +382,7 @@ it('matches keyword values across HTML tags', function ($frequency) {
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('does not match keyword values across adjacent inline HTML elements', function ($frequency) {
+it('does not match keyword values across adjacent inline HTML elements', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<span>Sign</span><span>in</span>'));
     Notification::fake();
 
@@ -411,7 +411,7 @@ it('does not match keyword values across adjacent inline HTML elements', functio
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across adjacent block HTML elements', function ($frequency) {
+it('matches keyword values across adjacent block HTML elements', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<p>Sign</p><p>in</p>'));
     Notification::fake();
 
@@ -437,7 +437,7 @@ it('matches keyword values across adjacent block HTML elements', function ($freq
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values separated by a line break element', function ($frequency) {
+it('matches keyword values separated by a line break element', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Sign<br>in'));
     Notification::fake();
 
@@ -463,7 +463,7 @@ it('matches keyword values separated by a line break element', function ($freque
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values across inline HTML elements with source whitespace', function ($frequency) {
+it('matches keyword values across inline HTML elements with source whitespace', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<strong>sign</strong> <em>in</em>'));
     Notification::fake();
 
@@ -489,7 +489,7 @@ it('matches keyword values across inline HTML elements with source whitespace', 
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('matches keyword values separated by a non-breaking space', function ($frequency) {
+it('matches keyword values separated by a non-breaking space', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Sign&nbsp;in'));
     Notification::fake();
 
@@ -515,7 +515,7 @@ it('matches keyword values separated by a non-breaking space', function ($freque
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('preserves block boundaries in minified HTML', function ($frequency) {
+it('preserves block boundaries in minified HTML', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<div>Sign</div><div>in</div>'));
     Notification::fake();
 
@@ -541,7 +541,7 @@ it('preserves block boundaries in minified HTML', function ($frequency) {
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('excludes script, style, and noscript content from keyword matching', function ($frequency) {
+it('excludes script, style, and noscript content from keyword matching', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('<script>sign in</script><style>sign in</style><noscript>sign in</noscript>'));
     Notification::fake();
 
@@ -570,7 +570,7 @@ it('excludes script, style, and noscript content from keyword matching', functio
     ]);
 })->with(ServiceMonitoringFrequency::cases());
 
-it('handles unresolvable host errors gracefully', function ($frequency) {
+it('handles unresolvable host errors gracefully', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(function () {
         throw new ConnectionException('Could not resolve host');
     });
@@ -598,7 +598,7 @@ it('handles unresolvable host errors gracefully', function ($frequency) {
         ]
     );
 
-it('sends a notification when a keyword match response has a binary content type', function ($frequency) {
+it('sends a notification when a keyword match response has a binary content type', function (ServiceMonitoringFrequency $frequency) {
     Http::fake(fn () => Http::response('Test 1', 200, ['Content-Type' => 'application/octet-stream']));
     Notification::fake();
 
@@ -1117,7 +1117,7 @@ it('includes the API endpoint failure reason in the email notification body', fu
     $body = (string) $notification->toMail($user)->render();
 
     expect($body)->toContain('Unexpected status code: 500')
-        ->not->toContain('The monitored service did not respond to a health check');
+        ->not()->toContain('The monitored service did not respond to a health check');
 });
 
 it('includes the max latency failure reason in the email notification body', function () {
@@ -1146,7 +1146,7 @@ it('includes the max latency failure reason in the email notification body', fun
     $body = (string) $notification->toMail($user)->render();
 
     expect($body)->toContain('Response exceeded maximum allowed latency of 1000ms')
-        ->not->toContain('The monitored service did not respond to a health check');
+        ->not()->toContain('The monitored service did not respond to a health check');
 });
 
 it('includes the keyword match failure reason in the email notification body', function () {
@@ -1170,7 +1170,7 @@ it('includes the keyword match failure reason in the email notification body', f
     $body = (string) $notification->toMail($user)->render();
 
     expect($body)->toContain('Required string not found: expected phrase')
-        ->not->toContain('The monitored service did not respond to a health check');
+        ->not()->toContain('The monitored service did not respond to a health check');
 });
 
 it('falls back to the generic failure message in the email for an Availability monitor', function () {

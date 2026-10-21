@@ -42,12 +42,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Facades\Notification;
 
+use function Pest\Laravel\travelTo;
+
 it('appends a status period for every request currently in the reclassified status', function () {
     Notification::fake();
 
     $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-    $this->travelTo($start);
+    travelTo($start);
 
     $status = ServiceRequestStatus::factory()->inProgress()->create();
 
@@ -78,7 +80,7 @@ it('splits the sla calculation at the reclassification boundary', function () {
 
     $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-    $this->travelTo($start);
+    travelTo($start);
 
     $status = ServiceRequestStatus::factory()->open()->create();
 
@@ -92,7 +94,7 @@ it('splits the sla calculation at the reclassification boundary', function () {
     (new RecordReclassifiedServiceRequestStatusPeriods($status, $reclassifiedAt))
         ->handle(app(RecordServiceRequestStatusPeriod::class));
 
-    $this->travelTo($start->addSeconds(300));
+    travelTo($start->addSeconds(300));
 
     $serviceRequest->load('statusPeriods');
 

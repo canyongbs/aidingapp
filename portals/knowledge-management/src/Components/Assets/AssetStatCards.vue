@@ -32,7 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { computed } from 'vue';
+    import { computed, defineProps } from 'vue';
     import BaseStatCard from '../ui/BaseStatCard.vue';
 
     const props = defineProps({

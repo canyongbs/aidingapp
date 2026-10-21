@@ -45,15 +45,14 @@ use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->ai_support_assistant = true;
-    $settings->save();
-});
+use Symfony\Component\HttpFoundation\Response;
 
-function assistantAuthenticate(PortalAuthentication $authentication, array $body): TestResponse
-{
+/**
+ * @param array<string, mixed> $body
+ *
+ * @return TestResponse<Response>
+ */
+$assistantAuthenticate = function (PortalAuthentication $authentication, array $body): TestResponse {
     $url = URL::signedRoute(
         name: 'widgets.assistant.api.authenticate',
         parameters: ['authentication' => $authentication],
@@ -61,89 +60,96 @@ function assistantAuthenticate(PortalAuthentication $authentication, array $body
     );
 
     return postJson($url, $body, ['Origin' => config('app.url')]);
-}
+};
 
-test('it authenticates the contact when the code is valid', function () {
+beforeEach(function () {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->ai_support_assistant = true;
+    $settings->save();
+});
+
+test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 123456;
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    $response = assistantAuthenticate($authentication, ['code' => $plainCode]);
+    $response = $assistantAuthenticate($authentication, ['code' => $plainCode]);
 
     $response
         ->assertOk()
         ->assertJsonPath('success', true);
 
-    expect($response->json('token'))->not->toBeEmpty()
+    expect($response->json('token'))->not()->toBeEmpty()
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns a validation error when the code is invalid', function () {
+test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(112233),
+        'code' => Hash::make((string) 112233),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    assistantAuthenticate($authentication, ['code' => 999999])
+    $assistantAuthenticate($authentication, ['code' => 999999])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code']);
 
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it returns expired when the authentication has expired', function () {
+test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 445566;
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now()->subDay()->subMinute(),
     ]);
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
-    assistantAuthenticate($authentication, ['code' => $plainCode])
+    $assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
         ->assertJsonPath('is_expired', true);
 
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate) {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
     $authentication->educatable()->associate($contact);
     $authentication->save();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
-        assistantAuthenticate($authentication, ['code' => 999999])
+        $assistantAuthenticate($authentication, ['code' => 999999])
             ->assertStatus(422)
             ->assertJsonValidationErrors(['code' => 'The provided code is invalid.']);
     }
 
-    assistantAuthenticate($authentication, ['code' => $plainCode])
+    $assistantAuthenticate($authentication, ['code' => $plainCode])
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code' => 'Too many invalid attempts. Please request a new code.']);
 

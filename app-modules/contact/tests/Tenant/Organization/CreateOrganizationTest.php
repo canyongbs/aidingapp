@@ -41,9 +41,9 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Organization\RequestFactories\CreateOrganizationRequestFactory;
 use App\Models\User;
 use Filament\Forms\Components\Repeater;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('Create Organization is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -53,7 +53,7 @@ test('Create Organization is gated with proper access control', function () {
             OrganizationResource::getUrl('create')
         )->assertForbidden();
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->assertForbidden();
 
     $user->givePermissionTo('organization.view-any');
@@ -80,7 +80,7 @@ test('validating that domain is required', function () {
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors([
@@ -106,7 +106,7 @@ test('validating that distinct domain is allowed', function () {
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors([
@@ -141,7 +141,7 @@ test('if the domain is already in use then not be used second time.', function (
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors([
@@ -168,7 +168,7 @@ test('check if the provided domain is invalid', function (string $domain) {
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors([
@@ -208,7 +208,7 @@ test('check if the provided domain is valid', function (string $domain) {
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();
@@ -239,7 +239,7 @@ test('the organization name must be unique among non-trashed organizations', fun
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -263,7 +263,7 @@ test('the organization name uniqueness check is case-insensitive', function () {
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasFormErrors(['name' => 'unique']);
@@ -287,7 +287,7 @@ test('the organization name of a soft-deleted organization can be reused', funct
 
     actingAs($user);
 
-    livewire(CreateOrganization::class)
+    Livewire::test(CreateOrganization::class)
         ->fillForm($request->toArray())
         ->call('create')
         ->assertHasNoFormErrors();

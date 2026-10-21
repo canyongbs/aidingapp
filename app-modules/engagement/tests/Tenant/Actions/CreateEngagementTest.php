@@ -39,6 +39,7 @@ use AidingApp\Engagement\DataTransferObjects\EngagementCreationData;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use AidingApp\Engagement\Tests\Tenant\RequestFactories\CreateEngagementRequestFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Notification;
 
 use function Pest\Laravel\assertDatabaseCount;
@@ -61,14 +62,11 @@ it('will create and send an engagement immediately', function () {
 
     assertDatabaseCount(Engagement::class, 1);
 
-    expect(Engagement::first())
-        ->user->is($data['user'])->toBeTrue()
-        ->recipient->is($data['recipient'])->toBeTrue()
-        ->channel->toBe($data['channel'])
-        ->subject->toBe($data['subject'])
-        ->body->toMatchArray($data['body'])
-        ->scheduled_at->toBeNull()
-        ->dispatched_at->not->toBeNull();
+    $createdEngagement = Engagement::query()->sole();
+
+    assert($createdEngagement->recipient instanceof Model);
+
+    expect($createdEngagement->user->is($data['user']))->toBeTrue()->and($createdEngagement->recipient->is($data['recipient']))->toBeTrue()->and($createdEngagement->channel)->toBe($data['channel'])->and($createdEngagement->subject)->toBe($data['subject'])->and($createdEngagement->body)->toMatchArray($data['body'])->and($createdEngagement->scheduled_at)->toBeNull()->and($createdEngagement->dispatched_at)->not()->toBeNull();
 
     Notification::assertSentTo(
         $data['recipient'],
@@ -94,14 +92,11 @@ it('will create but not dispatch a scheduled engagement', function () {
 
     assertDatabaseCount(Engagement::class, 1);
 
-    expect(Engagement::first())
-        ->user->is($data['user'])->toBeTrue()
-        ->recipient->is($data['recipient'])->toBeTrue()
-        ->channel->toBe($data['channel'])
-        ->subject->toBe($data['subject'])
-        ->body->toMatchArray($data['body'])
-        ->scheduled_at->startOfSecond()->eq($scheduledAt->startOfSecond())->toBeTrue()
-        ->dispatched_at->toBeNull();
+    $createdEngagement = Engagement::query()->sole();
+
+    assert($createdEngagement->recipient instanceof Model);
+
+    expect($createdEngagement->user->is($data['user']))->toBeTrue()->and($createdEngagement->recipient->is($data['recipient']))->toBeTrue()->and($createdEngagement->channel)->toBe($data['channel'])->and($createdEngagement->subject)->toBe($data['subject'])->and($createdEngagement->body)->toMatchArray($data['body'])->and($createdEngagement->scheduled_at->startOfSecond()->eq($scheduledAt->startOfSecond()))->toBeTrue()->and($createdEngagement->dispatched_at)->toBeNull();
 
     Notification::assertNotSentTo(
         $data['recipient'],

@@ -61,9 +61,9 @@ class EditContactRequestFactory extends RequestFactory
             'academic_department' => $this->faker->word(),
             'program' => $this->faker->word(),
             'address' => $this->faker->streetAddress(),
-            'address_2' => $this->faker->secondaryAddress(),
+            'address_2' => $this->faker->format('secondaryAddress'),
             'city' => $this->faker->city(),
-            'state' => $this->faker->stateAbbr(),
+            'state' => $this->faker->format('stateAbbr'),
             'postal' => $this->faker->postcode(),
             'country' => $this->faker->country(),
         ];

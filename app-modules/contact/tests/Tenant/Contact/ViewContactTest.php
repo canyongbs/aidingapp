@@ -46,12 +46,15 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\EditContactRequestFactory;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
 use App\Models\User;
+use Dom\HTMLDocument;
+use Dom\Node;
+use Dom\XPath;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Callout;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('The correct details are displayed on the ViewContact page', function () {
@@ -73,18 +76,23 @@ test('The correct details are displayed on the ViewContact page', function () {
         'last_activity_at' => now(),
     ]);
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
-        ->assertSuccessful()
-        ->assertSee('John')
-        ->assertSee('Doe')
-        ->assertSee('Mr. John Doe')
-        ->assertSee('Johnny')
-        ->assertSee('Online')
-        ->assertSee('Manager')
-        ->assertSee('john.doe@example.com')
-        ->assertSee('Springfield')
-        ->assertSee('Student')
-        ->assertSee('Acme Inc');
+    $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertSuccessful();
+
+    $expected = [
+        'first_name' => 'John',
+        'last_name' => 'Doe',
+        'full_name' => 'Mr. John Doe',
+        'preferred' => 'Johnny',
+        'presence_status' => $contact->presenceStatus(),
+        'job_title' => 'Manager',
+        'email' => 'john.doe@example.com',
+        'city' => 'Springfield',
+        'type.name' => 'Student',
+        'organization.name' => 'Acme Inc',
+    ];
+
+    expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected);
 });
 
 test('The primary information sections are organized into tabs on the ViewContact page', function () {
@@ -92,9 +100,14 @@ test('The primary information sections are organized into tabs on the ViewContac
 
     $contact = Contact::factory()->create();
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
-        ->assertSuccessful()
-        ->assertSeeInOrder(['Demographic', 'Contact', 'Employment', 'Academic', 'Address', 'Affiliation', 'System']);
+    $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertSuccessful();
+
+    $document = HTMLDocument::createFromString($component->html(), LIBXML_NOERROR);
+    $tabs = (new XPath($document))->query('(//*[contains(concat(" ", normalize-space(@class), " "), " fi-tabs ")])[1]//*[@role="tab"]');
+
+    expect(array_map(fn (Node $tab): string => trim($tab->textContent), iterator_to_array($tabs)))
+        ->toBe(['Demographic', 'Contact', 'Employment', 'Academic', 'Address', 'Affiliation', 'System']);
 });
 
 test('ViewContact renders successfully when optional fields have no value', function () {
@@ -106,7 +119,7 @@ test('ViewContact renders successfully when optional fields have no value', func
         'address_2' => null,
     ]);
 
-    livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
         ->assertSuccessful();
 });
 
@@ -146,14 +159,14 @@ describe('section edit actions', function () {
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionDoesNotExist(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
 
         $user->givePermissionTo('contact.*.update');
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->assertActionVisible(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
@@ -171,7 +184,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'), data: [
@@ -188,15 +201,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        expect($contact->fresh())
-            ->type_id->toEqual($request->get('type_id'))
-            ->first_name->toEqual($request->get('first_name'))
-            ->last_name->toEqual($request->get('last_name'))
-            ->full_name->toEqual("{$request->get('first_name')} {$request->get('last_name')}")
-            ->preferred->toEqual($request->get('preferred'))
-            ->email->toEqual($request->get('email'))
-            ->mobile->toEqual($request->get('mobile'))
-            ->phone->toEqual($request->get('phone'));
+        expect($contact->fresh()->type_id)->toEqual($request->get('type_id'))->and($contact->fresh()->first_name)->toEqual($request->get('first_name'))->and($contact->fresh()->last_name)->toEqual($request->get('last_name'))->and($contact->fresh()->full_name)->toEqual("{$request->get('first_name')} {$request->get('last_name')}")->and($contact->fresh()->preferred)->toEqual($request->get('preferred'))->and($contact->fresh()->email)->toEqual($request->get('email'))->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))->and($contact->fresh()->phone)->toEqual($request->get('phone'));
     });
 
     test('the employment information section can be updated', function () {
@@ -216,7 +221,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editEmploymentInformation')->schemaComponent('employmentInformation'), data: [
@@ -227,11 +232,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        expect($contact->fresh())
-            ->job_title->toEqual($request->get('job_title'))
-            ->employee_id->toEqual($request->get('employee_id'))
-            ->work_number->toEqual($request->get('work_number'))
-            ->work_extension->toEqual($request->get('work_extension'));
+        expect($contact->fresh()->job_title)->toEqual($request->get('job_title'))->and($contact->fresh()->employee_id)->toEqual($request->get('employee_id'))->and($contact->fresh()->work_number)->toEqual($request->get('work_number'))->and($contact->fresh()->work_extension)->toEqual($request->get('work_extension'));
     });
 
     test('the academic information section can be updated', function () {
@@ -251,7 +252,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editAcademicInformation')->schemaComponent('academicInformation'), data: [
@@ -262,11 +263,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        expect($contact->fresh())
-            ->student_id->toEqual($request->get('student_id'))
-            ->school->toEqual($request->get('school'))
-            ->academic_department->toEqual($request->get('academic_department'))
-            ->program->toEqual($request->get('program'));
+        expect($contact->fresh()->student_id)->toEqual($request->get('student_id'))->and($contact->fresh()->school)->toEqual($request->get('school'))->and($contact->fresh()->academic_department)->toEqual($request->get('academic_department'))->and($contact->fresh()->program)->toEqual($request->get('program'));
     });
 
     test('the address information section can be updated', function () {
@@ -288,7 +285,7 @@ describe('section edit actions', function () {
 
         $request = collect(EditContactRequestFactory::new()->create());
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editAddressInformation')->schemaComponent('addressInformation'), data: [
@@ -301,13 +298,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        expect($contact->fresh())
-            ->address->toEqual($request->get('address'))
-            ->address_2->toEqual($request->get('address_2'))
-            ->city->toEqual($request->get('city'))
-            ->state->toEqual($request->get('state'))
-            ->postal->toEqual($request->get('postal'))
-            ->country->toEqual($request->get('country'));
+        expect($contact->fresh()->address)->toEqual($request->get('address'))->and($contact->fresh()->address_2)->toEqual($request->get('address_2'))->and($contact->fresh()->city)->toEqual($request->get('city'))->and($contact->fresh()->state)->toEqual($request->get('state'))->and($contact->fresh()->postal)->toEqual($request->get('postal'))->and($contact->fresh()->country)->toEqual($request->get('country'));
     });
 
     test('the customer information section can be updated', function () {
@@ -322,7 +313,7 @@ describe('section edit actions', function () {
 
         $organization = Organization::factory()->create();
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editCustomerInformation')->schemaComponent('customerInformation'), data: [
@@ -330,8 +321,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        expect($contact->fresh())
-            ->organization_id->toEqual($organization->getKey());
+        expect($contact->fresh()->organization_id)->toEqual($organization->getKey());
     });
 
     test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function () {
@@ -345,7 +335,7 @@ describe('section edit actions', function () {
 
         actingAs($user);
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
@@ -353,7 +343,7 @@ describe('section edit actions', function () {
             ])
             ->assertHasNoFormErrors();
 
-        livewire(ViewContact::class, [
+        Livewire::test(ViewContact::class, [
             'record' => $contact->getRouteKey(),
         ])
             ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
@@ -369,7 +359,7 @@ describe('email health', function () {
 
         $contact = Contact::factory()->bounced()->create();
 
-        $component = livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        $component = Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentVisible('email-health-callout');
 
@@ -396,7 +386,7 @@ describe('email health', function () {
 
         $contact = Contact::factory()->create(['email_bounce' => false]);
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
             ->assertSuccessful()
             ->assertSchemaComponentHidden('email-health-callout')
             ->mountAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'))
@@ -408,6 +398,20 @@ describe('email health', function () {
                 return true;
             });
     });
+
+    it('hides the email health callout as soon as a bounced contact\'s email is updated, without requiring a fresh page load', function () {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->bounced()->create();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->assertSchemaComponentVisible('email-health-callout')
+            ->callAction(TestAction::make('editContactInformation')->schemaComponent('contactInformation'), data: [
+                'email' => 'updated@example.com',
+            ])
+            ->assertHasNoFormErrors()
+            ->assertSchemaComponentHidden('email-health-callout');
+    });
 });
 
 describe('tabs', function () {
@@ -418,7 +422,7 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
@@ -434,12 +438,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(ServiceRequestsRelationManager::class);
 
         $user->givePermissionTo('service_request.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(ServiceRequestsRelationManager::class);
     });
@@ -451,20 +455,20 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
 
         $user->givePermissionTo('asset_check_out.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertDontSeeLivewire(AssetCheckInRelationManager::class);
 
         $user->givePermissionTo('asset_check_in.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(AssetCheckOutRelationManager::class)
             ->assertSeeLivewire(AssetCheckInRelationManager::class);
@@ -477,12 +481,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementFilesRelationManager::class);
 
         $user->givePermissionTo('engagement_file.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementFilesRelationManager::class);
     });
@@ -494,12 +498,12 @@ describe('tabs', function () {
 
         $contact = Contact::factory()->create();
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertDontSeeLivewire(EngagementsRelationManager::class);
 
         $user->givePermissionTo('engagement.view-any');
 
-        livewire(ViewContact::class, ['record' => $contact->getRouteKey()])
+        \Pest\Laravel\get(ContactResource::getUrl('view', ['record' => $contact]))
             ->assertSuccessful()
             ->assertSeeLivewire(EngagementsRelationManager::class);
     });

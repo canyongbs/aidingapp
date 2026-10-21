@@ -40,11 +40,12 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
+use function Tests\htmlText;
 
 it('can render with proper permission', function () {
     $user = User::factory()->create();
@@ -84,7 +85,7 @@ it('can view a pipeline', function () {
         ->for($project)
         ->create();
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
@@ -119,13 +120,15 @@ it('displays correct pipeline details', function () {
             'description' => 'Test Pipeline Description',
         ]);
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Test Pipeline Name')
-        ->assertSee('Test Pipeline Description');
+        ->assertSchemaStateSet([
+            'name' => 'Test Pipeline Name',
+            'description' => 'Test Pipeline Description',
+        ]);
 });
 
 it('displays pipeline with multiple stages', function () {
@@ -151,15 +154,19 @@ it('displays pipeline with multiple stages', function () {
         'order' => 2,
     ]);
 
-    livewire(ViewPipeline::class, [
+    $component = Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])
         ->assertSuccessful()
-        ->assertSee('Customer Journey')
-        ->assertSee('Track customer progress')
-        ->assertSee('Initial Contact')
-        ->assertSee('Follow Up');
+        ->assertSchemaStateSet([
+            'name' => 'Customer Journey',
+            'description' => 'Track customer progress',
+            'stages' => $pipeline->stages()->get(),
+        ]);
+
+    expect(htmlText($component->html(), '//*[contains(concat(" ", normalize-space(@class), " "), " fi-in-entry ")][.//*[@role="term" and normalize-space()="Other stages"]]'))
+        ->toContain('Initial Contact', 'Follow Up');
 });
 
 it('can access pipeline from project context', function () {
@@ -172,7 +179,7 @@ it('can access pipeline from project context', function () {
 
     expect($pipeline->project->id)->toBe($project->id);
 
-    livewire(ViewPipeline::class, [
+    Livewire::test(ViewPipeline::class, [
         'record' => $pipeline->getRouteKey(),
         'parentRecord' => $project,
     ])

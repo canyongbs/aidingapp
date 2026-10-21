@@ -40,9 +40,9 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisorySeverityRequestFactory;
 use App\Models\User;
 use Filament\Actions\DeleteAction;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 test('EditAdvisorySeverity is gated with proper access control', function () {
     $user = User::factory()->create();
@@ -56,7 +56,7 @@ test('EditAdvisorySeverity is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditAdvisorySeverity::class, [
+    Livewire::test(EditAdvisorySeverity::class, [
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->assertForbidden();
@@ -73,7 +73,7 @@ test('EditAdvisorySeverity is gated with proper access control', function () {
 
     $request = collect(AdvisorySeverityRequestFactory::new()->create());
 
-    livewire(EditAdvisorySeverity::class, [
+    Livewire::test(EditAdvisorySeverity::class, [
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -83,7 +83,7 @@ test('EditAdvisorySeverity is gated with proper access control', function () {
     expect($advisorySeverity->fresh()->name)->toEqual($request->get('name'));
 });
 
-test('EditAdvisorySeverity validates the inputs', function ($data, $errors) {
+test('EditAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors) {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -95,7 +95,7 @@ test('EditAdvisorySeverity validates the inputs', function ($data, $errors) {
 
     $request = AdvisorySeverityRequestFactory::new($data)->create();
 
-    livewire(EditAdvisorySeverity::class, [
+    Livewire::test(EditAdvisorySeverity::class, [
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->fillForm($request)
@@ -132,14 +132,14 @@ test('delete action visible with proper access control', function () {
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.*.update');
 
-    livewire(EditAdvisorySeverity::class, [
+    Livewire::test(EditAdvisorySeverity::class, [
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->assertActionHidden(DeleteAction::class);
 
     $user->givePermissionTo('settings.*.delete');
 
-    livewire(EditAdvisorySeverity::class, [
+    Livewire::test(EditAdvisorySeverity::class, [
         'record' => $advisorySeverity->getRouteKey(),
     ])
         ->assertActionVisible(DeleteAction::class);

@@ -42,10 +42,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestTypeRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
@@ -62,7 +62,7 @@ test('A successful action on the EditServiceRequestType page', function () {
 
     $editRequest = EditServiceRequestTypeRequestFactory::new()->create();
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
@@ -75,12 +75,12 @@ test('A successful action on the EditServiceRequestType page', function () {
     assertEquals($editRequest['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType requires valid data', function ($data, $errors) {
+test('EditServiceRequestType requires valid data', function (EditServiceRequestTypeRequestFactory $data, array $errors) {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([
@@ -112,7 +112,7 @@ test('EditServiceRequestType is gated with proper access control', function () {
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -129,7 +129,7 @@ test('EditServiceRequestType is gated with proper access control', function () {
 
     $request = collect(EditServiceRequestTypeRequestFactory::new()->create());
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -160,7 +160,7 @@ test('EditServiceRequestType is gated with proper feature access control', funct
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertForbidden();
@@ -178,7 +178,7 @@ test('EditServiceRequestType is gated with proper feature access control', funct
 
     $request = collect(EditServiceRequestTypeRequestFactory::new()->create());
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->fillForm($request->toArray())
@@ -195,7 +195,7 @@ test('EditServiceRequestType is updating default_category when form saved', func
         'default_category' => ServiceRequestCategory::Incident,
     ]);
 
-    livewire(EditServiceRequestType::class, [
+    Livewire::test(EditServiceRequestType::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
         ->assertFormSet([

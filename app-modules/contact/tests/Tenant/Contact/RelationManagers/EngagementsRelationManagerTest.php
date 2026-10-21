@@ -44,9 +44,10 @@ use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 /**
@@ -55,26 +56,24 @@ use function Tests\asSuperAdmin;
  *
  * @return array{outbound: Collection<int, Engagement>, inbound: Collection<int, EngagementResponse>}
  */
-function seedContactEmails(Contact $contact): array
-{
+$seedContactEmails = function (Contact $contact): array {
     $outbound = Engagement::factory()->count(2)
         ->state([
             'recipient_id' => $contact->getKey(),
             'recipient_type' => $contact->getMorphClass(),
         ])->createQuietly();
-
     $inbound = EngagementResponse::factory()->count(3)
         ->state([
             'sender_id' => $contact->getKey(),
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
-
     $outbound->each(function (Engagement $engagement): void {
+        assert($engagement->recipient instanceof Model);
+
         app(AddRecordToTimeline::class)->handle(
             new TimelineableRecordCreated($engagement->recipient, $engagement),
         );
     });
-
     $inbound->each(function (EngagementResponse $response): void {
         app(AddRecordToTimeline::class)->handle(
             new TimelineableRecordCreated($response->sender, $response),
@@ -82,14 +81,14 @@ function seedContactEmails(Contact $contact): array
     });
 
     return ['outbound' => $outbound, 'inbound' => $inbound];
-}
+};
 
 it('disables the `engage` header action with the bounced tooltip for a bounced owner contact', function () {
     asSuperAdmin();
 
     $contact = Contact::factory()->bounced()->create();
 
-    $component = livewire(EngagementsRelationManager::class, [
+    $component = Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -97,7 +96,7 @@ it('disables the `engage` header action with the bounced tooltip for a bounced o
 
     $action = $component->instance()->getTable()->getAction('engage');
 
-    expect($action)->not->toBeNull()
+    expect($action)->not()->toBeNull()
         ->and($action->getTooltip())->toBe('Bounced. Email delivery failed and a bounce was received from our email provider.');
 });
 
@@ -106,7 +105,7 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
 
     $contact = Contact::factory()->create(['email_bounce' => false]);
 
-    $component = livewire(EngagementsRelationManager::class, [
+    $component = Livewire::test(EngagementsRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
@@ -114,12 +113,12 @@ it('enables the `engage` header action with no tooltip for a healthy owner conta
 
     $action = $component->instance()->getTable()->getAction('engage');
 
-    expect($action)->not->toBeNull()
+    expect($action)->not()->toBeNull()
         ->and($action->getTooltip())->toBeNull();
 });
 
-describe('email direction filtering by permission', function () {
-    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () {
+describe('email direction filtering by permission', function () use ($seedContactEmails) {
+    it('shows only outbound emails to a user with only the `engagement.view-any` permission', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement.view-any');
 
@@ -127,9 +126,9 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -138,7 +137,7 @@ describe('email direction filtering by permission', function () {
             ->assertCanNotSeeTableRecords($emails['inbound']->pluck('timelineRecord'));
     });
 
-    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () {
+    it('shows only inbound emails to a user with only the `engagement_response.view-any` permission', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement_response.view-any');
 
@@ -146,9 +145,9 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])
@@ -157,7 +156,7 @@ describe('email direction filtering by permission', function () {
             ->assertCanNotSeeTableRecords($emails['outbound']->pluck('timelineRecord'));
     });
 
-    it('shows both directions to a user with both engagement permissions', function () {
+    it('shows both directions to a user with both engagement permissions', function () use ($seedContactEmails) {
         $user = User::factory()->create();
         $user->givePermissionTo('engagement.view-any');
         $user->givePermissionTo('engagement_response.view-any');
@@ -166,9 +165,9 @@ describe('email direction filtering by permission', function () {
 
         $contact = Contact::factory()->create();
 
-        $emails = seedContactEmails($contact);
+        $emails = $seedContactEmails($contact);
 
-        livewire(EngagementsRelationManager::class, [
+        Livewire::test(EngagementsRelationManager::class, [
             'ownerRecord' => $contact,
             'pageClass' => ViewContact::class,
         ])

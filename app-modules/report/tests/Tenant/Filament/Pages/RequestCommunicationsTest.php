@@ -45,24 +45,24 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailPreference;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
-function grantRequestCommunicationsReportAccess(User $user): void
-{
+$grantRequestCommunicationsReportAccess = function (User $user): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
-
     ReportUserAccess::factory()->create([
         'report_key' => ReportAccessKey::RequestCommunications->value,
         'user_id' => $user->getKey(),
     ]);
-}
+};
 
-function richContent(string $content): array
-{
+/**
+ * @return array<string, mixed>
+ */
+$richContent = function (string $content): array {
     return [
         'type' => 'doc',
         'content' => [[
@@ -73,11 +73,11 @@ function richContent(string $content): array
             ]],
         ]],
     ];
-}
+};
 
-it('displays the selected service request type communication configuration', function () {
+it('displays the selected service request type communication configuration', function () use ($grantRequestCommunicationsReportAccess, $richContent) {
     $user = User::factory()->create(['timezone' => 'UTC']);
-    grantRequestCommunicationsReportAccess($user);
+    $grantRequestCommunicationsReportAccess($user);
     actingAs($user);
 
     $serviceRequestType = ServiceRequestType::factory()->create(['name' => 'Technology Support']);
@@ -94,29 +94,29 @@ it('displays the selected service request type communication configuration', fun
         'service_request_type_id' => $serviceRequestType->getKey(),
         'type' => ServiceRequestEmailTemplateType::Created,
         'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-        'subject' => richContent('A request has been received'),
-        'body' => richContent('The request is ready for review.'),
+        'subject' => $richContent('A request has been received'),
+        'body' => $richContent('The request is ready for review.'),
     ]);
 
-    livewire(RequestCommunications::class)
+    Livewire::test(RequestCommunications::class)
         ->set('filters.serviceRequestType', $serviceRequestType->getKey())
         ->assertSee('Notifications and Alerts')
         ->assertSet('notificationSettings.is_managers_service_request_created_email_enabled', true)
         ->assertSchemaComponentStateSet('notificationSettings', [
             'is_managers_service_request_created_email_enabled' => true,
         ], 'notificationForm')
-        ->assertSet('emailTemplates.created.manager.subject', richContent('A request has been received'))
-        ->assertSet('emailTemplates.created.manager.body', richContent('The request is ready for review.'));
+        ->assertSet('emailTemplates.created.manager.subject', $richContent('A request has been received'))
+        ->assertSet('emailTemplates.created.manager.body', $richContent('The request is ready for review.'));
 });
 
-it('renders Filament email-template tabs for each event type', function () {
+it('renders Filament email-template tabs for each event type', function () use ($grantRequestCommunicationsReportAccess) {
     $user = User::factory()->create(['timezone' => 'UTC']);
-    grantRequestCommunicationsReportAccess($user);
+    $grantRequestCommunicationsReportAccess($user);
     actingAs($user);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    livewire(RequestCommunications::class)
+    Livewire::test(RequestCommunications::class)
         ->set('filters.serviceRequestType', $serviceRequestType->getKey())
         ->assertSee('Created')
         ->assertSee('Assigned')
@@ -130,7 +130,7 @@ it('renders Filament email-template tabs for each event type', function () {
         ->assertSee('Customers');
 });
 
-describe('authorization', function () {
+describe('authorization', function () use ($grantRequestCommunicationsReportAccess) {
     it('denies access when the Service Management addon is disabled', function () {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = false;
@@ -138,7 +138,7 @@ describe('authorization', function () {
 
         actingAs(User::factory()->create(['timezone' => 'UTC']));
 
-        livewire(RequestCommunications::class)->assertForbidden();
+        Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
     it('denies access without an assignment to the report', function () {
@@ -148,14 +148,14 @@ describe('authorization', function () {
 
         actingAs(User::factory()->create(['timezone' => 'UTC']));
 
-        livewire(RequestCommunications::class)->assertForbidden();
+        Livewire::test(RequestCommunications::class)->assertForbidden();
     });
 
-    it('allows access with an assignment to the report', function () {
+    it('allows access with an assignment to the report', function () use ($grantRequestCommunicationsReportAccess) {
         $user = User::factory()->create(['timezone' => 'UTC']);
-        grantRequestCommunicationsReportAccess($user);
+        $grantRequestCommunicationsReportAccess($user);
         actingAs($user);
 
-        livewire(RequestCommunications::class)->assertOk();
+        Livewire::test(RequestCommunications::class)->assertOk();
     });
 });

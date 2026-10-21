@@ -43,8 +43,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\Timeline\Livewire\TimelineList;
 use App\Models\User;
 use Illuminate\Support\Str;
+use Livewire\Livewire;
 
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 it('renders the timeline records for the given record', function () {
@@ -55,27 +55,23 @@ it('renders the timeline records for the given record', function () {
     $update = ServiceRequestUpdate::factory()
         ->for($serviceRequest, 'serviceRequest')
         ->create(['update' => 'A distinctive timeline entry']);
-
-    livewire(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
-    ])
-        ->assertSuccessful()
-        ->assertSee($update->update);
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain($update->update);
 });
 
 it('shows the empty state message when there is nothing to timeline', function () {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
-
-    livewire(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
         'emptyStateMessage' => 'Nothing has happened yet.',
-    ])
-        ->assertSuccessful()
-        ->assertSee('Nothing has happened yet.');
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//div[contains(@class, "border-dashed")]/span'))->toContain('Nothing has happened yet.');
 });
 
 it('loads one page of records at a time and flags that more remain', function () {
@@ -88,13 +84,17 @@ it('loads one page of records at a time and flags that more remain', function ()
         ->count(7)
         ->create();
 
-    $component = livewire(TimelineList::class, [
+    $component = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])->assertSuccessful();
 
-    expect($component->get('timelineRecords'))->toHaveCount(5)
-        ->and($component->get('hasMorePages'))->toBeTrue();
+    $instance = $component->instance();
+
+    assert($instance instanceof TimelineList);
+
+    expect($instance->timelineRecords)->toHaveCount(5)
+        ->and($instance->hasMorePages)->toBeTrue();
 
     $component->call('loadTimelineRecords')
         ->assertSuccessful();
@@ -110,7 +110,7 @@ it('refuses to open a record from another entity timeline', function () {
         ->for($otherServiceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -127,7 +127,7 @@ it('refuses to open a record of a type this timeline does not display', function
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestAssignment::class],
     ])
@@ -144,7 +144,7 @@ it('returns a 404 when the view action is mounted without a record', function ()
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -161,7 +161,7 @@ it('keeps the opened record selected when more timeline records are loaded', fun
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -181,7 +181,7 @@ it('opens the slide over for a timeline record', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    livewire(TimelineList::class, [
+    Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])
@@ -199,7 +199,7 @@ it('opens the slide over for a soft-deleted timeline record', function () {
         ->for($serviceRequest, 'serviceRequest')
         ->create();
 
-    $component = livewire(TimelineList::class, [
+    $component = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ]);
@@ -229,14 +229,12 @@ describe('related people', function () {
         $performer->delete();
 
         expect($performer->refresh()->trashed())->toBeTrue();
-
-        livewire(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe')
-            ->assertDontSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Deleted user');
     });
 
     it('shows `Deleted user` when the person no longer exists', function () {
@@ -246,13 +244,11 @@ describe('related people', function () {
             'checked_out_by_type' => (new User())->getMorphClass(),
             'checked_out_by_id' => Str::uuid()->toString(),
         ]);
-
-        livewire(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Deleted user');
     });
 
     it('shows the soft-deleted creator of an engagement by name', function () {
@@ -269,12 +265,10 @@ describe('related people', function () {
         $creator->delete();
 
         expect($creator->refresh()->trashed())->toBeTrue();
-
-        livewire(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $contact,
             'modelsToTimeline' => [Engagement::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 });

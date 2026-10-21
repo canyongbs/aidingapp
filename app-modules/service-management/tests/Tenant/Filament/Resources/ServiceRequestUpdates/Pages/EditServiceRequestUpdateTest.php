@@ -44,10 +44,10 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestUpdateRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
@@ -73,7 +73,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
 
     $request = collect(EditServiceRequestUpdateRequestFactory::new()->create());
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
@@ -84,7 +84,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
     assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
-test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
+test('EditServiceRequestUpdate requires valid data', function (EditServiceRequestUpdateRequestFactory $data, array $errors) {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -97,7 +97,7 @@ test('EditServiceRequestUpdate requires valid data', function ($data, $errors) {
 
     asSuperAdmin();
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
@@ -144,7 +144,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
@@ -165,7 +165,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
 
     $request = collect(EditServiceRequestUpdateRequestFactory::new()->create());
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
@@ -213,7 +213,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
             ])
         )->assertForbidden();
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])
@@ -233,7 +233,7 @@ test('EditServiceRequestUpdate is gated with proper feature access control', fun
 
     $request = collect(EditServiceRequestUpdateRequestFactory::new()->create());
 
-    livewire(EditServiceRequestUpdate::class, [
+    Livewire::test(EditServiceRequestUpdate::class, [
         'record' => $serviceRequestUpdate->getRouteKey(),
         'parentRecord' => $serviceRequestUpdate->serviceRequest,
     ])

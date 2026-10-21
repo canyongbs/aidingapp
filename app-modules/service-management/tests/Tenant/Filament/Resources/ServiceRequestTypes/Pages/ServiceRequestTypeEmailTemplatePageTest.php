@@ -40,10 +40,10 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Ser
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ServiceRequestTypes\RequestFactories\ServiceRequestTypeEmailTemplateRequestFactory;
+use Livewire\Livewire;
 
 use function Pest\Laravel\assertDatabaseEmpty;
 use function Pest\Laravel\assertDatabaseHas;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist', function () {
@@ -61,7 +61,7 @@ test('it creates a ServiceRequestTypeEmailTemplate if it did not already exist',
         ? ServiceRequestTypeEmailTemplateRole::Customer
         : collect(ServiceRequestTypeEmailTemplateRole::cases())->random();
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $serviceRequestType->getKey(),
         'type' => $type,
     ])
@@ -90,7 +90,7 @@ test('it updates a ServiceRequestTypeEmailTemplate if it already exists', functi
     expect($emailTemplate->subject)->not->toEqualCanonicalizing($request['subject'])
         ->and($emailTemplate->body)->not->toEqualCanonicalizing($request['body']);
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $emailTemplate->serviceRequestType->getKey(),
         'type' => $emailTemplate->type,
     ])
@@ -122,7 +122,7 @@ test('it keeps a template whose content consists only of merge tags', function (
 
     asSuperAdmin();
 
-    livewire(ServiceRequestTypeEmailTemplatePage::class, [
+    Livewire::test(ServiceRequestTypeEmailTemplatePage::class, [
         'record' => $emailTemplate->serviceRequestType->getKey(),
         'type' => $emailTemplate->type,
     ])

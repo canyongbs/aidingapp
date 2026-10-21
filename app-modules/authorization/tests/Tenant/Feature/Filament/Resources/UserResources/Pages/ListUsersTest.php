@@ -43,14 +43,15 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Contracts\Support\Htmlable;
 use Lab404\Impersonate\Services\ImpersonateManager;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
-use function Pest\Livewire\livewire;
 
 use STS\FilamentImpersonate\Actions\Impersonate;
 
@@ -61,7 +62,7 @@ it('renders impersonate button for non super admin users when user is super admi
 
     $user = User::factory()->create();
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component
         ->assertSuccessful()
@@ -78,7 +79,7 @@ it('does not render impersonate button for super admin users when user is not su
         ->givePermissionTo('user.view-any', 'user.*.view');
     actingAs($user);
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component
         ->assertSuccessful()
@@ -94,7 +95,7 @@ it('does not render impersonate button for super admin users at all', function (
     $user = User::factory()->create();
     asSuperAdmin($user);
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component
         ->assertSuccessful()
@@ -113,7 +114,7 @@ it('does not render impersonate button for super admin users even if user is als
 
     actingAs($user);
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component
         ->assertSuccessful()
@@ -127,7 +128,7 @@ it('allows super admin user to impersonate', function () {
 
     $user = User::factory()->create();
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component
         ->assertSuccessful()
@@ -173,7 +174,7 @@ it('can filter users by departments', function () {
         ->for($department2)
         ->create();
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->set('tableRecordsPerPage', 16)
         ->assertCanSeeTableRecords($userWithoutDepartment->merge($userWithDepartment1)->merge($userWithDepartment2))
         ->filterTable('department', [$department1->getKey()])
@@ -193,7 +194,7 @@ it('shows the import and export header actions to a user with the user.import pe
         ->givePermissionTo('user.view-any', 'user.*.view', 'user.import');
     actingAs($user);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionVisible('import')
         ->assertActionVisible('export');
 });
@@ -204,7 +205,7 @@ it('hides the import and export header actions from a user without the user.impo
         ->givePermissionTo('user.view-any', 'user.*.view');
     actingAs($user);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionHidden('import')
         ->assertActionHidden('export');
 });
@@ -218,12 +219,12 @@ it('only shows the bulk delete action to a user with the user.delete permission'
 
     actingAs($user);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     $user->givePermissionTo('user.*.delete');
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
@@ -236,7 +237,7 @@ it('can assign groups to multiple users via the bulk action', function () {
     $users = User::factory()->count(3)->create();
     $users->first()->groups()->attach($existingGroup);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertTableBulkActionExists('assign_groups')
         ->callTableBulkAction('assign_groups', $users, [
             'replace' => false,
@@ -266,7 +267,7 @@ it('replaces existing group assignments when replace is enabled on the bulk acti
     $user = User::factory()->create();
     $user->groups()->attach($existingGroup);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->callTableBulkAction('assign_groups', [$user], [
             'replace' => true,
             'groups' => [$newGroup->getKey()],
@@ -293,12 +294,12 @@ it('only shows the bulk assign groups action to a user with the user.*.update pe
 
     actingAs($user);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionHidden(TestAction::make('assign_groups')->table()->bulk());
 
     $user->givePermissionTo('user.*.update');
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->assertActionVisible(TestAction::make('assign_groups')->table()->bulk());
 });
 
@@ -310,7 +311,7 @@ it('excludes archived groups from the bulk assign groups selection', function ()
 
     $users = User::factory()->count(2)->create();
 
-    $component = livewire(ListUsers::class);
+    $component = Livewire::test(ListUsers::class);
 
     $component->mountTableBulkAction('assign_groups', $users->modelKeys());
 
@@ -319,7 +320,7 @@ it('excludes archived groups from the bulk assign groups selection', function ()
     assert($groupsSelect instanceof Select);
 
     expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
-    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
+    expect($groupsSelect->getOptions())->not()->toHaveKey($archivedGroup->getKey());
 });
 
 it('can search users by name', function () {
@@ -328,7 +329,7 @@ it('can search users by name', function () {
     $matchingUser = User::factory()->create(['name' => 'John Doe']);
     $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->searchTable('John Doe')
         ->assertCanSeeTableRecords([$matchingUser])
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
@@ -340,7 +341,7 @@ it('can search users by email', function () {
     $matchingUser = User::factory()->create(['email' => 'searchable@example.com']);
     $nonMatchingUser = User::factory()->create(['email' => 'other@example.com']);
 
-    livewire(ListUsers::class)
+    Livewire::test(ListUsers::class)
         ->searchTable('searchable@example.com')
         ->assertCanSeeTableRecords([$matchingUser])
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
@@ -352,7 +353,7 @@ describe('name column', function () {
 
         $user = User::factory()->create(['last_activity_at' => now()]);
 
-        $component = livewire(ListUsers::class)
+        $component = Livewire::test(ListUsers::class)
             ->assertTableColumnHasExtraAttributes('name', [
                 'aria-label' => "{$user->name} (Presence: Online)",
             ], $user);
@@ -368,7 +369,7 @@ describe('name column', function () {
 
         $user = User::factory()->create();
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('name');
         $column->record($user);
 
         expect($column->getDescriptionBelow()->getData())->toMatchArray([
@@ -385,7 +386,7 @@ describe('service details column', function () {
 
         $user = User::factory()->create(['job_title' => 'Software Engineer']);
 
-        livewire(ListUsers::class)
+        Livewire::test(ListUsers::class)
             ->assertTableColumnStateSet('job_title', 'Software Engineer', $user)
             ->assertTableColumnFormattedStateSet('job_title', 'Software Engineer', $user)
             ->assertTableColumnHasDescription('job_title', null, $user);
@@ -396,11 +397,11 @@ describe('service details column', function () {
 
         $user = User::factory()->create(['job_title' => null]);
 
-        livewire(ListUsers::class)
+        Livewire::test(ListUsers::class)
             ->assertTableColumnStateSet('job_title', null, $user)
             ->assertTableColumnHasDescription('job_title', null, $user);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('job_title');
         $column->record($user);
 
         expect($column->getPlaceholder())->toBe('—')
@@ -415,7 +416,7 @@ describe('service details column', function () {
         $managedType = ServiceRequestType::factory()->create();
         $managedType->managerUsers()->attach($user);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('job_title');
         $column->record($user);
 
         expect($column->formatState($column->getState()))->toBe('')
@@ -423,7 +424,7 @@ describe('service details column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('1 Service Area');
     });
 
@@ -438,15 +439,15 @@ describe('service details column', function () {
         $auditedType = ServiceRequestType::factory()->create(['name' => 'Auditor <b>Team</b> & "Co"']);
         $auditedType->auditorUsers()->attach($user);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('job_title');
         $column->record($user);
 
         $tooltip = $column->getDescriptionBelow()->getData()['tooltip'];
 
         expect($tooltip)->toBeInstanceOf(Htmlable::class)
             ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
-            ->and($tooltip->toHtml())->not->toContain('<script>')
-            ->and($tooltip->toHtml())->not->toContain('<b>');
+            ->and($tooltip->toHtml())->not()->toContain('<script>')
+            ->and($tooltip->toHtml())->not()->toContain('<b>');
     });
 
     it('matches scoped service areas from direct, department, and group assignments without double counting', function () {
@@ -486,7 +487,7 @@ describe('service details column', function () {
         expect($managedNames)->toBe(['Department', 'Direct', 'Shared'])
             ->and($auditedNames)->toBe(['Group', 'Shared']);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('job_title');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('job_title');
         $column->record($user);
 
         $description = $column->getDescriptionBelow();
@@ -504,7 +505,7 @@ describe('associations column', function () {
         $userWithDepartment = User::factory()->for($department)->create();
         $userWithoutDepartment = User::factory()->create(['department_id' => null]);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('department.name');
 
         $column->record($userWithDepartment);
         expect($column->getIcon($column->getState()))->toBe('heroicon-o-building-office-2');
@@ -519,7 +520,7 @@ describe('associations column', function () {
         $department = Department::factory()->create();
         $user = User::factory()->for($department)->create();
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('department.name');
         $column->record($user);
 
         expect($column->getVerticalAlignment())->toBe(VerticalAlignment::Center)
@@ -533,7 +534,7 @@ describe('associations column', function () {
         $user = User::factory()->create(['department_id' => null]);
         $user->groups()->attach($group);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('department.name');
         $column->record($user);
 
         expect($column->formatState($column->getState()))->toBe('')
@@ -542,7 +543,7 @@ describe('associations column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('VIP');
     });
 
@@ -554,7 +555,7 @@ describe('associations column', function () {
         $user = User::factory()->for($department)->create();
         $user->groups()->attach($group);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('department.name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('department.name');
         $column->record($user);
 
         expect($column->getVerticalAlignment())->toBeNull();
@@ -567,10 +568,10 @@ describe('last login column', function () {
 
         $user = User::factory()->create(['last_logged_in_at' => null]);
 
-        livewire(ListUsers::class)
+        Livewire::test(ListUsers::class)
             ->assertTableColumnStateSet('last_logged_in_at', null, $user);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
         $column->record($user);
 
         expect($column->getPlaceholder())->toBe('Never');
@@ -581,7 +582,7 @@ describe('last login column', function () {
 
         $user = User::factory()->create(['last_logged_in_at' => now()]);
 
-        $column = livewire(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('last_logged_in_at');
         $column->record($user);
 
         $loggedInAt = $user->last_logged_in_at->clone()->timezone($column->getTimezone());
@@ -601,7 +602,7 @@ describe('hidden column search', function () {
         $matchingUser = User::factory()->create(['preferred_name' => 'Ace']);
         $nonMatchingUser = User::factory()->create(['preferred_name' => 'Bee']);
 
-        livewire(ListUsers::class)
+        Livewire::test(ListUsers::class)
             ->searchTable('Ace')
             ->assertCanSeeTableRecords([$matchingUser])
             ->assertCanNotSeeTableRecords([$nonMatchingUser]);
@@ -613,7 +614,7 @@ describe('hidden column search', function () {
         $matchingUser = User::factory()->create(['work_extension' => 12345]);
         $nonMatchingUser = User::factory()->create(['work_extension' => 98765]);
 
-        livewire(ListUsers::class)
+        Livewire::test(ListUsers::class)
             ->searchTable('12345')
             ->assertCanSeeTableRecords([$matchingUser])
             ->assertCanNotSeeTableRecords([$nonMatchingUser]);

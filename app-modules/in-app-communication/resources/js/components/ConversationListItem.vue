@@ -35,7 +35,7 @@
 <script setup>
     import { HashtagIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline';
     import { MapPinIcon } from '@heroicons/vue/24/solid';
-    import { computed, ref } from 'vue';
+    import { computed, defineEmits, defineProps, ref } from 'vue';
     import { extractTextFromTipTap } from '../utils/helpers';
     import Avatar from './ui/Avatar.vue';
 

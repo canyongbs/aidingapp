@@ -50,7 +50,7 @@ it('sets the mail from name based on settings fromName if set', function () {
 
     $notificationSetting->save();
 
-    $notification = new TestEmailSettingFromNameNotification($notificationSetting);
+    $notification = new TestEmailSettingFromNameNotification();
 
     $user->notify($notification);
 

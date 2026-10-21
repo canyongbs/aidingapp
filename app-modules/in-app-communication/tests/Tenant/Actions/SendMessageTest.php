@@ -82,10 +82,7 @@ it('creates a message in a conversation', function () {
 
     assertDatabaseCount(Message::class, 1);
 
-    expect($message)
-        ->conversation_id->toBe($conversation->getKey())
-        ->author_id->toBe($author->getKey())
-        ->content->toBe($content);
+    expect($message->conversation_id)->toBe($conversation->getKey())->and($message->author_id)->toBe($author->getKey())->and($message->content)->toBe($content);
 });
 
 it('updates the author `last_read_at` timestamp', function () {
@@ -108,7 +105,7 @@ it('updates the author `last_read_at` timestamp', function () {
 
     $participant->refresh();
 
-    expect($participant->last_read_at)->not->toBeNull();
+    expect($participant->last_read_at)->not()->toBeNull();
 });
 
 it('updates the author `last_activity_at` timestamp', function () {
@@ -349,7 +346,7 @@ it('broadcasts `UnreadCountUpdated` event to affected participants', function ()
         content: ['type' => 'doc', 'content' => []],
     );
 
-    Event::assertDispatched(UnreadCountUpdated::class, function ($event) use ($conversation, $otherUser) {
+    Event::assertDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($conversation, $otherUser) {
         return $event->userId === $otherUser->getKey()
             && $event->conversationId === $conversation->getKey()
             && $event->unreadCount === 1;
@@ -378,7 +375,7 @@ it('does not broadcast `UnreadCountUpdated` event to participants with None pref
         content: ['type' => 'doc', 'content' => []],
     );
 
-    Event::assertNotDispatched(UnreadCountUpdated::class, function ($event) use ($otherUser) {
+    Event::assertNotDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($otherUser) {
         return $event->userId === $otherUser->getKey();
     });
 });
@@ -419,7 +416,7 @@ it('broadcasts `MessageSent` event to user channels for all participants except 
     $channelNames = collect($channels)->map(fn ($channel) => $channel->name)->all();
     expect($channelNames)->toContain("private-user.{$participant1->getKey()}");
     expect($channelNames)->toContain("private-user.{$participant2->getKey()}");
-    expect($channelNames)->not->toContain("private-user.{$author->getKey()}");
+    expect($channelNames)->not()->toContain("private-user.{$author->getKey()}");
     expect($channelNames)->toContain("private-conversation.{$conversation->getKey()}");
     expect($channelNames)->toContain("presence-conversation.{$conversation->getKey()}");
 });

@@ -35,7 +35,7 @@
 <script setup>
     import { CheckIcon, ClockIcon, XMarkIcon } from '@heroicons/vue/24/outline';
     import axios from 'axios';
-    import { computed, onMounted, onUnmounted, ref } from 'vue';
+    import { computed, defineEmits, defineProps, onMounted, onUnmounted, ref } from 'vue';
 
     const props = defineProps({
         items: { type: Array, required: true },

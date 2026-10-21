@@ -49,9 +49,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Forms\Components\ToggleButtons;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 use function Tests\asSuperAdmin;
 
 test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
@@ -87,7 +87,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -121,7 +121,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -153,7 +153,7 @@ test('Assign To Me action is visible when the logged-in user belongs to a manage
         ])->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])->assertTableActionVisible('assign-to-me');
@@ -192,7 +192,7 @@ test('Assign To Me preselects the logged-in manager and waits for submission bef
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->exists())->toBeFalse();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -205,7 +205,7 @@ test('Assign To Me preselects the logged-in manager and waits for submission bef
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->exists())->toBeFalse();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -256,7 +256,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -293,7 +293,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -329,7 +329,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -364,7 +364,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -404,7 +404,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -438,7 +438,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -468,7 +468,7 @@ test('Manage Assignment action mounts with the Service Request current status pr
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -505,7 +505,7 @@ test('Manage Assignment action is not visible when the logged-in user cannot upd
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -545,7 +545,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -579,7 +579,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -619,7 +619,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -653,7 +653,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -685,7 +685,7 @@ test('Manage Assignment action is not visible when the logged-in user is not a m
     ])
         ->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequestsWithManager,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -718,7 +718,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when unass
         ])->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -757,7 +757,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
         'user_id' => $user->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -785,7 +785,7 @@ test('Manage Assignment action is hidden and the page renders when the Service R
         'priority_id' => null,
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -824,7 +824,7 @@ test('submitting Manage Assignment assigns the selected manager and deactivates 
         'user_id' => $firstManager->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -869,7 +869,7 @@ test('submitting Manage Assignment with a different status updates the service r
         ])->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -921,7 +921,7 @@ test('submitting Manage Assignment while moving the Service Request to a Closed 
 
     expect($serviceRequest->time_to_resolution)->toBeNull();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -966,7 +966,7 @@ test('submitting Manage Assignment with a non-manager user does not create an as
         ])->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -1006,7 +1006,7 @@ test('submitting Manage Assignment without a status fails validation and does no
         ])->getKey(),
     ])->create();
 
-    livewire(AssignedToRelationManager::class, [
+    Livewire::test(AssignedToRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
@@ -1042,7 +1042,7 @@ describe('archiving', function () {
             ])->getKey(),
         ])->create();
 
-        livewire(AssignedToRelationManager::class, [
+        Livewire::test(AssignedToRelationManager::class, [
             'ownerRecord' => $serviceRequest,
             'pageClass' => ViewServiceRequest::class,
         ])

@@ -178,6 +178,9 @@ class TestSystemNotification extends Notification implements ShouldQueue
 {
     use Queueable;
 
+    /**
+     * @return list<string>
+     */
     public function via(object $notifiable): array
     {
         return ['mail'];

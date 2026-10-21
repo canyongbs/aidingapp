@@ -36,8 +36,10 @@
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -46,10 +48,31 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Crypt;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Testing\TestResponse;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * @param array<string, mixed> $data
+ *
+ * @return TestResponse<Response>
+ */
+$postAssistantServiceRequest = function (Contact $contact, ServiceRequestType $type, array $data): TestResponse {
+    $contact->createToken('assistant-widget-access-token');
+
+    return actingAs($contact, 'contact')->postJson(
+        route('widgets.assistant.api.service-request.store', ['type' => $type]),
+        $data,
+        ['Origin' => config('app.url')],
+    );
+};
 
 beforeEach(function () {
     $portalSettings = app(PortalSettings::class);
@@ -63,24 +86,13 @@ beforeEach(function () {
     );
 });
 
-function postAssistantServiceRequest(Contact $contact, ServiceRequestType $type, array $data)
-{
-    $contact->createToken('assistant-widget-access-token');
-
-    return actingAs($contact, 'contact')->postJson(
-        route('widgets.assistant.api.service-request.store', ['type' => $type]),
-        $data,
-        ['Origin' => config('app.url')],
-    );
-}
-
-it('assigns the configured default priority when no priority is submitted', function () {
+it('assigns the configured default priority when no priority is submitted', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $defaultPriority->getKey()]);
     $contact = Contact::factory()->create();
 
-    $response = postAssistantServiceRequest($contact, $type, [
+    $response = $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant priority test',
         'description' => 'Configured priority should be assigned.',
     ]);
@@ -93,14 +105,14 @@ it('assigns the configured default priority when no priority is submitted', func
     ]);
 });
 
-it('prohibits a submitted priority when a default priority is configured', function () {
+it('prohibits a submitted priority when a default priority is configured', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $submittedPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $defaultPriority->getKey()]);
     $contact = Contact::factory()->create();
 
-    $response = postAssistantServiceRequest($contact, $type, [
+    $response = $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant priority test',
         'description' => 'Configured priority should be enforced.',
         'priority_id' => $submittedPriority->getKey(),
@@ -112,11 +124,11 @@ it('prohibits a submitted priority when a default priority is configured', funct
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('requires a priority when no default priority is configured', function () {
+it('requires a priority when no default priority is configured', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $contact = Contact::factory()->create();
 
-    $response = postAssistantServiceRequest($contact, $type, [
+    $response = $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant priority test',
         'description' => 'A priority is required.',
     ]);
@@ -127,12 +139,12 @@ it('requires a priority when no default priority is configured', function () {
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('assigns the submitted priority when no default priority is configured', function () {
+it('assigns the submitted priority when no default priority is configured', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create();
 
-    $response = postAssistantServiceRequest($contact, $type, [
+    $response = $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant priority test',
         'description' => 'Submitted priority should be assigned.',
         'priority_id' => $priority->getKey(),
@@ -146,7 +158,7 @@ it('assigns the submitted priority when no default priority is configured', func
     ]);
 });
 
-it('requires password fields in assistant submissions', function () {
+it('requires password fields in assistant submissions', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -165,7 +177,7 @@ it('requires password fields in assistant submissions', function () {
     $field->save();
     $contact = Contact::factory()->create();
 
-    postAssistantServiceRequest($contact, $type, [
+    $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant password test',
         'description' => 'Password fields are required.',
         'custom_fields' => [],
@@ -176,7 +188,7 @@ it('requires password fields in assistant submissions', function () {
     expect(ServiceRequest::query()->exists())->toBeFalse();
 });
 
-it('securely attaches password fields submitted by assistant clients', function () {
+it('securely attaches password fields submitted by assistant clients', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -198,7 +210,7 @@ it('securely attaches password fields submitted by assistant clients', function 
         'value' => Crypt::encryptString('service-request-password'),
     ]);
 
-    postAssistantServiceRequest($contact, $type, [
+    $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant password test',
         'description' => 'Password fields are supported.',
         'custom_fields' => [
@@ -211,12 +223,12 @@ it('securely attaches password fields submitted by assistant clients', function 
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($submittedField->pivot->response)->toBe($secret->getKey())
+        ->and($submittedField->pivot->getAttribute('response'))->toBe($secret->getKey())
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');
 });
 
-it('rejects password fields owned by another contact', function () {
+it('rejects password fields owned by another contact', function () use ($postAssistantServiceRequest) {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -236,7 +248,7 @@ it('rejects password fields owned by another contact', function () {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for(Contact::factory(), 'author')->create();
 
-    postAssistantServiceRequest($contact, $type, [
+    $postAssistantServiceRequest($contact, $type, [
         'title' => 'Assistant password test',
         'description' => 'Password ownership is enforced.',
         'custom_fields' => [
@@ -248,4 +260,43 @@ it('rejects password fields owned by another contact', function () {
 
     expect(ServiceRequest::query()->exists())->toBeFalse()
         ->and($secret->refresh()->related_id)->toBeNull();
+});
+
+it('records files submitted through upload fields as request submissions uploaded by the contact', function () use ($postAssistantServiceRequest) {
+    Storage::fake('s3');
+
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $type->update(['default_priority_id' => $priority->getKey()]);
+    $form = ServiceRequestForm::factory()->wizard()->for($type, 'type')->create();
+    $step = new ServiceRequestFormStep(['label' => 'Details', 'sort' => 1]);
+    $step->submissible()->associate($form);
+    $step->save();
+    $field = new ServiceRequestFormField([
+        'label' => 'Screenshot',
+        'type' => UploadFormFieldBlock::type(),
+        'is_required' => false,
+        'config' => [],
+    ]);
+    $field->submissible()->associate($form);
+    $field->step()->associate($step);
+    $field->save();
+    $contact = Contact::factory()->create();
+    $path = 'tmp/' . Str::uuid() . '.png';
+    Storage::disk('s3')->put($path, UploadedFile::fake()->image('screenshot.png')->getContent());
+
+    $postAssistantServiceRequest($contact, $type, [
+        'title' => 'Assistant upload test',
+        'description' => 'Upload fields are supported.',
+        'custom_fields' => [
+            $field->getKey() => [
+                ['path' => $path, 'originalFileName' => 'screenshot.png'],
+            ],
+        ],
+    ])->assertOk();
+
+    $media = ServiceRequest::query()->sole()->getFirstMedia('uploads');
+
+    expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::RequestSubmission)
+        ->and($media->createdBy->is($contact))->toBeTrue();
 });

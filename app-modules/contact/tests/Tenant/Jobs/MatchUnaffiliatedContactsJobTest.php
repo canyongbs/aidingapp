@@ -42,7 +42,6 @@ use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
@@ -232,8 +231,6 @@ it('does not match contacts when the targeted organization has been deleted', fu
 it('does not run reconciliation when another reconciliation for the tenant holds the lock', function () {
     $job = new MatchUnaffiliatedContactsJob();
     $middleware = $job->middleware()[0];
-
-    assert($middleware instanceof WithoutOverlapping);
 
     $tenant = Tenant::current();
     assert($tenant instanceof Tenant);
