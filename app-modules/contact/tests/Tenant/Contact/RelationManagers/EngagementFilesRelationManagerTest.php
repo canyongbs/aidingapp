@@ -37,6 +37,7 @@
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Resources\EngagementFiles\RelationManagers\EngagementFilesRelationManager;
+use AidingApp\Engagement\Models\EngagementFile;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
@@ -73,26 +74,38 @@ test('hides the files create, edit and delete actions when read only while still
 
     $contact = Contact::factory()->create();
 
+    $file = EngagementFile::factory()->create();
+    $contact->engagementFiles()->attach($file);
+
     $component = Livewire::test(EngagementFilesRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
         'readOnly' => true,
     ])
         ->assertSuccessful()
+        ->assertCanSeeTableRecords([$file])
         ->assertActionHidden(TestAction::make('create')->table())
+        ->assertActionHidden(TestAction::make('edit')->table($file))
+        ->assertActionHidden(TestAction::make('delete')->table($file))
         ->assertActionHidden(TestAction::make('delete')->table()->bulk());
 
     expect($component->instance()->isReadOnly())->toBeTrue();
 });
 
-test('shows the files create action when not read only', function () {
+test('shows the files create, edit and delete actions when not read only', function () {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
+
+    $file = EngagementFile::factory()->create();
+    $contact->engagementFiles()->attach($file);
 
     Livewire::test(EngagementFilesRelationManager::class, [
         'ownerRecord' => $contact,
         'pageClass' => ViewContact::class,
     ])
-        ->assertActionVisible(TestAction::make('create')->table());
+        ->assertCanSeeTableRecords([$file])
+        ->assertActionVisible(TestAction::make('create')->table())
+        ->assertActionVisible(TestAction::make('edit')->table($file))
+        ->assertActionVisible(TestAction::make('delete')->table($file));
 });
