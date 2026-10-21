@@ -200,3 +200,9 @@ html.dark .treeselect .treeselect-input__tags-element:hover .treeselect-input__t
         @apply lg:top-[6.5rem]! lg:h-[calc(100dvh-6.5rem)]!;
     }
 }
+
+/* The Archive action button (`ArchiveAction`) uses white text in dark mode. */
+.dark .fi-btn.fi-color-warning:not(.fi-outlined)[wire\:click*="mountAction('archive'"] {
+    --dark-text: white;
+    --dark-hover-text: white;
+}
