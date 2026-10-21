@@ -304,7 +304,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnStateSet('progress', 50, $project)
         ->assertTableColumnExists(
             'managers',
-            fn (Column $column): bool => $column->getState()->pluck('name')->all() === ['Casey Manager'],
+            fn (Column $column): bool => $column->getState()->pluck('full_name')->all() === ['Casey Manager'],
             $project,
         )
         ->assertTableColumnExists(
