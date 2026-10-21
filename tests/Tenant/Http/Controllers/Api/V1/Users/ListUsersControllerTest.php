@@ -199,7 +199,26 @@ it('can filter users by name', function (): void {
     expect($response['data'][0]['name'])->toBe($matchingUser->full_name);
 });
 
-it('can filter users by department', function (): void {
+it('can filter users by multiple names', function (array $filter) {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+    User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Brown']);
+
+    $response = getJson(route('api.v1.users.index', ['filter' => $filter], false));
+    $response->assertOk();
+
+    expect($response['meta']['total'])->toBe(2)
+        ->and($response->json('data.*.id'))->toEqualCanonicalizing([$john->id, $jane->id]);
+})->with([
+    'comma separated' => [['name' => 'John,Jane']],
+    'array' => [['name' => ['John', 'Jane']]],
+]);
+
+it('can filter users by department', function () {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);

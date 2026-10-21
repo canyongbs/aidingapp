@@ -47,6 +47,7 @@ use Dedoc\Scramble\Attributes\QueryParameter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Gate;
 use Spatie\QueryBuilder\AllowedFilter;
 use Spatie\QueryBuilder\AllowedSort;
@@ -76,7 +77,11 @@ class ListUsersController
             User::query()->tap(new WithoutAnyAdmin())->with(['roles', 'department', 'permissionsFromRoles'])
         )
             ->allowedFilters(
-                AllowedFilter::callback('name', fn (Builder $query, string $value) => $query->tap(new WhereFullNameLike($value))),
+                AllowedFilter::callback('name', fn (Builder $query, mixed $value) => $query->where(function (Builder $query) use ($value): void {
+                    foreach (Arr::wrap($value) as $name) {
+                        $query->orWhere(fn (Builder $query) => $query->tap(new WhereFullNameLike((string) $name)));
+                    }
+                })),
                 AllowedFilter::partial('department', 'department.name'),
             )
             ->allowedSorts(

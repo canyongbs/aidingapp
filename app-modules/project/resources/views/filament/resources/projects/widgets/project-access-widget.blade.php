@@ -31,6 +31,7 @@
     
     </COPYRIGHT>
 --}}
+@use('\AidingApp\Contact\Models\Contact')
 <x-filament-widgets::widget class="h-full">
     <x-filament::section divided>
         <x-slot name="heading">Project Access</x-slot>
@@ -80,8 +81,17 @@
                 <div class="flex flex-wrap gap-4">
                     @foreach ($this->guests as $item)
                         @php
-                            $name = $item->full_name;
-                            $initials = strtoupper(substr($item->first_name ?? '', 0, 1) . substr($item->last_name ?? '', 0, 1));
+                            $isContact = $item instanceof Contact;
+                            $name = $isContact ? $item->full_name : $item->name;
+                            $initials = $isContact
+                                ? strtoupper(substr($item->first_name ?? '', 0, 1) . substr($item->last_name ?? '', 0, 1))
+                                : strtoupper(
+                                    collect(explode(' ', trim($item->name ?? '')))
+                                        ->filter()
+                                        ->take(2)
+                                        ->map(fn (string $word): string => substr($word, 0, 1))
+                                        ->implode(''),
+                                );
                             $colors = ['bg-amber-500', 'bg-emerald-500', 'bg-violet-500', 'bg-rose-500', 'bg-cyan-500', 'bg-indigo-500'];
                             $color = $colors[crc32($item->getKey()) % count($colors)];
                         @endphp
