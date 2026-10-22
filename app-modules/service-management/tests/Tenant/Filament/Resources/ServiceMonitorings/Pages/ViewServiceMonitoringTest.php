@@ -134,10 +134,10 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
             'domain' => $serviceMonitoringTarget->domain,
             'frequency' => $serviceMonitoringTarget->frequency,
             'departments.name' => $serviceMonitoringTarget->departments()->pluck('name')->all(),
-            'users.name' => $serviceMonitoringTarget->users()->pluck('name')->all(),
+            'users.full_name' => $serviceMonitoringTarget->users()->get()->pluck('full_name')->all(),
             'reportConfigurations.weekly.email' => true,
             'reportConfigurations.weekly.database' => true,
-            'reportConfigurations.weekly.users' => [$reportUser->name],
+            'reportConfigurations.weekly.users' => [$reportUser->full_name],
             'reportConfigurations.weekly.departments' => [$reportDepartment->name],
             'reportConfigurations.weekly.contacts' => [$reportContact->full_name],
         ]);

@@ -124,7 +124,7 @@ it('substitutes the recipient name in the body and subject while the relabeled c
 });
 
 it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody) {
-    $user = User::factory()->create(['name' => 'Staff Recipient']);
+    $user = User::factory()->create(['first_name' => 'Staff', 'last_name' => 'Recipient']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();

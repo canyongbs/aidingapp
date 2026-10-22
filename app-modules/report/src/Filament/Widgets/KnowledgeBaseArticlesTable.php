@@ -111,9 +111,9 @@ class KnowledgeBaseArticlesTable extends BaseWidget
                         return $query->where('title', 'ilike', "%{$search}%");
                     })
                     ->url(fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl('view', ['record' => $record])),
-                TextColumn::make('managers.name')
+                TextColumn::make('managers.full_name')
                     ->label('Manager')
-                    ->searchable(),
+                    ->searchable(['first_name', 'last_name']),
                 TextColumn::make('portal_view_count')
                     ->label('Views')
                     ->sortable(),

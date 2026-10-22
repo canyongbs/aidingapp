@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
@@ -64,7 +65,7 @@ test('workload assigner assigns to user with fewest active requests', function (
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
 
     // Give the first two users 2 active assignments each
     foreach ($users->take(2) as $user) {
@@ -118,7 +119,7 @@ test('workload assigner distributes evenly when all managers have same workload'
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 
@@ -172,9 +173,9 @@ it('assigns to a manager through group membership', function () {
 it('does not count inactive assignments toward a manager\'s workload', function () {
     asSuperAdmin();
 
-    $alice = User::factory()->create(['name' => 'Alice']);
-    $bob = User::factory()->create(['name' => 'Bob']);
-    $carol = User::factory()->create(['name' => 'Carol']);
+    $alice = User::factory()->create(['first_name' => 'Alice']);
+    $bob = User::factory()->create(['first_name' => 'Bob']);
+    $carol = User::factory()->create(['first_name' => 'Carol']);
 
     $serviceRequestType = ServiceRequestType::factory()
         ->state(['assignment_type' => ServiceRequestTypeAssignmentTypes::Workload])

@@ -54,7 +54,8 @@ class UsersTable
             ->filters([
                 QueryBuilder::make()
                     ->constraints([
-                        TextConstraint::make('name'),
+                        TextConstraint::make('first_name'),
+                        TextConstraint::make('last_name'),
                         DateConstraint::make('created_at')
                             ->icon('heroicon-m-calendar'),
                         TextConstraint::make('email')

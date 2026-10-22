@@ -43,6 +43,8 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\User;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -134,9 +136,9 @@ class ServiceRequestsTable extends BaseWidget
                     )
                     ->url(fn (ServiceRequest $record): string => ContactResource::getUrl('view', ['record' => $record->respondent]))
                     ->description(fn (ServiceRequest $record): ?string => $record->respondent->organization->name ?? null),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned To')
-                    ->searchable()
+                    ->searchable(['first_name', 'last_name'])
                     ->placeholder('Unassigned'),
                 TextColumn::make('created_at')
                     ->label('Date/Time Opened')
@@ -189,8 +191,9 @@ class ServiceRequestsTable extends BaseWidget
                     ->preload(),
                 SelectFilter::make('assigned_to')
                     ->label('Assigned To')
-                    ->relationship('assignedTo.user', 'name')
-                    ->searchable()
+                    ->relationship('assignedTo.user', 'first_name', fn (Builder $query): Builder => $query->tap(new OrderByFullName()))
+                    ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->full_name)
+                    ->searchable(['first_name', 'last_name'])
                     ->preload(),
             ])
             ->headerActions([

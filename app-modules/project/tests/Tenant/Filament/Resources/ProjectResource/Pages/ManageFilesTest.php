@@ -150,7 +150,7 @@ it('can sort files by created by', function () {
     Livewire::test(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
-        ->sortTable('createdBy.name', 'asc')
+        ->sortTable('createdBy.full_name', 'asc')
         ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
 });
 

@@ -221,7 +221,7 @@ class SlaPerformanceByAgentTable extends BaseWidget
 
                     return [
                         'id' => $first->assignedTo?->user_id,
-                        'agent' => $first->assignedTo?->user->name ?? 'Unassigned',
+                        'agent' => $first->assignedTo?->user->full_name ?? 'Unassigned',
                         'requests' => $metrics['total'],
                         'responseSla' => $metrics['response_compliance_percentage'],
                         'resolutionSla' => $metrics['resolution_compliance_percentage'],

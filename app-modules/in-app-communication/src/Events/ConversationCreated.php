@@ -78,7 +78,7 @@ class ConversationCreated implements ShouldBroadcastNow
                 'participant_type' => $participant->participant_type,
                 'participant' => $participantModel instanceof User ? [
                     'id' => $participantModel->getKey(),
-                    'name' => $participantModel->name,
+                    'name' => $participantModel->full_name,
                     'avatar_url' => Filament::getUserAvatarUrl($participantModel),
                 ] : null,
                 'is_manager' => $participant->is_manager,
@@ -92,7 +92,7 @@ class ConversationCreated implements ShouldBroadcastNow
             $otherParticipant = $this->conversation->conversationParticipants
                 ->first(fn (ConversationParticipant $otherParticipant) => $otherParticipant->participant_id !== $this->recipientId);
             $otherUser = $otherParticipant?->participant;
-            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $displayName = $otherUser instanceof User ? $otherUser->full_name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
         }
 

@@ -122,7 +122,7 @@ class ProjectFilesWidget extends TableWidget
                     ->label('Retention Date')
                     ->placeholder('N/A')
                     ->dateTime(),
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Created By')
                     ->placeholder('N/A'),
             ])

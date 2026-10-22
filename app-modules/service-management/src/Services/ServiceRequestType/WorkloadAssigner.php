@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -86,11 +87,8 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                         ->whereNull('service_request_assignments.deleted_at')
                         ->where('service_request_assignments.status', ServiceRequestAssignmentStatus::Active);
                 }, '<=', $lowestServiceRequest)
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
+                ->whereRaw('(users.first_name, users.last_name, users.id) > (?, ?, ?)', [$lastAssignee->first_name, $lastAssignee->last_name, $lastAssignee->getKey()])
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {
@@ -102,7 +100,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                     },
                 ])
                 ->orderBy('service_request_count', 'asc')
-                ->orderBy('name')->orderBy('id')->first();
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {

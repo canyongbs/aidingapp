@@ -67,7 +67,7 @@ class ServiceRequestsExporter extends Exporter
                 ->state(
                     fn (ServiceRequest $record): ?string => $record->respondent->organization->name ?? null
                 ),
-            ExportColumn::make('assignedTo.user.name')
+            ExportColumn::make('assignedTo.user.full_name')
                 ->label('Assigned To'),
             ExportColumn::make('created_at')
                 ->label('Date/Time Opened')

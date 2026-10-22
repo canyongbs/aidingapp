@@ -40,7 +40,7 @@
         <p
             x-data="{ content: '' }"
             x-init="
-                const message = @js('Hi ' . auth()->user()->name . ", I am happy to help you draft this service request update for {$contactName} (re: #{$serviceRequestNumber}). Please describe the update you wish to share:")
+                const message = @js('Hi ' . auth()->user()->full_name . ", I am happy to help you draft this service request update for {$contactName} (re: #{$serviceRequestNumber}). Please describe the update you wish to share:")
 
                 const typeWord = async (word, delay) => {
                     content += word + ' '

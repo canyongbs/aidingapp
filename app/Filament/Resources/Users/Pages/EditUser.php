@@ -55,7 +55,6 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use STS\FilamentImpersonate\Actions\Impersonate;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
@@ -70,22 +69,6 @@ class EditUser extends EditRecord
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set) {
-            $firstName = trim($get('first_name'));
-
-            if (blank($firstName)) {
-                return;
-            }
-
-            $lastName = trim($get('last_name'));
-
-            if (blank($lastName)) {
-                return;
-            }
-
-            $set(User::displayNameKey(), "{$firstName} {$lastName}");
-        };
-
         return $schema
             ->components([
                 Section::make('Demographic Information')
@@ -94,16 +77,12 @@ class EditUser extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin())
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
+                            ->disabled(fn (User $record) => $record->isAdmin()),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin())
-                            ->live(onBlur: true)
-                            ->afterStateUpdated($generateFullName),
+                            ->disabled(fn (User $record) => $record->isAdmin()),
                         TextEntry::make('presence_status')
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
@@ -111,11 +90,6 @@ class EditUser extends EditRecord
                             ->color(fn (User $record) => $record->presenceStatus()->getColor())
                             ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
                             ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated(),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),

@@ -185,7 +185,7 @@ test('The correct details are displayed on the ListServiceRequests page via dire
         ->assertSee('Resolution:')
         ->assertSee('Created:')
         ->assertSee('Updated:')
-        ->assertSee($user->name)
+        ->assertSee($user->full_name)
         ->assertSeeInOrder(['CSAT:', 'N/A', 'NPS:', 'N/A']);
 
     $serviceRequests->each(

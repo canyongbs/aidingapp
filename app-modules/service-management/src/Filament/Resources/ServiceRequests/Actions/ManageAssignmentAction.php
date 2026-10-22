@@ -69,7 +69,7 @@ class ManageAssignmentAction
                     ->state(function () use ($serviceRequest): string {
                         $assignedUser = $serviceRequest->assignedTo?->user;
 
-                        return $assignedUser === null ? 'Unassigned' : $assignedUser->name;
+                        return $assignedUser === null ? 'Unassigned' : $assignedUser->full_name;
                     }),
                 TableSelect::make('userId')
                     ->label('Reassign')

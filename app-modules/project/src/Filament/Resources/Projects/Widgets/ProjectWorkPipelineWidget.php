@@ -157,7 +157,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->date()
                     ->placeholder('N/A')
                     ->sortable(),
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Created By')
                     ->placeholder('N/A'),
             ])

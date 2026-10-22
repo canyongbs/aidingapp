@@ -101,7 +101,7 @@ class AssignmentHistoryRelationManager extends RelationManager
             ->emptyStateHeading('No assignment history')
             ->defaultSort('assigned_at', 'desc')
             ->columns([
-                TextColumn::make('user.name')
+                TextColumn::make('user.full_name')
                     ->label('To')
                     ->description(fn (ServiceRequestAssignment $record): ?string => $userLine($record->user)),
                 TextColumn::make('assignedBy.name')
@@ -111,7 +111,7 @@ class AssignmentHistoryRelationManager extends RelationManager
                         $assignBy = $record->assignedBy;
 
                         if ($assignBy) {
-                            return $assignBy->name;
+                            return $assignBy instanceof User ? $assignBy->full_name : $assignBy->name;
                         }
 
                         return 'Auto-Assignment';

@@ -337,8 +337,8 @@ it('groups SLA performance by assigned agent and exports it', function () use ($
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
 
-    $agentA = User::factory()->create(['name' => 'Agent A']);
-    $agentB = User::factory()->create(['name' => 'Agent B']);
+    $agentA = User::factory()->create(['first_name' => 'Agent', 'last_name' => 'A']);
+    $agentB = User::factory()->create(['first_name' => 'Agent', 'last_name' => 'B']);
 
     $type->managerUsers()->attach([$agentA->getKey(), $agentB->getKey()]);
 
@@ -408,8 +408,8 @@ it('respects the assigned agent filter in the SLA stats', function () use ($slaR
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
 
-    $agentA = User::factory()->create(['name' => 'Agent A']);
-    $agentB = User::factory()->create(['name' => 'Agent B']);
+    $agentA = User::factory()->create(['first_name' => 'Agent', 'last_name' => 'A']);
+    $agentB = User::factory()->create(['first_name' => 'Agent', 'last_name' => 'B']);
 
     $type->managerUsers()->attach([$agentA->getKey(), $agentB->getKey()]);
 
@@ -433,8 +433,8 @@ it('only returns agents with active assignments in the assigned agent filter opt
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
 
-    $activeAgent = User::factory()->create(['name' => 'Active Agent']);
-    $inactiveAgent = User::factory()->create(['name' => 'Inactive Agent']);
+    $activeAgent = User::factory()->create(['first_name' => 'Active', 'last_name' => 'Agent']);
+    $inactiveAgent = User::factory()->create(['first_name' => 'Inactive', 'last_name' => 'Agent']);
 
     $type->managerUsers()->attach([$activeAgent->getKey(), $inactiveAgent->getKey()]);
 

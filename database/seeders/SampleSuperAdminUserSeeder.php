@@ -50,7 +50,8 @@ class SampleSuperAdminUserSeeder extends Seeder
             $superAdminRole = Role::where('name', Authenticatable::SUPER_ADMIN_ROLE)->firstOrFail();
 
             $superAdmin = User::factory()->create([
-                'name' => 'Super Admin',
+                'first_name' => 'Super',
+                'last_name' => 'Admin',
                 'email' => config('local_development.super_admin.email'),
                 'password' => Hash::make('password'),
             ]);

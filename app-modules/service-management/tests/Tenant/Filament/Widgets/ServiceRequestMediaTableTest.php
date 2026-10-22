@@ -116,7 +116,7 @@ describe('ServiceRequest', function () {
     test('shows uploader name for a User', function () {
         Storage::fake('s3');
 
-        $user = User::factory()->create(['name' => 'Jane Doe']);
+        $user = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
         actingAs($user);
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -194,8 +194,8 @@ describe('ServiceRequest', function () {
     test('can search by User uploader name (case-insensitive)', function () {
         Storage::fake('s3');
 
-        $userAlice = User::factory()->create(['name' => 'Alice Smith']);
-        $userBob = User::factory()->create(['name' => 'Bob Jones']);
+        $userAlice = User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Smith']);
+        $userBob = User::factory()->create(['first_name' => 'Bob', 'last_name' => 'Jones']);
 
         $serviceRequest = ServiceRequest::factory()->create();
 
@@ -950,8 +950,8 @@ describe('ServiceRequestUpdate', function () {
     test('can search by User uploader name', function () {
         Storage::fake('s3');
 
-        $userAlice = User::factory()->create(['name' => 'Alice Smith']);
-        $userBob = User::factory()->create(['name' => 'Bob Jones']);
+        $userAlice = User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Smith']);
+        $userBob = User::factory()->create(['first_name' => 'Bob', 'last_name' => 'Jones']);
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
