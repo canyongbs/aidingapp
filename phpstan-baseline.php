@@ -962,12 +962,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/app-modules/inventory-management/src/Actions/UpdateAssetStatusBasedOnMaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
-	'identifier' => 'method.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOuts/Pages/ListAssetCheckOuts.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\Assets\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
 	'identifier' => 'missingType.iterableValue',
 	'count' => 1,
@@ -988,30 +982,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
 	'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:checkOuts\\(\\)\\.$#',
 	'identifier' => 'method.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Eloquent local scopes are not allowed\\. The "scopeWithoutReturned" method on "AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-	'identifier' => 'Common.noLocalModelScope',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkedOutBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-	'identifier' => 'missingType.generics',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:scopeWithoutReturned\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
-	'identifier' => 'missingType.generics',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:scopeWithoutReturned\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
-	'identifier' => 'missingType.generics',
 	'count' => 1,
 	'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
 ];
@@ -1682,12 +1652,6 @@ $ignoreErrors[] = [
 	'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFilamentFormSchema.php',
 ];
 $ignoreErrors[] = [
-	'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submissible\\:\\:\\$type\\.$#',
-	'identifier' => 'property.notFound',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
-];
-$ignoreErrors[] = [
 	'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "content"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
 	'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
 	'count' => 1,
@@ -1812,18 +1776,6 @@ $ignoreErrors[] = [
 	'identifier' => 'Common.actionClassMustBeInvokable',
 	'count' => 1,
 	'path' => __DIR__ . '/app-modules/service-management/src/Actions/UpdateServiceRequestAction.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\:\\:fromData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
-	'identifier' => 'missingType.iterableValue',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-	'message' => '#^Method AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\:\\:fromData\\(\\) should return static\\(AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\) but returns AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\.$#',
-	'identifier' => 'return.type',
-	'count' => 1,
-	'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
 ];
 $ignoreErrors[] = [
 	'message' => '#^Parameter name "close_details" is not in camelCase\\.$#',
