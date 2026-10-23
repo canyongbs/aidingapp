@@ -36,8 +36,6 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects;
 
-use AidingApp\Project\Filament\Resources\Projects\Pages\CreateProject;
-use AidingApp\Project\Filament\Resources\Projects\Pages\EditProject;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageAuditors;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ManageFiles;
@@ -119,9 +117,7 @@ class ProjectResource extends Resource
     {
         return [
             'index' => ListProjects::route('/'),
-            'create' => CreateProject::route('/create'),
             'view' => ViewProject::route('/{record}'),
-            'edit' => EditProject::route('/{record}/edit'),
             'manage-managers' => ManageManagers::route('/{record}/managers'),
             'manage-auditors' => ManageAuditors::route('/{record}/auditors'),
             'manage-files' => ManageFiles::route('/{record}/files'),

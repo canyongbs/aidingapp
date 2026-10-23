@@ -45,6 +45,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\ToggleButtons;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Illuminate\Validation\Rule;
@@ -54,61 +55,65 @@ class ProjectForm
     /**
      * @return array<int, mixed>
      */
-    public static function components(bool $isEdit = false): array
+    public static function components(): array
     {
         return [
-            TextInput::make('name')
-                ->required()
-                ->string()
-                ->unique(ignoreRecord: $isEdit)
-                ->maxLength(255),
-            Textarea::make('description')
-                ->string()
-                ->maxLength(65535)
-                ->columnSpanFull(),
-            IconSelect::make('icon')
-                ->required()
-                ->visible()
-                ->default('heroicon-o-clipboard-document-list'),
-            ColorSelect::make('color')
-                ->required()
-                ->visible()
-                ->rules([Rule::in(array_map(fn (Color $color) => $color->value, Color::cases()))])
-                ->default('gray'),
-            Select::make('department_id')
-                ->relationship('department', 'name')
-                ->preload()
-                ->visible()
-                ->searchable()
-                ->nullable(),
-            DatePicker::make('start_date')
-                ->visible()
-                ->nullable(),
-            ToggleButtons::make('target_completion_date_type')
-                ->label('Target Completion Date')
-                ->visible()
-                ->options(['indefinite' => 'Indefinite', 'set' => 'Set'])
-                ->default('indefinite')
-                ->live()
-                ->inline()
-                ->columnSpanFull()
-                ->dehydrated(false)
-                ->afterStateHydrated(function (Set $set, ?Project $record): void {
-                    if ($record instanceof Project && filled($record->target_completion_date)) {
-                        $set('target_completion_date_type', 'set');
-                    } else {
-                        $set('target_completion_date_type', 'indefinite');
-                    }
-                })
-                ->afterStateUpdated(function (string $state, callable $set): void {
-                    if ($state === 'indefinite') {
-                        $set('target_completion_date', null);
-                    }
-                }),
-            DatePicker::make('target_completion_date')
-                ->hiddenLabel()
-                ->visible(fn (Get $get): bool => $get('target_completion_date_type') === 'set')
-                ->nullable(),
+            Section::make('Properties')
+                ->schema([
+                    TextInput::make('name')
+                        ->required()
+                        ->string()
+                        ->unique(ignoreRecord: true)
+                        ->maxLength(255),
+                    Textarea::make('description')
+                        ->string()
+                        ->maxLength(65535),
+                    Select::make('department_id')
+                        ->label('Department')
+                        ->relationship('department', 'name')
+                        ->preload()
+                        ->searchable()
+                        ->nullable(),
+                ]),
+            Section::make('Iconography')
+                ->schema([
+                    IconSelect::make('icon')
+                        ->required()
+                        ->default('heroicon-o-clipboard-document-list'),
+                    ColorSelect::make('color')
+                        ->required()
+                        ->rules([Rule::in(array_map(fn (Color $color) => $color->value, Color::cases()))])
+                        ->default('gray'),
+                ])
+                ->columns(2),
+            Section::make('Details')
+                ->schema([
+                    DatePicker::make('start_date')
+                        ->nullable(),
+                    ToggleButtons::make('target_completion_date_type')
+                        ->label('Target Completion Date')
+                        ->options(['indefinite' => 'Indefinite', 'set' => 'Set'])
+                        ->default('indefinite')
+                        ->live()
+                        ->inline()
+                        ->dehydrated(false)
+                        ->afterStateHydrated(function (Set $set, ?Project $record): void {
+                            if ($record instanceof Project && filled($record->target_completion_date)) {
+                                $set('target_completion_date_type', 'set');
+                            } else {
+                                $set('target_completion_date_type', 'indefinite');
+                            }
+                        })
+                        ->afterStateUpdated(function (string $state, callable $set): void {
+                            if ($state === 'indefinite') {
+                                $set('target_completion_date', null);
+                            }
+                        }),
+                    DatePicker::make('target_completion_date')
+                        ->hiddenLabel()
+                        ->visible(fn (Get $get): bool => $get('target_completion_date_type') === 'set')
+                        ->nullable(),
+                ]),
         ];
     }
 

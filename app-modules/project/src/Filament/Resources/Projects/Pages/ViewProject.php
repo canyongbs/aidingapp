@@ -42,12 +42,14 @@ use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectFilesWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectWorkPipelineWidget;
 use AidingApp\Project\Models\Project;
+use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Str;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 
 class ViewProject extends ViewRecord
@@ -138,5 +140,18 @@ class ViewProject extends ViewRecord
         }
 
         return $breadcrumbs;
+    }
+
+    #[On('projectUpdated')]
+    public function refreshRecord(): void
+    {
+        $this->getRecord()->refresh();
+    }
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            ArchiveAction::make(),
+        ];
     }
 }

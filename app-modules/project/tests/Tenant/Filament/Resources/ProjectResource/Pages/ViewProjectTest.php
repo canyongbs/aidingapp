@@ -1373,3 +1373,88 @@ it('gates the project stats widget behind project view permissions', function ()
 
     expect(ProjectStatsWidget::canView())->toBeTrue();
 });
+
+it('can archive a project from the header action', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    expect($project->isArchived())->toBeFalse();
+
+    Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->callAction(TestAction::make('archive'))
+        ->assertNotified();
+
+    expect($project->refresh()->isArchived())->toBeTrue();
+});
+
+it('hides the archive header action from a user without the `project.*.delete` permission', function () use ($loginAsUserWithProjectViewPermissions): void {
+    $loginAsUserWithProjectViewPermissions();
+
+    $project = Project::factory()->create();
+
+    Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertActionHidden(TestAction::make('archive'));
+});
+
+it('shows the archive header action to the creator or a manager with the `project.*.delete` permission', function (): void {
+    $creator = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+    $manager = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+
+    $project = Project::factory()
+        ->for($creator, 'createdBy')
+        ->hasAttached($manager, relationship: 'managerUsers')
+        ->create();
+
+    actingAs($creator);
+
+    Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertActionVisible(TestAction::make('archive'));
+
+    actingAs($manager);
+
+    Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertActionVisible(TestAction::make('archive'));
+});
+
+it('hides the archive header action from an auditor even with the `project.*.delete` permission', function (): void {
+    $auditor = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
+
+    $project = Project::factory()->hasAttached($auditor, relationship: 'auditorUsers')->create();
+
+    actingAs($auditor);
+
+    Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertActionHidden(TestAction::make('archive'));
+});
+
+it('hides the archive header action when the license addon is disabled after the page loads', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create();
+
+    $component = Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertActionVisible(TestAction::make('archive'));
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $component->assertActionHidden(TestAction::make('archive'));
+});
+
+it('refreshes the project when it is updated from the dashboard widget', function (): void {
+    asSuperAdmin();
+
+    $project = Project::factory()->create(['name' => 'Old name']);
+
+    $component = Livewire::test(ViewProject::class, ['record' => $project->getRouteKey()])
+        ->assertSee('Old name');
+
+    $project->update(['name' => 'New name']);
+
+    $component
+        ->dispatch('projectUpdated')
+        ->assertSee('New name')
+        ->assertDontSee('Old name');
+});
