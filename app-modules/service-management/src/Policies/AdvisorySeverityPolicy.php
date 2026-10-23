@@ -143,6 +143,14 @@ class AdvisorySeverityPolicy
         );
     }
 
+    public function reorder(Authenticatable $authenticatable): Response
+    {
+        return $authenticatable->canOrElse(
+            abilities: 'settings.*.update',
+            denyResponse: 'You do not have permission to rank advisory severities.'
+        );
+    }
+
     /**
      * @return array<Feature>
      */

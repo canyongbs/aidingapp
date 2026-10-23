@@ -60,30 +60,8 @@ class ViewProject extends ViewRecord
 
     protected static ?string $navigationLabel = 'View';
 
-    #[Url()]
-    public ?string $tab = null;
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        $project = $this->getRecord();
-        assert($project instanceof Project);
-
-        $availableTab = collect(ProjectTab::cases())
-            ->first(fn (ProjectTab $tab): bool => $tab->canView($project));
-
-        if ($availableTab === null) {
-            $this->tab = null;
-
-            return;
-        }
-
-        $requestedTab = is_string($this->tab) ? ProjectTab::tryFrom($this->tab) : null;
-        $effectiveTab = $requestedTab?->canView($project) ? $requestedTab : $availableTab;
-
-        $this->tab = $effectiveTab->value;
-    }
+    #[Url]
+    public ?string $tab = ProjectTab::Access->value;
 
     public function infolist(Schema $schema): Schema
     {

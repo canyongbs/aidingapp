@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,9 +32,30 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<template>
-    <tbody class="divide-y divide-gray-100 bg-white">
-        <slot />
-    </tbody>
-</template>
+*/
+
+namespace AidingApp\ServiceManagement\Observers;
+
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Support\Facades\DB;
+
+class AdvisorySeverityObserver
+{
+    /**
+     * New severities are ranked last (lowest), so admins only reorder when they want a higher rank.
+     */
+    public function creating(AdvisorySeverity $advisorySeverity): void
+    {
+        if (! AdvisorySeveritySortFeature::active()) {
+            return;
+        }
+
+        if (! isset($advisorySeverity->sort)) {
+            $advisorySeverity->setAttribute(
+                'sort',
+                DB::raw('(SELECT COALESCE(MAX(advisory_severities.sort), 0) + 1 FROM advisory_severities)')
+            );
+        }
+    }
+}

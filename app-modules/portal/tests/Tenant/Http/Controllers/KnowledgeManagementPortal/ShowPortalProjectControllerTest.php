@@ -135,6 +135,20 @@ it('shows guest-visible pipeline tasks grouped by milestone', function (): void 
         ->assertJsonMissing(['name' => 'Internal Review']);
 });
 
+it('shows a project without any pipelines', function (): void {
+    $contact = Contact::factory()->create();
+    $project = Project::factory()->create(['name' => 'Office Renovation']);
+    $project->guestContacts()->attach($contact);
+
+    actingAs($contact, 'contact');
+
+    getJson(route('api.portal.projects.show', ['portalProject' => $project->getKey()]))
+        ->assertOk()
+        ->assertJsonPath('data.name', 'Office Renovation')
+        ->assertJsonPath('data.pipelines', [])
+        ->assertJsonPath('meta.total', 0);
+});
+
 it('paginates guest-visible tasks for the selected pipeline', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();

@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
@@ -50,7 +51,12 @@ use function Pest\Laravel\actingAs;
 beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = true;
+    $licenseSettings->save();
 
     ServiceRequestStatus::firstOrCreate(
         ['name' => 'New'],

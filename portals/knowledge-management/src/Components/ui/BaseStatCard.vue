@@ -33,7 +33,6 @@
 -->
 <script setup>
     import { computed } from 'vue';
-    import BaseCard from './BaseCard.vue';
 
     const props = defineProps({
         label: {
@@ -54,7 +53,7 @@
     const toneConfig = computed(() => {
         const map = {
             neutral: { bg: 'bg-white', labelColor: 'text-gray-500', valueColor: 'text-gray-900' },
-            warning: { bg: 'bg-orange-50', labelColor: 'text-orange-600', valueColor: 'text-orange-600' },
+            warning: { bg: 'bg-amber-50', labelColor: 'text-amber-700', valueColor: 'text-amber-700' },
             success: { bg: 'bg-green-50', labelColor: 'text-green-600', valueColor: 'text-green-700' },
             danger: { bg: 'bg-red-50', labelColor: 'text-red-600', valueColor: 'text-red-600' },
         };
@@ -63,7 +62,7 @@
 </script>
 
 <template>
-    <BaseCard :bg="toneConfig.bg">
+    <div :class="['rounded-lg p-5 shadow-sm ring-1 ring-gray-950/5', toneConfig.bg]">
         <div class="flex items-start justify-between gap-3">
             <div>
                 <p class="mb-1 text-xs font-semibold" :class="toneConfig.labelColor">{{ label }}</p>
@@ -73,5 +72,5 @@
             </div>
             <slot name="icon" />
         </div>
-    </BaseCard>
+    </div>
 </template>

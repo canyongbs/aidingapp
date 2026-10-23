@@ -33,21 +33,26 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import BaseButton from '@common/BaseButton.vue';
+    import BaseTable from '@common/BaseTable.vue';
+    import BaseTableBody from '@common/BaseTableBody.vue';
+    import BaseTableCell from '@common/BaseTableCell.vue';
+    import BaseTableHeader from '@common/BaseTableHeader.vue';
+    import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
+    import BaseTableRow from '@common/BaseTableRow.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import { ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
-    import BaseTable from '../Components/ui/BaseTable.vue';
-    import BaseTableBody from '../Components/ui/BaseTableBody.vue';
-    import BaseTableCell from '../Components/ui/BaseTableCell.vue';
-    import BaseTableHeader from '../Components/ui/BaseTableHeader.vue';
-    import BaseTableHeaderCell from '../Components/ui/BaseTableHeaderCell.vue';
-    import BaseTableRow from '../Components/ui/BaseTableRow.vue';
     import { apiGet, apiPost, getApiBaseUrl } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
+    import { useFeatureStore } from '../Stores/feature.js';
     import { useServiceRequestData } from './loaders.js';
 
     const route = useRoute();
@@ -55,6 +60,8 @@
     // The current service request (page 1 of its updates) arrives via the route data
     // loader; paginating the updates fetches on demand.
     const { data: initialData } = useServiceRequestData();
+
+    const { hasServiceManagement } = storeToRefs(useFeatureStore());
 
     const uploadUrl = getApiBaseUrl() + '/service-request/request-upload-url';
 
@@ -177,10 +184,7 @@
 
         <!-- Error notices -->
         <template v-if="authorizationError">
-            <div
-                v-if="authorizationError"
-                class="rounded-[var(--rounding-md)] bg-red-50 px-4 py-3 text-sm text-red-700"
-            >
+            <div v-if="authorizationError" class="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
                 {{ authorizationError }}
             </div>
         </template>
@@ -278,15 +282,7 @@
                                 download
                                 class="inline-flex w-fit items-center space-x-2 rounded-lg border border-gray-100 bg-white px-2 py-1.5 text-sm transition hover:bg-gray-200"
                             >
-                                <svg
-                                    class="h-4 w-4 shrink-0 opacity-70"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
-                                </svg>
+                                <ArrowDownTrayIcon class="size-4 shrink-0 opacity-70" aria-hidden="true" />
                                 <span class="truncate text-gray-900">{{ mediaItem.name }}</span>
                             </a>
                         </li>
@@ -294,7 +290,7 @@
                 </div>
             </div>
 
-            <template #footer>
+            <template v-if="totalRecords > 0" #footer>
                 <Pagination
                     :currentPage="currentPage"
                     :lastPage="lastPage"
@@ -308,5 +304,34 @@
                 />
             </template>
         </BaseList>
+    </Page>
+
+    <Page v-else>
+        <template #heading>404 Not Found</template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :breadcrumbs="hasServiceManagement ? breadcrumbs : []" :currentCrumb="'Not Found'" />
+        </template>
+
+        <EmptyState>
+            <template #heading>Service Request Not Found</template>
+            <template #description>
+                The service request you are looking for does not exist or you no longer have access to it.
+            </template>
+            <template #actions>
+                <BaseButton
+                    v-if="hasServiceManagement"
+                    tag="router-link"
+                    :to="{ name: 'service' }"
+                    color="gray"
+                    size="md"
+                >
+                    Return to Service Requests
+                </BaseButton>
+                <BaseButton v-else tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
+                    Return Home
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

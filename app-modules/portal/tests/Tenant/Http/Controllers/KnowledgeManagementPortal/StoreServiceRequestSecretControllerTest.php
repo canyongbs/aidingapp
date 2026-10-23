@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
@@ -48,7 +49,12 @@ use Symfony\Component\HttpFoundation\Response;
 beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = true;
+    $licenseSettings->save();
 });
 
 it('stores an encrypted secret and returns only its id', function (): void {

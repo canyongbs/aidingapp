@@ -1,4 +1,4 @@
-<!--
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,25 +30,18 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        modelValue: { type: String, default: '' },
-        placeholder: { type: String, default: '' },
-        rows: { type: Number, default: 5 },
-        required: { type: Boolean, default: false },
-    });
+*/
 
-    defineEmits(['update:modelValue']);
-</script>
+export const SORT_OPTIONS = [
+    { value: 'highest_severity', label: 'Highest severity first' },
+    { value: 'lowest_severity', label: 'Lowest severity first' },
+];
 
-<template>
-    <textarea
-        :value="modelValue"
-        :rows="rows"
-        :placeholder="placeholder"
-        :required="required"
-        class="w-full resize-y rounded-[var(--rounding-md)] border border-gray-300 p-3 text-sm focus:border-[rgb(var(--primary-500))] focus:outline-hidden focus:ring-2 focus:ring-[rgb(var(--primary-500))]"
-        @input="$emit('update:modelValue', $event.target.value)"
-    />
-</template>
+export const DEFAULT_SORT = SORT_OPTIONS[0].value;
+
+/**
+ * The badge colour for an advisory status, by whether it is still active or has been resolved.
+ */
+export function getStatusColor(status) {
+    return status?.classification === 'resolved' ? 'success' : 'info';
+}

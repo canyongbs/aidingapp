@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,9 +32,32 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<template>
-    <thead class="border-b border-gray-200 bg-gray-50">
-        <slot />
-    </thead>
-</template>
+*/
+
+namespace AidingApp\Portal\DataTransferObjects;
+
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
+#[MapOutputName(SnakeCaseMapper::class)]
+class AdvisoryUpdateData extends Data
+{
+    public function __construct(
+        public string $id,
+        public string $title,
+        public string $update,
+        public string $date,
+    ) {}
+
+    public static function fromModel(AdvisoryUpdate $advisoryUpdate): self
+    {
+        return new self(
+            id: $advisoryUpdate->getKey(),
+            title: $advisoryUpdate->title,
+            update: $advisoryUpdate->update,
+            date: $advisoryUpdate->date->toIso8601String(),
+        );
+    }
+}

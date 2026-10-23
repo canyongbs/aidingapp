@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,43 +32,26 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        tabs: {
-            type: Array,
-            required: true,
-        },
-        modelValue: {
-            type: String,
-            required: true,
-        },
-    });
+*/
 
-    const emit = defineEmits(['update:modelValue']);
-</script>
+namespace AidingApp\Portal\Http\Middleware;
 
-<template>
-    <div class="mb-2 border-b border-gray-200">
-        <ul class="flex flex-wrap -mb-px" role="tablist" aria-label="Asset filter tabs">
-            <li v-for="tab in tabs" :key="tab.key" role="presentation">
-                <button
-                    type="button"
-                    role="tab"
-                    :id="`assets-tab-${tab.key}`"
-                    :aria-selected="modelValue === tab.key"
-                    :aria-controls="`assets-panel-${tab.key}`"
-                    @click="emit('update:modelValue', tab.key)"
-                    :class="[
-                        'inline-flex items-center whitespace-nowrap border-b-2 px-3 py-2.5 text-sm font-semibold leading-5 transition-colors',
-                        modelValue === tab.key
-                            ? 'border-[rgba(var(--primary-500),1)] text-[rgba(var(--primary-600),1)]'
-                            : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700',
-                    ]"
-                >
-                    {{ tab.label }}
-                </button>
-            </li>
-        </ul>
-    </div>
-</template>
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Settings\LicenseSettings;
+use Closure;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+class EnsureKnowledgeManagementPortalServiceManagementIsEnabled
+{
+    public function handle(Request $request, Closure $next): Response
+    {
+        abort_unless(
+            resolve(LicenseSettings::class)->data?->addons->serviceManagement
+                && resolve(PortalSettings::class)->knowledge_management_portal_service_management,
+            Response::HTTP_FORBIDDEN,
+        );
+
+        return $next($request);
+    }
+}
