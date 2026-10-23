@@ -41,10 +41,21 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Models\User;
+use App\Settings\PresenceSettings;
 use Filament\Actions\Testing\TestAction;
+use Filament\Support\Enums\IconSize;
+
+use function Filament\Support\generate_icon_html;
+
+use Filament\Support\View\ComponentAttributeBag;
+use Filament\Tables\View\Components\Columns\TextColumnComponent\ItemComponent\IconComponent;
+use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Support\Js;
+use Illuminate\Support\Str;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\freezeTime;
 
 it('displays the open and total service request counts', function (): void {
     actingAs(
@@ -119,8 +130,13 @@ it('links the contact name to the view page', function (): void {
 
     $contact = Contact::factory()->create();
 
-    Livewire::test(ListContacts::class)
+    $component = Livewire::test(ListContacts::class)
         ->assertSee(ContactResource::getUrl('view', ['record' => $contact]));
+
+    $matched = preg_match('/<td\b[^>]*class="[^"]*\bfi-ta-cell-contact\b[^"]*"[^>]*>(.*?)<\/td>/s', $component->html(), $matches);
+
+    expect($matched)->toBe(1);
+    expect(preg_match_all('/<a\b/', $matches[1]))->toBe(1);
 });
 
 it('does not render standalone view or edit actions', function (): void {
@@ -133,6 +149,77 @@ it('does not render standalone view or edit actions', function (): void {
     Livewire::test(ListContacts::class)
         ->assertActionDoesNotExist(TestAction::make('view')->table($contact))
         ->assertActionDoesNotExist(TestAction::make('edit')->table($contact));
+});
+
+describe('presence', function (): void {
+    it('displays the presence icon, color, tooltip and accessible label', function (?int $minutesAgo, string $label, string $icon, string $color): void {
+        freezeTime();
+
+        actingAs(
+            User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        );
+
+        $settings = app(PresenceSettings::class);
+        $settings->active_threshold = 5;
+        $settings->idle_threshold = 30;
+        $settings->inactive_threshold = 480;
+        $settings->save();
+
+        $contact = Contact::factory()->create([
+            'last_activity_at' => $minutesAgo === null ? null : now()->subMinutes($minutesAgo),
+        ]);
+
+        $presenceIcon = generate_icon_html($icon, attributes: (new ComponentAttributeBag())->color(IconComponent::class, $color), size: IconSize::Small);
+        assert($presenceIcon instanceof Htmlable);
+
+        Livewire::test(ListContacts::class)
+            ->assertSeeHtml('aria-label="' . e($contact->full_name) . ' (Presence: ' . $label . ')" class="flex items-center gap-x-1.5"')
+            ->assertSeeHtml('x-tooltip="{ content: ' . Js::from('Presence: ' . $label)->toHtml() . ', theme: $store.theme }"')
+            ->assertSeeHtml($presenceIcon->toHtml())
+            ->assertSee(ContactResource::getUrl('view', ['record' => $contact]));
+    })->with([
+        'online' => [0, 'Online', 'heroicon-m-check-circle', 'success'],
+        'idle' => [10, 'Idle', 'heroicon-m-clock', 'warning'],
+        'inactive' => [60, 'Inactive', 'heroicon-m-minus-circle', 'gray'],
+        'offline' => [500, 'Offline', 'heroicon-m-x-circle', 'gray'],
+        'no activity' => [null, 'Offline', 'heroicon-m-x-circle', 'gray'],
+    ]);
+
+    it('preserves the managed account explanation, link and email controls', function (): void {
+        freezeTime();
+
+        actingAs(
+            User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+        );
+
+        $contact = Contact::factory()->for(User::factory(), 'managedByUser')->create([
+            'last_activity_at' => now(),
+        ]);
+
+        $lockIcon = generate_icon_html('heroicon-m-lock-closed', attributes: new ComponentAttributeBag(['class' => 'h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500']));
+        assert($lockIcon instanceof Htmlable);
+
+        Livewire::test(ListContacts::class)
+            ->assertSee('Presence: Online')
+            ->assertSeeHtml(trim(Str::between($lockIcon->toHtml(), '>', '</svg>')))
+            ->assertSeeText("This is a User's managed non-administrative account for the self-service portal.")
+            ->assertSee(ContactResource::getUrl('view', ['record' => $contact]))
+            ->assertSeeText($contact->email)
+            ->assertSeeHtml('aria-label="Copy email address"');
+    });
+
+    it('displays presence without linking a contact the user cannot view', function (): void {
+        actingAs(
+            User::factory()->create()->givePermissionTo('contact.view-any')
+        );
+
+        $contact = Contact::factory()->create(['last_activity_at' => null]);
+
+        Livewire::test(ListContacts::class)
+            ->assertSeeHtml('aria-label="' . e($contact->full_name) . ' (Presence: Offline)"')
+            ->assertSee('Presence: Offline')
+            ->assertDontSee(ContactResource::getUrl('view', ['record' => $contact]));
+    });
 });
 
 it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
