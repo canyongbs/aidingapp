@@ -46,7 +46,6 @@ use AidingApp\Timeline\Models\Timeline;
 use AidingApp\Timeline\Timelines\AssetCheckOutTimeline;
 use App\Models\BaseModel;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -98,6 +97,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         return $this->belongsTo(Asset::class, 'asset_id');
     }
 
+    /**
+     * @return MorphTo<Model, $this>
+     */
     public function checkedOutBy(): MorphTo
     {
         return $this->morphTo(
@@ -141,14 +143,9 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
         return $forModel->checkOuts()->get();
     }
 
-    public function scopeWithoutReturned(Builder $query): Builder
-    {
-        return $query->whereNull('asset_check_in_id');
-    }
-
     protected function status(): Attribute
     {
-        return Attribute::get(function () {
+        return Attribute::get(function (): AssetCheckOutStatus {
             if ($this->checkIn()->exists()) {
                 return AssetCheckOutStatus::Returned;
             }

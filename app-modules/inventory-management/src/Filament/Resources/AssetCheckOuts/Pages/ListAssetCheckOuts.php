@@ -40,6 +40,7 @@ use AidingApp\InventoryManagement\Enums\AssetCheckOutStatus;
 use AidingApp\InventoryManagement\Filament\Resources\AssetCheckOuts\AssetCheckOutResource;
 use AidingApp\InventoryManagement\Filament\Resources\Assets\AssetResource;
 use AidingApp\InventoryManagement\Models\AssetCheckOut;
+use AidingApp\InventoryManagement\Models\Scopes\WithoutReturned;
 use App\Filament\Tables\Columns\IdColumn;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Pages\ListRecords;
@@ -81,6 +82,6 @@ class ListAssetCheckOuts extends ListRecords
                 ViewAction::make()
                     ->modalHeading('View Checked Out Asset'),
             ])
-            ->modifyQueryUsing(fn (Builder $query) => $query->withoutReturned());
+            ->modifyQueryUsing(fn (Builder $query) => $query->tap(new WithoutReturned()));
     }
 }

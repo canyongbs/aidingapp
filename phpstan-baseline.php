@@ -32,7 +32,9 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
-*/ declare(strict_types = 1);
+*/
+
+declare(strict_types = 1);
 
 $ignoreErrors = [];
 $ignoreErrors[] = [
@@ -996,12 +998,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Actions/UpdateAssetStatusBasedOnMaintenanceActivity.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Builder\\:\\:withoutReturned\\(\\)\\.$#',
-    'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Filament/Resources/AssetCheckOuts/Pages/ListAssetCheckOuts.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Filament\\\\Resources\\\\Assets\\\\Pages\\\\ManageAssetMaintenanceActivity\\:\\:managers\\(\\) return type has no value type specified in iterable type array\\.$#',
     'identifier' => 'missingType.iterableValue',
     'count' => 1,
@@ -1022,30 +1018,6 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Call to an undefined method Illuminate\\\\Database\\\\Eloquent\\\\Model\\:\\:checkOuts\\(\\)\\.$#',
     'identifier' => 'method.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Eloquent local scopes are not allowed\\. The "scopeWithoutReturned" method on "AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',
-    'identifier' => 'Common.noLocalModelScope',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:checkedOutBy\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\MorphTo does not specify its types\\: TRelatedModel, TDeclaringModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:scopeWithoutReturned\\(\\) has parameter \\$query with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder but does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\InventoryManagement\\\\Models\\\\AssetCheckOut\\:\\:scopeWithoutReturned\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Builder does not specify its types\\: TModel$#',
-    'identifier' => 'missingType.generics',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/AssetCheckOut.php',
 ];
@@ -1302,12 +1274,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/portal/src/Settings/SettingsProperties/PortalSettingsProperty.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/AssetsTable.php',
-];
-$ignoreErrors[] = [
     'message' => '#^If condition is always true\\.$#',
     'identifier' => 'if.alwaysTrue',
     'count' => 1,
@@ -1324,12 +1290,6 @@ $ignoreErrors[] = [
     'identifier' => 'deadCode.unreachable',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsStats.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/report/src/Filament/Widgets/ServiceRequestsTable.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\AcceptServiceRequestConversation" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
@@ -1728,12 +1688,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFilamentFormSchema.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submissible\\:\\:\\$type\\.$#',
-    'identifier' => 'property.notFound',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Actions/GenerateServiceRequestFormKitSchema.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\ServiceManagement\\\\Actions\\\\GenerateServiceRequestFormKitSchema" defines disallowed public method "content"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
     'identifier' => 'Common.actionClassHasDisallowedPublicMethod',
     'count' => 1,
@@ -1860,18 +1814,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/service-management/src/Actions/UpdateServiceRequestAction.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\:\\:fromData\\(\\) has parameter \\$data with no value type specified in iterable type array\\.$#',
-    'identifier' => 'missingType.iterableValue',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Method AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\:\\:fromData\\(\\) should return static\\(AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\) but returns AidingApp\\\\ServiceManagement\\\\DataTransferObjects\\\\ServiceRequestDataObject\\.$#',
-    'identifier' => 'return.type',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/DataTransferObjects/ServiceRequestDataObject.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Parameter name "close_details" is not in camelCase\\.$#',
     'identifier' => 'MeliorStan.parameterNameNotCamelCase',
     'count' => 1,
@@ -1912,18 +1854,6 @@ $ignoreErrors[] = [
     'identifier' => 'property.notFound',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestTypes/ServiceRequestTypeResource.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequests/Pages/ListServiceRequests.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 2,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Widgets/ServiceRequestMediaTable.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^PHPDoc tag @return contains generic type AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany\\<App\\\\Models\\\\User, \\$this\\(AidingApp\\\\ServiceManagement\\\\Models\\\\ChangeRequestType\\)\\> but class AidingApp\\\\Audit\\\\Overrides\\\\BelongsToMany is not generic\\.$#',
@@ -2178,18 +2108,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Casts/CurrencyCast.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Resources/Users/RelationManagers/RolesRelationManager.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Filament/Widgets/ListServiceRequestTableWidgets.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\ServiceManagement\\\\Models\\\\ServiceRequest\\:\\:\\$service_request_id\\.$#',
     'identifier' => 'property.notFound',
     'count' => 2,
@@ -2244,12 +2162,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app/Filament/Widgets/ServiceRequestWidget.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 4,
-    'path' => __DIR__ . '/app/Http/Requests/Api/V1/Users/CreateUserRequest.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Method App\\\\Models\\\\Authenticatable\\:\\:roles\\(\\) return type with generic class Illuminate\\\\Database\\\\Eloquent\\\\Relations\\\\BelongsToMany does not specify its types\\: TRelatedModel, TDeclaringModel, TPivotModel, TAccessor \\(2\\-4 required\\)$#',
     'identifier' => 'missingType.generics',
     'count' => 1,
@@ -2260,12 +2172,6 @@ $ignoreErrors[] = [
     'identifier' => 'argument.templateType',
     'count' => 1,
     'path' => __DIR__ . '/app/Models/Authenticatable.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 1,
-    'path' => __DIR__ . '/app/Models/Scopes/EducatableSearch.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Eloquent local scopes are not allowed\\. The "scopeAdvancedFilter" method on "App\\\\Support\\\\HasAdvancedFilter" defines a local scope, which relies on magic methods that static analysis cannot reason about\\. Use a tappable scope instead\\. See https\\://seankegel\\.com/elevate\\-your\\-laravel\\-eloquent\\-queries\\-with\\-tappable\\-scopes\\.$#',

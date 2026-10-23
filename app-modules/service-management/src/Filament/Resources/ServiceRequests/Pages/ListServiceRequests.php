@@ -68,6 +68,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ListServiceRequests extends ListRecords
 {
@@ -138,7 +139,7 @@ class ListServiceRequests extends ListRecords
                     ->searchable(
                         query: fn (Builder $query, $search) => $query->whereHas(
                             'respondent',
-                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . strtolower($search) . '%'])
+                            fn (Builder $query) => $query->whereRaw('lower(full_name) like ?', ['%' . Str::lower($search) . '%'])
                         )
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
@@ -232,7 +233,7 @@ class ListServiceRequests extends ListRecords
                     ->getOptionLabelUsing(fn (string $value): ?string => $value === 'unassigned'
                         ? 'Unassigned'
                         : User::query()->whereKey($value)->value('name'))
-                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
+                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
                     ->query(
                         fn (Builder $query, array $data) => $query
                             ->when(
