@@ -37,6 +37,7 @@
 namespace AidingApp\Engagement\Filament\Resources\EmailTemplates\Pages;
 
 use AidingApp\Engagement\Filament\Resources\EmailTemplates\EmailTemplateResource;
+use App\Features\EmailTemplateNameUniquenessFeature;
 use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\RichEditor\ToolbarButtonGroup;
 use Filament\Forms\Components\Textarea;
@@ -44,6 +45,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateEmailTemplate extends CreateRecord
 {
@@ -57,7 +59,12 @@ class CreateEmailTemplate extends CreateRecord
                 TextInput::make('name')
                     ->string()
                     ->required()
-                    ->autocomplete(false),
+                    ->maxLength(255)
+                    ->autocomplete(false)
+                    ->when(
+                        EmailTemplateNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
                 Textarea::make('description')
                     ->string(),
                 RichEditor::make('content')
