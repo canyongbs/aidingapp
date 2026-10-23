@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
+use Illuminate\Contracts\View\View;
 use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
@@ -67,7 +68,7 @@ class BulkDraftWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (Page $livewire): Factory|\Illuminate\Contracts\View\View => view('engagement::filament.actions.draft-with-ai-modal-content', [
+            ->modalContent(fn (Page $livewire): Factory|View => view('engagement::filament.actions.draft-with-ai-modal-content', [
                 'recordTitle' => $livewire::getResource()::getPluralModelLabel(),
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()
                     ?->getFirstTemporaryUrl(now()->addHour(), 'avatar', 'avatar-height-250px') ?: Vite::asset('resources/images/canyon-ai-headshot.jpg'),

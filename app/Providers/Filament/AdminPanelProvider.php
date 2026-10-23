@@ -36,6 +36,7 @@
 
 namespace App\Providers\Filament;
 
+use Illuminate\Contracts\View\View;
 use AidingApp\Authorization\Filament\Pages\Auth\Login;
 use AidingApp\Theme\Settings\ThemeSettings;
 use App\Enums\NavigationGroup;
@@ -172,7 +173,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
                     ->modalDescription('Version ' . config('sentry.release'))
-                    ->modalContent(fn (): Factory|\Illuminate\Contracts\View\View => view('components.about-modal'))
+                    ->modalContent(fn (): Factory|View => view('components.about-modal'))
                     ->modalFooterActions([])
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),

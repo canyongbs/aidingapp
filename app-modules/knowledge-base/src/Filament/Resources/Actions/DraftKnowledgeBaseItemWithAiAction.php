@@ -36,6 +36,7 @@
 
 namespace AidingApp\KnowledgeBase\Filament\Resources\Actions;
 
+use Illuminate\Contracts\View\View;
 use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
@@ -62,7 +63,7 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (Page $livewire): Factory|\Illuminate\Contracts\View\View => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
+            ->modalContent(fn (Page $livewire): Factory|View => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
                 // @phpstan-ignore-next-line
                 'recordTitle' => $livewire->data['title'],
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()

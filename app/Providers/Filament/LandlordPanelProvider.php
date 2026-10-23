@@ -36,6 +36,7 @@
 
 namespace App\Providers\Filament;
 
+use Illuminate\Contracts\View\View;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Panel;
 use Filament\PanelProvider;
@@ -65,7 +66,7 @@ class LandlordPanelProvider extends PanelProvider
                 Route::get('/ping', fn () => response()->json(['message' => 'pong']))
                     ->name('ping');
 
-                Route::get('/{path?}', fn (): Factory|\Illuminate\Contracts\View\View => view('landlord'))
+                Route::get('/{path?}', fn (): Factory|View => view('landlord'))
                     ->where('path', '.*');
             });
     }

@@ -36,6 +36,7 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
+use Illuminate\Contracts\View\View;
 use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
@@ -69,7 +70,7 @@ class RelationManagerDraftWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (RelationManager $livewire): Factory|\Illuminate\Contracts\View\View => view('engagement::filament.actions.draft-with-ai-modal-content', [
+            ->modalContent(fn (RelationManager $livewire): Factory|View => view('engagement::filament.actions.draft-with-ai-modal-content', [
                 'recordTitle' => (function () use ($livewire) {
                     $record = $livewire->getOwnerRecord();
                     assert($record instanceof Educatable);

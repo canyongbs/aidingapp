@@ -36,6 +36,8 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages;
 
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Actions\ReclassifyServiceRequestAction;
 use AidingApp\ServiceManagement\Filament\Concerns\ServiceRequestLocked;
@@ -181,7 +183,7 @@ class ViewServiceRequest extends ViewRecord
             AssignmentHistoryRelationManager::class,
             CreatedByRelationManager::class,
         ])
-            ->map(fn (string $relationManager): string|\Filament\Resources\RelationManagers\RelationManagerConfiguration|\Filament\Resources\RelationManagers\RelationGroup|null => self::filterRelationManagers($relationManager, $record))
+            ->map(fn (string $relationManager): string|RelationManagerConfiguration|RelationGroup|null => self::filterRelationManagers($relationManager, $record))
             ->filter()
             ->map(fn (string $relationManager): Livewire => Livewire::make($relationManager, [
                 'ownerRecord' => $record,
