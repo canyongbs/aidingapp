@@ -68,7 +68,7 @@ class ParticipantAdded implements ShouldBroadcastNow
         $conversation = $this->participant->conversation;
         $conversation->load(['conversationParticipants.participant', 'latestMessage.author']);
 
-        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant) {
+        $participants = $conversation->conversationParticipants->map(function (ConversationParticipant $conversationParticipant): array {
             $userModel = $conversationParticipant->participant;
 
             return [
@@ -89,7 +89,7 @@ class ParticipantAdded implements ShouldBroadcastNow
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $conversationParticipant) => $conversationParticipant->participant_id !== $this->participant->participant_id);
+                ->first(fn (ConversationParticipant $conversationParticipant): bool => $conversationParticipant->participant_id !== $this->participant->participant_id);
             $otherUser = $otherParticipant?->participant;
             $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;

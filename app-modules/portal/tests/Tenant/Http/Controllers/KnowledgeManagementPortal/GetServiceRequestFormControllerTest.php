@@ -44,13 +44,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
 });
 
-it('omits the priority field when the type has a configured default priority', function () {
+it('omits the priority field when the type has a configured default priority', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()
         ->for($type, 'type')
@@ -65,7 +65,7 @@ it('omits the priority field when the type has a configured default priority', f
     expect(json_encode($response->json('schema')))->not->toContain('priority');
 });
 
-it('includes the priority field when the type has no configured default priority', function () {
+it('includes the priority field when the type has no configured default priority', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
@@ -75,7 +75,7 @@ it('includes the priority field when the type has no configured default priority
     expect(json_encode($response->json('schema')))->toContain('priority');
 });
 
-it('blocks guests from loading the form of a visibility restricted type', function () {
+it('blocks guests from loading the form of a visibility restricted type', function (): void {
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
     $restrictedType->restrictedToContactTypes()->attach(ContactType::factory()->create());
 
@@ -83,7 +83,7 @@ it('blocks guests from loading the form of a visibility restricted type', functi
         ->assertNotFound();
 });
 
-it('blocks contacts of a non-matching contact type from loading a restricted type form', function () {
+it('blocks contacts of a non-matching contact type from loading a restricted type form', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -97,7 +97,7 @@ it('blocks contacts of a non-matching contact type from loading a restricted typ
         ->assertNotFound();
 });
 
-it('blocks a type nested under a restricted area from a non-matching contact', function () {
+it('blocks a type nested under a restricted area from a non-matching contact', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -116,7 +116,7 @@ it('blocks a type nested under a restricted area from a non-matching contact', f
         ->assertNotFound();
 });
 
-it('builds breadcrumbs for the category the contact navigated under', function () {
+it('builds breadcrumbs for the category the contact navigated under', function (): void {
     $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -132,7 +132,7 @@ it('builds breadcrumbs for the category the contact navigated under', function (
     expect($responseB->json('category.id'))->toBe($categoryB->id);
 });
 
-it('builds a nested breadcrumb ancestor trail for the navigated category', function () {
+it('builds a nested breadcrumb ancestor trail for the navigated category', function (): void {
     $parent = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $child = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parent->id]);
 
@@ -147,7 +147,7 @@ it('builds a nested breadcrumb ancestor trail for the navigated category', funct
         ->and($response->collect('category.ancestors')->pluck('id')->all())->toBe([$parent->id]);
 });
 
-it('allows loading the form when the type is reachable via any authorized category path', function () {
+it('allows loading the form when the type is reachable via any authorized category path', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -169,7 +169,7 @@ it('allows loading the form when the type is reachable via any authorized catego
         ->assertOk();
 });
 
-it('does not build a breadcrumb for a category the type does not belong to', function () {
+it('does not build a breadcrumb for a category the type does not belong to', function (): void {
     $ownCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $unrelatedCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -183,7 +183,7 @@ it('does not build a breadcrumb for a category the type does not belong to', fun
     expect($response->json('category'))->toBeNull();
 });
 
-it('does not build a breadcrumb for a category the contact is not allowed to see', function () {
+it('does not build a breadcrumb for a category the contact is not allowed to see', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 

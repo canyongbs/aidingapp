@@ -49,7 +49,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the ManageServiceRequestTypeManagers page', function () {
+test('A successful action on the ManageServiceRequestTypeManagers page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -61,7 +61,7 @@ test('A successful action on the ManageServiceRequestTypeManagers page', functio
         ->assertSuccessful();
 });
 
-it('can attach manager users to a service request type', function () {
+it('can attach manager users to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
@@ -81,7 +81,7 @@ it('can attach manager users to a service request type', function () {
         ->toContain($user->getKey());
 });
 
-it('can attach manager departments to a service request type', function () {
+it('can attach manager departments to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $department = Department::factory()->create();
@@ -101,7 +101,7 @@ it('can attach manager departments to a service request type', function () {
         ->toContain($department->getKey());
 });
 
-it('can attach manager groups to a service request type', function () {
+it('can attach manager groups to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
     $group = Group::factory()->create();
 
@@ -120,7 +120,7 @@ it('can attach manager groups to a service request type', function () {
         ->toContain($group->getKey());
 });
 
-it('can attach manager users, departments, and groups to a service request type', function () {
+it('can attach manager users, departments, and groups to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
@@ -147,7 +147,7 @@ it('can attach manager users, departments, and groups to a service request type'
         ->and($serviceRequestType->managerGroups->pluck('id'))->toContain($group->getKey());
 });
 
-test('ManageServiceRequestTypeManagers is gated with proper access control', function () {
+test('ManageServiceRequestTypeManagers is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -190,7 +190,7 @@ test('ManageServiceRequestTypeManagers is gated with proper access control', fun
         ->toContain($managerUser->getKey());
 });
 
-test('ManageServiceRequestTypeManagers is gated with proper feature access control', function () {
+test('ManageServiceRequestTypeManagers is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -245,7 +245,7 @@ test('ManageServiceRequestTypeManagers is gated with proper feature access contr
 
 // UserSelect (managerUsers field) admin-filtering tests
 
-it('managerUsers UserSelect does not show admin users in options by default', function () {
+it('managerUsers UserSelect does not show admin users in options by default', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -261,7 +261,7 @@ it('managerUsers UserSelect does not show admin users in options by default', fu
         });
 });
 
-it('managerUsers UserSelect shows a pre-selected admin user so they can be deselected', function () {
+it('managerUsers UserSelect shows a pre-selected admin user so they can be deselected', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -276,7 +276,7 @@ it('managerUsers UserSelect shows a pre-selected admin user so they can be desel
         });
 });
 
-it('managerUsers UserSelect shows all users when filter_admins_from_selection config is false', function () {
+it('managerUsers UserSelect shows all users when filter_admins_from_selection config is false', function (): void {
     Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 

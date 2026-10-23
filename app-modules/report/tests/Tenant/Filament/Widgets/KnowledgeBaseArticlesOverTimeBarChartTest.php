@@ -39,7 +39,7 @@ use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseStatus;
 use AidingApp\Report\Filament\Widgets\KnowledgeBaseArticlesOverTimeBarChart;
 
-it('returns correct articles over time data without filters', function () {
+it('returns correct articles over time data without filters', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -65,7 +65,7 @@ it('returns correct articles over time data without filters', function () {
         ->and(array_sum($data['datasets'][0]['data']))->toEqual(5);
 });
 
-it('filters articles over time by category', function () {
+it('filters articles over time by category', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create();
     $categoryB = KnowledgeBaseCategory::factory()->create();

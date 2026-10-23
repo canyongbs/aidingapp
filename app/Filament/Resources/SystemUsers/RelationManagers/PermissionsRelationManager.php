@@ -99,7 +99,7 @@ class PermissionsRelationManager extends RelationManager
                                 ->whereNotIn('name', $owner->getPermissionNames());
                         }
                     )
-                    ->recordSelect(fn (Select $select) => $select->multiple()),
+                    ->recordSelect(fn (Select $select): Select => $select->multiple()),
             ])
             ->recordActions([
                 DetachAction::make(),

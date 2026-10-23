@@ -44,7 +44,7 @@ test('The correct details are displayed on the ViewAudit page')->todo();
 
 // Permission Tests
 
-test('ViewAudit is gated with proper access control', function () {
+test('ViewAudit is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $audit = Audit::factory()->create();

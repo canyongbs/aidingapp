@@ -41,7 +41,7 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
-it('records the file as a request submission uploaded by the respondent', function () {
+it('records the file as a request submission uploaded by the respondent', function (): void {
     Storage::fake('s3');
 
     $serviceRequest = ServiceRequest::factory()->create();

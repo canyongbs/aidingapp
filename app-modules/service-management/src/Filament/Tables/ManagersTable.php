@@ -72,9 +72,9 @@ class ManagersTable
                 TextColumn::make('name')
                     ->label('Name')
                     ->searchable()
-                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
-                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
+                    ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                    ->iconColor(fn (User $record): string => $record->presenceStatus()->getColor())
+                    ->tooltip(fn (User $record): string => $record->presenceStatus()->getLabel())
                     ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
                 TextColumn::make('department.name')
                     ->label('Department')

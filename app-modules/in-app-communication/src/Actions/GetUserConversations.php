@@ -64,22 +64,22 @@ class GetUserConversations
             ->select('conversations.*')
             ->selectRaw('conversation_participants.last_activity_at as participant_last_activity_at')
             ->selectRaw('conversation_participants.unread_count as unread_count')
-            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId): void {
                 $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
             ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
-            ->when($excludePinned, function (Builder $query) {
+            ->when($excludePinned, function (Builder $query): void {
                 $query->where('conversation_participants.is_pinned', false);
             })
-            ->when($participantType === 'contact', function (Builder $query) {
+            ->when($participantType === 'contact', function (Builder $query): void {
                 $query->whereHas('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when($participantType === 'user', function (Builder $query) {
+            ->when($participantType === 'user', function (Builder $query): void {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when($confidential !== null, function (Builder $query) use ($confidential) {
+            ->when($confidential !== null, function (Builder $query) use ($confidential): void {
                 $query->where('conversations.is_confidential', $confidential);
             })
             ->tap(new WithCurrentParticipant($user))
@@ -102,20 +102,20 @@ class GetUserConversations
             ->select('conversations.*')
             ->selectRaw('conversation_participants.last_activity_at as participant_last_activity_at')
             ->selectRaw('conversation_participants.unread_count as unread_count')
-            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId): void {
                 $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
             })
             ->whereDoesntHave('serviceRequestConversation', fn (Builder $query) => $query->whereNotNull('finished_at'))
             ->where('conversation_participants.is_pinned', true)
-            ->when($participantType === 'contact', function (Builder $query) {
+            ->when($participantType === 'contact', function (Builder $query): void {
                 $query->whereHas('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when($participantType === 'user', function (Builder $query) {
+            ->when($participantType === 'user', function (Builder $query): void {
                 $query->whereDoesntHave('conversationParticipants', fn (Builder $query) => $query->where('participant_type', 'contact'));
             })
-            ->when($confidential !== null, function (Builder $query) use ($confidential) {
+            ->when($confidential !== null, function (Builder $query) use ($confidential): void {
                 $query->where('conversations.is_confidential', $confidential);
             })
             ->tap(new WithCurrentParticipant($user))

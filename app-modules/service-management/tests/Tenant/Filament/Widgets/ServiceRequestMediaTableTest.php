@@ -52,8 +52,8 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-describe('ServiceRequest', function () {
-    test('renders uploaded files', function () {
+describe('ServiceRequest', function (): void {
+    test('renders uploaded files', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -72,7 +72,7 @@ describe('ServiceRequest', function () {
             ->assertCanSeeTableRecords($serviceRequest->getMedia('uploads'));
     });
 
-    test('appends the extension to the display name when the name has none', function () {
+    test('appends the extension to the display name when the name has none', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -92,7 +92,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnStateSet('display_name', 'report.png', record: $media);
     });
 
-    test('does not double the extension when the name already includes it', function () {
+    test('does not double the extension when the name already includes it', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -113,7 +113,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnStateSet('display_name', 'Screenshot.jpg', record: $media);
     });
 
-    test('shows uploader name for a User', function () {
+    test('shows uploader name for a User', function (): void {
         Storage::fake('s3');
 
         $user = User::factory()->create(['name' => 'Jane Doe']);
@@ -135,7 +135,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnStateSet('created_by_name', 'Jane Doe', record: $media);
     });
 
-    test('shows uploader name for a Contact', function () {
+    test('shows uploader name for a Contact', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -163,7 +163,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnStateSet('created_by_name', 'Carol Williams', record: $media);
     });
 
-    test('can search by file name (case-insensitive)', function () {
+    test('can search by file name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -179,8 +179,8 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($mock) => $mock->name === 'Annual-Report');
-        $invoice = $allMedia->first(fn ($mock) => $mock->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($mock): bool => $mock->name === 'Annual-Report');
+        $invoice = $allMedia->first(fn ($mock): bool => $mock->name === 'invoice');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -191,7 +191,7 @@ describe('ServiceRequest', function () {
             ->assertCanNotSeeTableRecords([$invoice]);
     });
 
-    test('can search by User uploader name (case-insensitive)', function () {
+    test('can search by User uploader name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         $userAlice = User::factory()->create(['name' => 'Alice Smith']);
@@ -212,8 +212,8 @@ describe('ServiceRequest', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock): bool => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock): bool => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
@@ -226,7 +226,7 @@ describe('ServiceRequest', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('can search by Contact uploader first name (case-insensitive)', function () {
+    test('can search by Contact uploader first name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -267,7 +267,7 @@ describe('ServiceRequest', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('can search by Contact uploader last name (case-insensitive)', function () {
+    test('can search by Contact uploader last name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -308,7 +308,7 @@ describe('ServiceRequest', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('can search by Contact uploader full name (case-insensitive)', function () {
+    test('can search by Contact uploader full name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -349,7 +349,7 @@ describe('ServiceRequest', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('shows empty state when no uploads exist', function () {
+    test('shows empty state when no uploads exist', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -367,7 +367,7 @@ describe('ServiceRequest', function () {
 
     // Authorization
 
-    test('uploadFile action is visible for a user who can update the service request', function () {
+    test('uploadFile action is visible for a user who can update the service request', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create([
@@ -381,7 +381,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionVisible('uploadFile');
     });
 
-    test('uploadFile action is hidden for a user who cannot update the service request', function () {
+    test('uploadFile action is hidden for a user who cannot update the service request', function (): void {
         actingAs(User::factory()->create());
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -393,7 +393,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionHidden('uploadFile');
     });
 
-    test('delete action is visible for a user who can update the service request', function () {
+    test('delete action is visible for a user who can update the service request', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -413,7 +413,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionVisible('delete', record: $media);
     });
 
-    test('delete action is hidden for a user who cannot update the service request', function () {
+    test('delete action is hidden for a user who cannot update the service request', function (): void {
         Storage::fake('s3');
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -431,7 +431,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionHidden('delete', record: $media);
     });
 
-    test('uploadFile action is hidden for an admin when the service request is closed', function () {
+    test('uploadFile action is hidden for an admin when the service request is closed', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create([
@@ -445,7 +445,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionHidden('uploadFile');
     });
 
-    test('delete action is hidden for an admin when the service request is closed', function () {
+    test('delete action is hidden for an admin when the service request is closed', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -467,7 +467,7 @@ describe('ServiceRequest', function () {
         expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
-    test('a partner admin is granted a registered permission ability via the gate bypass but is still denied by a record-level policy restriction', function () {
+    test('a partner admin is granted a registered permission ability via the gate bypass but is still denied by a record-level policy restriction', function (): void {
         $partnerAdmin = User::factory()->create();
         $partnerAdmin->assignRole(Authenticatable::PARTNER_ADMIN_ROLE);
 
@@ -487,7 +487,7 @@ describe('ServiceRequest', function () {
             ->and($partnerAdmin->can('update', $serviceRequest))->toBeFalse();
     });
 
-    test('a partner admin granted the delete permission via the gate bypass is still denied deleting a service request whose type they do not manage', function () {
+    test('a partner admin granted the delete permission via the gate bypass is still denied deleting a service request whose type they do not manage', function (): void {
         $partnerAdmin = User::factory()->create();
         $partnerAdmin->assignRole(Authenticatable::PARTNER_ADMIN_ROLE);
 
@@ -503,7 +503,7 @@ describe('ServiceRequest', function () {
 
     // Validation
 
-    test('uploadFile action requires a file', function () {
+    test('uploadFile action requires a file', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create([
@@ -522,7 +522,7 @@ describe('ServiceRequest', function () {
         expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
-    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
+    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -543,7 +543,7 @@ describe('ServiceRequest', function () {
         expect($serviceRequest->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
-    test('uploadFile action is disabled once the collection has reached its 6 file limit', function () {
+    test('uploadFile action is disabled once the collection has reached its 6 file limit', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -566,7 +566,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionDisabled('uploadFile');
     });
 
-    test('uploadFile action rejects uploading a new file once the collection has reached its 6 file limit', function () {
+    test('uploadFile action rejects uploading a new file once the collection has reached its 6 file limit', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -602,7 +602,7 @@ describe('ServiceRequest', function () {
 
     // Success
 
-    test('can upload a new file', function () {
+    test('can upload a new file', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -627,7 +627,7 @@ describe('ServiceRequest', function () {
             ->and($media->first()->file_name)->toBe('report.pdf');
     });
 
-    test('uploading a file records a history entry for the timeline', function () {
+    test('uploading a file records a history entry for the timeline', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -654,7 +654,7 @@ describe('ServiceRequest', function () {
             ->and($history->eventTitle())->toBe('File Uploaded');
     });
 
-    test('can delete a file', function () {
+    test('can delete a file', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -683,7 +683,7 @@ describe('ServiceRequest', function () {
         expect(Media::find($media->getKey()))->toBeNull();
     });
 
-    test('deleting a file records a history entry for the timeline', function () {
+    test('deleting a file records a history entry for the timeline', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -713,7 +713,7 @@ describe('ServiceRequest', function () {
             ->and($history->eventTitle())->toBe('File Deleted');
     });
 
-    test('lists files attached to the updates of the service request', function () {
+    test('lists files attached to the updates of the service request', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -753,7 +753,7 @@ describe('ServiceRequest', function () {
             ]);
     });
 
-    test('does not list files attached to the updates of the service request for a user who cannot view service request updates', function () {
+    test('does not list files attached to the updates of the service request for a user who cannot view service request updates', function (): void {
         Storage::fake('s3');
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -775,7 +775,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnVisible('upload_type');
     });
 
-    test('shows the update type of each file', function () {
+    test('shows the update type of each file', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -803,7 +803,7 @@ describe('ServiceRequest', function () {
             ->assertTableColumnStateSet('upload_type', ServiceRequestFileUploadType::Update, record: $updateMedia);
     });
 
-    test('delete action is hidden for a file attached to an update of the service request', function () {
+    test('delete action is hidden for a file attached to an update of the service request', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -823,7 +823,7 @@ describe('ServiceRequest', function () {
             ->assertTableActionHidden('delete', record: $media);
     });
 
-    test('uploading a file records it as a staff upload', function () {
+    test('uploading a file records it as a staff upload', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -846,7 +846,7 @@ describe('ServiceRequest', function () {
         expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::StaffUpload);
     });
 
-    test('does not list files attached to the updates of the service request when the feature flag is inactive', function () {
+    test('does not list files attached to the updates of the service request when the feature flag is inactive', function (): void {
         ServiceRequestFileUploadTypeFeature::deactivate();
 
         asSuperAdmin();
@@ -871,8 +871,8 @@ describe('ServiceRequest', function () {
     });
 });
 
-describe('ServiceRequestUpdate', function () {
-    test('renders uploaded files', function () {
+describe('ServiceRequestUpdate', function (): void {
+    test('renders uploaded files', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -891,7 +891,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertCanSeeTableRecords($serviceRequestUpdate->getMedia('uploads'));
     });
 
-    test('shows uploader name for a Contact', function () {
+    test('shows uploader name for a Contact', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -919,7 +919,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertTableColumnStateSet('created_by_name', 'Carol Williams', record: $media);
     });
 
-    test('can search by file name (case-insensitive)', function () {
+    test('can search by file name (case-insensitive)', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -935,8 +935,8 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $meetingNotes = $allMedia->first(fn ($mock) => $mock->name === 'Meeting-Notes');
-        $screenshot = $allMedia->first(fn ($mock) => $mock->name === 'screenshot');
+        $meetingNotes = $allMedia->first(fn ($mock): bool => $mock->name === 'Meeting-Notes');
+        $screenshot = $allMedia->first(fn ($mock): bool => $mock->name === 'screenshot');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequestUpdate,
@@ -947,7 +947,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertCanNotSeeTableRecords([$screenshot]);
     });
 
-    test('can search by User uploader name', function () {
+    test('can search by User uploader name', function (): void {
         Storage::fake('s3');
 
         $userAlice = User::factory()->create(['name' => 'Alice Smith']);
@@ -968,8 +968,8 @@ describe('ServiceRequestUpdate', function () {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequestUpdate->getMedia('uploads');
-        $aliceMedia = $allMedia->first(fn ($mock) => $mock->name === 'alice-file');
-        $bobMedia = $allMedia->first(fn ($mock) => $mock->name === 'bob-file');
+        $aliceMedia = $allMedia->first(fn ($mock): bool => $mock->name === 'alice-file');
+        $bobMedia = $allMedia->first(fn ($mock): bool => $mock->name === 'bob-file');
 
         asSuperAdmin();
 
@@ -982,7 +982,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('can search by Contact uploader name', function () {
+    test('can search by Contact uploader name', function (): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -1023,7 +1023,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertCanNotSeeTableRecords([$bobMedia]);
     });
 
-    test('shows empty state when no uploads exist', function () {
+    test('shows empty state when no uploads exist', function (): void {
         asSuperAdmin();
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
@@ -1039,7 +1039,7 @@ describe('ServiceRequestUpdate', function () {
             ->toBe('No uploads');
     });
 
-    test('uploadFile action is hidden for an admin when the parent service request is closed', function () {
+    test('uploadFile action is hidden for an admin when the parent service request is closed', function (): void {
         asSuperAdmin();
 
         $serviceRequestUpdate = ServiceRequestUpdate::factory()->create([
@@ -1055,7 +1055,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertTableActionHidden('uploadFile');
     });
 
-    test('delete action is hidden for an admin when the parent service request is closed', function () {
+    test('delete action is hidden for an admin when the parent service request is closed', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -1079,7 +1079,7 @@ describe('ServiceRequestUpdate', function () {
         expect(Media::find($media->getKey()))->not()->toBeNull();
     });
 
-    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function () {
+    test('uploadFile action rejects a file type that is not accepted by the uploads collection', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -1102,7 +1102,7 @@ describe('ServiceRequestUpdate', function () {
         expect($serviceRequestUpdate->fresh()->getMedia('uploads'))->toHaveCount(0);
     });
 
-    test('uploading a file to a service request update does not record a history entry on the parent service request', function () {
+    test('uploading a file to a service request update does not record a history entry on the parent service request', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -1129,7 +1129,7 @@ describe('ServiceRequestUpdate', function () {
         expect($history)->toBeNull();
     });
 
-    test('deleting a file from a service request update does not record a history entry on the parent service request', function () {
+    test('deleting a file from a service request update does not record a history entry on the parent service request', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');
@@ -1159,7 +1159,7 @@ describe('ServiceRequestUpdate', function () {
         expect($history)->toBeNull();
     });
 
-    test('does not show the update type column', function () {
+    test('does not show the update type column', function (): void {
         asSuperAdmin();
 
         Livewire::test(ServiceRequestMediaTable::class, [
@@ -1169,7 +1169,7 @@ describe('ServiceRequestUpdate', function () {
             ->assertTableColumnHidden('upload_type');
     });
 
-    test('uploading a file to a service request update does not record an upload type', function () {
+    test('uploading a file to a service request update does not record an upload type', function (): void {
         asSuperAdmin();
 
         Storage::fake('s3');

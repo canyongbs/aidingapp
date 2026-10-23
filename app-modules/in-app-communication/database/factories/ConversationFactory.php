@@ -63,7 +63,7 @@ class ConversationFactory extends Factory
 
     public function direct(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'type' => ConversationType::Direct,
             'name' => null,
         ]);
@@ -71,7 +71,7 @@ class ConversationFactory extends Factory
 
     public function channel(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'type' => ConversationType::Channel,
             'name' => $this->faker->words(3, true),
         ]);
@@ -79,7 +79,7 @@ class ConversationFactory extends Factory
 
     public function confidential(?ConversationEphemeralPeriod $ephemeralPeriod = ConversationEphemeralPeriod::TwentyFourHours): static
     {
-        return $this->channel()->state(fn (array $attributes) => [
+        return $this->channel()->state(fn (array $attributes): array => [
             'is_private' => true,
             'is_confidential' => true,
             'ephemeral_period' => $ephemeralPeriod,

@@ -85,7 +85,7 @@ class CreatePipeline extends CreateRecord
                             ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->default(
-                        collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case) => [
+                        collect(PipelineStageClassification::cases())->map(fn (PipelineStageClassification $case): array => [
                             'name' => $case->getLabel(),
                             'classification' => $case->value,
                         ])->all()

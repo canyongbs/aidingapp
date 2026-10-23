@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Jobs\DispatchEndServiceRequestConversationsForEa
 use AidingApp\ServiceManagement\Jobs\EndServiceRequestConversations;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `EndServiceRequestConversations` for each eligible tenant', function () {
+it('dispatches `EndServiceRequestConversations` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchEndServiceRequestConversationsForEachTenant())->handle();

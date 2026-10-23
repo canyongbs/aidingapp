@@ -45,7 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -60,7 +60,7 @@ it('is gated with proper access control', function () {
     get(AiResolution::getUrl())->assertSuccessful();
 });
 
-it('grants access to a user belonging to a department that has been granted access', function () {
+it('grants access to a user belonging to a department that has been granted access', function (): void {
     $department = Department::factory()->create();
 
     $user = User::factory()->create(['department_id' => $department->getKey()]);

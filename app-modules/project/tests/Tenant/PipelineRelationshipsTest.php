@@ -40,7 +40,7 @@ use AidingApp\Project\Models\ProjectMilestone;
 
 use function Tests\asSuperAdmin;
 
-it('has many milestones', function () {
+it('has many milestones', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

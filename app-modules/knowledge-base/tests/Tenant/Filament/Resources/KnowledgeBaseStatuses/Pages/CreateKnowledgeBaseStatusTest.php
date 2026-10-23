@@ -53,7 +53,7 @@ use function PHPUnit\Framework\assertCount;
 
 // Permission Tests
 
-test('CreateKnowledgeBaseStatus is gated with proper access control', function () {
+test('CreateKnowledgeBaseStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -84,7 +84,7 @@ test('CreateKnowledgeBaseStatus is gated with proper access control', function (
     assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseStatus is gated with proper feature access control', function () {
+test('CreateKnowledgeBaseStatus is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -125,7 +125,7 @@ test('CreateKnowledgeBaseStatus is gated with proper feature access control', fu
     assertDatabaseHas(KnowledgeBaseStatus::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate name', function () {
+test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate name', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');
@@ -142,7 +142,7 @@ test('CreateKnowledgeBaseStatus prevents creating a case-insensitive duplicate n
     assertCount(1, KnowledgeBaseStatus::all());
 });
 
-test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status', function () {
+test('CreateKnowledgeBaseStatus allows reusing the name of a soft deleted status', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('settings.view-any');
     $user->givePermissionTo('settings.create');

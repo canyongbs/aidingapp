@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('only shows the associate contact action to a user with the organization.update permission', function () {
+it('only shows the associate contact action to a user with the organization.update permission', function (): void {
     $organization = Organization::factory()->create();
 
     $user = User::factory()

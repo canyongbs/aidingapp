@@ -107,7 +107,7 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
             ->selectRaw('date_trunc(\'month\', created_at) as month')
             ->selectRaw('COUNT(*) as total')
             ->when(
-                $startDate && $endDate,
+                $startDate instanceof Carbon && $endDate instanceof Carbon,
                 fn ($query) => $query->whereBetween('created_at', [$startDate, $endDate]),
                 fn ($query) => $query->where('created_at', '>', now()->subYearNoOverflow())
             )
@@ -117,12 +117,12 @@ class ServiceRequestsOverTimeBarChart extends BarChartReportWidget
 
         $serviceRequestTotalPerMonthArray = [];
 
-        $monthRange = ($startDate && $endDate)
+        $monthRange = ($startDate instanceof Carbon && $endDate instanceof Carbon)
             ? $this->getMonthRangeFromDates($startDate, $endDate)
             : range(11, 0);
 
         foreach ($monthRange as $monthOffset) {
-            $month = ($startDate && $endDate)
+            $month = ($startDate instanceof Carbon && $endDate instanceof Carbon)
                 ? $startDate->copy()->addMonthsNoOverflow($monthOffset)
                 : Carbon::now()->subMonthsNoOverflow($monthOffset);
 

@@ -45,13 +45,13 @@ use function Pest\Laravel\postJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
 });
 
-it('stores an encrypted secret and returns only its id', function () {
+it('stores an encrypted secret and returns only its id', function (): void {
     $contact = Contact::factory()->create();
 
     $response = actingAs($contact, 'contact')->postJson(
@@ -71,7 +71,7 @@ it('stores an encrypted secret and returns only its id', function () {
         ->and($secret->related_id)->toBeNull();
 });
 
-it('denies unauthenticated secret storage', function () {
+it('denies unauthenticated secret storage', function (): void {
     postJson(
         route('api.portal.service-request.store-secret'),
         ['value' => 'service-request-password'],
@@ -80,7 +80,7 @@ it('denies unauthenticated secret storage', function () {
     expect(Secret::query()->exists())->toBeFalse();
 });
 
-it('replaces an unattached secret owned by the contact', function () {
+it('replaces an unattached secret owned by the contact', function (): void {
     $contact = Contact::factory()->create();
     $previousSecret = Secret::factory()->for($contact, 'author')->create();
 
@@ -102,7 +102,7 @@ it('replaces an unattached secret owned by the contact', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('retries replacing an unattached secret with the same id', function () {
+it('retries replacing an unattached secret with the same id', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -122,7 +122,7 @@ it('retries replacing an unattached secret with the same id', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('clears an unattached secret owned by the contact', function () {
+it('clears an unattached secret owned by the contact', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -139,7 +139,7 @@ it('clears an unattached secret owned by the contact', function () {
     expect($secret->fresh())->toBeNull();
 });
 
-it('retries clearing an unattached secret', function () {
+it('retries clearing an unattached secret', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -158,7 +158,7 @@ it('retries clearing an unattached secret', function () {
     expect($secret->fresh())->toBeNull();
 });
 
-it('does not replace a secret owned by another contact', function () {
+it('does not replace a secret owned by another contact', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for(Contact::factory(), 'author')->create();
 
@@ -174,7 +174,7 @@ it('does not replace a secret owned by another contact', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('does not replace a secret that is already attached', function () {
+it('does not replace a secret that is already attached', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()
         ->for($contact, 'author')
@@ -193,7 +193,7 @@ it('does not replace a secret that is already attached', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('rate limits secret storage per contact', function () {
+it('rate limits secret storage per contact', function (): void {
     $contact = Contact::factory()->create();
 
     foreach (range(1, 30) as $attempt) {

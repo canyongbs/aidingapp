@@ -73,7 +73,7 @@ $loginAsUserWithProjectViewPermissions = function (): User {
     return $user;
 };
 
-it('cannot render without proper permission', function () {
+it('cannot render without proper permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -86,7 +86,7 @@ it('cannot render without proper permission', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission', function () use ($loginAsUserWithProjectViewPermissions) {
+it('can render with proper permission', function () use ($loginAsUserWithProjectViewPermissions): void {
     $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
@@ -97,7 +97,7 @@ it('can render with proper permission', function () use ($loginAsUserWithProject
         ->assertSuccessful();
 });
 
-it('cannot render an archived project', function () use ($loginAsUserWithProjectViewPermissions) {
+it('cannot render an archived project', function () use ($loginAsUserWithProjectViewPermissions): void {
     $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
@@ -109,7 +109,7 @@ it('cannot render an archived project', function () use ($loginAsUserWithProject
         ->assertNotFound();
 });
 
-it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project', function () {
+it('can render if logged in user is a superadmin, the creator, a manager, or an auditor of the project', function (): void {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
@@ -198,7 +198,7 @@ it('can render if logged in user is a superadmin, the creator, a manager, or an 
         ->assertSuccessful();
 });
 
-it('can view a record', function () use ($loginAsUserWithProjectViewPermissions) {
+it('can view a record', function () use ($loginAsUserWithProjectViewPermissions): void {
     $loginAsUserWithProjectViewPermissions();
 
     $project = Project::factory()->create();
@@ -209,8 +209,8 @@ it('can view a record', function () use ($loginAsUserWithProjectViewPermissions)
         ->assertHasNoErrors();
 });
 
-describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
-    it('shows each tab the user can view', function (ProjectTab $tab) use ($loginAsUserWithProjectViewPermissions) {
+describe('tabs', function () use ($loginAsUserWithProjectViewPermissions): void {
+    it('shows each tab the user can view', function (ProjectTab $tab) use ($loginAsUserWithProjectViewPermissions): void {
         $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
@@ -219,7 +219,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
             ->assertSee($tab->getLabel());
     })->with(ProjectTab::cases());
 
-    it('defaults to the access tab when no tab is requested', function () use ($loginAsUserWithProjectViewPermissions) {
+    it('defaults to the access tab when no tab is requested', function () use ($loginAsUserWithProjectViewPermissions): void {
         $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
@@ -228,7 +228,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('falls back to the access tab when the requested tab is invalid', function () use ($loginAsUserWithProjectViewPermissions) {
+    it('falls back to the access tab when the requested tab is invalid', function () use ($loginAsUserWithProjectViewPermissions): void {
         $loginAsUserWithProjectViewPermissions();
 
         $project = Project::factory()->create();
@@ -240,7 +240,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
             ->assertSet('tab', ProjectTab::Access->value);
     });
 
-    it('denies access without the `project.view-any` permission even when the user can view the project', function () {
+    it('denies access without the `project.view-any` permission even when the user can view the project', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('project.*.view');
 
@@ -258,7 +258,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
             ->assertForbidden();
     });
 
-    it('does not make the files tab available when project management is inactive', function () {
+    it('does not make the files tab available when project management is inactive', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->projectManagement = false;
         $settings->save();
@@ -270,7 +270,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
         expect(ProjectTab::Files->canView($project))->toBeFalse();
     });
 
-    it('renders only the active tab widget', function (ProjectTab $tab) {
+    it('renders only the active tab widget', function (ProjectTab $tab): void {
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -296,7 +296,7 @@ describe('tabs', function () use ($loginAsUserWithProjectViewPermissions) {
     })->with(ProjectTab::cases());
 });
 
-it('can render the project access widget and mount the manage access action', function () {
+it('can render the project access widget and mount the manage access action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -309,7 +309,7 @@ it('can render the project access widget and mount the manage access action', fu
         ->assertHasNoErrors();
 });
 
-it('can list pipeline entries in the project work pipeline widget', function () {
+it('can list pipeline entries in the project work pipeline widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -328,7 +328,7 @@ it('can list pipeline entries in the project work pipeline widget', function () 
         ->assertCanSeeTableRecords($entries);
 });
 
-it('hides archived pipeline entries in the project work pipeline widget', function () {
+it('hides archived pipeline entries in the project work pipeline widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -349,7 +349,7 @@ it('hides archived pipeline entries in the project work pipeline widget', functi
         ->assertCanNotSeeTableRecords([$archived]);
 });
 
-it('can create a milestone through the project milestones widget create action', function () {
+it('can create a milestone through the project milestones widget create action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -376,7 +376,7 @@ it('can create a milestone through the project milestones widget create action',
         ->and($created->pipeline_id)->toBe($pipeline->getKey());
 });
 
-it('hides the create milestone action when the project has no pipeline', function () {
+it('hides the create milestone action when the project has no pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -387,7 +387,7 @@ it('hides the create milestone action when the project has no pipeline', functio
         ->assertTableActionHidden('createMilestone');
 });
 
-it('shows the create milestone action to users who can update the project', function () {
+it('shows the create milestone action to users who can update the project', function (): void {
     $manager = User::factory()->create();
     $manager->givePermissionTo('project.view-any');
     $manager->givePermissionTo('project.*.view');
@@ -409,7 +409,7 @@ it('shows the create milestone action to users who can update the project', func
         ->assertTableActionVisible('createMilestone');
 });
 
-it('hides the create milestone action from users who cannot update the project', function () {
+it('hides the create milestone action from users who cannot update the project', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
@@ -429,7 +429,7 @@ it('hides the create milestone action from users who cannot update the project',
         ->assertTableActionHidden('createMilestone');
 });
 
-it('auto-selects the first pipeline on mount in the project work pipeline widget', function () {
+it('auto-selects the first pipeline on mount in the project work pipeline widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -445,7 +445,7 @@ it('auto-selects the first pipeline on mount in the project work pipeline widget
         ->assertSet('selectedPipelineId', $pipeline->getKey());
 });
 
-it('only shows pipeline entries that belong to the selected pipeline', function () {
+it('only shows pipeline entries that belong to the selected pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -479,7 +479,7 @@ it('only shows pipeline entries that belong to the selected pipeline', function 
         ->assertCanNotSeeTableRecords($entriesA);
 });
 
-it('displays a pipeline entry start date in the project work pipeline widget', function () {
+it('displays a pipeline entry start date in the project work pipeline widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -498,7 +498,7 @@ it('displays a pipeline entry start date in the project work pipeline widget', f
         ->assertTableColumnStateSet('start_date', $entry->start_date, $entry);
 });
 
-it('displays a pipeline entry created by and customer visibility in the project work pipeline widget', function () {
+it('displays a pipeline entry created by and customer visibility in the project work pipeline widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -518,7 +518,7 @@ it('displays a pipeline entry created by and customer visibility in the project 
         ->assertTableColumnStateSet('is_visible_to_guests', true, $entry);
 });
 
-it('can switch the selected pipeline through the select pipeline action', function () {
+it('can switch the selected pipeline through the select pipeline action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -544,7 +544,7 @@ it('can switch the selected pipeline through the select pipeline action', functi
         ->assertSet('selectedPipelineId', $pipelineB->getKey());
 });
 
-it('rejects selecting a pipeline that belongs to another project', function () {
+it('rejects selecting a pipeline that belongs to another project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -570,7 +570,7 @@ it('rejects selecting a pipeline that belongs to another project', function () {
         ->assertSet('selectedPipelineId', $pipeline->getKey());
 });
 
-it('rejects selecting an archived pipeline', function () {
+it('rejects selecting an archived pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -597,7 +597,7 @@ it('rejects selecting an archived pipeline', function () {
         ->assertSet('selectedPipelineId', $pipeline->getKey());
 });
 
-it('can create a pipeline through the create pipeline action', function () {
+it('can create a pipeline through the create pipeline action', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     asSuperAdmin();
@@ -629,7 +629,7 @@ it('can create a pipeline through the create pipeline action', function () {
     $undoRepeaterFake();
 });
 
-it('can create a pipeline entry through the widget header create action', function () {
+it('can create a pipeline entry through the widget header create action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -660,7 +660,7 @@ it('can create a pipeline entry through the widget header create action', functi
     )->toBeTrue();
 });
 
-it('displays milestone progress from completed pipeline tasks', function () {
+it('displays milestone progress from completed pipeline tasks', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -688,7 +688,7 @@ it('displays milestone progress from completed pipeline tasks', function () {
         ->assertSee('Progress: 50%');
 });
 
-it('groups unassigned pipeline tasks after milestone groups', function () {
+it('groups unassigned pipeline tasks after milestone groups', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -712,7 +712,7 @@ it('groups unassigned pipeline tasks after milestone groups', function () {
         ->assertSeeInOrder([$milestone->title, 'No Associated Milestone']);
 });
 
-it('shows a manage milestone action when the user can manage the project', function () {
+it('shows a manage milestone action when the user can manage the project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -734,7 +734,7 @@ it('shows a manage milestone action when the user can manage the project', funct
         ->assertDontSee('Manage');
 });
 
-it('does not show a manage milestone action when the user cannot manage the project', function () {
+it('does not show a manage milestone action when the user cannot manage the project', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
@@ -759,7 +759,7 @@ it('does not show a manage milestone action when the user cannot manage the proj
         ->assertDontSeeHtml("wire:click=\"mountAction('manageMilestone', { milestone: '{$milestone->getKey()}' })\"");
 });
 
-it('renders the milestone title as plain text and denies the manage milestone action for view-only users', function () {
+it('renders the milestone title as plain text and denies the manage milestone action for view-only users', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
@@ -784,7 +784,7 @@ it('renders the milestone title as plain text and denies the manage milestone ac
         ->assertActionHidden(TestAction::make('manageMilestone')->arguments(['milestone' => $milestone->getKey()]));
 });
 
-it('renders a clean aria-label for the collapsible milestone group toggle instead of leaking the manage action markup', function () {
+it('renders a clean aria-label for the collapsible milestone group toggle instead of leaking the manage action markup', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -804,7 +804,7 @@ it('renders a clean aria-label for the collapsible milestone group toggle instea
         ->assertSeeHtml("aria-label=\"{$milestone->title}\"");
 });
 
-it('does not re-authorize milestone updates per milestone group row', function () {
+it('does not re-authorize milestone updates per milestone group row', function (): void {
     $manager = User::factory()->create();
     $manager->givePermissionTo('project.view-any');
     $manager->givePermissionTo('project.*.view');
@@ -846,7 +846,7 @@ it('does not re-authorize milestone updates per milestone group row', function (
     expect($milestoneUpdateChecks)->toBe(0);
 });
 
-it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
+it('deletes a milestone and leaves its pipeline tasks unassigned', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -873,7 +873,7 @@ it('deletes a milestone and leaves its pipeline tasks unassigned', function () {
         ->and($entry->fresh()->project_milestone_id)->toBeNull();
 });
 
-it('shows the delete milestone action to users who can manage the project', function () {
+it('shows the delete milestone action to users who can manage the project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -888,7 +888,7 @@ it('shows the delete milestone action to users who can manage the project', func
         ]);
 });
 
-it('hides the delete milestone action from users who cannot manage the project', function () {
+it('hides the delete milestone action from users who cannot manage the project', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
@@ -907,7 +907,7 @@ it('hides the delete milestone action from users who cannot manage the project',
         ]);
 });
 
-it('does not show a soft-deleted milestone as a phantom empty group after the table resets', function () {
+it('does not show a soft-deleted milestone as a phantom empty group after the table resets', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -932,7 +932,7 @@ it('does not show a soft-deleted milestone as a phantom empty group after the ta
         ->assertDontSee('No tasks yet');
 });
 
-it('shows milestones that have no pipeline tasks as an empty group', function () {
+it('shows milestones that have no pipeline tasks as an empty group', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -949,7 +949,7 @@ it('shows milestones that have no pipeline tasks as an empty group', function ()
         ->assertTableColumnStateSet('name', 'No tasks yet', record: $milestone->getKey());
 });
 
-it('only shows empty milestones that belong to the selected pipeline', function () {
+it('only shows empty milestones that belong to the selected pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -982,7 +982,7 @@ it('only shows empty milestones that belong to the selected pipeline', function 
         ->assertDontSee($selectedPipelineMilestone->title);
 });
 
-it('disables the name column click for placeholder rows but keeps it clickable for real entries', function () {
+it('disables the name column click for placeholder rows but keeps it clickable for real entries', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1002,7 +1002,7 @@ it('disables the name column click for placeholder rows but keeps it clickable f
         ->assertTableColumnDoesNotHaveExtraAttributes('name', ['class' => 'ps-6 underline'], $milestone);
 });
 
-it('shows the inbox icon for milestone placeholder rows and the clipboard icon for real tasks', function () {
+it('shows the inbox icon for milestone placeholder rows and the clipboard icon for real tasks', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1028,7 +1028,7 @@ it('shows the inbox icon for milestone placeholder rows and the clipboard icon f
     expect($column->record($entryRecord)->getIcon($entryRecord))->toBe('heroicon-o-clipboard-document');
 });
 
-it('does not show an archived or soft-deleted milestone as an empty group', function () {
+it('does not show an archived or soft-deleted milestone as an empty group', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1050,7 +1050,7 @@ it('does not show an archived or soft-deleted milestone as an empty group', func
         ->assertDontSee('Deleted Milestone');
 });
 
-it('keeps placeholder milestone rows visible when the classification filter excludes real entries', function () {
+it('keeps placeholder milestone rows visible when the classification filter excludes real entries', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1074,7 +1074,7 @@ it('keeps placeholder milestone rows visible when the classification filter excl
         ->assertTableColumnStateSet('name', 'No tasks yet', record: $emptyMilestone->getKey());
 });
 
-it('updates a milestone from the manage slide-over', function () {
+it('updates a milestone from the manage slide-over', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1100,7 +1100,7 @@ it('updates a milestone from the manage slide-over', function () {
     expect($milestone->fresh()->title)->toBe('New Title');
 });
 
-it('clears related milestones, assets, and service requests on the widget edit action when type is set to none', function () {
+it('clears related milestones, assets, and service requests on the widget edit action when type is set to none', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1143,7 +1143,7 @@ it('clears related milestones, assets, and service requests on the widget edit a
     expect($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
-it('shows the header create entry action once a pipeline is selected even without entries', function () {
+it('shows the header create entry action once a pipeline is selected even without entries', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1160,7 +1160,7 @@ it('shows the header create entry action once a pipeline is selected even withou
         ->assertSee('Add Pipeline Task');
 });
 
-it('shows the header create entry action when the pipeline has a milestone but no entries', function () {
+it('shows the header create entry action when the pipeline has a milestone but no entries', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1178,7 +1178,7 @@ it('shows the header create entry action when the pipeline has a milestone but n
         ->assertTableActionVisible('createEntry');
 });
 
-it('shows the empty state when the project has no pipelines', function () {
+it('shows the empty state when the project has no pipelines', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1191,7 +1191,7 @@ it('shows the empty state when the project has no pipelines', function () {
         ->assertSee('No pipeline selected');
 });
 
-it('shows the kanban header action once a pipeline is selected and links to the entries page in kanban mode', function () {
+it('shows the kanban header action once a pipeline is selected and links to the entries page in kanban mode', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1211,7 +1211,7 @@ it('shows the kanban header action once a pipeline is selected and links to the 
         ]));
 });
 
-it('hides the kanban header action when the project has no pipelines', function () {
+it('hides the kanban header action when the project has no pipelines', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1222,7 +1222,7 @@ it('hides the kanban header action when the project has no pipelines', function 
         ->assertTableActionHidden('kanban');
 });
 
-it('can list files in the project files widget', function () {
+it('can list files in the project files widget', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1235,7 +1235,7 @@ it('can list files in the project files widget', function () {
         ->assertCanSeeTableRecords($files);
 });
 
-it('shows the manage files action to users who can update the project', function () {
+it('shows the manage files action to users who can update the project', function (): void {
     $manager = User::factory()->create();
     $manager->givePermissionTo('project.view-any');
     $manager->givePermissionTo('project.*.view');
@@ -1252,7 +1252,7 @@ it('shows the manage files action to users who can update the project', function
         ->assertTableActionVisible('manageFiles');
 });
 
-it('hides the manage files action from users who cannot update the project', function () {
+it('hides the manage files action from users who cannot update the project', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('project.view-any');
     $user->givePermissionTo('project.*.view');
@@ -1267,7 +1267,7 @@ it('hides the manage files action from users who cannot update the project', fun
         ->assertTableActionHidden('manageFiles');
 });
 
-it('calculates progress as 0 when the project has no pipeline entries', function () {
+it('calculates progress as 0 when the project has no pipeline entries', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1284,7 +1284,7 @@ it('calculates progress as 0 when the project has no pipeline entries', function
         ->assertSee('Progress: 0%');
 });
 
-it('calculates progress as the percentage of pipeline entries with a complete stage classification', function () {
+it('calculates progress as the percentage of pipeline entries with a complete stage classification', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1308,7 +1308,7 @@ it('calculates progress as the percentage of pipeline entries with a complete st
         ->assertSee('Progress: 25%');
 });
 
-it('only counts pipeline entries belonging to the given project when calculating progress', function () {
+it('only counts pipeline entries belonging to the given project when calculating progress', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -1332,7 +1332,7 @@ it('only counts pipeline entries belonging to the given project when calculating
         ->assertSee('Progress: 100%');
 });
 
-it('gates the project access widget behind project view permissions', function () {
+it('gates the project access widget behind project view permissions', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -1346,7 +1346,7 @@ it('gates the project access widget behind project view permissions', function (
     expect(ProjectAccessWidget::canView())->toBeTrue();
 });
 
-it('gates the project files widget behind project view permissions', function () {
+it('gates the project files widget behind project view permissions', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -1360,7 +1360,7 @@ it('gates the project files widget behind project view permissions', function ()
     expect(ProjectFilesWidget::canView())->toBeTrue();
 });
 
-it('gates the project stats widget behind project view permissions', function () {
+it('gates the project stats widget behind project view permissions', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);

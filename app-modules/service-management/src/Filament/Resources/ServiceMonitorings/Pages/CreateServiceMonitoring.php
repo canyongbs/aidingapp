@@ -110,7 +110,7 @@ class CreateServiceMonitoring extends CreateRecord
                         TextEntry::make('helperText')
                             ->hiddenLabel()
                             ->state('Spaces may be used within a string. Use quotes when a string contains a comma or double quotes.')
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->columnSpanFull(),
                         TextInput::make('should_contain')
                             ->label('Should Contain')
@@ -118,7 +118,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_not_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more required strings separated by commas. Every string must appear in the response. Matching is case-insensitive.'),
                         TextInput::make('should_not_contain')
                             ->label('Should Not Contain')
@@ -126,7 +126,7 @@ class CreateServiceMonitoring extends CreateRecord
                                 ...($get('monitor_type') === MonitorType::KeywordMatch ? ['required_without:data.should_contain'] : []),
                                 new ValidServiceMonitoringKeywordValues(),
                             ])
-                            ->visible(fn (Get $get) => $get('monitor_type') === MonitorType::KeywordMatch)
+                            ->visible(fn (Get $get): bool => $get('monitor_type') === MonitorType::KeywordMatch)
                             ->hintIcon('heroicon-m-question-mark-circle', 'Enter one or more prohibited strings separated by commas. The check fails if any string appears in the response. Matching is case-insensitive.'),
                         SuccessfulStatusCodesSelect::make(),
                         MaxLatencyToggle::make(),

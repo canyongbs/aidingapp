@@ -47,7 +47,7 @@ use function Pest\Laravel\assertDatabaseHas;
 
 beforeEach(fn () => Event::fake());
 
-it('creates a direct message conversation between two users', function () {
+it('creates a direct message conversation between two users', function (): void {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -78,7 +78,7 @@ it('creates a direct message conversation between two users', function () {
     ]);
 });
 
-it('returns existing direct conversation if one already exists', function () {
+it('returns existing direct conversation if one already exists', function (): void {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -101,7 +101,7 @@ it('returns existing direct conversation if one already exists', function () {
     expect($secondConversation->getKey())->toBe($firstConversation->getKey());
 });
 
-it('creates a channel conversation with creator as manager', function () {
+it('creates a channel conversation with creator as manager', function (): void {
     $creator = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
@@ -140,7 +140,7 @@ it('creates a channel conversation with creator as manager', function () {
     ]);
 });
 
-it('creates a public channel when `isPrivate` is false', function () {
+it('creates a public channel when `isPrivate` is false', function (): void {
     $creator = User::factory()->create();
 
     $conversation = app(CreateConversation::class)(
@@ -154,7 +154,7 @@ it('creates a public channel when `isPrivate` is false', function () {
     expect($conversation->is_private)->toBeFalse();
 });
 
-it('does not duplicate the creator in participants if included in `participantIds`', function () {
+it('does not duplicate the creator in participants if included in `participantIds`', function (): void {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -168,7 +168,7 @@ it('does not duplicate the creator in participants if included in `participantId
     assertDatabaseCount(ConversationParticipant::class, 2);
 });
 
-it('sets `last_activity_at` for all participants when creating a conversation', function () {
+it('sets `last_activity_at` for all participants when creating a conversation', function (): void {
     $creator = User::factory()->create();
     $participant1 = User::factory()->create();
     $participant2 = User::factory()->create();
@@ -200,7 +200,7 @@ it('sets `last_activity_at` for all participants when creating a conversation', 
     expect($participant2Record->last_activity_at)->not()->toBeNull();
 });
 
-it('sets `last_activity_at` for direct message participants', function () {
+it('sets `last_activity_at` for direct message participants', function (): void {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 
@@ -224,7 +224,7 @@ it('sets `last_activity_at` for direct message participants', function () {
     expect($participantRecord->last_activity_at)->not()->toBeNull();
 });
 
-it('creates a confidential channel with an ephemeral period', function () {
+it('creates a confidential channel with an ephemeral period', function (): void {
     $creator = User::factory()->create();
 
     $conversation = app(CreateConversation::class)(
@@ -239,7 +239,7 @@ it('creates a confidential channel with an ephemeral period', function () {
     expect($conversation->is_confidential)->toBeTrue()->and($conversation->ephemeral_period)->toBe(ConversationEphemeralPeriod::TwentyFourHours)->and($conversation->is_private)->toBeTrue();
 });
 
-it('forces a confidential channel to be private even when asked for a public one', function () {
+it('forces a confidential channel to be private even when asked for a public one', function (): void {
     $creator = User::factory()->create();
 
     $conversation = app(CreateConversation::class)(
@@ -254,7 +254,7 @@ it('forces a confidential channel to be private even when asked for a public one
     expect($conversation->is_confidential)->toBeTrue()->and($conversation->is_private)->toBeTrue();
 });
 
-it('ignores the ephemeral period when the channel is not confidential', function () {
+it('ignores the ephemeral period when the channel is not confidential', function (): void {
     $creator = User::factory()->create();
 
     $conversation = app(CreateConversation::class)(
@@ -269,7 +269,7 @@ it('ignores the ephemeral period when the channel is not confidential', function
     expect($conversation->is_confidential)->toBeFalse()->and($conversation->ephemeral_period)->toBeNull();
 });
 
-it('does not make a direct message confidential', function () {
+it('does not make a direct message confidential', function (): void {
     $creator = User::factory()->create();
     $participant = User::factory()->create();
 

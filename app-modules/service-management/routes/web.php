@@ -48,9 +48,9 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('web')
     ->prefix('service-request-forms')
     ->name('service-request-forms.')
-    ->group(function () {
+    ->group(function (): void {
         Route::middleware(['auth', EnsureServiceManagementFeatureIsActive::class])
-            ->group(function () {
+            ->group(function (): void {
                 Route::get('/{serviceRequestForm}/preview', ServiceRequestFormPreviewController::class)
                     ->name('preview');
 

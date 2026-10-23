@@ -145,7 +145,7 @@ class PipelineEntryForm
                 ->default('none')
                 ->inline()
                 ->live()
-                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
+                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record): void {
                     $state = $record?->assets()->exists();
 
                     if ($state) {
@@ -155,7 +155,7 @@ class PipelineEntryForm
                     }
                 })
                 ->dehydrated(false)
-                ->afterStateUpdated(function (?string $state, Set $set) {
+                ->afterStateUpdated(function (?string $state, Set $set): void {
                     if ($state === 'none') {
                         $set('assets', []);
                     }
@@ -177,7 +177,7 @@ class PipelineEntryForm
                 ->default('none')
                 ->inline()
                 ->live()
-                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record) {
+                ->afterStateHydrated(function (Set $set, ?PipelineEntry $record): void {
                     $state = $record?->serviceRequests()->exists();
 
                     if ($state) {
@@ -187,7 +187,7 @@ class PipelineEntryForm
                     }
                 })
                 ->dehydrated(false)
-                ->afterStateUpdated(function (?string $state, Set $set) {
+                ->afterStateUpdated(function (?string $state, Set $set): void {
                     if ($state === 'none') {
                         $set('serviceRequests', []);
                     }

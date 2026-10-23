@@ -72,7 +72,7 @@ class ListAdvisorySeverities extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records): void {
                             /** @var Collection<int, AdvisorySeverity> $records */
                             $deletedAdvisorySeveritiesCount = AdvisorySeverity::query()
                                 ->whereKey($records)

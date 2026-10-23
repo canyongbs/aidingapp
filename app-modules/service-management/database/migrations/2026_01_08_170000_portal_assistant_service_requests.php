@@ -42,12 +42,12 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('portal_assistant_messages', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('portal_assistant_messages', function (Blueprint $table): void {
                 $table->text('internal_content')->nullable();
             });
 
-            Schema::table('service_requests', function (Blueprint $table) {
+            Schema::table('service_requests', function (Blueprint $table): void {
                 $table->boolean('is_draft')->default(false);
                 $table->foreignUuid('portal_assistant_thread_id')
                     ->nullable()
@@ -55,14 +55,14 @@ return new class () extends Migration {
                     ->nullOnDelete();
             });
 
-            Schema::table('portal_assistant_threads', function (Blueprint $table) {
+            Schema::table('portal_assistant_threads', function (Blueprint $table): void {
                 $table->foreignUuid('current_service_request_draft_id')
                     ->nullable()
                     ->constrained('service_requests')
                     ->nullOnDelete();
             });
 
-            Schema::table('service_request_updates', function (Blueprint $table) {
+            Schema::table('service_request_updates', function (Blueprint $table): void {
                 $table->string('update_type')->nullable();
             });
         });
@@ -70,21 +70,21 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_updates', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_updates', function (Blueprint $table): void {
                 $table->dropColumn('update_type');
             });
 
-            Schema::table('portal_assistant_threads', function (Blueprint $table) {
+            Schema::table('portal_assistant_threads', function (Blueprint $table): void {
                 $table->dropConstrainedForeignId('current_service_request_draft_id');
             });
 
-            Schema::table('service_requests', function (Blueprint $table) {
+            Schema::table('service_requests', function (Blueprint $table): void {
                 $table->dropConstrainedForeignId('portal_assistant_thread_id');
                 $table->dropColumn('is_draft');
             });
 
-            Schema::table('portal_assistant_messages', function (Blueprint $table) {
+            Schema::table('portal_assistant_messages', function (Blueprint $table): void {
                 $table->dropColumn('internal_content');
             });
         });

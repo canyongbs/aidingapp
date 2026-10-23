@@ -57,7 +57,7 @@ class ServiceRequestTypeCategoryFactory extends Factory
 
     public function withParent(?string $parentId): self
     {
-        return $this->state(function (array $attributes) use ($parentId) {
+        return $this->state(function (array $attributes) use ($parentId): array {
             return ['parent_id' => $parentId];
         });
     }

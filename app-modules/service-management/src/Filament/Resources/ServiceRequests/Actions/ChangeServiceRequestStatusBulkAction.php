@@ -70,7 +70,7 @@ class ChangeServiceRequestStatusBulkAction
                     ->exists(ServiceRequestStatus::class, 'id')
                     ->required(),
             ])
-            ->action(function (array $data, Collection $records) {
+            ->action(function (array $data, Collection $records): void {
                 $records->loadMissing([
                     'priority',
                     'respondent',
@@ -129,7 +129,7 @@ class ChangeServiceRequestStatusBulkAction
                             return "You don't have permission to update {$count} service requests because you're not a manager of their types.";
                         };
                     })
-                    ->process(function (ServiceRequest $serviceRequest) use ($data) {
+                    ->process(function (ServiceRequest $serviceRequest) use ($data): void {
                         $serviceRequest->status()->associate($data['statusId']);
                         $serviceRequest->save();
                     })

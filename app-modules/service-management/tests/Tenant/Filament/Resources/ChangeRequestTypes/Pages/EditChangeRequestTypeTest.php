@@ -46,7 +46,7 @@ use function Tests\asSuperAdmin;
 
 // UserSelect (userApprovers field) admin-filtering tests
 
-test('userApprovers UserSelect does not show admin users in options by default on EditChangeRequestType', function () {
+test('userApprovers UserSelect does not show admin users in options by default on EditChangeRequestType', function (): void {
     asSuperAdmin();
 
     $changeRequestType = ChangeRequestType::factory()->create();
@@ -62,7 +62,7 @@ test('userApprovers UserSelect does not show admin users in options by default o
         });
 });
 
-test('userApprovers UserSelect shows a pre-selected admin user so they can be deselected on EditChangeRequestType', function () {
+test('userApprovers UserSelect shows a pre-selected admin user so they can be deselected on EditChangeRequestType', function (): void {
     asSuperAdmin();
 
     $changeRequestType = ChangeRequestType::factory()->create();
@@ -77,7 +77,7 @@ test('userApprovers UserSelect shows a pre-selected admin user so they can be de
         });
 });
 
-test('userApprovers UserSelect shows all users when filter_admins_from_selection config is false on EditChangeRequestType', function () {
+test('userApprovers UserSelect shows all users when filter_admins_from_selection config is false on EditChangeRequestType', function (): void {
     Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 

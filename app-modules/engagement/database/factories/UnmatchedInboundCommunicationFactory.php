@@ -77,7 +77,7 @@ class UnmatchedInboundCommunicationFactory extends Factory
 
     public function email(): self
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'type' => EngagementResponseType::Email,
             'sender' => $this->faker->unique()->email(),
             'subject' => $this->faker->sentence(),

@@ -53,10 +53,10 @@ class SearchUsers
         int $limit = 25,
     ): Collection {
         return User::query()
-            ->when(filled($searchTerm), function (Builder $query) use ($searchTerm) {
+            ->when(filled($searchTerm), function (Builder $query) use ($searchTerm): void {
                 $searchTermLower = Str::lower($searchTerm);
 
-                $query->where(function (Builder $query) use ($searchTermLower) {
+                $query->where(function (Builder $query) use ($searchTermLower): void {
                     $query->where(DB::raw('lower(name)'), 'like', "%{$searchTermLower}%")
                         ->orWhere(DB::raw('lower(email)'), 'like', "%{$searchTermLower}%");
                 });

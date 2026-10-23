@@ -48,7 +48,7 @@ trait AttachOverrides
      * @param mixed $id
      * @param bool $touch
      */
-    public function attach($id, array $attributes = [], $touch = true)
+    public function attach($id, array $attributes = [], $touch = true): void
     {
         /** @var Auditable $parentModel */
         $parentModel = $this->getParent();

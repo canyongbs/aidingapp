@@ -43,8 +43,8 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('service_request_notification_automation_email_templates', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('service_request_notification_automation_email_templates', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->string('type');
                 $table->string('role');
@@ -70,7 +70,7 @@ return new class () extends SettingsMigration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             $this->migrator->deleteIfExists('service-request-notification-automation.is_enabled');
             $this->migrator->deleteIfExists('service-request-notification-automation.ai_prompt');
 

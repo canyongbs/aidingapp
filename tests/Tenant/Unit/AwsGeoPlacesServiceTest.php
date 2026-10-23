@@ -40,9 +40,9 @@ use Aws\Result;
 use Illuminate\Support\Facades\Exceptions;
 use Mockery\MockInterface;
 
-it('maps US addresses using Country.Code2 and Region.Code', function () {
+it('maps US addresses using Country.Code2 and Region.Code', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -83,9 +83,9 @@ it('maps US addresses using Country.Code2 and Region.Code', function () {
     expect($results[0]->label)->toBe('123 Main St, Austin, TX, 78701, US');
 });
 
-it('maps Canadian addresses using Region.Code for province', function () {
+it('maps Canadian addresses using Region.Code for province', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -124,9 +124,9 @@ it('maps Canadian addresses using Region.Code for province', function () {
     expect($results[0]->postalCode)->toBe('K1A 0A9');
 });
 
-it('falls back to District for city when Locality is absent in Canadian addresses', function () {
+it('falls back to District for city when Locality is absent in Canadian addresses', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -163,9 +163,9 @@ it('falls back to District for city when Locality is absent in Canadian addresse
     expect($results[0]->country)->toBe('CA');
 });
 
-it('maps Mexican addresses with SubRegion fallback for city', function () {
+it('maps Mexican addresses with SubRegion fallback for city', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -204,9 +204,9 @@ it('maps Mexican addresses with SubRegion fallback for city', function () {
     expect($results[0]->country)->toBe('MX');
 });
 
-it('maps UK addresses with District fallback for city', function () {
+it('maps UK addresses with District fallback for city', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -243,9 +243,9 @@ it('maps UK addresses with District fallback for city', function () {
     expect($results[0]->country)->toBe('GB');
 });
 
-it('falls back to Code3 when Code2 is absent', function () {
+it('falls back to Code3 when Code2 is absent', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -279,9 +279,9 @@ it('falls back to Code3 when Code2 is absent', function () {
     expect($results[0]->state)->toBe('TestState');
 });
 
-it('falls back to Region.Name when Region.Code is absent', function () {
+it('falls back to Region.Name when Region.Code is absent', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -314,9 +314,9 @@ it('falls back to Region.Name when Region.Code is absent', function () {
     expect($results[0]->state)->toBe('SomeProvince');
 });
 
-it('returns empty strings when address fields are missing', function () {
+it('returns empty strings when address fields are missing', function (): void {
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -346,11 +346,11 @@ it('returns empty strings when address fields are missing', function () {
     expect($results[0]->label)->toBe('Sparse Address');
 });
 
-it('reports the failure and returns no results when the client throws', function () {
+it('reports the failure and returns no results when the client throws', function (): void {
     Exceptions::fake();
 
     /** @phpstan-ignore method.notFound */
-    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock) {
+    $client = $this->mock(GeoPlacesClient::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocomplete')
             /** @phpstan-ignore method.notFound */
             ->once()

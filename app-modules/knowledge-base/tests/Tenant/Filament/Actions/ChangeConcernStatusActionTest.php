@@ -44,7 +44,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('is gated by proper access control', function () {
+it('is gated by proper access control', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('knowledge_base_item.view-any');
 

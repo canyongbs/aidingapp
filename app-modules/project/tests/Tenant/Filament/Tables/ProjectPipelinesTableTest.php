@@ -44,11 +44,11 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin(User::factory()->create());
 });
 
-it('excludes archived pipelines from the switcher list', function () {
+it('excludes archived pipelines from the switcher list', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     $archived = Pipeline::factory()->for($project)->create();

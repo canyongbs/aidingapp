@@ -49,7 +49,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('returns all service requests information created in given time range', function () {
+it('returns all service requests information created in given time range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
     $otherDate = now()->subDays(15);
@@ -117,7 +117,7 @@ it('returns all service requests information created in given time range', funct
         ->assertCanNotSeeTableRecords(collect([$otherRequest]));
 });
 
-it('returns all service requests when no date filters are applied', function () {
+it('returns all service requests when no date filters are applied', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 
@@ -158,14 +158,14 @@ it('returns all service requests when no date filters are applied', function () 
         ]));
 });
 
-it('has table an export action', function () {
+it('has table an export action', function (): void {
     Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-export',
         'pageFilters' => [],
     ])->assertTableActionExists(ExportAction::class);
 });
 
-it('can start an export and send a notification', function () {
+it('can start an export and send a notification', function (): void {
     Storage::fake('s3');
 
     actingAs(User::factory()->create());
@@ -178,7 +178,7 @@ it('can start an export and send a notification', function () {
         ->assertNotified();
 });
 
-it('filters records by category using the table-level category filter', function () {
+it('filters records by category using the table-level category filter', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 

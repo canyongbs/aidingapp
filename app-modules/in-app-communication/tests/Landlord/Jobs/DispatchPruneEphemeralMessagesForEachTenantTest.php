@@ -38,7 +38,7 @@ use AidingApp\InAppCommunication\Jobs\DispatchPruneEphemeralMessagesForEachTenan
 use AidingApp\InAppCommunication\Jobs\PruneEphemeralMessages;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `PruneEphemeralMessages` for each eligible tenant', function () {
+it('dispatches `PruneEphemeralMessages` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchPruneEphemeralMessagesForEachTenant())->handle();

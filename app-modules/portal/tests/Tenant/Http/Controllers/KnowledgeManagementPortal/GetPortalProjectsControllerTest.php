@@ -48,7 +48,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -58,7 +58,7 @@ beforeEach(function () {
     $licenseSettings->save();
 });
 
-it('lists directly assigned projects with progress based on non-archived tasks', function () {
+it('lists directly assigned projects with progress based on non-archived tasks', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create([
         'name' => 'Campus Network Upgrade',
@@ -110,7 +110,7 @@ it('lists directly assigned projects with progress based on non-archived tasks',
         ->assertJsonPath('meta.per_page', 10);
 });
 
-it('does not list projects the contact cannot access', function () {
+it('does not list projects the contact cannot access', function (): void {
     $contact = Contact::factory()->create();
     $assignedProject = Project::factory()->create();
     $assignedProject->guestContacts()->attach($contact);
@@ -124,7 +124,7 @@ it('does not list projects the contact cannot access', function () {
         ->assertJsonMissing(['id' => $unassignedProject->getKey()]);
 });
 
-it('paginates assigned projects', function () {
+it('paginates assigned projects', function (): void {
     $contact = Contact::factory()->create();
 
     $projects = collect(range(1, 11))->map(function (int $number) use ($contact): Project {
@@ -150,7 +150,7 @@ it('paginates assigned projects', function () {
         ->assertJsonPath('meta.per_page', 10);
 });
 
-it('does not list archived projects', function () {
+it('does not list archived projects', function (): void {
     $contact = Contact::factory()->create();
     $project = Project::factory()->create();
     $project->guestContacts()->attach($contact);
@@ -163,7 +163,7 @@ it('does not list archived projects', function () {
         ->assertJsonPath('data', []);
 });
 
-it('lists organization projects once when the contact is also a direct guest', function () {
+it('lists organization projects once when the contact is also a direct guest', function (): void {
     $organization = Organization::factory()->create();
     $contact = Contact::factory()->for($organization)->create();
     $project = Project::factory()->create();
@@ -178,11 +178,11 @@ it('lists organization projects once when the contact is also a direct guest', f
         ->assertJsonPath('data.0.id', $project->getKey());
 });
 
-it('requires contact authentication', function () {
+it('requires contact authentication', function (): void {
     getJson(route('api.portal.projects.index'))->assertUnauthorized();
 });
 
-it('denies access when Project Management is not licensed', function () {
+it('denies access when Project Management is not licensed', function (): void {
     $licenseSettings = app(LicenseSettings::class);
     $licenseSettings->data->addons->projectManagement = false;
     $licenseSettings->save();

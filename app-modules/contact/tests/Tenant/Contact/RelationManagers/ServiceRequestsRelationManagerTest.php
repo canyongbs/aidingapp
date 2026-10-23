@@ -60,7 +60,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('ServiceRequestsRelationManager hides the create and edit actions when read only while still listing records', function () {
+test('ServiceRequestsRelationManager hides the create and edit actions when read only while still listing records', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -87,7 +87,7 @@ test('ServiceRequestsRelationManager hides the create and edit actions when read
         ->assertActionVisible(TestAction::make('view')->table($serviceRequest));
 });
 
-test('ServiceRequestsRelationManager shows the create action when not read only', function () {
+test('ServiceRequestsRelationManager shows the create action when not read only', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -103,7 +103,7 @@ test('ServiceRequestsRelationManager shows the create action when not read only'
         ->assertActionVisible(TestAction::make('create')->table());
 });
 
-test('ServiceRequestsRelationManager can list service requests for a contact', function () {
+test('ServiceRequestsRelationManager can list service requests for a contact', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -126,7 +126,7 @@ test('ServiceRequestsRelationManager can list service requests for a contact', f
         ->assertCanSeeTableRecords([$serviceRequest]);
 });
 
-test('ServiceRequestsRelationManager filters service requests by priority', function () {
+test('ServiceRequestsRelationManager filters service requests by priority', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -157,7 +157,7 @@ test('ServiceRequestsRelationManager filters service requests by priority', func
         ->assertCanNotSeeTableRecords([$serviceRequest2]);
 });
 
-test('ServiceRequestsRelationManager filters service requests by status', function () {
+test('ServiceRequestsRelationManager filters service requests by status', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -188,7 +188,7 @@ test('ServiceRequestsRelationManager filters service requests by status', functi
         ->assertCanNotSeeTableRecords([$serviceRequest2]);
 });
 
-test('Only service request types managed by user department are available in type select', function () {
+test('Only service request types managed by user department are available in type select', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -213,12 +213,12 @@ test('Only service request types managed by user department are available in typ
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType): bool {
             $options = $select->getOptions();
 
             return array_key_exists($managedType->getKey(), $options);
         })
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType): bool {
             $options = $select->getOptions();
 
             return ! array_key_exists($unmanagedType->getKey(), $options);
@@ -226,7 +226,7 @@ test('Only service request types managed by user department are available in typ
         ->assertSuccessful();
 });
 
-test('Only service request types where user is a direct manager are available in type select', function () {
+test('Only service request types where user is a direct manager are available in type select', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -249,12 +249,12 @@ test('Only service request types where user is a direct manager are available in
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($managedType): bool {
             $options = $select->getOptions();
 
             return array_key_exists($managedType->getKey(), $options);
         })
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($unmanagedType): bool {
             $options = $select->getOptions();
 
             return ! array_key_exists($unmanagedType->getKey(), $options);
@@ -262,7 +262,7 @@ test('Only service request types where user is a direct manager are available in
         ->assertSuccessful();
 });
 
-test('Super admin can see all service request types', function () {
+test('Super admin can see all service request types', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -279,7 +279,7 @@ test('Super admin can see all service request types', function () {
         'pageClass' => ViewContact::class,
     ])
         ->mountTableAction('create')
-        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($type1, $type2) {
+        ->assertFormFieldExists('type_id', 'mountedActionSchema0', function (Select $select) use ($type1, $type2): bool {
             $options = $select->getOptions();
 
             return array_key_exists($type1->getKey(), $options) && array_key_exists($type2->getKey(), $options);
@@ -287,7 +287,7 @@ test('Super admin can see all service request types', function () {
         ->assertSuccessful();
 });
 
-test('Priority select is populated based on selected type', function () {
+test('Priority select is populated based on selected type', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -312,7 +312,7 @@ test('Priority select is populated based on selected type', function () {
         ->assertSuccessful();
 });
 
-test('Can create a service request for a contact', function () {
+test('Can create a service request for a contact', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -342,7 +342,7 @@ test('Can create a service request for a contact', function () {
     expect($contact->serviceRequests()->first()->respondent_id)->toBe($contact->getKey());
 });
 
-test('Attaches password secrets to a service request created for a contact', function () {
+test('Attaches password secrets to a service request created for a contact', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -408,7 +408,7 @@ test('Attaches password secrets to a service request created for a contact', fun
         ->toBe('service-request-password');
 });
 
-test('Can view a service request', function () {
+test('Can view a service request', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -428,7 +428,7 @@ test('Can view a service request', function () {
         ->assertSuccessful();
 });
 
-test('Can edit a service request', function () {
+test('Can edit a service request', function (): void {
     asSuperAdmin();
 
     $settings = app(LicenseSettings::class);
@@ -459,7 +459,7 @@ test('Can edit a service request', function () {
     expect($serviceRequest->status_id)->toBe($newStatus->getKey());
 });
 
-test('Non-super admin can only see service requests from managed or audited types', function () {
+test('Non-super admin can only see service requests from managed or audited types', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -505,7 +505,7 @@ test('Non-super admin can only see service requests from managed or audited type
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
 });
 
-test('Non-super admin can only see service requests from directly managed or directly audited types', function () {
+test('Non-super admin can only see service requests from directly managed or directly audited types', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -549,7 +549,7 @@ test('Non-super admin can only see service requests from directly managed or dir
         ->assertCanNotSeeTableRecords([$unmanagedServiceRequest]);
 });
 
-test('Non-super admin can see service requests from group-managed and group-audited types', function () {
+test('Non-super admin can see service requests from group-managed and group-audited types', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -588,8 +588,8 @@ test('Non-super admin can see service requests from group-managed and group-audi
     ])->assertCanSeeTableRecords([$managedServiceRequest, $auditedServiceRequest]);
 });
 
-describe('feedback visibility', function () {
-    it('shows the feedback summary when the `FeedbackManagement` feature is enabled', function () {
+describe('feedback visibility', function (): void {
+    it('shows the feedback summary when the `FeedbackManagement` feature is enabled', function (): void {
         asSuperAdmin();
 
         $contact = Contact::factory()->create();
@@ -611,7 +611,7 @@ describe('feedback visibility', function () {
             ->assertSchemaComponentVisible('feedback.csat_answer', 'mountedActionSchema0');
     });
 
-    it('hides the feedback summary when the `FeedbackManagement` feature is disabled', function () {
+    it('hides the feedback summary when the `FeedbackManagement` feature is disabled', function (): void {
         asSuperAdmin();
 
         $contact = Contact::factory()->create();
@@ -638,8 +638,8 @@ describe('feedback visibility', function () {
     });
 });
 
-describe('archiving', function () {
-    test('the status select still offers the archived status a service request is already on', function () {
+describe('archiving', function (): void {
+    test('the status select still offers the archived status a service request is already on', function (): void {
         asSuperAdmin();
 
         $settings = app(LicenseSettings::class);
@@ -671,7 +671,7 @@ describe('archiving', function () {
             });
     });
 
-    test('the status select does not offer archived statuses', function () {
+    test('the status select does not offer archived statuses', function (): void {
         asSuperAdmin();
 
         $settings = app(LicenseSettings::class);

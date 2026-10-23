@@ -42,7 +42,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertGuest;
 
-it('sets the user\'s password', function () {
+it('sets the user\'s password', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -70,7 +70,7 @@ it('sets the user\'s password', function () {
     ]))->toBeTrue();
 });
 
-it('redirects if the user already has a password', function () {
+it('redirects if the user already has a password', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -79,7 +79,7 @@ it('redirects if the user already has a password', function () {
         ->assertRedirect();
 });
 
-it('redirects if the user is external', function () {
+it('redirects if the user is external', function (): void {
     $user = User::factory()->external()->create();
 
     actingAs($user);
@@ -88,7 +88,7 @@ it('redirects if the user is external', function () {
         ->assertRedirect();
 });
 
-test('`password` is required', function () {
+test('`password` is required', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -104,7 +104,7 @@ test('`password` is required', function () {
         ->assertNoRedirect();
 });
 
-test('`passwordConfirmation` is required', function () {
+test('`passwordConfirmation` is required', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -120,7 +120,7 @@ test('`passwordConfirmation` is required', function () {
         ->assertNoRedirect();
 });
 
-test('`password` is the same as `passwordConfirmation`', function () {
+test('`password` is the same as `passwordConfirmation`', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);
@@ -137,7 +137,7 @@ test('`password` is the same as `passwordConfirmation`', function () {
         ->assertNoRedirect();
 });
 
-it('does not redirect if the password is not set', function () {
+it('does not redirect if the password is not set', function (): void {
     $user = User::factory()->create([
         'password' => null,
     ]);

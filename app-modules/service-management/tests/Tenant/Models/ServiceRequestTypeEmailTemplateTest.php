@@ -65,7 +65,7 @@ $mergeTagBody = function (array $tagIds): array {
     ];
 };
 
-it('exposes the expected merge tags with stable keys and friendly labels in order', function () {
+it('exposes the expected merge tags with stable keys and friendly labels in order', function (): void {
     $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
     expect(array_keys($mergeTags))->toBe([
@@ -90,7 +90,7 @@ it('exposes the expected merge tags with stable keys and friendly labels in orde
     expect($mergeTags['assigned staff name'])->toBe('assigned manager');
 });
 
-it('substitutes the recipient name in the body and subject while the relabeled contact merge tag still resolves', function () use ($mergeTagBody) {
+it('substitutes the recipient name in the body and subject while the relabeled contact merge tag still resolves', function () use ($mergeTagBody): void {
     $contact = Contact::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -123,7 +123,7 @@ it('substitutes the recipient name in the body and subject while the relabeled c
     expect($subject)->toContain('Jane Recipient');
 });
 
-it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody) {
+it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody): void {
     $user = User::factory()->create(['name' => 'Staff Recipient']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -144,7 +144,7 @@ it('renders the staff recipient full name into a staff notification body', funct
     expect($message->viewData['content'])->toContain('Staff Recipient');
 });
 
-it('renders the contact recipient full name into an educatable notification body', function () use ($mergeTagBody) {
+it('renders the contact recipient full name into an educatable notification body', function () use ($mergeTagBody): void {
     $contact = Contact::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();

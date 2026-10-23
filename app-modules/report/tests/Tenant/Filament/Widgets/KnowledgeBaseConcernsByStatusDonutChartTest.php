@@ -44,7 +44,7 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-it('returns correct concerns by status data without filters', function () {
+it('returns correct concerns by status data without filters', function (): void {
     actingAs(User::factory()->create());
 
     $status = KnowledgeBaseStatus::factory()->create();
@@ -75,7 +75,7 @@ it('returns correct concerns by status data without filters', function () {
         ->and($data['datasets'][0]['data'])->toContain(2, 1);
 });
 
-it('filters concerns by category', function () {
+it('filters concerns by category', function (): void {
     actingAs(User::factory()->create());
 
     $status = KnowledgeBaseStatus::factory()->create();

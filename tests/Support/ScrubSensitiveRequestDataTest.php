@@ -37,7 +37,7 @@
 use App\Support\ScrubSensitiveRequestData;
 use Sentry\Event;
 
-it('scrubs password values from secret storage request events', function (Event $event, string $url) {
+it('scrubs password values from secret storage request events', function (Event $event, string $url): void {
     $event->setRequest([
         'url' => $url,
         'data' => [
@@ -83,7 +83,7 @@ it('scrubs password values from secret storage request events', function (Event 
     ],
 ]);
 
-it('does not change unrelated request events', function () {
+it('does not change unrelated request events', function (): void {
     $event = Event::createEvent();
     $event->setRequest([
         'url' => 'https://example.test/api/portal/service-request/create/type-id',
@@ -98,7 +98,7 @@ it('does not change unrelated request events', function () {
         ->toBe(['value' => 'ordinary-value']);
 });
 
-it('drops secret reveal request events', function (Event $event) {
+it('drops secret reveal request events', function (Event $event): void {
     $event->setRequest([
         'url' => 'https://example.test/service-request/reveal-secret',
         'data' => ['secret_id' => 'secret-id'],

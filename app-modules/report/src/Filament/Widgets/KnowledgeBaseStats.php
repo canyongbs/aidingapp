@@ -84,7 +84,7 @@ class KnowledgeBaseStats extends StatsOverviewReportWidget
             : Cache::tags(["{{$this->cacheTag}}"])->remember(
                 'healthy-articles-count',
                 now()->addHours(24),
-                fn () => $this->calculateHealthyArticles()
+                fn (): int => $this->calculateHealthyArticles()
             );
 
         $totalViews = $shouldBypassCache

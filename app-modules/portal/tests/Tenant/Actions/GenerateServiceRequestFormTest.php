@@ -61,7 +61,7 @@ $serviceRequestFormStepContent = function (string $label): array {
     ];
 };
 
-it('keeps the default fields and custom content as separate steps by default', function () use ($serviceRequestFormStepContent) {
+it('keeps the default fields and custom content as separate steps by default', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -84,7 +84,7 @@ it('keeps the default fields and custom content as separate steps by default', f
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the caller does not opt in, even if the flag is set', function () use ($serviceRequestFormStepContent) {
+it('does not combine the first step when the caller does not opt in, even if the flag is set', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -107,7 +107,7 @@ it('does not combine the first step when the caller does not opt in, even if the
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('does not combine the first step when the form has not opted in, even if the caller allows it', function () use ($serviceRequestFormStepContent) {
+it('does not combine the first step when the form has not opted in, even if the caller allows it', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -130,7 +130,7 @@ it('does not combine the first step when the form has not opted in, even if the 
         ->and($result->steps->last()->label)->toBe('Details');
 });
 
-it('combines the single custom step into the Main step when both the caller and form opt in', function () use ($serviceRequestFormStepContent) {
+it('combines the single custom step into the Main step when both the caller and form opt in', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -153,7 +153,7 @@ it('combines the single custom step into the Main step when both the caller and 
         ->and($mainContent[4]['attrs']['config']['label'])->toBe('Preferred name');
 });
 
-it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () use ($serviceRequestFormStepContent) {
+it('combines only the first step of a multi-step custom form into Main, keeping remaining steps separate', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()

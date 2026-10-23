@@ -78,7 +78,7 @@ class AssignedToRelationManager extends RelationManager
                     'assign-to-me',
                     auth()->user()?->getKey(),
                 )
-                    ->visible(function () {
+                    ->visible(function (): bool {
                         $user = auth()->user();
                         $type = $this->getOwnerRecord()->priority?->type;
 
@@ -95,7 +95,7 @@ class AssignedToRelationManager extends RelationManager
             ])
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn (ServiceRequestAssignment $assignment) => UserResource::getUrl('view', ['record' => $assignment->user])),
+                    ->url(fn (ServiceRequestAssignment $assignment): string => UserResource::getUrl('view', ['record' => $assignment->user])),
             ]);
     }
 

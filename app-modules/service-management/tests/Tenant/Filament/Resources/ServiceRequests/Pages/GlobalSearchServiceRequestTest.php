@@ -47,7 +47,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('global search is gated with proper feature access control', function () {
+test('global search is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -78,7 +78,7 @@ test('global search is gated with proper feature access control', function () {
     expect($results->first()->getAttribute('service_request_number'))->toBe('SR-FEATURE');
 });
 
-test('global search is gated with proper feature access control for direct user manager', function () {
+test('global search is gated with proper feature access control for direct user manager', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -106,7 +106,7 @@ test('global search is gated with proper feature access control for direct user 
     expect($results->first()->getAttribute('service_request_number'))->toBe('SR-FEATURE-USER');
 });
 
-test('global search returns service requests for managers of service request type', function () {
+test('global search returns service requests for managers of service request type', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -136,7 +136,7 @@ test('global search returns service requests for managers of service request typ
     expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
-test('global search returns service requests for direct user managers of service request type', function () {
+test('global search returns service requests for direct user managers of service request type', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -163,7 +163,7 @@ test('global search returns service requests for direct user managers of service
     expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
-test('global search returns service requests for auditors of service request type', function () {
+test('global search returns service requests for auditors of service request type', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -193,7 +193,7 @@ test('global search returns service requests for auditors of service request typ
     expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
-test('global search returns service requests for direct user auditors of service request type', function () {
+test('global search returns service requests for direct user auditors of service request type', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -220,7 +220,7 @@ test('global search returns service requests for direct user auditors of service
     expect($results->first()->getAttribute('service_request_number'))->toBe($serviceRequest->service_request_number);
 });
 
-test('global search does not return service requests for non-managers/auditors', function () {
+test('global search does not return service requests for non-managers/auditors', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -248,7 +248,7 @@ test('global search does not return service requests for non-managers/auditors',
     expect($results)->toHaveCount(0);
 });
 
-test('global search returns all service requests for super admin', function () {
+test('global search returns all service requests for super admin', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -277,7 +277,7 @@ test('global search returns all service requests for super admin', function () {
     expect($results)->toHaveCount(2);
 });
 
-test('global search returns no results for user without department', function () {
+test('global search returns no results for user without department', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -301,7 +301,7 @@ test('global search returns no results for user without department', function ()
     expect($results)->toHaveCount(0);
 });
 
-test('global search details are correctly formatted', function () {
+test('global search details are correctly formatted', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -342,7 +342,7 @@ test('global search details are correctly formatted', function () {
     expect($details['Status'])->toBe('Open');
 });
 
-test('global search details are correctly formatted for direct user manager', function () {
+test('global search details are correctly formatted for direct user manager', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -380,7 +380,7 @@ test('global search details are correctly formatted for direct user manager', fu
     expect($details['Status'])->toBe('Open');
 });
 
-test('global search URL points to view page', function () {
+test('global search URL points to view page', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -409,7 +409,7 @@ test('global search URL points to view page', function () {
     expect($url)->not()->toContain('/edit');
 });
 
-test('global search URL points to view page for direct user manager', function () {
+test('global search URL points to view page for direct user manager', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -435,7 +435,7 @@ test('global search URL points to view page for direct user manager', function (
     expect($url)->not()->toContain('/edit');
 });
 
-test('globally searchable attributes include service request number and title', function () {
+test('globally searchable attributes include service request number and title', function (): void {
     $attributes = ServiceRequestResource::getGloballySearchableAttributes();
 
     expect($attributes)->toContain('service_request_number');

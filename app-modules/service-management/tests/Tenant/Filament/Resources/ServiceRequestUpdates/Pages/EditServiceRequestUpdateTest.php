@@ -51,7 +51,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the EditServiceRequestUpdate page', function () {
+test('A successful action on the EditServiceRequestUpdate page', function (): void {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -84,7 +84,7 @@ test('A successful action on the EditServiceRequestUpdate page', function () {
     assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
-test('EditServiceRequestUpdate requires valid data', function (EditServiceRequestUpdateRequestFactory $data, array $errors) {
+test('EditServiceRequestUpdate requires valid data', function (EditServiceRequestUpdateRequestFactory $data, array $errors): void {
     $serviceRequest = ServiceRequest::factory([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -118,7 +118,7 @@ test('EditServiceRequestUpdate requires valid data', function (EditServiceReques
 
 // Permission Tests
 
-test('EditServiceRequestUpdate is gated with proper access control', function () {
+test('EditServiceRequestUpdate is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -176,7 +176,7 @@ test('EditServiceRequestUpdate is gated with proper access control', function ()
     assertDatabaseHas(ServiceRequestUpdate::class, $request->toArray());
 });
 
-test('EditServiceRequestUpdate is gated with proper feature access control', function () {
+test('EditServiceRequestUpdate is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;

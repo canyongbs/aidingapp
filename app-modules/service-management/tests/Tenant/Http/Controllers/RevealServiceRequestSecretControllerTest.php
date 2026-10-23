@@ -76,13 +76,13 @@ $revealableSecretFor = function (User $manager, bool $isAssigned = true): Secret
         ]);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
 });
 
-it('reveals a secret to the assigned manager', function () use ($revealableSecretFor) {
+it('reveals a secret to the assigned manager', function () use ($revealableSecretFor): void {
     $manager = user(permissions: ['service_request.*.update']);
     $secret = $revealableSecretFor($manager);
 
@@ -96,7 +96,7 @@ it('reveals a secret to the assigned manager', function () use ($revealableSecre
         ->assertExactJson(['value' => 'service-request-password']);
 });
 
-it('denies an unassigned service request secret to a super admin', function () use ($revealableSecretFor) {
+it('denies an unassigned service request secret to a super admin', function () use ($revealableSecretFor): void {
     $superAdmin = User::factory()->create();
     $secret = $revealableSecretFor($superAdmin, isAssigned: false);
 
@@ -107,7 +107,7 @@ it('denies an unassigned service request secret to a super admin', function () u
     ])->assertForbidden();
 });
 
-it('denies a secret to a manager who is not assigned to the service request', function () use ($revealableSecretFor) {
+it('denies a secret to a manager who is not assigned to the service request', function () use ($revealableSecretFor): void {
     $assignedManager = user(permissions: ['service_request.*.update']);
     $secret = $revealableSecretFor($assignedManager);
     $otherManager = user(permissions: ['service_request.*.update']);
@@ -123,7 +123,7 @@ it('denies a secret to a manager who is not assigned to the service request', fu
     ])->assertForbidden();
 });
 
-it('does not reveal an unattached secret', function () {
+it('does not reveal an unattached secret', function (): void {
     $manager = user(permissions: ['service_request.*.update']);
     $secret = Secret::factory()->for($manager, 'author')->create();
 
@@ -134,7 +134,7 @@ it('does not reveal an unattached secret', function () {
     ])->assertNotFound();
 });
 
-it('denies unauthenticated secret reveals', function () use ($revealableSecretFor) {
+it('denies unauthenticated secret reveals', function () use ($revealableSecretFor): void {
     $secret = $revealableSecretFor(user(permissions: ['service_request.*.update']));
 
     postJson(route('service-request.reveal-secret'), [

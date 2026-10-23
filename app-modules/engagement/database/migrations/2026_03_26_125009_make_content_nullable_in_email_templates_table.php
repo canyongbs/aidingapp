@@ -41,14 +41,14 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('email_templates', function (Blueprint $table) {
+        Schema::table('email_templates', function (Blueprint $table): void {
             $table->json('content')->nullable()->change(); // @phpstan-ignore Common.jsonColumnInMigration
         });
     }
 
     public function down(): void
     {
-        Schema::table('email_templates', function (Blueprint $table) {
+        Schema::table('email_templates', function (Blueprint $table): void {
             $table->json('content')->nullable(false)->change(); // @phpstan-ignore Common.jsonColumnInMigration
         });
     }

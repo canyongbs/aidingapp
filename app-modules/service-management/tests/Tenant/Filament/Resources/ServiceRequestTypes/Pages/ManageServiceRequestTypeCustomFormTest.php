@@ -68,14 +68,14 @@ $customFormContent = function (string $label = 'Your name'): array {
     ];
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->onlineForms = true;
     $settings->save();
 });
 
-it('is not accessible when the online forms feature is disabled', function () {
+it('is not accessible when the online forms feature is disabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->onlineForms = false;
     $settings->save();
@@ -87,7 +87,7 @@ it('is not accessible when the online forms feature is disabled', function () {
     expect(ManageServiceRequestTypeCustomForm::canAccess(['record' => $type]))->toBeFalse();
 });
 
-it('is forbidden for users without the required permissions', function () {
+it('is forbidden for users without the required permissions', function (): void {
     $user = User::factory()->create();
     $type = ServiceRequestType::factory()->create();
 
@@ -98,7 +98,7 @@ it('is forbidden for users without the required permissions', function () {
     ])->assertForbidden();
 });
 
-it('creates a form for a type that does not have one yet', function () use ($customFormContent) {
+it('creates a form for a type that does not have one yet', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -119,7 +119,7 @@ it('creates a form for a type that does not have one yet', function () use ($cus
         ->and($type->form->fields()->count())->toBe(1);
 });
 
-it('edits the form in place when it has no submissions', function () use ($customFormContent) {
+it('edits the form in place when it has no submissions', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -141,7 +141,7 @@ it('edits the form in place when it has no submissions', function () use ($custo
         ->and($type->form->fields()->where('label', 'Updated label')->exists())->toBeTrue();
 });
 
-it('archives the current form and creates a new version when submissions exist', function () use ($customFormContent) {
+it('archives the current form and creates a new version when submissions exist', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -168,7 +168,7 @@ it('archives the current form and creates a new version when submissions exist',
         ->and($type->form->fields()->where('label', 'New version field')->exists())->toBeTrue();
 });
 
-it('creates a new version when a non-submitted submission exists so its field references are preserved', function () use ($customFormContent) {
+it('creates a new version when a non-submitted submission exists so its field references are preserved', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -193,7 +193,7 @@ it('creates a new version when a non-submitted submission exists so its field re
         ->and($type->form->getKey())->not()->toBe($form->getKey());
 });
 
-it('only ever has one active form per type after repeated edits with submissions', function () use ($customFormContent) {
+it('only ever has one active form per type after repeated edits with submissions', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -218,7 +218,7 @@ it('only ever has one active form per type after repeated edits with submissions
     )->toBe(1);
 });
 
-it('keeps prior submissions rendering against their archived form version', function () use ($customFormContent) {
+it('keeps prior submissions rendering against their archived form version', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -245,7 +245,7 @@ it('keeps prior submissions rendering against their archived form version', func
         ->and($submission->submissible->isArchived())->toBeTrue();
 });
 
-it('preserves the field responses of a prior submission after a version bump', function () use ($customFormContent) {
+it('preserves the field responses of a prior submission after a version bump', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -287,7 +287,7 @@ it('preserves the field responses of a prior submission after a version bump', f
         ->and($submission->fields()->first()->pivot->getAttribute('response'))->toBe('Jane Doe');
 });
 
-it('saves the description', function () use ($customFormContent) {
+it('saves the description', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -306,7 +306,7 @@ it('saves the description', function () use ($customFormContent) {
     expect($type->form->description)->toBe('How to request access.');
 });
 
-it('saves the is_first_step_combined toggle', function () use ($customFormContent) {
+it('saves the is_first_step_combined toggle', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -325,7 +325,7 @@ it('saves the is_first_step_combined toggle', function () use ($customFormConten
     expect($type->form->is_first_step_combined)->toBeTrue();
 });
 
-it('hydrates the is_first_step_combined toggle from an existing form', function () {
+it('hydrates the is_first_step_combined toggle from an existing form', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -340,7 +340,7 @@ it('hydrates the is_first_step_combined toggle from an existing form', function 
         ->assertSet('data.is_first_step_combined', true);
 });
 
-it('stores steps and clears top-level content for a multi-step form', function () use ($customFormContent) {
+it('stores steps and clears top-level content for a multi-step form', function () use ($customFormContent): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();

@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('change_requests', function (Blueprint $table) {
+        Schema::create('change_requests', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('created_by')->nullable()->constrained('users');

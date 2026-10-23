@@ -66,7 +66,7 @@ class GetServiceRequestsController extends Controller
                     ->with('serviceRequestFormSubmission')
                     ->latest()
                     ->get()
-                    ->map(function (ServiceRequest $serviceRequest) {
+                    ->map(function (ServiceRequest $serviceRequest): ServiceRequestData {
                         return ServiceRequestData::from([
                             'id' => $serviceRequest->getKey(),
                             'number' => $serviceRequest->service_request_number,
@@ -114,7 +114,7 @@ class GetServiceRequestsController extends Controller
                 ->latest('created_at')
                 ->where('internal', false)
                 ->paginate(5)
-                ->through(function (ServiceRequestUpdate $serviceRequestUpdate) {
+                ->through(function (ServiceRequestUpdate $serviceRequestUpdate): array {
                     return [
                         'id' => $serviceRequestUpdate->getKey(),
                         'update' => $serviceRequestUpdate->update,

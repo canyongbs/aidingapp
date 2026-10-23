@@ -42,7 +42,7 @@ use function Pest\Laravel\withoutExceptionHandling;
 
 use PHPUnit\Framework\Assert;
 
-test('All permissions are normalized', function (string $guard) {
+test('All permissions are normalized', function (string $guard): void {
     Exceptions::fake();
 
     $permissionsMatrix = PermissionsMatrix::make('test')

@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Livewire\Livewire;
 
-it('returns service request feedbacks within the given date range', function () {
+it('returns service request feedbacks within the given date range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 
@@ -88,7 +88,7 @@ it('returns service request feedbacks within the given date range', function () 
         ]));
 });
 
-it('filters service request feedbacks by date and type', function () {
+it('filters service request feedbacks by date and type', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 

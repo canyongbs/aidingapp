@@ -44,7 +44,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('EditDepartment is gated with proper access control', function () {
+test('EditDepartment is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();

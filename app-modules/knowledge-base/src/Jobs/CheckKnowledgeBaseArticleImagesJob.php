@@ -220,7 +220,7 @@ class CheckKnowledgeBaseArticleImagesJob implements ShouldBeUnique, ShouldQueue
         $brokenUrls = [];
 
         try {
-            $responses = Http::pool(fn (Pool $pool) => array_map(
+            $responses = Http::pool(fn (Pool $pool): array => array_map(
                 fn (string $url) => $pool->as($url)->timeout(15)->head($url),
                 $urls
             ));

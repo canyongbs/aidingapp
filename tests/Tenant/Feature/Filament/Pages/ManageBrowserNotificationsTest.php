@@ -40,13 +40,13 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('webpush.vapid.subject', 'mailto:test@example.com');
     config()->set('webpush.vapid.public_key', 'test-public-key');
     config()->set('webpush.vapid.private_key', 'test-private-key');
 });
 
-it('is not accessible when desktop notifications are not configured', function () {
+it('is not accessible when desktop notifications are not configured', function (): void {
     config()->set('webpush.vapid.public_key', null);
 
     actingAs(User::factory()->create());
@@ -54,7 +54,7 @@ it('is not accessible when desktop notifications are not configured', function (
     Livewire::test(ManageBrowserNotifications::class)->assertForbidden();
 });
 
-it('renders the desktop notifications management page when configured', function () {
+it('renders the desktop notifications management page when configured', function (): void {
     actingAs(User::factory()->create());
 
     Livewire::test(ManageBrowserNotifications::class)->assertOk();

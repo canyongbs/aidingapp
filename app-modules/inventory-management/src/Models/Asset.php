@@ -181,7 +181,7 @@ class Asset extends BaseModel implements Auditable
      */
     protected function purchaseAge(): Attribute
     {
-        return Attribute::get(function () {
+        return Attribute::get(function (): string {
             if ($this->purchase_date->isFuture()) {
                 return '0 Years 0 Months';
             }

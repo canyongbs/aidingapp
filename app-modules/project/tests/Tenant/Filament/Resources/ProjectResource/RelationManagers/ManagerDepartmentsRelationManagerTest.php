@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can list manager departments', function () {
+it('can list manager departments', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -64,7 +64,7 @@ it('can list manager departments', function () {
         ->assertCanSeeTableRecords($departments);
 });
 
-it('can attach a manager department to a project', function () {
+it('can attach a manager department to a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -83,7 +83,7 @@ it('can attach a manager department to a project', function () {
     expect($project->managerDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
 });
 
-it('can detach a manager department from a project', function () {
+it('can detach a manager department from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -102,7 +102,7 @@ it('can detach a manager department from a project', function () {
     expect($project->managerDepartments()->whereKey($department->getKey())->exists())->toBeFalse();
 });
 
-it('can bulk detach manager departments from a project', function () {
+it('can bulk detach manager departments from a project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -122,8 +122,8 @@ it('can bulk detach manager departments from a project', function () {
     expect($project->managerDepartments()->count())->toBe(0);
 });
 
-describe('authorization', function () {
-    it('allows a super admin to attach a manager department', function () {
+describe('authorization', function (): void {
+    it('allows a super admin to attach a manager department', function (): void {
         asSuperAdmin();
 
         $project = Project::factory()->create();
@@ -143,7 +143,7 @@ describe('authorization', function () {
         expect($project->managerDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
     });
 
-    it('allows the project creator with the update permission to attach a manager department', function () {
+    it('allows the project creator with the update permission to attach a manager department', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -169,7 +169,7 @@ describe('authorization', function () {
         expect($project->managerDepartments()->whereKey($department->getKey())->exists())->toBeTrue();
     });
 
-    it('allows a manager whose department manages the project with the update permission to attach a manager department', function () {
+    it('allows a manager whose department manages the project with the update permission to attach a manager department', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -201,7 +201,7 @@ describe('authorization', function () {
         expect($project->managerDepartments()->whereKey($newDepartment->getKey())->exists())->toBeTrue();
     });
 
-    it('hides the attach action when the user has no update permission', function () {
+    it('hides the attach action when the user has no update permission', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');
@@ -218,7 +218,7 @@ describe('authorization', function () {
             ->assertActionHidden(TestAction::make(AttachAction::class)->table());
     });
 
-    it('hides the attach action when the user has the update permission but is unrelated to the project', function () {
+    it('hides the attach action when the user has the update permission but is unrelated to the project', function (): void {
         $user = User::factory()->create();
 
         $user->givePermissionTo('project.view-any');

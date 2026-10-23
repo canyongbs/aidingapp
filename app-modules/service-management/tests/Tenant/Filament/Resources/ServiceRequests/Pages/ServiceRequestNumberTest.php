@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Services\ServiceRequestNumber\Contracts\ServiceRequestNumberGenerator;
 use Mockery\MockInterface;
 
-test('An Exception is thrown if it is attempted to change the service_request_number', function () {
+test('An Exception is thrown if it is attempted to change the service_request_number', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $serviceRequest->service_request_number = '1234567890';
@@ -48,10 +48,10 @@ test('An Exception is thrown if it is attempted to change the service_request_nu
     $serviceRequest->save();
 })->throws(ServiceRequestNumberUpdateAttemptException::class);
 
-test('A save is attempted again and the service_request_number re-rolled if a UniqueConstraintViolationException is thrown', function () {
+test('A save is attempted again and the service_request_number re-rolled if a UniqueConstraintViolationException is thrown', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    app()->instance(ServiceRequestNumberGenerator::class, mock(ServiceRequestNumberGenerator::class, function (MockInterface $mock) use ($serviceRequest) {
+    app()->instance(ServiceRequestNumberGenerator::class, mock(ServiceRequestNumberGenerator::class, function (MockInterface $mock) use ($serviceRequest): void {
         $mock->shouldReceive('generate')
             ->twice()
             ->andReturn($serviceRequest->service_request_number, '1234567891');
@@ -62,10 +62,10 @@ test('A save is attempted again and the service_request_number re-rolled if a Un
     expect($newServiceRequest->service_request_number)->toBe('1234567891');
 });
 
-test('ServiceRequestNumberExceededReRollsException will be thrown if the service_request_number is re-rolled more than allowed times', function () {
+test('ServiceRequestNumberExceededReRollsException will be thrown if the service_request_number is re-rolled more than allowed times', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    app()->instance(ServiceRequestNumberGenerator::class, mock(ServiceRequestNumberGenerator::class, function (MockInterface $mock) use ($serviceRequest) {
+    app()->instance(ServiceRequestNumberGenerator::class, mock(ServiceRequestNumberGenerator::class, function (MockInterface $mock) use ($serviceRequest): void {
         $mock->shouldReceive('generate')
             ->andReturn($serviceRequest->service_request_number);
     }));

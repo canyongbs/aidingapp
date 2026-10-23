@@ -46,14 +46,14 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-it('renders successfully with no record', function () {
+it('renders successfully with no record', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateContact::class)
         ->assertSuccessful();
 });
 
-it('does not show an email health hint icon on the email field', function () {
+it('does not show an email health hint icon on the email field', function (): void {
     asSuperAdmin();
 
     $component = Livewire::test(CreateContact::class)
@@ -75,7 +75,7 @@ it('does not show an email health hint icon on the email field', function () {
 
 // Permission Tests
 
-test('CreateContact is gated with proper access control', function () {
+test('CreateContact is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -108,7 +108,7 @@ test('CreateContact is gated with proper access control', function () {
     assertDatabaseHas(Contact::class, $request->toArray());
 });
 
-test('CreateContact rejects a duplicate email case-insensitively', function () {
+test('CreateContact rejects a duplicate email case-insensitively', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.create');
@@ -130,7 +130,7 @@ test('CreateContact rejects a duplicate email case-insensitively', function () {
     assertCount(1, Contact::all());
 });
 
-test('CreateContact allows reusing a soft-deleted contact email', function () {
+test('CreateContact allows reusing a soft-deleted contact email', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('contact.view-any');
     $user->givePermissionTo('contact.create');

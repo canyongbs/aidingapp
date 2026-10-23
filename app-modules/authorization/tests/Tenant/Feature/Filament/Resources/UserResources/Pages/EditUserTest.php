@@ -50,7 +50,7 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
-it('renders impersonate button for non super admin users when user is super admin', function () {
+it('renders impersonate button for non super admin users when user is super admin', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -64,7 +64,7 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertActionVisible(Impersonate::class);
 });
 
-it('does not render impersonate button for super admin users at all', function () {
+it('does not render impersonate button for super admin users at all', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -80,7 +80,7 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertActionHidden(Impersonate::class);
 });
 
-it('allows super admin user to impersonate', function () {
+it('allows super admin user to impersonate', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -98,7 +98,7 @@ it('allows super admin user to impersonate', function () {
     expect(auth()->id())->toBe($user->id);
 });
 
-it('allows user with permission to impersonate', function () {
+it('allows user with permission to impersonate', function (): void {
     $first = User::factory()->create();
     $first->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
     asSuperAdmin($first);
@@ -117,7 +117,7 @@ it('allows user with permission to impersonate', function () {
     expect(auth()->id())->toBe($second->id);
 });
 
-it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function () {
+it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo(
         'role.view-any',
@@ -145,14 +145,14 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select): bool {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options);
         });
 });
 
-test('EditUser is gated with proper access control', function () {
+test('EditUser is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $record = User::factory()->create();
@@ -191,7 +191,7 @@ test('EditUser is gated with proper access control', function () {
     ]);
 });
 
-test('EditUser requires an email address', function () {
+test('EditUser requires an email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -207,7 +207,7 @@ test('EditUser requires an email address', function () {
         ->assertHasFormErrors(['email' => 'required']);
 });
 
-test('EditUser rejects an invalid email address', function () {
+test('EditUser rejects an invalid email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -223,7 +223,7 @@ test('EditUser rejects an invalid email address', function () {
         ->assertHasFormErrors(['email' => 'email']);
 });
 
-test('EditUser allows saving with its own unchanged email address', function () {
+test('EditUser allows saving with its own unchanged email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create(['email' => 'unchanged@example.com']);
@@ -244,7 +244,7 @@ test('EditUser allows saving with its own unchanged email address', function () 
     ]);
 });
 
-test('EditUser rejects a duplicate email belonging to another user case-insensitively', function () {
+test('EditUser rejects a duplicate email belonging to another user case-insensitively', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'taken@example.com']);
@@ -262,7 +262,7 @@ test('EditUser rejects a duplicate email belonging to another user case-insensit
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser rejects reusing another soft-deleted user\'s email', function () {
+test('EditUser rejects reusing another soft-deleted user\'s email', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'archived@example.com'])->delete();
@@ -280,7 +280,7 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function () 
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser shows and requires first and last name fields when the full name feature is active', function () {
+test('EditUser shows and requires first and last name fields when the full name feature is active', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -299,7 +299,7 @@ test('EditUser shows and requires first and last name fields when the full name 
         ]);
 });
 
-test('EditUser disables demographic and contact fields when editing an admin record', function () {
+test('EditUser disables demographic and contact fields when editing an admin record', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -314,7 +314,7 @@ test('EditUser disables demographic and contact fields when editing an admin rec
         ->assertFormFieldDisabled('is_external');
 });
 
-test('EditUser enables demographic and contact fields when editing a non-admin record', function () {
+test('EditUser enables demographic and contact fields when editing a non-admin record', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -327,7 +327,7 @@ test('EditUser enables demographic and contact fields when editing a non-admin r
         ->assertFormFieldEnabled('is_external');
 });
 
-test('delete action visible with proper access control', function () {
+test('delete action visible with proper access control', function (): void {
     $user = User::factory()->create();
 
     $anotherUser = User::factory()->create();
@@ -350,7 +350,7 @@ test('delete action visible with proper access control', function () {
         ->assertActionVisible(DeleteAction::class);
 });
 
-test('EditUser validates the inputs', function (array $data, array $errors) {
+test('EditUser validates the inputs', function (array $data, array $errors): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -461,7 +461,7 @@ test('EditUser validates the inputs', function (array $data, array $errors) {
     ]
 );
 
-it('prevents assigning an email that belongs to a soft-deleted user', function () {
+it('prevents assigning an email that belongs to a soft-deleted user', function (): void {
     $user = User::factory()->create();
     $deletedUser = User::factory()->state(['deleted_at' => now()])->create();
 
@@ -480,7 +480,7 @@ it('prevents assigning an email that belongs to a soft-deleted user', function (
         ->assertHasFormErrors(['email' => 'An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.']);
 });
 
-it('prevents assigning duplicate email to a user', function () {
+it('prevents assigning duplicate email to a user', function (): void {
     $user = User::factory()->create();
     $anotherUser = User::factory()->create();
 

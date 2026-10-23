@@ -47,7 +47,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('renders the timeline records for the given record', function () {
+it('renders the timeline records for the given record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -62,7 +62,7 @@ it('renders the timeline records for the given record', function () {
     expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain($update->update);
 });
 
-it('shows the empty state message when there is nothing to timeline', function () {
+it('shows the empty state message when there is nothing to timeline', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -74,7 +74,7 @@ it('shows the empty state message when there is nothing to timeline', function (
     expect(\Tests\htmlText($renderedTimeline->html(), '//div[contains(@class, "border-dashed")]/span'))->toContain('Nothing has happened yet.');
 });
 
-it('loads one page of records at a time and flags that more remain', function () {
+it('loads one page of records at a time and flags that more remain', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -100,7 +100,7 @@ it('loads one page of records at a time and flags that more remain', function ()
         ->assertSuccessful();
 });
 
-it('refuses to open a record from another entity timeline', function () {
+it('refuses to open a record from another entity timeline', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -118,7 +118,7 @@ it('refuses to open a record from another entity timeline', function () {
         ->assertStatus(404);
 });
 
-it('refuses to open a record of a type this timeline does not display', function () {
+it('refuses to open a record of a type this timeline does not display', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -135,7 +135,7 @@ it('refuses to open a record of a type this timeline does not display', function
         ->assertStatus(404);
 });
 
-it('returns a 404 when the view action is mounted without a record', function () {
+it('returns a 404 when the view action is mounted without a record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -152,7 +152,7 @@ it('returns a 404 when the view action is mounted without a record', function ()
         ->assertStatus(404);
 });
 
-it('keeps the opened record selected when more timeline records are loaded', function () {
+it('keeps the opened record selected when more timeline records are loaded', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -172,7 +172,7 @@ it('keeps the opened record selected when more timeline records are loaded', fun
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-it('opens the slide over for a timeline record', function () {
+it('opens the slide over for a timeline record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -190,7 +190,7 @@ it('opens the slide over for a timeline record', function () {
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-it('opens the slide over for a soft-deleted timeline record', function () {
+it('opens the slide over for a soft-deleted timeline record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -215,8 +215,8 @@ it('opens the slide over for a soft-deleted timeline record', function () {
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-describe('related people', function () {
-    it('shows a soft-deleted person by name', function () {
+describe('related people', function (): void {
+    it('shows a soft-deleted person by name', function (): void {
         asSuperAdmin();
 
         $performer = User::factory()->create(['name' => 'Jane Doe']);
@@ -237,7 +237,7 @@ describe('related people', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Deleted user');
     });
 
-    it('shows `Deleted user` when the person no longer exists', function () {
+    it('shows `Deleted user` when the person no longer exists', function (): void {
         asSuperAdmin();
 
         $checkOut = AssetCheckOut::factory()->create([
@@ -251,7 +251,7 @@ describe('related people', function () {
         expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Deleted user');
     });
 
-    it('shows the soft-deleted creator of an engagement by name', function () {
+    it('shows the soft-deleted creator of an engagement by name', function (): void {
         asSuperAdmin();
 
         $creator = User::factory()->create(['name' => 'Jane Doe']);
