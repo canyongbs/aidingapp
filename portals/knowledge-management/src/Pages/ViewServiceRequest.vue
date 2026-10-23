@@ -33,6 +33,7 @@
 -->
 <script setup>
     import BaseBadge from '@common/BaseBadge.vue';
+    import BaseButton from '@common/BaseButton.vue';
     import BaseTable from '@common/BaseTable.vue';
     import BaseTableBody from '@common/BaseTableBody.vue';
     import BaseTableCell from '@common/BaseTableCell.vue';
@@ -40,6 +41,7 @@
     import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
     import BaseTableRow from '@common/BaseTableRow.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import { ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
@@ -298,5 +300,25 @@
                 />
             </template>
         </BaseList>
+    </Page>
+
+    <Page v-else>
+        <template #heading>404 Not Found</template>
+
+        <template #breadcrumbs>
+            <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="'Not Found'" />
+        </template>
+
+        <EmptyState>
+            <template #heading>Service Request Not Found</template>
+            <template #description>
+                The service request you are looking for does not exist or you no longer have access to it.
+            </template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'service' }" color="gray" size="md">
+                    Return to Service Requests
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>
