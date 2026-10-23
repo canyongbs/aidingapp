@@ -43,7 +43,7 @@ return new class () extends Migration {
     {
         Schema::rename('contact_statuses', 'contact_types');
 
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->renameColumn('status_id', 'type_id');
         });
     }
@@ -51,7 +51,7 @@ return new class () extends Migration {
     // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
-        Schema::table('contacts', function (Blueprint $table) {
+        Schema::table('contacts', function (Blueprint $table): void {
             $table->renameColumn('type_id', 'status_id');
         });
 

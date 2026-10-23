@@ -109,7 +109,7 @@ class Contract extends BaseModel implements HasMedia, Auditable
     protected function status(): Attribute
     {
         return Attribute::make(
-            get: fn () => ContractStatus::getStatus($this->start_date, $this->end_date),
+            get: fn (): ContractStatus => ContractStatus::getStatus($this->start_date, $this->end_date),
         );
     }
 }

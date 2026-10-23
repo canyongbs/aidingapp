@@ -74,7 +74,7 @@ class EngagementsRelationManager extends RelationManager
 
     public function infolist(Schema $schema): Schema
     {
-        return $schema->components(fn (Timeline $record) => match ($record->timelineable::class) {
+        return $schema->components(fn (Timeline $record): array => match ($record->timelineable::class) {
             Engagement::class => [
                 Tabs::make()
                     ->columnSpanFull()
@@ -178,11 +178,11 @@ class EngagementsRelationManager extends RelationManager
             ]))
             ->columns([
                 TextColumn::make('direction')
-                    ->getStateUsing(fn (Timeline $record) => match ($record->timelineable::class) {
+                    ->getStateUsing(fn (Timeline $record): string => match ($record->timelineable::class) {
                         Engagement::class => 'Outbound',
                         EngagementResponse::class => 'Inbound',
                     })
-                    ->icon(fn (string $state) => match ($state) {
+                    ->icon(fn (string $state): string => match ($state) {
                         'Outbound' => 'heroicon-o-arrow-up-tray',
                         'Inbound' => 'heroicon-o-arrow-down-tray',
                     }),
@@ -218,7 +218,7 @@ class EngagementsRelationManager extends RelationManager
             ->recordActions([
                 ViewAction::make()
                     ->slideOver()
-                    ->modalHeading(function (Timeline $record) {
+                    ->modalHeading(function (Timeline $record): string {
                         /** @var HasDeliveryMethod $timelineable */
                         $timelineable = $record->timelineable;
 

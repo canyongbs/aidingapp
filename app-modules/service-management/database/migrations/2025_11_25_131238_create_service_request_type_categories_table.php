@@ -42,8 +42,8 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('service_request_type_categories', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('service_request_type_categories', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->string('name');
                 $table->uuid('parent_id')->nullable();
@@ -52,13 +52,13 @@ return new class () extends Migration {
                 $table->softDeletes();
             });
 
-            Schema::table('service_request_type_categories', function (Blueprint $table) {
+            Schema::table('service_request_type_categories', function (Blueprint $table): void {
                 $table->foreign('parent_id')
                     ->references('id')
                     ->on('service_request_type_categories');
             });
 
-            Schema::table('service_request_types', function (Blueprint $table) {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->foreignUuid('category_id')
                     ->nullable()
                     ->constrained('service_request_type_categories');
@@ -69,8 +69,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->dropConstrainedForeignId('category_id');
                 $table->dropColumn('sort');
             });

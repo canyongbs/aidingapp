@@ -46,7 +46,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('displays the open and total service request counts', function () {
+it('displays the open and total service request counts', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
     );
@@ -71,7 +71,7 @@ it('displays the open and total service request counts', function () {
         ->assertSeeText('3 Total');
 });
 
-it('displays 0 open and 0 total when the contact has no service requests', function () {
+it('displays 0 open and 0 total when the contact has no service requests', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
     );
@@ -83,7 +83,7 @@ it('displays 0 open and 0 total when the contact has no service requests', funct
         ->assertSeeText('0 Total');
 });
 
-it('only displays populated identifiers', function () {
+it('only displays populated identifiers', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
     );
@@ -99,7 +99,7 @@ it('only displays populated identifiers', function () {
         ->assertDontSeeText('Student ID:');
 });
 
-it('only displays the organization when one is associated', function () {
+it('only displays the organization when one is associated', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
     );
@@ -112,7 +112,7 @@ it('only displays the organization when one is associated', function () {
         ->assertSeeText('Acme University');
 });
 
-it('links the contact name to the view page', function () {
+it('links the contact name to the view page', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
     );
@@ -123,7 +123,7 @@ it('links the contact name to the view page', function () {
         ->assertSee(ContactResource::getUrl('view', ['record' => $contact]));
 });
 
-it('does not render standalone view or edit actions', function () {
+it('does not render standalone view or edit actions', function (): void {
     actingAs(
         User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update')
     );
@@ -135,7 +135,7 @@ it('does not render standalone view or edit actions', function () {
         ->assertActionDoesNotExist(TestAction::make('edit')->table($contact));
 });
 
-it('only shows the bulk delete action to a user with the contact.delete permission', function () {
+it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
     Contact::factory(15)->create();
 
     $user = User::factory()

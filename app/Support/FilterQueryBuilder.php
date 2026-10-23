@@ -76,7 +76,7 @@ class FilterQueryBuilder
      *
      * @return Builder<Model>
      */
-    public function contains($filter, $query): Builder
+    public function contains(array $filter, $query): Builder
     {
         $filter['query_1'] = addslashes($filter['query_1']);
 
@@ -121,14 +121,14 @@ class FilterQueryBuilder
      * @param Builder<Model> $query
      * @param array<string, mixed> $filter
      */
-    protected function makeFilter(Builder $query, $filter): void
+    protected function makeFilter(Builder $query, array $filter): void
     {
         if ($this->isNestedColumn($filter['column'])) {
             [$relation, $filter['column']] = explode('.', $filter['column']);
             $callable = Str::camel($relation);
             $filter['match'] = 'and';
 
-            $query->orWhereHas(Str::camel($callable), function (Builder $query) use ($filter) {
+            $query->orWhereHas(Str::camel($callable), function (Builder $query) use ($filter): void {
                 $this->{Str::camel($filter['operator'])}(
                     $filter,
                     $query

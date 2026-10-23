@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 
-test('Create Organization Type is gated with proper access control', function () {
+test('Create Organization Type is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -71,7 +71,7 @@ test('Create Organization Type is gated with proper access control', function ()
         ->assertSuccessful();
 });
 
-test('Create New Organization Type', function () {
+test('Create New Organization Type', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -92,7 +92,7 @@ test('Create New Organization Type', function () {
     assertDatabaseHas(OrganizationType::class, $request->toArray());
 });
 
-test('the organization type name must be unique among non-trashed types', function () {
+test('the organization type name must be unique among non-trashed types', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -110,7 +110,7 @@ test('the organization type name must be unique among non-trashed types', functi
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('the organization type name uniqueness check is case-insensitive', function () {
+test('the organization type name uniqueness check is case-insensitive', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -128,7 +128,7 @@ test('the organization type name uniqueness check is case-insensitive', function
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('does not apply the unique form rule when the feature is disabled', function () {
+test('does not apply the unique form rule when the feature is disabled', function (): void {
     OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
     $user = User::factory()->create();

@@ -41,14 +41,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('asset_check_ins', function (Blueprint $table) {
+        Schema::table('asset_check_ins', function (Blueprint $table): void {
             $table->dropColumn('checked_in_from_type');
         });
     }
 
     public function down(): void
     {
-        Schema::table('asset_check_ins', function (Blueprint $table) {
+        Schema::table('asset_check_ins', function (Blueprint $table): void {
             $table->string('checked_in_from_type');
         });
     }

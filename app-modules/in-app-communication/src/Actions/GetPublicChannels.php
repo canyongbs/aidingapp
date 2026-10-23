@@ -58,10 +58,10 @@ class GetPublicChannels
             ->where('type', ConversationType::Channel)
             ->where('is_private', false)
             ->where('is_confidential', false)
-            ->whereDoesntHave('conversationParticipants', function (Builder $query) use ($excludeUser) {
+            ->whereDoesntHave('conversationParticipants', function (Builder $query) use ($excludeUser): void {
                 $query->whereMorphedTo('participant', $excludeUser);
             })
-            ->when(filled($search), function (Builder $query) use ($search) {
+            ->when(filled($search), function (Builder $query) use ($search): void {
                 $searchLower = Str::lower($search);
 
                 $query->where(DB::raw('lower(name)'), 'like', "%{$searchLower}%");

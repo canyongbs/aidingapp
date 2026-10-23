@@ -49,7 +49,7 @@ return new class () extends SettingsMigration {
     // @phpstan-ignore Common.multipleMigrationChangesNotWrappedInTransaction
     public function down(): void
     {
-        Schema::create('twilio_conversations', function (Blueprint $table) {
+        Schema::create('twilio_conversations', function (Blueprint $table): void {
             $table->string('sid')->primary();
 
             $table->string('friendly_name')->nullable();
@@ -61,7 +61,7 @@ return new class () extends SettingsMigration {
             $table->softDeletes();
         });
 
-        Schema::create('twilio_conversation_user', function (Blueprint $table) {
+        Schema::create('twilio_conversation_user', function (Blueprint $table): void {
             $table->string('conversation_sid');
             $table->foreignUuid('user_id');
             $table->string('participant_sid');

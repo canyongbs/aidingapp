@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Jobs\DispatchClosedServiceRequestFeedbackReminde
 use AidingApp\ServiceManagement\Jobs\SendClosedServiceRequestFeedbackReminders;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `SendClosedServiceRequestFeedbackReminders` for each eligible tenant', function () {
+it('dispatches `SendClosedServiceRequestFeedbackReminders` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchClosedServiceRequestFeedbackRemindersForEachTenant())->handle();

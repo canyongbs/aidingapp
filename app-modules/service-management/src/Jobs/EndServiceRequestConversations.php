@@ -72,7 +72,7 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
             ->whereNull('accepted_at')
             ->whereNull('finished_at')
             ->where('queued_at', '<', now()->subMinutes(5))
-            ->eachById(function (ServiceRequestConversation $record) {
+            ->eachById(function (ServiceRequestConversation $record): void {
                 $record->update([
                     'finished_at' => now(),
                     'finished_reason' => ServiceRequestConversationFinishedReason::QueueExpired,
@@ -85,15 +85,15 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
             ->whereNotNull('queued_at')
             ->whereNull('accepted_at')
             ->whereNull('finished_at')
-            ->whereHas('user', function (Builder $query) {
+            ->whereHas('user', function (Builder $query): void {
                 $threshold = app(PresenceSettings::class)->active_threshold;
 
-                $query->where(function (Builder $query) use ($threshold) {
+                $query->where(function (Builder $query) use ($threshold): void {
                     $query->whereNull('last_activity_at')
                         ->orWhere('last_activity_at', '<', now()->subMinutes($threshold));
                 });
             })
-            ->eachById(function (ServiceRequestConversation $record) {
+            ->eachById(function (ServiceRequestConversation $record): void {
                 $record->update([
                     'finished_at' => now(),
                     'finished_reason' => ServiceRequestConversationFinishedReason::AgentInactive,
@@ -109,7 +109,7 @@ class EndServiceRequestConversations implements ShouldQueue, ShouldBeUnique
             ->whereNotNull('accepted_at')
             ->whereNull('finished_at')
             ->whereNotNull('conversation_id')
-            ->eachById(function (ServiceRequestConversation $record) {
+            ->eachById(function (ServiceRequestConversation $record): void {
                 $lastMessage = $record->conversation?->messages()->latest()->first();
 
                 $lastActivity = $lastMessage->created_at ?? $record->accepted_at;

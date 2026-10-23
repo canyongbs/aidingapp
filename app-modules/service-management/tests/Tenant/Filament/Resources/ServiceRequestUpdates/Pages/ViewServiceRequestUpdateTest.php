@@ -46,7 +46,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewServiceRequestUpdate page', function () {
+test('The correct details are displayed on the ViewServiceRequestUpdate page', function (): void {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
     asSuperAdmin();
@@ -65,7 +65,7 @@ test('The correct details are displayed on the ViewServiceRequestUpdate page', f
 
 // Permission Tests
 
-test('ViewServiceRequestUpdate is gated with proper access control', function () {
+test('ViewServiceRequestUpdate is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -96,7 +96,7 @@ test('ViewServiceRequestUpdate is gated with proper access control', function ()
         )->assertSuccessful();
 });
 
-test('ViewServiceRequestUpdate is gated with proper feature access control', function () {
+test('ViewServiceRequestUpdate is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -137,7 +137,7 @@ test('ViewServiceRequestUpdate is gated with proper feature access control', fun
         )->assertSuccessful();
 });
 
-test('ViewServiceRequestUpdate page displays the uploaded files section', function () {
+test('ViewServiceRequestUpdate page displays the uploaded files section', function (): void {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
 
     asSuperAdmin()

@@ -132,13 +132,13 @@ class ListServiceRequestTypes extends ListRecords
             ->with([
                 'restrictedToContactTypes:id',
                 /** @phpstan-ignore argument.type */
-                'children' => function (HasMany $query) use ($loadTypes) {
+                'children' => function (HasMany $query) use ($loadTypes): void {
                     $query->orderBy('sort')
                         // @phpstan-ignore argument.type
                         ->with([
                             'restrictedToContactTypes:id',
                             'types' => $loadTypes,
-                            'children' => function (HasMany $childQuery) use ($loadTypes) {
+                            'children' => function (HasMany $childQuery) use ($loadTypes): void {
                                 $childQuery->orderBy('sort')
                                     ->with([
                                         'restrictedToContactTypes:id',
@@ -210,7 +210,7 @@ class ListServiceRequestTypes extends ListRecords
                 $isRestricted = (bool) ($data['is_visibility_restricted'] ?? false);
                 $contactTypeIds = $isRestricted ? array_values($data['contact_type_ids'] ?? []) : [];
 
-                DB::transaction(function () use ($node, $isRestricted, $contactTypeIds) {
+                DB::transaction(function () use ($node, $isRestricted, $contactTypeIds): void {
                     $node->is_visibility_restricted = $isRestricted;
                     $node->save();
                     $node->restrictedToContactTypes()->sync($contactTypeIds);
@@ -824,7 +824,7 @@ class ListServiceRequestTypes extends ListRecords
      */
     protected function formatCategories(Collection $categories): array
     {
-        return $categories->map(function (ServiceRequestTypeCategory $category) {
+        return $categories->map(function (ServiceRequestTypeCategory $category): array {
             return [
                 'id' => $category->id,
                 'name' => $category->name,
@@ -847,7 +847,7 @@ class ListServiceRequestTypes extends ListRecords
      */
     protected function formatTypes(Collection $types, ?string $contextCategoryId): array
     {
-        return $types->map(function (ServiceRequestType $type) use ($contextCategoryId) {
+        return $types->map(function (ServiceRequestType $type) use ($contextCategoryId): array {
             return [
                 'id' => $type->id,
                 'name' => $type->name,

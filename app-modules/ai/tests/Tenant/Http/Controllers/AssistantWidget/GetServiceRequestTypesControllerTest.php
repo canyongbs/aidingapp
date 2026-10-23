@@ -68,14 +68,14 @@ $widgetRequestAsContact = function (Contact $contact, string $url): TestResponse
     return getJson($url, ['Origin' => config('app.url')]);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->ai_support_assistant = true;
     $portalSettings->save();
 });
 
-it('returns a configured default priority for a service request type', function () use ($authenticatedWidgetRequest) {
+it('returns a configured default priority for a service request type', function () use ($authenticatedWidgetRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()
         ->for($type, 'type')
@@ -91,7 +91,7 @@ it('returns a configured default priority for a service request type', function 
         ->toBe($priority->getKey());
 });
 
-it('does not return categories that have no service request types', function () use ($authenticatedWidgetRequest) {
+it('does not return categories that have no service request types', function () use ($authenticatedWidgetRequest): void {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithType, relationship: 'categories')->create();
 
@@ -107,7 +107,7 @@ it('does not return categories that have no service request types', function () 
         ->and($categoryIds)->not()->toContain($emptyCategory->id);
 });
 
-it('returns a parent category when a child category has types', function () use ($authenticatedWidgetRequest) {
+it('returns a parent category when a child category has types', function () use ($authenticatedWidgetRequest): void {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
     ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create();
@@ -121,7 +121,7 @@ it('returns a parent category when a child category has types', function () use 
     expect($categoryIds)->toContain($parentCategory->id);
 });
 
-it('does not return a parent category when all child categories are empty', function () use ($authenticatedWidgetRequest) {
+it('does not return a parent category when all child categories are empty', function () use ($authenticatedWidgetRequest): void {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
 
@@ -134,7 +134,7 @@ it('does not return a parent category when all child categories are empty', func
     expect($categoryIds)->not()->toContain($parentCategory->id);
 });
 
-it('does not return archived service request types as part of a category', function () use ($authenticatedWidgetRequest) {
+it('does not return archived service request types as part of a category', function () use ($authenticatedWidgetRequest): void {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithOnlyArchivedType, relationship: 'categories')->create([
         'archived_at' => now(),
@@ -153,7 +153,7 @@ it('does not return archived service request types as part of a category', funct
         ->and($categoryIds)->not()->toContain($categoryWithOnlyArchivedType->id);
 });
 
-it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () use ($widgetRequestAsContact) {
+it('hides visibility restricted top level types from widget contacts of a non-matching contact type', function () use ($widgetRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -174,7 +174,7 @@ it('hides visibility restricted top level types from widget contacts of a non-ma
         ->and($typeIds)->not()->toContain($restrictedType->id);
 });
 
-it('shows visibility restricted types to widget contacts of a matching contact type', function () use ($widgetRequestAsContact) {
+it('shows visibility restricted types to widget contacts of a matching contact type', function () use ($widgetRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -191,7 +191,7 @@ it('shows visibility restricted types to widget contacts of a matching contact t
     expect($typeIds)->toContain($restrictedType->id);
 });
 
-it('hides the entire subtree of a visibility restricted area from non-matching widget contacts', function () use ($widgetRequestAsContact) {
+it('hides the entire subtree of a visibility restricted area from non-matching widget contacts', function () use ($widgetRequestAsContact): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -221,7 +221,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching w
         ->toContain($restrictedCategory->id);
 });
 
-it('lists a type under every category it belongs to', function () use ($authenticatedWidgetRequest) {
+it('lists a type under every category it belongs to', function () use ($authenticatedWidgetRequest): void {
     $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -243,7 +243,7 @@ it('lists a type under every category it belongs to', function () use ($authenti
         ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
-it('orders types within a category by their per-area sort rather than the global sort', function () use ($authenticatedWidgetRequest) {
+it('orders types within a category by their per-area sort rather than the global sort', function () use ($authenticatedWidgetRequest): void {
     $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
     $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);

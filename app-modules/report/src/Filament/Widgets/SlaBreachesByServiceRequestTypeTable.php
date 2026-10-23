@@ -213,7 +213,7 @@ class SlaBreachesByServiceRequestTypeTable extends BaseWidget
             return $serviceRequests
                 ->groupBy(fn (ServiceRequest $serviceRequest): ?string => $serviceRequest->priority?->type?->getKey())
                 ->filter(fn (Collection $group, ?string $typeId): bool => filled($typeId))
-                ->map(function (Collection $group) {
+                ->map(function (Collection $group): array {
                     $metrics = $this->summarizeSlaMetrics($group);
 
                     /** @var ServiceRequest $first */

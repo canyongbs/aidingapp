@@ -67,7 +67,7 @@ class ServiceMonitoringTargetVisibilityScope implements Scope
                 return;
             }
 
-            $builder->where(function (Builder $query) use ($authenticatable) {
+            $builder->where(function (Builder $query) use ($authenticatable): void {
                 $query->where('is_confidential', false)
                     ->orWhereMorphedTo('createdBy', $authenticatable)
                     ->orWhereHas('confidentialUsers', fn (Builder $query) => $query->where('users.id', $authenticatable->getKey()))
@@ -78,7 +78,7 @@ class ServiceMonitoringTargetVisibilityScope implements Scope
         }
 
         if ($authenticatable instanceof Contact) {
-            $builder->where(function (Builder $query) use ($authenticatable) {
+            $builder->where(function (Builder $query) use ($authenticatable): void {
                 $query->where('is_confidential', false)
                     ->orWhereHas('confidentialContacts', fn (Builder $query) => $query->where('contacts.id', $authenticatable->getKey()));
             });

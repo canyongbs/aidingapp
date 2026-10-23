@@ -58,6 +58,8 @@ use App\Settings\DisplaySettings;
 use Filament\Actions\DeleteAction;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
+use Filament\Resources\RelationManagers\RelationGroup;
+use Filament\Resources\RelationManagers\RelationManagerConfiguration;
 use Filament\Schemas\Components\Livewire;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Tabs;
@@ -181,7 +183,7 @@ class ViewServiceRequest extends ViewRecord
             AssignmentHistoryRelationManager::class,
             CreatedByRelationManager::class,
         ])
-            ->map(fn (string $relationManager) => self::filterRelationManagers($relationManager, $record))
+            ->map(fn (string $relationManager): string|RelationManagerConfiguration|RelationGroup|null => self::filterRelationManagers($relationManager, $record))
             ->filter()
             ->map(fn (string $relationManager): Livewire => Livewire::make($relationManager, [
                 'ownerRecord' => $record,

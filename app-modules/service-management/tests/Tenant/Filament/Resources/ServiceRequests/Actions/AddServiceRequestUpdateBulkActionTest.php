@@ -50,7 +50,7 @@ use function Pest\Laravel\actingAs;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('it can add updates to multiple service requests as super admin', function () {
+test('it can add updates to multiple service requests as super admin', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -60,7 +60,7 @@ test('it can add updates to multiple service requests as super admin', function 
         ->count(10)
         ->create();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         $serviceRequest->refresh();
         assertCount(0, $serviceRequest->serviceRequestUpdates);
     });
@@ -75,13 +75,13 @@ test('it can add updates to multiple service requests as super admin', function 
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         $serviceRequest->refresh();
         assertCount(1, $serviceRequest->serviceRequestUpdates);
     });
 });
 
-test('it can add updates to multiple service requests for user directly assigned as manager user', function () {
+test('it can add updates to multiple service requests for user directly assigned as manager user', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -107,7 +107,7 @@ test('it can add updates to multiple service requests for user directly assigned
         ->count(10)
         ->create();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 
@@ -127,12 +127,12 @@ test('it can add updates to multiple service requests for user directly assigned
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 });
 
-test('it can add updates to multiple service requests for user belonging to a manager department', function () {
+test('it can add updates to multiple service requests for user belonging to a manager department', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -162,7 +162,7 @@ test('it can add updates to multiple service requests for user belonging to a ma
         ->count(10)
         ->create();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 
@@ -182,12 +182,12 @@ test('it can add updates to multiple service requests for user belonging to a ma
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 });
 
-test('it can add updates to multiple service requests for user belonging to a manager group', function () {
+test('it can add updates to multiple service requests for user belonging to a manager group', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create();
     $group->users()->attach($user);
@@ -220,7 +220,7 @@ test('it can add updates to multiple service requests for user belonging to a ma
     $serviceRequests->each(fn (ServiceRequest $serviceRequest) => assertCount(1, $serviceRequest->refresh()->serviceRequestUpdates));
 });
 
-test('it cannot add updates to service requests for user who is not a manager', function () {
+test('it cannot add updates to service requests for user who is not a manager', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -247,12 +247,12 @@ test('it cannot add updates to service requests for user who is not a manager', 
             'internal' => true,
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 });
 
-test('it cannot add updates to service requests for user without required permissions', function () {
+test('it cannot add updates to service requests for user without required permissions', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -279,7 +279,7 @@ test('it cannot add updates to service requests for user without required permis
             'internal' => true,
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest): void {
         assertCount(0, $serviceRequest->refresh()->serviceRequestUpdates);
     });
 });

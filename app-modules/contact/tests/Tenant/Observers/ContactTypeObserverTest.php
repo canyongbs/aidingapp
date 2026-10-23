@@ -39,7 +39,7 @@ use AidingApp\Contact\Models\ContactType;
 use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertTrue;
 
-test('only one ContactType can be the default at a time', function () {
+test('only one ContactType can be the default at a time', function (): void {
     $first = ContactType::factory()->create(['is_default' => true]);
     $second = ContactType::factory()->create(['is_default' => true]);
 
@@ -50,7 +50,7 @@ test('only one ContactType can be the default at a time', function () {
     assertDatabaseHas(ContactType::class, ['id' => $first->id, 'is_default' => false]);
 });
 
-test('promoting an existing ContactType to default unsets the previous default', function () {
+test('promoting an existing ContactType to default unsets the previous default', function (): void {
     $original = ContactType::factory()->create(['is_default' => true]);
     $other = ContactType::factory()->create(['is_default' => false]);
 
@@ -60,7 +60,7 @@ test('promoting an existing ContactType to default unsets the previous default',
         ->and($original->fresh()->is_default)->toBeFalse();
 });
 
-test('soft deleting the default ContactType unsets the default flag', function () {
+test('soft deleting the default ContactType unsets the default flag', function (): void {
     $default = ContactType::factory()->create(['is_default' => true]);
 
     $default->delete();

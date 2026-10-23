@@ -43,7 +43,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Livewire\Livewire;
 
-it('returns all service request types information created in given time range', function () {
+it('returns all service request types information created in given time range', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
     $otherDate = now()->subDays(15);
@@ -101,7 +101,7 @@ it('returns all service request types information created in given time range', 
         ]));
 });
 
-it('returns all service request types when no date filters are applied', function () {
+it('returns all service request types when no date filters are applied', function (): void {
     $type1 = ServiceRequestType::factory()->create(['name' => 'Account Issue']);
     $type2 = ServiceRequestType::factory()->create(['name' => 'Feature Request']);
 
@@ -135,7 +135,7 @@ it('returns all service request types when no date filters are applied', functio
         ]));
 });
 
-it('shows correct incident and request counts per type', function () {
+it('shows correct incident and request counts per type', function (): void {
     $type = ServiceRequestType::factory()->create(['name' => 'Access Issues']);
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();
 
@@ -164,7 +164,7 @@ it('shows correct incident and request counts per type', function () {
         ->assertTableColumnFormattedStateSet('request_count', '5', record: $type);
 });
 
-it('applies date filters consistently to total, incident, and request counts', function () {
+it('applies date filters consistently to total, incident, and request counts', function (): void {
     $startDate = now()->subDays(10);
     $endDate = now()->subDays(5);
 

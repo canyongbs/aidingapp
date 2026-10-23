@@ -38,7 +38,7 @@ use AidingApp\Ai\Jobs\DispatchPrepareKnowledgeBaseVectorStoreForEachTenant;
 use AidingApp\Ai\Jobs\PrepareKnowledgeBaseVectorStore;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `PrepareKnowledgeBaseVectorStore` for each eligible tenant', function () {
+it('dispatches `PrepareKnowledgeBaseVectorStore` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchPrepareKnowledgeBaseVectorStoreForEachTenant())->handle();

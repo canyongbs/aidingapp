@@ -62,7 +62,7 @@ class ViewChangeRequestType extends ViewRecord
                             ->schema([
                                 TextEntry::make('name')
                                     ->hiddenLabel()
-                                    ->url(fn ($record) => UserResource::getUrl('view', ['record' => $record]))
+                                    ->url(fn ($record): string => UserResource::getUrl('view', ['record' => $record]))
                                     ->color('primary'),
                             ]),
                     ])

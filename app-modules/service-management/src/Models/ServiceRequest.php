@@ -358,9 +358,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
             ->ofMany([
                 'created_at' => 'max',
-            ], function (Builder $query) {
+            ], function (Builder $query): void {
                 $query
-                    ->whereHas('createdBy', function (Builder $query) {
+                    ->whereHas('createdBy', function (Builder $query): void {
                         $query->where('created_by_type', (new Contact())->getMorphClass());
                     })
                     ->where('internal', false);
@@ -375,9 +375,9 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
         return $this->hasOne(ServiceRequestUpdate::class, 'service_request_id')
             ->ofMany([
                 'created_at' => 'max',
-            ], function (Builder $query) {
+            ], function (Builder $query): void {
                 $query
-                    ->whereHas('createdBy', function (Builder $query) {
+                    ->whereHas('createdBy', function (Builder $query): void {
                         $query->where('created_by_type', (new User())->getMorphClass());
                     })
                     ->where('internal', false);
@@ -543,7 +543,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
     public function getTemplateMergeData(?string $timezone = null, ?string $recipientName = null): array
     {
         return [
-            'recipient name' => fn () => $recipientName ?? '',
+            'recipient name' => fn (): string => $recipientName ?? '',
             'contact name' => fn () => $this->respondent->{$this->respondent::displayNameKey()},
             'service request number' => fn () => $this->service_request_number,
             'created date' => fn () => ! is_null($timezone) ? $this->created_at->setTimeZone($timezone)->format('M j, Y g:i a (T)') : $this->created_at->format('M j, Y g:i a (T)'),
@@ -553,7 +553,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
             'title' => fn () => $this->title,
             'type' => fn () => $this->priority->type->name,
             'description' => fn () => $this->close_details,
-            'recent update' => fn () => $this->getRecentUpdateFormatted($timezone),
+            'recent update' => fn (): Htmlable|string => $this->getRecentUpdateFormatted($timezone),
         ];
     }
 
@@ -608,7 +608,7 @@ class ServiceRequest extends BaseModel implements Auditable, HasMedia
 
     protected static function booted(): void
     {
-        static::addGlobalScope('excludeDrafts', function (Builder $builder) {
+        static::addGlobalScope('excludeDrafts', function (Builder $builder): void {
             $builder->where('is_draft', false);
         });
     }

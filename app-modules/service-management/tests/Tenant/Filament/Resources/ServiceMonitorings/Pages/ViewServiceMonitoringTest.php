@@ -54,7 +54,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-test('ViewServiceMonitoring is gated with proper access control', function () {
+test('ViewServiceMonitoring is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceMonitoring = false;
@@ -91,7 +91,7 @@ test('ViewServiceMonitoring is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('The correct details are displayed on the ViewServiceMonitoring page', function () {
+test('The correct details are displayed on the ViewServiceMonitoring page', function (): void {
     $reportDepartment = Department::factory()->create();
     $reportUser = User::factory()->create();
     $reportContact = Contact::factory()->create();
@@ -143,7 +143,7 @@ test('The correct details are displayed on the ViewServiceMonitoring page', func
         ]);
 });
 
-test('The Automated Reporting section is hidden when no reporting frequency is active', function () {
+test('The Automated Reporting section is hidden when no reporting frequency is active', function (): void {
     $reportDepartment = Department::factory()->create();
     $reportUser = User::factory()->create();
     $reportContact = Contact::factory()->create();
@@ -172,7 +172,7 @@ test('The Automated Reporting section is hidden when no reporting frequency is a
         ->assertSchemaComponentHidden('reportConfigurations.weekly.contacts');
 });
 
-test('keyword match values are displayed only for keyword monitors', function () {
+test('keyword match values are displayed only for keyword monitors', function (): void {
     $keywordMonitor = ServiceMonitoringTarget::factory()->create([
         'monitor_type' => MonitorType::KeywordMatch,
         'should_contain' => ['test 1', 'test 2'],
@@ -202,7 +202,7 @@ test('keyword match values are displayed only for keyword monitors', function ()
         ->assertSchemaComponentHidden('should_not_contain');
 });
 
-test('keyword match values with punctuation retain clear boundaries', function () {
+test('keyword match values with punctuation retain clear boundaries', function (): void {
     $keywordMonitor = ServiceMonitoringTarget::factory()->create([
         'monitor_type' => MonitorType::KeywordMatch,
         'should_contain' => ['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"'],
@@ -223,7 +223,7 @@ test('keyword match values with punctuation retain clear boundaries', function (
         ->toBe(['test1', 'test 2', 'test 3, "test 4"', '"test 5, test 6"']);
 });
 
-test('API endpoint fields are displayed only for API endpoint monitors', function () {
+test('API endpoint fields are displayed only for API endpoint monitors', function (): void {
     $apiEndpointMonitor = ServiceMonitoringTarget::factory()
         ->apiEndpoint()
         ->create([
@@ -276,7 +276,7 @@ test('API endpoint fields are displayed only for API endpoint monitors', functio
         ->assertSchemaComponentHidden('request_headers');
 });
 
-test('Reset Monitoring button resets monitoring', function () {
+test('Reset Monitoring button resets monitoring', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -303,7 +303,7 @@ test('Reset Monitoring button resets monitoring', function () {
         ->toBe(0);
 });
 
-test('a confidential service monitoring is only visible to its creator, granted users/departments, and admins', function () {
+test('a confidential service monitoring is only visible to its creator, granted users/departments, and admins', function (): void {
     $creator = User::factory()->create();
     $user = User::factory()->create();
 

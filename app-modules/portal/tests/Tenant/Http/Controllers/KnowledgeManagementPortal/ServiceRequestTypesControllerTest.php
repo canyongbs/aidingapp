@@ -43,13 +43,13 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
 });
 
-it('does not return categories that have no service request types', function () {
+it('does not return categories that have no service request types', function (): void {
     $categoryWithType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithType, relationship: 'categories')->create();
 
@@ -65,7 +65,7 @@ it('does not return categories that have no service request types', function () 
         ->and($categoryIds)->not()->toContain($emptyCategory->id);
 });
 
-it('returns a category with a child category that has types', function () {
+it('returns a category with a child category that has types', function (): void {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $childCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
     ServiceRequestType::factory()->hasAttached($childCategory, relationship: 'categories')->create();
@@ -79,7 +79,7 @@ it('returns a category with a child category that has types', function () {
     expect($categoryIds)->toContain($parentCategory->id);
 });
 
-it('does not return a parent category when all child categories are empty', function () {
+it('does not return a parent category when all child categories are empty', function (): void {
     $parentCategory = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestTypeCategory::factory()->create(['parent_id' => $parentCategory->id]);
 
@@ -92,7 +92,7 @@ it('does not return a parent category when all child categories are empty', func
     expect($categoryIds)->not()->toContain($parentCategory->id);
 });
 
-it('does not return archived service request types as part of a category', function () {
+it('does not return archived service request types as part of a category', function (): void {
     $categoryWithOnlyArchivedType = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     ServiceRequestType::factory()->hasAttached($categoryWithOnlyArchivedType, relationship: 'categories')->create([
         'archived_at' => now(),
@@ -111,7 +111,7 @@ it('does not return archived service request types as part of a category', funct
         ->and($categoryIds)->not()->toContain($categoryWithOnlyArchivedType->id);
 });
 
-it('hides visibility restricted top level types from guests', function () {
+it('hides visibility restricted top level types from guests', function (): void {
     $visibleType = ServiceRequestType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -127,7 +127,7 @@ it('hides visibility restricted top level types from guests', function () {
         ->and($typeIds)->not()->toContain($restrictedType->id);
 });
 
-it('hides visibility restricted types from contacts of a non-matching contact type', function () {
+it('hides visibility restricted types from contacts of a non-matching contact type', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -146,7 +146,7 @@ it('hides visibility restricted types from contacts of a non-matching contact ty
     expect($typeIds)->not()->toContain($restrictedType->id);
 });
 
-it('shows visibility restricted types to contacts of a matching contact type', function () {
+it('shows visibility restricted types to contacts of a matching contact type', function (): void {
     $allowedContactType = ContactType::factory()->create();
 
     $restrictedType = ServiceRequestType::factory()->create(['is_visibility_restricted' => true]);
@@ -164,7 +164,7 @@ it('shows visibility restricted types to contacts of a matching contact type', f
     expect($typeIds)->toContain($restrictedType->id);
 });
 
-it('hides the entire subtree of a visibility restricted area from non-matching contacts', function () {
+it('hides the entire subtree of a visibility restricted area from non-matching contacts', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -196,7 +196,7 @@ it('hides the entire subtree of a visibility restricted area from non-matching c
         ->toContain($restrictedCategory->id);
 });
 
-it('lists a type under every category it belongs to', function () {
+it('lists a type under every category it belongs to', function (): void {
     $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
@@ -222,7 +222,7 @@ it('lists a type under every category it belongs to', function () {
         ->and(collect($secondCategoryData['types'])->firstWhere('id', $type->id)['category_id'])->toBe($categoryB->id);
 });
 
-it('shows a type under an authorized category path and hides it under a restricted one', function () {
+it('shows a type under an authorized category path and hides it under a restricted one', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -254,7 +254,7 @@ it('shows a type under an authorized category path and hides it under a restrict
     expect(collect($openData['types'])->pluck('id'))->toContain($type->id);
 });
 
-it('orders types within a category by their per-area sort rather than the global sort', function () {
+it('orders types within a category by their per-area sort rather than the global sort', function (): void {
     $category = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 
     // Global sort would place $first before $second, but the per-area pivot sort reverses them.
@@ -274,7 +274,7 @@ it('orders types within a category by their per-area sort rather than the global
     expect(collect($categoryData['types'])->pluck('id')->all())->toBe([$second->id, $first->id]);
 });
 
-it('orders the same type differently in each area it belongs to', function () {
+it('orders the same type differently in each area it belongs to', function (): void {
     $categoryA = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
     $categoryB = ServiceRequestTypeCategory::factory()->create(['parent_id' => null]);
 

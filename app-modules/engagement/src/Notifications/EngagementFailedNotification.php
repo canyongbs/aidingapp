@@ -69,7 +69,7 @@ class EngagementFailedNotification extends Notification implements ShouldQueue
         $recipient = $this->engagement->recipient;
 
         $to = match (true) {
-            $recipient instanceof Contact => (function () use ($recipient) {
+            $recipient instanceof Contact => (function () use ($recipient): string {
                 return "{$recipient->full_name} <{$recipient->email}> (Contact)";
             })(),
             default => 'N/A',

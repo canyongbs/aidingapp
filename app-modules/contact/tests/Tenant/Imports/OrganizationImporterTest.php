@@ -63,11 +63,11 @@ $runOrganizationImport = function (array $row, ?Import $import = null): void {
     $importer($row);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     Cache::flush();
 });
 
-it('creates a new organization with all fields, industry and type', function () use ($runOrganizationImport) {
+it('creates a new organization with all fields, industry and type', function () use ($runOrganizationImport): void {
     $industry = OrganizationIndustry::factory()->create(['name' => 'Technology']);
     $type = OrganizationType::factory()->create(['name' => 'Partner']);
 
@@ -102,7 +102,7 @@ it('creates a new organization with all fields, industry and type', function () 
         ->and($organization->is_contact_generation_enabled)->toBeTrue();
 });
 
-it('updates an existing organization matched by name case-insensitively', function () use ($runOrganizationImport) {
+it('updates an existing organization matched by name case-insensitively', function () use ($runOrganizationImport): void {
     $existing = Organization::factory()->create([
         'name' => 'Globex',
         'city' => 'Old City',
@@ -118,7 +118,7 @@ it('updates an existing organization matched by name case-insensitively', functi
     expect($existing->refresh()->city)->toBe('New City');
 });
 
-it('resolves industry and type by name', function () use ($runOrganizationImport) {
+it('resolves industry and type by name', function () use ($runOrganizationImport): void {
     $industry = OrganizationIndustry::factory()->create(['name' => 'Finance']);
     $type = OrganizationType::factory()->create(['name' => 'Vendor']);
 
@@ -134,7 +134,7 @@ it('resolves industry and type by name', function () use ($runOrganizationImport
         ->and($organization->type->is($type))->toBeTrue();
 });
 
-it('resolves industry and type by name case-insensitively', function () use ($runOrganizationImport) {
+it('resolves industry and type by name case-insensitively', function () use ($runOrganizationImport): void {
     OrganizationIndustry::factory()->create(['name' => 'Default Industry', 'is_default' => true]);
     OrganizationType::factory()->create(['name' => 'Default Type', 'is_default' => true]);
 
@@ -153,7 +153,7 @@ it('resolves industry and type by name case-insensitively', function () use ($ru
         ->and($organization->type->is($type))->toBeTrue();
 });
 
-it('falls back to the default industry and type when the column is blank', function () use ($runOrganizationImport) {
+it('falls back to the default industry and type when the column is blank', function () use ($runOrganizationImport): void {
     $defaultIndustry = OrganizationIndustry::factory()->create(['name' => 'Default Industry', 'is_default' => true]);
     $defaultType = OrganizationType::factory()->create(['name' => 'Default Type', 'is_default' => true]);
 
@@ -169,14 +169,14 @@ it('falls back to the default industry and type when the column is blank', funct
         ->and($organization->type->is($defaultType))->toBeTrue();
 });
 
-it('fails the row when the name is missing', function () use ($runOrganizationImport) {
+it('fails the row when the name is missing', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => '',
         'city' => 'Nowhere',
     ]);
 })->throws(ValidationException::class);
 
-it('imports domains from a pipe-separated list', function () use ($runOrganizationImport) {
+it('imports domains from a pipe-separated list', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
         'domains' => 'collegecc.edu|college.edu',
@@ -190,7 +190,7 @@ it('imports domains from a pipe-separated list', function () use ($runOrganizati
     ]);
 });
 
-it('imports domains from a comma-separated list', function () use ($runOrganizationImport) {
+it('imports domains from a comma-separated list', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
         'domains' => 'collegecc.edu, college.edu ',
@@ -204,21 +204,21 @@ it('imports domains from a comma-separated list', function () use ($runOrganizat
     ]);
 });
 
-it('fails the row when a domain is invalid', function () use ($runOrganizationImport) {
+it('fails the row when a domain is invalid', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
         'domains' => 'collegecc.edu|not a domain',
     ]);
 })->throws(ValidationException::class);
 
-it('fails the row when the same domain is listed more than once in one row', function () use ($runOrganizationImport) {
+it('fails the row when the same domain is listed more than once in one row', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'College Community College',
         'domains' => 'collegecc.edu|CollegeCC.edu',
     ]);
 })->throws(ValidationException::class);
 
-it('rejects a domain already used by another organization', function () use ($runOrganizationImport) {
+it('rejects a domain already used by another organization', function () use ($runOrganizationImport): void {
     Organization::factory()->create([
         'name' => 'Existing College',
         'domains' => [['domain' => 'shared.edu']],
@@ -230,7 +230,7 @@ it('rejects a domain already used by another organization', function () use ($ru
     ]);
 })->throws(RowImportFailedException::class);
 
-it('rejects a domain already used by another organization case-insensitively', function () use ($runOrganizationImport) {
+it('rejects a domain already used by another organization case-insensitively', function () use ($runOrganizationImport): void {
     Organization::factory()->create([
         'name' => 'Existing College',
         'domains' => [['domain' => 'Shared.edu']],
@@ -242,7 +242,7 @@ it('rejects a domain already used by another organization case-insensitively', f
     ]);
 })->throws(RowImportFailedException::class);
 
-it('allows an organization to keep its own domain while adding another on update', function () use ($runOrganizationImport) {
+it('allows an organization to keep its own domain while adding another on update', function () use ($runOrganizationImport): void {
     $organization = Organization::factory()->create([
         'name' => 'Keep College',
         'domains' => [['domain' => 'keep.edu']],
@@ -259,7 +259,7 @@ it('allows an organization to keep its own domain while adding another on update
     ]);
 });
 
-it('leaves existing domains unchanged when the domains column is blank', function () use ($runOrganizationImport) {
+it('leaves existing domains unchanged when the domains column is blank', function () use ($runOrganizationImport): void {
     $organization = Organization::factory()->create([
         'name' => 'Keep College',
         'domains' => [['domain' => 'keep.edu']],
@@ -275,7 +275,7 @@ it('leaves existing domains unchanged when the domains column is blank', functio
         ->and($organization->city)->toBe('New City');
 });
 
-it('rejects a domain claimed by a different organization earlier in the same import', function () use ($runOrganizationImport) {
+it('rejects a domain claimed by a different organization earlier in the same import', function () use ($runOrganizationImport): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
 
@@ -288,7 +288,7 @@ it('rejects a domain claimed by a different organization earlier in the same imp
     ], $import);
 })->throws(RowImportFailedException::class);
 
-it('allows an organization to re-claim its own domains within the same import', function () use ($runOrganizationImport) {
+it('allows an organization to re-claim its own domains within the same import', function () use ($runOrganizationImport): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
 
@@ -304,7 +304,7 @@ it('allows an organization to re-claim its own domains within the same import', 
         ->toBe([['domain' => 'shared.edu']]);
 });
 
-it('does not reject a domain claimed by a different import', function () use ($runOrganizationImport) {
+it('does not reject a domain claimed by a different import', function () use ($runOrganizationImport): void {
     $otherImport = new Import();
     $otherImport->id = (string) Str::uuid();
 
@@ -323,21 +323,21 @@ it('does not reject a domain claimed by a different import', function () use ($r
         ->toBe([['domain' => 'shared.edu']]);
 });
 
-it('fails the row when the industry does not exist', function () use ($runOrganizationImport) {
+it('fails the row when the industry does not exist', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'New College',
         'industry' => 'Nonexistent Industry',
     ]);
 })->throws(ValidationException::class);
 
-it('fails the row when the type does not exist', function () use ($runOrganizationImport) {
+it('fails the row when the type does not exist', function () use ($runOrganizationImport): void {
     $runOrganizationImport([
         'name' => 'New College',
         'type' => 'Nonexistent Type',
     ]);
 })->throws(ValidationException::class);
 
-it('preserves the existing industry and type when the columns are blank on update', function () use ($runOrganizationImport) {
+it('preserves the existing industry and type when the columns are blank on update', function () use ($runOrganizationImport): void {
     $industry = OrganizationIndustry::factory()->create(['name' => 'Finance']);
     $type = OrganizationType::factory()->create(['name' => 'Vendor']);
 

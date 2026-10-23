@@ -164,7 +164,7 @@ class StoreServiceRequestController extends Controller
             $this->handleAiResolution($data, $serviceRequest, $contact, $type, $updateUuids);
 
             $uploadJobs = array_map(
-                fn (array $file) => new PersistServiceRequestUpload(
+                fn (array $file): PersistServiceRequestUpload => new PersistServiceRequestUpload(
                     $serviceRequest,
                     $file['path'],
                     $file['original_file_name'],

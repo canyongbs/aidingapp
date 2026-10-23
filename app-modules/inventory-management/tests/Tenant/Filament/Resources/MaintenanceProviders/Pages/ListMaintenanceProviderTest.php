@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->assetManagement = false;
     $settings->save();
@@ -65,7 +65,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ListMaintenanceProviders::class)->assertOk();
 });
 
-it('only shows the bulk delete action to a user with the maintenance_provider.delete permission', function () {
+it('only shows the bulk delete action to a user with the maintenance_provider.delete permission', function (): void {
     MaintenanceProvider::factory(15)->create();
 
     $user = User::factory()

@@ -66,7 +66,7 @@ class CreateUser extends CreateRecord
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set) {
+        $generateFullName = function (Get $get, Set $set): void {
             $firstName = trim($get('first_name'));
 
             if (blank($firstName)) {
@@ -219,7 +219,7 @@ class CreateUser extends CreateRecord
                             ->hiddenLabel()
                             ->relationship('department', 'name'),
                     ])
-                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                    ->hidden(fn (?User $record): bool => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
             ]);
     }
 

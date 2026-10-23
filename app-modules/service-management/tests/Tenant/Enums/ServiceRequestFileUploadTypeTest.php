@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 
-it('resolves the upload type of a file attached to a service request update', function () {
+it('resolves the upload type of a file attached to a service request update', function (): void {
     Storage::fake('s3');
 
     $media = ServiceRequestUpdate::factory()->create()
@@ -50,7 +50,7 @@ it('resolves the upload type of a file attached to a service request update', fu
     expect(ServiceRequestFileUploadType::fromMedia($media))->toBe(ServiceRequestFileUploadType::Update);
 });
 
-it('resolves the upload type of a file attached directly to a service request', function (?string $uploadType, ?ServiceRequestFileUploadType $expectedUploadType) {
+it('resolves the upload type of a file attached directly to a service request', function (?string $uploadType, ?ServiceRequestFileUploadType $expectedUploadType): void {
     Storage::fake('s3');
 
     $media = ServiceRequest::factory()->create()

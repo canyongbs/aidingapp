@@ -41,14 +41,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn(['is_reporting_active', 'report_frequency', 'is_reported_via_database', 'is_reported_via_email']);
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->boolean('is_reporting_active')->default(false);
             $table->string('report_frequency')->nullable();
             $table->boolean('is_reported_via_database')->default(false);

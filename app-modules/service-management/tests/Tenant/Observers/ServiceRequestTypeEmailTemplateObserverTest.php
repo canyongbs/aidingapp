@@ -39,7 +39,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestTypeEmailTemplate;
 use function Tests\richContentText;
 use function Tests\richContentWith;
 
-it('converts a literal merge tag identifier when creating', function () {
+it('converts a literal merge tag identifier when creating', function (): void {
     $template = ServiceRequestTypeEmailTemplate::factory()->create([
         'body' => richContentText('Hello {{ recipient name }}!'),
     ]);
@@ -51,7 +51,7 @@ it('converts a literal merge tag identifier when creating', function () {
     ]));
 });
 
-it('converts a literal merge tag label when creating', function () {
+it('converts a literal merge tag label when creating', function (): void {
     $template = ServiceRequestTypeEmailTemplate::factory()->create([
         'subject' => richContentText("A request from {{ recipient's name }}"),
     ]);
@@ -62,7 +62,7 @@ it('converts a literal merge tag label when creating', function () {
     ]));
 });
 
-it('converts a literal merge tag with a custom label when updating', function () {
+it('converts a literal merge tag with a custom label when updating', function (): void {
     $template = ServiceRequestTypeEmailTemplate::factory()->create();
 
     $template->update([
@@ -75,7 +75,7 @@ it('converts a literal merge tag with a custom label when updating', function ()
     ]));
 });
 
-it('converts literal merge tags in both the subject and the body', function () {
+it('converts literal merge tags in both the subject and the body', function (): void {
     $template = ServiceRequestTypeEmailTemplate::factory()->create([
         'subject' => richContentText('{{ title }}'),
         'body' => richContentText('{{ description }}'),
@@ -85,7 +85,7 @@ it('converts literal merge tags in both the subject and the body', function () {
         ->and($template->body)->toEqual(richContentWith([['type' => 'mergeTag', 'attrs' => ['id' => 'description']]]));
 });
 
-it('leaves text that does not match a merge tag untouched', function () {
+it('leaves text that does not match a merge tag untouched', function (): void {
     $body = richContentText('Hello {{ not a merge tag }}!');
 
     $template = ServiceRequestTypeEmailTemplate::factory()->create([
@@ -95,7 +95,7 @@ it('leaves text that does not match a merge tag untouched', function () {
     expect($template->refresh()->body)->toEqual($body);
 });
 
-it('leaves an existing merge tag node untouched', function () {
+it('leaves an existing merge tag node untouched', function (): void {
     $body = richContentWith([
         ['type' => 'text', 'text' => 'Hello '],
         ['type' => 'mergeTag', 'attrs' => ['id' => 'recipient name']],
@@ -108,7 +108,7 @@ it('leaves an existing merge tag node untouched', function () {
     expect($template->refresh()->body)->toEqual($body);
 });
 
-it('renders the converted merge tag with its value', function () {
+it('renders the converted merge tag with its value', function (): void {
     $template = ServiceRequestTypeEmailTemplate::factory()->create([
         'body' => richContentText("Hello {{ recipient's name }}!"),
     ]);

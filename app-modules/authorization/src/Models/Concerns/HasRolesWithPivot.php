@@ -67,7 +67,7 @@ trait HasRolesWithPivot
         }
 
         return $relation->wherePivot($permissionRegistrar->teamsKey, getPermissionsTeamId())
-            ->where(function (Builder $query) use ($permissionRegistrar) {
+            ->where(function (Builder $query) use ($permissionRegistrar): void {
                 $teamField = config('permission.table_names.roles') . '.' . $permissionRegistrar->teamsKey;
                 $query->whereNull($teamField)->orWhere($teamField, getPermissionsTeamId());
             });

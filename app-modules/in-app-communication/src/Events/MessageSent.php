@@ -98,7 +98,7 @@ class MessageSent implements ShouldBroadcastNow
             ->pluck('participant_id');
 
         $channels = $participantIds->map(
-            fn (string $id) => new PrivateChannel("user.{$id}")
+            fn (string $id): PrivateChannel => new PrivateChannel("user.{$id}")
         )->all();
 
         $channels[] = new PrivateChannel("conversation.{$this->message->conversation_id}");

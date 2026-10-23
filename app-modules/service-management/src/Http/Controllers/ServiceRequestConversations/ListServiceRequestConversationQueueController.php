@@ -55,7 +55,7 @@ class ListServiceRequestConversationQueueController extends Controller
             ->with(['contact', 'serviceRequest'])
             ->orderBy('queued_at')
             ->get()
-            ->map(fn (ServiceRequestConversation $item) => [
+            ->map(fn (ServiceRequestConversation $item): array => [
                 'id' => $item->getKey(),
                 'contact_name' => $item->contact->full_name,
                 'service_request_number' => $item->serviceRequest->service_request_number ?? $item->serviceRequest->getKey(),

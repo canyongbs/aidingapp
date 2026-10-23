@@ -41,14 +41,14 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('organizations', function (Blueprint $table) {
+        Schema::table('organizations', function (Blueprint $table): void {
             $table->boolean('is_contact_generation_enabled')->default(false);
         });
     }
 
     public function down(): void
     {
-        Schema::table('organizations', function (Blueprint $table) {
+        Schema::table('organizations', function (Blueprint $table): void {
             $table->dropColumn('is_contact_generation_enabled');
         });
     }

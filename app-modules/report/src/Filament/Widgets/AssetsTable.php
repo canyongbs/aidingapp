@@ -151,34 +151,34 @@ class AssetsTable extends BaseWidget
                             return $query;
                         }
 
-                        return $query->where(function (Builder $query) use ($data) {
+                        return $query->where(function (Builder $query) use ($data): void {
                             foreach ($data['values'] as $status) {
-                                $query->orWhere(function (Builder $subQuery) use ($status) {
+                                $query->orWhere(function (Builder $subQuery) use ($status): void {
                                     if ($status === 'Maintenance') {
-                                        $subQuery->whereHas('maintenanceActivities', function (Builder $maintenanceQuery) {
+                                        $subQuery->whereHas('maintenanceActivities', function (Builder $maintenanceQuery): void {
                                             $maintenanceQuery->whereNotIn('status', [
                                                 MaintenanceActivityStatus::Completed,
                                                 MaintenanceActivityStatus::Canceled,
                                             ]);
                                         });
                                     } elseif ($status === 'Checked Out') {
-                                        $subQuery->whereHas('latestCheckOut', function (Builder $checkoutQuery) {
+                                        $subQuery->whereHas('latestCheckOut', function (Builder $checkoutQuery): void {
                                             $checkoutQuery->whereNull('asset_check_in_id');
-                                        })->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery) {
+                                        })->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery): void {
                                             $maintenanceQuery->whereNotIn('status', [
                                                 MaintenanceActivityStatus::Completed,
                                                 MaintenanceActivityStatus::Canceled,
                                             ]);
                                         });
                                     } elseif ($status === 'Bench Stock') {
-                                        $subQuery->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery) {
+                                        $subQuery->whereDoesntHave('maintenanceActivities', function (Builder $maintenanceQuery): void {
                                             $maintenanceQuery->whereNotIn('status', [
                                                 MaintenanceActivityStatus::Completed,
                                                 MaintenanceActivityStatus::Canceled,
                                             ]);
-                                        })->where(function (Builder $checkoutQuery) {
+                                        })->where(function (Builder $checkoutQuery): void {
                                             $checkoutQuery->whereDoesntHave('latestCheckOut')
-                                                ->orWhereHas('latestCheckOut', function (Builder $checkinQuery) {
+                                                ->orWhereHas('latestCheckOut', function (Builder $checkinQuery): void {
                                                     $checkinQuery->whereNotNull('asset_check_in_id');
                                                 });
                                         });

@@ -38,6 +38,7 @@ namespace AidingApp\Report\Filament\Widgets;
 
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Cache;
@@ -69,7 +70,7 @@ class ServiceRequestFeedbackStats extends StatsOverviewReportWidget
 
         $applyFilters = function (Builder $query, ?string $rootRelation = null) use ($startDate, $endDate, $types) {
             return $query
-                ->when($startDate && $endDate, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]))
+                ->when($startDate instanceof Carbon && $endDate instanceof Carbon, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]))
                 ->when(
                     $types,
                     fn (Builder $query): Builder => $query->whereHas(

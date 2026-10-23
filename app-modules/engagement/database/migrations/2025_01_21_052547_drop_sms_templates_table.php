@@ -46,7 +46,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::create('sms_templates', function (Blueprint $table) {
+        Schema::create('sms_templates', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->string('name');

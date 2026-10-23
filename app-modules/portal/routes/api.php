@@ -78,8 +78,8 @@ Route::prefix('api')
         EnsureKnowledgeManagementPortalIsEnabled::class,
         EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
     ])
-    ->group(function () {
-        Route::middleware(['auth:sanctum'])->group(function () {
+    ->group(function (): void {
+        Route::middleware(['auth:sanctum'])->group(function (): void {
             Route::get('/user', fn () => auth('contact')->user() ?? response()->json(status: Response::HTTP_UNAUTHORIZED))
                 ->name('user.auth-check');
         });
@@ -87,7 +87,7 @@ Route::prefix('api')
         Route::prefix('portal')
             ->name('portal.')
             ->middleware(TrackContactPresence::class)
-            ->group(function () {
+            ->group(function (): void {
                 Route::get('/', [KnowledgeManagementPortalController::class, 'show'])
                     ->name('define');
 

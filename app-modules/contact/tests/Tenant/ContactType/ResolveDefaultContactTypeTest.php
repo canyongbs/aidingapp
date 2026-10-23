@@ -38,7 +38,7 @@ use AidingApp\Contact\Models\ContactType;
 
 use function PHPUnit\Framework\assertNull;
 
-test('resolveDefault returns the configured default when one exists', function () {
+test('resolveDefault returns the configured default when one exists', function (): void {
     ContactType::factory()->create(['is_default' => false]);
     $default = ContactType::factory()->create(['is_default' => true]);
     ContactType::factory()->create(['is_default' => false]);
@@ -46,13 +46,13 @@ test('resolveDefault returns the configured default when one exists', function (
     expect(ContactType::resolveDefault()->is($default))->toBeTrue();
 });
 
-test('resolveDefault falls back to the oldest type when no default is set', function () {
+test('resolveDefault falls back to the oldest type when no default is set', function (): void {
     $oldest = ContactType::factory()->create(['is_default' => false, 'created_at' => now()->subDay()]);
     ContactType::factory()->create(['is_default' => false, 'created_at' => now()]);
 
     expect(ContactType::resolveDefault()->is($oldest))->toBeTrue();
 });
 
-test('resolveDefault returns null when no types exist', function () {
+test('resolveDefault returns null when no types exist', function (): void {
     assertNull(ContactType::resolveDefault());
 });

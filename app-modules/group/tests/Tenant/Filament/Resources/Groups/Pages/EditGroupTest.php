@@ -46,14 +46,14 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render the edit group page', function () {
+it('can render the edit group page', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
     get(GroupResource::getUrl('edit', ['record' => $group]))->assertSuccessful();
 });
 
-it('displays the group data', function () {
+it('displays the group data', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
@@ -64,7 +64,7 @@ it('displays the group data', function () {
         ]);
 });
 
-it('can update a group', function () {
+it('can update a group', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
@@ -80,7 +80,7 @@ it('can update a group', function () {
     ]);
 });
 
-it('allows saving with the same name as the current group', function () {
+it('allows saving with the same name as the current group', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
@@ -90,7 +90,7 @@ it('allows saving with the same name as the current group', function () {
         ->assertHasNoFormErrors();
 });
 
-it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
+it('validates the inputs', function (GroupRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     Group::factory()->create(['name' => 'Student Success']);
@@ -107,8 +107,8 @@ it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
     'description max' => [GroupRequestFactory::new()->state(['description' => str()->random(65536)]), ['description' => 'max']],
 ]);
 
-describe('authorization', function () {
-    it('denies access without the `group.*.update` permission', function () {
+describe('authorization', function (): void {
+    it('denies access without the `group.*.update` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('group.view-any');
         actingAs($user);

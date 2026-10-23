@@ -42,7 +42,7 @@ use Mockery\MockInterface;
 
 use function Pest\Laravel\partialMock;
 
-test('it clears broken images when article has no content', function () {
+test('it clears broken images when article has no content', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => null,
@@ -61,7 +61,7 @@ test('it clears broken images when article has no content', function () {
     expect($knowledgeBaseItem->broken_images)->toBeNull();
 });
 
-test('it clears broken images when article has no image nodes', function () {
+test('it clears broken images when article has no image nodes', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -87,7 +87,7 @@ test('it clears broken images when article has no image nodes', function () {
     Http::assertNothingSent();
 });
 
-test('it marks media image as not broken when file exists on disk', function () {
+test('it marks media image as not broken when file exists on disk', function (): void {
     Storage::fake('s3');
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -103,7 +103,7 @@ test('it marks media image as not broken when file exists on disk', function () 
 
     Http::fake();
 
-    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media): void {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
@@ -122,7 +122,7 @@ test('it marks media image as not broken when file exists on disk', function () 
     expect($knowledgeBaseItem->broken_images)->toBeNull();
 });
 
-test('it detects broken media image when uuid has no matching media record', function () {
+test('it detects broken media image when uuid has no matching media record', function (): void {
     Storage::fake('s3');
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -135,7 +135,7 @@ test('it detects broken media image when uuid has no matching media record', fun
 
     Http::fake();
 
-    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($missingUuid) {
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($missingUuid): void {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
@@ -154,7 +154,7 @@ test('it detects broken media image when uuid has no matching media record', fun
     expect($knowledgeBaseItem->broken_images)->toContain($missingUuid);
 });
 
-test('it detects broken media image when file is missing from disk', function () {
+test('it detects broken media image when file is missing from disk', function (): void {
     Storage::fake('s3');
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -172,7 +172,7 @@ test('it detects broken media image when file is missing from disk', function ()
 
     Http::fake();
 
-    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media) {
+    $mock = partialMock(CheckKnowledgeBaseArticleImagesJob::class, function (MockInterface $mock) use ($media): void {
         $mock
             ->shouldAllowMockingProtectedMethods()
             ->shouldReceive('extractMediaImageIds')
@@ -191,7 +191,7 @@ test('it detects broken media image when file is missing from disk', function ()
     expect($knowledgeBaseItem->broken_images)->toContain($media->uuid);
 });
 
-test('it ignores external images with relative paths', function () {
+test('it ignores external images with relative paths', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -223,7 +223,7 @@ test('it ignores external images with relative paths', function () {
     Http::assertNothingSent();
 });
 
-test('it has correct unique id and unique for values', function () {
+test('it has correct unique id and unique for values', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
     $job = new CheckKnowledgeBaseArticleImagesJob($knowledgeBaseItem);

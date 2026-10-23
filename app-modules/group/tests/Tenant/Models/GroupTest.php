@@ -38,7 +38,7 @@ use AidingApp\Group\Models\Group;
 
 use function Pest\Laravel\assertSoftDeleted;
 
-it('can be archived', function () {
+it('can be archived', function (): void {
     $group = Group::factory()->create();
 
     expect($group->isArchived())->toBeFalse();
@@ -48,13 +48,13 @@ it('can be archived', function () {
     expect($group->refresh()->isArchived())->toBeTrue();
 });
 
-it('is audited', function () {
+it('is audited', function (): void {
     $group = Group::factory()->create();
 
     expect($group->audits()->exists())->toBeTrue();
 });
 
-it('allows reusing a soft deleted group name', function () {
+it('allows reusing a soft deleted group name', function (): void {
     $deletedGroup = Group::factory()->create(['name' => 'Student Success']);
 
     $deletedGroup->delete();

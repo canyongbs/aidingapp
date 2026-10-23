@@ -43,11 +43,11 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -58,7 +58,7 @@ it('is gated with proper access control', function () {
     ])->assertForbidden();
 });
 
-it('requires service_request.view-any permission', function () {
+it('requires service_request.view-any permission', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -70,7 +70,7 @@ it('requires service_request.view-any permission', function () {
     ])->assertForbidden();
 });
 
-it('requires service_request_update.create permission', function () {
+it('requires service_request_update.create permission', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -82,7 +82,7 @@ it('requires service_request_update.create permission', function () {
     ])->assertForbidden();
 });
 
-it('can create a service request update with valid data', function () {
+it('can create a service request update with valid data', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -107,7 +107,7 @@ it('can create a service request update with valid data', function () {
         ->toBe(true);
 });
 
-it('can create a non-internal service request update', function () {
+it('can create a non-internal service request update', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -130,7 +130,7 @@ it('can create a non-internal service request update', function () {
         ->toBe(false);
 });
 
-it('defaults internal to false when it is omitted', function () {
+it('defaults internal to false when it is omitted', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -146,7 +146,7 @@ it('defaults internal to false when it is omitted', function () {
         ->toBe(false);
 });
 
-it('can create a service request update with only required fields', function () {
+it('can create a service request update with only required fields', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -164,7 +164,7 @@ it('can create a service request update with only required fields', function () 
     ]);
 });
 
-it('validates that update field is required', function () {
+it('validates that update field is required', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -177,7 +177,7 @@ it('validates that update field is required', function () {
         ->assertJsonValidationErrors(['update']);
 });
 
-it('validates that update field must be a string', function () {
+it('validates that update field must be a string', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -191,7 +191,7 @@ it('validates that update field must be a string', function () {
         ->assertJsonValidationErrors(['update']);
 });
 
-it('validates that internal field must be a boolean', function () {
+it('validates that internal field must be a boolean', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -206,7 +206,7 @@ it('validates that internal field must be a boolean', function () {
         ->assertJsonValidationErrors(['internal']);
 });
 
-it('returns 404 for a non-existent service request', function () {
+it('returns 404 for a non-existent service request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request_update.create');
@@ -217,7 +217,7 @@ it('returns 404 for a non-existent service request', function () {
     ])->assertNotFound();
 });
 
-it('stamps the update as created by the authenticated system user', function () {
+it('stamps the update as created by the authenticated system user', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -235,7 +235,7 @@ it('stamps the update as created by the authenticated system user', function () 
     expect($serviceRequestUpdate->created_by_type)->toBe($user->getMorphClass());
 });
 
-it('can create a service request update with file attachments', function () {
+it('can create a service request update with file attachments', function (): void {
     Storage::fake('s3');
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -260,7 +260,7 @@ it('can create a service request update with file attachments', function () {
     expect($serviceRequestUpdate->getMedia('uploads'))->toHaveCount(1);
 });
 
-it('rejects unauthenticated requests', function () {
+it('rejects unauthenticated requests', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     postJson(route('api.v1.service-requests.updates.store', ['serviceRequest' => $serviceRequest], false), [
@@ -268,7 +268,7 @@ it('rejects unauthenticated requests', function () {
     ])->assertUnauthorized();
 });
 
-it('persists the update associated with the correct service request', function () {
+it('persists the update associated with the correct service request', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
     $otherServiceRequest = ServiceRequest::factory()->create();
 

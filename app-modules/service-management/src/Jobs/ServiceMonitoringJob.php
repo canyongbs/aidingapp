@@ -87,7 +87,7 @@ class ServiceMonitoringJob implements ShouldQueue, ShouldBeUnique
         // Bypass confidentiality visibility: this runs with no authenticated user and must check every monitor
         ServiceMonitoringTarget::withoutGlobalScope(ServiceMonitoringTargetVisibilityScope::class)
             ->where('frequency', $this->interval)
-            ->chunkById(100, function (Collection $serviceMonitoringTargets) {
+            ->chunkById(100, function (Collection $serviceMonitoringTargets): void {
                 foreach ($serviceMonitoringTargets as $serviceMonitoringTarget) {
                     dispatch(new ServiceMonitoringCheckJob($serviceMonitoringTarget));
                 }

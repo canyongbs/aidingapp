@@ -61,7 +61,7 @@ class ServiceRequestUpdateResource extends JsonResource
                 'id' => $this->resource->created_by_id,
                 'type' => $this->resource->created_by_type,
             ],
-            'files' => $this->resource->getMedia('uploads')->map(fn ($media) => [
+            'files' => $this->resource->getMedia('uploads')->map(fn ($media): array => [
                 'id' => $media->id,
                 'url' => $media->getTemporaryUrl(now()->addHour()),
                 'name' => $media->name,

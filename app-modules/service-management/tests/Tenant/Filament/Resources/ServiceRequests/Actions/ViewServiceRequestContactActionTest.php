@@ -89,7 +89,7 @@ $mountViewContact = function (ServiceRequest $serviceRequest): Testable {
         ->assertActionMounted(TestAction::make('viewContact')->schemaComponent('respondent'));
 };
 
-test('viewContact action is visible for a user with permission to view contacts', function () use ($actingAsServiceRequestViewer) {
+test('viewContact action is visible for a user with permission to view contacts', function () use ($actingAsServiceRequestViewer): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     Livewire::test(ViewServiceRequest::class, [
@@ -99,7 +99,7 @@ test('viewContact action is visible for a user with permission to view contacts'
         ->assertActionVisible(TestAction::make('viewContact')->schemaComponent('respondent'));
 });
 
-test('viewContact action is hidden for a user without permission to view contacts', function () {
+test('viewContact action is hidden for a user without permission to view contacts', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -131,7 +131,7 @@ test('viewContact action is hidden for a user without permission to view contact
 
 // Service Requests tab (always visible to anyone who can reach this page - see actingAsServiceRequestViewer())
 
-test('viewContact shows scoped service request records on the Service Requests tab', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows scoped service request records on the Service Requests tab', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $otherServiceRequest = ServiceRequest::factory()->create([
@@ -146,7 +146,7 @@ test('viewContact shows scoped service request records on the Service Requests t
 
 // Assets tab - Checked Out Assets
 
-test('viewContact shows scoped checked out assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows scoped checked out assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer('asset_check_out.view-any');
 
     $asset = Asset::factory()->create(['name' => 'Checked Out Test Laptop']);
@@ -160,7 +160,7 @@ test('viewContact shows scoped checked out assets when the user has permission',
         ->assertMountedActionModalSee('Checked Out Test Laptop');
 });
 
-test('viewContact hides the Checked Out Assets section for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact hides the Checked Out Assets section for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $asset = Asset::factory()->create(['name' => 'Checked Out Test Laptop']);
@@ -176,7 +176,7 @@ test('viewContact hides the Checked Out Assets section for a user without permis
 
 // Assets tab - Returned Assets
 
-test('viewContact shows scoped returned assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows scoped returned assets when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer('asset_check_in.view-any');
 
     $asset = Asset::factory()->create(['name' => 'Returned Test Monitor']);
@@ -191,7 +191,7 @@ test('viewContact shows scoped returned assets when the user has permission', fu
         ->assertMountedActionModalSee('Returned Test Monitor');
 });
 
-test('viewContact hides the Returned Assets section for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact hides the Returned Assets section for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $asset = Asset::factory()->create(['name' => 'Returned Test Monitor']);
@@ -208,7 +208,7 @@ test('viewContact hides the Returned Assets section for a user without permissio
 
 // Files tab
 
-test('viewContact shows scoped engagement files when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows scoped engagement files when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer('engagement_file.view-any');
 
     $contact = $serviceRequest->respondent;
@@ -221,7 +221,7 @@ test('viewContact shows scoped engagement files when the user has permission', f
         ->assertMountedActionModalSee('Scoped Test File Description');
 });
 
-test('viewContact hides the Files tab for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact hides the Files tab for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
@@ -236,7 +236,7 @@ test('viewContact hides the Files tab for a user without permission', function (
 
 // Emails tab
 
-test('viewContact shows scoped engagement timeline entries when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows scoped engagement timeline entries when the user has permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer('engagement.view-any');
 
     $contact = $serviceRequest->respondent;
@@ -251,7 +251,7 @@ test('viewContact shows scoped engagement timeline entries when the user has per
         ->assertMountedActionModalSee('Outbound');
 });
 
-test('viewContact hides the Emails tab for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact hides the Emails tab for a user without permission', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
@@ -268,7 +268,7 @@ test('viewContact hides the Emails tab for a user without permission', function 
 
 // Email health
 
-test('viewContact shows the email health callout for a bounced respondent contact', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact shows the email health callout for a bounced respondent contact', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
@@ -278,7 +278,7 @@ test('viewContact shows the email health callout for a bounced respondent contac
         ->assertSchemaComponentVisible('email-health-callout', 'mountedActionSchema0');
 });
 
-test('viewContact hides the email health callout for a healthy respondent contact', function () use ($actingAsServiceRequestViewer, $mountViewContact) {
+test('viewContact hides the email health callout for a healthy respondent contact', function () use ($actingAsServiceRequestViewer, $mountViewContact): void {
     $serviceRequest = $actingAsServiceRequestViewer();
 
     $contact = $serviceRequest->respondent;
@@ -290,7 +290,7 @@ test('viewContact hides the email health callout for a healthy respondent contac
 
 // Success - full contact details
 
-test('viewContact shows the full contact details for the service request respondent', function () use ($mountViewContact) {
+test('viewContact shows the full contact details for the service request respondent', function () use ($mountViewContact): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,

@@ -49,7 +49,7 @@ use function Pest\Laravel\travelBack;
 use function Pest\Laravel\travelTo;
 use function Tests\asSuperAdmin;
 
-test('round robin assigner distributes requests evenly across managers', function () {
+test('round robin assigner distributes requests evenly across managers', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -90,7 +90,7 @@ test('round robin assigner distributes requests evenly across managers', functio
     travelBack();
 });
 
-test('round robin assigner wraps around after all managers have been assigned', function () {
+test('round robin assigner wraps around after all managers have been assigned', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -145,7 +145,7 @@ test('round robin assigner wraps around after all managers have been assigned', 
     expect($serviceRequest->assignedTo?->user_id)->toBe($firstUser->getKey());
 });
 
-it('assigns to a manager through group membership', function () {
+it('assigns to a manager through group membership', function (): void {
     asSuperAdmin();
 
     $manager = User::factory()->create();
@@ -171,7 +171,7 @@ it('assigns to a manager through group membership', function () {
     expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
-test('round robin assigner does not assign when no managers exist', function () {
+test('round robin assigner does not assign when no managers exist', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->state([

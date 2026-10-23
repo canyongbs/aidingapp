@@ -79,7 +79,7 @@ class TypingBroadcast implements ShouldBroadcastNow
             ->conversationParticipants()
             ->where('participant_id', '!=', $this->userId)
             ->pluck('participant_id')
-            ->map(fn (string $id) => new PrivateChannel("user.{$id}"))
+            ->map(fn (string $id): PrivateChannel => new PrivateChannel("user.{$id}"))
             ->all();
     }
 }

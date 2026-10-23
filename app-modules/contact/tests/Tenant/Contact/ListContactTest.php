@@ -55,7 +55,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('ListContacts is gated with proper access control', function () {
+test('ListContacts is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -71,7 +71,7 @@ test('ListContacts is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('can list records of engagements timelineable', function () {
+test('can list records of engagements timelineable', function (): void {
     Queue::fake();
     $user = User::factory()->create();
 
@@ -100,7 +100,7 @@ test('can list records of engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function (Engagement $response) {
+    $engagements->each(function (Engagement $response): void {
         assert($response->recipient instanceof Model);
 
         $event = new TimelineableRecordCreated($response->recipient, $response);
@@ -109,7 +109,7 @@ test('can list records of engagements timelineable', function () {
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function (EngagementResponse $response) {
+    $engagementResponses->each(function (EngagementResponse $response): void {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 
@@ -124,7 +124,7 @@ test('can list records of engagements timelineable', function () {
         ->assertSuccessful();
 });
 
-test('can filter engagements timelineable', function () {
+test('can filter engagements timelineable', function (): void {
     Queue::fake();
     $user = User::factory()->create();
 
@@ -153,7 +153,7 @@ test('can filter engagements timelineable', function () {
             'sender_type' => $contact->getMorphClass(),
         ])->createQuietly();
 
-    $engagements->each(function (Engagement $response) {
+    $engagements->each(function (Engagement $response): void {
         assert($response->recipient instanceof Model);
 
         $event = new TimelineableRecordCreated($response->recipient, $response);
@@ -162,7 +162,7 @@ test('can filter engagements timelineable', function () {
         $listener->handle($event);
     });
 
-    $engagementResponses->each(function (EngagementResponse $response) {
+    $engagementResponses->each(function (EngagementResponse $response): void {
         $event = new TimelineableRecordCreated($response->sender, $response);
         $listener = app(AddRecordToTimeline::class);
 

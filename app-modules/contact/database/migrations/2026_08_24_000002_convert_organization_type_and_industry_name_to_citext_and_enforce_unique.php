@@ -54,11 +54,11 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             foreach ($this->tables as $table) {
                 DB::statement("ALTER TABLE {$table} ALTER COLUMN {$this->column} TYPE citext");
 
-                Schema::table($table, function (Blueprint $blueprint) use ($table) {
+                Schema::table($table, function (Blueprint $blueprint) use ($table): void {
                     $blueprint->uniqueIndex($this->column, "{$table}_name_unique")
                         ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
                 });
@@ -70,7 +70,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
             foreach ($this->tables as $table) {

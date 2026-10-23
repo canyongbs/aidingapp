@@ -41,6 +41,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactEmailHea
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactFormSchema;
 use AidingApp\Contact\Filament\Resources\ContactResource\Schemas\ContactInfolist;
 use AidingApp\Contact\Models\Contact;
+use App\Enums\PresenceStatus;
 use App\Features\ContactTrackingFeature;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
@@ -89,11 +90,11 @@ class ViewContact extends ViewRecord
                                         TextEntry::make('presence_status')
                                             ->label('Presence')
                                             ->visible(fn (): bool => ContactTrackingFeature::active())
-                                            ->state(fn (Contact $record) => $record->presenceStatus())
+                                            ->state(fn (Contact $record): PresenceStatus => $record->presenceStatus())
                                             ->badge()
-                                            ->color(fn (Contact $record) => $record->presenceStatus()->getColor())
-                                            ->icon(fn (Contact $record) => $record->presenceStatus()->getIcon())
-                                            ->formatStateUsing(fn (Contact $record) => $record->presenceStatus()->getLabel()),
+                                            ->color(fn (Contact $record): string => $record->presenceStatus()->getColor())
+                                            ->icon(fn (Contact $record): string => $record->presenceStatus()->getIcon())
+                                            ->formatStateUsing(fn (Contact $record): string => $record->presenceStatus()->getLabel()),
                                         TextEntry::make('type.name')
                                             ->label('Type'),
                                     ])

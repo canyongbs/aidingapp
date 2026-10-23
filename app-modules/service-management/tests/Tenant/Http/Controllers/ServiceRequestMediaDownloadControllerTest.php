@@ -45,11 +45,11 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('s3');
 });
 
-test('an authenticated user with permission can download service request update media', function () {
+test('an authenticated user with permission can download service request update media', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');
@@ -66,7 +66,7 @@ test('an authenticated user with permission can download service request update 
         ->assertRedirect();
 });
 
-test('an authenticated user without permission cannot download service request update media', function () {
+test('an authenticated user without permission cannot download service request update media', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
@@ -81,7 +81,7 @@ test('an authenticated user without permission cannot download service request u
         ->assertForbidden();
 });
 
-test('an unauthenticated user cannot download service request media', function () {
+test('an unauthenticated user cannot download service request media', function (): void {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
         ->addMedia(UploadedFile::fake()->image('test-file.png'))
@@ -93,7 +93,7 @@ test('an unauthenticated user cannot download service request media', function (
         ->assertRedirect();
 });
 
-test('a super admin can download service request update media', function () {
+test('a super admin can download service request update media', function (): void {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
         ->addMedia(UploadedFile::fake()->image('document.png'))
@@ -106,7 +106,7 @@ test('a super admin can download service request update media', function () {
         ->assertRedirect();
 });
 
-test('an authenticated user with permission can download service request media', function () {
+test('an authenticated user with permission can download service request media', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
     $serviceRequest
         ->addMedia(UploadedFile::fake()->image('test-file.png'))
@@ -119,7 +119,7 @@ test('an authenticated user with permission can download service request media',
         ->assertRedirect();
 });
 
-test('an authenticated user without permission cannot download service request media', function () {
+test('an authenticated user without permission cannot download service request media', function (): void {
     $user = User::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -134,7 +134,7 @@ test('an authenticated user without permission cannot download service request m
         ->assertForbidden();
 });
 
-test('the download redirect url contains a temporary url', function () {
+test('the download redirect url contains a temporary url', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');
@@ -154,7 +154,7 @@ test('the download redirect url contains a temporary url', function () {
     expect($redirectUrl)->toContain($media->file_name);
 });
 
-test('a user cannot download media that does not belong to a service request or service request update', function () {
+test('a user cannot download media that does not belong to a service request or service request update', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('service_request_update.view-any');
     $user->givePermissionTo('service_request_update.*.view');

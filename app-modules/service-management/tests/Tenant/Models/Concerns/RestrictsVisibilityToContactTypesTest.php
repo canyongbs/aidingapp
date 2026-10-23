@@ -38,14 +38,14 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 
-it('treats an unrestricted type with no categories as visible to anyone', function () {
+it('treats an unrestricted type with no categories as visible to anyone', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     expect($type->isVisibleToContactType(null))->toBeTrue()
         ->and($type->isVisibleToContactType(ContactType::factory()->create()->id))->toBeTrue();
 });
 
-it('restricts a type with its own restriction to matching contact types', function () {
+it('restricts a type with its own restriction to matching contact types', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -57,7 +57,7 @@ it('restricts a type with its own restriction to matching contact types', functi
         ->and($type->isVisibleToContactType(null))->toBeFalse();
 });
 
-it('is visible when at least one category path is authorized', function () {
+it('is visible when at least one category path is authorized', function (): void {
     $otherContactType = ContactType::factory()->create();
     $allowedContactType = ContactType::factory()->create();
 
@@ -73,7 +73,7 @@ it('is visible when at least one category path is authorized', function () {
     expect($type->isVisibleToContactType($otherContactType->id))->toBeTrue();
 });
 
-it('is hidden when every category path is restricted and none authorize the contact', function () {
+it('is hidden when every category path is restricted and none authorize the contact', function (): void {
     $otherContactType = ContactType::factory()->create();
     $allowedContactTypeA = ContactType::factory()->create();
     $allowedContactTypeB = ContactType::factory()->create();
@@ -92,7 +92,7 @@ it('is hidden when every category path is restricted and none authorize the cont
         ->and($type->isVisibleToContactType($allowedContactTypeA->id))->toBeTrue();
 });
 
-it('is hidden when the type itself is restricted even under an open category', function () {
+it('is hidden when the type itself is restricted even under an open category', function (): void {
     $allowedContactType = ContactType::factory()->create();
     $otherContactType = ContactType::factory()->create();
 
@@ -106,7 +106,7 @@ it('is hidden when the type itself is restricted even under an open category', f
         ->and($type->isVisibleToContactType($allowedContactType->id))->toBeTrue();
 });
 
-it('walks the full category path when evaluating a nested placement', function () {
+it('walks the full category path when evaluating a nested placement', function (): void {
     $otherContactType = ContactType::factory()->create();
     $allowedContactType = ContactType::factory()->create();
 

@@ -44,7 +44,7 @@ class GenerateServiceRequestFormKitSchema extends GenerateFormKitSchema
 {
     public function __invoke(Submissible $submissible): array
     {
-        $priorities = $submissible->type->priorities->map(function (ServiceRequestPriority $priority) {
+        $priorities = $submissible->type->priorities->map(function (ServiceRequestPriority $priority): array {
             return [
                 'label' => $priority->name,
                 'value' => $priority->id,

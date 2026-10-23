@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('assistant_chat_message_logs', function (Blueprint $table) {
+        Schema::create('assistant_chat_message_logs', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->longText('message');

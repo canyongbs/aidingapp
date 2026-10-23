@@ -130,7 +130,7 @@ class ListConversationsController extends Controller
     protected function formatConversations(Collection $items, string $currentUserId): array
     {
         $dmConversationIds = $items
-            ->filter(fn (Conversation $conversation) => $conversation->type === ConversationType::Direct)
+            ->filter(fn (Conversation $conversation): bool => $conversation->type === ConversationType::Direct)
             ->pluck('id')
             ->all();
 

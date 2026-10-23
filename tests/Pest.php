@@ -96,7 +96,7 @@ function user(array | null | string $roles = null, array | null | string $permis
     $user = User::factory()->create();
 
     collect($roles)
-        ->whenNotEmpty(function (Collection $collection) use ($guard, $user) {
+        ->whenNotEmpty(function (Collection $collection) use ($guard, $user): void {
             $roles = Role::query()
                 ->whereIn('name', $collection)
                 ->where('guard_name', $guard)
@@ -115,7 +115,7 @@ function isolatedMigration(string $migrationName, callable $callback): void
 {
     Event::listen(
         MigrationStarted::class,
-        function (MigrationStarted $event) use ($migrationName) {
+        function (MigrationStarted $event) use ($migrationName): void {
             if (preg_match('/[^\/]*(?=\.php)/', get_class($event->migration), $matches)) {
                 if ($matches[0] === $migrationName) {
                     throw new StopMigration();

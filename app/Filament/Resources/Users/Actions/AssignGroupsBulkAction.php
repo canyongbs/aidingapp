@@ -67,11 +67,11 @@ class AssignGroupsBulkAction extends BulkAction
                     ->multiple()
                     ->exists('groups', 'id'),
             ])
-            ->action(function (array $data, Collection $records) {
+            ->action(function (array $data, Collection $records): void {
                 try {
-                    DB::transaction(function () use ($data, $records) {
+                    DB::transaction(function () use ($data, $records): void {
                         /** @var Collection<int, User> $records */
-                        $records->each(function (User $record) use ($data) {
+                        $records->each(function (User $record) use ($data): void {
                             if ($data['replace']) {
                                 $record->groups()->sync($data['groups']);
                             } else {

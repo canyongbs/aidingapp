@@ -121,15 +121,15 @@ $streamedContent = function (StreamedResponse $response): string {
     return (string) ob_get_clean();
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     Carbon::setTestNow(Carbon::parse('2026-06-15 12:00:00'));
 });
 
-afterEach(function () {
+afterEach(function (): void {
     Carbon::setTestNow();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->save();
@@ -153,7 +153,7 @@ it('is gated with proper access control', function () {
     Livewire::test(Sla::class)->assertOk();
 });
 
-it('grants access to a user belonging to a department that has been granted access', function () {
+it('grants access to a user belonging to a department that has been granted access', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -174,7 +174,7 @@ it('grants access to a user belonging to a department that has been granted acce
     Livewire::test(Sla::class)->assertOk();
 });
 
-it('renders the report filters', function () use ($grantSlaReportAccess) {
+it('renders the report filters', function () use ($grantSlaReportAccess): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantSlaReportAccess($user);
@@ -190,7 +190,7 @@ it('renders the report filters', function () use ($grantSlaReportAccess) {
         ->assertSee('Assigned Agent');
 });
 
-it('renders every SLA widget on the page', function () use ($grantSlaReportAccess, $slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('renders every SLA widget on the page', function () use ($grantSlaReportAccess, $slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $user = User::factory()->create(['timezone' => 'UTC']);
 
     $grantSlaReportAccess($user);
@@ -212,7 +212,7 @@ it('renders every SLA widget on the page', function () use ($grantSlaReportAcces
     Livewire::test(SlaBreachesByServiceRequestTypeTable::class, ['cacheTag' => 'render-type', 'pageFilters' => []])->assertOk();
 });
 
-it('computes the SLA stats for the filtered service requests', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('computes the SLA stats for the filtered service requests', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $orderWithSla = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -235,7 +235,7 @@ it('computes the SLA stats for the filtered service requests', function () use (
         ->and($stats[3]->getValue())->toEqual('33.3%');
 });
 
-it('splits response SLA breaches by classification', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('splits response SLA breaches by classification', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $priority = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -254,7 +254,7 @@ it('splits response SLA breaches by classification', function () use ($slaReport
         ->and($data['datasets'][0]['data']->all())->toBe([2, 1]);
 });
 
-it('splits resolution SLA breaches by classification', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('splits resolution SLA breaches by classification', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $priority = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -272,7 +272,7 @@ it('splits resolution SLA breaches by classification', function () use ($slaRepo
         ->and($data['datasets'][0]['data']->all())->toBe([1, 1]);
 });
 
-it('plots response and resolution compliance over a rolling 12 months', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('plots response and resolution compliance over a rolling 12 months', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $priority = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -299,7 +299,7 @@ it('plots response and resolution compliance over a rolling 12 months', function
         ->and(end($resolutionData))->toBe(50.0);
 });
 
-it('applies the selected date range to the SLA compliance over time chart', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('applies the selected date range to the SLA compliance over time chart', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $priority = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -332,7 +332,7 @@ it('applies the selected date range to the SLA compliance over time chart', func
         ->and(end($filteredResolutionData))->toBe(100.0);
 });
 
-it('groups SLA performance by assigned agent and exports it', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest, $streamedContent) {
+it('groups SLA performance by assigned agent and exports it', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest, $streamedContent): void {
     $type = ServiceRequestType::factory()->create();
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
@@ -363,7 +363,7 @@ it('groups SLA performance by assigned agent and exports it', function () use ($
         ->toContain('100%');
 });
 
-it('groups SLA breaches by service request type and exports it', function () use ($openServiceRequestStatus, $slaReportPriority, $makeSlaServiceRequest, $streamedContent) {
+it('groups SLA breaches by service request type and exports it', function () use ($openServiceRequestStatus, $slaReportPriority, $makeSlaServiceRequest, $streamedContent): void {
     $status = $openServiceRequestStatus();
 
     $typeX = ServiceRequestType::factory()->create(['name' => 'Type X']);
@@ -387,7 +387,7 @@ it('groups SLA breaches by service request type and exports it', function () use
         ->toContain('Type Y');
 });
 
-it('respects the classification filter in the SLA stats', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('respects the classification filter in the SLA stats', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $priority = $slaReportPriority();
     $status = $openServiceRequestStatus();
 
@@ -403,7 +403,7 @@ it('respects the classification filter in the SLA stats', function () use ($slaR
     expect($stats[0]->getValue())->toEqual('1');
 });
 
-it('respects the assigned agent filter in the SLA stats', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('respects the assigned agent filter in the SLA stats', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
@@ -428,7 +428,7 @@ it('respects the assigned agent filter in the SLA stats', function () use ($slaR
     expect($stats[0]->getValue())->toEqual('1');
 });
 
-it('only returns agents with active assignments in the assigned agent filter options', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest) {
+it('only returns agents with active assignments in the assigned agent filter options', function () use ($slaReportPriority, $openServiceRequestStatus, $makeSlaServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = $slaReportPriority($type);
     $status = $openServiceRequestStatus();
@@ -460,7 +460,7 @@ it('only returns agents with active assignments in the assigned agent filter opt
         ->not()->toHaveKey((string) $inactiveAgent->getKey());
 });
 
-it('respects the selected service request types in the SLA stats', function () use ($openServiceRequestStatus, $slaReportPriority, $makeSlaServiceRequest) {
+it('respects the selected service request types in the SLA stats', function () use ($openServiceRequestStatus, $slaReportPriority, $makeSlaServiceRequest): void {
     $status = $openServiceRequestStatus();
 
     $typeA = ServiceRequestType::factory()->create();

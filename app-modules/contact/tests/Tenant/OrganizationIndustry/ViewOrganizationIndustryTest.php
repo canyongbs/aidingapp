@@ -41,7 +41,7 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-test('View OrganizationIndustry is gated with proper access control', function () {
+test('View OrganizationIndustry is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $organizationIndustry = OrganizationIndustry::factory()->create();

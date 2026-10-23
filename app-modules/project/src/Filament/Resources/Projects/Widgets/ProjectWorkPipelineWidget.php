@@ -192,7 +192,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->paginated([5, 10, 20, 50])
             ->defaultPaginationPageOption(50)
             ->defaultGroup(
-                function () use ($pipeline, $canManageMilestones) {
+                function () use ($pipeline, $canManageMilestones): Group {
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)

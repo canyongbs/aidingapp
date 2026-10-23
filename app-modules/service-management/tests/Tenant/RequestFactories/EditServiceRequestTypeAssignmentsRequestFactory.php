@@ -53,7 +53,7 @@ class EditServiceRequestTypeAssignmentsRequestFactory extends RequestFactory
     public function withRandomTypeNotIncludingIndividual(): static
     {
         return $this->state([
-            'assignment_type' => fake()->randomElement(array_filter(ServiceRequestTypeAssignmentTypes::cases(), fn (ServiceRequestTypeAssignmentTypes $type) => $type !== ServiceRequestTypeAssignmentTypes::Individual))->value,
+            'assignment_type' => fake()->randomElement(array_filter(ServiceRequestTypeAssignmentTypes::cases(), fn (ServiceRequestTypeAssignmentTypes $type): bool => $type !== ServiceRequestTypeAssignmentTypes::Individual))->value,
         ]);
     }
 

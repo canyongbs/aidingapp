@@ -74,7 +74,7 @@ class StoreServiceRequestUpdateController extends Controller
                 ->latest('created_at')
                 ->where('internal', false)
                 ->paginate(5)
-                ->through(function (ServiceRequestUpdate $update) {
+                ->through(function (ServiceRequestUpdate $update): array {
                     return [
                         'id' => $update->getKey(),
                         'update' => $update->update,

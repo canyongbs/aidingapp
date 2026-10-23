@@ -94,7 +94,7 @@ class CreateContract extends CreateRecord
                     ->native(false)
                     ->live(onBlur: true)
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
+                        fn (Get $get, Set $set): mixed => $get('start_date') > $get('end_date') ? $set('end_date', '') : ''
                     )
                     ->closeOnDateSelection()
                     ->placeholder('Select start date')
@@ -103,7 +103,7 @@ class CreateContract extends CreateRecord
                     ->label('End Date')
                     ->native(false)
                     ->placeholder('Select end date')
-                    ->minDate(fn (Get $get) => $get('start_date'))
+                    ->minDate(fn (Get $get): mixed => $get('start_date'))
                     ->live(onBlur: true)
                     ->closeOnDateSelection()
                     ->required(),

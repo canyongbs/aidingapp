@@ -107,19 +107,19 @@ class ServiceRequestTypeTemplates extends SettingsPage
                 Toggle::make('preload_new_service_request_types')
                     ->label('Preload New Service Request Types')
                     ->helperText('When selected, new service request types will inherit the base templates.')
-                    ->visible(fn (Get $get) => $get('use_custom_templates'))
+                    ->visible(fn (Get $get): mixed => $get('use_custom_templates'))
                     ->columnSpanFull(),
                 Tabs::make('Event templates')
                     ->persistTab()
                     ->id('service-request-type-template-event-tabs')
                     ->tabs(array_map(
-                        fn (ServiceRequestEmailTemplateType $type) => Tab::make($type->getLabel())
+                        fn (ServiceRequestEmailTemplateType $type): Tab => Tab::make($type->getLabel())
                             ->schema([
                                 Tabs::make('Role templates')
                                     ->persistTab()
                                     ->id("service-request-type-template-role-tabs-{$type->value}")
                                     ->tabs(array_map(
-                                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
+                                        fn (ServiceRequestTypeEmailTemplateRole $role): Tab => Tab::make($role->getLabel())
                                             ->schema($this->getServiceRequestTemplateEditorSchema(
                                                 $type,
                                                 subjectHelperText: 'You may use “merge tags” to substitute information about a service request into your subject line.',
@@ -133,7 +133,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
-                    ->visible(fn (Get $get) => $get('use_custom_templates'))
+                    ->visible(fn (Get $get): mixed => $get('use_custom_templates'))
                     ->columnSpanFull(),
             ]);
     }
@@ -196,7 +196,7 @@ class ServiceRequestTypeTemplates extends SettingsPage
     public function preloadBaseTemplates(): array
     {
         $existingTemplates = ServiceRequestNotificationAutomationEmailTemplate::all()
-            ->keyBy(fn ($template) => "{$template->type->value}:{$template->role->value}");
+            ->keyBy(fn ($template): string => "{$template->type->value}:{$template->role->value}");
 
         $templates = [];
 

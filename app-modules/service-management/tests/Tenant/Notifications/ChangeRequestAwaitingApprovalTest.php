@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Notification;
 </COPYRIGHT>
 */
 
-test('ChangeRequestAwaitingApprovalNotification notification is sent to each change request approver based on the change request type', function () {
+test('ChangeRequestAwaitingApprovalNotification notification is sent to each change request approver based on the change request type', function (): void {
     Notification::fake();
 
     // Given that we have a change request type with user approvers

@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Gate;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('delegates viewAny to the project when a project is passed', function () {
+it('delegates viewAny to the project when a project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -59,7 +59,7 @@ it('delegates viewAny to the project when a project is passed', function () {
     expect($user->can('viewAny', [Pipeline::class, $project]))->toBeTrue();
 });
 
-it('falls back to the pipeline.view-any permission when no project is passed', function () {
+it('falls back to the pipeline.view-any permission when no project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -72,7 +72,7 @@ it('falls back to the pipeline.view-any permission when no project is passed', f
     expect($user->can('viewAny', Pipeline::class))->toBeTrue();
 });
 
-it('delegates create to the project when a project is passed', function () {
+it('delegates create to the project when a project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -89,7 +89,7 @@ it('delegates create to the project when a project is passed', function () {
     expect($user->can('create', [Pipeline::class, $project]))->toBeTrue();
 });
 
-it('falls back to the pipeline.create permission when no project is passed', function () {
+it('falls back to the pipeline.create permission when no project is passed', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -102,7 +102,7 @@ it('falls back to the pipeline.create permission when no project is passed', fun
     expect($user->can('create', Pipeline::class))->toBeTrue();
 });
 
-it('delegates update to the pipeline\'s project when it has one', function () {
+it('delegates update to the pipeline\'s project when it has one', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -124,7 +124,7 @@ it('delegates update to the pipeline\'s project when it has one', function () {
     expect($user->can('update', $pipeline))->toBeTrue();
 });
 
-it('falls back to the pipeline.*.update permission when the pipeline has no project', function () {
+it('falls back to the pipeline.*.update permission when the pipeline has no project', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -141,7 +141,7 @@ it('falls back to the pipeline.*.update permission when the pipeline has no proj
     expect($user->can('update', $pipeline))->toBeTrue();
 });
 
-it('does not let a super admin view or update a pipeline whose project is archived', function () {
+it('does not let a super admin view or update a pipeline whose project is archived', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -158,7 +158,7 @@ it('does not let a super admin view or update a pipeline whose project is archiv
         ->and($user->can('update', $pipeline))->toBeFalse();
 });
 
-it('denies access to a pipeline of an archived project without disclosing that it is archived', function () {
+it('denies access to a pipeline of an archived project without disclosing that it is archived', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('pipeline.view-any', 'pipeline.*.view');

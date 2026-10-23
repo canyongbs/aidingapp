@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->string('assignment_type')->default('none');
             $table->foreignUuid('assignment_type_individual_id')->nullable()->constrained('users')->nullOnDelete();
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_request_types', function (Blueprint $table) {
+        Schema::table('service_request_types', function (Blueprint $table): void {
             $table->dropColumn('assignment_type');
             $table->dropConstrainedForeignId('assignment_type_individual_id');
         });

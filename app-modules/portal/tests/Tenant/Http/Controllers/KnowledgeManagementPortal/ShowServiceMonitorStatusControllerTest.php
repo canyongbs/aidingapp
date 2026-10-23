@@ -48,7 +48,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\travelTo;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -56,7 +56,7 @@ beforeEach(function () {
     actingAs(Contact::factory()->create());
 });
 
-it('displays the service monitor data', function () {
+it('displays the service monitor data', function (): void {
     // Midday, so checks a few hours old still land in today's history bucket.
     travelTo(today()->setTime(12, 0));
 
@@ -97,7 +97,7 @@ it('displays the service monitor data', function () {
         ->assertJsonPath('data.history.29.checks_count', 2);
 });
 
-it('can show the history for a different period', function () {
+it('can show the history for a different period', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()]);
@@ -109,7 +109,7 @@ it('can show the history for a different period', function () {
         ->assertJsonPath('data.history.59.status', 'outage');
 });
 
-it('validates the inputs', function (array $query, string $error) {
+it('validates the inputs', function (array $query, string $error): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget, ...$query]))
@@ -119,24 +119,24 @@ it('validates the inputs', function (array $query, string $error) {
     'timezone max' => [['timezone' => str_repeat('a', 256)], 'timezone'],
 ]);
 
-it('does not reject a timezone the date extension cannot resolve by name', function () {
+it('does not reject a timezone the date extension cannot resolve by name', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget, 'timezone' => 'Asia/Calcutta']))
         ->assertOk();
 });
 
-it('does not show a service monitor that does not exist', function () {
+it('does not show a service monitor that does not exist', function (): void {
     getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => (string) Str::uuid()]))
         ->assertNotFound();
 });
 
-it('does not show a service monitor when the id is not a uuid', function () {
+it('does not show a service monitor when the id is not a uuid', function (): void {
     getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => 'not-a-uuid']))->assertNotFound();
 });
 
-describe('authorization', function () {
-    it('requires contact authentication', function () {
+describe('authorization', function (): void {
+    it('requires contact authentication', function (): void {
         auth()->forgetGuards();
 
         $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -145,7 +145,7 @@ describe('authorization', function () {
             ->assertUnauthorized();
     });
 
-    it('does not show a confidential service monitor unless the contact is granted access', function () {
+    it('does not show a confidential service monitor unless the contact is granted access', function (): void {
         $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
 
         getJson(route('api.portal.status.show', ['serviceMonitoringTarget' => $serviceMonitoringTarget]))
@@ -157,7 +157,7 @@ describe('authorization', function () {
             ->assertOk();
     });
 
-    it('denies access without the service monitoring add-on', function () {
+    it('denies access without the service monitoring add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->serviceMonitoring = false;
         $licenseSettings->save();

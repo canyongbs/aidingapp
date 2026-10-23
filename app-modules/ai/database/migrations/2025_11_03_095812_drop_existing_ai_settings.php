@@ -41,7 +41,7 @@ use Spatie\LaravelSettings\Migrations\SettingsMigration;
 return new class () extends SettingsMigration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             $this->migrator->deleteIfExists('ai.url');
             $this->migrator->deleteIfExists('ai.key');
             $this->migrator->deleteIfExists('ai.api_version');

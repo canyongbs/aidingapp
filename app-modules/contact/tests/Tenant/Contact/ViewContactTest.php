@@ -57,7 +57,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewContact page', function () {
+test('The correct details are displayed on the ViewContact page', function (): void {
     asSuperAdmin();
 
     $contactType = ContactType::factory()->create(['name' => 'Student']);
@@ -95,7 +95,7 @@ test('The correct details are displayed on the ViewContact page', function () {
     expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected);
 });
 
-test('The primary information sections are organized into tabs on the ViewContact page', function () {
+test('The primary information sections are organized into tabs on the ViewContact page', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -110,7 +110,7 @@ test('The primary information sections are organized into tabs on the ViewContac
         ->toBe(['Demographic', 'Contact', 'Employment', 'Academic', 'Address', 'Affiliation', 'System']);
 });
 
-test('ViewContact renders successfully when optional fields have no value', function () {
+test('ViewContact renders successfully when optional fields have no value', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create([
@@ -125,7 +125,7 @@ test('ViewContact renders successfully when optional fields have no value', func
 
 // Permission Tests
 
-test('ViewContact is gated with proper access control', function () {
+test('ViewContact is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $contact = Contact::factory()->create();
@@ -148,8 +148,8 @@ test('ViewContact is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-describe('section edit actions', function () {
-    test('the contact section edit actions are gated with proper access control', function () {
+describe('section edit actions', function (): void {
+    test('the contact section edit actions are gated with proper access control', function (): void {
         $user = User::factory()->create();
 
         $contact = Contact::factory()->create();
@@ -172,7 +172,7 @@ describe('section edit actions', function () {
             ->assertActionVisible(TestAction::make('editDemographicInformation')->schemaComponent('demographicInformation'));
     });
 
-    test('the contact sections can be updated', function () {
+    test('the contact sections can be updated', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -204,7 +204,7 @@ describe('section edit actions', function () {
         expect($contact->fresh()->type_id)->toEqual($request->get('type_id'))->and($contact->fresh()->first_name)->toEqual($request->get('first_name'))->and($contact->fresh()->last_name)->toEqual($request->get('last_name'))->and($contact->fresh()->full_name)->toEqual("{$request->get('first_name')} {$request->get('last_name')}")->and($contact->fresh()->preferred)->toEqual($request->get('preferred'))->and($contact->fresh()->email)->toEqual($request->get('email'))->and($contact->fresh()->mobile)->toEqual($request->get('mobile'))->and($contact->fresh()->phone)->toEqual($request->get('phone'));
     });
 
-    test('the employment information section can be updated', function () {
+    test('the employment information section can be updated', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -235,7 +235,7 @@ describe('section edit actions', function () {
         expect($contact->fresh()->job_title)->toEqual($request->get('job_title'))->and($contact->fresh()->employee_id)->toEqual($request->get('employee_id'))->and($contact->fresh()->work_number)->toEqual($request->get('work_number'))->and($contact->fresh()->work_extension)->toEqual($request->get('work_extension'));
     });
 
-    test('the academic information section can be updated', function () {
+    test('the academic information section can be updated', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -266,7 +266,7 @@ describe('section edit actions', function () {
         expect($contact->fresh()->student_id)->toEqual($request->get('student_id'))->and($contact->fresh()->school)->toEqual($request->get('school'))->and($contact->fresh()->academic_department)->toEqual($request->get('academic_department'))->and($contact->fresh()->program)->toEqual($request->get('program'));
     });
 
-    test('the address information section can be updated', function () {
+    test('the address information section can be updated', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -301,7 +301,7 @@ describe('section edit actions', function () {
         expect($contact->fresh()->address)->toEqual($request->get('address'))->and($contact->fresh()->address_2)->toEqual($request->get('address_2'))->and($contact->fresh()->city)->toEqual($request->get('city'))->and($contact->fresh()->state)->toEqual($request->get('state'))->and($contact->fresh()->postal)->toEqual($request->get('postal'))->and($contact->fresh()->country)->toEqual($request->get('country'));
     });
 
-    test('the customer information section can be updated', function () {
+    test('the customer information section can be updated', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -324,7 +324,7 @@ describe('section edit actions', function () {
         expect($contact->fresh()->organization_id)->toEqual($organization->getKey());
     });
 
-    test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function () {
+    test('the contact information section keeps its own email but rejects another contact\'s email case-insensitively', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any');
         $user->givePermissionTo('contact.*.view');
@@ -353,8 +353,8 @@ describe('section edit actions', function () {
     });
 });
 
-describe('email health', function () {
-    it('shows the email health callout and the bounced hint icon for a bounced contact', function () {
+describe('email health', function (): void {
+    it('shows the email health callout and the bounced hint icon for a bounced contact', function (): void {
         asSuperAdmin();
 
         $contact = Contact::factory()->bounced()->create();
@@ -381,7 +381,7 @@ describe('email health', function () {
             });
     });
 
-    it('hides the email health callout and shows the healthy hint icon for a healthy contact', function () {
+    it('hides the email health callout and shows the healthy hint icon for a healthy contact', function (): void {
         asSuperAdmin();
 
         $contact = Contact::factory()->create(['email_bounce' => false]);
@@ -399,7 +399,7 @@ describe('email health', function () {
             });
     });
 
-    it('hides the email health callout as soon as a bounced contact\'s email is updated, without requiring a fresh page load', function () {
+    it('hides the email health callout as soon as a bounced contact\'s email is updated, without requiring a fresh page load', function (): void {
         asSuperAdmin();
 
         $contact = Contact::factory()->bounced()->create();
@@ -414,8 +414,8 @@ describe('email health', function () {
     });
 });
 
-describe('tabs', function () {
-    test('renders successfully with no tabs visible when the user has no relation manager abilities', function () {
+describe('tabs', function (): void {
+    test('renders successfully with no tabs visible when the user has no relation manager abilities', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any', 'contact.*.view');
         actingAs($user);
@@ -431,7 +431,7 @@ describe('tabs', function () {
             ->assertDontSeeLivewire(EngagementsRelationManager::class);
     });
 
-    test('shows the Service Requests tab only with the service_request.view-any ability', function () {
+    test('shows the Service Requests tab only with the service_request.view-any ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any', 'contact.*.view');
         actingAs($user);
@@ -448,7 +448,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(ServiceRequestsRelationManager::class);
     });
 
-    test('shows the Assets tab only with an asset_check_out/asset_check_in.view-any ability', function () {
+    test('shows the Assets tab only with an asset_check_out/asset_check_in.view-any ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any', 'contact.*.view');
         actingAs($user);
@@ -474,7 +474,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(AssetCheckInRelationManager::class);
     });
 
-    test('shows the Files tab only with the engagement_file.view-any ability', function () {
+    test('shows the Files tab only with the engagement_file.view-any ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any', 'contact.*.view');
         actingAs($user);
@@ -491,7 +491,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(EngagementFilesRelationManager::class);
     });
 
-    test('shows the Emails tab only with an engagement/engagement_response.view-any ability', function () {
+    test('shows the Emails tab only with an engagement/engagement_response.view-any ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('contact.view-any', 'contact.*.view');
         actingAs($user);

@@ -47,7 +47,7 @@ use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -58,7 +58,7 @@ beforeEach(function () {
     );
 });
 
-it('prohibits a submitted priority when a default priority is configured', function () {
+it('prohibits a submitted priority when a default priority is configured', function (): void {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $submittedPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -83,7 +83,7 @@ it('prohibits a submitted priority when a default priority is configured', funct
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('requires a submitted priority when the type has no configured default priority', function () {
+it('requires a submitted priority when the type has no configured default priority', function (): void {
     $type = ServiceRequestType::factory()->create();
     ServiceRequestPriority::factory()->for($type, 'type')->create();
 
@@ -105,7 +105,7 @@ it('requires a submitted priority when the type has no configured default priori
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('assigns the configured default priority when no priority is submitted', function () {
+it('assigns the configured default priority when no priority is submitted', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -121,7 +121,7 @@ it('assigns the configured default priority when no priority is submitted', func
     expect(ServiceRequest::query()->sole()->priority_id)->toBe($priority->getKey());
 });
 
-it('attaches submitted password secrets to the service request', function () {
+it('attaches submitted password secrets to the service request', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create();
@@ -177,7 +177,7 @@ it('attaches submitted password secrets to the service request', function () {
     expect($secret->refresh()->related->is($serviceRequest))->toBeTrue();
 });
 
-it('rejects a password secret owned by another contact', function () {
+it('rejects a password secret owned by another contact', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create();
