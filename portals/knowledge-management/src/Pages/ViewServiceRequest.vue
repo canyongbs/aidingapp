@@ -45,12 +45,14 @@
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import { ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
+    import { storeToRefs } from 'pinia';
     import { ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
     import BaseList from '../Components/ui/BaseList.vue';
     import { apiGet, apiPost, getApiBaseUrl } from '../Services/api.js';
     import formatDateTime from '../Services/FormatDateTime.js';
+    import { useFeatureStore } from '../Stores/feature.js';
     import { useServiceRequestData } from './loaders.js';
 
     const route = useRoute();
@@ -58,6 +60,8 @@
     // The current service request (page 1 of its updates) arrives via the route data
     // loader; paginating the updates fetches on demand.
     const { data: initialData } = useServiceRequestData();
+
+    const { hasServiceManagement } = storeToRefs(useFeatureStore());
 
     const uploadUrl = getApiBaseUrl() + '/service-request/request-upload-url';
 
@@ -306,7 +310,7 @@
         <template #heading>404 Not Found</template>
 
         <template #breadcrumbs>
-            <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="'Not Found'" />
+            <Breadcrumbs :breadcrumbs="hasServiceManagement ? breadcrumbs : []" :currentCrumb="'Not Found'" />
         </template>
 
         <EmptyState>
@@ -315,8 +319,17 @@
                 The service request you are looking for does not exist or you no longer have access to it.
             </template>
             <template #actions>
-                <BaseButton tag="router-link" :to="{ name: 'service' }" color="gray" size="md">
+                <BaseButton
+                    v-if="hasServiceManagement"
+                    tag="router-link"
+                    :to="{ name: 'service' }"
+                    color="gray"
+                    size="md"
+                >
                     Return to Service Requests
+                </BaseButton>
+                <BaseButton v-else tag="router-link" :to="{ name: 'home' }" color="gray" size="md">
+                    Return Home
                 </BaseButton>
             </template>
         </EmptyState>
