@@ -37,7 +37,9 @@
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Models\SystemUser;
 use App\Models\User;
@@ -243,6 +245,63 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
                     expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
                 }
             }
+        });
+    });
+});
+
+// TODO: Cleanup Task (email-template-name-uniqueness): delete this describe and the tests within
+describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function () {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(3)]);
+            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinutes(2)]);
+            $third = EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL', 'created_at' => now()->subMinute()]);
+            $unique = EmailTemplate::factory()->create(['name' => 'Reminder Email', 'created_at' => now()->subMinutes(4)]);
+
+            expect(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Welcome Email')
+                ->and($second->refresh()->name)->toBe('welcome email-2')
+                ->and($third->refresh()->name)->toBe('WELCOME EMAIL-3')
+                ->and($unique->refresh()->name)->toBe('Reminder Email')
+                ->and(EmailTemplateNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+            $kept = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
+            $trashed = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Welcome Email')
+                ->and($trashed->refresh()->name)->toBe('welcome email');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
+            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('welcome email-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('welcome email')
+                ->and(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });
