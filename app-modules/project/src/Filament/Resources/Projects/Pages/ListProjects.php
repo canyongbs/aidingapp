@@ -40,7 +40,6 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
-use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -192,12 +191,6 @@ class ListProjects extends ListRecords
             ->recordUrl(fn (Project $record): ?string => ProjectResource::can('view', $record)
                 ? ProjectResource::getUrl('view', ['record' => $record])
                 : null)
-            ->recordActions([
-                ArchiveAction::make()
-                    ->icon('heroicon-m-archive-box')
-                    ->authorize('archive')
-                    ->successRedirectUrl(null),
-            ])
             ->toolbarActions([
                 BulkActionGroup::make([
                     ArchiveBulkAction::make()
