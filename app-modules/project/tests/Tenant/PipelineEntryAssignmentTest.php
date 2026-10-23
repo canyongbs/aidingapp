@@ -44,11 +44,11 @@ use Illuminate\Support\Facades\Notification;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Notification::fake();
 });
 
-it('sends notification to assigned user when pipeline entry is created with assigned_to', function () {
+it('sends notification to assigned user when pipeline entry is created with assigned_to', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -67,7 +67,7 @@ it('sends notification to assigned user when pipeline entry is created with assi
     Notification::assertSentTo($user, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when pipeline entry is created without assigned_to', function () {
+it('does not send notification when pipeline entry is created without assigned_to', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -84,7 +84,7 @@ it('does not send notification when pipeline entry is created without assigned_t
     Notification::assertNothingSent();
 });
 
-it('sends notification to newly assigned user when assigned_to changes', function () {
+it('sends notification to newly assigned user when assigned_to changes', function (): void {
     asSuperAdmin();
 
     $originalUser = User::factory()->create();
@@ -115,7 +115,7 @@ it('sends notification to newly assigned user when assigned_to changes', functio
     Notification::assertNotSentTo($originalUser, PipelineEntryAssignedToUserNotification::class);
 });
 
-it('does not send notification when a non-assignment field changes', function () {
+it('does not send notification when a non-assignment field changes', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -134,7 +134,7 @@ it('does not send notification when a non-assignment field changes', function ()
     Notification::assertNothingSent();
 });
 
-it('does not send notification when assigned_to is unchanged on update', function () {
+it('does not send notification when assigned_to is unchanged on update', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();

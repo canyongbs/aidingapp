@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('project_files', function (Blueprint $table) {
+        Schema::create('project_files', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('project_id')->constrained('projects');
             $table->string('description');

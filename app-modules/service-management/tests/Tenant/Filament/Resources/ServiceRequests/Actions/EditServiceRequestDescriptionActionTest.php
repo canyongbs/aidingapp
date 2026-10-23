@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editDescription action is visible for manager department member with update permission', function () {
+test('editDescription action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -80,7 +80,7 @@ test('editDescription action is visible for manager department member with updat
         ->assertActionVisible(TestAction::make('editDescription')->schemaComponent('request.description::section'));
 });
 
-test('editDescription action is hidden for user without update permission', function () {
+test('editDescription action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -112,7 +112,7 @@ test('editDescription action is hidden for user without update permission', func
         ->assertActionDoesNotExist(TestAction::make('editDescription')->schemaComponent('request.description::section'));
 });
 
-test('editDescription requires close_details to be a string', function () {
+test('editDescription requires close_details to be a string', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -130,7 +130,7 @@ test('editDescription requires close_details to be a string', function () {
         ->assertHasFormErrors(['close_details' => 'string']);
 });
 
-test('can update the service request description', function () {
+test('can update the service request description', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -151,7 +151,7 @@ test('can update the service request description', function () {
     expect($serviceRequest->fresh()->close_details)->toBe('Updated description');
 });
 
-test('can clear the service request description', function () {
+test('can clear the service request description', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,

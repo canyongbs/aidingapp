@@ -49,6 +49,7 @@ use AidingApp\Ai\Support\StreamingChunks\ToolCall;
 use AidingApp\IntegrationOpenAi\Prism\ValueObjects\Messages\DeveloperMessage;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\KnowledgeBase\Models\Scopes\KnowledgeBasePortalAssistantItem;
+use Carbon\CarbonInterface;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -177,7 +178,7 @@ class RetryMessage implements ShouldQueue
 
             // When the stream was rate limited or errored, surface that to the client and do
             // not persist a partial assistant response. The client can then retry the message.
-            if ($finishChunk?->rateLimitResetsAt || $finishChunk?->error) {
+            if ($finishChunk?->rateLimitResetsAt instanceof CarbonInterface || $finishChunk?->error) {
                 event(new PortalAssistantMessageChunk(
                     $this->thread,
                     content: '',

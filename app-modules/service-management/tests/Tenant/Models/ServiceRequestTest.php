@@ -52,7 +52,7 @@ use Illuminate\Support\Facades\Storage;
 
 use function Pest\Laravel\travelTo;
 
-it('excludes its secret key from serialization and audits', function () {
+it('excludes its secret key from serialization and audits', function (): void {
     $serviceRequest = ServiceRequest::factory()->create([
         'secret_key' => 'encrypted-secret-key',
     ]);
@@ -71,7 +71,7 @@ if (! function_exists('recentUpdateCreatorInfo')) {
     }
 }
 
-it('renders a contact update as Customer with the organization on its own line', function () {
+it('renders a contact update as Customer with the organization on its own line', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $contact = Contact::factory()
@@ -86,7 +86,7 @@ it('renders a contact update as Customer with the organization on its own line',
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Jane Doe - Customer<br>Acme Corp');
 });
 
-it('renders a contact update with no organization as Customer only, without an N/A line', function () {
+it('renders a contact update with no organization as Customer only, without an N/A line', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $contact = Contact::factory()
@@ -105,7 +105,7 @@ it('renders a contact update with no organization as Customer only, without an N
         ->and($html)->not()->toContain('N/A');
 });
 
-it('renders a user update as Service Provider, unchanged', function () {
+it('renders a user update as Service Provider, unchanged', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = User::factory()->state(['name' => 'Sam Staff'])->create();
@@ -118,7 +118,7 @@ it('renders a user update as Service Provider, unchanged', function () {
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Sam Staff - Service Provider');
 });
 
-it('appends the file-attachment note when the update has uploads', function () {
+it('appends the file-attachment note when the update has uploads', function (): void {
     Storage::fake('s3');
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -137,8 +137,8 @@ it('appends the file-attachment note when the update has uploads', function () {
         ->toContain('<br><br>Note: Files were attached with this update. Please login the service portal to see the files.');
 });
 
-describe('SLA waiting exclusion', function () {
-    it('excludes waiting and closed time from the resolution seconds when the feature is active', function () {
+describe('SLA waiting exclusion', function (): void {
+    it('excludes waiting and closed time from the resolution seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -164,7 +164,7 @@ describe('SLA waiting exclusion', function () {
         expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(130);
     });
 
-    it('excludes waiting time from the latest response seconds when the feature is active', function () {
+    it('excludes waiting time from the latest response seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -186,7 +186,7 @@ describe('SLA waiting exclusion', function () {
         expect($serviceRequest->fresh()->getLatestResponseSeconds())->toBe(100);
     });
 
-    it('recomputes the stored time to resolution from the ledger on close when the feature is active', function () {
+    it('recomputes the stored time to resolution from the ledger on close when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -208,7 +208,7 @@ describe('SLA waiting exclusion', function () {
         expect($serviceRequest->fresh()->time_to_resolution)->toBe(100);
     });
 
-    it('reports the resolution SLA as compliant once waiting time is excluded', function () {
+    it('reports the resolution SLA as compliant once waiting time is excluded', function (): void {
         Notification::fake();
 
         $sla = Sla::create([
@@ -245,7 +245,7 @@ describe('SLA waiting exclusion', function () {
         expect($serviceRequest->fresh()->getResolutionSlaComplianceStatus())->toBe(SlaComplianceStatus::Compliant);
     });
 
-    it('excludes time spent closed before a reopen from the resolution seconds when the feature is active', function () {
+    it('excludes time spent closed before a reopen from the resolution seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -270,7 +270,7 @@ describe('SLA waiting exclusion', function () {
         expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(200);
     });
 
-    it('persists the excluded time to resolution column after a reopen and re-close cycle', function () {
+    it('persists the excluded time to resolution column after a reopen and re-close cycle', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -295,7 +295,7 @@ describe('SLA waiting exclusion', function () {
         expect((int) $serviceRequest->fresh()->time_to_resolution)->toBe(200);
     });
 
-    it('accounts for every second across all classifications (the ledger tiles the timeline)', function () {
+    it('accounts for every second across all classifications (the ledger tiles the timeline)', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -339,7 +339,7 @@ describe('SLA waiting exclusion', function () {
             ->and($serviceRequest->getExcludedSecondsBetween($start, $end, $classifications))->toBe(180);
     });
 
-    it('anchors the resolved time to the first status change of the trailing closed run', function () {
+    it('anchors the resolved time to the first status change of the trailing closed run', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -362,7 +362,7 @@ describe('SLA waiting exclusion', function () {
             ->toBe($start->addSeconds(100)->toDateTimeString());
     });
 
-    it('resets the resolved time to the latest close when a request was reopened', function () {
+    it('resets the resolved time to the latest close when a request was reopened', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -388,7 +388,7 @@ describe('SLA waiting exclusion', function () {
             ->toBe($start->addSeconds(300)->toDateTimeString());
     });
 
-    it('caps the response seconds at the first close when moving between two closed statuses', function () {
+    it('caps the response seconds at the first close when moving between two closed statuses', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();

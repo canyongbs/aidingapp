@@ -57,7 +57,7 @@ class ListAssetCheckOuts extends ListRecords
             ->columns([
                 IdColumn::make(),
                 TextColumn::make('asset.name')
-                    ->url(fn ($record) => AssetResource::getUrl('view', ['record' => $record->asset]))
+                    ->url(fn ($record): string => AssetResource::getUrl('view', ['record' => $record->asset]))
                     ->color('primary')
                     ->searchable(),
                 TextColumn::make('asset.type.name')
@@ -69,7 +69,7 @@ class ListAssetCheckOuts extends ListRecords
                 TextColumn::make('asset_check_in_id')
                     ->label('Status')
                     ->state(fn (AssetCheckOut $record): AssetCheckOutStatus => $record->status)
-                    ->formatStateUsing(fn (AssetCheckOutStatus $state) => $state->getLabel())
+                    ->formatStateUsing(fn (AssetCheckOutStatus $state): string => $state->getLabel())
                     ->badge()
                     ->color(fn (AssetCheckOutStatus $state): string => match ($state) {
                         AssetCheckOutStatus::Returned => 'success',

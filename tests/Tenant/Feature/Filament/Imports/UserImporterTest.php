@@ -58,7 +58,7 @@ $runUserImport = function (array $row): void {
     $importer($row);
 };
 
-it('creates a new user with all fields, department and roles', function () use ($runUserImport) {
+it('creates a new user with all fields, department and roles', function () use ($runUserImport): void {
     Notification::fake();
 
     $department = Department::factory()->create(['name' => 'Engineering']);
@@ -94,7 +94,7 @@ it('creates a new user with all fields, department and roles', function () use (
     Notification::assertSentTo($user, SetPasswordNotification::class);
 });
 
-it('updates an existing user matched by email case-insensitively', function () use ($runUserImport) {
+it('updates an existing user matched by email case-insensitively', function () use ($runUserImport): void {
     $department = Department::factory()->create(['name' => 'Support']);
     Role::factory()->create(['name' => 'Agent', 'guard_name' => 'web']);
 
@@ -126,7 +126,7 @@ it('updates an existing user matched by email case-insensitively', function () u
         ->and($existing->roles->pluck('name')->all())->toBe(['Agent']);
 });
 
-it('replaces (syncs) roles, removing roles not listed', function () use ($runUserImport) {
+it('replaces (syncs) roles, removing roles not listed', function () use ($runUserImport): void {
     Role::factory()->create(['name' => 'KeepMe', 'guard_name' => 'web']);
     Role::factory()->create(['name' => 'RemoveMe', 'guard_name' => 'web']);
 
@@ -144,7 +144,7 @@ it('replaces (syncs) roles, removing roles not listed', function () use ($runUse
     expect($user->fresh()->roles->pluck('name')->all())->toBe(['KeepMe']);
 });
 
-it('leaves existing roles untouched when the roles column is blank', function () use ($runUserImport) {
+it('leaves existing roles untouched when the roles column is blank', function () use ($runUserImport): void {
     Role::factory()->create(['name' => 'Existing', 'guard_name' => 'web']);
 
     $user = User::factory()->create(['email' => 'blank@example.com']);
@@ -161,7 +161,7 @@ it('leaves existing roles untouched when the roles column is blank', function ()
     expect($user->fresh()->roles->pluck('name')->all())->toBe(['Existing']);
 });
 
-it('resolves department and roles by name case-insensitively', function () use ($runUserImport) {
+it('resolves department and roles by name case-insensitively', function () use ($runUserImport): void {
     $department = Department::factory()->create(['name' => 'Finance']);
     Role::factory()->create(['name' => 'Reviewer', 'guard_name' => 'web']);
 
@@ -180,7 +180,7 @@ it('resolves department and roles by name case-insensitively', function () use (
         ->and($user->roles->pluck('name')->all())->toBe(['Reviewer']);
 });
 
-it('fails the row when the department does not exist', function () use ($runUserImport) {
+it('fails the row when the department does not exist', function () use ($runUserImport): void {
     $runUserImport([
         'first_name' => 'No',
         'last_name' => 'Dept',
@@ -190,7 +190,7 @@ it('fails the row when the department does not exist', function () use ($runUser
     ]);
 })->throws(ValidationException::class);
 
-it('fails the row when a role does not exist', function () use ($runUserImport) {
+it('fails the row when a role does not exist', function () use ($runUserImport): void {
     Role::factory()->create(['name' => 'RealRole', 'guard_name' => 'web']);
 
     $runUserImport([
@@ -202,7 +202,7 @@ it('fails the row when a role does not exist', function () use ($runUserImport) 
     ]);
 })->throws(ValidationException::class);
 
-it('fails the row when the email belongs to an archived user', function () use ($runUserImport) {
+it('fails the row when the email belongs to an archived user', function () use ($runUserImport): void {
     $archived = User::factory()->create(['email' => 'archived@example.com']);
     $archived->delete();
 

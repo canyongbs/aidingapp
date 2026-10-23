@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseCount;
 
 beforeEach(fn () => Event::fake());
 
-it('adds a participant to a channel conversation', function () {
+it('adds a participant to a channel conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -62,7 +62,7 @@ it('adds a participant to a channel conversation', function () {
     expect($participant->conversation_id)->toBe($conversation->getKey())->and($participant->participant_id)->toBe($user->getKey())->and($participant->is_manager)->toBeFalse();
 });
 
-it('adds a participant as a manager when specified', function () {
+it('adds a participant as a manager when specified', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -75,7 +75,7 @@ it('adds a participant as a manager when specified', function () {
     expect($participant->is_manager)->toBeTrue();
 });
 
-it('returns existing participant if already in conversation', function () {
+it('returns existing participant if already in conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -98,7 +98,7 @@ it('returns existing participant if already in conversation', function () {
     expect($secondParticipant->is_manager)->toBeFalse();
 });
 
-it('throws exception when adding participant to direct message', function () {
+it('throws exception when adding participant to direct message', function (): void {
     $conversation = Conversation::factory()->direct()->create();
     $user = User::factory()->create();
 
@@ -108,7 +108,7 @@ it('throws exception when adding participant to direct message', function () {
     );
 })->throws(InvalidArgumentException::class, 'Cannot add participants to direct message conversations.');
 
-it('sets `last_activity_at` when adding a participant', function () {
+it('sets `last_activity_at` when adding a participant', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -120,7 +120,7 @@ it('sets `last_activity_at` when adding a participant', function () {
     expect($participant->last_activity_at)->not()->toBeNull();
 });
 
-it('broadcasts `ParticipantAdded` event when adding participant to public channel', function () {
+it('broadcasts `ParticipantAdded` event when adding participant to public channel', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => false,
     ]);
@@ -131,13 +131,13 @@ it('broadcasts `ParticipantAdded` event when adding participant to public channe
         user: $user,
     );
 
-    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user) {
+    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user): bool {
         return $event->participant->conversation_id === $conversation->getKey()
             && $event->participant->participant_id === $user->getKey();
     });
 });
 
-it('broadcasts `ParticipantAdded` event when adding participant to private channel', function () {
+it('broadcasts `ParticipantAdded` event when adding participant to private channel', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
     ]);
@@ -148,13 +148,13 @@ it('broadcasts `ParticipantAdded` event when adding participant to private chann
         user: $user,
     );
 
-    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user) {
+    Event::assertDispatched(ParticipantAdded::class, function (ParticipantAdded $event) use ($conversation, $user): bool {
         return $event->participant->conversation_id === $conversation->getKey()
             && $event->participant->participant_id === $user->getKey();
     });
 });
 
-it('does not broadcast `ParticipantAdded` event when participant already exists', function () {
+it('does not broadcast `ParticipantAdded` event when participant already exists', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -176,7 +176,7 @@ it('does not broadcast `ParticipantAdded` event when participant already exists'
     Event::assertDispatchedTimes(ParticipantAdded::class, 1);
 });
 
-it('broadcasts `ParticipantAdded` event to both conversation and user channels', function () {
+it('broadcasts `ParticipantAdded` event to both conversation and user channels', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'Test Private Channel',
@@ -196,7 +196,7 @@ it('broadcasts `ParticipantAdded` event to both conversation and user channels',
     expect($channels[1]->name)->toBe("private-user.{$user->getKey()}");
 });
 
-it('includes conversation data with display_name in `ParticipantAdded` event', function () {
+it('includes conversation data with display_name in `ParticipantAdded` event', function (): void {
     $conversation = Conversation::factory()->channel()->create([
         'is_private' => true,
         'name' => 'My Private Channel',
@@ -220,7 +220,7 @@ it('includes conversation data with display_name in `ParticipantAdded` event', f
         ->and($payload['conversation']['is_private'])->toBeTrue();
 });
 
-it('includes confidentiality data in `ParticipantAdded` event', function () {
+it('includes confidentiality data in `ParticipantAdded` event', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::SevenDays)
         ->create();

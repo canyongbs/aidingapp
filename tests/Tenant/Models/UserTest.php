@@ -38,14 +38,14 @@ use App\Models\User;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('can always receive email', function () {
+it('can always receive email', function (): void {
     $user = User::factory()->create();
 
     expect($user->canReceiveEmail())->toBeTrue();
 });
 
-describe('push subscriptions', function () {
-    it('stores a push subscription for the user on the tenant connection', function () {
+describe('push subscriptions', function (): void {
+    it('stores a push subscription for the user on the tenant connection', function (): void {
         $user = User::factory()->create();
 
         expect($user->pushSubscriptions()->count())->toBe(0);
@@ -68,7 +68,7 @@ describe('push subscriptions', function () {
         ], 'tenant');
     });
 
-    it('replaces an existing subscription for the same endpoint', function () {
+    it('replaces an existing subscription for the same endpoint', function (): void {
         $user = User::factory()->create();
 
         $user->updatePushSubscription(endpoint: 'https://push.test/endpoint/abc', key: 'first');
@@ -78,7 +78,7 @@ describe('push subscriptions', function () {
             ->and($user->pushSubscriptions()->first()->public_key)->toBe('second');
     });
 
-    it('deletes a push subscription by endpoint', function () {
+    it('deletes a push subscription by endpoint', function (): void {
         $user = User::factory()->create();
 
         $user->updatePushSubscription(endpoint: 'https://push.test/endpoint/abc');

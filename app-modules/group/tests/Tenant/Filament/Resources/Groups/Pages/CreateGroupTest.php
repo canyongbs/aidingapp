@@ -46,13 +46,13 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render the create group page', function () {
+it('can render the create group page', function (): void {
     asSuperAdmin();
 
     get(GroupResource::getUrl('create'))->assertSuccessful();
 });
 
-it('can create a group', function () {
+it('can create a group', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo(['group.view-any', 'group.create']);
     actingAs($user);
@@ -72,7 +72,7 @@ it('can create a group', function () {
     ]);
 });
 
-it('can create a group without a description', function () {
+it('can create a group without a description', function (): void {
     asSuperAdmin();
 
     $request = GroupRequestFactory::new()->state(['description' => null])->create();
@@ -85,7 +85,7 @@ it('can create a group without a description', function () {
     assertDatabaseHas(Group::class, $request);
 });
 
-it('can create a group with a soft deleted group name', function () {
+it('can create a group with a soft deleted group name', function (): void {
     asSuperAdmin();
 
     $deletedGroup = Group::factory()->create(['name' => 'Student Success']);
@@ -101,7 +101,7 @@ it('can create a group with a soft deleted group name', function () {
     assertDatabaseHas(Group::class, $request);
 });
 
-it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
+it('validates the inputs', function (GroupRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     Group::factory()->create(['name' => 'Student Success']);
@@ -117,8 +117,8 @@ it('validates the inputs', function (GroupRequestFactory $data, array $errors) {
     'description max' => [GroupRequestFactory::new()->state(['description' => str()->random(65536)]), ['description' => 'max']],
 ]);
 
-describe('authorization', function () {
-    it('denies access without the `group.create` permission', function () {
+describe('authorization', function (): void {
+    it('denies access without the `group.create` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('group.view-any');
         actingAs($user);

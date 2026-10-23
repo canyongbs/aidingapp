@@ -70,7 +70,7 @@ class EditUser extends EditRecord
 
     public function form(Schema $schema): Schema
     {
-        $generateFullName = function (Get $get, Set $set) {
+        $generateFullName = function (Get $get, Set $set): void {
             $firstName = trim($get('first_name'));
 
             if (blank($firstName)) {
@@ -94,23 +94,23 @@ class EditUser extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin())
+                            ->disabled(fn (User $record): bool => $record->isAdmin())
                             ->live(onBlur: true)
                             ->afterStateUpdated($generateFullName),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin())
+                            ->disabled(fn (User $record): bool => $record->isAdmin())
                             ->live(onBlur: true)
                             ->afterStateUpdated($generateFullName),
                         TextEntry::make('presence_status')
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
                             ->badge()
-                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
-                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
+                            ->color(fn (User $record): string => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record): string => $record->presenceStatus()->getLabel()),
                         TextInput::make('name')
                             ->label('Full Name')
                             ->maxLength(255)
@@ -129,7 +129,7 @@ class EditUser extends EditRecord
                         TextInput::make('job_title')
                             ->string()
                             ->maxLength(255)
-                            ->disabled(fn (User $record) => $record->isAdmin()),
+                            ->disabled(fn (User $record): bool => $record->isAdmin()),
                         PhoneInput::make('work_number')
                             ->nullable()
                             ->label('Work Number'),
@@ -165,7 +165,7 @@ class EditUser extends EditRecord
                             ->rules([
                                 new EmailNotInUseOrSoftDeleted($this->getRecord()->getKey()),
                             ])
-                            ->disabled(fn (User $record) => $record->isAdmin()),
+                            ->disabled(fn (User $record): bool => $record->isAdmin()),
                         PhoneInput::make('mobile')
                             ->nullable(),
                     ])
@@ -213,7 +213,7 @@ class EditUser extends EditRecord
                             ->visible(fn (Get $get): bool => (bool) $get('is_managed_contact')),
                         Toggle::make('is_external')
                             ->label('User can only log in via a social provider.')
-                            ->disabled(fn (User $record) => $record->isAdmin()),
+                            ->disabled(fn (User $record): bool => $record->isAdmin()),
                     ]),
                 Section::make('System Information')
                     ->schema([
@@ -231,7 +231,7 @@ class EditUser extends EditRecord
                             ->hiddenLabel()
                             ->relationship('department', 'name'),
                     ])
-                    ->hidden(fn (?User $record) => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
+                    ->hidden(fn (?User $record): bool => (bool) $record?->hasRole(Authenticatable::SUPER_ADMIN_ROLE)),
             ]);
     }
 
@@ -297,7 +297,7 @@ class EditUser extends EditRecord
                 ->requiresConfirmation()
                 ->modalDescription('This will remove the user\'s current password and send them an email with a link to set a new password.')
                 ->hidden($user->is_external)
-                ->action(function () use ($user) {
+                ->action(function () use ($user): void {
                     $user->password = null;
                     $user->save();
 

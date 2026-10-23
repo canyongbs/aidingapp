@@ -41,10 +41,10 @@ use Illuminate\Support\Facades\Artisan;
 use Mockery\MockInterface;
 use Symfony\Component\Console\Output\BufferedOutput;
 
-it('runs the `cache:prune-stale-tags` command', function () {
+it('runs the `cache:prune-stale-tags` command', function (): void {
     $kernel = app(Kernel::class);
 
-    Artisan::swap(Mockery::mock(Kernel::class, function (MockInterface $mock) {
+    Artisan::swap(Mockery::mock(Kernel::class, function (MockInterface $mock): void {
         $mock->shouldReceive('call')
             ->once()
             ->with('cache:prune-stale-tags', [], Mockery::type(BufferedOutput::class))
@@ -56,10 +56,10 @@ it('runs the `cache:prune-stale-tags` command', function () {
     Artisan::swap($kernel);
 });
 
-it('fails with an `ArtisanCommandFailedException` when the command exits non-zero', function () {
+it('fails with an `ArtisanCommandFailedException` when the command exits non-zero', function (): void {
     $kernel = app(Kernel::class);
 
-    Artisan::swap(Mockery::mock(Kernel::class, function (MockInterface $mock) {
+    Artisan::swap(Mockery::mock(Kernel::class, function (MockInterface $mock): void {
         $mock->shouldReceive('call')->once()->andReturn(1);
     }));
 

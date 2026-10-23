@@ -40,7 +40,7 @@ use App\Enums\SubscriptionStatus;
 use App\Models\Tenant;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches a contact reconciliation job for each eligible tenant', function () {
+it('dispatches a contact reconciliation job for each eligible tenant', function (): void {
     $firstTenant = Tenant::query()->firstOrFail();
     $secondTenant = Tenant::factory()->create([
         'domain' => 'second-contact-reconciliation.aidingapp.local',

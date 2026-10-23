@@ -49,7 +49,7 @@ use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 
-test('ListAdvisoryStatuses is gated with proper access control', function () {
+test('ListAdvisoryStatuses is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -65,7 +65,7 @@ test('ListAdvisoryStatuses is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('it is gated with proper feature access control', function () {
+test('it is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->advisoryManagement = false;
@@ -91,7 +91,7 @@ test('it is gated with proper feature access control', function () {
     get(ListAdvisoryStatuses::getUrl())->assertSuccessful();
 });
 
-test('can list records', function () {
+test('can list records', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -109,7 +109,7 @@ test('can list records', function () {
         ->assertSuccessful();
 });
 
-test('bulk delete AdvisoryStatuses', function () {
+test('bulk delete AdvisoryStatuses', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -127,7 +127,7 @@ test('bulk delete AdvisoryStatuses', function () {
     }
 });
 
-test('prevent deletion of AdvisoryStatus if it has associated Advisories', function () {
+test('prevent deletion of AdvisoryStatus if it has associated Advisories', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -148,7 +148,7 @@ test('prevent deletion of AdvisoryStatus if it has associated Advisories', funct
     }
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     AdvisoryStatus::factory(15)->create();
 
     $user = User::factory()

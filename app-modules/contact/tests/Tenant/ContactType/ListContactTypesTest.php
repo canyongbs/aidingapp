@@ -45,7 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListContactTypes page', function () {
+test('The correct details are displayed on the ListContactTypes page', function (): void {
     $contactTypes = ContactType::factory()
         // TODO: Fix this once Contact factory is created
         //->has(ServiceRequest::factory()->count(fake()->randomNumber(1)), 'serviceRequests')
@@ -87,7 +87,7 @@ test('The correct details are displayed on the ListContactTypes page', function 
 
 // Permission Tests
 
-test('ListContactTypes is gated with proper access control', function () {
+test('ListContactTypes is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -103,7 +103,7 @@ test('ListContactTypes is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     ContactType::factory(15)->create();
 
     $user = User::factory()

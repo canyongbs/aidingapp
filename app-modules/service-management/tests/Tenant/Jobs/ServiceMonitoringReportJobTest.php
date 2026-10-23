@@ -42,13 +42,13 @@ use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Queue;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceMonitoring = true;
     $settings->save();
 });
 
-it('successfully dispatches ServiceMonitoringReportNotifyJob', function (ServiceMonitoringReportFrequency $frequency) {
+it('successfully dispatches ServiceMonitoringReportNotifyJob', function (ServiceMonitoringReportFrequency $frequency): void {
     Queue::fake();
 
     $numConfigurations = rand(1, 10);
@@ -63,13 +63,13 @@ it('successfully dispatches ServiceMonitoringReportNotifyJob', function (Service
 })
     ->with(
         [
-            fn () => ServiceMonitoringReportFrequency::Daily,
-            fn () => ServiceMonitoringReportFrequency::Weekly,
-            fn () => ServiceMonitoringReportFrequency::Monthly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Daily,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Weekly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Monthly,
         ]
     );
 
-it('does not dispatch when serviceMonitoring addon is disabled', function (ServiceMonitoringReportFrequency $frequency) {
+it('does not dispatch when serviceMonitoring addon is disabled', function (ServiceMonitoringReportFrequency $frequency): void {
     Queue::fake();
 
     $settings = app(LicenseSettings::class);
@@ -86,13 +86,13 @@ it('does not dispatch when serviceMonitoring addon is disabled', function (Servi
 })
     ->with(
         [
-            fn () => ServiceMonitoringReportFrequency::Daily,
-            fn () => ServiceMonitoringReportFrequency::Weekly,
-            fn () => ServiceMonitoringReportFrequency::Monthly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Daily,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Weekly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Monthly,
         ]
     );
 
-it('only dispatches for configurations matching the specified report frequency', function (ServiceMonitoringReportFrequency $frequency) {
+it('only dispatches for configurations matching the specified report frequency', function (ServiceMonitoringReportFrequency $frequency): void {
     Queue::fake();
 
     foreach (ServiceMonitoringReportFrequency::cases() as $case) {
@@ -107,13 +107,13 @@ it('only dispatches for configurations matching the specified report frequency',
 })
     ->with(
         [
-            fn () => ServiceMonitoringReportFrequency::Daily,
-            fn () => ServiceMonitoringReportFrequency::Weekly,
-            fn () => ServiceMonitoringReportFrequency::Monthly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Daily,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Weekly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Monthly,
         ]
     );
 
-it('does not dispatch for configurations that are inactive', function (ServiceMonitoringReportFrequency $frequency) {
+it('does not dispatch for configurations that are inactive', function (ServiceMonitoringReportFrequency $frequency): void {
     Queue::fake();
 
     ServiceMonitoringReportConfiguration::factory()->count(3)->inactive()->create([
@@ -126,13 +126,13 @@ it('does not dispatch for configurations that are inactive', function (ServiceMo
 })
     ->with(
         [
-            fn () => ServiceMonitoringReportFrequency::Daily,
-            fn () => ServiceMonitoringReportFrequency::Weekly,
-            fn () => ServiceMonitoringReportFrequency::Monthly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Daily,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Weekly,
+            fn (): ServiceMonitoringReportFrequency => ServiceMonitoringReportFrequency::Monthly,
         ]
     );
 
-it('still dispatches for confidential targets, since delivery suppression happens per recipient', function () {
+it('still dispatches for confidential targets, since delivery suppression happens per recipient', function (): void {
     Queue::fake();
 
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
@@ -145,7 +145,7 @@ it('still dispatches for confidential targets, since delivery suppression happen
     Queue::assertPushed(ServiceMonitoringReportNotifyJob::class, 1);
 });
 
-it('does not dispatch a configuration whose target has been soft-deleted', function () {
+it('does not dispatch a configuration whose target has been soft-deleted', function (): void {
     Queue::fake();
 
     $target = ServiceMonitoringTarget::factory()->create();

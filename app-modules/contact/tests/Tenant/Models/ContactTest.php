@@ -37,14 +37,14 @@
 use AidingApp\Contact\Enums\EmailHealthStatus;
 use AidingApp\Contact\Models\Contact;
 
-it('reports a bounced email health status and cannot receive email when the email has bounced', function () {
+it('reports a bounced email health status and cannot receive email when the email has bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => true]);
 
     expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Bounced)
         ->and($contact->canReceiveEmail())->toBeFalse();
 });
 
-it('reports a healthy email health status and can receive email when the email has not bounced', function () {
+it('reports a healthy email health status and can receive email when the email has not bounced', function (): void {
     $contact = Contact::factory()->create(['email_bounce' => false]);
 
     expect($contact->getEmailHealthStatus())->toBe(EmailHealthStatus::Healthy)

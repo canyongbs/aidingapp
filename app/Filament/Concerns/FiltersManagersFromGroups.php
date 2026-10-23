@@ -52,13 +52,13 @@ trait FiltersManagersFromGroups
     {
         if ($relationManager instanceof RelationGroup) {
             $filteredManagers = collect($relationManager->getManagers())
-                ->reject(fn (string | RelationManagerConfiguration $manager): bool => $record && ! self::resolveRelationManagerClass($manager)::canViewForRecord($record, static::class))
+                ->reject(fn (string | RelationManagerConfiguration $manager): bool => $record instanceof Model && ! self::resolveRelationManagerClass($manager)::canViewForRecord($record, static::class))
                 ->all();
 
             return RelationGroup::make($relationManager->getLabel(), $filteredManagers);
         }
 
-        if ($record && ! self::resolveRelationManagerClass($relationManager)::canViewForRecord($record, static::class)) {
+        if ($record instanceof Model && ! self::resolveRelationManagerClass($relationManager)::canViewForRecord($record, static::class)) {
             return null;
         }
 

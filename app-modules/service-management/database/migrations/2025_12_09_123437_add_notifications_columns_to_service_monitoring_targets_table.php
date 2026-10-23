@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->boolean('is_notified_via_database')->default(false);
             $table->boolean('is_notified_via_email')->default(false);
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_monitoring_targets', function (Blueprint $table) {
+        Schema::table('service_monitoring_targets', function (Blueprint $table): void {
             $table->dropColumn(['is_notified_via_database', 'is_notified_via_email']);
         });
     }

@@ -43,12 +43,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\putJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $targetUser = User::factory()->create();
 
     $actingUser = SystemUser::factory()->create();
@@ -67,7 +67,7 @@ it('is gated with proper access control', function () {
         ->assertOk();
 });
 
-it('returns a user resource', function () {
+it('returns a user resource', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -83,7 +83,7 @@ it('returns a user resource', function () {
     ]);
 });
 
-it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
+it('returns correct user fields', function (string $responseKey, Closure $getExpected): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -103,7 +103,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
-it('returns correct roles relationship structure', function () {
+it('returns correct roles relationship structure', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -121,7 +121,7 @@ it('returns correct roles relationship structure', function () {
     ]);
 });
 
-it('returns an empty roles list when no role_ids are provided', function () {
+it('returns an empty roles list when no role_ids are provided', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -136,7 +136,7 @@ it('returns an empty roles list when no role_ids are provided', function () {
     expect($response['data']['roles'])->toBe([]);
 });
 
-it('returns 404 if the target user is an admin', function () {
+it('returns 404 if the target user is an admin', function (): void {
     $adminRole = Role::firstOrCreate([
         'name' => Authenticatable::SUPER_ADMIN_ROLE,
         'guard_name' => 'web',
@@ -155,7 +155,7 @@ it('returns 404 if the target user is an admin', function () {
         ->assertNotFound();
 });
 
-it('returns 422 if any provided role_ids correspond to admin roles', function () {
+it('returns 422 if any provided role_ids correspond to admin roles', function (): void {
     $adminRole = Role::firstOrCreate([
         'name' => Authenticatable::SUPER_ADMIN_ROLE,
         'guard_name' => 'web',
@@ -174,7 +174,7 @@ it('returns 422 if any provided role_ids correspond to admin roles', function ()
         ->assertJsonValidationErrors(['role_ids']);
 });
 
-it('returns 422 if any provided role_ids do not exist', function () {
+it('returns 422 if any provided role_ids do not exist', function (): void {
     $targetUser = User::factory()->create();
 
     $actingUser = SystemUser::factory()->create();
@@ -188,7 +188,7 @@ it('returns 422 if any provided role_ids do not exist', function () {
         ->assertJsonValidationErrors(['role_ids.0']);
 });
 
-it('adds roles in the list that were not previously assigned', function () {
+it('adds roles in the list that were not previously assigned', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -205,7 +205,7 @@ it('adds roles in the list that were not previously assigned', function () {
         ->toBe([$role->id]);
 });
 
-it('removes roles not in the list', function () {
+it('removes roles not in the list', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 
@@ -224,7 +224,7 @@ it('removes roles not in the list', function () {
         ->toBe([$roleToKeep->id]);
 });
 
-it('removes all roles when an empty role_ids list is provided', function () {
+it('removes all roles when an empty role_ids list is provided', function (): void {
     $actingUser = SystemUser::factory()->create();
     $actingUser->givePermissionTo('user.*.update');
 

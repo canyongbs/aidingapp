@@ -78,7 +78,7 @@ $serviceRequestForType = function (ServiceRequestType $type, ServiceRequestStatu
     ])->create();
 };
 
-test('individual assigner assigns to configured user via department manager', function () {
+test('individual assigner assigns to configured user via department manager', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -113,7 +113,7 @@ test('individual assigner assigns to configured user via department manager', fu
     expect($assignment->assigned_by_type)->toBeNull();
 });
 
-test('individual assigner assigns to configured user via direct manager', function () {
+test('individual assigner assigns to configured user via direct manager', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -145,7 +145,7 @@ test('individual assigner assigns to configured user via direct manager', functi
     expect($assignment->assigned_by_type)->toBeNull();
 });
 
-it('assigns to a configured user through manager group membership', function () {
+it('assigns to a configured user through manager group membership', function (): void {
     asSuperAdmin();
 
     $manager = User::factory()->create();
@@ -174,7 +174,7 @@ it('assigns to a configured user through manager group membership', function () 
     expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
-test('individual assigner does not assign when no individual is configured', function () {
+test('individual assigner does not assign when no individual is configured', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->state([
@@ -196,8 +196,8 @@ test('individual assigner does not assign when no individual is configured', fun
     expect($serviceRequest->assignments()->count())->toBe(0);
 });
 
-describe('automated status change on assignment', function () use ($individualAutoAssignType, $serviceRequestForType) {
-    it('sets the request status when auto-assigning and the toggle is on', function () use ($individualAutoAssignType, $serviceRequestForType) {
+describe('automated status change on assignment', function () use ($individualAutoAssignType, $serviceRequestForType): void {
+    it('sets the request status when auto-assigning and the toggle is on', function () use ($individualAutoAssignType, $serviceRequestForType): void {
         asSuperAdmin();
 
         $manager = User::factory()->create();
@@ -213,7 +213,7 @@ describe('automated status change on assignment', function () use ($individualAu
         expect($serviceRequest->fresh()->status_id)->toBe($target->getKey());
     });
 
-    it('does not change the status when no automated status is configured', function () use ($individualAutoAssignType, $serviceRequestForType) {
+    it('does not change the status when no automated status is configured', function () use ($individualAutoAssignType, $serviceRequestForType): void {
         asSuperAdmin();
 
         $manager = User::factory()->create();
@@ -226,7 +226,7 @@ describe('automated status change on assignment', function () use ($individualAu
         expect($serviceRequest->fresh()->status_id)->toBe($open->getKey());
     });
 
-    it('sends status change notifications for the automated change (send as normal)', function () use ($individualAutoAssignType, $serviceRequestForType) {
+    it('sends status change notifications for the automated change (send as normal)', function () use ($individualAutoAssignType, $serviceRequestForType): void {
         Notification::fake();
 
         asSuperAdmin();
@@ -245,7 +245,7 @@ describe('automated status change on assignment', function () use ($individualAu
         Notification::assertSentTo($manager, ServiceRequestStatusChanged::class);
     });
 
-    it('does not send a duplicate notification when the request is already at the target status', function () use ($individualAutoAssignType, $serviceRequestForType) {
+    it('does not send a duplicate notification when the request is already at the target status', function () use ($individualAutoAssignType, $serviceRequestForType): void {
         Notification::fake();
 
         asSuperAdmin();

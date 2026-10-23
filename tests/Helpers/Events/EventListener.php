@@ -40,7 +40,7 @@ use Illuminate\Support\Facades\Event;
 
 function testEventIsBeingListenedTo(string $event, string $listener): void
 {
-    test("{$event} is being listened to by {$listener}", function () use ($event, $listener) {
+    test("{$event} is being listened to by {$listener}", function () use ($event, $listener): void {
         Event::fake();
 
         Event::assertListening(

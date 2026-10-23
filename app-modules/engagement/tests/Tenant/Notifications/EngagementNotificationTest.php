@@ -42,7 +42,7 @@ use AidingApp\IntegrationAwsSesEventHandling\Settings\SesSettings;
 use App\Models\Tenant;
 use App\Models\User;
 
-it('sets the from address to the tenant engagement address', function () {
+it('sets the from address to the tenant engagement address', function (): void {
     $tenant = Tenant::current();
 
     $user = User::factory()->create();
@@ -60,7 +60,7 @@ it('sets the from address to the tenant engagement address', function () {
     expect($mailMessage->from[0])->toBe($expectedAddress);
 });
 
-it('uses the user name as from name when dynamic_engagements is enabled', function () {
+it('uses the user name as from name when dynamic_engagements is enabled', function (): void {
     $settings = app(SesSettings::class);
     $settings->dynamic_engagements = true;
     $settings->save();
@@ -80,7 +80,7 @@ it('uses the user name as from name when dynamic_engagements is enabled', functi
     expect($mailMessage->from[1])->toBe('Test Sender');
 });
 
-it('uses the default config from name when dynamic_engagements is disabled', function () {
+it('uses the default config from name when dynamic_engagements is disabled', function (): void {
     $settings = app(SesSettings::class);
     $settings->dynamic_engagements = false;
     $settings->save();
@@ -98,7 +98,7 @@ it('uses the default config from name when dynamic_engagements is disabled', fun
     expect($mailMessage->from[1])->toBe(config('mail.from.name'));
 });
 
-it('advances processed_engagements but not successful_engagements for a bounced recipient in a batch', function () {
+it('advances processed_engagements but not successful_engagements for a bounced recipient in a batch', function (): void {
     $contact = Contact::factory()->bounced()->create();
 
     $batch = EngagementBatch::factory()->create([

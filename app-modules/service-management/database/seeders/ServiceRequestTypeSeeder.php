@@ -58,7 +58,7 @@ class ServiceRequestTypeSeeder extends Seeder
                     ['name' => 'Training/Instruction', 'description' => 'Requests for IT training or guidance on using specific software applications or IT systems effectively.', 'icon' => null],
                 ]
             )
-            ->each(function (ServiceRequestType $type) {
+            ->each(function (ServiceRequestType $type): void {
                 $type->priorities()->createMany(
                     [
                         ['name' => 'High', 'order' => 1],

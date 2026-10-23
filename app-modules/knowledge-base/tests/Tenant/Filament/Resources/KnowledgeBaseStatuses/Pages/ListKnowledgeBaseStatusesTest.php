@@ -51,7 +51,7 @@ use function Pest\Laravel\actingAs;
 
 // Permission Tests
 
-test('ListKnowledgeBaseStatuses is gated with proper access control', function () {
+test('ListKnowledgeBaseStatuses is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -67,7 +67,7 @@ test('ListKnowledgeBaseStatuses is gated with proper access control', function (
         )->assertSuccessful();
 });
 
-test('ListKnowledgeBaseStatuses is gated with proper feature access control', function () {
+test('ListKnowledgeBaseStatuses is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -93,7 +93,7 @@ test('ListKnowledgeBaseStatuses is gated with proper feature access control', fu
         )->assertSuccessful();
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     KnowledgeBaseStatus::factory(15)->create();
 
     $user = User::factory()

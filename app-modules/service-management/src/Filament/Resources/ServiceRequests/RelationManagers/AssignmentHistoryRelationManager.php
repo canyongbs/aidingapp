@@ -92,7 +92,7 @@ class AssignmentHistoryRelationManager extends RelationManager
         return $table
             ->modifyQueryUsing(fn (Builder $query) => $query
                 ->with(['user.department', 'serviceRequestStatus'])
-                ->with(['assignedBy' => function (Relation $relation) {
+                ->with(['assignedBy' => function (Relation $relation): void {
                     assert($relation instanceof MorphTo);
                     $relation->morphWith([
                         User::class => ['department'],

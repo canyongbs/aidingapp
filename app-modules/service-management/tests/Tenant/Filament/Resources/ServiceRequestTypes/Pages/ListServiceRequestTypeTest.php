@@ -63,14 +63,14 @@ $builderEditor = function (): User {
     return $user;
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Keep tests from broadcasting to the real websocket service.
     Event::fake([ServiceRequestTypeCatalogUpdated::class]);
 });
 
 // Permission Tests
 
-test('ListServiceRequestTypes is gated with proper access control', function () {
+test('ListServiceRequestTypes is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -86,7 +86,7 @@ test('ListServiceRequestTypes is gated with proper access control', function () 
         )->assertSuccessful();
 });
 
-test('ListServiceRequestTypes is gated with proper feature access control', function () {
+test('ListServiceRequestTypes is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -112,7 +112,7 @@ test('ListServiceRequestTypes is gated with proper feature access control', func
         )->assertSuccessful();
 });
 
-it('loads hierarchical data', function () {
+it('loads hierarchical data', function (): void {
     asSuperAdmin();
 
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
@@ -138,7 +138,7 @@ it('loads hierarchical data', function () {
     expect($first['children'][0]['id'])->toBe($child->id);
 });
 
-it('creates an area and tells other viewers', function () {
+it('creates an area and tells other viewers', function (): void {
     asSuperAdmin();
 
     assertDatabaseMissing(ServiceRequestTypeCategory::class, ['name' => 'Brand New']);
@@ -164,7 +164,7 @@ it('creates an area and tells other viewers', function () {
     );
 });
 
-it('creates a child area', function () {
+it('creates a child area', function (): void {
     asSuperAdmin();
 
     $parent = ServiceRequestTypeCategory::factory()->create();
@@ -175,7 +175,7 @@ it('creates a child area', function () {
     expect(ServiceRequestTypeCategory::query()->where('name', 'Child')->firstOrFail()->parent_id)->toBe($parent->getKey());
 });
 
-it('does not nest areas more than two levels deep', function () {
+it('does not nest areas more than two levels deep', function (): void {
     asSuperAdmin();
 
     $root = ServiceRequestTypeCategory::factory()->create();
@@ -189,7 +189,7 @@ it('does not nest areas more than two levels deep', function () {
     assertDatabaseMissing(ServiceRequestTypeCategory::class, ['name' => 'Grandchild']);
 });
 
-it('reports an area that another user has deleted', function () {
+it('reports an area that another user has deleted', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -203,7 +203,7 @@ it('reports an area that another user has deleted', function () {
     assertDatabaseMissing(ServiceRequestType::class, ['name' => 'Orphan']);
 });
 
-it('creates a type in an area with default priorities', function () {
+it('creates a type in an area with default priorities', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -219,7 +219,7 @@ it('creates a type in an area with default priorities', function () {
         ->and($type->priorities()->orderBy('order')->pluck('name')->all())->toBe(['High', 'Medium', 'Low']);
 });
 
-it('does not create a type with a name already in use', function () {
+it('does not create a type with a name already in use', function (): void {
     asSuperAdmin();
 
     ServiceRequestType::factory()->create(['name' => 'Existing']);
@@ -232,7 +232,7 @@ it('does not create a type with a name already in use', function () {
     expect(ServiceRequestType::query()->where('name', 'existing')->count())->toBe(1);
 });
 
-it('restores an archived type into an area', function () {
+it('restores an archived type into an area', function (): void {
     asSuperAdmin();
 
     $oldCategory = ServiceRequestTypeCategory::factory()->create();
@@ -250,7 +250,7 @@ it('restores an archived type into an area', function () {
         ->and($type->categories->pluck('id')->all())->toBe([$newCategory->getKey()]);
 });
 
-it('renames an area', function () {
+it('renames an area', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Old Cat']);
@@ -261,7 +261,7 @@ it('renames an area', function () {
     expect($category->refresh()->name)->toBe('New Cat Name');
 });
 
-it('renames a type', function () {
+it('renames a type', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create(['name' => 'Old Type']);
@@ -272,7 +272,7 @@ it('renames a type', function () {
     expect($type->refresh()->name)->toBe('New Type Name');
 });
 
-it('does not rename a type to a name already in use', function () {
+it('does not rename a type to a name already in use', function (): void {
     asSuperAdmin();
 
     ServiceRequestType::factory()->create(['name' => 'Taken']);
@@ -285,7 +285,7 @@ it('does not rename a type to a name already in use', function () {
     expect($type->refresh()->name)->toBe('Original');
 });
 
-it('deletes a type without service requests', function () {
+it('deletes a type without service requests', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -296,7 +296,7 @@ it('deletes a type without service requests', function () {
     assertSoftDeleted($type);
 });
 
-it('prevents deleting a type when service requests exist', function () {
+it('prevents deleting a type when service requests exist', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -310,7 +310,7 @@ it('prevents deleting a type when service requests exist', function () {
     assertNotSoftDeleted($type);
 });
 
-it('archives a type with service requests', function () {
+it('archives a type with service requests', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -323,7 +323,7 @@ it('archives a type with service requests', function () {
     expect($type->refresh()->isArchived())->toBeTrue();
 });
 
-it('does not archive a type without service requests', function () {
+it('does not archive a type without service requests', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -335,7 +335,7 @@ it('does not archive a type without service requests', function () {
     expect($type->refresh()->isArchived())->toBeFalse();
 });
 
-it('deletes an area with its child areas and the types filed only within them', function () {
+it('deletes an area with its child areas and the types filed only within them', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -350,7 +350,7 @@ it('deletes an area with its child areas and the types filed only within them', 
     assertSoftDeleted($type);
 });
 
-it('prevents deleting an area when its child areas have service requests', function () {
+it('prevents deleting an area when its child areas have service requests', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -367,7 +367,7 @@ it('prevents deleting an area when its child areas have service requests', funct
     assertNotSoftDeleted($child);
 });
 
-it('moves an area under another area and orders its new siblings', function () {
+it('moves an area under another area and orders its new siblings', function (): void {
     asSuperAdmin();
 
     $parent = ServiceRequestTypeCategory::factory()->create();
@@ -382,7 +382,7 @@ it('moves an area under another area and orders its new siblings', function () {
         ->and($sibling->refresh()->sort)->toBe(2);
 });
 
-it('moves a child area to the top level and orders the top-level areas', function () {
+it('moves a child area to the top level and orders the top-level areas', function (): void {
     asSuperAdmin();
 
     $parent = ServiceRequestTypeCategory::factory()->create(['sort' => 1]);
@@ -396,7 +396,7 @@ it('moves a child area to the top level and orders the top-level areas', functio
         ->and($parent->refresh()->sort)->toBe(2);
 });
 
-it('does not move an area with child areas under another area', function () {
+it('does not move an area with child areas under another area', function (): void {
     asSuperAdmin();
 
     $target = ServiceRequestTypeCategory::factory()->create();
@@ -410,7 +410,7 @@ it('does not move an area with child areas under another area', function () {
     expect($moved->refresh()->parent_id)->toBeNull();
 });
 
-it('reorders types within an area, keeping unmentioned types after the requested order', function () {
+it('reorders types within an area, keeping unmentioned types after the requested order', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -427,7 +427,7 @@ it('reorders types within an area, keeping unmentioned types after the requested
         ->toBe([$type2->getKey(), $type1->getKey(), $type3->getKey()]);
 });
 
-it('moves a type from one area to another', function () {
+it('moves a type from one area to another', function (): void {
     asSuperAdmin();
 
     $from = ServiceRequestTypeCategory::factory()->create();
@@ -440,7 +440,7 @@ it('moves a type from one area to another', function () {
     expect($type->refresh()->categories->pluck('id')->all())->toBe([$to->getKey()]);
 });
 
-it('moves an uncategorized type into an area', function () {
+it('moves an uncategorized type into an area', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -452,7 +452,7 @@ it('moves an uncategorized type into an area', function () {
     expect($type->refresh()->categories->pluck('id')->all())->toBe([$category->getKey()]);
 });
 
-it('restricts a service request type visibility via the manage visibility action', function () {
+it('restricts a service request type visibility via the manage visibility action', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -480,7 +480,7 @@ it('restricts a service request type visibility via the manage visibility action
     Event::assertDispatched(ServiceRequestTypeCatalogUpdated::class);
 });
 
-it('restricts a service request area visibility via the manage visibility action', function () {
+it('restricts a service request area visibility via the manage visibility action', function (): void {
     asSuperAdmin();
 
     $category = ServiceRequestTypeCategory::factory()->create();
@@ -506,7 +506,7 @@ it('restricts a service request area visibility via the manage visibility action
         ->and($category->restrictedToContactTypes->pluck('id')->all())->toBe([$contactType->id]);
 });
 
-it('requires at least one contact type when restricting visibility', function () {
+it('requires at least one contact type when restricting visibility', function (): void {
     asSuperAdmin();
 
     $type = ServiceRequestType::factory()->create();
@@ -528,7 +528,7 @@ it('requires at least one contact type when restricting visibility', function ()
     expect($type->fresh()->is_visibility_restricted)->toBeFalse();
 });
 
-it('clears a visibility restriction and detaches contact types', function () {
+it('clears a visibility restriction and detaches contact types', function (): void {
     asSuperAdmin();
 
     $contactType = ContactType::factory()->create();
@@ -554,7 +554,7 @@ it('clears a visibility restriction and detaches contact types', function () {
         ->and($type->restrictedToContactTypes()->count())->toBe(0);
 });
 
-it('shows a type under every category it belongs to in the hierarchical data', function () {
+it('shows a type under every category it belongs to in the hierarchical data', function (): void {
     asSuperAdmin();
 
     $categoryA = ServiceRequestTypeCategory::factory()->create(['name' => 'Area A', 'sort' => 1]);
@@ -575,8 +575,8 @@ it('shows a type under every category it belongs to in the hierarchical data', f
         ->and(collect($secondCategoryData['types'])->pluck('id'))->toContain($type->id);
 });
 
-describe('authorization', function () use ($builderEditor) {
-    it('denies builder changes without the `settings.*.update` permission', function (string $method, array $arguments) {
+describe('authorization', function () use ($builderEditor): void {
+    it('denies builder changes without the `settings.*.update` permission', function (string $method, array $arguments): void {
         $user = User::factory()->create();
         $user->givePermissionTo('settings.view-any');
 
@@ -589,20 +589,20 @@ describe('authorization', function () use ($builderEditor) {
         Event::assertNotDispatched(ServiceRequestTypeCatalogUpdated::class);
     })->with([
         'createCategory' => ['createCategory', ['Area']],
-        'renameCategory' => fn () => ['renameCategory', [(string) Str::uuid(), 'Area']],
-        'moveCategory' => fn () => ['moveCategory', [(string) Str::uuid(), null, []]],
-        'deleteCategory' => fn () => ['deleteCategory', [(string) Str::uuid()]],
+        'renameCategory' => fn (): array => ['renameCategory', [(string) Str::uuid(), 'Area']],
+        'moveCategory' => fn (): array => ['moveCategory', [(string) Str::uuid(), null, []]],
+        'deleteCategory' => fn (): array => ['deleteCategory', [(string) Str::uuid()]],
         'createType' => ['createType', ['Type']],
-        'restoreArchivedType' => fn () => ['restoreArchivedType', [(string) Str::uuid()]],
-        'renameType' => fn () => ['renameType', [(string) Str::uuid(), 'Type']],
-        'moveType' => fn () => ['moveType', [(string) Str::uuid(), null, null, []]],
-        'addTypeToCategory' => fn () => ['addTypeToCategory', [(string) Str::uuid(), (string) Str::uuid()]],
-        'removeTypeFromCategory' => fn () => ['removeTypeFromCategory', [(string) Str::uuid(), (string) Str::uuid()]],
-        'deleteType' => fn () => ['deleteType', [(string) Str::uuid()]],
-        'archiveType' => fn () => ['archiveType', [(string) Str::uuid()]],
+        'restoreArchivedType' => fn (): array => ['restoreArchivedType', [(string) Str::uuid()]],
+        'renameType' => fn (): array => ['renameType', [(string) Str::uuid(), 'Type']],
+        'moveType' => fn (): array => ['moveType', [(string) Str::uuid(), null, null, []]],
+        'addTypeToCategory' => fn (): array => ['addTypeToCategory', [(string) Str::uuid(), (string) Str::uuid()]],
+        'removeTypeFromCategory' => fn (): array => ['removeTypeFromCategory', [(string) Str::uuid(), (string) Str::uuid()]],
+        'deleteType' => fn (): array => ['deleteType', [(string) Str::uuid()]],
+        'archiveType' => fn (): array => ['archiveType', [(string) Str::uuid()]],
     ]);
 
-    it('does not create a type without the `settings.create` permission', function () use ($builderEditor) {
+    it('does not create a type without the `settings.create` permission', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         Livewire::test(ListServiceRequestTypes::class)
@@ -613,7 +613,7 @@ describe('authorization', function () use ($builderEditor) {
         assertDatabaseMissing(ServiceRequestType::class, ['name' => 'Unauthorized Type']);
     });
 
-    it('does not delete a type without the `settings.*.delete` permission', function () use ($builderEditor) {
+    it('does not delete a type without the `settings.*.delete` permission', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
@@ -625,7 +625,7 @@ describe('authorization', function () use ($builderEditor) {
         assertNotSoftDeleted($type);
     });
 
-    it('does not archive a type without the `settings.*.delete` permission', function () use ($builderEditor) {
+    it('does not archive a type without the `settings.*.delete` permission', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
@@ -639,7 +639,7 @@ describe('authorization', function () use ($builderEditor) {
         expect($type->refresh()->isArchived())->toBeFalse();
     });
 
-    it('does not restore an archived type without the `settings.*.restore` permission', function () use ($builderEditor) {
+    it('does not restore an archived type without the `settings.*.restore` permission', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         $type = ServiceRequestType::factory()->create();
@@ -652,7 +652,7 @@ describe('authorization', function () use ($builderEditor) {
         expect($type->refresh()->isArchived())->toBeTrue();
     });
 
-    it('does not delete an area whose types would be deleted without the `settings.*.delete` permission', function () use ($builderEditor) {
+    it('does not delete an area whose types would be deleted without the `settings.*.delete` permission', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         $category = ServiceRequestTypeCategory::factory()->create();
@@ -666,7 +666,7 @@ describe('authorization', function () use ($builderEditor) {
         assertNotSoftDeleted($type);
     });
 
-    it('lets a user who can only update the builder change areas and type placements', function () use ($builderEditor) {
+    it('lets a user who can only update the builder change areas and type placements', function () use ($builderEditor): void {
         actingAs($builderEditor());
 
         $category = ServiceRequestTypeCategory::factory()->create();

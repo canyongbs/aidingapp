@@ -43,7 +43,7 @@ use AidingApp\Engagement\Models\UnmatchedInboundCommunication;
 
 use function Pest\Laravel\assertDatabaseHas;
 
-it('will properly match to and create an engagement response for a contact', function () {
+it('will properly match to and create an engagement response for a contact', function (): void {
     $unmatchedInboundRecordOne = UnmatchedInboundCommunication::factory()->email()->create();
     $unmatchedInboundRecordTwo = UnmatchedInboundCommunication::factory()->email()->create();
 
@@ -75,7 +75,7 @@ it('will properly match to and create an engagement response for a contact', fun
     ]);
 });
 
-it('can check unmatched inbound communications with no match', function () {
+it('can check unmatched inbound communications with no match', function (): void {
     $unmatchedInboundEmailRecord = UnmatchedInboundCommunication::factory()->email()->create();
 
     expect(UnmatchedInboundCommunication::count())->toBe(1);

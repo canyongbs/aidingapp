@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Exceptions;
 use Illuminate\Support\Facades\Http;
 use Spatie\Health\Enums\Status;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $azureSsoSettings = app(AzureSsoSettings::class);
     $azureSsoSettings->tenant_id = 'test_tenant';
     $azureSsoSettings->client_id = 'test_client';
@@ -50,7 +50,7 @@ beforeEach(function () {
     $azureSsoSettings->save();
 });
 
-it('returns with ok status if credentials exist and do not expire soon', function () {
+it('returns with ok status if credentials exist and do not expire soon', function (): void {
     $azureSsoSettings = app(AzureSsoSettings::class);
 
     Http::fake([
@@ -68,7 +68,7 @@ it('returns with ok status if credentials exist and do not expire soon', functio
     expect((new AzureCredentialsExpiringCheck())->run()->status)->toBe(Status::ok());
 });
 
-it('returns with ok status if there is an exception in the API request', function () {
+it('returns with ok status if there is an exception in the API request', function (): void {
     Exceptions::fake();
     $azureSsoSettings = app(AzureSsoSettings::class);
 
@@ -80,7 +80,7 @@ it('returns with ok status if there is an exception in the API request', functio
     Exceptions::assertReported(RequestException::class);
 });
 
-it('returns with ok status if there is an exception when retrieving the password credentials', function () {
+it('returns with ok status if there is an exception when retrieving the password credentials', function (): void {
     Exceptions::fake();
     $azureSsoSettings = app(AzureSsoSettings::class);
 
@@ -100,7 +100,7 @@ it('returns with ok status if there is an exception when retrieving the password
     Exceptions::assertReported(RequestException::class);
 });
 
-it('returns with ok status if there are no matching password credentials', function () {
+it('returns with ok status if there are no matching password credentials', function (): void {
     Exceptions::fake();
     $azureSsoSettings = app(AzureSsoSettings::class);
 
@@ -115,7 +115,7 @@ it('returns with ok status if there are no matching password credentials', funct
     Exceptions::assertReported(NoMatchingAzureCredentialsException::class);
 });
 
-it('uses the soonest ending credential if it receives multiple', function () {
+it('uses the soonest ending credential if it receives multiple', function (): void {
     $azureSsoSettings = app(AzureSsoSettings::class);
 
     Http::fake([
@@ -137,7 +137,7 @@ it('uses the soonest ending credential if it receives multiple', function () {
     expect((new AzureCredentialsExpiringCheck())->run()->status)->toBe(Status::warning());
 });
 
-it('returns with a failed status if the credential has already expired', function () {
+it('returns with a failed status if the credential has already expired', function (): void {
     $azureSsoSettings = app(AzureSsoSettings::class);
 
     Http::fake([
@@ -155,7 +155,7 @@ it('returns with a failed status if the credential has already expired', functio
     expect((new AzureCredentialsExpiringCheck())->run()->status)->toBe(Status::failed());
 });
 
-it('returns with a warning status if the credential is within 45 days of expiring', function () {
+it('returns with a warning status if the credential is within 45 days of expiring', function (): void {
     $azureSsoSettings = app(AzureSsoSettings::class);
 
     Http::fake([

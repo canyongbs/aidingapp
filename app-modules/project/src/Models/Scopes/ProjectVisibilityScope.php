@@ -61,7 +61,7 @@ class ProjectVisibilityScope implements Scope
             return;
         }
 
-        $builder->where(function (Builder $query) use ($user) {
+        $builder->where(function (Builder $query) use ($user): void {
             $query->whereMorphedTo('createdBy', $user)
                 ->orWhereHas('managerDepartments.users', fn (Builder $query) => $query->where('id', $user->getKey()))
                 ->orWhereHas('auditorDepartments.users', fn (Builder $query) => $query->where('id', $user->getKey()))

@@ -76,7 +76,7 @@ class StoreKnowledgeBaseArticleVoteController extends Controller
         }
         $helpfulVoteData = KnowledgeBaseItem::withCount([
             'votes',
-            'votes as helpful_votes_count' => function (Builder $query) {
+            'votes as helpful_votes_count' => function (Builder $query): void {
                 $query->where('is_helpful', true);
             },
         ])->find($request->article_id);

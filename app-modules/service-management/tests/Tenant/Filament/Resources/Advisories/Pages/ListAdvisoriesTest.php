@@ -54,7 +54,7 @@ use function Pest\Laravel\get;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('ListAdvisories is gated with proper access control', function () {
+test('ListAdvisories is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -70,7 +70,7 @@ test('ListAdvisories is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->advisoryManagement = false;
@@ -96,7 +96,7 @@ it('is gated with proper access control', function () {
     get(ListAdvisories::getUrl())->assertSuccessful();
 });
 
-test('can list records', function () {
+test('can list records', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -114,7 +114,7 @@ test('can list records', function () {
         ->assertSuccessful();
 });
 
-test('bulk delete Advisories', function () {
+test('bulk delete Advisories', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -132,7 +132,7 @@ test('bulk delete Advisories', function () {
     }
 });
 
-it('only shows the bulk delete action to a user with the advisory.delete permission', function () {
+it('only shows the bulk delete action to a user with the advisory.delete permission', function (): void {
     Advisory::factory(15)->create();
 
     $user = User::factory()
@@ -150,7 +150,7 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-it('links each row to the advisory view page', function () {
+it('links each row to the advisory view page', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any', 'advisory.*.view');
@@ -167,7 +167,7 @@ it('links each row to the advisory view page', function () {
     expect($url)->toBe(AdvisoryResource::getUrl('view', ['record' => $advisory]));
 });
 
-it('does not link a row when the user cannot view the advisory', function () {
+it('does not link a row when the user cannot view the advisory', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any');
@@ -184,7 +184,7 @@ it('does not link a row when the user cannot view the advisory', function () {
     expect($url)->toBeNull();
 });
 
-it('renders the severity column as a badge using the severity color', function () {
+it('renders the severity column as a badge using the severity color', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any');
@@ -205,7 +205,7 @@ it('renders the severity column as a badge using the severity color', function (
         ->and($column->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
 
-test('advisories can be created from the list page create modal with proper access control', function () {
+test('advisories can be created from the list page create modal with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -230,7 +230,7 @@ test('advisories can be created from the list page create modal with proper acce
     assertDatabaseHas(Advisory::class, $request);
 });
 
-test('creating an advisory from the list page modal is gated by the advisory management feature', function () {
+test('creating an advisory from the list page modal is gated by the advisory management feature', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->advisoryManagement = false;
@@ -259,7 +259,7 @@ test('creating an advisory from the list page modal is gated by the advisory man
     assertDatabaseHas(Advisory::class, $request);
 });
 
-test('the create advisory modal validates the inputs', function (AdvisoryRequestFactory $data, array $errors) {
+test('the create advisory modal validates the inputs', function (AdvisoryRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $request = AdvisoryRequestFactory::new($data)->create();
@@ -312,7 +312,7 @@ test('the create advisory modal validates the inputs', function (AdvisoryRequest
     ]
 );
 
-test('creating an advisory redirects a user who can view it to the new advisory', function () {
+test('creating an advisory redirects a user who can view it to the new advisory', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -330,7 +330,7 @@ test('creating an advisory redirects a user who can view it to the new advisory'
     $component->assertRedirect(AdvisoryResource::getUrl('view', ['record' => $advisory]));
 });
 
-test('creating an advisory keeps a user who cannot view it on the list page', function () {
+test('creating an advisory keeps a user who cannot view it on the list page', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -345,7 +345,7 @@ test('creating an advisory keeps a user who cannot view it on the list page', fu
         ->assertNoRedirect();
 });
 
-test('the create advisory modal defaults the assigned department to the current user department', function () {
+test('the create advisory modal defaults the assigned department to the current user department', function (): void {
     $department = Department::factory()->create();
 
     $user = User::factory()->for($department)->create();

@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_monitoring_target_team', function (Blueprint $table) {
+        Schema::create('service_monitoring_target_team', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_monitoring_target_id')->constrained()->cascadeOnDelete();
             $table->foreignUuid('team_id')->constrained()->cascadeOnDelete();

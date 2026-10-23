@@ -54,7 +54,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -94,7 +94,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
         ->assertTableActionVisible('assign-to-me');
 });
 
-test('Assign To Me action visible when the Service Request is unassigned and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
+test('Assign To Me action visible when the Service Request is unassigned and the logged-in user is a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -128,7 +128,7 @@ test('Assign To Me action visible when the Service Request is unassigned and the
         ->assertTableActionVisible('assign-to-me');
 });
 
-test('Assign To Me action is visible when the logged-in user belongs to a manager group', function () {
+test('Assign To Me action is visible when the logged-in user belongs to a manager group', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
@@ -159,7 +159,7 @@ test('Assign To Me action is visible when the logged-in user belongs to a manage
     ])->assertTableActionVisible('assign-to-me');
 });
 
-test('Assign To Me preselects the logged-in manager and waits for submission before assigning', function () {
+test('Assign To Me preselects the logged-in manager and waits for submission before assigning', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -220,7 +220,7 @@ test('Assign To Me preselects the logged-in manager and waits for submission bef
         ->exists())->toBeTrue();
 });
 
-test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -263,7 +263,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is already assigned and the logged-in user is a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -300,7 +300,7 @@ test('Assign To Me action is not visible when the Service Request is already ass
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user does not belong to a Department that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user does not belong to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -336,7 +336,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user is not a direct managerUser of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is unassigned and the logged-in user is not a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -371,7 +371,7 @@ test('Assign To Me action is not visible when the Service Request is unassigned 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Manage Assignment action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
+test('Manage Assignment action visible when the Service Request is unassigned and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -411,7 +411,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
         ->assertTableActionVisible('manageAssignment');
 });
 
-test('Manage Assignment action visible when the Service Request is unassigned and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
+test('Manage Assignment action visible when the Service Request is unassigned and the logged-in user is a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -445,7 +445,7 @@ test('Manage Assignment action visible when the Service Request is unassigned an
         ->assertTableActionVisible('manageAssignment');
 });
 
-test('Manage Assignment action mounts with the Service Request current status pre-filled', function () {
+test('Manage Assignment action mounts with the Service Request current status pre-filled', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -478,7 +478,7 @@ test('Manage Assignment action mounts with the Service Request current status pr
         ]);
 });
 
-test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function () {
+test('Manage Assignment action is not visible when the logged-in user cannot update the Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -512,7 +512,7 @@ test('Manage Assignment action is not visible when the logged-in user cannot upd
         ->assertTableActionHidden('manageAssignment');
 });
 
-test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -552,7 +552,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
+test('Assign To Me action is not visible when the Service Request is Closed and the logged-in user is a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -586,7 +586,7 @@ test('Assign To Me action is not visible when the Service Request is Closed and 
         ->assertTableActionHidden('assign-to-me');
 });
 
-test('Manage Assignment action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function () {
+test('Manage Assignment action is not visible when the Service Request is Closed and the logged-in user belongs to a Department that is Manager of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -626,7 +626,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
         ->assertTableActionHidden('manageAssignment');
 });
 
-test('Manage Assignment action is not visible when the Service Request is Closed and the logged-in user is a direct managerUser of the Type of this Service Request', function () {
+test('Manage Assignment action is not visible when the Service Request is Closed and the logged-in user is a direct managerUser of the Type of this Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -660,7 +660,7 @@ test('Manage Assignment action is not visible when the Service Request is Closed
         ->assertTableActionHidden('manageAssignment');
 });
 
-test('Manage Assignment action is not visible when the logged-in user is not a manager of the Type of the Service Request', function () {
+test('Manage Assignment action is not visible when the logged-in user is not a manager of the Type of the Service Request', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -692,7 +692,7 @@ test('Manage Assignment action is not visible when the logged-in user is not a m
         ->assertTableActionHidden('manageAssignment');
 });
 
-test('Manage Assignment action is always labelled "Manage Assignment" when unassigned', function () {
+test('Manage Assignment action is always labelled "Manage Assignment" when unassigned', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -726,7 +726,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when unass
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
 });
 
-test('Manage Assignment action is always labelled "Manage Assignment" when already assigned', function () {
+test('Manage Assignment action is always labelled "Manage Assignment" when already assigned', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -765,7 +765,7 @@ test('Manage Assignment action is always labelled "Manage Assignment" when alrea
         ->assertTableActionHasLabel('manageAssignment', 'Manage Assignment');
 });
 
-test('Manage Assignment action is hidden and the page renders when the Service Request has no priority or type to assign against', function () {
+test('Manage Assignment action is hidden and the page renders when the Service Request has no priority or type to assign against', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -793,7 +793,7 @@ test('Manage Assignment action is hidden and the page renders when the Service R
         ->assertTableActionHidden('manageAssignment');
 });
 
-test('submitting Manage Assignment assigns the selected manager and deactivates the prior assignment', function () {
+test('submitting Manage Assignment assigns the selected manager and deactivates the prior assignment', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -841,7 +841,7 @@ test('submitting Manage Assignment assigns the selected manager and deactivates 
     expect($priorAssignment->refresh()->status)->toBe(ServiceRequestAssignmentStatus::Inactive);
 });
 
-test('submitting Manage Assignment with a different status updates the service request status and snapshots it on the assignment', function () {
+test('submitting Manage Assignment with a different status updates the service request status and snapshots it on the assignment', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -888,7 +888,7 @@ test('submitting Manage Assignment with a different status updates the service r
     expect($assignment->service_request_status_id)->toBe($newStatus->getKey());
 });
 
-test('submitting Manage Assignment while moving the Service Request to a Closed status stamps the resolution time', function () {
+test('submitting Manage Assignment while moving the Service Request to a Closed status stamps the resolution time', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -939,7 +939,7 @@ test('submitting Manage Assignment while moving the Service Request to a Closed 
         ->and($serviceRequest->time_to_resolution)->not->toBeNull();
 });
 
-test('submitting Manage Assignment with a non-manager user does not create an assignment', function () {
+test('submitting Manage Assignment with a non-manager user does not create an assignment', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -981,7 +981,7 @@ test('submitting Manage Assignment with a non-manager user does not create an as
     expect($serviceRequest->assignments()->where('user_id', $nonManager->getKey())->exists())->toBeFalse();
 });
 
-test('submitting Manage Assignment without a status fails validation and does not create an assignment', function () {
+test('submitting Manage Assignment without a status fails validation and does not create an assignment', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -1021,8 +1021,8 @@ test('submitting Manage Assignment without a status fails validation and does no
     expect($serviceRequest->assignments()->where('user_id', $manager->getKey())->exists())->toBeFalse();
 });
 
-describe('archiving', function () {
-    test('Manage Assignment still offers the current status when it has been archived', function () {
+describe('archiving', function (): void {
+    test('Manage Assignment still offers the current status when it has been archived', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = true;
         $settings->save();

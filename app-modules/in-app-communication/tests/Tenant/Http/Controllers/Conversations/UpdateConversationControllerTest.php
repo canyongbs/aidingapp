@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -50,7 +50,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('updates a channel conversation', function () {
+it('updates a channel conversation', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create(['name' => 'Old Name']);
@@ -67,7 +67,7 @@ it('updates a channel conversation', function () {
         ->assertJsonPath('data.name', 'New Name');
 });
 
-it('only allows managers to update conversations', function () {
+it('only allows managers to update conversations', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -84,7 +84,7 @@ it('only allows managers to update conversations', function () {
         ->assertForbidden();
 });
 
-it('validates request', function (array $data, array $expectedErrors) {
+it('validates request', function (array $data, array $expectedErrors): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -104,7 +104,7 @@ it('validates request', function (array $data, array $expectedErrors) {
     ],
 ]);
 
-it('does not let a confidential channel be made public', function () {
+it('does not let a confidential channel be made public', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->confidential()->create();
@@ -122,7 +122,7 @@ it('does not let a confidential channel be made public', function () {
     expect($conversation->fresh()->is_private)->toBeTrue();
 });
 
-it('still renames a confidential channel', function () {
+it('still renames a confidential channel', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->confidential()->create(['name' => 'Old Name']);

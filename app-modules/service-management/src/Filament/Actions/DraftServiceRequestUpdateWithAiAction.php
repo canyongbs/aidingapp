@@ -52,6 +52,8 @@ use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class DraftServiceRequestUpdateWithAiAction extends Action
@@ -64,7 +66,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(function (ServiceRequestUpdates $livewire) {
+            ->modalContent(function (ServiceRequestUpdates $livewire): Factory|View {
                 $serviceRequest = $livewire->serviceRequest;
 
                 return view('service-management::filament.actions.draft-with-ai-modal-content-service-request-update', [
@@ -83,7 +85,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                     ->placeholder('Describe the update you wish to share, and I will help you draft it. I already have all the context of this service request, and your knowledge base, so no need to share those details.')
                     ->required(),
             ])
-            ->action(function (array $data, Set $set, ServiceRequestUpdates $livewire) {
+            ->action(function (array $data, Set $set, ServiceRequestUpdates $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
                 $serviceRequest = $livewire->serviceRequest;
@@ -98,7 +100,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                     ->with('createdBy')
                     ->orderBy('created_at', 'asc')
                     ->get()
-                    ->map(function (ServiceRequestUpdate $update) {
+                    ->map(function (ServiceRequestUpdate $update): string {
                         $createdByName = match ($update->createdBy::class) {
                             User::class => $update->createdBy->name,
                             Contact::class => $update->createdBy->full_name,

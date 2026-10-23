@@ -55,8 +55,8 @@ class AssignManagerBulkAction
             ->label('Assign Managers')
             ->icon('heroicon-s-user-group')
             ->modalHeading('Bulk Assign Managers')
-            ->authorize(fn () => auth()->user()->can('knowledge_base_item.view-any') && auth()->user()->can('knowledge_base_item.*.update'))
-            ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} " . Str::plural('item', $records->count()) . ' to assign manager(s).')
+            ->authorize(fn (): bool => auth()->user()->can('knowledge_base_item.view-any') && auth()->user()->can('knowledge_base_item.*.update'))
+            ->modalDescription(fn (Collection $records): string => "You have selected {$records->count()} " . Str::plural('item', $records->count()) . ' to assign manager(s).')
             ->schema([
                 Select::make('manager_ids')
                     ->label('Managers')
@@ -70,11 +70,11 @@ class AssignManagerBulkAction
                     ->default(false)
                     ->hintIconTooltip('If selected, all prior managers will be removed.'),
             ])
-            ->action(function (array $data, Collection $records) {
+            ->action(function (array $data, Collection $records): void {
                 try {
                     DB::beginTransaction();
 
-                    $records->each(function (KnowledgeBaseItem $record) use ($data) {
+                    $records->each(function (KnowledgeBaseItem $record) use ($data): void {
                         if (! empty($data['manager_ids'])) {
                             $record->managers()->sync($data['manager_ids'], $data['remove_prior']);
                         }

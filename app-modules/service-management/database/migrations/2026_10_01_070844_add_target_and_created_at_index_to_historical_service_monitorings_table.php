@@ -44,7 +44,7 @@ return new class () extends Migration {
 
     public function up(): void
     {
-        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+        Schema::table('historical_service_monitorings', function (Blueprint $table): void {
             $table->index(['service_monitoring_target_id', 'created_at'], 'historical_service_monitorings_target_id_created_at_index')
                 ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'))
                 ->concurrently();
@@ -53,7 +53,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('historical_service_monitorings', function (Blueprint $table) {
+        Schema::table('historical_service_monitorings', function (Blueprint $table): void {
             $table->dropIndexIfExists('historical_service_monitorings_target_id_created_at_index');
         });
     }

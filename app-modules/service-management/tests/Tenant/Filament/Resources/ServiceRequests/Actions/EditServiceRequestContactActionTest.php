@@ -52,7 +52,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editContact action is visible for manager department member with update permission', function () {
+test('editContact action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -84,7 +84,7 @@ test('editContact action is visible for manager department member with update pe
         ->assertActionVisible(TestAction::make('editContact')->schemaComponent('respondent'));
 });
 
-test('editContact action is hidden for user without update permission', function () {
+test('editContact action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -116,7 +116,7 @@ test('editContact action is hidden for user without update permission', function
         ->assertActionDoesNotExist(TestAction::make('editContact')->schemaComponent('respondent'));
 });
 
-test('editContact requires respondent_id', function () {
+test('editContact requires respondent_id', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -134,7 +134,7 @@ test('editContact requires respondent_id', function () {
         ->assertHasFormErrors(['respondent_id' => 'required']);
 });
 
-test('editContact requires an existing contact', function () {
+test('editContact requires an existing contact', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -152,7 +152,7 @@ test('editContact requires an existing contact', function () {
         ->assertHasFormErrors(['respondent_id' => 'exists']);
 });
 
-test('can update the service request customer contact', function () {
+test('can update the service request customer contact', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -176,7 +176,7 @@ test('can update the service request customer contact', function () {
         ->and($serviceRequest->fresh()->respondent->is($newContact))->toBeTrue();
 });
 
-test('the customer contact selector table omits the unaffiliated placeholder and shows the organization when present', function () {
+test('the customer contact selector table omits the unaffiliated placeholder and shows the organization when present', function (): void {
     asSuperAdmin();
 
     $organization = Organization::factory()->create(['name' => 'Acme University']);

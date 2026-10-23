@@ -51,7 +51,7 @@ class UniqueOrganizationDomain implements ValidationRule
      *
      * @param  int|null  $ignoreId
      */
-    public function __construct($ignoreId = null)
+    public function __construct(int|string|null $ignoreId = null)
     {
         $this->ignoreId = $ignoreId;
     }

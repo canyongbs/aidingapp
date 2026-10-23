@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('it can change status of multiple service requests as super admin', function () {
+test('it can change status of multiple service requests as super admin', function (): void {
     asSuperAdmin();
 
     $newStatus = ServiceRequestStatus::factory()->open()->create();
@@ -69,12 +69,12 @@ test('it can change status of multiple service requests as super admin', functio
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it can change status of multiple service requests for user directly assigned as manager user', function () {
+test('it can change status of multiple service requests for user directly assigned as manager user', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -109,12 +109,12 @@ test('it can change status of multiple service requests for user directly assign
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it can change status of multiple service requests for user belonging to a manager department', function () {
+test('it can change status of multiple service requests for user belonging to a manager department', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -153,12 +153,12 @@ test('it can change status of multiple service requests for user belonging to a 
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($newStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($newStatus->getKey());
     });
 });
 
-test('it can change status of multiple service requests for user belonging to a manager group', function () {
+test('it can change status of multiple service requests for user belonging to a manager group', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create();
     $group->users()->attach($user);
@@ -193,7 +193,7 @@ test('it can change status of multiple service requests for user belonging to a 
     });
 });
 
-test('it cannot change status of service requests for user who is not a manager', function () {
+test('it cannot change status of service requests for user who is not a manager', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -222,12 +222,12 @@ test('it cannot change status of service requests for user who is not a manager'
             'statusId' => $newStatus->getKey(),
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($originalStatus->getKey());
     });
 });
 
-test('it cannot change status of closed service requests', function () {
+test('it cannot change status of closed service requests', function (): void {
     asSuperAdmin();
 
     $closedStatus = ServiceRequestStatus::factory()
@@ -249,12 +249,12 @@ test('it cannot change status of closed service requests', function () {
             'statusId' => $newStatus->getKey(),
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($closedStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($closedStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($closedStatus->getKey());
     });
 });
 
-test('it cannot change status of service requests without required permissions', function () {
+test('it cannot change status of service requests without required permissions', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -284,13 +284,13 @@ test('it cannot change status of service requests without required permissions',
             'statusId' => $newStatus->getKey(),
         ]);
 
-    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus) {
+    $serviceRequests->each(function (ServiceRequest $serviceRequest) use ($originalStatus): void {
         expect($serviceRequest->refresh()->status_id)->toBe($originalStatus->getKey());
     });
 });
 
-describe('archiving', function () {
-    test('it cannot change status of service requests to an archived status', function () {
+describe('archiving', function (): void {
+    test('it cannot change status of service requests to an archived status', function (): void {
         asSuperAdmin();
 
         $archivedStatus = ServiceRequestStatus::factory()->archived()->create();

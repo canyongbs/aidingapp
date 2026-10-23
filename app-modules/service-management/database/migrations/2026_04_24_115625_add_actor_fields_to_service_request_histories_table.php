@@ -41,14 +41,14 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_histories', function (Blueprint $table) {
+        Schema::table('service_request_histories', function (Blueprint $table): void {
             $table->nullableUuidMorphs('actor');
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_request_histories', function (Blueprint $table) {
+        Schema::table('service_request_histories', function (Blueprint $table): void {
             $table->dropMorphs('actor');
         });
     }

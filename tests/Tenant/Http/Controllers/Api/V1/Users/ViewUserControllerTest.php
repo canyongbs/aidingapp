@@ -45,12 +45,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $targetUser = User::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -77,7 +77,7 @@ it('is gated with proper access control', function () {
         ->assertOk();
 });
 
-it('returns a user resource', function () {
+it('returns a user resource', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -91,7 +91,7 @@ it('returns a user resource', function () {
     ]);
 });
 
-it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
+it('returns correct user fields', function (string $responseKey, Closure $getExpected): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -108,7 +108,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
-it('returns correct roles relationship structure', function () {
+it('returns correct roles relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -123,7 +123,7 @@ it('returns correct roles relationship structure', function () {
     expect($response['data']['roles'])->toBe([$role->name]);
 });
 
-it('returns correct department relationship structure', function () {
+it('returns correct department relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -141,7 +141,7 @@ it('returns correct department relationship structure', function () {
     ]);
 });
 
-it('returns null department when no department is assigned', function () {
+it('returns null department when no department is assigned', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -154,7 +154,7 @@ it('returns null department when no department is assigned', function () {
     expect($response['data']['department'])->toBeNull();
 });
 
-it('returns correct permissions relationship structure', function () {
+it('returns correct permissions relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);
@@ -172,7 +172,7 @@ it('returns correct permissions relationship structure', function () {
     expect($response['data']['permissions'])->toBe([$permission->name]);
 });
 
-it('returns 404 when the requested user has an admin role', function (string $adminRole) {
+it('returns 404 when the requested user has an admin role', function (string $adminRole): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['user.view-any', 'user.*.view']);
     Sanctum::actingAs($user, ['api']);

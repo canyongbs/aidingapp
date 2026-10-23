@@ -48,7 +48,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the EditContactType page', function () {
+test('A successful action on the EditContactType page', function (): void {
     $contactType = ContactType::factory()->create();
 
     asSuperAdmin()
@@ -76,7 +76,7 @@ test('A successful action on the EditContactType page', function () {
     assertEquals($editRequest['color'], $contactType->fresh()->color);
 });
 
-test('EditContactType requires valid data', function (EditContactTypeRequestFactory $data, array $errors) {
+test('EditContactType requires valid data', function (EditContactTypeRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $contactType = ContactType::factory()->create();
@@ -95,16 +95,16 @@ test('EditContactType requires valid data', function (EditContactTypeRequestFact
     assertDatabaseHas(ContactType::class, $contactType->toArray());
 })->with(
     [
-        'name missing' => [fn () => EditContactTypeRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
-        'name not a string' => [fn () => EditContactTypeRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
-        'color missing' => [fn () => EditContactTypeRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
-        'color not within enum' => [fn () => EditContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
+        'name missing' => [fn (): EditContactTypeRequestFactory => EditContactTypeRequestFactory::new()->state(['name' => null]), ['name' => 'required']],
+        'name not a string' => [fn (): EditContactTypeRequestFactory => EditContactTypeRequestFactory::new()->state(['name' => 1]), ['name' => 'string']],
+        'color missing' => [fn (): EditContactTypeRequestFactory => EditContactTypeRequestFactory::new()->state(['color' => null]), ['color' => 'required']],
+        'color not within enum' => [fn (): EditContactTypeRequestFactory => EditContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
 
 // Permission Tests
 
-test('EditContactType is gated with proper access control', function () {
+test('EditContactType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $contactType = ContactType::factory()->create();

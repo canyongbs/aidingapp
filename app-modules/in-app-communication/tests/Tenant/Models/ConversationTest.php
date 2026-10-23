@@ -37,7 +37,7 @@
 use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use AidingApp\InAppCommunication\Models\Conversation;
 
-it('exposes the confidentiality payload for a confidential conversation', function () {
+it('exposes the confidentiality payload for a confidential conversation', function (): void {
     $conversation = Conversation::factory()
         ->confidential(ConversationEphemeralPeriod::SevenDays)
         ->create();
@@ -48,7 +48,7 @@ it('exposes the confidentiality payload for a confidential conversation', functi
     ]);
 });
 
-it('exposes a null ephemeral period when none is set', function () {
+it('exposes a null ephemeral period when none is set', function (): void {
     $conversation = Conversation::factory()
         ->confidential(null)
         ->create();
@@ -59,7 +59,7 @@ it('exposes a null ephemeral period when none is set', function () {
     ]);
 });
 
-it('exposes the confidentiality payload for an ordinary conversation', function () {
+it('exposes the confidentiality payload for an ordinary conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
 
     expect($conversation->confidentialityPayload())->toBe([

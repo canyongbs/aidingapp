@@ -72,9 +72,9 @@ use function Pest\Laravel\assertDatabaseMissing;
 //});
 
 // TODO: Cleanup Task (restore-reclassified-assignments): delete this describe and the test within
-describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function () {
-    it('restores soft-deleted assignments as inactive and leaves other assignments untouched', function () {
-        isolatedMigration('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function () {
+describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
+    it('restores soft-deleted assignments as inactive and leaves other assignments untouched', function (): void {
+        isolatedMigration('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments', function (): void {
             // Setup data before migration
             $serviceRequest = ServiceRequest::factory()->create();
             $user = User::factory()->create();
@@ -121,9 +121,9 @@ describe('2026_10_06_150704_tmp_restore_reclassified_service_request_assignments
 });
 
 // TODO: Cleanup Task (service-request-file-upload-type): delete this describe and the test within
-describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function () {
-    it('backfills the upload type of files attached directly to service requests and activates the feature flag', function () {
-        isolatedMigration('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function () {
+describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
+    it('backfills the upload type of files attached directly to service requests and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', function (): void {
             $submittedAt = now()->subDay();
             $serviceRequest = ServiceRequest::factory()->create(['created_at' => $submittedAt]);
             $contact = Contact::factory()->create();
@@ -180,9 +180,9 @@ describe('2026_10_15_081432_tmp_backfill_service_request_media_upload_type', fun
     });
 });
 
-describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function () {
-    it('deletes the retired Role Group and interaction.import permissions and their emptied groups without touching unrelated permissions', function () {
-        isolatedMigration('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function () {
+describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function (): void {
+    it('deletes the retired Role Group and interaction.import permissions and their emptied groups without touching unrelated permissions', function (): void {
+        isolatedMigration('2026_10_15_101455_delete_role_group_and_interaction_import_permissions', function (): void {
             $roleGroupPermissionNames = [
                 'role_group.view-any',
                 'role_group.create',

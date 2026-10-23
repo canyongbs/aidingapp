@@ -65,7 +65,7 @@ class CreateOrganizationType extends CreateRecord
                             ->string()
                             ->when(
                                 OrganizationTypeAndIndustryNameUniquenessFeature::active(),
-                                fn (TextInput $input) => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                                fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
                             ),
 
                         Toggle::make('is_default')

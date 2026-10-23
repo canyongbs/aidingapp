@@ -42,12 +42,12 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_requests', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_requests', function (Blueprint $table): void {
                 $table->renameColumn('issue_category', 'category');
             });
 
-            Schema::table('service_request_types', function (Blueprint $table) {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->renameColumn('default_issue_category', 'default_category');
             });
         });
@@ -55,12 +55,12 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->renameColumn('default_category', 'default_issue_category');
             });
 
-            Schema::table('service_requests', function (Blueprint $table) {
+            Schema::table('service_requests', function (Blueprint $table): void {
                 $table->renameColumn('category', 'issue_category');
             });
         });

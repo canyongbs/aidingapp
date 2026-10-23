@@ -42,7 +42,7 @@ use Illuminate\Database\Events\QueryExecuted;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 
-it('creates a managed contact synchronized from the user', function () {
+it('creates a managed contact synchronized from the user', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create([
@@ -69,7 +69,7 @@ it('creates a managed contact synchronized from the user', function () {
         ->and($contact->isManaged())->toBeTrue();
 });
 
-it('synchronizes every supported field from the user to the managed contact', function () {
+it('synchronizes every supported field from the user to the managed contact', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create([
@@ -120,7 +120,7 @@ it('synchronizes every supported field from the user to the managed contact', fu
         ->and($contact->country)->toBe('US');
 });
 
-it('updates the managed contact when any synchronized user field changes', function (string $userAttribute, string $contactAttribute) {
+it('updates the managed contact when any synchronized user field changes', function (string $userAttribute, string $contactAttribute): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -151,7 +151,7 @@ it('updates the managed contact when any synchronized user field changes', funct
     'country' => ['country', 'country'],
 ]);
 
-it('updates the managed contact work extension when the user work extension changes', function () {
+it('updates the managed contact work extension when the user work extension changes', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create(['work_extension' => 1111]);
@@ -163,7 +163,7 @@ it('updates the managed contact work extension when the user work extension chan
     expect($user->managedContact()->first()->work_extension)->toBe('2222');
 });
 
-it('clears the managed contact values when the user values are cleared', function () {
+it('clears the managed contact values when the user values are cleared', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create([
@@ -206,7 +206,7 @@ it('clears the managed contact values when the user values are cleared', functio
         ->and($contact->country)->toBeNull();
 });
 
-it('does not touch the managed contact when no synchronized user field changed', function () {
+it('does not touch the managed contact when no synchronized user field changed', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -224,7 +224,7 @@ it('does not touch the managed contact when no synchronized user field changed',
     expect(collect($queries)->filter(fn (string $sql): bool => str_contains($sql, '"contacts"')))->toBeEmpty();
 });
 
-it('synchronizes a stale managed contact from an already loaded user', function () {
+it('synchronizes a stale managed contact from an already loaded user', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create(['school' => 'School of Science', 'employee_id' => 'EMP-1']);
@@ -242,7 +242,7 @@ it('synchronizes a stale managed contact from an already loaded user', function 
         ->and($contact->fresh()->type_id)->toBe($type->getKey());
 });
 
-it('synchronizes the managed contact when the user is updated', function () {
+it('synchronizes the managed contact when the user is updated', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create(['name' => 'Old Name', 'job_title' => 'Junior']);
@@ -270,7 +270,7 @@ it('synchronizes the managed contact when the user is updated', function () {
         ->and($contact->mobile)->toBe('+1 555 777 6666');
 });
 
-it('links and overrides an existing contact with the same email instead of duplicating', function () {
+it('links and overrides an existing contact with the same email instead of duplicating', function (): void {
     $type = ContactType::factory()->create();
 
     $existing = Contact::factory()->create([
@@ -298,7 +298,7 @@ it('links and overrides an existing contact with the same email instead of dupli
     expect(Contact::query()->where('email', 'match@example.com')->count())->toBe(1);
 });
 
-it('links an existing contact whose email differs only in case instead of duplicating', function () {
+it('links an existing contact whose email differs only in case instead of duplicating', function (): void {
     $type = ContactType::factory()->create();
 
     $existing = Contact::factory()->create([
@@ -323,7 +323,7 @@ it('links an existing contact whose email differs only in case instead of duplic
     expect(Contact::query()->count())->toBe(1);
 });
 
-it('links an existing lower-case contact to a mixed-case user email instead of duplicating', function () {
+it('links an existing lower-case contact to a mixed-case user email instead of duplicating', function (): void {
     $type = ContactType::factory()->create();
 
     $existing = Contact::factory()->create(['email' => 'match@example.com']);
@@ -338,7 +338,7 @@ it('links an existing lower-case contact to a mixed-case user email instead of d
     expect(Contact::query()->count())->toBe(1);
 });
 
-it('restores a soft-deleted contact when linking by email', function () {
+it('restores a soft-deleted contact when linking by email', function (): void {
     $type = ContactType::factory()->create();
 
     $existing = Contact::factory()->create(['email' => 'gone@example.com']);
@@ -353,7 +353,7 @@ it('restores a soft-deleted contact when linking by email', function () {
         ->and($contact->user_id)->toBe($user->getKey());
 });
 
-it('does not reassign a contact managed by a different user', function () {
+it('does not reassign a contact managed by a different user', function (): void {
     $type = ContactType::factory()->create();
 
     $otherUser = User::factory()->create(['email' => 'other@example.com']);
@@ -366,14 +366,14 @@ it('does not reassign a contact managed by a different user', function () {
         ->and($otherContact->fresh()->user_id)->toBe($otherUser->getKey());
 });
 
-it('enforces a unique contact email case-insensitively', function () {
+it('enforces a unique contact email case-insensitively', function (): void {
     Contact::factory()->create(['email' => 'shared@example.com']);
 
     expect(fn () => Contact::factory()->create(['email' => 'Shared@Example.com']))
         ->toThrow(UniqueConstraintViolationException::class);
 });
 
-it('unlinks the managed contact when disabled but keeps it editable', function () {
+it('unlinks the managed contact when disabled but keeps it editable', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -386,7 +386,7 @@ it('unlinks the managed contact when disabled but keeps it editable', function (
         ->and($contact->fresh()->trashed())->toBeFalse();
 });
 
-it('unlinks the managed contact when the user is deleted', function () {
+it('unlinks the managed contact when the user is deleted', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();

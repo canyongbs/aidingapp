@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-test('fill with AI action is hidden when settings are disabled', function () {
+test('fill with AI action is hidden when settings are disabled', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->is_enabled = false;
     $settings->save();
@@ -64,7 +64,7 @@ test('fill with AI action is hidden when settings are disabled', function () {
         ->assertActionHidden('fillWithAi');
 });
 
-test('fill with AI action is disabled when no AI templates exist for the event type', function () {
+test('fill with AI action is disabled when no AI templates exist for the event type', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->is_enabled = true;
     $settings->save();
@@ -81,7 +81,7 @@ test('fill with AI action is disabled when no AI templates exist for the event t
         ->assertActionDisabled('fillWithAi');
 });
 
-test('fill with AI action is enabled when feature is enabled and AI templates exist', function () {
+test('fill with AI action is enabled when feature is enabled and AI templates exist', function (): void {
     $settings = app(ServiceRequestNotificationAutomationSettings::class);
     $settings->is_enabled = true;
     $settings->save();

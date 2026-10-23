@@ -53,7 +53,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertModelMissing;
 use function Tests\asSuperAdmin;
 
-it('renders entry cards with their name on the kanban board', function () {
+it('renders entry cards with their name on the kanban board', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -70,7 +70,7 @@ it('renders entry cards with their name on the kanban board', function () {
         ->assertSee($entry->name);
 });
 
-it('renders stage name with card count in the stage header', function () {
+it('renders stage name with card count in the stage header', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -95,7 +95,7 @@ it('renders stage name with card count in the stage header', function () {
         ->assertSee('1');
 });
 
-it('renders modern card metadata with assignment and due tooltip', function () {
+it('renders modern card metadata with assignment and due tooltip', function (): void {
     asSuperAdmin();
 
     Carbon::setTestNow('2026-08-07 12:00:00');
@@ -137,7 +137,7 @@ it('renders modern card metadata with assignment and due tooltip', function () {
     Carbon::setTestNow();
 });
 
-it('hides archived tasks from the kanban board', function () {
+it('hides archived tasks from the kanban board', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -162,7 +162,7 @@ it('hides archived tasks from the kanban board', function () {
         ->assertDontSee($archived->name);
 });
 
-it('renders stages in order sequence on the kanban board', function () {
+it('renders stages in order sequence on the kanban board', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -177,7 +177,7 @@ it('renders stages in order sequence on the kanban board', function () {
         ->assertSeeInOrder([$first->name, $second->name, $third->name]);
 });
 
-it('assigns a pipeline entry created from a stage column to that column stage', function () {
+it('assigns a pipeline entry created from a stage column to that column stage', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -199,7 +199,7 @@ it('assigns a pipeline entry created from a stage column to that column stage', 
         ->and($entry->pipeline_stage_id)->not->toBe($firstStage->getKey());
 });
 
-it('persists a start date for a pipeline entry created from a stage column', function () {
+it('persists a start date for a pipeline entry created from a stage column', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -222,7 +222,7 @@ it('persists a start date for a pipeline entry created from a stage column', fun
     expect($entry->start_date?->toDateTimeString())->toBe($startDate->toDateTimeString());
 });
 
-it('hides the add entry action without pipeline update permission', function () {
+it('hides the add entry action without pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -246,7 +246,7 @@ it('hides the add entry action without pipeline update permission', function () 
         ->assertDontSeeHtml('addEntry');
 });
 
-it('rejects adding a pipeline entry into a stage that does not belong to the pipeline', function () {
+it('rejects adding a pipeline entry into a stage that does not belong to the pipeline', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -265,7 +265,7 @@ it('rejects adding a pipeline entry into a stage that does not belong to the pip
     expect(PipelineEntry::query()->where('name', 'Invalid Stage Entry')->exists())->toBeFalse();
 });
 
-it('can move a pipeline entry between stages belonging to the pipeline', function () {
+it('can move a pipeline entry between stages belonging to the pipeline', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -283,7 +283,7 @@ it('can move a pipeline entry between stages belonging to the pipeline', functio
     expect($entry->fresh()->pipeline_stage_id)->toBe($toStage->getKey());
 });
 
-it('denies moving a pipeline entry without pipeline update permission', function () {
+it('denies moving a pipeline entry without pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -311,7 +311,7 @@ it('denies moving a pipeline entry without pipeline update permission', function
     expect($entry->fresh()->pipeline_stage_id)->toBe($fromStage->getKey());
 });
 
-it('disables kanban drag and drop for users without pipeline update permission', function () {
+it('disables kanban drag and drop for users without pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -331,7 +331,7 @@ it('disables kanban drag and drop for users without pipeline update permission',
         ->assertSee('kanban($wire, false)');
 });
 
-it('enables kanban drag and drop for users with pipeline update permission', function () {
+it('enables kanban drag and drop for users with pipeline update permission', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -343,7 +343,7 @@ it('enables kanban drag and drop for users with pipeline update permission', fun
         ->assertSee('kanban($wire, true)');
 });
 
-it('rejects moving a pipeline entry into a stage that does not belong to the pipeline', function () {
+it('rejects moving a pipeline entry into a stage that does not belong to the pipeline', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -362,7 +362,7 @@ it('rejects moving a pipeline entry into a stage that does not belong to the pip
     expect($entry->fresh()->pipeline_stage_id)->toBe($fromStage->getKey());
 });
 
-it('rejects moving a pipeline entry that does not belong to the pipeline', function () {
+it('rejects moving a pipeline entry that does not belong to the pipeline', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -381,7 +381,7 @@ it('rejects moving a pipeline entry that does not belong to the pipeline', funct
     expect($otherEntry->fresh()->pipeline_stage_id)->toBe($originalStageId);
 });
 
-it('can view a pipeline entry through the slide over modal', function () {
+it('can view a pipeline entry through the slide over modal', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -411,7 +411,7 @@ it('can view a pipeline entry through the slide over modal', function () {
         ]);
 });
 
-it('hides the view action without pipeline view permission', function () {
+it('hides the view action without pipeline view permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -429,7 +429,7 @@ it('hides the view action without pipeline view permission', function () {
         ->assertActionHidden('viewPipelineEntry');
 });
 
-it('can edit a pipeline entry through the slide over modal', function () {
+it('can edit a pipeline entry through the slide over modal', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -459,7 +459,7 @@ it('can edit a pipeline entry through the slide over modal', function () {
     ]);
 });
 
-it('archives a pipeline entry through the slide-over modal', function () {
+it('archives a pipeline entry through the slide-over modal', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -484,7 +484,7 @@ it('archives a pipeline entry through the slide-over modal', function () {
     expect($entry->refresh()->isArchived())->toBeTrue();
 });
 
-it('notifies when archiving a pipeline entry is cancelled', function () {
+it('notifies when archiving a pipeline entry is cancelled', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -511,7 +511,7 @@ it('notifies when archiving a pipeline entry is cancelled', function () {
     expect($entry->refresh()->isArchived())->toBeFalse();
 });
 
-it('persists related milestone, assets, and service requests when edited through the modal', function () {
+it('persists related milestone, assets, and service requests when edited through the modal', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -546,7 +546,7 @@ it('persists related milestone, assets, and service requests when edited through
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
 });
 
-it('fails to edit a pipeline entry that belongs to a different pipeline', function () {
+it('fails to edit a pipeline entry that belongs to a different pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -569,7 +569,7 @@ it('fails to edit a pipeline entry that belongs to a different pipeline', functi
         ->mountAction('editPipelineEntry', ['entry' => $entry->getKey()]);
 })->throws(ModelNotFoundException::class);
 
-it('preserves related milestone, assets, and service requests when edited without changing them', function () {
+it('preserves related milestone, assets, and service requests when edited without changing them', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -609,7 +609,7 @@ it('preserves related milestone, assets, and service requests when edited withou
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([$serviceRequest->getKey()]);
 });
 
-it('clears related milestone, assets, and service requests when the type is set to none', function () {
+it('clears related milestone, assets, and service requests when the type is set to none', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -654,7 +654,7 @@ it('clears related milestone, assets, and service requests when the type is set 
         ->and($entry->serviceRequests->pluck('id')->all())->toBe([]);
 });
 
-it('can remove a pipeline entry', function () {
+it('can remove a pipeline entry', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -674,7 +674,7 @@ it('can remove a pipeline entry', function () {
     assertModelMissing($entry);
 });
 
-it('fails to remove a pipeline entry that belongs to a different pipeline', function () {
+it('fails to remove a pipeline entry that belongs to a different pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -697,7 +697,7 @@ it('fails to remove a pipeline entry that belongs to a different pipeline', func
         ->callAction('removePipelineEntry', arguments: ['entry' => $entry->getKey()]);
 })->throws(ModelNotFoundException::class);
 
-it('hides the remove action without pipeline update permission', function () {
+it('hides the remove action without pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -723,7 +723,7 @@ it('hides the remove action without pipeline update permission', function () {
         ->assertActionHidden('removePipelineEntry');
 });
 
-it('mounts the edit pipeline entry action from the card title with pipeline update permission', function () {
+it('mounts the edit pipeline entry action from the card title with pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -756,7 +756,7 @@ it('mounts the edit pipeline entry action from the card title with pipeline upda
         ->assertActionMounted('editPipelineEntry');
 });
 
-it('mounts the view pipeline entry action from the card title without pipeline update permission', function () {
+it('mounts the view pipeline entry action from the card title without pipeline update permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -786,7 +786,7 @@ it('mounts the view pipeline entry action from the card title without pipeline u
         ->assertActionMounted('viewPipelineEntry');
 });
 
-it('eager loads the milestone relation instead of lazy loading it per card', function () {
+it('eager loads the milestone relation instead of lazy loading it per card', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

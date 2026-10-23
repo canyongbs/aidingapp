@@ -61,7 +61,7 @@ dataset('contactSectionEditActions', [
     'customer information' => ['editCustomerInformation', 'customerInformation'],
 ]);
 
-it('does not render standalone view or edit actions in the list', function () use ($makeManagedContact) {
+it('does not render standalone view or edit actions in the list', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -77,7 +77,7 @@ it('does not render standalone view or edit actions in the list', function () us
         ->assertActionDoesNotExist(TestAction::make('edit')->table($unmanaged));
 });
 
-it('shows a lock action instead of the section edit actions on the view page of a managed contact', function (string $action, string $component) use ($makeManagedContact) {
+it('shows a lock action instead of the section edit actions on the view page of a managed contact', function (string $action, string $component) use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -90,7 +90,7 @@ it('shows a lock action instead of the section edit actions on the view page of 
         ->assertActionDoesNotExist(TestAction::make($action)->schemaComponent($component));
 })->with('contactSectionEditActions');
 
-it('shows the section edit actions on the view page of an unmanaged contact', function (string $action, string $component) {
+it('shows the section edit actions on the view page of an unmanaged contact', function (string $action, string $component): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -103,7 +103,7 @@ it('shows the section edit actions on the view page of an unmanaged contact', fu
         ->assertActionDoesNotExist('managed');
 })->with('contactSectionEditActions');
 
-it('denies the update ability for a managed contact via the policy', function () use ($makeManagedContact) {
+it('denies the update ability for a managed contact via the policy', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 

@@ -40,7 +40,7 @@ use App\Models\User;
 
 use function Pest\Laravel\actingAs;
 
-it('defaults created_by to the authenticated user when not provided', function () {
+it('defaults created_by to the authenticated user when not provided', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -57,7 +57,7 @@ it('defaults created_by to the authenticated user when not provided', function (
     expect($milestone->created_by_id)->toBe($user->getKey());
 });
 
-it('keeps an explicitly provided created_by', function () {
+it('keeps an explicitly provided created_by', function (): void {
     $actingUser = User::factory()->create();
     $authorUser = User::factory()->create();
 
@@ -79,7 +79,7 @@ it('keeps an explicitly provided created_by', function () {
     expect($milestone->created_by_id)->toBe($authorUser->getKey());
 });
 
-it('does not assign or override the pipeline, leaving it to the caller', function () {
+it('does not assign or override the pipeline, leaving it to the caller', function (): void {
     actingAs(User::factory()->create());
 
     $project = Project::factory()->create();

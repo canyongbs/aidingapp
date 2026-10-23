@@ -47,7 +47,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -81,7 +81,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can validate edit pipeline inputs', function (EditPipelineRequestFactory $data, array $errors) {
+it('can validate edit pipeline inputs', function (EditPipelineRequestFactory $data, array $errors): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -119,7 +119,7 @@ it('can validate edit pipeline inputs', function (EditPipelineRequestFactory $da
     ],
 ]);
 
-it('can edit pipelines', function () {
+it('can edit pipelines', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $superAdmin = User::factory()->create();
@@ -160,7 +160,7 @@ it('can edit pipelines', function () {
     $undoRepeaterFake();
 });
 
-it('can delete pipelines', function () {
+it('can delete pipelines', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 

@@ -67,7 +67,7 @@ $runContactImport = function (array $row, ?Import $import = null): void {
     $importer($row);
 };
 
-it('associates an imported contact with the matching organization', function () use ($runContactImport) {
+it('associates an imported contact with the matching organization', function () use ($runContactImport): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -85,7 +85,7 @@ it('associates an imported contact with the matching organization', function () 
     expect($contact->organization_id)->toBe($organization->getKey());
 });
 
-it('preserves an existing organization when importing a contact', function () use ($runContactImport) {
+it('preserves an existing organization when importing a contact', function () use ($runContactImport): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);

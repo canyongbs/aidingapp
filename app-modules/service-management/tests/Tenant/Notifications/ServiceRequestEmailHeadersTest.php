@@ -44,8 +44,8 @@ use App\Models\Tenant;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
 
-describe('Unit-level customizeOutboundMail', function () {
-    it('sets the from address to the plus-addressed SR address', function () {
+describe('Unit-level customizeOutboundMail', function (): void {
+    it('sets the from address to the plus-addressed SR address', function (): void {
         $tenant = Tenant::current();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -69,7 +69,7 @@ describe('Unit-level customizeOutboundMail', function () {
             ->and($mailMessage->from[1])->toBe(config('mail.from.name'));
     });
 
-    it('sets the reply-to address with plus-addressed SR number', function () {
+    it('sets the reply-to address with plus-addressed SR number', function (): void {
         $tenant = Tenant::current();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -93,7 +93,7 @@ describe('Unit-level customizeOutboundMail', function () {
             ->and($mailMessage->replyTo[0][0])->toBe($expectedAddress);
     });
 
-    it('includes a visible body reference with the SR number', function () {
+    it('includes a visible body reference with the SR number', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
@@ -113,7 +113,7 @@ describe('Unit-level customizeOutboundMail', function () {
             ->toContain($bodyRef);
     });
 
-    it('creates an OutboundEmailMessageId record after successful send with messageId', function () {
+    it('creates an OutboundEmailMessageId record after successful send with messageId', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
@@ -140,7 +140,7 @@ describe('Unit-level customizeOutboundMail', function () {
         expect($emailMessage->outbound_message_id)->toBe('0101019d9205135c-e21c7d7b-f8bc-44fa-9c51-46d5decf9c65-000000');
     });
 
-    it('does not create an OutboundEmailMessageId record after failed send', function () {
+    it('does not create an OutboundEmailMessageId record after failed send', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
@@ -157,7 +157,7 @@ describe('Unit-level customizeOutboundMail', function () {
         expect(OutboundEmailMessageId::count())->toBe(0);
     });
 
-    it('does not create an OutboundEmailMessageId record when messageId is null', function () {
+    it('does not create an OutboundEmailMessageId record when messageId is null', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
 
         $notification = new SendEducatableServiceRequestOpenedNotification($serviceRequest, null);
@@ -172,8 +172,8 @@ describe('Unit-level customizeOutboundMail', function () {
     });
 });
 
-describe('Full notification send flow', function () {
-    it('sets the from address on the actual outgoing email', function () {
+describe('Full notification send flow', function (): void {
+    it('sets the from address on the actual outgoing email', function (): void {
         Event::fake([MessageSending::class]);
 
         $tenant = Tenant::current();
@@ -191,7 +191,7 @@ describe('Full notification send flow', function () {
             config('mail.from.root_domain'),
         );
 
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress) {
+        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress): bool {
             $from = $event->message->getFrom();
 
             return count($from) === 1
@@ -199,7 +199,7 @@ describe('Full notification send flow', function () {
         });
     });
 
-    it('sets the reply-to address with plus-addressed SR number on the actual outgoing email', function () {
+    it('sets the reply-to address with plus-addressed SR number on the actual outgoing email', function (): void {
         Event::fake([MessageSending::class]);
 
         $tenant = Tenant::current();
@@ -217,7 +217,7 @@ describe('Full notification send flow', function () {
             config('mail.from.root_domain'),
         );
 
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress) {
+        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($expectedAddress): bool {
             $replyTo = $event->message->getReplyTo();
 
             return count($replyTo) === 1
@@ -225,7 +225,7 @@ describe('Full notification send flow', function () {
         });
     });
 
-    it('includes the body reference in the actual outgoing email', function () {
+    it('includes the body reference in the actual outgoing email', function (): void {
         Event::fake([MessageSending::class]);
 
         $serviceRequest = ServiceRequest::withoutEvents(fn () => ServiceRequest::factory()->create());
@@ -236,7 +236,7 @@ describe('Full notification send flow', function () {
 
         $bodyRef = '[REF:' . $serviceRequest->service_request_number . ']';
 
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($bodyRef) {
+        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($bodyRef): bool {
             $body = $event->message->getHtmlBody() ?? $event->message->getTextBody() ?? '';
 
             return str_contains($body, $bodyRef);

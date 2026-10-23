@@ -50,8 +50,8 @@ $serviceRequestDraft = function (): ServiceRequest {
     ]);
 };
 
-describe('archiving', function () use ($serviceRequestDraft) {
-    it('does not submit a draft into an archived status', function () use ($serviceRequestDraft) {
+describe('archiving', function () use ($serviceRequestDraft): void {
+    it('does not submit a draft into an archived status', function () use ($serviceRequestDraft): void {
         ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
         ]);
@@ -71,7 +71,7 @@ describe('archiving', function () use ($serviceRequestDraft) {
         expect($draft->fresh()->status_id)->toBe($selectableStatus->getKey());
     });
 
-    it('leaves the status unchanged when every status of the classification is archived', function () use ($serviceRequestDraft) {
+    it('leaves the status unchanged when every status of the classification is archived', function () use ($serviceRequestDraft): void {
         ServiceRequestStatus::factory()->archived()->create([
             'classification' => SystemServiceRequestClassification::Waiting,
         ]);

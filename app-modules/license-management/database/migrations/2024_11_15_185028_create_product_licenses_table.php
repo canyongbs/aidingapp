@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('product_licenses', function (Blueprint $table) {
+        Schema::create('product_licenses', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('product_id')->constrained('products');
             $table->text('license');

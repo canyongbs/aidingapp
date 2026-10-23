@@ -47,8 +47,8 @@ use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
 dataset('admins', [
-    'super admin' => fn () => user(Authenticatable::SUPER_ADMIN_ROLE),
-    'partner admin' => fn () => user(Authenticatable::PARTNER_ADMIN_ROLE),
+    'super admin' => fn (): User => user(Authenticatable::SUPER_ADMIN_ROLE),
+    'partner admin' => fn (): User => user(Authenticatable::PARTNER_ADMIN_ROLE),
 ]);
 
 dataset('admin roles', [
@@ -57,8 +57,8 @@ dataset('admin roles', [
     'AI Admin role' => Authenticatable::AI_ADMIN_ROLE,
 ]);
 
-describe('authorization', function () {
-    it('denies access to the view role page without the `role.*.view` permission', function () {
+describe('authorization', function (): void {
+    it('denies access to the view role page without the `role.*.view` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any');
         actingAs($user);
@@ -69,7 +69,7 @@ describe('authorization', function () {
             ->assertForbidden();
     });
 
-    it('allows access to the view role page with the `role.*.view` permission', function () {
+    it('allows access to the view role page with the `role.*.view` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view');
         actingAs($user);
@@ -80,7 +80,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('allows a super admin to access the view role page', function () {
+    it('allows a super admin to access the view role page', function (): void {
         asSuperAdmin();
 
         $role = Role::factory()->create();
@@ -89,7 +89,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('allows a partner admin to access the view role page without any explicit permissions', function () {
+    it('allows a partner admin to access the view role page without any explicit permissions', function (): void {
         actingAs(user(Authenticatable::PARTNER_ADMIN_ROLE));
 
         $role = Role::factory()->create();
@@ -98,7 +98,7 @@ describe('authorization', function () {
             ->assertSuccessful();
     });
 
-    it('shows the `EditAction` action with the `role.*.update` permission', function () {
+    it('shows the `EditAction` action with the `role.*.update` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('role.view-any', 'role.*.view', 'role.*.update');
         actingAs($user);
@@ -109,7 +109,7 @@ describe('authorization', function () {
             ->assertActionVisible(EditAction::class);
     });
 
-    it('hides the `EditAction` action on an admin role for an admin', function (User $admin, string $roleName) {
+    it('hides the `EditAction` action on an admin role for an admin', function (User $admin, string $roleName): void {
         actingAs($admin);
 
         $role = Role::query()

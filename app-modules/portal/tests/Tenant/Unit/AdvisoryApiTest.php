@@ -46,7 +46,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\Get;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -55,7 +55,7 @@ beforeEach(function () {
     actingAs(Contact::factory()->create());
 });
 
-test('Can fetch all advisories with updates', function () {
+test('Can fetch all advisories with updates', function (): void {
     $advisoryStatus = AdvisoryStatus::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();
@@ -74,7 +74,7 @@ test('Can fetch all advisories with updates', function () {
     $response->assertJsonCount(5, 'data.data');
 });
 
-test('advisory updates are ordered by date', function () {
+test('advisory updates are ordered by date', function (): void {
     $advisory = Advisory::factory()
         ->for(AdvisoryStatus::factory(), 'status')
         ->for(AdvisorySeverity::factory(), 'severity')
@@ -100,7 +100,7 @@ test('advisory updates are ordered by date', function () {
     expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
 });
 
-it('serializes advisory datetimes as UTC ISO-8601 instants', function () {
+it('serializes advisory datetimes as UTC ISO-8601 instants', function (): void {
     $instant = Carbon::parse('2026-09-16 23:30:00', 'UTC');
 
     $advisory = Advisory::factory()
@@ -122,7 +122,7 @@ it('serializes advisory datetimes as UTC ISO-8601 instants', function () {
         ->and($response->json('data.data.0.advisory_updates.0.date'))->toBe('2026-09-16T23:30:00+00:00');
 });
 
-it('preserves the advisory payload the portal renders', function () {
+it('preserves the advisory payload the portal renders', function (): void {
     $advisoryStatus = AdvisoryStatus::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();

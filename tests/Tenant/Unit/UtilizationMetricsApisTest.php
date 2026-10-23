@@ -46,11 +46,11 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\get;
 use function Pest\Laravel\withoutMiddleware;
 
-beforeEach(function () {
+beforeEach(function (): void {
     withoutMiddleware(CheckOlympusKey::class);
 });
 
-it('checks the API returns users', function () {
+it('checks the API returns users', function (): void {
     $randomRecords = random_int(1, 10);
 
     User::factory()->count($randomRecords)->create();
@@ -67,7 +67,7 @@ it('checks the API returns users', function () {
     expect($data['users'])->toBe($randomRecords);
 });
 
-it('checks the API returns service requests', function () {
+it('checks the API returns service requests', function (): void {
     $randomRecords = random_int(1, 10);
 
     ServiceRequest::factory()->count($randomRecords)->create();
@@ -84,7 +84,7 @@ it('checks the API returns service requests', function () {
     expect($data['service_requests'])->toBe($randomRecords);
 });
 
-it('checks the API returns assets', function () {
+it('checks the API returns assets', function (): void {
     $randomRecords = random_int(1, 10);
 
     Asset::factory()->count($randomRecords)->create();
@@ -101,7 +101,7 @@ it('checks the API returns assets', function () {
     expect($data['assets'])->toBe($randomRecords);
 });
 
-it('checks the API returns changes', function () {
+it('checks the API returns changes', function (): void {
     $randomRecords = random_int(1, 10);
 
     ChangeRequest::factory()->count($randomRecords)->create();
@@ -115,7 +115,7 @@ it('checks the API returns changes', function () {
     expect($data['changes'])->toBe($randomRecords);
 });
 
-it('checks the API returns knowledge base articles', function () {
+it('checks the API returns knowledge base articles', function (): void {
     $randomRecords = random_int(1, 10);
 
     KnowledgeBaseItem::factory()->count($randomRecords)->create();
@@ -132,7 +132,7 @@ it('checks the API returns knowledge base articles', function () {
     expect($data['knowledge_base_articles'])->toBe($randomRecords);
 });
 
-it('checks the API returns emails sent', function () {
+it('checks the API returns emails sent', function (): void {
     $randomRecords = random_int(1, 10);
 
     EmailMessage::factory(['quota_usage' => 1])->count($randomRecords)->create();
@@ -151,7 +151,7 @@ it('checks the API returns emails sent', function () {
     expect($data['emails'])->toBe($randomRecords . '/100');
 });
 
-it('checks the API returns the reset date', function () {
+it('checks the API returns the reset date', function (): void {
     $resetDate = now()->addMonth()->format('m-d');
 
     $settings = app(LicenseSettings::class);

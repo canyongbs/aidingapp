@@ -118,7 +118,7 @@ abstract class TestCase extends BaseTestCase
         $connection->beginTransaction();
         $connection->setEventDispatcher($dispatcher);
 
-        $this->beforeApplicationDestroyed(function () use ($database, $name) {
+        $this->beforeApplicationDestroyed(function () use ($database, $name): void {
             $connection = $database->connection($name);
             $dispatcher = $connection->getEventDispatcher();
 
@@ -202,7 +202,7 @@ abstract class TestCase extends BaseTestCase
             seedTenantDatabase: false,
         );
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             Role::query()->firstOrCreate([
                 'name' => Authenticatable::SUPER_ADMIN_ROLE,
                 'guard_name' => 'web',

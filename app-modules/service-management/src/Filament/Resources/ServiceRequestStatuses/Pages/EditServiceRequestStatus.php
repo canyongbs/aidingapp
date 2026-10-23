@@ -77,13 +77,13 @@ class EditServiceRequestStatus extends EditRecord
                         ColorSelect::make()
                             ->required(),
                     ]),
-            ])->disabled(fn (ServiceRequestStatus $record) => $record->trashed() || $record->isArchived());
+            ])->disabled(fn (ServiceRequestStatus $record): bool => $record->trashed() || $record->isArchived());
     }
 
     protected function getSaveFormAction(): Action
     {
         return parent::getSaveFormAction()
-            ->hidden(fn (ServiceRequestStatus $record) => $record->trashed() || $record->isArchived());
+            ->hidden(fn (ServiceRequestStatus $record): bool => $record->trashed() || $record->isArchived());
     }
 
     protected function getHeaderActions(): array

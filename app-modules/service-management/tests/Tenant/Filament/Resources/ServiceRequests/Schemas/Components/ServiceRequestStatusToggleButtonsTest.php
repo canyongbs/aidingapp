@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Compo
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use Filament\Forms\Components\ToggleButtons;
 
-it('builds a status_id toggle buttons field with no default by default', function () {
+it('builds a status_id toggle buttons field with no default by default', function (): void {
     $toggleButtons = ServiceRequestStatusToggleButtons::make();
 
     expect($toggleButtons)->toBeInstanceOf(ToggleButtons::class)
@@ -47,7 +47,7 @@ it('builds a status_id toggle buttons field with no default by default', functio
         ->and($toggleButtons->isInline())->toBeTrue();
 });
 
-it('builds a toggle buttons field for a custom field name', function () {
+it('builds a toggle buttons field for a custom field name', function (): void {
     ServiceRequestStatus::factory()->create();
 
     $toggleButtons = ServiceRequestStatusToggleButtons::make('automated_status_id');
@@ -55,7 +55,7 @@ it('builds a toggle buttons field for a custom field name', function () {
     expect($toggleButtons->getName())->toBe('automated_status_id');
 });
 
-it('applies a chained default when provided', function () {
+it('applies a chained default when provided', function (): void {
     $status = ServiceRequestStatus::factory()->create();
 
     $toggleButtons = ServiceRequestStatusToggleButtons::make()->default($status->getKey());
@@ -63,7 +63,7 @@ it('applies a chained default when provided', function () {
     expect($toggleButtons->getDefaultState())->toBe($status->getKey());
 });
 
-it('maps statuses to options labelled by name', function () {
+it('maps statuses to options labelled by name', function (): void {
     $status = ServiceRequestStatus::factory()->create();
 
     $toggleButtons = ServiceRequestStatusToggleButtons::make();
@@ -71,7 +71,7 @@ it('maps statuses to options labelled by name', function () {
     expect($toggleButtons->getOptions())->toHaveKey($status->getKey(), $status->name);
 });
 
-it('maps statuses to colors matching their color option', function () {
+it('maps statuses to colors matching their color option', function (): void {
     $status = ServiceRequestStatus::factory()->create();
 
     $toggleButtons = ServiceRequestStatusToggleButtons::make();
@@ -79,8 +79,8 @@ it('maps statuses to colors matching their color option', function () {
     expect($toggleButtons->getColors())->toHaveKey($status->getKey(), $status->color->value);
 });
 
-describe('archiving', function () {
-    it('does not offer archived service request statuses', function () {
+describe('archiving', function (): void {
+    it('does not offer archived service request statuses', function (): void {
         $active = ServiceRequestStatus::factory()->create();
         $archived = ServiceRequestStatus::factory()->archived()->create();
 
@@ -90,7 +90,7 @@ describe('archiving', function () {
             ->and($options)->not->toHaveKey($archived->getKey());
     });
 
-    it('offers the currently selected status even when it is archived', function () {
+    it('offers the currently selected status even when it is archived', function (): void {
         $archived = ServiceRequestStatus::factory()->archived()->create();
 
         $options = ServiceRequestStatusToggleButtons::make(selectedId: $archived->getKey())->getOptions();
@@ -98,7 +98,7 @@ describe('archiving', function () {
         expect($options)->toHaveKey($archived->getKey(), $archived->name);
     });
 
-    it('does not offer an archived status other than the selected one', function () {
+    it('does not offer an archived status other than the selected one', function (): void {
         $selected = ServiceRequestStatus::factory()->archived()->create();
         $otherArchived = ServiceRequestStatus::factory()->archived()->create();
 
@@ -109,8 +109,8 @@ describe('archiving', function () {
     });
 });
 
-describe('soft deleted statuses', function () {
-    it('does not offer soft deleted service request statuses', function () {
+describe('soft deleted statuses', function (): void {
+    it('does not offer soft deleted service request statuses', function (): void {
         $active = ServiceRequestStatus::factory()->create();
         $trashed = ServiceRequestStatus::factory()->create();
         $trashed->delete();
@@ -121,7 +121,7 @@ describe('soft deleted statuses', function () {
             ->and($options)->not->toHaveKey($trashed->getKey());
     });
 
-    it('offers the currently selected status even when it is soft deleted', function () {
+    it('offers the currently selected status even when it is soft deleted', function (): void {
         $trashed = ServiceRequestStatus::factory()->create();
         $trashed->delete();
 

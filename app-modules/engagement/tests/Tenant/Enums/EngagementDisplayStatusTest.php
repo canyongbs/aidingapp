@@ -40,7 +40,7 @@ use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Models\EmailMessageEvent;
 
-it('returns the correct case given a particular Engagement', function (Engagement $engagement, EngagementDisplayStatus $expectedStatus) {
+it('returns the correct case given a particular Engagement', function (Engagement $engagement, EngagementDisplayStatus $expectedStatus): void {
     expect(EngagementDisplayStatus::getStatus($engagement))->toBe($expectedStatus);
 })->with([
     'email | not scheduled' => [

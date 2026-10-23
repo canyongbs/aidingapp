@@ -46,7 +46,7 @@ use AidingApp\ServiceManagement\Notifications\ServiceMonitoringReportNotificatio
 use App\Models\User;
 use Illuminate\Support\Facades\Notification;
 
-it('sends notification to direct report users', function () {
+it('sends notification to direct report users', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -63,7 +63,7 @@ it('sends notification to direct report users', function () {
     );
 });
 
-it('sends notification to direct report contacts', function () {
+it('sends notification to direct report contacts', function (): void {
     Notification::fake();
 
     $contact = Contact::factory()->create();
@@ -80,7 +80,7 @@ it('sends notification to direct report contacts', function () {
     );
 });
 
-it('sends notification to users from report departments', function () {
+it('sends notification to users from report departments', function (): void {
     Notification::fake();
 
     $department = Department::factory()->create();
@@ -99,7 +99,7 @@ it('sends notification to users from report departments', function () {
     );
 });
 
-it('merges users from direct users and departments without duplicates', function () {
+it('merges users from direct users and departments without duplicates', function (): void {
     Notification::fake();
 
     $department = Department::factory()->create();
@@ -120,7 +120,7 @@ it('merges users from direct users and departments without duplicates', function
     expect(Notification::sent($user1, ServiceMonitoringReportNotification::class))->toHaveCount(1);
 });
 
-it('sends notifications based on configured channels', function (bool $emailEnabled, bool $databaseEnabled, ?string $expectedChannel) {
+it('sends notifications based on configured channels', function (bool $emailEnabled, bool $databaseEnabled, ?string $expectedChannel): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -143,13 +143,13 @@ it('sends notifications based on configured channels', function (bool $emailEnab
         Notification::assertSentTo(
             $user,
             ServiceMonitoringReportNotification::class,
-            fn (ServiceMonitoringReportNotification $notification) => $notification->channel === $expectedChannel
+            fn (ServiceMonitoringReportNotification $notification): bool => $notification->channel === $expectedChannel
         );
 
         Notification::assertSentTo(
             $contact,
             ServiceMonitoringReportNotification::class,
-            fn (ServiceMonitoringReportNotification $notification) => $notification->channel === $expectedChannel
+            fn (ServiceMonitoringReportNotification $notification): bool => $notification->channel === $expectedChannel
         );
     }
 })
@@ -176,7 +176,7 @@ it('sends notifications based on configured channels', function (bool $emailEnab
         ],
     ]);
 
-it('does not send notification when no recipients are configured', function () {
+it('does not send notification when no recipients are configured', function (): void {
     Notification::fake();
 
     $configuration = ServiceMonitoringReportConfiguration::factory()
@@ -188,7 +188,7 @@ it('does not send notification when no recipients are configured', function () {
     Notification::assertNothingSent();
 });
 
-it('sends to all recipient types simultaneously', function () {
+it('sends to all recipient types simultaneously', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -211,7 +211,7 @@ it('sends to all recipient types simultaneously', function () {
 });
 
 // The following tests cover dispatching with a ServiceMonitoringReportConfiguration (the per-frequency path)
-it('sends notification for a configuration-backed reportable with its own recipients, channel, and frequency', function () {
+it('sends notification for a configuration-backed reportable with its own recipients, channel, and frequency', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -235,12 +235,12 @@ it('sends notification for a configuration-backed reportable with its own recipi
 
     (new ServiceMonitoringReportNotifyJob($configuration))->handle();
 
-    Notification::assertSentTo($user, ServiceMonitoringReportNotification::class, fn (ServiceMonitoringReportNotification $notification) => $notification->channel === 'both' && $notification->frequency === ServiceMonitoringReportFrequency::Weekly);
+    Notification::assertSentTo($user, ServiceMonitoringReportNotification::class, fn (ServiceMonitoringReportNotification $notification): bool => $notification->channel === 'both' && $notification->frequency === ServiceMonitoringReportFrequency::Weekly);
     Notification::assertSentTo($contact, ServiceMonitoringReportNotification::class);
     Notification::assertSentTo($departmentUser, ServiceMonitoringReportNotification::class);
 });
 
-it('suppresses delivery for a configuration-backed reportable whose target is confidential', function () {
+it('suppresses delivery for a configuration-backed reportable whose target is confidential', function (): void {
     Notification::fake();
 
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
@@ -260,7 +260,7 @@ it('suppresses delivery for a configuration-backed reportable whose target is co
     Notification::assertNotSentTo($user, ServiceMonitoringReportNotification::class);
 });
 
-it('delivers for a configuration-backed reportable whose target is confidential once access is granted', function () {
+it('delivers for a configuration-backed reportable whose target is confidential once access is granted', function (): void {
     Notification::fake();
 
     $target = ServiceMonitoringTarget::factory()->confidential()->create();

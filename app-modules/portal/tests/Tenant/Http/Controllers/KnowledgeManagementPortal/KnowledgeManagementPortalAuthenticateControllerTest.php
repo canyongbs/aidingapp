@@ -47,7 +47,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\withHeader;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->knowledge_management_portal_service_management = false;
@@ -59,7 +59,7 @@ beforeEach(function () {
     $assistantSettings->save();
 });
 
-test('it returns expired and creates guest session when authentication is expired', function () {
+test('it returns expired and creates guest session when authentication is expired', function (): void {
     $plainCode = 123456;
 
     $authentication = PortalAuthentication::factory()->create([
@@ -86,7 +86,7 @@ test('it returns expired and creates guest session when authentication is expire
     expect(PortalGuest::query()->count())->toBe(1);
 });
 
-test('it reuses existing guest session for expired authentication', function () {
+test('it reuses existing guest session for expired authentication', function (): void {
     $existingGuest = PortalGuest::factory()->create();
 
     $plainCode = 223344;
@@ -115,7 +115,7 @@ test('it reuses existing guest session for expired authentication', function () 
     expect(PortalGuest::query()->count())->toBe(1);
 });
 
-test('it authenticates contact and clears guest session when code is valid', function () {
+test('it authenticates contact and clears guest session when code is valid', function (): void {
     $contact = Contact::factory()->create();
     $existingGuest = PortalGuest::factory()->create();
 
@@ -152,7 +152,7 @@ test('it authenticates contact and clears guest session when code is valid', fun
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it does not rotate the csrf token shared with the admin panel', function () {
+test('it does not rotate the csrf token shared with the admin panel', function (): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 654321;
@@ -189,7 +189,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns validation error when code is invalid', function () {
+test('it returns validation error when code is invalid', function (): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -215,7 +215,7 @@ test('it returns validation error when code is invalid', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it returns validation error when code is missing', function () {
+test('it returns validation error when code is missing', function (): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -239,7 +239,7 @@ test('it returns validation error when code is missing', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () {
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function (): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;

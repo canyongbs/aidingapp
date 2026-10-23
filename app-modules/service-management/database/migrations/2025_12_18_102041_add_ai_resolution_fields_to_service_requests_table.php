@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
+        Schema::table('service_requests', function (Blueprint $table): void {
             $table->unsignedTinyInteger('ai_resolution_confidence_score')->nullable();
             $table->boolean('is_ai_resolution_attempted')->default(false);
             $table->boolean('is_ai_resolution_successful')->nullable();
@@ -50,7 +50,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
+        Schema::table('service_requests', function (Blueprint $table): void {
             $table->dropColumn('ai_resolution_confidence_score');
             $table->dropColumn('is_ai_resolution_attempted');
             $table->dropColumn('is_ai_resolution_successful');

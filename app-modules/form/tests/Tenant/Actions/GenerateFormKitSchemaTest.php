@@ -36,7 +36,7 @@
 
 use AidingApp\Form\Actions\GenerateFormKitSchema;
 
-it('renders a heading block that has no content', function () {
+it('renders a heading block that has no content', function (): void {
     $schema = app(GenerateFormKitSchema::class)->content([], [
         ['type' => 'heading', 'attrs' => ['level' => 2]],
     ]);
@@ -46,7 +46,7 @@ it('renders a heading block that has no content', function () {
     ]);
 });
 
-it('renders a gridColumn block that has no content', function () {
+it('renders a gridColumn block that has no content', function (): void {
     $schema = app(GenerateFormKitSchema::class)->content([], [
         ['type' => 'gridColumn'],
     ]);

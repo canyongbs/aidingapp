@@ -36,14 +36,14 @@
 
 use App\Models\Tenant;
 
-it('extracts subdomain from a standard three-part domain', function () {
+it('extracts subdomain from a standard three-part domain', function (): void {
     $tenant = Tenant::query()->firstOrFail();
 
     // Test tenant has domain 'test.aidingapp.local'
     expect($tenant->getSubdomain())->toBe('test');
 });
 
-it('extracts subdomain from a two-level TLD domain', function () {
+it('extracts subdomain from a two-level TLD domain', function (): void {
     $tenant = Tenant::factory()->make([
         'domain' => 'mycampus.example.com',
     ]);
@@ -51,7 +51,7 @@ it('extracts subdomain from a two-level TLD domain', function () {
     expect($tenant->getSubdomain())->toBe('mycampus');
 });
 
-it('extracts multi-level subdomain correctly', function () {
+it('extracts multi-level subdomain correctly', function (): void {
     $tenant = Tenant::factory()->make([
         'domain' => 'a.b.example.com',
     ]);

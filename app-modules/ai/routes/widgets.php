@@ -68,18 +68,18 @@ Route::middleware([
 ])
     ->prefix('widgets/assistant')
     ->name('widgets.assistant.')
-    ->group(function () {
+    ->group(function (): void {
         Route::middleware([
             AssistantWidgetCors::class,
         ])
-            ->group(function () {
+            ->group(function (): void {
                 Route::prefix('api')
                     ->name('api.')
                     ->middleware([
                         EnsureFrontendRequestsAreStateful::class,
                         EnsureAssistantWidgetIsEmbeddableAndAuthorized::class,
                     ])
-                    ->group(function () {
+                    ->group(function (): void {
                         Route::get('config', GetWidgetConfigController::class)
                             ->name('config');
 

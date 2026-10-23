@@ -36,6 +36,7 @@
 
 namespace AidingApp\Report\Filament\Widgets;
 
+use Carbon\CarbonInterface;
 use Filament\Notifications\Notification;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Carbon;
@@ -62,7 +63,7 @@ class RefreshWidget extends StatsOverviewReportWidget
             Cache::tags(["{{$this->cacheTag}}"])->remember(
                 'updated-time',
                 now()->addHours(24),
-                fn () => now()
+                fn (): CarbonInterface => now()
             )
         )->setTimezone($timezone);
 

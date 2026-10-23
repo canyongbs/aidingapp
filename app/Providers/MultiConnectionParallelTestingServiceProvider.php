@@ -72,8 +72,8 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
     public function boot(): void
     {
         if (app()->environment('testing')) {
-            ParallelTesting::setUpProcess(function () {
-                $this->whenNotUsingInMemoryDatabase(function () {
+            ParallelTesting::setUpProcess(function (): void {
+                $this->whenNotUsingInMemoryDatabase(function (): void {
                     if (ParallelTesting::option('recreate_databases')) {
                         foreach ($this->parallelConnections as $connection) {
                             Schema::connection($connection)
@@ -83,7 +83,7 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
                 });
             });
 
-            ParallelTesting::setUpTestCase(function (TestCase $testCase) {
+            ParallelTesting::setUpTestCase(function (TestCase $testCase): void {
                 $uses = array_flip(class_uses_recursive(get_class($testCase)));
 
                 $databaseTraits = [
@@ -94,11 +94,11 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
                 ];
 
                 if (Arr::hasAny($uses, $databaseTraits) && ! ParallelTesting::option('without_databases')) {
-                    $this->whenNotUsingInMemoryDatabase(function () use ($uses) {
+                    $this->whenNotUsingInMemoryDatabase(function () use ($uses): void {
                         $allCreated = [];
 
                         foreach ($this->parallelConnections as $connection) {
-                            $this->usingConnection($connection, function (string $connection) use (&$allCreated) {
+                            $this->usingConnection($connection, function (string $connection) use (&$allCreated): void {
                                 [$testDatabase, $created] = $this->ensureTestDatabaseExists($this->databaseOnConnection($connection));
 
                                 $this->switchToDatabase($testDatabase);
@@ -114,7 +114,7 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
                         }
 
                         foreach ($allCreated as [$connection, $testDatabase]) {
-                            $this->usingConnection($connection, function () use ($testDatabase) {
+                            $this->usingConnection($connection, function () use ($testDatabase): void {
                                 ParallelTesting::callSetUpTestDatabaseCallbacks($testDatabase);
                             });
 
@@ -124,8 +124,8 @@ class MultiConnectionParallelTestingServiceProvider extends ServiceProvider
                 }
             });
 
-            ParallelTesting::tearDownProcess(function () {
-                $this->whenNotUsingInMemoryDatabase(function () {
+            ParallelTesting::tearDownProcess(function (): void {
+                $this->whenNotUsingInMemoryDatabase(function (): void {
                     if (ParallelTesting::option('drop_databases')) {
                         foreach ($this->parallelConnections as $connection) {
                             Schema::connection($connection)

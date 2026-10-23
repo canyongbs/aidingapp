@@ -60,7 +60,7 @@ class CreateEngagementBatch
         $engagementBatch->successful_engagements = 0;
         $engagementBatch->body = $data->body;
 
-        DB::transaction(function () use ($engagementBatch, $data) {
+        DB::transaction(function () use ($engagementBatch, $data): void {
             $engagementBatch->save();
 
             if ($data->schema) {
@@ -76,7 +76,7 @@ class CreateEngagementBatch
                     ->all(),
             ])
                 ->name("Bulk Engagement {$engagementBatch->getKey()}")
-                ->finally(function () use ($engagementBatch) {
+                ->finally(function () use ($engagementBatch): void {
                     if ($engagementBatch->scheduled_at) {
                         return;
                     }

@@ -53,7 +53,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the EditServiceRequestTypeAssignments page', function () {
+test('A successful action on the EditServiceRequestTypeAssignments page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -79,7 +79,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page', functi
     assertEquals($editRequest['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
 });
 
-test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual', function () {
+test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual', function (): void {
     $managerDepartment = Department::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()
@@ -112,7 +112,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     assertEquals($editRequest['assignment_type'], $serviceRequestType->fresh()->assignment_type);
 });
 
-test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual and user is a direct manager', function () {
+test('A successful action on the EditServiceRequestTypeAssignments page when the type selected is Individual and user is a direct manager', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $directManager = User::factory()->create();
@@ -140,7 +140,7 @@ test('A successful action on the EditServiceRequestTypeAssignments page when the
     assertEquals($directManager->getKey(), $serviceRequestType->fresh()->assignment_type_individual_id);
 });
 
-test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, array $errors) {
+test('EditServiceRequestTypeAssignments requires valid data', function (EditServiceRequestTypeAssignmentsRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -155,16 +155,16 @@ test('EditServiceRequestTypeAssignments requires valid data', function (EditServ
     assertDatabaseHas(ServiceRequestType::class, $serviceRequestType->fresh()->toArray());
 })->with(
     [
-        'assignment_type is required' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],
-        'assignment_type is not a valid enum value' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => 'in']],
-        'assignment_type_individual_id is required when assignment_type is Individual' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => null]), ['assignment_type_individual_id' => 'required']],
-        'assignment_type_individual_id must be a User in the ServiceRequestTypes managers' => [fn () => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => User::factory()]), ['assignment_type_individual_id' => ServiceRequestTypeAssignmentsIndividualUserMustBeAManager::class]],
+        'assignment_type is required' => [fn (): EditServiceRequestTypeAssignmentsRequestFactory => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => null]), ['assignment_type' => 'required']],
+        'assignment_type is not a valid enum value' => [fn (): EditServiceRequestTypeAssignmentsRequestFactory => EditServiceRequestTypeAssignmentsRequestFactory::new()->state(['assignment_type' => 'blah']), ['assignment_type' => 'in']],
+        'assignment_type_individual_id is required when assignment_type is Individual' => [fn (): EditServiceRequestTypeAssignmentsRequestFactory => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => null]), ['assignment_type_individual_id' => 'required']],
+        'assignment_type_individual_id must be a User in the ServiceRequestTypes managers' => [fn (): EditServiceRequestTypeAssignmentsRequestFactory => EditServiceRequestTypeAssignmentsRequestFactory::new()->withIndividualType()->state(['assignment_type_individual_id' => User::factory()]), ['assignment_type_individual_id' => ServiceRequestTypeAssignmentsIndividualUserMustBeAManager::class]],
     ]
 );
 
 // Permission Tests
 
-test('EditServiceRequestTypeAssignments is gated with proper access control', function () {
+test('EditServiceRequestTypeAssignments is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -203,7 +203,7 @@ test('EditServiceRequestTypeAssignments is gated with proper access control', fu
     assertEquals($request['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
 });
 
-test('EditServiceRequestTypeAssignments is gated with proper feature access control', function () {
+test('EditServiceRequestTypeAssignments is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -252,7 +252,7 @@ test('EditServiceRequestTypeAssignments is gated with proper feature access cont
     assertEquals($request['assignment_type'], $serviceRequestType->fresh()->assignment_type->value);
 });
 
-test('the automated status change toggle is hidden when assignment type is None', function () {
+test('the automated status change toggle is hidden when assignment type is None', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -262,7 +262,7 @@ test('the automated status change toggle is hidden when assignment type is None'
         ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isHidden());
 });
 
-test('the automated status change toggle is visible for an automated assignment type', function () {
+test('the automated status change toggle is visible for an automated assignment type', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -272,7 +272,7 @@ test('the automated status change toggle is visible for an automated assignment 
         ->assertFormFieldExists('is_automated_status_change_enabled', fn (Toggle $field): bool => $field->isVisible());
 });
 
-test('the status picker is required when the automated status change toggle is on', function () {
+test('the status picker is required when the automated status change toggle is on', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -287,7 +287,7 @@ test('the status picker is required when the automated status change toggle is o
         ->assertHasFormErrors(['automated_status_id' => 'required']);
 });
 
-test('the status picker pre-fills with the default open status when the toggle is switched on', function () {
+test('the status picker pre-fills with the default open status when the toggle is switched on', function (): void {
     asSuperAdmin();
 
     // The tenant seeds a system-protected "New" Open status at sort 0 that cannot be modified or
@@ -305,7 +305,7 @@ test('the status picker pre-fills with the default open status when the toggle i
         ->assertFormSet(['automated_status_id' => $openStatus->getKey()]);
 });
 
-test('the status picker is hidden when assignment type is switched back to None even though the toggle was previously enabled', function () {
+test('the status picker is hidden when assignment type is switched back to None even though the toggle was previously enabled', function (): void {
     asSuperAdmin();
 
     $status = ServiceRequestStatus::factory()->open()->create();
@@ -321,7 +321,7 @@ test('the status picker is hidden when assignment type is switched back to None 
         ->assertFormFieldExists('automated_status_id', fn (Select $field): bool => $field->isHidden());
 });
 
-test('it persists the automated status change configuration', function () {
+test('it persists the automated status change configuration', function (): void {
     asSuperAdmin();
 
     $status = ServiceRequestStatus::factory()->open()->create();
@@ -340,7 +340,7 @@ test('it persists the automated status change configuration', function () {
         ->automated_status_id->toBe($status->getKey());
 });
 
-test('the automated status change toggle is on when loading a type with an automated_status_id set', function () {
+test('the automated status change toggle is on when loading a type with an automated_status_id set', function (): void {
     asSuperAdmin();
 
     $status = ServiceRequestStatus::factory()->open()->create();
@@ -356,7 +356,7 @@ test('the automated status change toggle is on when loading a type with an autom
         ]);
 });
 
-test('saving with the automated status change toggle off nulls the automated_status_id', function () {
+test('saving with the automated status change toggle off nulls the automated_status_id', function (): void {
     asSuperAdmin();
 
     $status = ServiceRequestStatus::factory()->open()->create();
@@ -378,8 +378,8 @@ test('saving with the automated status change toggle off nulls the automated_sta
     expect($serviceRequestType->fresh()->automated_status_id)->toBeNull();
 });
 
-describe('archiving', function () {
-    test('the status picker does not offer archived statuses', function () {
+describe('archiving', function (): void {
+    test('the status picker does not offer archived statuses', function (): void {
         asSuperAdmin();
 
         $activeStatus = ServiceRequestStatus::factory()->create();
@@ -398,7 +398,7 @@ describe('archiving', function () {
             });
     });
 
-    test('the status picker still offers the saved automated status when it is archived', function () {
+    test('the status picker still offers the saved automated status when it is archived', function (): void {
         asSuperAdmin();
 
         $archivedStatus = ServiceRequestStatus::factory()->archived()->create();

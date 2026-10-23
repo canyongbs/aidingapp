@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use Carbon\Carbon;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -95,7 +96,7 @@ class ServiceRequestsTable extends BaseWidget
                         'assignedTo.user',
                     ])
                     ->when(
-                        $startDate && $endDate,
+                        $startDate instanceof Carbon && $endDate instanceof Carbon,
                         fn (Builder $query) => $query->whereBetween('created_at', [$startDate, $endDate])
                     )
                     ->when(

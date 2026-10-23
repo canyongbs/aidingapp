@@ -46,7 +46,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-test('Edit Organization Type is gated with proper access control', function () {
+test('Edit Organization Type is gated with proper access control', function (): void {
     $user = User::factory()->create();
     $organizationType = OrganizationType::factory()->create();
 
@@ -77,7 +77,7 @@ test('Edit Organization Type is gated with proper access control', function () {
     ])->assertSuccessful();
 });
 
-test('Edit Organization Type Record', function () {
+test('Edit Organization Type Record', function (): void {
     $user = User::factory()->create();
     $organizationType = OrganizationType::factory()->create();
 
@@ -100,7 +100,7 @@ test('Edit Organization Type Record', function () {
     expect($organizationType->name)->toEqual($request->get('name'));
 });
 
-test('the organization type name must be unique among other non-trashed types', function () {
+test('the organization type name must be unique among other non-trashed types', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -119,7 +119,7 @@ test('the organization type name must be unique among other non-trashed types', 
         ->assertHasFormErrors(['name' => 'unique']);
 });
 
-test('an organization type can keep its own name when editing', function () {
+test('an organization type can keep its own name when editing', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -137,7 +137,7 @@ test('an organization type can keep its own name when editing', function () {
         ->assertHasNoFormErrors();
 });
 
-test('does not apply the unique form rule when the feature is disabled', function () {
+test('does not apply the unique form rule when the feature is disabled', function (): void {
     OrganizationTypeAndIndustryNameUniquenessFeature::deactivate();
 
     $user = User::factory()->create();

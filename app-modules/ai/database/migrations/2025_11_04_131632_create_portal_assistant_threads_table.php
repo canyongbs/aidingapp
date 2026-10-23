@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('portal_assistant_threads', function (Blueprint $table) {
+        Schema::create('portal_assistant_threads', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->nullableUuidMorphs('author');
             $table->timestamps();

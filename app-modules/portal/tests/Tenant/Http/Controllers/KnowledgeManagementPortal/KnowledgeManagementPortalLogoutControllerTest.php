@@ -41,13 +41,13 @@ use AidingApp\Portal\Settings\PortalSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
 });
 
-test('it returns unsuccessful response when no contact is authenticated', function () {
+test('it returns unsuccessful response when no contact is authenticated', function (): void {
     $response = postJson(route('api.portal.logout'));
 
     $response
@@ -57,7 +57,7 @@ test('it returns unsuccessful response when no contact is authenticated', functi
     expect(PortalGuest::query()->count())->toBe(0);
 });
 
-test('it logs out contact, deletes portal token, and creates guest session', function () {
+test('it logs out contact, deletes portal token, and creates guest session', function (): void {
     $contact = Contact::factory()->create();
 
     $contact->createToken('knowledge-management-portal-access-token');
@@ -79,7 +79,7 @@ test('it logs out contact, deletes portal token, and creates guest session', fun
         ->and(PortalGuest::query()->count())->toBe(1);
 });
 
-test('it preserves existing guest session during logout', function () {
+test('it preserves existing guest session during logout', function (): void {
     $contact = Contact::factory()->create();
     $existingGuest = PortalGuest::factory()->create();
 

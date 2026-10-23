@@ -36,7 +36,7 @@
 
 use AidingApp\KnowledgeBase\Enums\KnowledgeBaseCategoryTabOrder;
 
-it('has a human readable label for each case', function (KnowledgeBaseCategoryTabOrder $case, string $label) {
+it('has a human readable label for each case', function (KnowledgeBaseCategoryTabOrder $case, string $label): void {
     expect($case->getLabel())->toBe($label);
 })->with([
     [KnowledgeBaseCategoryTabOrder::AllArticlesFeaturedMostViewed, 'All Articles, Featured, Most Viewed'],
@@ -47,7 +47,7 @@ it('has a human readable label for each case', function (KnowledgeBaseCategoryTa
     [KnowledgeBaseCategoryTabOrder::MostViewedFeaturedAllArticles, 'Most Viewed, Featured, All Articles'],
 ]);
 
-it('returns the ordered tab identifiers for each case', function (KnowledgeBaseCategoryTabOrder $case, array $tabs) {
+it('returns the ordered tab identifiers for each case', function (KnowledgeBaseCategoryTabOrder $case, array $tabs): void {
     expect($case->tabs())->toBe($tabs);
 })->with([
     [KnowledgeBaseCategoryTabOrder::AllArticlesFeaturedMostViewed, ['all-articles', 'featured', 'most-viewed']],

@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 
-it('resolves manager and auditor types through groups', function () {
+it('resolves manager and auditor types through groups', function (): void {
     $user = User::factory()->create();
 
     $managerType = ServiceRequestType::factory()->create();

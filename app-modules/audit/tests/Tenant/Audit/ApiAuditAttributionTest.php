@@ -44,11 +44,11 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\patchJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('audit.queue.enable', false);
 });
 
-it('attributes audit change_agent to the authenticated SystemUser for API-initiated changes', function () {
+it('attributes audit change_agent to the authenticated SystemUser for API-initiated changes', function (): void {
     $systemUser = SystemUser::factory()->create(['name' => 'Test System User']);
     $systemUser->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($systemUser, ['api']);
@@ -75,7 +75,7 @@ it('attributes audit change_agent to the authenticated SystemUser for API-initia
     expect($audit->change_agent_id)->toBe($systemUser->id);
 });
 
-it('resolves the SystemUser name via the audit user() relationship', function () {
+it('resolves the SystemUser name via the audit user() relationship', function (): void {
     $systemUser = SystemUser::factory()->create(['name' => 'Test System User']);
     $systemUser->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($systemUser, ['api']);
@@ -101,7 +101,7 @@ it('resolves the SystemUser name via the audit user() relationship', function ()
     expect($audit->user->name)->toBe('Test System User');
 });
 
-it('records null change_agent when no user is authenticated', function () {
+it('records null change_agent when no user is authenticated', function (): void {
     $serviceRequest = ServiceRequest::factory()->create([
         'status_id' => ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open]),
     ]);

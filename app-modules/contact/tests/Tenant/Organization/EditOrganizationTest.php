@@ -45,7 +45,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-test('Edit Organization is gated with proper access control', function () {
+test('Edit Organization is gated with proper access control', function (): void {
     $user = User::factory()->create();
     $organization = Organization::factory()->create();
 
@@ -76,7 +76,7 @@ test('Edit Organization is gated with proper access control', function () {
         ->assertSuccessful();
 });
 
-test('Edit Organization Record', function () {
+test('Edit Organization Record', function (): void {
     $user = User::factory()->create();
     $organization = Organization::factory()->create();
 
@@ -115,7 +115,7 @@ test('Edit Organization Record', function () {
         ->and($organization->domains)->toEqual($request->get('domains'));
 });
 
-test('validating that domain is required', function () {
+test('validating that domain is required', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -141,7 +141,7 @@ test('validating that domain is required', function () {
     $undoRepeaterFake();
 });
 
-test('validating that distinct domain is allowed', function () {
+test('validating that distinct domain is allowed', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -173,7 +173,7 @@ test('validating that distinct domain is allowed', function () {
     $undoRepeaterFake();
 });
 
-test('if the domain is already in use then not be used second time.', function () {
+test('if the domain is already in use then not be used second time.', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -212,7 +212,7 @@ test('if the domain is already in use then not be used second time.', function (
     $undoRepeaterFake();
 });
 
-test('check if the provided domain is invalid', function (string $domain) {
+test('check if the provided domain is invalid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -256,7 +256,7 @@ test('check if the provided domain is invalid', function (string $domain) {
         '-mydomain.com',
     ]);
 
-test('check if the provided domain is valid', function (string $domain) {
+test('check if the provided domain is valid', function (string $domain): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -292,7 +292,7 @@ test('check if the provided domain is valid', function (string $domain) {
         'subdomain.example.org',
     ]);
 
-test('the organization name must be unique among other non-trashed organizations', function () {
+test('the organization name must be unique among other non-trashed organizations', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();
@@ -315,7 +315,7 @@ test('the organization name must be unique among other non-trashed organizations
     $undoRepeaterFake();
 });
 
-test('an organization can keep its own name when editing', function () {
+test('an organization can keep its own name when editing', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $user = User::factory()->create();

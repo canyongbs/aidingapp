@@ -50,14 +50,14 @@ $makeIneligibleContactNotification = function (?string $bcc): IneligibleContactS
     return new IneligibleContactSesS3InboundEmailServiceRequestNotification($serviceRequestTypeDomain, 'Original message');
 };
 
-it('bccs the service request type bcc address when one is configured', function () use ($makeIneligibleContactNotification) {
+it('bccs the service request type bcc address when one is configured', function () use ($makeIneligibleContactNotification): void {
     $mailMessage = $makeIneligibleContactNotification('bcc@example.com')
         ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
 
     expect($mailMessage->bcc)->toBe([['bcc@example.com', null]]);
 });
 
-it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) use ($makeIneligibleContactNotification) {
+it('does not add a bcc recipient when the service request type has no bcc address', function (?string $bcc) use ($makeIneligibleContactNotification): void {
     $mailMessage = $makeIneligibleContactNotification($bcc)
         ->toMail((new AnonymousNotifiable())->route('mail', 'sender@example.com'));
 

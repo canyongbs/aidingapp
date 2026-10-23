@@ -46,7 +46,7 @@ class CreatePipelineRequestFactory extends RequestFactory
         return [
             'name' => fake()->words(3, true),
             'description' => fake()->sentence(),
-            'stages' => fn () => collect(PipelineStageClassification::cases())->map(fn ($classification) => [
+            'stages' => fn () => collect(PipelineStageClassification::cases())->map(fn ($classification): array => [
                 'name' => $classification->getLabel(),
                 'classification' => $classification->value,
             ])->toArray(),

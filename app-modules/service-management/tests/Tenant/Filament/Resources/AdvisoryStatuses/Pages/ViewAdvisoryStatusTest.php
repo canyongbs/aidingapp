@@ -43,7 +43,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewAdvisoryStatus page', function () {
+test('The correct details are displayed on the ViewAdvisoryStatus page', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -63,7 +63,7 @@ test('The correct details are displayed on the ViewAdvisoryStatus page', functio
         ]);
 });
 
-test('ViewAdvisoryStatus is gated with proper access control', function () {
+test('ViewAdvisoryStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisoryStatus = AdvisoryStatus::factory()->create();

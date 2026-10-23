@@ -39,7 +39,7 @@ use AidingApp\Engagement\Models\Engagement;
 use function Tests\richContentText;
 use function Tests\richContentWith;
 
-it('converts a literal merge tag when creating', function () {
+it('converts a literal merge tag when creating', function (): void {
     $engagement = Engagement::factory()->create([
         'body' => richContentText('Hello {{ contact full name }}!'),
     ]);
@@ -51,7 +51,7 @@ it('converts a literal merge tag when creating', function () {
     ]));
 });
 
-it('converts a literal merge tag when updating', function () {
+it('converts a literal merge tag when updating', function (): void {
     $engagement = Engagement::factory()->create();
 
     $engagement->update([
@@ -65,7 +65,7 @@ it('converts a literal merge tag when updating', function () {
     ]));
 });
 
-it('leaves text that does not match a merge tag untouched', function () {
+it('leaves text that does not match a merge tag untouched', function (): void {
     $body = richContentText('Hello {{ not a merge tag }}!');
 
     $engagement = Engagement::factory()->create([
@@ -75,7 +75,7 @@ it('leaves text that does not match a merge tag untouched', function () {
     expect($engagement->refresh()->body)->toEqual($body);
 });
 
-it('leaves an existing merge tag node untouched', function () {
+it('leaves an existing merge tag node untouched', function (): void {
     $body = richContentWith([
         ['type' => 'text', 'text' => 'Hello '],
         ['type' => 'mergeTag', 'attrs' => ['id' => 'contact full name']],
