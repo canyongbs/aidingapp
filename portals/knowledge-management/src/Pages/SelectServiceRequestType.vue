@@ -187,7 +187,7 @@
         </template>
 
         <PageCard>
-            <main>
+            <div>
                 <h3 class="text-xl">
                     <span v-if="!currentCategory">Select Category</span>
                     <span v-else>{{ currentCategory.name }}</span>
@@ -274,7 +274,7 @@
                         No categories or types found.
                     </div>
                 </div>
-            </main>
+            </div>
         </PageCard>
     </Page>
 </template>

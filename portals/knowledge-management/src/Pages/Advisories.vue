@@ -200,7 +200,11 @@
                             :contained="false"
                         >
                             <template #heading>No active advisories</template>
-                            <template #description>Resolved advisories are available in the history.</template>
+                            <template #description>{{
+                                counts.resolved > 0
+                                    ? 'Resolved advisories are available in the history.'
+                                    : 'There are no advisories to show yet.'
+                            }}</template>
                             <template v-if="counts.resolved > 0" #actions>
                                 <BaseButton color="gray" size="md" @click="classification = 'resolved'">
                                     View resolved advisories

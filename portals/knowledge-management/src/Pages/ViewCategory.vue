@@ -218,7 +218,7 @@
             </template>
         </EmptyState>
         <div v-else>
-            <main class="flex flex-col gap-8">
+            <div class="flex flex-col gap-8">
                 <div v-if="isSearchActive" class="flex flex-col gap-6">
                     <SearchResults
                         :searchQuery="searchQuery"
@@ -289,7 +289,7 @@
                         </div>
                     </div>
                 </div>
-            </main>
+            </div>
         </div>
     </Page>
 </template>

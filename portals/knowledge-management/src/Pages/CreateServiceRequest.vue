@@ -494,7 +494,7 @@
         </template>
 
         <PageCard>
-            <main class="grid gap-4" v-if="submittedSuccess">
+            <div class="grid gap-4" v-if="submittedSuccess">
                 <template v-if="wasAiResolved">
                     <p>Great! We're glad the AI was able to resolve your issue.</p>
                     <p class="text-sm text-gray-600">
@@ -509,9 +509,9 @@
                 <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
                     Submit Another Request
                 </BaseButton>
-            </main>
+            </div>
 
-            <main class="grid gap-4" v-else>
+            <div class="grid gap-4" v-else>
                 <div v-if="isGeneratingQuestions || isEvaluatingAiResolution" class="flex items-center justify-center">
                     <div role="status" aria-live="polite" class="pointer-events-auto flex items-center gap-3 px-4 py-2">
                         <LoadingSpinner size="sm" class="text-brand-600" />
@@ -557,7 +557,7 @@
                 >
                     <FormKitSchema :schema="schema" :data="data" />
                 </div>
-            </main>
+            </div>
         </PageCard>
     </Page>
 </template>
