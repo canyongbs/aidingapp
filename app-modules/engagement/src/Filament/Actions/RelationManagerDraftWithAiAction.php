@@ -36,7 +36,6 @@
 
 namespace AidingApp\Engagement\Filament\Actions;
 
-use Illuminate\Contracts\View\View;
 use AidingApp\Ai\Actions\CompletePrompt;
 use AidingApp\Ai\Exceptions\MessageResponseException;
 use AidingApp\Ai\Models\AiAssistant;
@@ -53,6 +52,7 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class RelationManagerDraftWithAiAction extends Action

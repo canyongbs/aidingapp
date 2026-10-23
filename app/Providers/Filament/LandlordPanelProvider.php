@@ -36,11 +36,11 @@
 
 namespace App\Providers\Filament;
 
-use Illuminate\Contracts\View\View;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
