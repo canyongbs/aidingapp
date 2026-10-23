@@ -43,8 +43,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('advisory_severities', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('advisory_severities', function (Blueprint $table): void {
                 $table->integer('sort')->default(0);
                 $table->index('sort');
             });
@@ -65,10 +65,10 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             AdvisorySeveritySortFeature::deactivate();
 
-            Schema::table('advisory_severities', function (Blueprint $table) {
+            Schema::table('advisory_severities', function (Blueprint $table): void {
                 $table->dropIndex(['sort']);
                 $table->dropColumn('sort');
             });

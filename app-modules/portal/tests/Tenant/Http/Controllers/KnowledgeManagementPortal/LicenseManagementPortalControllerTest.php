@@ -41,7 +41,7 @@ use App\Settings\LicenseSettings;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -49,12 +49,12 @@ beforeEach(function () {
     actingAs(Contact::factory()->create(), 'contact');
 });
 
-describe('authorization', function () {
-    it('allows access with the license management add-on', function () {
+describe('authorization', function (): void {
+    it('allows access with the license management add-on', function (): void {
         getJson(route('api.portal.product.licenses'))->assertOk();
     });
 
-    it('denies access without the license management add-on', function () {
+    it('denies access without the license management add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->licenseManagement = false;
         $licenseSettings->save();

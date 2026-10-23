@@ -48,7 +48,7 @@ use Illuminate\Support\Carbon;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -56,7 +56,7 @@ beforeEach(function () {
     actingAs(Contact::factory()->create());
 });
 
-it('lists the active advisories by default', function () {
+it('lists the active advisories by default', function (): void {
     $activeAdvisories = Advisory::factory()->count(2)->for(AdvisoryStatus::factory()->open(), 'status')->create();
     $resolvedAdvisory = Advisory::factory()->for(AdvisoryStatus::factory()->resolved(), 'status')->create();
 
@@ -66,7 +66,7 @@ it('lists the active advisories by default', function () {
         ->and($ids)->not->toContain($resolvedAdvisory->getKey());
 });
 
-it('can list the resolved advisories', function () {
+it('can list the resolved advisories', function (): void {
     Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
     $resolvedAdvisory = Advisory::factory()->for(AdvisoryStatus::factory()->resolved(), 'status')->create();
 
@@ -76,7 +76,7 @@ it('can list the resolved advisories', function () {
         ->assertJsonPath('data.0.id', $resolvedAdvisory->getKey());
 });
 
-it('displays the advisory data', function () {
+it('displays the advisory data', function (): void {
     $severity = AdvisorySeverity::factory()->create(['name' => 'Major', 'color' => 'orange']);
     $status = AdvisoryStatus::factory()->open()->create(['name' => 'Mitigating']);
 
@@ -97,7 +97,7 @@ it('displays the advisory data', function () {
         ->assertJsonPath('data.0.status', ['id' => $status->getKey(), 'name' => 'Mitigating', 'classification' => 'open']);
 });
 
-it('resolves the last updated date from the latest update', function () {
+it('resolves the last updated date from the latest update', function (): void {
     $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
 
     $advisoryWithUpdates = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
@@ -113,7 +113,7 @@ it('resolves the last updated date from the latest update', function () {
         ->and($lastUpdatedAt[$advisoryWithoutUpdates->getKey()])->toBe('2026-10-08T07:00:00+00:00');
 });
 
-it('returns the advisory counts for each classification regardless of the search and filters', function () {
+it('returns the advisory counts for each classification regardless of the search and filters', function (): void {
     Advisory::factory()->count(3)->for(AdvisoryStatus::factory()->open(), 'status')->create();
     Advisory::factory()->count(2)->for(AdvisoryStatus::factory()->resolved(), 'status')->create();
 
@@ -123,7 +123,7 @@ it('returns the advisory counts for each classification regardless of the search
         ->assertJsonPath('counts', ['open' => 3, 'resolved' => 2]);
 });
 
-it('returns the severity options ranked from highest to lowest', function () {
+it('returns the severity options ranked from highest to lowest', function (): void {
     $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
     $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
 
@@ -132,7 +132,7 @@ it('returns the severity options ranked from highest to lowest', function () {
     expect($severityIds->all())->toBe([$critical->getKey(), $minor->getKey()]);
 });
 
-it('returns the status options for the requested classification', function () {
+it('returns the status options for the requested classification', function (): void {
     AdvisoryStatus::factory()->open()->create();
     $resolvedStatus = AdvisoryStatus::factory()->resolved()->create();
 
@@ -142,7 +142,7 @@ it('returns the status options for the requested classification', function () {
         ->assertJsonPath('statuses.0.id', $resolvedStatus->getKey());
 });
 
-it('can search advisories', function (Advisory $matchingAdvisory) {
+it('can search advisories', function (Advisory $matchingAdvisory): void {
     Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create();
 
     getJson(route('api.portal.advisories', ['search' => 'FLOODED']))
@@ -166,7 +166,7 @@ it('can search advisories', function (Advisory $matchingAdvisory) {
         ->create(),
 ]);
 
-it('ignores internal updates when resolving the last updated date', function () {
+it('ignores internal updates when resolving the last updated date', function (): void {
     $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
 
     $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
@@ -177,7 +177,7 @@ it('ignores internal updates when resolving the last updated date', function () 
         ->assertJsonPath('data.0.last_updated_at', '2026-10-08T07:00:00+00:00');
 });
 
-it('does not resolve the last updated date to before the advisory was created', function () {
+it('does not resolve the last updated date to before the advisory was created', function (): void {
     $createdAt = Carbon::parse('2026-10-08 07:00:00', 'UTC');
 
     $advisory = Advisory::factory()->for(AdvisoryStatus::factory()->open(), 'status')->create(['created_at' => $createdAt]);
@@ -188,7 +188,7 @@ it('does not resolve the last updated date to before the advisory was created', 
         ->assertJsonPath('data.0.last_updated_at', '2026-10-08T07:00:00+00:00');
 });
 
-it('does not search internal updates', function (string $field) {
+it('does not search internal updates', function (string $field): void {
     Advisory::factory()
         ->for(AdvisoryStatus::factory()->open(), 'status')
         ->has(AdvisoryUpdate::factory()->internal()->state([$field => 'Basement flooded']), 'advisoryUpdates')
@@ -199,7 +199,7 @@ it('does not search internal updates', function (string $field) {
         ->assertJsonCount(0, 'data');
 })->with(['title', 'update']);
 
-it('treats search wildcards literally', function () {
+it('treats search wildcards literally', function (): void {
     $status = AdvisoryStatus::factory()->open()->create();
 
     $matchingAdvisory = Advisory::factory()->for($status, 'status')->create(['title' => '100% outage']);
@@ -211,7 +211,7 @@ it('treats search wildcards literally', function () {
         ->assertJsonPath('data.0.id', $matchingAdvisory->getKey());
 });
 
-it('can filter advisories by severity', function () {
+it('can filter advisories by severity', function (): void {
     $status = AdvisoryStatus::factory()->open()->create();
     $severity = AdvisorySeverity::factory()->create();
 
@@ -224,7 +224,7 @@ it('can filter advisories by severity', function () {
         ->assertJsonPath('data.0.id', $matchingAdvisory->getKey());
 });
 
-it('can filter advisories by status', function () {
+it('can filter advisories by status', function (): void {
     $status = AdvisoryStatus::factory()->open()->create();
 
     $matchingAdvisory = Advisory::factory()->for($status, 'status')->create();
@@ -236,7 +236,7 @@ it('can filter advisories by status', function () {
         ->assertJsonPath('data.0.id', $matchingAdvisory->getKey());
 });
 
-it('paginates the advisories', function () {
+it('paginates the advisories', function (): void {
     Advisory::factory()->count(12)->for(AdvisoryStatus::factory()->open(), 'status')->create();
 
     getJson(route('api.portal.advisories', ['page' => 2]))
@@ -252,7 +252,7 @@ it('paginates the advisories', function () {
         ]);
 });
 
-it('validates the inputs', function (array $parameters, string $error) {
+it('validates the inputs', function (array $parameters, string $error): void {
     getJson(route('api.portal.advisories', $parameters))
         ->assertUnprocessable()
         ->assertJsonValidationErrors([$error]);
@@ -264,7 +264,7 @@ it('validates the inputs', function (array $parameters, string $error) {
     'sort enum' => [['sort' => 'name'], 'sort'],
 ]);
 
-describe('sorting', function () {
+describe('sorting', function (): void {
     $createAdvisories = function (): array {
         $status = AdvisoryStatus::factory()->open()->create();
 
@@ -278,7 +278,7 @@ describe('sorting', function () {
         ];
     };
 
-    it('sorts advisories by the highest severity first by default', function () use ($createAdvisories) {
+    it('sorts advisories by the highest severity first by default', function () use ($createAdvisories): void {
         [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
 
         $ids = getJson(route('api.portal.advisories'))->assertOk()->collect('data')->pluck('id');
@@ -290,7 +290,7 @@ describe('sorting', function () {
         ]);
     });
 
-    it('can sort advisories by the lowest severity first', function () use ($createAdvisories) {
+    it('can sort advisories by the lowest severity first', function () use ($createAdvisories): void {
         [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
 
         $ids = getJson(route('api.portal.advisories', ['sort' => 'lowest_severity']))->assertOk()->collect('data')->pluck('id');
@@ -302,7 +302,7 @@ describe('sorting', function () {
         ]);
     });
 
-    it('sorts advisories by the most recently updated when `AdvisorySeveritySortFeature` is inactive', function () use ($createAdvisories) {
+    it('sorts advisories by the most recently updated when `AdvisorySeveritySortFeature` is inactive', function () use ($createAdvisories): void {
         [$criticalAdvisory, $recentMinorAdvisory, $olderMinorAdvisory] = $createAdvisories();
 
         AdvisorySeveritySortFeature::deactivate();
@@ -317,14 +317,14 @@ describe('sorting', function () {
     });
 });
 
-describe('authorization', function () {
-    it('denies access to guests', function () {
+describe('authorization', function (): void {
+    it('denies access to guests', function (): void {
         auth()->logout();
 
         getJson(route('api.portal.advisories'))->assertUnauthorized();
     });
 
-    it('denies access without the advisory management add-on', function () {
+    it('denies access without the advisory management add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->advisoryManagement = false;
         $licenseSettings->save();

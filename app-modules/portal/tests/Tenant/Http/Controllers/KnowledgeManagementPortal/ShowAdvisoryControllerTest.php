@@ -48,7 +48,7 @@ use Illuminate\Support\Str;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -56,7 +56,7 @@ beforeEach(function () {
     actingAs(Contact::factory()->create());
 });
 
-it('displays the advisory data', function () {
+it('displays the advisory data', function (): void {
     $date = Carbon::parse('2026-10-08 08:30:00', 'UTC');
 
     $severity = AdvisorySeverity::factory()->create(['name' => 'Major', 'color' => 'orange']);
@@ -93,7 +93,7 @@ it('displays the advisory data', function () {
         ]]);
 });
 
-it('lists the updates newest first', function () {
+it('lists the updates newest first', function (): void {
     $advisory = Advisory::factory()->create();
 
     $olderUpdate = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create(['date' => now()->subDay(), 'created_at' => now()]);
@@ -104,7 +104,7 @@ it('lists the updates newest first', function () {
     expect($updateIds->all())->toBe([$newerUpdate->getKey(), $olderUpdate->getKey()]);
 });
 
-it('does not show internal updates', function () {
+it('does not show internal updates', function (): void {
     $advisory = Advisory::factory()->create();
 
     $publicUpdate = AdvisoryUpdate::factory()->public()->for($advisory, 'advisory')->create();
@@ -115,25 +115,25 @@ it('does not show internal updates', function () {
     expect($updateIds->all())->toBe([$publicUpdate->getKey()]);
 });
 
-it('returns not found for a missing advisory', function () {
+it('returns not found for a missing advisory', function (): void {
     getJson(route('api.portal.advisories.show', ['advisory' => (string) Str::uuid()]))->assertNotFound();
 });
 
-it('returns not found for a deleted advisory', function () {
+it('returns not found for a deleted advisory', function (): void {
     $advisory = Advisory::factory()->create();
     $advisory->delete();
 
     getJson(route('api.portal.advisories.show', ['advisory' => $advisory]))->assertNotFound();
 });
 
-describe('authorization', function () {
-    it('denies access to guests', function () {
+describe('authorization', function (): void {
+    it('denies access to guests', function (): void {
         auth()->logout();
 
         getJson(route('api.portal.advisories.show', ['advisory' => Advisory::factory()->create()]))->assertUnauthorized();
     });
 
-    it('denies access without the advisory management add-on', function () {
+    it('denies access without the advisory management add-on', function (): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->advisoryManagement = false;
         $licenseSettings->save();

@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
 use App\Features\AdvisorySeveritySortFeature;
 
-it('orders severities by rank, then by name', function () {
+it('orders severities by rank, then by name', function (): void {
     $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 2]);
     $critical = AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 1]);
     $informational = AdvisorySeverity::factory()->create(['name' => 'Informational', 'sort' => 2]);
@@ -47,7 +47,7 @@ it('orders severities by rank, then by name', function () {
         ->toBe([$critical->getKey(), $informational->getKey(), $minor->getKey()]);
 });
 
-it('orders severities by name when `AdvisorySeveritySortFeature` is inactive', function () {
+it('orders severities by name when `AdvisorySeveritySortFeature` is inactive', function (): void {
     $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 1]);
     $critical = AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 2]);
 

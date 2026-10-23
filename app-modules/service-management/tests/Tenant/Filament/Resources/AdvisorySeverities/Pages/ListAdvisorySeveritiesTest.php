@@ -166,12 +166,12 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-describe('ranking', function () {
-    beforeEach(function () {
+describe('ranking', function (): void {
+    beforeEach(function (): void {
         actingAs(User::factory()->create()->givePermissionTo('settings.view-any', 'settings.*.update'));
     });
 
-    it('lists severities in rank order', function () {
+    it('lists severities in rank order', function (): void {
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
 
@@ -179,7 +179,7 @@ describe('ranking', function () {
             ->assertCanSeeTableRecords([$critical, $minor], inOrder: true);
     });
 
-    it('can rank severities by reordering them', function () {
+    it('can rank severities by reordering them', function (): void {
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
 
@@ -190,7 +190,7 @@ describe('ranking', function () {
             ->and($critical->refresh()->sort)->toBe(2);
     });
 
-    it('cannot rank severities without permission to update them', function () {
+    it('cannot rank severities without permission to update them', function (): void {
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
 
@@ -203,7 +203,7 @@ describe('ranking', function () {
             ->and($critical->refresh()->sort)->toBe(1);
     });
 
-    it('does not reorder severities when `AdvisorySeveritySortFeature` is inactive', function () {
+    it('does not reorder severities when `AdvisorySeveritySortFeature` is inactive', function (): void {
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
 

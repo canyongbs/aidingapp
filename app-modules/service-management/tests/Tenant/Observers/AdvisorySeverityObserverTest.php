@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use App\Features\AdvisorySeveritySortFeature;
 
-it('ranks a new severity last', function () {
+it('ranks a new severity last', function (): void {
     AdvisorySeverity::factory()->create(['sort' => 4]);
 
     $severity = AdvisorySeverity::factory()->create();
@@ -45,7 +45,7 @@ it('ranks a new severity last', function () {
     expect($severity->refresh()->sort)->toBe(5);
 });
 
-it('keeps an explicitly provided rank', function () {
+it('keeps an explicitly provided rank', function (): void {
     AdvisorySeverity::factory()->create(['sort' => 4]);
 
     $severity = AdvisorySeverity::factory()->create(['sort' => 2]);
@@ -53,7 +53,7 @@ it('keeps an explicitly provided rank', function () {
     expect($severity->refresh()->sort)->toBe(2);
 });
 
-it('does not rank a new severity when `AdvisorySeveritySortFeature` is inactive', function () {
+it('does not rank a new severity when `AdvisorySeveritySortFeature` is inactive', function (): void {
     AdvisorySeverity::factory()->create(['sort' => 4]);
 
     AdvisorySeveritySortFeature::deactivate();
