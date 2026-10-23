@@ -43,14 +43,22 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
+use AidingApp\Project\Tests\Tenant\Filament\Resources\ProjectResource\RequestFactory\CreateProjectRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Action;
 use Filament\Actions\Testing\TestAction;
 use Filament\Tables\Columns\Column;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseCount;
+use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
+
+use Spatie\Permission\PermissionRegistrar;
+
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function (): void {
@@ -116,6 +124,184 @@ it('can list records', function (): void {
         ->assertCountTableRecords(5)
         ->assertCanSeeTableRecords($records)
         ->assertSuccessful();
+});
+
+it('only shows the create action to users with the `project.create` permission', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view');
+
+    actingAs($user);
+
+    Livewire::test(ListProjects::class)
+        ->assertActionHidden(TestAction::make('create'))
+        ->mountAction('create')
+        ->assertActionNotMounted();
+
+    $user->givePermissionTo('project.create');
+
+    Livewire::test(ListProjects::class)
+        ->assertActionVisible(TestAction::make('create'));
+});
+
+it('opens the create form in a slide-over instead of redirecting to a page', function (): void {
+    asSuperAdmin();
+
+    Livewire::test(ListProjects::class)
+        ->assertActionExists(TestAction::make('create'), fn (Action $action): bool => $action->getUrl() === null)
+        ->mountAction('create')
+        ->assertActionMounted('create')
+        ->assertNoRedirect()
+        ->assertSeeInOrder(['Properties', 'Iconography', 'Details']);
+});
+
+it('creates a project from the slide-over', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors()
+        ->assertNotified();
+
+    assertDatabaseHas(Project::class, [
+        'name' => $request['name'],
+        'description' => $request['description'],
+        'department_id' => $request['department_id'],
+        'start_date' => $request['start_date'],
+        'target_completion_date' => null,
+    ]);
+});
+
+it('creates a project with a target completion date from the slide-over', function (): void {
+    asSuperAdmin();
+
+    $request = CreateProjectRequestFactory::new()->withTargetCompletionDate()->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(Project::class, [
+        'name' => $request['name'],
+        'target_completion_date' => $request['target_completion_date'],
+    ]);
+});
+
+it('does not create a project when the user loses the create permission after opening the slide-over', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    $component = Livewire::test(ListProjects::class)
+        ->mountAction('create')
+        ->assertActionMounted('create');
+
+    $user->revokePermissionTo('project.create');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $component
+        ->setActionData($request)
+        ->callMountedAction();
+
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+});
+
+it('validates the inputs when creating a project', function (CreateProjectRequestFactory $data, array $errors): void {
+    asSuperAdmin();
+
+    Project::factory()->create(['name' => 'Test Project']);
+
+    $request = CreateProjectRequestFactory::new($data)->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasFormErrors($errors);
+
+    assertDatabaseCount(Project::class, 1);
+})->with([
+    'name required' => [
+        CreateProjectRequestFactory::new()->without('name'),
+        ['name' => 'required'],
+    ],
+    'name string' => [
+        CreateProjectRequestFactory::new()->state(['name' => 1]),
+        ['name' => 'string'],
+    ],
+    'name max' => [
+        CreateProjectRequestFactory::new()->state(['name' => str()->random(256)]),
+        ['name' => 'max'],
+    ],
+    'name unique' => [
+        CreateProjectRequestFactory::new()->state(['name' => 'Test Project']),
+        ['name' => 'unique'],
+    ],
+    'description string' => [
+        CreateProjectRequestFactory::new()->state(['description' => 1]),
+        ['description' => 'string'],
+    ],
+    'description max' => [
+        CreateProjectRequestFactory::new()->state(['description' => str()->random(65536)]),
+        ['description' => 'max'],
+    ],
+    'icon required' => [
+        CreateProjectRequestFactory::new()->state(['icon' => null]),
+        ['icon' => 'required'],
+    ],
+    'color required' => [
+        CreateProjectRequestFactory::new()->state(['color' => null]),
+        ['color' => 'required'],
+    ],
+    'color invalid' => [
+        CreateProjectRequestFactory::new()->state(['color' => 'not-a-color']),
+        ['color' => 'in'],
+    ],
+]);
+
+it('does not create a project for a user without the `project.create` permission', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    Livewire::test(ListProjects::class)
+        ->mountAction('create')
+        ->assertActionNotMounted()
+        ->setActionData($request)
+        ->callMountedAction();
+
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+});
+
+it('hides the create action when the license addon is disabled after the page loads', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $component = Livewire::test(ListProjects::class)
+        ->assertActionVisible(TestAction::make('create'));
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->projectManagement = false;
+    $settings->save();
+
+    $component->assertActionHidden(TestAction::make('create'));
 });
 
 it('does not list archived projects', function (): void {
