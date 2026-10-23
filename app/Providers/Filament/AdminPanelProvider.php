@@ -66,6 +66,7 @@ use Filament\Tables\Columns\Column;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -172,7 +173,7 @@ class AdminPanelProvider extends PanelProvider
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
                     ->modalDescription('Version ' . config('sentry.release'))
-                    ->modalContent(fn (): Factory|\Illuminate\Contracts\View\View => view('components.about-modal'))
+                    ->modalContent(fn (): Factory|View => view('components.about-modal'))
                     ->modalFooterActions([])
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),

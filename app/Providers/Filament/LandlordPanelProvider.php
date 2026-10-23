@@ -40,6 +40,7 @@ use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
@@ -65,7 +66,7 @@ class LandlordPanelProvider extends PanelProvider
                 Route::get('/ping', fn () => response()->json(['message' => 'pong']))
                     ->name('ping');
 
-                Route::get('/{path?}', fn (): Factory|\Illuminate\Contracts\View\View => view('landlord'))
+                Route::get('/{path?}', fn (): Factory|View => view('landlord'))
                     ->where('path', '.*');
             });
     }

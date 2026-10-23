@@ -50,6 +50,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class DraftKnowledgeBaseItemWithAiAction extends Action
@@ -62,7 +63,7 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (Page $livewire): Factory|\Illuminate\Contracts\View\View => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
+            ->modalContent(fn (Page $livewire): Factory|View => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
                 // @phpstan-ignore-next-line
                 'recordTitle' => $livewire->data['title'],
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()
