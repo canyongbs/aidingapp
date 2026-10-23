@@ -53,7 +53,7 @@
 @endphp
 
 <div class="fi-ta-text grid w-full gap-y-1 text-sm">
-    <div aria-label="{{ $name }} ({{ $presenceTooltip }})" class="flex items-center gap-x-1.5">
+    <div role="group" aria-label="{{ $name }} ({{ $presenceTooltip }})" class="flex items-center gap-x-1.5">
         <span class="fi-ta-text-item shrink-0" x-tooltip="{ content: @js($presenceTooltip), theme: $store.theme }">
             {{ generate_icon_html($presence->getIcon(), attributes: (new ComponentAttributeBag())->color(IconComponent::class, $presence->getColor()), size: IconSize::Small) }}
         </span>

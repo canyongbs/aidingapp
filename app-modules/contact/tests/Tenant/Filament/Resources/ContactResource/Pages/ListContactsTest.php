@@ -173,7 +173,7 @@ describe('presence', function (): void {
         assert($presenceIcon instanceof Htmlable);
 
         Livewire::test(ListContacts::class)
-            ->assertSeeHtml('aria-label="' . e($contact->full_name) . ' (Presence: ' . $label . ')" class="flex items-center gap-x-1.5"')
+            ->assertSeeHtml('role="group" aria-label="' . e($contact->full_name) . ' (Presence: ' . $label . ')" class="flex items-center gap-x-1.5"')
             ->assertSeeHtml('x-tooltip="{ content: ' . Js::from('Presence: ' . $label)->toHtml() . ', theme: $store.theme }"')
             ->assertSeeHtml($presenceIcon->toHtml())
             ->assertSee(ContactResource::getUrl('view', ['record' => $contact]));
@@ -216,7 +216,7 @@ describe('presence', function (): void {
         $contact = Contact::factory()->create(['last_activity_at' => null]);
 
         Livewire::test(ListContacts::class)
-            ->assertSeeHtml('aria-label="' . e($contact->full_name) . ' (Presence: Offline)"')
+            ->assertSeeHtml('role="group" aria-label="' . e($contact->full_name) . ' (Presence: Offline)"')
             ->assertSee('Presence: Offline')
             ->assertDontSee(ContactResource::getUrl('view', ['record' => $contact]));
     });
