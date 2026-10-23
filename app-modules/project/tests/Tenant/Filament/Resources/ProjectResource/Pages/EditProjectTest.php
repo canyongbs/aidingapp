@@ -49,7 +49,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission.', function () {
+it('cannot render without proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -62,7 +62,7 @@ it('cannot render without proper permission.', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -80,7 +80,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can render if logged in user is superadmin, creator, or a manager of the project.', function () {
+it('can render if logged in user is superadmin, creator, or a manager of the project.', function (): void {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
@@ -169,7 +169,7 @@ it('can render if logged in user is superadmin, creator, or a manager of the pro
         ->assertSuccessful();
 });
 
-it('validates the inputs', function (EditProjectRequestFactory $data, array $errors) {
+it('validates the inputs', function (EditProjectRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -232,7 +232,7 @@ it('validates the inputs', function (EditProjectRequestFactory $data, array $err
     ]
 );
 
-it('can edit a record', function () {
+it('can edit a record', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -267,7 +267,7 @@ it('can edit a record', function () {
     );
 });
 
-it('can edit a record with target completion date', function () {
+it('can edit a record with target completion date', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -296,7 +296,7 @@ it('can edit a record with target completion date', function () {
     );
 });
 
-it('clears target_completion_date when switching to indefinite', function () {
+it('clears target_completion_date when switching to indefinite', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create([
@@ -324,7 +324,7 @@ it('clears target_completion_date when switching to indefinite', function () {
     );
 });
 
-it('hydrates target_completion_date_type to set when record has target_completion_date', function () {
+it('hydrates target_completion_date_type to set when record has target_completion_date', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create([
@@ -338,7 +338,7 @@ it('hydrates target_completion_date_type to set when record has target_completio
         ->assertFormFieldExists('target_completion_date');
 });
 
-it('cannot render an archived project', function () {
+it('cannot render an archived project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -350,7 +350,7 @@ it('cannot render an archived project', function () {
         ->assertNotFound();
 });
 
-it('can archive a project from the header action', function () {
+it('can archive a project from the header action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

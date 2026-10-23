@@ -42,7 +42,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('only shows the bulk delete action to a user with the organization.delete permission', function () {
+it('only shows the bulk delete action to a user with the organization.delete permission', function (): void {
     Organization::factory(15)->create();
 
     $user = User::factory()
@@ -60,7 +60,7 @@ it('only shows the bulk delete action to a user with the organization.delete per
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-it('only shows the import and export actions to a user with the `organization.import` permission', function () {
+it('only shows the import and export actions to a user with the `organization.import` permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('organization.view-any', 'organization.*.view');

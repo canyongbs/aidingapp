@@ -44,7 +44,7 @@ use AidingApp\InventoryManagement\Models\AssetType;
 use AidingApp\InventoryManagement\Models\MaintenanceActivity;
 use AidingApp\Report\Filament\Widgets\AssetStats;
 
-it('returns correct asset statistics with various asset states', function () {
+it('returns correct asset statistics with various asset states', function (): void {
     $availableStatus = AssetStatus::factory()
         ->available()
         ->state(['name' => 'Available'])
@@ -162,7 +162,7 @@ it('returns correct asset statistics with various asset states', function () {
         ->and($stats[3]->getValue())->toEqual((string) $expectedBenchStock); // Bench Stock
 });
 
-it('returns correct statistics with different maintenance statuses', function () {
+it('returns correct statistics with different maintenance statuses', function (): void {
     $availableStatus = AssetStatus::factory()
         ->available()
         ->state(['name' => 'Available'])
@@ -208,7 +208,7 @@ it('returns correct statistics with different maintenance statuses', function ()
         ->and($stats[3]->getValue())->toEqual((string) $expectedBenchStock); // Bench Stock
 });
 
-it('returns zero counts when no assets exist', function () {
+it('returns zero counts when no assets exist', function (): void {
     $widget = new AssetStats();
     $widget->cacheTag = 'test-asset-stats-empty';
 

@@ -181,7 +181,7 @@ class ViewServiceRequest extends ViewRecord
             AssignmentHistoryRelationManager::class,
             CreatedByRelationManager::class,
         ])
-            ->map(fn (string $relationManager) => self::filterRelationManagers($relationManager, $record))
+            ->map(fn (string $relationManager): string|\Filament\Resources\RelationManagers\RelationManagerConfiguration|\Filament\Resources\RelationManagers\RelationGroup|null => self::filterRelationManagers($relationManager, $record))
             ->filter()
             ->map(fn (string $relationManager): Livewire => Livewire::make($relationManager, [
                 'ownerRecord' => $record,

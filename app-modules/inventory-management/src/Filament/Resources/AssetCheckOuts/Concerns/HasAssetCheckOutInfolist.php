@@ -55,7 +55,7 @@ trait HasAssetCheckOutInfolist
             TextEntry::make('asset_check_in_id')
                 ->label('Status')
                 ->state(fn (AssetCheckOut $record): AssetCheckOutStatus => $record->status)
-                ->formatStateUsing(fn (AssetCheckOutStatus $state) => $state->getLabel())
+                ->formatStateUsing(fn (AssetCheckOutStatus $state): string => $state->getLabel())
                 ->badge()
                 ->color(fn (AssetCheckOutStatus $state): string => match ($state) {
                     AssetCheckOutStatus::Returned => 'success',

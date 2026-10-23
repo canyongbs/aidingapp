@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_request_forms', function (Blueprint $table) {
+        Schema::create('service_request_forms', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('service_request_type_id')->nullable()->constrained('service_request_types');

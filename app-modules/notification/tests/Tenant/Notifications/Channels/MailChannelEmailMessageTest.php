@@ -46,7 +46,7 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
 
-it('will create an EmailMessage for the notification', function () {
+it('will create an EmailMessage for the notification', function (): void {
     $notifiable = User::factory()->create();
 
     $notification = new TestEmailNotification();
@@ -59,7 +59,7 @@ it('will create an EmailMessage for the notification', function () {
     expect($emailMessages->first()->notification_class)->toBe(TestEmailNotification::class);
 });
 
-it('will not send emails in demo mode and record a BlockedByDemoMode event', function () {
+it('will not send emails in demo mode and record a BlockedByDemoMode event', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -80,7 +80,7 @@ it('will not send emails in demo mode and record a BlockedByDemoMode event', fun
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::BlockedByDemoMode);
 });
 
-it('will send system notifications in demo mode', function () {
+it('will send system notifications in demo mode', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -102,7 +102,7 @@ it('will send system notifications in demo mode', function () {
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
-it('will not send system notifications in demo mode when system notifications are not excluded', function () {
+it('will not send system notifications in demo mode when system notifications are not excluded', function (): void {
     $user = User::factory()->create();
 
     $tenantConfig = Tenant::current()->config;
@@ -124,7 +124,7 @@ it('will not send system notifications in demo mode when system notifications ar
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::BlockedByDemoMode);
 });
 
-it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function () {
+it('suppresses the send and records a SuppressedByBounced event for a bounced contact', function (): void {
     $contact = Contact::factory()->bounced()->create();
 
     expect($contact->canReceiveEmail())->toBeFalse();
@@ -141,7 +141,7 @@ it('suppresses the send and records a SuppressedByBounced event for a bounced co
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByBounced);
 });
 
-it('still dispatches to a healthy contact', function () {
+it('still dispatches to a healthy contact', function (): void {
     $contact = Contact::factory()->create();
 
     expect($contact->canReceiveEmail())->toBeTrue();
@@ -158,7 +158,7 @@ it('still dispatches to a healthy contact', function () {
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::Dispatched);
 });
 
-it('is unaffected for a User notifiable', function () {
+it('is unaffected for a User notifiable', function (): void {
     $user = User::factory()->create();
 
     $notification = new TestEmailNotification();

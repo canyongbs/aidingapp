@@ -49,7 +49,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-test('ViewKnowledgeBaseItem is gated with proper access control', function () {
+test('ViewKnowledgeBaseItem is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -77,7 +77,7 @@ test('ViewKnowledgeBaseItem is gated with proper access control', function () {
     )->assertSuccessful();
 });
 
-test('ViewKnowledgeBaseItem is gated with proper feature access control', function () {
+test('ViewKnowledgeBaseItem is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -115,7 +115,7 @@ test('ViewKnowledgeBaseItem is gated with proper feature access control', functi
     )->assertSuccessful();
 });
 
-test('rating displays Unrated when article has no votes', function () {
+test('rating displays Unrated when article has no votes', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -124,7 +124,7 @@ test('rating displays Unrated when article has no votes', function () {
         ->assertSchemaComponentStateSet('properties.rating', 'Unrated', 'infolist');
 });
 
-test('rating displays correct percentage when article has votes', function () {
+test('rating displays correct percentage when article has votes', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -153,7 +153,7 @@ test('rating displays correct percentage when article has votes', function () {
         ->assertSchemaComponentStateSet('properties.rating', '67%', 'infolist');
 });
 
-test('rating displays 100 percent when all votes are helpful', function () {
+test('rating displays 100 percent when all votes are helpful', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -173,7 +173,7 @@ test('rating displays 100 percent when all votes are helpful', function () {
         ->assertSchemaComponentStateSet('properties.rating', '100%', 'infolist');
 });
 
-test('rating displays 0 percent when no votes are helpful', function () {
+test('rating displays 0 percent when no votes are helpful', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -195,7 +195,7 @@ test('rating displays 0 percent when no votes are helpful', function () {
 
 // Health Tab Tests
 
-test('Health tab title_filled shows correct state', function () {
+test('Health tab title_filled shows correct state', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -211,7 +211,7 @@ test('Health tab title_filled shows correct state', function () {
         ->assertSchemaComponentStateSet('health.title_filled', true, 'infolist');
 });
 
-test('Health tab article_filled shows correct state', function () {
+test('Health tab article_filled shows correct state', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -258,7 +258,7 @@ test('Health tab article_filled shows correct state', function () {
         ->assertSchemaComponentStateSet('health.article_filled', true, 'infolist');
 });
 
-test('Health tab manager_assigned shows correct state', function () {
+test('Health tab manager_assigned shows correct state', function (): void {
     $user = User::factory()->create();
     asSuperAdmin($user);
 
@@ -273,7 +273,7 @@ test('Health tab manager_assigned shows correct state', function () {
         ->assertSchemaComponentStateSet('health.manager_assigned', true, 'infolist');
 });
 
-test('Health tab no_unresolved_concerns shows correct state', function () {
+test('Health tab no_unresolved_concerns shows correct state', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
@@ -292,7 +292,7 @@ test('Health tab no_unresolved_concerns shows correct state', function () {
         ->assertSchemaComponentStateSet('health.no_unresolved_concerns', true, 'infolist');
 });
 
-test('Health tab no_broken_links shows correct state', function () {
+test('Health tab no_broken_links shows correct state', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
@@ -314,7 +314,7 @@ test('Health tab no_broken_links shows correct state', function () {
         ->assertSchemaComponentStateSet('health.no_broken_links', true, 'infolist');
 });
 
-test('Health tab no_broken_images shows correct state', function () {
+test('Health tab no_broken_images shows correct state', function (): void {
     asSuperAdmin();
 
     $knowledgeBaseItem = KnowledgeBaseItem::factory()

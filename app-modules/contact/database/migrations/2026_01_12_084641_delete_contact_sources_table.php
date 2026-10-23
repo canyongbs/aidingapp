@@ -41,8 +41,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('contacts', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('contacts', function (Blueprint $table): void {
                 $table->dropColumn('source_id');
             });
 
@@ -52,8 +52,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::create('contact_sources', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('contact_sources', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
 
                 $table->string('name');
@@ -62,7 +62,7 @@ return new class () extends Migration {
                 $table->softDeletes();
             });
 
-            Schema::table('contacts', function (Blueprint $table) {
+            Schema::table('contacts', function (Blueprint $table): void {
                 $table->uuid('source_id')->nullable();
             });
         });

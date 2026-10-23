@@ -71,14 +71,14 @@ class ServiceMonitoringTargetFactory extends Factory
 
     public function confidential(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'is_confidential' => true,
         ]);
     }
 
     public function basicAuth(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'auth_type' => AuthType::Basic,
             'auth_username' => $this->faker->userName(),
             'auth_password' => $this->faker->password(),
@@ -87,7 +87,7 @@ class ServiceMonitoringTargetFactory extends Factory
 
     public function apiEndpoint(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'monitor_type' => MonitorType::ApiEndpoint,
             'follow_redirection' => true,
             'successful_status_codes' => [200],

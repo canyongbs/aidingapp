@@ -49,7 +49,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editCategory action is visible for manager department member with update permission', function () {
+test('editCategory action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -81,7 +81,7 @@ test('editCategory action is visible for manager department member with update p
         ->assertActionVisible(TestAction::make('editCategory')->schemaComponent('category'));
 });
 
-test('editCategory action is hidden for user without update permission', function () {
+test('editCategory action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -113,7 +113,7 @@ test('editCategory action is hidden for user without update permission', functio
         ->assertActionDoesNotExist(TestAction::make('editCategory')->schemaComponent('category'));
 });
 
-test('editCategory requires category', function () {
+test('editCategory requires category', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -131,7 +131,7 @@ test('editCategory requires category', function () {
         ->assertHasFormErrors(['category' => 'required']);
 });
 
-test('can update the service request category', function () {
+test('can update the service request category', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,

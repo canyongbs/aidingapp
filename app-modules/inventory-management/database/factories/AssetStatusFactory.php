@@ -55,11 +55,11 @@ class AssetStatusFactory extends Factory
 
     public function available(): self
     {
-        return $this->state(fn () => ['classification' => SystemAssetStatusClassification::Available]);
+        return $this->state(fn (): array => ['classification' => SystemAssetStatusClassification::Available]);
     }
 
     public function unavailable(): self
     {
-        return $this->state(fn () => ['classification' => SystemAssetStatusClassification::Unavailable]);
+        return $this->state(fn (): array => ['classification' => SystemAssetStatusClassification::Unavailable]);
     }
 }

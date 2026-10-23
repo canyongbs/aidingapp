@@ -46,13 +46,13 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\withHeader;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-test('it registers a new portal contact for matching organization domain', function () {
+test('it registers a new portal contact for matching organization domain', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -103,7 +103,7 @@ test('it registers a new portal contact for matching organization domain', funct
     expect($response->json('token'))->not()->toBeEmpty();
 });
 
-test('it does not rotate the csrf token shared with the admin panel', function () {
+test('it does not rotate the csrf token shared with the admin panel', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -153,7 +153,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns expired flag when portal authentication is expired', function () {
+test('it returns expired flag when portal authentication is expired', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -190,7 +190,7 @@ test('it returns expired flag when portal authentication is expired', function (
     expect(Contact::query()->where('email', 'expired.user@test.example.com')->exists())->toBeFalse();
 });
 
-test('it forbids registration when email domain does not match an enabled organization', function () {
+test('it forbids registration when email domain does not match an enabled organization', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -223,7 +223,7 @@ test('it forbids registration when email domain does not match an enabled organi
     $response->assertForbidden();
 });
 
-test('it normalizes stored www domain and allows only base-domain email registration', function () {
+test('it normalizes stored www domain and allows only base-domain email registration', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -287,7 +287,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
     $blockedResponse->assertForbidden();
 });
 
-test('it returns validation error when code is invalid', function () {
+test('it returns validation error when code is invalid', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -320,7 +320,7 @@ test('it returns validation error when code is invalid', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it generates registration url for unknown contact when organization domain matches', function () {
+test('it generates registration url for unknown contact when organization domain matches', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -348,7 +348,7 @@ test('it generates registration url for unknown contact when organization domain
         ->and($authentication?->educatable_id)->toBeNull();
 });
 
-test('it generates spa registration url for unknown contact when organization domain matches', function () {
+test('it generates spa registration url for unknown contact when organization domain matches', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [

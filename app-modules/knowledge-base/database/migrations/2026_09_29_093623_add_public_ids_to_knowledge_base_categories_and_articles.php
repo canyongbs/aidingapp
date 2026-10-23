@@ -42,21 +42,21 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('knowledge_base_categories', function (Blueprint $table): void {
                 $table->string('public_id')->nullable();
             });
 
-            Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            Schema::table('knowledge_base_articles', function (Blueprint $table): void {
                 $table->string('public_id')->nullable();
             });
 
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
+            Schema::table('knowledge_base_categories', function (Blueprint $table): void {
                 $table->string('public_id')->nullable(false)->change();
                 $table->uniqueIndex('public_id');
             });
 
-            Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            Schema::table('knowledge_base_articles', function (Blueprint $table): void {
                 $table->string('public_id')->nullable(false)->change();
                 $table->uniqueIndex('public_id');
             });
@@ -65,13 +65,13 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('knowledge_base_categories', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('knowledge_base_categories', function (Blueprint $table): void {
                 $table->dropIndex('knowledge_base_categories_public_id_unique');
                 $table->dropColumn('public_id');
             });
 
-            Schema::table('knowledge_base_articles', function (Blueprint $table) {
+            Schema::table('knowledge_base_articles', function (Blueprint $table): void {
                 $table->dropIndex('knowledge_base_articles_public_id_unique');
                 $table->dropColumn('public_id');
             });

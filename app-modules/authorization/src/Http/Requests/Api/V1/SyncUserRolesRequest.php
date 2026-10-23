@@ -66,7 +66,7 @@ class SyncUserRolesRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function (Validator $validator) {
+        $validator->after(function (Validator $validator): void {
             $roleIds = $this->input('role_ids', []);
 
             if (empty($roleIds)) {

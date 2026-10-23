@@ -92,7 +92,7 @@ class CreateUserRequest extends FormRequest
 
     public function withValidator(Validator $validator): void
     {
-        $validator->after(function (Validator $validator) {
+        $validator->after(function (Validator $validator): void {
             $this->validateDepartment($validator);
             $this->validateRoles($validator);
         });
@@ -155,7 +155,7 @@ class CreateUserRequest extends FormRequest
             ->get();
 
         if ($this->resolvedRoles->count() !== count($roleNames)) {
-            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name) => strtolower($name))->toArray();
+            $foundNames = $this->resolvedRoles->pluck('name')->map(fn ($name): string => strtolower($name))->toArray();
 
             foreach ($roleNames as $index => $roleName) {
                 if (! in_array(strtolower($roleName), $foundNames, true)) {

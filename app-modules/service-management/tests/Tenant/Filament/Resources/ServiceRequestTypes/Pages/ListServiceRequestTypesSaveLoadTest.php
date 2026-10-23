@@ -43,13 +43,13 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin();
 
     Event::fake([ServiceRequestTypeCatalogUpdated::class]);
 });
 
-it('loads hierarchical data', function () {
+it('loads hierarchical data', function (): void {
     $root = ServiceRequestTypeCategory::factory()->create(['name' => 'Root', 'sort' => 1]);
     $child = ServiceRequestTypeCategory::factory()->create(['name' => 'Child', 'sort' => 1, 'parent_id' => $root->id]);
 
@@ -72,7 +72,7 @@ it('loads hierarchical data', function () {
     expect($first['children'][0]['id'])->toBe($child->id);
 });
 
-it('moves a type into an area another user just created', function () {
+it('moves a type into an area another user just created', function (): void {
     $type = ServiceRequestType::factory()->create(['name' => 'Movable', 'sort' => 1]);
 
     $component = Livewire::test(ListServiceRequestTypes::class);
@@ -84,7 +84,7 @@ it('moves a type into an area another user just created', function () {
     expect($type->fresh()->categoryIds())->toBe([$newCategory->id]);
 });
 
-it('moves type from one existing category to another existing category', function () {
+it('moves type from one existing category to another existing category', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 

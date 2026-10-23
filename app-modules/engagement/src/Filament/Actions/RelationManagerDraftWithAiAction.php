@@ -51,6 +51,7 @@ use Filament\Resources\Pages\ManageRelatedRecords;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\Factory;
 use Illuminate\Support\Facades\Vite;
 
 class RelationManagerDraftWithAiAction extends Action
@@ -68,7 +69,7 @@ class RelationManagerDraftWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (RelationManager $livewire) => view('engagement::filament.actions.draft-with-ai-modal-content', [
+            ->modalContent(fn (RelationManager $livewire): Factory|\Illuminate\Contracts\View\View => view('engagement::filament.actions.draft-with-ai-modal-content', [
                 'recordTitle' => (function () use ($livewire) {
                     $record = $livewire->getOwnerRecord();
                     assert($record instanceof Educatable);
@@ -87,7 +88,7 @@ class RelationManagerDraftWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Set $set, ManageRelatedRecords | RelationManager $livewire) {
+            ->action(function (array $data, Set $set, ManageRelatedRecords | RelationManager $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
                 $userName = auth()->user()->name;

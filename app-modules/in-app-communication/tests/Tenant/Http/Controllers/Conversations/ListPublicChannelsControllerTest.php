@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Event;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -50,7 +50,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('returns public channels the user is not a member of', function () {
+it('returns public channels the user is not a member of', function (): void {
     $user = User::factory()->create();
 
     $publicChannel = Conversation::factory()->channel()->create([
@@ -79,7 +79,7 @@ it('returns public channels the user is not a member of', function () {
         ->assertJsonPath('data.0.name', 'Public Channel');
 });
 
-it('searches public channels by name', function () {
+it('searches public channels by name', function (): void {
     $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([
@@ -99,7 +99,7 @@ it('searches public channels by name', function () {
         ->assertJsonPath('data.0.name', 'Engineering Department');
 });
 
-it('searches public channels case insensitively', function () {
+it('searches public channels case insensitively', function (): void {
     $user = User::factory()->create();
 
     Conversation::factory()->channel()->create([

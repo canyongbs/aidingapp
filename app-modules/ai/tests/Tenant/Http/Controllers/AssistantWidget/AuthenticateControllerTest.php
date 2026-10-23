@@ -62,14 +62,14 @@ $assistantAuthenticate = function (PortalAuthentication $authentication, array $
     return postJson($url, $body, ['Origin' => config('app.url')]);
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->ai_support_assistant = true;
     $settings->save();
 });
 
-test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate) {
+test('it authenticates the contact when the code is valid', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 123456;
@@ -92,7 +92,7 @@ test('it authenticates the contact when the code is valid', function () use ($as
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate) {
+test('it returns a validation error when the code is invalid', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $authentication = PortalAuthentication::factory()->create([
@@ -110,7 +110,7 @@ test('it returns a validation error when the code is invalid', function () use (
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate) {
+test('it returns expired when the authentication has expired', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 445566;
@@ -130,7 +130,7 @@ test('it returns expired when the authentication has expired', function () use (
     expect(auth('contact')->check())->toBeFalse();
 });
 
-test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate) {
+test('it locks the authentication after too many invalid code attempts and rejects even the correct code', function () use ($assistantAuthenticate): void {
     $contact = Contact::factory()->create();
 
     $plainCode = 778899;

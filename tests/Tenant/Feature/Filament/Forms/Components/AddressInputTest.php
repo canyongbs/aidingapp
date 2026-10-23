@@ -42,7 +42,7 @@ use Mockery\MockInterface;
 
 use function Pest\Laravel\actingAs;
 
-it('does not query the address suggestion service for searches shorter than three characters', function () {
+it('does not query the address suggestion service for searches shorter than three characters', function (): void {
     actingAs(
         User::factory()
             ->create()
@@ -50,7 +50,7 @@ it('does not query the address suggestion service for searches shorter than thre
     );
 
     /** @phpstan-ignore method.notFound */
-    $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock) {
+    $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock): void {
         $mock->shouldNotReceive('autocompleteComponents');
     });
 
@@ -59,7 +59,7 @@ it('does not query the address suggestion service for searches shorter than thre
         ->assertReturned([]);
 });
 
-it('returns no suggestions and notifies the user when the address suggestion service fails', function () {
+it('returns no suggestions and notifies the user when the address suggestion service fails', function (): void {
     Exceptions::fake();
 
     actingAs(
@@ -69,7 +69,7 @@ it('returns no suggestions and notifies the user when the address suggestion ser
     );
 
     /** @phpstan-ignore method.notFound */
-    $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock) {
+    $this->mock(AwsGeoPlacesService::class, function (MockInterface $mock): void {
         $mock->shouldReceive('autocompleteComponents')
             /** @phpstan-ignore method.notFound */
             ->once()
@@ -84,7 +84,7 @@ it('returns no suggestions and notifies the user when the address suggestion ser
     Exceptions::assertReported(fn (Exception $exception): bool => $exception->getMessage() === 'AWS GeoPlaces is unavailable');
 });
 
-it('limits the address to 255 characters', function () {
+it('limits the address to 255 characters', function (): void {
     actingAs(
         User::factory()
             ->create()

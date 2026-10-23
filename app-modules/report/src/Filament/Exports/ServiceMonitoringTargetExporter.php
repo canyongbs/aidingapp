@@ -54,16 +54,16 @@ class ServiceMonitoringTargetExporter extends Exporter
             ExportColumn::make('frequency'),
             ExportColumn::make('one_day')
                 ->label('Last 1 Day')
-                ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(1)),
+                ->state(fn (ServiceMonitoringTarget $record): string => $record->getUptimePercentage(1)),
             ExportColumn::make('seven_days')
                 ->label('Last 7 Days')
-                ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(7)),
+                ->state(fn (ServiceMonitoringTarget $record): string => $record->getUptimePercentage(7)),
             ExportColumn::make('thirty_days')
                 ->label('Last 30 Days')
-                ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(30)),
+                ->state(fn (ServiceMonitoringTarget $record): string => $record->getUptimePercentage(30)),
             ExportColumn::make('one_year')
                 ->label('Last Year')
-                ->state(fn (ServiceMonitoringTarget $record) => $record->getUptimePercentage(365)),
+                ->state(fn (ServiceMonitoringTarget $record): string => $record->getUptimePercentage(365)),
         ];
     }
 

@@ -74,7 +74,7 @@ $postAssistantServiceRequest = function (Contact $contact, ServiceRequestType $t
     );
 };
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->ai_support_assistant = true;
@@ -86,7 +86,7 @@ beforeEach(function () {
     );
 });
 
-it('assigns the configured default priority when no priority is submitted', function () use ($postAssistantServiceRequest) {
+it('assigns the configured default priority when no priority is submitted', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $defaultPriority->getKey()]);
@@ -105,7 +105,7 @@ it('assigns the configured default priority when no priority is submitted', func
     ]);
 });
 
-it('prohibits a submitted priority when a default priority is configured', function () use ($postAssistantServiceRequest) {
+it('prohibits a submitted priority when a default priority is configured', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $defaultPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $submittedPriority = ServiceRequestPriority::factory()->for($type, 'type')->create();
@@ -124,7 +124,7 @@ it('prohibits a submitted priority when a default priority is configured', funct
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('requires a priority when no default priority is configured', function () use ($postAssistantServiceRequest) {
+it('requires a priority when no default priority is configured', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $contact = Contact::factory()->create();
 
@@ -139,7 +139,7 @@ it('requires a priority when no default priority is configured', function () use
     expect(ServiceRequest::query()->count())->toBe(0);
 });
 
-it('assigns the submitted priority when no default priority is configured', function () use ($postAssistantServiceRequest) {
+it('assigns the submitted priority when no default priority is configured', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create();
@@ -158,7 +158,7 @@ it('assigns the submitted priority when no default priority is configured', func
     ]);
 });
 
-it('requires password fields in assistant submissions', function () use ($postAssistantServiceRequest) {
+it('requires password fields in assistant submissions', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -188,7 +188,7 @@ it('requires password fields in assistant submissions', function () use ($postAs
     expect(ServiceRequest::query()->exists())->toBeFalse();
 });
 
-it('securely attaches password fields submitted by assistant clients', function () use ($postAssistantServiceRequest) {
+it('securely attaches password fields submitted by assistant clients', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -228,7 +228,7 @@ it('securely attaches password fields submitted by assistant clients', function 
         ->toBe('service-request-password');
 });
 
-it('rejects password fields owned by another contact', function () use ($postAssistantServiceRequest) {
+it('rejects password fields owned by another contact', function () use ($postAssistantServiceRequest): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $type->update(['default_priority_id' => $priority->getKey()]);
@@ -262,7 +262,7 @@ it('rejects password fields owned by another contact', function () use ($postAss
         ->and($secret->refresh()->related_id)->toBeNull();
 });
 
-it('records files submitted through upload fields as request submissions uploaded by the contact', function () use ($postAssistantServiceRequest) {
+it('records files submitted through upload fields as request submissions uploaded by the contact', function () use ($postAssistantServiceRequest): void {
     Storage::fake('s3');
 
     $type = ServiceRequestType::factory()->create();

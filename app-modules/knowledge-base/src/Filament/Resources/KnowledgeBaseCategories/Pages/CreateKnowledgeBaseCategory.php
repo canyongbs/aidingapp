@@ -59,7 +59,7 @@ class CreateKnowledgeBaseCategory extends CreateRecord
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
-                    ->unique(modifyRuleUsing: function (Unique $rule) {
+                    ->unique(modifyRuleUsing: function (Unique $rule): void {
                         $rule->withoutTrashed();
                     })
                     ->maxLength(255)

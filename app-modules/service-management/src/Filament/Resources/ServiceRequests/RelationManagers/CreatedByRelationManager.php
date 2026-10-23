@@ -73,7 +73,7 @@ class CreatedByRelationManager extends RelationManager
             ->paginated(false)
             ->recordActions([
                 ViewAction::make()
-                    ->url(fn (User $user) => UserResource::getUrl('view', ['record' => $user])),
+                    ->url(fn (User $user): string => UserResource::getUrl('view', ['record' => $user])),
             ]);
     }
 }

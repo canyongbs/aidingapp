@@ -76,7 +76,7 @@ class ManageAssetMaintenanceActivity extends ManageRelatedRecords
         return collect([
             MaintenanceActivitiesRelationManager::class,
         ])
-            ->reject(fn ($relationManager) => $record && (! $relationManager::canViewForRecord($record, static::class)))
+            ->reject(fn ($relationManager): bool => $record instanceof Model && (! $relationManager::canViewForRecord($record, static::class)))
             ->toArray();
     }
 }

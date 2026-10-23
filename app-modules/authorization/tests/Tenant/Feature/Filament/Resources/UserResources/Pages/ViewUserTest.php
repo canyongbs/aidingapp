@@ -46,7 +46,7 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
-it('renders impersonate button for non super admin users when user is super admin', function () {
+it('renders impersonate button for non super admin users when user is super admin', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -58,7 +58,7 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertActionVisible(Impersonate::class);
 });
 
-it('does not render impersonate button for super admin users at all', function () {
+it('does not render impersonate button for super admin users at all', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -72,7 +72,7 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertActionHidden(Impersonate::class);
 });
 
-it('allows super admin user to impersonate', function () {
+it('allows super admin user to impersonate', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -88,7 +88,7 @@ it('allows super admin user to impersonate', function () {
     expect(auth()->id())->toBe($user->id);
 });
 
-test('ViewUser is gated with proper access control', function () {
+test('ViewUser is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $record = User::factory()->create();
@@ -113,7 +113,7 @@ test('ViewUser is gated with proper access control', function () {
         ->assertSuccessful();
 });
 
-test('ViewUser displays the record\'s current field values', function () {
+test('ViewUser displays the record\'s current field values', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create([
@@ -132,7 +132,7 @@ test('ViewUser displays the record\'s current field values', function () {
         ]);
 });
 
-test('ViewUser shows first and last name fields when the full name feature is active', function () {
+test('ViewUser shows first and last name fields when the full name feature is active', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -142,7 +142,7 @@ test('ViewUser shows first and last name fields when the full name feature is ac
         ->assertFormFieldIsVisible('last_name');
 });
 
-test('ViewUser disables all editable fields', function () {
+test('ViewUser disables all editable fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -155,7 +155,7 @@ test('ViewUser disables all editable fields', function () {
         ->assertFormFieldDisabled('job_title');
 });
 
-test('ViewUser hides the Department section for admin records', function () {
+test('ViewUser hides the Department section for admin records', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -165,7 +165,7 @@ test('ViewUser hides the Department section for admin records', function () {
         ->assertFormFieldIsHidden('department_id');
 });
 
-test('ViewUser shows the Department section for non-admin records', function () {
+test('ViewUser shows the Department section for non-admin records', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -174,7 +174,7 @@ test('ViewUser shows the Department section for non-admin records', function () 
         ->assertFormFieldIsVisible('department_id');
 });
 
-test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function () {
+test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function (): void {
     $actingUser = User::factory()->create(['timezone' => 'America/New_York']);
     asSuperAdmin($actingUser);
 

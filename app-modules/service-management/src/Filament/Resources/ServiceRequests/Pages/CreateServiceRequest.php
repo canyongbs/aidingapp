@@ -117,7 +117,7 @@ class CreateServiceRequest extends CreateRecord
                                     ))
                                     ->searchable()
                                     ->rule(new ManagedServiceRequestType())
-                                    ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire) {
+                                    ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire): void {
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
 
@@ -258,17 +258,17 @@ class CreateServiceRequest extends CreateRecord
 
         /** @var Collection<int, ServiceRequestFormField> $fields */
         $fields = $form->fields;
-        $fields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+        $fields->each(function (ServiceRequestFormField $field) use (&$allFields): void {
             $allFields->put($field->id, $field);
         });
 
         if ($form->steps->isNotEmpty()) {
             /** @var Collection<int, ServiceRequestFormStep> $steps */
             $steps = $form->steps;
-            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields) {
+            $steps->each(function (ServiceRequestFormStep $step) use (&$allFields): void {
                 /** @var Collection<int, ServiceRequestFormField> $stepFields */
                 $stepFields = $step->fields;
-                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields) {
+                $stepFields->each(function (ServiceRequestFormField $field) use (&$allFields): void {
                     $allFields->put($field->id, $field);
                 });
             });

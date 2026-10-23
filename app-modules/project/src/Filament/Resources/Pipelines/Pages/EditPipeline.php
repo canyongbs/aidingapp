@@ -88,8 +88,8 @@ class EditPipeline extends EditRecord
                             ->default(PipelineStageClassification::Planning->value),
                     ])
                     ->deleteAction(
-                        function (Action $action) {
-                            $action->before(function (array $arguments, Repeater $component, Action $action) {
+                        function (Action $action): void {
+                            $action->before(function (array $arguments, Repeater $component, Action $action): void {
                                 $currentStage = $component->getRawItemState($arguments['item']);
 
                                 if (isset($currentStage['id'])) {

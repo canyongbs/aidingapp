@@ -47,13 +47,13 @@ $validateAuthenticationCode = function (OtpLoginCode $authentication, string $co
     );
 };
 
-it('passes for the correct code', function () use ($validateAuthenticationCode) {
+it('passes for the correct code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     expect($validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
 });
 
-it('fails for an incorrect code', function () use ($validateAuthenticationCode) {
+it('fails for an incorrect code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     $validator = $validateAuthenticationCode($authentication, '654321');
@@ -62,7 +62,7 @@ it('fails for an incorrect code', function () use ($validateAuthenticationCode) 
     expect($validator->errors()->first('code'))->toBe('The provided code is invalid.');
 });
 
-it('locks the record after the maximum failed attempts and then rejects even the correct code', function () use ($validateAuthenticationCode) {
+it('locks the record after the maximum failed attempts and then rejects even the correct code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
@@ -75,7 +75,7 @@ it('locks the record after the maximum failed attempts and then rejects even the
     expect($validator->errors()->first('code'))->toBe('Too many invalid attempts. Please request a new code.');
 });
 
-it('clears the failed-attempt counter after a successful validation', function () use ($validateAuthenticationCode) {
+it('clears the failed-attempt counter after a successful validation', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS - 1) as $attempt) {

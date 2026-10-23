@@ -41,14 +41,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Notifications\SendClosedServiceFeedbackNotification;
 use Illuminate\Support\Facades\Notification;
 
-it('is delayed by 120 seconds', function () {
+it('is delayed by 120 seconds', function (): void {
     $notification = new SendClosedServiceFeedbackNotification(ServiceRequest::factory()->make(), null);
 
     expect($notification->delay)->toBe(120);
 });
 
-describe('shouldSend', function () {
-    it('sends when the service request is still closed', function () {
+describe('shouldSend', function (): void {
+    it('sends when the service request is still closed', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -60,7 +60,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeTrue();
     });
 
-    it('does not send when the service request was reopened after the notification was queued', function () {
+    it('does not send when the service request was reopened after the notification was queued', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -76,7 +76,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 
-    it('does not send when feedback was already submitted', function () {
+    it('does not send when feedback was already submitted', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -90,7 +90,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 
-    it('does not send a reminder when feedback was already submitted', function () {
+    it('does not send a reminder when feedback was already submitted', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -104,7 +104,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($serviceRequest->respondent, 'mail'))->toBeFalse();
     });
 
-    it('does not send when the respondent changed after the notification was queued', function () {
+    it('does not send when the respondent changed after the notification was queued', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()
@@ -122,7 +122,7 @@ describe('shouldSend', function () {
         expect($notification->shouldSend($originalRespondent, 'mail'))->toBeFalse();
     });
 
-    it('does not send when the service request no longer exists', function () {
+    it('does not send when the service request no longer exists', function (): void {
         Notification::fake();
 
         $serviceRequest = ServiceRequest::factory()

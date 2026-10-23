@@ -43,11 +43,11 @@ use Carbon\CarbonImmutable;
 
 use function Pest\Laravel\travelTo;
 
-beforeEach(function () {
+beforeEach(function (): void {
     travelTo(CarbonImmutable::parse('2026-09-28 10:30:00', 'UTC'));
 });
 
-it('groups the checks into buckets covering the period', function (ServiceMonitoringHistoryPeriod $period, int $bucketCount, string $firstBucketStartsAt, string $lastBucketStartsAt) {
+it('groups the checks into buckets covering the period', function (ServiceMonitoringHistoryPeriod $period, int $bucketCount, string $firstBucketStartsAt, string $lastBucketStartsAt): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     $history = app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], $period, 'UTC');
@@ -61,7 +61,7 @@ it('groups the checks into buckets covering the period', function (ServiceMonito
     'past month' => [ServiceMonitoringHistoryPeriod::PastMonth, 30, '2026-08-30T00:00:00+00:00', '2026-09-28T00:00:00+00:00'],
 ]);
 
-it('summarizes the checks within each bucket', function () {
+it('summarizes the checks within each bucket', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => '2026-09-28 10:05:00']);
@@ -85,7 +85,7 @@ it('summarizes the checks within each bucket', function () {
         ->and(collect($buckets)->sum('checksCount'))->toBe(4);
 });
 
-it('aligns the buckets to the given timezone', function () {
+it('aligns the buckets to the given timezone', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     // 10:00 pm on the 27th in New York.
@@ -99,7 +99,7 @@ it('aligns the buckets to the given timezone', function () {
         ->and($buckets[28]->status)->toBe(ServiceMonitoringStatus::Outage);
 });
 
-it('resolves a legacy timezone alias unsupported by the date extension to an equivalent zone', function (string $timezone, string $lastBucketStartsAt) {
+it('resolves a legacy timezone alias unsupported by the date extension to an equivalent zone', function (string $timezone, string $lastBucketStartsAt): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     $buckets = app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastMonth, $timezone)[$serviceMonitoringTarget->getKey()];
@@ -110,7 +110,7 @@ it('resolves a legacy timezone alias unsupported by the date extension to an equ
     'observing daylight saving time' => ['US/Eastern', '2026-09-28T00:00:00-04:00'],
 ]);
 
-it('keeps the hour repeated when daylight saving time ends as separate buckets', function () {
+it('keeps the hour repeated when daylight saving time ends as separate buckets', function (): void {
     travelTo(CarbonImmutable::parse('2026-11-01 08:30:00', 'UTC'));
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -128,7 +128,7 @@ it('keeps the hour repeated when daylight saving time ends as separate buckets',
         ->and($buckets['2026-11-01T01:00:00-05:00']->checksCount)->toBe(1);
 });
 
-it('skips the hour missing when daylight saving time starts', function () {
+it('skips the hour missing when daylight saving time starts', function (): void {
     travelTo(CarbonImmutable::parse('2026-03-08 09:30:00', 'UTC'));
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -146,7 +146,7 @@ it('skips the hour missing when daylight saving time starts', function () {
         ->and($buckets['2026-03-08T03:00:00-04:00']->status)->toBe(ServiceMonitoringStatus::Operational);
 });
 
-it('falls back to the app timezone when the timezone cannot be resolved at all', function () {
+it('falls back to the app timezone when the timezone cannot be resolved at all', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     $buckets = app(GetServiceMonitoringStatusHistory::class)([$serviceMonitoringTarget->getKey()], ServiceMonitoringHistoryPeriod::PastMonth, 'Not/AReal_Zone')[$serviceMonitoringTarget->getKey()];
@@ -154,7 +154,7 @@ it('falls back to the app timezone when the timezone cannot be resolved at all',
     expect($buckets[29]->startsAt)->toBe('2026-09-28T00:00:00+00:00');
 });
 
-it('keeps the history of each target separate', function () {
+it('keeps the history of each target separate', function (): void {
     [$firstServiceMonitoringTarget, $secondServiceMonitoringTarget] = ServiceMonitoringTarget::factory()->count(2)->create();
 
     HistoricalServiceMonitoring::factory()->for($firstServiceMonitoringTarget)->failed()->create(['created_at' => '2026-09-28 10:05:00']);

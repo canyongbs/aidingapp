@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Storage::fake('s3');
 
     $portalSettings = app(PortalSettings::class);
@@ -59,7 +59,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-test('an authenticated contact can download media from their own service request update', function () {
+test('an authenticated contact can download media from their own service request update', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -78,7 +78,7 @@ test('an authenticated contact can download media from their own service request
         ->assertRedirect();
 });
 
-test('an authenticated contact cannot download media from another contacts service request update', function () {
+test('an authenticated contact cannot download media from another contacts service request update', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -98,7 +98,7 @@ test('an authenticated contact cannot download media from another contacts servi
         ->assertForbidden();
 });
 
-test('an unauthenticated user cannot download media from the portal endpoint', function () {
+test('an unauthenticated user cannot download media from the portal endpoint', function (): void {
     $serviceRequestUpdate = ServiceRequestUpdate::factory()->create();
     $serviceRequestUpdate
         ->addMedia(UploadedFile::fake()->image('test-file.png'))
@@ -110,7 +110,7 @@ test('an unauthenticated user cannot download media from the portal endpoint', f
         ->assertForbidden();
 });
 
-test('an authenticated contact can download media from their own service request', function () {
+test('an authenticated contact can download media from their own service request', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -128,7 +128,7 @@ test('an authenticated contact can download media from their own service request
         ->assertRedirect();
 });
 
-test('an authenticated contact cannot download media from another contacts service request', function () {
+test('an authenticated contact cannot download media from another contacts service request', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -147,7 +147,7 @@ test('an authenticated contact cannot download media from another contacts servi
         ->assertForbidden();
 });
 
-test('the portal download redirect url contains a temporary url', function () {
+test('the portal download redirect url contains a temporary url', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();

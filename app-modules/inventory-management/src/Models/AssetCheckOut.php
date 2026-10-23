@@ -148,7 +148,7 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
 
     protected function status(): Attribute
     {
-        return Attribute::get(function () {
+        return Attribute::get(function (): AssetCheckOutStatus {
             if ($this->checkIn()->exists()) {
                 return AssetCheckOutStatus::Returned;
             }
@@ -167,7 +167,7 @@ class AssetCheckOut extends BaseModel implements Auditable, ProvidesATimeline
     protected function formattedCheckedOutAt(): Attribute
     {
         return Attribute::make(
-            get: fn (?string $value, array $attributes) => Carbon::parse($attributes['checked_out_at'])->format('M j, Y g:i a (T)'),
+            get: fn (?string $value, array $attributes): string => Carbon::parse($attributes['checked_out_at'])->format('M j, Y g:i a (T)'),
         );
     }
 }

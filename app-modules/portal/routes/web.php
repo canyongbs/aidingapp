@@ -42,10 +42,11 @@ use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEmbeddable
 use AidingApp\Portal\Http\Middleware\EnsureKnowledgeManagementPortalIsEnabled;
 use AidingApp\Portal\Livewire\RenderKnowledgeManagementPortal;
 use App\Http\Middleware\TrackContactPresence;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Route;
 use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
-Route::get('/portals/knowledge-management/{any?}', function (?string $any = null) {
+Route::get('/portals/knowledge-management/{any?}', function (?string $any = null): RedirectResponse {
     $url = $any ? '/portal/' . $any : '/portal';
 
     return redirect($url, 301);
@@ -62,11 +63,11 @@ Route::prefix('portal')
         EnsureFrontendRequestsAreStateful::class,
         TrackContactPresence::class,
     ])
-    ->group(function () {
+    ->group(function (): void {
         Route::middleware([
             EnsureKnowledgeManagementPortalIsEnabled::class,
             EnsureKnowledgeManagementPortalIsEmbeddableAndAuthorized::class,
-        ])->group(function () {
+        ])->group(function (): void {
             Route::post('/authenticate/{authentication}', KnowledgeManagementPortalAuthenticateController::class)
                 ->middleware(['signed:relative', 'throttle:authentication-code-verify', EnsureFrontendRequestsAreStateful::class])
                 ->name('authenticate');

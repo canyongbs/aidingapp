@@ -39,8 +39,8 @@ use AidingApp\Authorization\Http\Controllers\OtpLoginCodeController;
 use AidingApp\Authorization\Http\Controllers\SocialiteController;
 use AidingApp\Authorization\Http\Controllers\VerifyOtpLoginCodeController;
 
-Route::middleware('web')->group(function () {
-    Route::prefix('auth')->name('socialite.')->group(function () {
+Route::middleware('web')->group(function (): void {
+    Route::prefix('auth')->name('socialite.')->group(function (): void {
         Route::get('/{provider}/redirect', [SocialiteController::class, 'redirect'])
             ->name('redirect');
 

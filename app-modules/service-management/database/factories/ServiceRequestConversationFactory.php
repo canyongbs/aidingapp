@@ -61,7 +61,7 @@ class ServiceRequestConversationFactory extends Factory
 
     public function finished(): static
     {
-        return $this->state(fn (array $attributes) => [
+        return $this->state(fn (array $attributes): array => [
             'conversation_id' => Conversation::factory(),
             'accepted_at' => $this->faker->dateTimeBetween('-29 minutes', '-10 minutes'),
             'finished_at' => $this->faker->dateTimeBetween('-9 minutes', now()),

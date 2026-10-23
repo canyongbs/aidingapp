@@ -44,7 +44,7 @@ use Illuminate\Support\Facades\Event;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     $settings = app(LicenseSettings::class);
@@ -52,7 +52,7 @@ beforeEach(function () {
     $settings->save();
 });
 
-it('returns conversations for the authenticated user', function () {
+it('returns conversations for the authenticated user', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -70,7 +70,7 @@ it('returns conversations for the authenticated user', function () {
         ->assertJsonPath('data.0.id', $conversation->getKey());
 });
 
-it('sorts conversations by last activity date', function () {
+it('sorts conversations by last activity date', function (): void {
     $user = User::factory()->create();
 
     $olderConversation = Conversation::factory()->channel()->create();
@@ -94,7 +94,7 @@ it('sorts conversations by last activity date', function () {
         ->assertJsonPath('data.1.id', $olderConversation->getKey());
 });
 
-it('sorts newly joined conversations at the top', function () {
+it('sorts newly joined conversations at the top', function (): void {
     $user = User::factory()->create();
 
     $olderJoinConversation = Conversation::factory()->channel()->create();
@@ -118,12 +118,12 @@ it('sorts newly joined conversations at the top', function () {
         ->assertJsonPath('data.1.id', $olderJoinConversation->getKey());
 });
 
-it('requires authentication', function () {
+it('requires authentication', function (): void {
     getJson(route('in-app-communication.conversations.index'))
         ->assertUnauthorized();
 });
 
-it('requires the realtime chat feature to be enabled', function () {
+it('requires the realtime chat feature to be enabled', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->realtimeChat = false;
     $settings->save();
@@ -135,7 +135,7 @@ it('requires the realtime chat feature to be enabled', function () {
         ->assertForbidden();
 });
 
-it('returns pagination metadata', function () {
+it('returns pagination metadata', function (): void {
     $user = User::factory()->create();
 
     $conversation = Conversation::factory()->channel()->create();
@@ -155,7 +155,7 @@ it('returns pagination metadata', function () {
         ->assertJsonPath('has_more', false);
 });
 
-it('respects the limit parameter', function () {
+it('respects the limit parameter', function (): void {
     $user = User::factory()->create();
 
     $conversations = Conversation::factory()->channel()->count(5)->create();
@@ -174,7 +174,7 @@ it('respects the limit parameter', function () {
         ->assertJsonPath('has_more', true);
 });
 
-it('can paginate through conversations using cursor', function () {
+it('can paginate through conversations using cursor', function (): void {
     $user = User::factory()->create();
 
     for ($index = 0; $index < 5; $index++) {
@@ -211,7 +211,7 @@ it('can paginate through conversations using cursor', function () {
         ->assertJsonPath('next_cursor', null);
 });
 
-it('returns correct conversation data structure', function () {
+it('returns correct conversation data structure', function (): void {
     $user = User::factory()->create();
     $otherUser = User::factory()->create();
 
@@ -268,7 +268,7 @@ it('returns correct conversation data structure', function () {
         ->assertJsonPath('data.0.participant_count', 2);
 });
 
-it('returns only confidential conversations when `confidential` is true', function () {
+it('returns only confidential conversations when `confidential` is true', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();
@@ -291,7 +291,7 @@ it('returns only confidential conversations when `confidential` is true', functi
         ->assertJsonPath('data.0.is_confidential', true);
 });
 
-it('excludes confidential conversations when `confidential` is false', function () {
+it('excludes confidential conversations when `confidential` is false', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();
@@ -313,7 +313,7 @@ it('excludes confidential conversations when `confidential` is false', function 
         ->assertJsonPath('data.0.id', $ordinary->getKey());
 });
 
-it('excludes a pinned confidential conversation from the non confidential list', function () {
+it('excludes a pinned confidential conversation from the non confidential list', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create();

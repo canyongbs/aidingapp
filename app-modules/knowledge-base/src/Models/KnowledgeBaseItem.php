@@ -205,7 +205,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function titleFilled(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => ! empty($attributes['title']),
+            get: fn (mixed $value, array $attributes): bool => ! empty($attributes['title']),
         );
     }
 
@@ -222,7 +222,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
 
                 if (($this->article_details['type'] ?? null) === 'doc'
                     && collect((array) ($this->article_details['content'] ?? []))
-                        ->every(fn (array $node) => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
+                        ->every(fn (array $node): bool => empty($node['content'] ?? []) || $node['content'] === [['type' => 'text', 'text' => '']])
                 ) {
                     return false;
                 }
@@ -261,7 +261,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function noBrokenLinks(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->are_broken_links_detected,
+            get: fn (): bool => ! $this->are_broken_links_detected,
         );
     }
 
@@ -271,7 +271,7 @@ class KnowledgeBaseItem extends BaseModel implements AiFile, Auditable, HasMedia
     protected function noBrokenImages(): Attribute
     {
         return Attribute::make(
-            get: fn () => ! $this->are_broken_images_detected,
+            get: fn (): bool => ! $this->are_broken_images_detected,
         );
     }
 

@@ -62,7 +62,7 @@ class SendMessage
     ): Message {
         $presentUserIds = $this->presence->getPresentUserIds($conversation->getKey());
 
-        return DB::transaction(function () use ($conversation, $author, $content, $presentUserIds) {
+        return DB::transaction(function () use ($conversation, $author, $content, $presentUserIds): Message {
             $message = new Message();
             $message->conversation_id = $conversation->getKey();
             $message->author_type = $author->getMorphClass();

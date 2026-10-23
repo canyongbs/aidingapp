@@ -42,7 +42,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use CanyonGBS\Common\Enums\Color;
 
-it('returns correct service request data within the given date range', function () {
+it('returns correct service request data within the given date range', function (): void {
     $startDate = now()->subMonthsNoOverflow(3)->startOfMonth();
     $endDate = now()->subMonthsNoOverflow(1)->endOfMonth();
 
@@ -115,7 +115,7 @@ it('returns correct service request data within the given date range', function 
         ->and($counts[$month3Index])->toBe(4);
 });
 
-it('returns correct data when no date filters are applied', function () {
+it('returns correct data when no date filters are applied', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $priority = ServiceRequestPriority::factory()->state(['type_id' => $type->id])->create();

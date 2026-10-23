@@ -62,7 +62,7 @@ class ContractTypeFactory extends Factory
 
     public function default(): Factory
     {
-        return $this->state(function (array $attributes) {
+        return $this->state(function (array $attributes): array {
             return [
                 'is_default' => true,
             ];

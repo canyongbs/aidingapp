@@ -42,15 +42,15 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::create('outbound_email_message_ids', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('outbound_email_message_ids', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->string('message_id')->index();
                 $table->uuidMorphs('trackable');
                 $table->timestamps();
             });
 
-            Schema::table('email_messages', function (Blueprint $table) {
+            Schema::table('email_messages', function (Blueprint $table): void {
                 $table->string('outbound_message_id')->nullable();
             });
         });
@@ -58,8 +58,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('email_messages', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('email_messages', function (Blueprint $table): void {
                 $table->dropColumn('outbound_message_id');
             });
 

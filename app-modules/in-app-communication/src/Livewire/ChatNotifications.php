@@ -72,7 +72,7 @@ class ChatNotifications extends Component
         return Conversation::query()
             ->select('conversations.*')
             ->selectRaw('conversation_participants.unread_count as unread_count')
-            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId): void {
                 $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
@@ -92,7 +92,7 @@ class ChatNotifications extends Component
                     ->limit(1)
             )
             ->get()
-            ->map(fn (Conversation $conversation) => $this->formatNotification($conversation, $user));
+            ->map(fn (Conversation $conversation): array => $this->formatNotification($conversation, $user));
     }
 
     public function getTotalUnreadCount(): int
@@ -135,7 +135,7 @@ class ChatNotifications extends Component
             $displayName = $conversation->name ?? 'Unnamed Channel';
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $participant) => $participant->participant_id !== $currentUser->getKey());
+                ->first(fn (ConversationParticipant $participant): bool => $participant->participant_id !== $currentUser->getKey());
             $otherUser = $otherParticipant?->participant;
 
             $displayName = match (true) {

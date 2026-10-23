@@ -43,7 +43,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('is gated by proper access control', function () {
+it('is gated by proper access control', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo('knowledge_base_item.view-any');
 
@@ -62,7 +62,7 @@ it('is gated by proper access control', function () {
         ->assertTableBulkActionVisible('bulkManagers');
 });
 
-it('can bulk assign managers to items', function () {
+it('can bulk assign managers to items', function (): void {
     asSuperAdmin();
 
     $manager = User::factory()->create();
@@ -80,12 +80,12 @@ it('can bulk assign managers to items', function () {
         )
         ->assertHasNoErrors();
 
-    $items->each(function (KnowledgeBaseItem $item) use ($manager) {
+    $items->each(function (KnowledgeBaseItem $item) use ($manager): void {
         expect($item->refresh()->managers->pluck('id'))->toContain($manager->id);
     });
 });
 
-it('can bulk assign managers to items without removing previously assigned managers', function () {
+it('can bulk assign managers to items without removing previously assigned managers', function (): void {
     asSuperAdmin();
 
     $oldManager = User::factory()->create();
@@ -93,7 +93,7 @@ it('can bulk assign managers to items without removing previously assigned manag
 
     $items = KnowledgeBaseItem::factory(5)->create();
 
-    $items->each(function (KnowledgeBaseItem $item) use ($oldManager) {
+    $items->each(function (KnowledgeBaseItem $item) use ($oldManager): void {
         $item->managers()->attach($oldManager->id);
     });
 
@@ -108,12 +108,12 @@ it('can bulk assign managers to items without removing previously assigned manag
         )
         ->assertHasNoErrors();
 
-    $items->each(function (KnowledgeBaseItem $item) use ($oldManager, $newManager) {
+    $items->each(function (KnowledgeBaseItem $item) use ($oldManager, $newManager): void {
         expect($item->refresh()->managers->pluck('id'))->toContain($oldManager->id, $newManager->id);
     });
 });
 
-it('can bulk assign managers to items with removing previously assigned managers', function () {
+it('can bulk assign managers to items with removing previously assigned managers', function (): void {
     asSuperAdmin();
 
     $oldManager = User::factory()->create();
@@ -121,7 +121,7 @@ it('can bulk assign managers to items with removing previously assigned managers
 
     $items = KnowledgeBaseItem::factory(5)->create();
 
-    $items->each(function (KnowledgeBaseItem $item) use ($oldManager) {
+    $items->each(function (KnowledgeBaseItem $item) use ($oldManager): void {
         $item->managers()->attach($oldManager->id);
     });
 
@@ -136,7 +136,7 @@ it('can bulk assign managers to items with removing previously assigned managers
         )
         ->assertHasNoErrors();
 
-    $items->each(function (KnowledgeBaseItem $item) use ($oldManager, $newManager) {
+    $items->each(function (KnowledgeBaseItem $item) use ($oldManager, $newManager): void {
         expect($item->refresh()->managers->pluck('id'))->toContain($newManager->id);
         expect($item->managers->pluck('id'))->not()->toContain($oldManager->id);
     });

@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('excludes password fields from the AI resolution prompt', function () {
+it('excludes password fields from the AI resolution prompt', function (): void {
     $type = ServiceRequestType::factory()->create();
     $form = ServiceRequestForm::factory()->for($type, 'type')->create();
 

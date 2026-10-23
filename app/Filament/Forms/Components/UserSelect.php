@@ -64,7 +64,7 @@ class UserSelect extends Select
         return parent::relationship(
             $name,
             $titleAttribute ?? 'name',
-            function (Builder $query, UserSelect $component) use ($modifyQueryUsing) {
+            function (Builder $query, UserSelect $component) use ($modifyQueryUsing): void {
                 if ($component->shouldFilterAdmins()) {
                     $alreadySelected = [];
 
@@ -77,7 +77,7 @@ class UserSelect extends Select
                         $alreadySelected = $record->{$relationshipName}()
                             ->getQuery()
                             ->pluck($qualifiedKey)
-                            ->map(fn ($variable) => (string) $variable)
+                            ->map(fn ($variable): string => (string) $variable)
                             ->toArray();
                     }
 
@@ -85,7 +85,7 @@ class UserSelect extends Select
                     $stateSelected = array_filter(is_array($state) ? $state : [$state]);
                     $alreadySelected = array_values(array_unique(array_merge($alreadySelected, $stateSelected)));
 
-                    $query->where(function (Builder $query) use ($alreadySelected) {
+                    $query->where(function (Builder $query) use ($alreadySelected): void {
                         $query->tap(new WithoutAnyAdmin());
 
                         if (! empty($alreadySelected)) {

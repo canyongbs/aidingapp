@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('service_request_category_types', function (Blueprint $table) {
+        Schema::create('service_request_category_types', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_request_type_id')
                 ->constrained('service_request_types', indexName: 'srct_service_request_type_id_foreign')

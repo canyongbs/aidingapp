@@ -61,7 +61,7 @@ class BulkEngagementAction
             ->icon('heroicon-o-chat-bubble-bottom-center-text')
             ->modalHeading('Send Bulk Engagement')
             ->slideOver()
-            ->modalDescription(fn (Collection $records) => "You have selected {$records->count()} {$context} to engage.")
+            ->modalDescription(fn (Collection $records): string => "You have selected {$records->count()} {$context} to engage.")
             ->model(EngagementBatch::class)
             ->steps([
                 Step::make('Choose your delivery method')
@@ -85,7 +85,7 @@ class BulkEngagementAction
                         EngagementScheduledAtDateTimePicker::make(),
                     ]),
             ])
-            ->action(function (Collection $records, array $data, Schema $schema) {
+            ->action(function (Collection $records, array $data, Schema $schema): void {
                 $channel = NotificationChannel::parse($data['channel']);
 
                 $data['body'] ??= ['type' => 'doc', 'content' => []];

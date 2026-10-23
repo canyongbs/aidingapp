@@ -37,7 +37,7 @@
 use AidingApp\InAppCommunication\Enums\ConversationEphemeralPeriod;
 use Illuminate\Support\Carbon;
 
-it('has a human readable label', function (ConversationEphemeralPeriod $period, string $label) {
+it('has a human readable label', function (ConversationEphemeralPeriod $period, string $label): void {
     expect($period->getLabel())->toBe($label);
 })->with([
     'one minute' => [ConversationEphemeralPeriod::OneMinute, '1 Minute'],
@@ -53,7 +53,7 @@ it('has a human readable label', function (ConversationEphemeralPeriod $period, 
     'one year' => [ConversationEphemeralPeriod::OneYear, '1 Year'],
 ]);
 
-it('resolves the cutoff for a given date', function (ConversationEphemeralPeriod $period, string $expected) {
+it('resolves the cutoff for a given date', function (ConversationEphemeralPeriod $period, string $expected): void {
     $date = Carbon::parse('2026-08-24 12:00:00');
 
     expect($period->subtractFrom($date)->toDateTimeString())->toBe($expected);
@@ -71,7 +71,7 @@ it('resolves the cutoff for a given date', function (ConversationEphemeralPeriod
     'one year' => [ConversationEphemeralPeriod::OneYear, '2025-08-24 12:00:00'],
 ]);
 
-it('does not mutate the date it is given', function () {
+it('does not mutate the date it is given', function (): void {
     $date = Carbon::parse('2026-08-24 12:00:00');
 
     ConversationEphemeralPeriod::OneYear->subtractFrom($date);
@@ -79,7 +79,7 @@ it('does not mutate the date it is given', function () {
     expect($date->toDateTimeString())->toBe('2026-08-24 12:00:00');
 });
 
-it('does not overflow calendar period cutoffs', function (ConversationEphemeralPeriod $period, string $date, string $expected) {
+it('does not overflow calendar period cutoffs', function (ConversationEphemeralPeriod $period, string $date, string $expected): void {
     expect($period->subtractFrom(Carbon::parse($date))->toDateTimeString())->toBe($expected);
 })->with([
     'one month from the end of March' => [ConversationEphemeralPeriod::OneMonth, '2026-03-31 12:00:00', '2026-02-28 12:00:00'],

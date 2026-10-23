@@ -42,12 +42,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $user = SystemUser::factory()->create();
@@ -74,7 +74,7 @@ it('is gated with proper access control', function () {
         ->assertOk();
 });
 
-it('returns a service request resource', function () {
+it('returns a service request resource', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -88,7 +88,7 @@ it('returns a service request resource', function () {
     ]);
 });
 
-it('returns correct service request fields', function (string $responseKey, Closure $getExpected) {
+it('returns correct service request fields', function (string $responseKey, Closure $getExpected): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -108,7 +108,7 @@ it('returns correct service request fields', function (string $responseKey, Clos
     '`category`' => ['category', fn (ServiceRequest $serviceRequest) => $serviceRequest->category->value],
 ]);
 
-it('returns correct status relationship structure', function () {
+it('returns correct status relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -124,7 +124,7 @@ it('returns correct status relationship structure', function () {
     ]);
 });
 
-it('returns correct priority relationship structure', function () {
+it('returns correct priority relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -140,7 +140,7 @@ it('returns correct priority relationship structure', function () {
     ]);
 });
 
-it('returns correct respondent relationship structure', function () {
+it('returns correct respondent relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -156,7 +156,7 @@ it('returns correct respondent relationship structure', function () {
     ]);
 });
 
-it('returns correct assignee relationship structure', function () {
+it('returns correct assignee relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 
@@ -180,7 +180,7 @@ it('returns correct assignee relationship structure', function () {
     ]);
 });
 
-it('returns null assignee when no assignment exists', function () {
+it('returns null assignee when no assignment exists', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.view']);
 

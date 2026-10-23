@@ -73,7 +73,7 @@ class ReportFrequencySection
                                 $alreadySelected = array_map('strval', array_filter((array) $component->getState()));
 
                                 return User::query()
-                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected) {
+                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected): void {
                                         $query->tap(new WithoutAnyAdmin());
 
                                         if (filled($alreadySelected)) {

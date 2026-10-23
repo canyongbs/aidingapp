@@ -48,7 +48,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('editPriority action is visible for manager department member with update permission', function () {
+test('editPriority action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -80,7 +80,7 @@ test('editPriority action is visible for manager department member with update p
         ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
-test('editPriority action is hidden for user without update permission', function () {
+test('editPriority action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -112,7 +112,7 @@ test('editPriority action is hidden for user without update permission', functio
         ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
-test('editPriority action is hidden when the service request has no priority', function () {
+test('editPriority action is hidden when the service request has no priority', function (): void {
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
             'classification' => SystemServiceRequestClassification::Open,
@@ -129,7 +129,7 @@ test('editPriority action is hidden when the service request has no priority', f
         ->assertActionDoesNotExist(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
-test('editPriority action is visible when the service request priority is soft-deleted', function () {
+test('editPriority action is visible when the service request priority is soft-deleted', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $trashedPriority = ServiceRequestPriority::factory()->create([
@@ -154,7 +154,7 @@ test('editPriority action is visible when the service request priority is soft-d
         ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
 });
 
-test('editPriority requires priority_id', function () {
+test('editPriority requires priority_id', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
@@ -177,7 +177,7 @@ test('editPriority requires priority_id', function () {
         ->assertHasFormErrors(['priority_id' => 'required']);
 });
 
-test('editPriority rejects a priority belonging to a different service request type', function () {
+test('editPriority rejects a priority belonging to a different service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->state([
@@ -206,7 +206,7 @@ test('editPriority rejects a priority belonging to a different service request t
     expect($serviceRequest->fresh()->priority_id)->not->toBe($otherTypePriority->getKey());
 });
 
-test('can update the service request priority', function () {
+test('can update the service request priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $originalPriority = ServiceRequestPriority::factory()->create([
@@ -238,7 +238,7 @@ test('can update the service request priority', function () {
     expect($serviceRequest->fresh()->priority_id)->toBe($newPriority->getKey());
 });
 
-test('can update the service request priority away from a soft-deleted priority', function () {
+test('can update the service request priority away from a soft-deleted priority', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $trashedPriority = ServiceRequestPriority::factory()->create([

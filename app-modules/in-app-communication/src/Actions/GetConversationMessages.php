@@ -64,9 +64,9 @@ class GetConversationMessages
                 ->find($beforeId);
 
             if ($beforeMessage) {
-                $query->where(function (Builder $query) use ($beforeMessage) {
+                $query->where(function (Builder $query) use ($beforeMessage): void {
                     $query->where('created_at', '<', $beforeMessage->created_at)
-                        ->orWhere(function (Builder $query) use ($beforeMessage) {
+                        ->orWhere(function (Builder $query) use ($beforeMessage): void {
                             $query->where('created_at', '=', $beforeMessage->created_at)
                                 ->where('id', '<', $beforeMessage->id);
                         });
@@ -80,9 +80,9 @@ class GetConversationMessages
                 ->find($afterId);
 
             if ($afterMessage) {
-                $query->where(function (Builder $query) use ($afterMessage) {
+                $query->where(function (Builder $query) use ($afterMessage): void {
                     $query->where('created_at', '>', $afterMessage->created_at)
-                        ->orWhere(function (Builder $query) use ($afterMessage) {
+                        ->orWhere(function (Builder $query) use ($afterMessage): void {
                             $query->where('created_at', '=', $afterMessage->created_at)
                                 ->where('id', '>', $afterMessage->id);
                         });

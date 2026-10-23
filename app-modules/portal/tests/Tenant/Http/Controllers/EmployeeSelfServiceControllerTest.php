@@ -46,7 +46,7 @@ $employeeSelfServiceUrl = function (): string {
     return URL::temporarySignedRoute('employee-self-service', now()->addHour());
 };
 
-it('logs the managed contact into the portal and redirects', function () use ($employeeSelfServiceUrl) {
+it('logs the managed contact into the portal and redirects', function () use ($employeeSelfServiceUrl): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -60,7 +60,7 @@ it('logs the managed contact into the portal and redirects', function () use ($e
     expect(Auth::guard('contact')->id())->toBe($contact->getKey());
 });
 
-it('does not rotate the csrf token shared with the admin panel', function () use ($employeeSelfServiceUrl) {
+it('does not rotate the csrf token shared with the admin panel', function () use ($employeeSelfServiceUrl): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();
@@ -81,7 +81,7 @@ it('does not rotate the csrf token shared with the admin panel', function () use
         ->and(Auth::guard('contact')->check())->toBeTrue();
 });
 
-it('forbids a user without a managed contact', function () use ($employeeSelfServiceUrl) {
+it('forbids a user without a managed contact', function () use ($employeeSelfServiceUrl): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -89,7 +89,7 @@ it('forbids a user without a managed contact', function () use ($employeeSelfSer
         ->assertForbidden();
 });
 
-it('rejects an unsigned or tampered url', function () {
+it('rejects an unsigned or tampered url', function (): void {
     $type = ContactType::factory()->create();
 
     $user = User::factory()->create();

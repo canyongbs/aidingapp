@@ -61,7 +61,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
             $lowestServiceRequest = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
-                    'serviceRequests as service_request_count' => function (Builder $query) {
+                    'serviceRequests as service_request_count' => function (Builder $query): void {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
                     },
                 ])
@@ -70,12 +70,12 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
 
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where(function (QueryBuilder $query) {
+                ->where(function (QueryBuilder $query): void {
                     $query->selectRaw('count(*)')
                         ->from('service_requests')
                         ->join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
                         ->whereColumn('users.id', 'service_request_assignments.user_id')
-                        ->whereExists(function (QueryBuilder $query) {
+                        ->whereExists(function (QueryBuilder $query): void {
                             $query->selectRaw('*')
                                 ->from('service_request_statuses')
                                 ->whereColumn('service_requests.status_id', 'service_request_statuses.id')
@@ -97,7 +97,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
-                    'serviceRequests as service_request_count' => function (Builder $query) {
+                    'serviceRequests as service_request_count' => function (Builder $query): void {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
                     },
                 ])

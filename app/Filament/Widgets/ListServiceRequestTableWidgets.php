@@ -79,7 +79,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->label('Service Request #')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable()
-                    ->url(fn (ServiceRequest $record) => ServiceRequestResource::getUrl('view', ['record' => $record]))
+                    ->url(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl('view', ['record' => $record]))
                     ->color('primary')
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
@@ -120,7 +120,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
             ->filters([
                 SelectFilter::make('priority')
                     ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
-                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record): string => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('status')
@@ -139,7 +139,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->preload(),
             ])
             ->recordActions([
-                Action::make('View')->url(function (ServiceRequest $serviceRequest) {
+                Action::make('View')->url(function (ServiceRequest $serviceRequest): string {
                     return ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
                 }),
             ])

@@ -42,13 +42,13 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             Schema::rename('incident_severities', 'advisory_severities');
             Schema::rename('incident_statuses', 'advisory_statuses');
             Schema::rename('incident_updates', 'advisory_updates');
             Schema::rename('incidents', 'advisories');
 
-            Schema::table('advisory_updates', function (Blueprint $table) {
+            Schema::table('advisory_updates', function (Blueprint $table): void {
                 $table->renameColumn('incident_id', 'advisory_id');
             });
 
@@ -72,7 +72,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             DB::table('audits')
                 ->where('auditable_type', 'advisory')
                 ->update(['auditable_type' => 'incident']);
@@ -89,7 +89,7 @@ return new class () extends Migration {
                 ->where('auditable_type', 'advisory_update')
                 ->update(['auditable_type' => 'incident_update']);
 
-            Schema::table('advisory_updates', function (Blueprint $table) {
+            Schema::table('advisory_updates', function (Blueprint $table): void {
                 $table->renameColumn('advisory_id', 'incident_id');
             });
 

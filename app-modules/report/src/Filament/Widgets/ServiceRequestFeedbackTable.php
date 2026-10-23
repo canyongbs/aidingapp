@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use Carbon\Carbon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -95,12 +96,12 @@ class ServiceRequestFeedbackTable extends BaseWidget
                         'serviceRequest.statusPeriods',
                     ])
                     ->when(
-                        $startDate && $endDate,
+                        $startDate instanceof Carbon && $endDate instanceof Carbon,
                         fn (Builder $query) => $query->whereBetween('service_request_feedback.created_at', [$startDate, $endDate])
                     )
                     ->when(
                         $types,
-                        fn (Builder $query) => $query->whereHas('serviceRequest.priority.type', function (Builder $query) use ($types) {
+                        fn (Builder $query) => $query->whereHas('serviceRequest.priority.type', function (Builder $query) use ($types): void {
                             $query->whereIn('id', $types);
                         })
                     )->orderBy('created_at', 'desc')
@@ -125,7 +126,7 @@ class ServiceRequestFeedbackTable extends BaseWidget
                 TextColumn::make('serviceRequest.assignedTo.user.name')
                     ->label('Assigned To')
                     ->searchable()
-                    ->badge(fn (ServiceRequestFeedback $record) => is_null($record->serviceRequest->assignedTo))
+                    ->badge(fn (ServiceRequestFeedback $record): bool => is_null($record->serviceRequest->assignedTo))
                     ->default('Unassigned'),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')

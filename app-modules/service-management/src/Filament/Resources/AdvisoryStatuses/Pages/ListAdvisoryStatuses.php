@@ -73,7 +73,7 @@ class ListAdvisoryStatuses extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records): void {
                             $deletedAdvisoryStatusesCount = AdvisoryStatus::query()
                                 ->whereKey($records)
                                 ->whereDoesntHave('advisories')

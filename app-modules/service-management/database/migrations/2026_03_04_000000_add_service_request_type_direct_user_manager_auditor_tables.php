@@ -45,14 +45,14 @@ return new class () extends Migration {
         Schema::rename('service_request_type_managers', 'service_request_type_manager_teams');
         Schema::rename('service_request_type_auditors', 'service_request_type_auditor_teams');
 
-        Schema::create('service_request_type_manager_users', function (Blueprint $table) {
+        Schema::create('service_request_type_manager_users', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });
 
-        Schema::create('service_request_type_auditor_users', function (Blueprint $table) {
+        Schema::create('service_request_type_auditor_users', function (Blueprint $table): void {
             $table->uuid('id')->primary();
             $table->foreignUuid('service_request_type_id')->constrained('service_request_types')->cascadeOnDelete();
             $table->foreignUuid('user_id')->constrained('users')->cascadeOnDelete();

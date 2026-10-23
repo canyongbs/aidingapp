@@ -43,7 +43,7 @@ class CreateContactsTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('contacts', function (Blueprint $table) {
+        Schema::create('contacts', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('status_id')->references('id')->on('contact_statuses');

@@ -150,10 +150,10 @@ class ContactFormSchema
                 ->maxLength(255)
                 ->unique(ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                 ->hintIcon(
-                    fn (?Contact $record) => $record?->getEmailHealthStatus()->getIcon(),
-                    tooltip: fn (?Contact $record) => $record?->getEmailHealthStatus()->getTooltipText(),
+                    fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getIcon(),
+                    tooltip: fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getTooltipText(),
                 )
-                ->hintColor(fn (?Contact $record) => $record?->getEmailHealthStatus()->getColor()),
+                ->hintColor(fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getColor()),
             PhoneInput::make('mobile')
                 ->label('Mobile')
                 ->string(),

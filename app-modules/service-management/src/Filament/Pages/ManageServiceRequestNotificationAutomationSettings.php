@@ -97,13 +97,13 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                     ->persistTab()
                     ->id('event-template-tabs')
                     ->tabs(array_map(
-                        fn (ServiceRequestEmailTemplateType $type) => Tab::make($type->getLabel())
+                        fn (ServiceRequestEmailTemplateType $type): Tab => Tab::make($type->getLabel())
                             ->schema([
                                 Tabs::make('Role templates')
                                     ->persistTab()
                                     ->id("role-template-tabs-{$type->value}")
                                     ->tabs(array_map(
-                                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
+                                        fn (ServiceRequestTypeEmailTemplateRole $role): Tab => Tab::make($role->getLabel())
                                             ->schema([
                                                 Textarea::make('ai_instructions')
                                                     ->label('AI Instructions')
@@ -123,7 +123,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                             ]),
                         ServiceRequestEmailTemplateType::cases()
                     ))
-                    ->visible(fn (Get $get) => $get('is_enabled'))
+                    ->visible(fn (Get $get): mixed => $get('is_enabled'))
                     ->columnSpanFull(),
                 RichEditor::make('ai_prompt')
                     ->label('AI Prompt')
@@ -142,7 +142,7 @@ class ManageServiceRequestNotificationAutomationSettings extends SettingsPage
                         'role name',
                     ])
                     ->extraInputAttributes(['style' => 'min-height: 12rem;'])
-                    ->visible(fn (Get $get) => $get('is_enabled'))
+                    ->visible(fn (Get $get): mixed => $get('is_enabled'))
                     ->json()
                     ->columnSpanFull(),
             ])

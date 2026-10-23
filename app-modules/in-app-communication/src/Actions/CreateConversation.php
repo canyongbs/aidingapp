@@ -76,7 +76,7 @@ class CreateConversation
             }
         }
 
-        $conversation = DB::transaction(function () use ($creator, $type, $participantIds, $name, $isPrivate, $isConfidential, $ephemeralPeriod) {
+        $conversation = DB::transaction(function () use ($creator, $type, $participantIds, $name, $isPrivate, $isConfidential, $ephemeralPeriod): Conversation {
             $conversation = new Conversation();
             $conversation->type = $type;
             $conversation->name = $name;

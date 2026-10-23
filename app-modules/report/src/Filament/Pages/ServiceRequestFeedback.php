@@ -105,17 +105,17 @@ class ServiceRequestFeedback extends Dashboard
                 ->schema([
                     DatePicker::make('startDate')
                         ->native(false)
-                        ->maxDate(fn (Get $get) => $get('endDate') ?: now())
-                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                        ->maxDate(fn (Get $get): mixed => $get('endDate') ?: now())
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get): void {
                             if (blank($get('endDate')) && filled($state)) {
                                 $set('endDate', $state);
                             }
                         }),
                     DatePicker::make('endDate')
                         ->native(false)
-                        ->minDate(fn (Get $get) => $get('startDate') ?: now())
+                        ->minDate(fn (Get $get): mixed => $get('startDate') ?: now())
                         ->maxDate(now())
-                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get) {
+                        ->afterStateUpdated(function (callable $set, mixed $state, Get $get): void {
                             if (blank($get('startDate')) && filled($state)) {
                                 $set('startDate', $state);
                             }

@@ -73,7 +73,7 @@ class ProjectForm
             ColorSelect::make('color')
                 ->required()
                 ->visible()
-                ->rules([Rule::in(array_map(fn ($color) => $color->value, Color::cases()))])
+                ->rules([Rule::in(array_map(fn (Color $color) => $color->value, Color::cases()))])
                 ->default('gray'),
             Select::make('department_id')
                 ->relationship('department', 'name')
@@ -93,21 +93,21 @@ class ProjectForm
                 ->inline()
                 ->columnSpanFull()
                 ->dehydrated(false)
-                ->afterStateHydrated(function (Set $set, ?Project $record) {
-                    if ($record && filled($record->target_completion_date)) {
+                ->afterStateHydrated(function (Set $set, ?Project $record): void {
+                    if ($record instanceof Project && filled($record->target_completion_date)) {
                         $set('target_completion_date_type', 'set');
                     } else {
                         $set('target_completion_date_type', 'indefinite');
                     }
                 })
-                ->afterStateUpdated(function (string $state, callable $set) {
+                ->afterStateUpdated(function (string $state, callable $set): void {
                     if ($state === 'indefinite') {
                         $set('target_completion_date', null);
                     }
                 }),
             DatePicker::make('target_completion_date')
                 ->hiddenLabel()
-                ->visible(fn (Get $get) => $get('target_completion_date_type') === 'set')
+                ->visible(fn (Get $get): bool => $get('target_completion_date_type') === 'set')
                 ->nullable(),
         ];
     }

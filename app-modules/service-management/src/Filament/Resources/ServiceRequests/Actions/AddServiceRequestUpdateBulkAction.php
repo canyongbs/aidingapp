@@ -69,7 +69,7 @@ class AddServiceRequestUpdateBulkAction
                     ->label('Internal')
                     ->rule(['boolean']),
             ])
-            ->action(function (array $data, Collection $records) {
+            ->action(function (array $data, Collection $records): void {
                 $records->loadMissing([
                     'priority',
                     'serviceRequestUpdates',
@@ -115,7 +115,7 @@ class AddServiceRequestUpdateBulkAction
                             return "You don't have permission to add service request update to {$count} service requests because you're not a manager of their types.";
                         };
                     })
-                    ->process(function (ServiceRequest $serviceRequest) use ($data) {
+                    ->process(function (ServiceRequest $serviceRequest) use ($data): void {
                         $update = new ServiceRequestUpdate([
                             'service_request_id' => $serviceRequest->getKey(),
                             'update' => $data['update'],

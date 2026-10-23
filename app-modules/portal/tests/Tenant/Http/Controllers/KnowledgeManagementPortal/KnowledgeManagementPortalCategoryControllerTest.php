@@ -40,7 +40,7 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
 
-it('only returns categories that have at least one public article', function () {
+it('only returns categories that have at least one public article', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -70,7 +70,7 @@ it('only returns categories that have at least one public article', function () 
         ->and($slugs)->not->toContain($categoryWithNoArticles->slug);
 });
 
-it('resolves a category by its public ID locator', function () {
+it('resolves a category by its public ID locator', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();
@@ -85,7 +85,7 @@ it('resolves a category by its public ID locator', function () {
         ->assertJsonPath('category.slug', $category->slug);
 });
 
-it('preserves the legacy category API by slug', function () {
+it('preserves the legacy category API by slug', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();

@@ -40,7 +40,7 @@ use AidingApp\InAppCommunication\Models\Conversation;
 use AidingApp\InAppCommunication\Models\ConversationParticipant;
 use App\Models\User;
 
-it('updates `is_pinned` setting', function () {
+it('updates `is_pinned` setting', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -59,7 +59,7 @@ it('updates `is_pinned` setting', function () {
     expect($participant)->not()->toBeNull()->and($participant->is_pinned)->toBeTrue();
 });
 
-it('updates `notification_preference` setting', function () {
+it('updates `notification_preference` setting', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -78,7 +78,7 @@ it('updates `notification_preference` setting', function () {
     expect($participant)->not()->toBeNull()->and($participant->notification_preference)->toBe(ConversationNotificationPreference::Mentions);
 });
 
-it('updates both settings at once', function () {
+it('updates both settings at once', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -99,7 +99,7 @@ it('updates both settings at once', function () {
     expect($participant)->not()->toBeNull()->and($participant->is_pinned)->toBeTrue()->and($participant->notification_preference)->toBe(ConversationNotificationPreference::None);
 });
 
-it('returns null when participant does not exist', function () {
+it('returns null when participant does not exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -112,7 +112,7 @@ it('returns null when participant does not exist', function () {
     expect($participant)->toBeNull();
 });
 
-it('does not update when no settings are provided', function () {
+it('does not update when no settings are provided', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -131,7 +131,7 @@ it('does not update when no settings are provided', function () {
     expect($participant)->not()->toBeNull()->and($participant->is_pinned)->toBeTrue()->and($participant->notification_preference)->toBe(ConversationNotificationPreference::Mentions);
 });
 
-it('can unpin a conversation', function () {
+it('can unpin a conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 

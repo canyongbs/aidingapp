@@ -55,7 +55,7 @@ class EducatableSort
         $prospectNameColumn = Contact::displayNameKey();
 
         $query
-            ->leftJoin('contacts', function (JoinClause $join) {
+            ->leftJoin('contacts', function (JoinClause $join): void {
                 $join->on(DB::raw('CAST(service_requests.respondent_id AS VARCHAR)'), '=', DB::raw('CAST(contacts.id AS VARCHAR)'));
             })
             ->select('service_requests.*', DB::raw("COALESCE(contacts.{$prospectNameColumn}) as respondent_name"))

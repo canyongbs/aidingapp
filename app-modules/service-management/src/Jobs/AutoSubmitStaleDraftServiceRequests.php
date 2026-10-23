@@ -66,17 +66,17 @@ class AutoSubmitStaleDraftServiceRequests implements ShouldQueue, ShouldBeUnique
             ->where('title', '!=', '')
             ->whereNotNull('close_details')
             ->where('close_details', '!=', '')
-            ->whereDoesntHave('serviceRequestFormSubmission', function (Builder $query) use ($cutoffTime) {
+            ->whereDoesntHave('serviceRequestFormSubmission', function (Builder $query) use ($cutoffTime): void {
                 $query->where('updated_at', '>', $cutoffTime);
             })
-            ->whereDoesntHave('serviceRequestFormSubmission.fields', function (Builder $query) use ($cutoffTime) {
+            ->whereDoesntHave('serviceRequestFormSubmission.fields', function (Builder $query) use ($cutoffTime): void {
                 $query->where('service_request_form_field_submission.updated_at', '>', $cutoffTime);
             })
-            ->whereDoesntHave('serviceRequestUpdates', function (Builder $query) use ($cutoffTime) {
+            ->whereDoesntHave('serviceRequestUpdates', function (Builder $query) use ($cutoffTime): void {
                 $query->where('updated_at', '>', $cutoffTime);
             })
             ->select('id')
-            ->eachById(function (ServiceRequest $draft) {
+            ->eachById(function (ServiceRequest $draft): void {
                 dispatch(new AutoSubmitStaleDraftServiceRequest($draft->getKey()));
             }, 100);
     }

@@ -44,13 +44,13 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render the list groups page', function () {
+it('can render the list groups page', function (): void {
     asSuperAdmin();
 
     get(GroupResource::getUrl())->assertSuccessful();
 });
 
-it('can list groups with their descriptions and member counts', function () {
+it('can list groups with their descriptions and member counts', function (): void {
     asSuperAdmin();
 
     $group = Group::factory()->create(['description' => 'Peer mentoring cohort']);
@@ -62,7 +62,7 @@ it('can list groups with their descriptions and member counts', function () {
         ->assertSee('Peer mentoring cohort');
 });
 
-it('can render groups with a null description', function () {
+it('can render groups with a null description', function (): void {
     asSuperAdmin();
 
     $group = Group::factory()->create(['description' => null]);
@@ -72,7 +72,7 @@ it('can render groups with a null description', function () {
         ->assertSuccessful();
 });
 
-it('can search and sort groups by name', function () {
+it('can search and sort groups by name', function (): void {
     asSuperAdmin();
 
     $alpha = Group::factory()->create(['name' => 'Alpha']);
@@ -88,8 +88,8 @@ it('can search and sort groups by name', function () {
         ->assertCanSeeTableRecords([$alpha, $beta], inOrder: true);
 });
 
-describe('authorization', function () {
-    it('denies access without the `group.view-any` permission', function () {
+describe('authorization', function (): void {
+    it('denies access without the `group.view-any` permission', function (): void {
         actingAs(User::factory()->create());
 
         get(GroupResource::getUrl())->assertForbidden();

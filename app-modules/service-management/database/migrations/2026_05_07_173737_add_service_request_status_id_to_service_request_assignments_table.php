@@ -41,7 +41,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_assignments', function (Blueprint $table) {
+        Schema::table('service_request_assignments', function (Blueprint $table): void {
             $table->foreignUuid('service_request_status_id')
                 ->nullable()
                 ->constrained('service_request_statuses')
@@ -51,7 +51,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_request_assignments', function (Blueprint $table) {
+        Schema::table('service_request_assignments', function (Blueprint $table): void {
             $table->dropConstrainedForeignId('service_request_status_id');
         });
     }

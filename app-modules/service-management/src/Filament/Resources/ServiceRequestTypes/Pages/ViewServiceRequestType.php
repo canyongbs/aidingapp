@@ -78,29 +78,29 @@ class ViewServiceRequestType extends ViewRecord
                             ->label('Form')
                             ->state(fn (ServiceRequestType $record): bool => (bool) $record->form)
                             ->boolean()
-                            ->url(fn (ServiceRequestType $record) => ManageServiceRequestTypeCustomForm::getUrl(['record' => $record])),
+                            ->url(fn (ServiceRequestType $record): string => ManageServiceRequestTypeCustomForm::getUrl(['record' => $record])),
                         Group::make()
                             ->schema([
                                 TextEntry::make('has_enabled_feedback_collection')
                                     ->hiddenLabel()
                                     ->state('Feedback collection')
                                     ->badge()
-                                    ->color(fn (ServiceRequestType $record) => $record->has_enabled_feedback_collection ? 'success' : 'gray'),
+                                    ->color(fn (ServiceRequestType $record): string => $record->has_enabled_feedback_collection ? 'success' : 'gray'),
                                 TextEntry::make('has_enabled_csat')
                                     ->hiddenLabel()
                                     ->state('CSAT')
                                     ->badge()
-                                    ->color(fn (ServiceRequestType $record) => $record->has_enabled_csat ? 'success' : 'gray'),
+                                    ->color(fn (ServiceRequestType $record): string => $record->has_enabled_csat ? 'success' : 'gray'),
                                 TextEntry::make('has_enabled_nps')
                                     ->hiddenLabel()
                                     ->state('NPS')
                                     ->badge()
-                                    ->color(fn (ServiceRequestType $record) => $record->has_enabled_nps ? 'success' : 'gray'),
+                                    ->color(fn (ServiceRequestType $record): string => $record->has_enabled_nps ? 'success' : 'gray'),
                                 TextEntry::make('is_reminders_enabled')
                                     ->hiddenLabel()
                                     ->state('Feedback Reminder')
                                     ->badge()
-                                    ->color(fn (ServiceRequestType $record) => (bool) $record->getAttribute('is_reminders_enabled') ? 'success' : 'gray'),
+                                    ->color(fn (ServiceRequestType $record): string => (bool) $record->getAttribute('is_reminders_enabled') ? 'success' : 'gray'),
                             ])
                             ->visible(fn (Get $get): bool => Gate::check(Feature::FeedbackManagement->getGateName())),
                         TextEntry::make('description')

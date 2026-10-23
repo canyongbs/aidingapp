@@ -52,13 +52,13 @@ use function Pest\Laravel\withHeaders;
 use function Pest\Laravel\withoutMiddleware;
 use function Tests\loadFixtureFromModule;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Event::fake();
 
     withoutMiddleware(VerifyAwsSnsRequest::class);
 });
 
-it('handles a bounce event', function () {
+it('handles a bounce event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -90,7 +90,7 @@ it('handles a bounce event', function () {
     Event::assertDispatched(SesBounceEvent::class);
 });
 
-it('handles a complaint event', function () {
+it('handles a complaint event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -122,7 +122,7 @@ it('handles a complaint event', function () {
     Event::assertDispatched(SesComplaintEvent::class);
 });
 
-it('handles a delivery event', function () {
+it('handles a delivery event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -154,7 +154,7 @@ it('handles a delivery event', function () {
     Event::assertDispatched(SesDeliveryEvent::class);
 });
 
-it('handles a send event', function () {
+it('handles a send event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -186,7 +186,7 @@ it('handles a send event', function () {
     Event::assertDispatched(SesSendEvent::class);
 });
 
-it('handles a reject event', function () {
+it('handles a reject event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -218,7 +218,7 @@ it('handles a reject event', function () {
     Event::assertDispatched(SesRejectEvent::class);
 });
 
-it('handles a open event', function () {
+it('handles a open event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -250,7 +250,7 @@ it('handles a open event', function () {
     Event::assertDispatched(SesOpenEvent::class);
 });
 
-it('handles a click event', function () {
+it('handles a click event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -282,7 +282,7 @@ it('handles a click event', function () {
     Event::assertDispatched(SesClickEvent::class);
 });
 
-it('handles a renderingFailure event', function () {
+it('handles a renderingFailure event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -314,7 +314,7 @@ it('handles a renderingFailure event', function () {
     Event::assertDispatched(SesRenderingFailureEvent::class);
 });
 
-it('handles a DeliveryDelay event', function () {
+it('handles a DeliveryDelay event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */
@@ -346,7 +346,7 @@ it('handles a DeliveryDelay event', function () {
     Event::assertDispatched(SesDeliveryDelayEvent::class);
 });
 
-it('handles a Subscription event', function () {
+it('handles a Subscription event', function (): void {
     $snsData = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
 
     /** @var Tenant $tenant */

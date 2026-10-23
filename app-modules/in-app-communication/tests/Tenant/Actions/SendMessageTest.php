@@ -48,7 +48,7 @@ use function Pest\Laravel\assertDatabaseCount;
 
 beforeEach(fn () => Event::fake());
 
-it('creates a message in a conversation', function () {
+it('creates a message in a conversation', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -85,7 +85,7 @@ it('creates a message in a conversation', function () {
     expect($message->conversation_id)->toBe($conversation->getKey())->and($message->author_id)->toBe($author->getKey())->and($message->content)->toBe($content);
 });
 
-it('updates the author `last_read_at` timestamp', function () {
+it('updates the author `last_read_at` timestamp', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -108,7 +108,7 @@ it('updates the author `last_read_at` timestamp', function () {
     expect($participant->last_read_at)->not()->toBeNull();
 });
 
-it('updates the author `last_activity_at` timestamp', function () {
+it('updates the author `last_activity_at` timestamp', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -131,7 +131,7 @@ it('updates the author `last_activity_at` timestamp', function () {
     expect($participant->last_activity_at->isAfter($oldActivityAt))->toBeTrue();
 });
 
-it('updates `last_activity_at` for all other participants', function () {
+it('updates `last_activity_at` for all other participants', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -161,7 +161,7 @@ it('updates `last_activity_at` for all other participants', function () {
     expect($otherParticipant->last_activity_at->isAfter($oldActivityAt))->toBeTrue();
 });
 
-it('increments `unread_count` for participants with All notification preference', function () {
+it('increments `unread_count` for participants with All notification preference', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -190,7 +190,7 @@ it('increments `unread_count` for participants with All notification preference'
     expect($otherParticipant->unread_count)->toBe(1);
 });
 
-it('does not increment `unread_count` for the message author', function () {
+it('does not increment `unread_count` for the message author', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
 
@@ -212,7 +212,7 @@ it('does not increment `unread_count` for the message author', function () {
     expect($authorParticipant->unread_count)->toBe(0);
 });
 
-it('does not increment `unread_count` for participants with None notification preference', function () {
+it('does not increment `unread_count` for participants with None notification preference', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -240,7 +240,7 @@ it('does not increment `unread_count` for participants with None notification pr
     expect($otherParticipant->unread_count)->toBe(0);
 });
 
-it('increments `unread_count` for participants with Mentions preference only when mentioned', function () {
+it('increments `unread_count` for participants with Mentions preference only when mentioned', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $mentionedUser = User::factory()->create();
@@ -296,7 +296,7 @@ it('increments `unread_count` for participants with Mentions preference only whe
     expect($notMentionedParticipant->unread_count)->toBe(0);
 });
 
-it('atomically increments `unread_count` for multiple messages', function () {
+it('atomically increments `unread_count` for multiple messages', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -324,7 +324,7 @@ it('atomically increments `unread_count` for multiple messages', function () {
     expect($otherParticipant->unread_count)->toBe(6);
 });
 
-it('broadcasts `UnreadCountUpdated` event to affected participants', function () {
+it('broadcasts `UnreadCountUpdated` event to affected participants', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -346,14 +346,14 @@ it('broadcasts `UnreadCountUpdated` event to affected participants', function ()
         content: ['type' => 'doc', 'content' => []],
     );
 
-    Event::assertDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($conversation, $otherUser) {
+    Event::assertDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($conversation, $otherUser): bool {
         return $event->userId === $otherUser->getKey()
             && $event->conversationId === $conversation->getKey()
             && $event->unreadCount === 1;
     });
 });
 
-it('does not broadcast `UnreadCountUpdated` event to participants with None preference', function () {
+it('does not broadcast `UnreadCountUpdated` event to participants with None preference', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $otherUser = User::factory()->create();
@@ -375,12 +375,12 @@ it('does not broadcast `UnreadCountUpdated` event to participants with None pref
         content: ['type' => 'doc', 'content' => []],
     );
 
-    Event::assertNotDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($otherUser) {
+    Event::assertNotDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($otherUser): bool {
         return $event->userId === $otherUser->getKey();
     });
 });
 
-it('broadcasts `MessageSent` event to user channels for all participants except author', function () {
+it('broadcasts `MessageSent` event to user channels for all participants except author', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $author = User::factory()->create();
     $participant1 = User::factory()->create();

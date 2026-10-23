@@ -43,23 +43,23 @@ use Filament\View\PanelsRenderHook;
 
 use function Pest\Laravel\actingAs;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('webpush.vapid.subject', 'mailto:test@example.com');
     config()->set('webpush.vapid.public_key', 'test-public-key');
     config()->set('webpush.vapid.private_key', 'test-private-key');
 });
 
-it('registers browser notifications on the admin panel', function () {
+it('registers browser notifications on the admin panel', function (): void {
     expect(Filament::getPanel('admin')->getPlugin('browser-notifications'))
         ->toBeInstanceOf(BrowserNotificationsPlugin::class);
 });
 
-it('uses the Aiding App favicon for desktop notifications', function () {
+it('uses the Aiding App favicon for desktop notifications', function (): void {
     expect(app(BrowserNotificationsManager::class)->resolveIcon())
         ->toEndWith('/images/default-favicon.png');
 });
 
-it('does not show the browser notification prompt', function () {
+it('does not show the browser notification prompt', function (): void {
     actingAs(User::factory()->create());
 
     Filament::setCurrentPanel('admin');

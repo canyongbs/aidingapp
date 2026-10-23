@@ -83,13 +83,13 @@ class ManageServiceRequestBaseTemplatesSettings extends SettingsPage
                     ->persistTab()
                     ->id('event-template-tabs')
                     ->tabs(array_map(
-                        fn (ServiceRequestEmailTemplateType $type) => Tab::make($type->getLabel())
+                        fn (ServiceRequestEmailTemplateType $type): Tab => Tab::make($type->getLabel())
                             ->schema([
                                 Tabs::make('Role templates')
                                     ->persistTab()
                                     ->id("role-template-tabs-{$type->value}")
                                     ->tabs(array_map(
-                                        fn (ServiceRequestTypeEmailTemplateRole $role) => Tab::make($role->getLabel())
+                                        fn (ServiceRequestTypeEmailTemplateRole $role): Tab => Tab::make($role->getLabel())
                                             ->schema($this->getServiceRequestTemplateEditorSchema(
                                                 $type,
                                                 subjectLabel: 'Example Subject',

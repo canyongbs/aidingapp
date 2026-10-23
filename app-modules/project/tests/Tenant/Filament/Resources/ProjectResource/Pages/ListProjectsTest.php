@@ -54,7 +54,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission.', function () {
+it('cannot render without proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -63,7 +63,7 @@ it('cannot render without proper permission.', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -77,7 +77,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->projectManagement = false;
@@ -103,7 +103,7 @@ it('is gated with proper access control', function () {
     get(ListProjects::getUrl())->assertSuccessful();
 });
 
-it('can list records', function () {
+it('can list records', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -119,7 +119,7 @@ it('can list records', function () {
         ->assertSuccessful();
 });
 
-it('does not list archived projects', function () {
+it('does not list archived projects', function (): void {
     asSuperAdmin();
 
     $activeProject = Project::factory()->create();
@@ -132,7 +132,7 @@ it('does not list archived projects', function () {
         ->assertSuccessful();
 });
 
-it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function () {
+it('can see project in list if logged in user is a superadmin, the creator, a manager, or an auditor of the project.', function (): void {
     $user = User::factory()->create();
     $secondUser = User::factory()->create();
 
@@ -211,7 +211,7 @@ it('can see project in list if logged in user is a superadmin, the creator, a ma
         ->assertSuccessful();
 });
 
-it('only shows archive actions to a user with the project.delete permission', function () {
+it('only shows archive actions to a user with the project.delete permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('project.view-any', 'project.*.view');
@@ -231,7 +231,7 @@ it('only shows archive actions to a user with the project.delete permission', fu
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());
 });
 
-it('can archive a project from the list row action', function () {
+it('can archive a project from the list row action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -252,7 +252,7 @@ it('can archive a project from the list row action', function () {
     ]);
 });
 
-it('can archive multiple projects from the list bulk action', function () {
+it('can archive multiple projects from the list bulk action', function (): void {
     asSuperAdmin();
 
     $projects = Project::factory()->count(3)->create();
@@ -272,7 +272,7 @@ it('can archive multiple projects from the list bulk action', function () {
     });
 });
 
-it('does not show the archive row action to an auditor who is neither a manager nor the creator', function () {
+it('does not show the archive row action to an auditor who is neither a manager nor the creator', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('project.view-any', 'project.*.view', 'project.*.delete');
@@ -289,7 +289,7 @@ it('does not show the archive row action to an auditor who is neither a manager 
         ->assertActionHidden(TestAction::make('archive')->table($project));
 });
 
-it('displays project name, manager(s), department, start date, target date, and progress columns', function () {
+it('displays project name, manager(s), department, start date, target date, and progress columns', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()->create(['name' => 'Enrollment']);
@@ -348,7 +348,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnDoesNotExist('milestones_count');
 });
 
-it('shows N/A when a project has no managers, no department, or no start date', function () {
+it('shows N/A when a project has no managers, no department, or no start date', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create([
@@ -378,7 +378,7 @@ it('shows N/A when a project has no managers, no department, or no start date', 
         );
 });
 
-it('can search projects by project name, manager name, and department name', function () {
+it('can search projects by project name, manager name, and department name', function (): void {
     asSuperAdmin();
 
     $matchingByName = Project::factory()->create(['name' => 'Onboarding Revamp']);
@@ -419,7 +419,7 @@ it('can search projects by project name, manager name, and department name', fun
         ->assertCanNotSeeTableRecords([$matchingByName, $notMatching]);
 });
 
-it('caps the manager avatars it renders but keeps every manager searchable', function () {
+it('caps the manager avatars it renders but keeps every manager searchable', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()
@@ -441,7 +441,7 @@ it('caps the manager avatars it renders but keeps every manager searchable', fun
         ->assertCanSeeTableRecords([$project]);
 });
 
-it('shows the same managers on the list as the project dashboard', function () {
+it('shows the same managers on the list as the project dashboard', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -471,7 +471,7 @@ it('shows the same managers on the list as the project dashboard', function () {
         );
 });
 
-it('shows the same progress on the list as the project dashboard', function () {
+it('shows the same progress on the list as the project dashboard', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -502,7 +502,7 @@ it('shows the same progress on the list as the project dashboard', function () {
         ->assertTableColumnStateSet('progress', $dashboardProgress, $project);
 });
 
-it('ranks a project named Test above a project managed by someone named Test', function () {
+it('ranks a project named Test above a project managed by someone named Test', function (): void {
     asSuperAdmin();
 
     $managedByTest = Project::factory()
@@ -516,7 +516,7 @@ it('ranks a project named Test above a project managed by someone named Test', f
         ->assertCanSeeTableRecords([$namedTest, $managedByTest], inOrder: true);
 });
 
-it('ranks project name matches above manager matches, and manager matches above department matches, when searching', function () {
+it('ranks project name matches above manager matches, and manager matches above department matches, when searching', function (): void {
     asSuperAdmin();
 
     $matchingByDepartment = Project::factory()
@@ -537,7 +537,7 @@ it('ranks project name matches above manager matches, and manager matches above 
         );
 });
 
-it('ranks project name matches first when the search words are given in another order', function () {
+it('ranks project name matches first when the search words are given in another order', function (): void {
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
@@ -551,7 +551,7 @@ it('ranks project name matches first when the search words are given in another 
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
 
-it('ranks project name matches first when the search is a quoted phrase', function () {
+it('ranks project name matches first when the search is a quoted phrase', function (): void {
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
@@ -565,7 +565,7 @@ it('ranks project name matches first when the search is a quoted phrase', functi
         ->assertCanSeeTableRecords([$matchingByName, $matchingByManager], inOrder: true);
 });
 
-it('does not fail when the search contains no searchable words', function () {
+it('does not fail when the search contains no searchable words', function (): void {
     asSuperAdmin();
 
     Project::factory()->create(['name' => 'Alpha']);
@@ -575,7 +575,7 @@ it('does not fail when the search contains no searchable words', function () {
         ->assertSuccessful();
 });
 
-it('sorts by the selected column instead of search relevance when a sort is applied', function () {
+it('sorts by the selected column instead of search relevance when a sort is applied', function (): void {
     asSuperAdmin();
 
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
@@ -590,7 +590,7 @@ it('sorts by the selected column instead of search relevance when a sort is appl
         ->assertCanSeeTableRecords([$matchingByManager, $matchingByName], inOrder: true);
 });
 
-it('can filter projects by department', function () {
+it('can filter projects by department', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()->create();

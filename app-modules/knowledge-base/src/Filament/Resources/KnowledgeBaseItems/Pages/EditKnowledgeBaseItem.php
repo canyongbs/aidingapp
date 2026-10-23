@@ -122,7 +122,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->suffixAction(
                                         BaseAction::make('saveArticleTitle')
                                             ->icon('heroicon-o-check')
-                                            ->action(function (KnowledgeBaseItem $record, string $state) {
+                                            ->action(function (KnowledgeBaseItem $record, string $state): void {
                                                 if ($record->title === $state) {
                                                     return;
                                                 }

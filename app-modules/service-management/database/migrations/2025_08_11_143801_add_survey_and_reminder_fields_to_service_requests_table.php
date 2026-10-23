@@ -41,7 +41,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
+        Schema::table('service_requests', function (Blueprint $table): void {
             $table->timestamp('survey_sent_at')->nullable();
             $table->timestamp('reminder_sent_at')->nullable();
         });
@@ -49,7 +49,7 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        Schema::table('service_requests', function (Blueprint $table) {
+        Schema::table('service_requests', function (Blueprint $table): void {
             $table->dropColumn(['survey_sent_at', 'reminder_sent_at']);
         });
     }

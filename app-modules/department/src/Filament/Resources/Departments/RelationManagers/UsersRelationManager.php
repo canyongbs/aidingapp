@@ -76,13 +76,13 @@ class UsersRelationManager extends RelationManager
             ->headerActions([
                 AssociateAction::make()
                     ->label('Add user to this department')
-                    ->recordSelectOptionsQuery(function (Builder $query) {
+                    ->recordSelectOptionsQuery(function (Builder $query): void {
                         $query->tap(new WithoutAnyAdmin());
                     })
                     ->form(fn (AssociateAction $action): array => [
                         $action->getRecordSelect()
                             ->rules([
-                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
+                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
                                     if (User::findOrFail($value)->department()->count() > 0) {
                                         $fail('This user already belongs to a department.');
                                     }

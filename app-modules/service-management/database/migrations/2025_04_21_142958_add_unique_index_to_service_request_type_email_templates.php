@@ -41,14 +41,14 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+        Schema::table('service_request_type_email_templates', function (Blueprint $table): void {
             $table->unique(['service_request_type_id', 'type', 'role']);
         });
     }
 
     public function down(): void
     {
-        Schema::table('service_request_type_email_templates', function (Blueprint $table) {
+        Schema::table('service_request_type_email_templates', function (Blueprint $table): void {
             $table->dropUnique('service_request_type_email_templates_service_request_type_id_ty');
         });
     }

@@ -44,7 +44,7 @@ use Illuminate\Support\Facades\Validator;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('super admin passes ManagedServiceRequestType rule for any type', function () {
+test('super admin passes ManagedServiceRequestType rule for any type', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -57,7 +57,7 @@ test('super admin passes ManagedServiceRequestType rule for any type', function 
     expect($validator->passes())->toBeTrue();
 });
 
-test('department manager passes ManagedServiceRequestType rule', function () {
+test('department manager passes ManagedServiceRequestType rule', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -77,7 +77,7 @@ test('department manager passes ManagedServiceRequestType rule', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-test('direct user manager passes ManagedServiceRequestType rule', function () {
+test('direct user manager passes ManagedServiceRequestType rule', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -93,7 +93,7 @@ test('direct user manager passes ManagedServiceRequestType rule', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-test('group manager passes ManagedServiceRequestType rule', function () {
+test('group manager passes ManagedServiceRequestType rule', function (): void {
     $user = User::factory()->create();
     $group = Group::factory()->create();
     $group->users()->attach($user);
@@ -111,7 +111,7 @@ test('group manager passes ManagedServiceRequestType rule', function () {
     expect($validator->passes())->toBeTrue();
 });
 
-test('non-manager fails ManagedServiceRequestType rule', function () {
+test('non-manager fails ManagedServiceRequestType rule', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();

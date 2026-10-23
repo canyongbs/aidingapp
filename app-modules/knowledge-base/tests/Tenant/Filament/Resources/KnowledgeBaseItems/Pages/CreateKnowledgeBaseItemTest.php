@@ -55,7 +55,7 @@ use function Pest\Laravel\assertDatabaseHas;
 
 // Permission Tests
 
-test('CreateKnowledgeBaseItem is gated with proper access control', function () {
+test('CreateKnowledgeBaseItem is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -80,7 +80,7 @@ test('CreateKnowledgeBaseItem is gated with proper access control', function () 
     assertDatabaseHas(KnowledgeBaseItem::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseItem is gated with proper feature access control', function () {
+test('CreateKnowledgeBaseItem is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -116,7 +116,7 @@ test('CreateKnowledgeBaseItem is gated with proper feature access control', func
 // UserSelect (manager_ids field) admin-filtering tests
 // No pre-selected scenario on Create — no persisted record exists yet.
 
-test('manager_ids UserSelect does not show admin users in options by default on CreateKnowledgeBaseItem', function () {
+test('manager_ids UserSelect does not show admin users in options by default on CreateKnowledgeBaseItem', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('knowledge_base_item.view-any');
     $actor->givePermissionTo('knowledge_base_item.create');
@@ -138,7 +138,7 @@ test('manager_ids UserSelect does not show admin users in options by default on 
         });
 });
 
-test('manager_ids UserSelect shows all users when filter_admins_from_selection config is false on CreateKnowledgeBaseItem', function () {
+test('manager_ids UserSelect shows all users when filter_admins_from_selection config is false on CreateKnowledgeBaseItem', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
