@@ -115,7 +115,9 @@
 
                 <EmptyState role="status" v-else :icon="InboxIcon" :contained="false">
                     <template #heading>No pipeline tasks</template>
-                    <template #description>There are no tasks to display for this pipeline yet.</template>
+                    <template #description>
+                        There are no tasks to display for this {{ pipelines.length > 0 ? 'pipeline' : 'project' }} yet.
+                    </template>
                 </EmptyState>
             </template>
 

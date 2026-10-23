@@ -290,7 +290,7 @@
                 </div>
             </div>
 
-            <template #footer>
+            <template v-if="totalRecords > 0" #footer>
                 <Pagination
                     :currentPage="currentPage"
                     :lastPage="lastPage"
