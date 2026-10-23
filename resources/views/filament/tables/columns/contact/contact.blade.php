@@ -34,6 +34,11 @@
 @php
     use AidingApp\Contact\Filament\Resources\ContactResource;
     use AidingApp\Contact\Models\Contact;
+    use Filament\Support\Enums\IconSize;
+    use Filament\Support\View\ComponentAttributeBag;
+    use Filament\Tables\View\Components\Columns\TextColumnComponent\ItemComponent\IconComponent;
+
+    use function Filament\Support\generate_icon_html;
 
     $record = $getRecord();
 
@@ -43,47 +48,55 @@
     $viewUrl = $canView ? ContactResource::getUrl("view", ["record" => $record]) : null;
     $isManaged = $record->isManaged();
     $managedTooltip = 'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.';
+    $presence = $record->presenceStatus();
+    $presenceTooltip = "Presence: " . $presence->getLabel();
 @endphp
 
 <div class="fi-ta-text grid w-full gap-y-1 text-sm">
-    @if ($canView)
-        <a
-            href="{{ $viewUrl }}"
-            @if ($isManaged)
-                x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
-            @endif
-            class="flex items-center gap-x-1.5 font-semibold text-gray-950 hover:text-primary-600 hover:underline dark:text-white dark:hover:text-primary-400"
-        >
-            @if ($isManaged)
-                <x-filament::icon
-                    icon="heroicon-m-lock-closed"
-                    class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-                />
+    <div role="group" aria-label="{{ $name }} ({{ $presenceTooltip }})" class="flex items-center gap-x-1.5">
+        <span class="fi-ta-text-item shrink-0" x-tooltip="{ content: @js($presenceTooltip), theme: $store.theme }">
+            {{ generate_icon_html($presence->getIcon(), attributes: (new ComponentAttributeBag())->color(IconComponent::class, $presence->getColor()), size: IconSize::Small) }}
+        </span>
 
-                <span class="fi-sr-only">{{ $managedTooltip }}</span>
-            @endif
+        @if ($canView)
+            <a
+                href="{{ $viewUrl }}"
+                @if ($isManaged)
+                    x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
+                @endif
+                class="flex items-center gap-x-1.5 font-semibold text-gray-950 hover:text-primary-600 hover:underline dark:text-white dark:hover:text-primary-400"
+            >
+                @if ($isManaged)
+                    <x-filament::icon
+                        icon="heroicon-m-lock-closed"
+                        class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+                    />
 
-            <span>{{ $name }}</span>
-        </a>
-    @else
-        <div
-            @if ($isManaged)
-                x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
-            @endif
-            class="flex items-center gap-x-1.5 font-semibold text-gray-950 dark:text-white"
-        >
-            @if ($isManaged)
-                <x-filament::icon
-                    icon="heroicon-m-lock-closed"
-                    class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
-                />
+                    <span class="fi-sr-only">{{ $managedTooltip }}</span>
+                @endif
 
-                <span class="fi-sr-only">{{ $managedTooltip }}</span>
-            @endif
+                <span>{{ $name }}</span>
+            </a>
+        @else
+            <div
+                @if ($isManaged)
+                    x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }"
+                @endif
+                class="flex items-center gap-x-1.5 font-semibold text-gray-950 dark:text-white"
+            >
+                @if ($isManaged)
+                    <x-filament::icon
+                        icon="heroicon-m-lock-closed"
+                        class="h-4 w-4 shrink-0 text-gray-400 dark:text-gray-500"
+                    />
 
-            <span>{{ $name }}</span>
-        </div>
-    @endif
+                    <span class="fi-sr-only">{{ $managedTooltip }}</span>
+                @endif
+
+                <span>{{ $name }}</span>
+            </div>
+        @endif
+    </div>
 
     @if (filled($email))
         <div class="flex items-center gap-x-1.5 text-gray-500 dark:text-gray-400">

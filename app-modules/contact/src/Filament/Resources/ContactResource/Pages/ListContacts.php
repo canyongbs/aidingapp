@@ -71,6 +71,7 @@ class ListContacts extends ListRecords
             ->columns([
                 ViewColumn::make('contact')
                     ->label('Contact')
+                    ->disabledClick()
                     ->view('filament.tables.columns.contact.contact')
                     ->searchable(['full_name', 'email']),
                 ViewColumn::make('classification')
