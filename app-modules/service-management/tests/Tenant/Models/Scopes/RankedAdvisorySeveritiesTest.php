@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,39 +32,27 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        delay: {
-            type: Number,
-            default: 0,
-        },
-    });
-</script>
+*/
 
-<template>
-    <tr
-        class="base-table-row transition-colors duration-100 hover:bg-gray-50/70"
-        :style="{ '--row-delay': `${delay}ms` }"
-    >
-        <slot />
-    </tr>
-</template>
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Models\Scopes\RankedAdvisorySeverities;
+use App\Features\AdvisorySeveritySortFeature;
 
-<style>
-    @keyframes baseTableRowIn {
-        from {
-            opacity: 0;
-            transform: translateY(4px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
+it('orders severities by rank, then by name', function (): void {
+    $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 2]);
+    $critical = AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 1]);
+    $informational = AdvisorySeverity::factory()->create(['name' => 'Informational', 'sort' => 2]);
 
-    .base-table-row {
-        animation: baseTableRowIn 0.2s ease both;
-        animation-delay: var(--row-delay, 0ms);
-    }
-</style>
+    expect(AdvisorySeverity::query()->tap(new RankedAdvisorySeverities())->pluck('id')->all())
+        ->toBe([$critical->getKey(), $informational->getKey(), $minor->getKey()]);
+});
+
+it('orders severities by name when `AdvisorySeveritySortFeature` is inactive', function (): void {
+    $minor = AdvisorySeverity::factory()->create(['name' => 'Minor', 'sort' => 1]);
+    $critical = AdvisorySeverity::factory()->create(['name' => 'Critical', 'sort' => 2]);
+
+    AdvisorySeveritySortFeature::deactivate();
+
+    expect(AdvisorySeverity::query()->tap(new RankedAdvisorySeverities())->pluck('id')->all())
+        ->toBe([$critical->getKey(), $minor->getKey()]);
+});

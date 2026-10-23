@@ -41,7 +41,7 @@
 </script>
 
 <template>
-    <div class="overflow-hidden rounded-[var(--rounding-lg)] border border-gray-200 bg-white shadow-xs">
+    <div class="overflow-hidden rounded-lg bg-white shadow-sm ring-1 ring-gray-950/5">
         <div class="border-b border-gray-100 px-5 py-3">
             <p class="text-xs font-semibold text-gray-500">{{ label }}</p>
         </div>

@@ -65,6 +65,12 @@
             font-family: ui-sans-serif, system-ui, sans-serif;
         "
     >
+        <!--
+            Same spinner artwork as @common/LoadingSpinner.vue (which we can't reuse
+            directly here — its Tailwind classes aren't styled until the async CSS
+            loads). Sized like the common "md" spinner (20px), coloured via
+            `currentColor`, and spun with SMIL so it needs no external CSS.
+        -->
         <svg
             width="20"
             height="20"

@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,19 +32,47 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        label: {
-            type: String,
-            required: true,
-        },
-    });
-</script>
+*/
 
-<template>
-    <div class="grid gap-0.5 md:border-l md:border-gray-300 md:pl-6">
-        <dt class="text-xs text-gray-500">{{ label }}</dt>
-        <dd class="text-sm font-semibold text-gray-900"><slot /></dd>
-    </div>
-</template>
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Settings\LicenseSettings;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\getJson;
+
+beforeEach(function (): void {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
+    $portalSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = true;
+    $licenseSettings->save();
+
+    actingAs(Contact::factory()->create(), 'contact');
+});
+
+it('allows access when service management is enabled', function (): void {
+    getJson(route('api.portal.service-request.index'))
+        ->assertOk();
+});
+
+it('denies access without the service management add-on', function (): void {
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = false;
+    $licenseSettings->save();
+
+    getJson(route('api.portal.service-request.index'))
+        ->assertForbidden();
+});
+
+it('denies access when service management is disabled in the portal', function (): void {
+    $portalSettings = app(PortalSettings::class);
+    $portalSettings->knowledge_management_portal_service_management = false;
+    $portalSettings->save();
+
+    getJson(route('api.portal.service-request.index'))
+        ->assertForbidden();
+});

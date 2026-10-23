@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,35 +32,46 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/vue/24/solid';
-    import { computed, defineProps } from 'vue';
-    import { getStatus } from './serviceMonitorStatuses.js';
+*/
 
-    const props = defineProps({
-        status: {
-            type: String,
-            required: true,
-        },
-    });
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
+use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
+use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
-    const config = computed(() => getStatus(props.status));
-</script>
+return new class () extends Migration {
+    public function up(): void
+    {
+        DB::transaction(function (): void {
+            Schema::table('advisory_severities', function (Blueprint $table): void {
+                $table->integer('sort')->default(0);
+                $table->index('sort');
+            });
 
-<template>
-    <div
-        role="note"
-        :class="['flex items-start gap-3 rounded-[var(--rounding-md)] border px-4 py-3', config.noteClass]"
-    >
-        <component
-            :is="status === 'operational' ? ShieldCheckIcon : ShieldExclamationIcon"
-            :class="['mt-0.5 size-5 shrink-0', config.noteIconClass]"
-            aria-hidden="true"
-        />
-        <div class="grid gap-1">
-            <p class="text-sm font-semibold">{{ config.noteTitle }}</p>
-            <p :class="['text-sm text-pretty', config.noteTextClass]">{{ config.noteDescription }}</p>
-        </div>
-    </div>
-</template>
+            DB::statement(<<<'SQL'
+                UPDATE advisory_severities
+                SET sort = ranked.position
+                FROM (
+                    SELECT id, ROW_NUMBER() OVER (ORDER BY created_at, id) AS position
+                    FROM advisory_severities
+                ) AS ranked
+                WHERE advisory_severities.id = ranked.id
+            SQL);
+
+            AdvisorySeveritySortFeature::activate();
+        });
+    }
+
+    public function down(): void
+    {
+        DB::transaction(function (): void {
+            AdvisorySeveritySortFeature::deactivate();
+
+            Schema::table('advisory_severities', function (Blueprint $table): void {
+                $table->dropIndex(['sort']);
+                $table->dropColumn('sort');
+            });
+        });
+    }
+};

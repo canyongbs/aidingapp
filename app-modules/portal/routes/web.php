@@ -100,6 +100,8 @@ Route::prefix('portal')
                 ->name('service');
             Route::get('/advisories', RenderKnowledgeManagementPortal::class)
                 ->name('advisories');
+            Route::get('/advisories/{advisory}', RenderKnowledgeManagementPortal::class)
+                ->name('advisories.show');
             Route::get('/assets', RenderKnowledgeManagementPortal::class)
                 ->name('assets');
             Route::get('/licenses', RenderKnowledgeManagementPortal::class)

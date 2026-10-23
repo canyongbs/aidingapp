@@ -32,13 +32,38 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { defineProps } from 'vue';
+    import formatDateTime from '../../Services/FormatDateTime.js';
+
     defineProps({
-        errors: { type: Array, default: () => [] },
+        updates: {
+            type: Array,
+            required: true,
+        },
     });
 </script>
 
 <template>
-    <div v-if="errors.length" class="mt-1 text-sm text-red-500">
-        <p v-for="error in errors" :key="error">{{ error }}</p>
-    </div>
+    <ol class="flex flex-col">
+        <li v-for="(update, idx) in updates" :key="update.id" class="relative flex gap-4">
+            <div class="flex w-3 shrink-0 flex-col items-center" aria-hidden="true">
+                <span
+                    :class="[
+                        'mt-1.5 size-3 shrink-0 rounded-full ring-4 ring-white',
+                        idx === 0 ? 'bg-brand-600' : 'bg-gray-300',
+                    ]"
+                />
+                <span v-if="idx < updates.length - 1" class="w-px flex-1 bg-gray-200" />
+            </div>
+
+            <div :class="['min-w-0 flex-1', idx < updates.length - 1 && 'mb-5 border-b border-gray-200 pb-5']">
+                <time :datetime="update.date" class="block text-sm text-gray-500">
+                    {{ formatDateTime(update.date, { dateOnly: true }) }} &middot;
+                    {{ formatDateTime(update.date, { timeOnly: true }) }}
+                </time>
+                <h3 class="mt-1 text-base font-semibold text-gray-900">{{ update.title }}</h3>
+                <p class="mt-1 whitespace-pre-line break-words text-sm text-gray-700">{{ update.update }}</p>
+            </div>
+        </li>
+    </ol>
 </template>

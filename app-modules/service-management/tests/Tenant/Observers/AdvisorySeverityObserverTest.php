@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,26 +32,33 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        bordered: {
-            type: Boolean,
-            default: true,
-        },
-        padded: {
-            type: Boolean,
-            default: true,
-        },
-        bg: {
-            type: String,
-            default: 'bg-white',
-        },
-    });
-</script>
+*/
 
-<template>
-    <div :class="['rounded-[var(--rounding-lg)] shadow-xs', bg, bordered && 'border border-gray-200', padded && 'p-5']">
-        <slot />
-    </div>
-</template>
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
+
+it('ranks a new severity last', function (): void {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
+
+    $severity = AdvisorySeverity::factory()->create();
+
+    expect($severity->refresh()->sort)->toBe(5);
+});
+
+it('keeps an explicitly provided rank', function (): void {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
+
+    $severity = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+    expect($severity->refresh()->sort)->toBe(2);
+});
+
+it('does not rank a new severity when `AdvisorySeveritySortFeature` is inactive', function (): void {
+    AdvisorySeverity::factory()->create(['sort' => 4]);
+
+    AdvisorySeveritySortFeature::deactivate();
+
+    $severity = AdvisorySeverity::factory()->create();
+
+    expect($severity->refresh()->sort)->toBe(0);
+});

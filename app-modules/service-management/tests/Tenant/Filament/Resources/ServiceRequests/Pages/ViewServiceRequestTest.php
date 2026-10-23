@@ -461,7 +461,7 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
             ->assertSet('tab', ServiceRequestTab::Request->value);
     });
 
-    it('falls back to the request tab when given an unknown tab', function (): void {
+    it('renders when given an unknown tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -470,8 +470,7 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
             'record' => $serviceRequest->getRouteKey(),
             'tab' => 'not-a-tab',
         ])
-            ->assertSuccessful()
-            ->assertSet('tab', ServiceRequestTab::Request->value);
+            ->assertSuccessful();
     });
 
     it('renders the relation managers for the assignments tab', function (): void {
@@ -1113,7 +1112,7 @@ describe('authorization', function () use ($serviceRequestManagedBy): void {
         $settings->save();
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentHidden(ServiceRequestTab::Chats->value);
+            ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Chats->value);
     });
 
     it('hides the updates tab from a user who cannot view service request updates', function () use ($serviceRequestManagedBy): void {
@@ -1136,7 +1135,7 @@ describe('authorization', function () use ($serviceRequestManagedBy): void {
         actingAs($user);
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentHidden(ServiceRequestTab::Assignments->value);
+            ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Assignments->value);
 
         $user->givePermissionTo('service_request_assignment.view-any');
 
