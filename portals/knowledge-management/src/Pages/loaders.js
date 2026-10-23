@@ -116,6 +116,12 @@ export const useAdvisoriesData = defineColadaLoader({
     staleTime: fiveMinutes,
 });
 
+export const useAdvisoryData = defineColadaLoader({
+    key: (to) => ['knowledge-management', 'advisory', String(to.params.advisoryId)],
+    query: (to) => tolerant(apiGet(`/advisories/${to.params.advisoryId}`), { notFound: true }),
+    staleTime: fiveMinutes,
+});
+
 export const useAssetsData = defineColadaLoader({
     key: () => ['knowledge-management', 'assets'],
     query: () => tolerant(apiGet('/assets')),

@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,36 +32,47 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        text: {
-            type: String,
-            default: null,
-        },
-        subText: {
-            type: String,
-            default: null,
-        },
-        subTextMaxLength: {
-            type: Number,
-            default: 30,
-        },
-    });
+*/
 
-    function truncate(str, max) {
-        if (!str) return '';
-        return str.length > max ? str.slice(0, max) + '\u2026' : str;
+namespace AidingApp\Portal\DataTransferObjects;
+
+use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisoryUpdate;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
+#[MapOutputName(SnakeCaseMapper::class)]
+class AdvisoryDetailData extends Data
+{
+    /**
+     * @param list<AdvisoryUpdateData> $updates The advisory's updates, newest first.
+     */
+    public function __construct(
+        public string $id,
+        public string $title,
+        public string $description,
+        public ?AdvisorySeverityData $severity,
+        public ?AdvisoryStatusData $status,
+        public ?string $departmentName,
+        public array $updates,
+    ) {}
+
+    /**
+     * Expects the advisory's updates to have been loaded newest first.
+     */
+    public static function fromModel(Advisory $advisory): self
+    {
+        return new self(
+            id: $advisory->getKey(),
+            title: $advisory->title,
+            description: $advisory->description,
+            severity: $advisory->severity ? AdvisorySeverityData::fromModel($advisory->severity) : null,
+            status: $advisory->status ? AdvisoryStatusData::fromModel($advisory->status) : null,
+            departmentName: $advisory->assignedDepartment?->name,
+            updates: $advisory->advisoryUpdates
+                ->map(fn (AdvisoryUpdate $advisoryUpdate): AdvisoryUpdateData => AdvisoryUpdateData::fromModel($advisoryUpdate))
+                ->all(),
+        );
     }
-</script>
-
-<template>
-    <div>
-        <p class="truncate text-sm leading-5 text-gray-900" :title="text || undefined">
-            {{ text ?? '—' }}
-        </p>
-        <p v-if="subText" class="mt-0.5 text-xs leading-5 text-gray-500" :title="subText">
-            {{ truncate(subText, subTextMaxLength) }}
-        </p>
-    </div>
-</template>
+}

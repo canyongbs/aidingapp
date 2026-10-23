@@ -32,8 +32,8 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseBadge from '@common/BaseBadge.vue';
     import { computed, defineProps } from 'vue';
-    import BaseStatusPill from '../ui/BaseStatusPill.vue';
     import { getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
@@ -47,5 +47,5 @@
 </script>
 
 <template>
-    <BaseStatusPill :tone="config.tone">{{ config.label }}</BaseStatusPill>
+    <BaseBadge :color="config.color" dot>{{ config.label }}</BaseBadge>
 </template>

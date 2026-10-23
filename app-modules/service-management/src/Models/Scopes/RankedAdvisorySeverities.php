@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,52 +32,28 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    import { computed } from 'vue';
-    import { getStatus } from './serviceMonitorStatuses.js';
+*/
 
-    const props = defineProps({
-        status: {
-            type: String,
-            required: true,
-        },
-        title: {
-            type: String,
-            required: true,
-        },
-        description: {
-            type: String,
-            required: true,
-        },
-    });
+namespace AidingApp\ServiceManagement\Models\Scopes;
 
-    const config = computed(() => getStatus(props.status));
-</script>
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
+use Illuminate\Database\Eloquent\Builder;
 
-<template>
-    <section
-        role="status"
-        :class="[
-            'flex flex-col gap-4 rounded-[var(--rounding-lg)] border px-5 py-4 shadow-xs md:flex-row md:items-center md:justify-between',
-            config.bannerClass,
-        ]"
-    >
-        <div class="flex items-center gap-4">
-            <span
-                :class="['flex size-11 shrink-0 items-center justify-center rounded-full', config.iconClass]"
-                aria-hidden="true"
-            >
-                <component :is="config.icon" class="size-6 stroke-2" />
-            </span>
-            <div class="grid gap-0.5">
-                <h2 :class="['text-lg font-semibold', config.bannerTitleClass]">{{ title }}</h2>
-                <p class="text-sm text-pretty text-gray-600">{{ description }}</p>
-            </div>
-        </div>
+/**
+ * Orders advisory severities from the highest rank to the lowest, then by name.
+ */
+class RankedAdvisorySeverities
+{
+    /**
+     * @param Builder<AdvisorySeverity> $query
+     */
+    public function __invoke(Builder $query): void
+    {
+        if (AdvisorySeveritySortFeature::active()) {
+            $query->orderBy('advisory_severities.sort');
+        }
 
-        <dl v-if="$slots.meta" class="flex flex-wrap gap-x-6 gap-y-3 md:flex-nowrap">
-            <slot name="meta" />
-        </dl>
-    </section>
-</template>
+        $query->orderBy('advisory_severities.name');
+    }
+}

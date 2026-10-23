@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,11 +32,39 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<template>
-    <div class="overflow-x-auto rounded-[var(--rounding-lg)] border border-gray-200 bg-white shadow-xs">
-        <table class="w-full text-left text-sm text-gray-600">
-            <slot />
-        </table>
-    </div>
-</template>
+*/
+
+namespace AidingApp\Portal\DataTransferObjects;
+
+use AidingApp\ServiceManagement\Models\Advisory;
+use Spatie\LaravelData\Attributes\MapOutputName;
+use Spatie\LaravelData\Data;
+use Spatie\LaravelData\Mappers\SnakeCaseMapper;
+
+#[MapOutputName(SnakeCaseMapper::class)]
+class AdvisoryData extends Data
+{
+    public function __construct(
+        public string $id,
+        public string $title,
+        public string $description,
+        public ?AdvisorySeverityData $severity,
+        public ?AdvisoryStatusData $status,
+        public string $lastUpdatedAt,
+    ) {}
+
+    /**
+     * Requires the `WithLastUpdatedAt` scope to have been applied to the query.
+     */
+    public static function fromModel(Advisory $advisory): self
+    {
+        return new self(
+            id: $advisory->getKey(),
+            title: $advisory->title,
+            description: $advisory->description,
+            severity: $advisory->severity ? AdvisorySeverityData::fromModel($advisory->severity) : null,
+            status: $advisory->status ? AdvisoryStatusData::fromModel($advisory->status) : null,
+            lastUpdatedAt: $advisory->getLastUpdatedAt()->toIso8601String(),
+        );
+    }
+}

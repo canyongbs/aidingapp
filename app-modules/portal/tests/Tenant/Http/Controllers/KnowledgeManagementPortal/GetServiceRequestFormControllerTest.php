@@ -40,6 +40,7 @@ use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Settings\LicenseSettings;
 
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\getJson;
@@ -47,7 +48,12 @@ use function Pest\Laravel\getJson;
 beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = true;
+    $licenseSettings->save();
 });
 
 it('omits the priority field when the type has a configured default priority', function (): void {

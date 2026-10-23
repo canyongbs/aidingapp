@@ -32,46 +32,29 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import { ChevronDownIcon, ChevronUpDownIcon, ChevronUpIcon } from '@heroicons/vue/16/solid';
-    import { computed } from 'vue';
-    import BaseTableHeaderCell from './BaseTableHeaderCell.vue';
+    import { computed, defineProps } from 'vue';
+    import { getStatus } from './serviceMonitorStatuses.js';
 
     const props = defineProps({
-        column: {
+        status: {
             type: String,
             required: true,
         },
-        sort: {
-            type: String,
-            default: null,
-        },
-        direction: {
-            type: String,
-            default: 'asc',
-            validator: (v) => ['asc', 'desc'].includes(v),
-        },
     });
 
-    const emit = defineEmits(['sort']);
+    /**
+     * The fill for each status colour, used by the history bars, legends and status counts.
+     */
+    const COLOR_CLASSES = {
+        green: 'bg-green-500',
+        amber: 'bg-amber-500',
+        red: 'bg-red-500',
+        gray: 'bg-gray-200',
+    };
 
-    const isActive = computed(() => props.sort === props.column);
+    const colorClass = computed(() => COLOR_CLASSES[getStatus(props.status).color] ?? COLOR_CLASSES.gray);
 </script>
 
 <template>
-    <BaseTableHeaderCell :aria-sort="isActive ? (direction === 'asc' ? 'ascending' : 'descending') : 'none'">
-        <button
-            type="button"
-            class="group inline-flex items-center gap-1 whitespace-nowrap rounded-sm text-left hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgba(var(--primary-500),1)]"
-            @click="emit('sort', column)"
-        >
-            <slot />
-            <ChevronUpIcon v-if="isActive && direction === 'asc'" class="size-4 text-gray-700" aria-hidden="true" />
-            <ChevronDownIcon v-else-if="isActive" class="size-4 text-gray-700" aria-hidden="true" />
-            <ChevronUpDownIcon
-                v-else
-                class="size-4 text-gray-300 transition-colors group-hover:text-gray-500"
-                aria-hidden="true"
-            />
-        </button>
-    </BaseTableHeaderCell>
+    <span :class="colorClass" />
 </template>

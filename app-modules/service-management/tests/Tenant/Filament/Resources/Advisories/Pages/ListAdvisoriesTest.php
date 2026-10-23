@@ -205,6 +205,19 @@ it('renders the severity column as a badge using the severity color', function (
         ->and($column->getColor($advisory->severity->name))->toBe(Color::Red->value);
 });
 
+it('can sort advisories by severity rank', function (): void {
+    actingAs(User::factory()->create()->givePermissionTo('advisory.view-any'));
+
+    $minorAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 2]), 'severity')->create();
+    $criticalAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 1]), 'severity')->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->sortTable('severity.name')
+        ->assertCanSeeTableRecords([$criticalAdvisory, $minorAdvisory], inOrder: true)
+        ->sortTable('severity.name', 'desc')
+        ->assertCanSeeTableRecords([$minorAdvisory, $criticalAdvisory], inOrder: true);
+});
+
 test('advisories can be created from the list page create modal with proper access control', function (): void {
     $user = User::factory()->create();
 

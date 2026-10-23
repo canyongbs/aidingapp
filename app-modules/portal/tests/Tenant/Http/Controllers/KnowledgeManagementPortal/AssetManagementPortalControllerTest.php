@@ -1,4 +1,6 @@
-<!--
+<?php
+
+/*
 <COPYRIGHT>
 
     Copyright © 2016-2026, Canyon GBS Inc. All rights reserved.
@@ -30,18 +32,33 @@
     <https://www.canyongbs.com> or contact us via email at legal@canyongbs.com.
 
 </COPYRIGHT>
--->
-<script setup>
-    defineProps({
-        scope: {
-            type: String,
-            default: 'col',
-        },
-    });
-</script>
+*/
 
-<template>
-    <th :scope="scope" class="px-4 py-3 text-xs font-semibold text-gray-500">
-        <slot />
-    </th>
-</template>
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Portal\Settings\PortalSettings;
+use App\Settings\LicenseSettings;
+
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\getJson;
+
+beforeEach(function (): void {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+
+    actingAs(Contact::factory()->create(), 'contact');
+});
+
+describe('authorization', function (): void {
+    it('allows access with the asset management add-on', function (): void {
+        getJson(route('api.portal.assets.index'))->assertOk();
+    });
+
+    it('denies access without the asset management add-on', function (): void {
+        $licenseSettings = app(LicenseSettings::class);
+        $licenseSettings->data->addons->assetManagement = false;
+        $licenseSettings->save();
+
+        getJson(route('api.portal.assets.index'))->assertForbidden();
+    });
+});
