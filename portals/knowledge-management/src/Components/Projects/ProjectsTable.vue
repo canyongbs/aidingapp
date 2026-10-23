@@ -40,9 +40,7 @@
     import BaseTableHeader from '@common/BaseTableHeader.vue';
     import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
     import BaseTableRow from '@common/BaseTableRow.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
     import { ArrowRightIcon } from '@heroicons/vue/16/solid';
-    import { FolderIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
 
@@ -51,19 +49,24 @@
             type: Array,
             required: true,
         },
+        loading: {
+            type: Boolean,
+            default: false,
+        },
     });
 </script>
 
 <template>
-    <BaseTable>
-        <template v-if="projects.length === 0" #empty>
-            <EmptyState role="status" :icon="FolderIcon" :contained="false">
-                <template #heading>No projects to display</template>
-                <template #description>You don't currently have visibility into any projects.</template>
-            </EmptyState>
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
         </template>
 
-        <template v-if="$slots.footer && projects.length > 0" #footer>
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
+        </template>
+
+        <template v-if="$slots.footer" #footer>
             <slot name="footer" />
         </template>
 
@@ -101,6 +104,7 @@
                         icon-position="after"
                     >
                         View
+                        <span class="sr-only">{{ project.name }}</span>
                     </BaseButton>
                 </BaseTableCell>
             </BaseTableRow>

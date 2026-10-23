@@ -41,12 +41,12 @@
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import { ExclamationTriangleIcon, MagnifyingGlassIcon, SignalIcon } from '@heroicons/vue/24/outline';
-    import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import ServiceMonitorsTable from '../Components/ServiceMonitors/ServiceMonitorsTable.vue';
     import ServiceMonitorStatusCounts from '../Components/ServiceMonitors/ServiceMonitorStatusCounts.vue';
     import { getStatus } from '../Components/ServiceMonitors/serviceMonitorStatuses.js';
     import { useNow } from '../Composables/useNow.js';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import formatDateTime, { resolveTimezone } from '../Services/FormatDateTime.js';
     import { useServiceMonitorData } from './loaders.js';
@@ -59,70 +59,44 @@
 
     const now = useNow();
 
-    const currentPage = ref(1);
     const search = ref('');
     const sort = ref(DEFAULT_SORT);
     const direction = ref(DEFAULT_DIRECTION);
 
     const appliedSearch = computed(() => search.value.trim());
 
-    watch([appliedSearch, sort, direction], () => {
-        currentPage.value = 1;
-    });
-
-    const usesInitialData = computed(
-        () =>
-            currentPage.value === 1 &&
+    const { currentPage, shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope: initialData,
+        usesInitialEnvelope: (page) =>
+            page === 1 &&
             appliedSearch.value === '' &&
             sort.value === DEFAULT_SORT &&
             direction.value === DEFAULT_DIRECTION,
-    );
-
-    const pageQuery = useQuery({
-        key: () => [
+        key: (page) => [
             'knowledge-management',
             'service-monitors',
-            currentPage.value,
+            page,
             appliedSearch.value,
             sort.value,
             direction.value,
         ],
-        query: () =>
+        query: (page) =>
             apiGet('/status', {
-                page: currentPage.value,
+                page,
                 search: appliedSearch.value || undefined,
                 sort: sort.value,
                 direction: direction.value,
                 timezone: resolveTimezone(),
             }),
-        enabled: () => !usesInitialData.value,
     });
 
-    const currentEnvelope = computed(() =>
-        usesInitialData.value ? (initialData.value ?? null) : (pageQuery.data.value ?? null),
-    );
-
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
+    watch([appliedSearch, sort, direction], () => {
+        currentPage.value = 1;
+    });
 
     const monitors = computed(() => shownEnvelope.value?.data ?? []);
     const summary = computed(() => shownEnvelope.value?.summary ?? null);
     const summaryStatus = computed(() => getStatus(summary.value?.status));
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
-    const isFetching = computed(() => !usesInitialData.value && pageQuery.isLoading.value);
-    const loadingPage = computed(() => (isFetching.value ? currentPage.value : null));
-    const loadFailed = computed(() => !usesInitialData.value && !isFetching.value && Boolean(pageQuery.error.value));
 
     const summaryCopy = computed(() => {
         const total = summary.value?.total_count ?? 0;
@@ -165,12 +139,6 @@
 
         sort.value = column;
         direction.value = 'asc';
-    }
-
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
-        }
     }
 </script>
 
@@ -227,7 +195,7 @@
                         <template #heading>Could not load monitors</template>
                         <template #description>Something went wrong while loading these results.</template>
                         <template #actions>
-                            <BaseButton color="gray" size="md" @click="pageQuery.refetch()">Try again</BaseButton>
+                            <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
                         </template>
                     </EmptyState>
 
@@ -238,17 +206,7 @@
                 </template>
 
                 <template v-if="!loadFailed && monitors.length > 0" #footer>
-                    <Pagination
-                        :current-page="currentPage"
-                        :last-page="lastPage"
-                        :from-item="fromItem"
-                        :to-item="toItem"
-                        :total-items="totalItems"
-                        :loading-page="loadingPage"
-                        @fetchPreviousPage="fetchPage(currentPage - 1)"
-                        @fetchNextPage="fetchPage(currentPage + 1)"
-                        @fetchPage="fetchPage"
-                    />
+                    <Pagination v-bind="pagination" />
                 </template>
             </ServiceMonitorsTable>
         </template>

@@ -35,6 +35,7 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
+    import { ChevronRightIcon, DocumentIcon, FolderIcon } from '@heroicons/vue/24/outline';
     import { storeToRefs } from 'pinia';
     import { computed, ref, watch } from 'vue';
     import { useRoute, useRouter } from 'vue-router';
@@ -209,20 +210,7 @@
                                 <div
                                     class="w-10 h-10 flex items-center justify-center rounded bg-white/10 text-white/70"
                                 >
-                                    <svg
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M3 7.5a2.25 2.25 0 0 1 2.25-2.25h3.375a1.125 1.125 0 0 0 .9-.45L11.25 2.25h7.5A2.25 2.25 0 0 1 21 4.5v13.5A2.25 2.25 0 0 1 18.75 20.25H5.25A2.25 2.25 0 0 1 3 18V7.5z"
-                                        />
-                                    </svg>
+                                    <FolderIcon class="size-6" aria-hidden="true" />
                                 </div>
                             </div>
                             <div class="w-full">
@@ -235,20 +223,7 @@
                                 class="pointer-events-none text-white/60 group-hover:text-white/80"
                                 aria-hidden="true"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="w-6 h-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="M8.25 4.5 15.75 12 8.25 19.5"
-                                    />
-                                </svg>
+                                <ChevronRightIcon class="size-6" aria-hidden="true" />
                             </span>
                         </div>
                     </div>
@@ -265,21 +240,7 @@
                                     class="w-10 h-10 flex items-center justify-center rounded bg-gray-100 text-brand-600"
                                 >
                                     <span v-if="type.icon" v-html="type.icon"></span>
-                                    <svg
-                                        v-else
-                                        xmlns="http://www.w3.org/2000/svg"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke-width="1.5"
-                                        stroke="currentColor"
-                                        class="w-6 h-6"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            d="M7.5 3.75h6.75L21 9.75v9a1.5 1.5 0 0 1-1.5 1.5H6a1.5 1.5 0 0 1-1.5-1.5V5.25A1.5 1.5 0 0 1 6 3.75h1.5z"
-                                        />
-                                    </svg>
+                                    <DocumentIcon v-else class="size-6" aria-hidden="true" />
                                 </div>
                             </div>
                             <div class="w-full">
@@ -301,20 +262,7 @@
                                 class="pointer-events-none text-gray-300 group-hover:text-brand-600"
                                 aria-hidden="true"
                             >
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke-width="1.5"
-                                    stroke="currentColor"
-                                    class="w-6 h-6"
-                                >
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                                    />
-                                </svg>
+                                <ChevronRightIcon class="size-6" aria-hidden="true" />
                             </span>
                         </div>
                     </div>

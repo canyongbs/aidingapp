@@ -47,7 +47,7 @@
      */
     const COLOR_CLASSES = {
         green: 'bg-green-500',
-        orange: 'bg-orange-400',
+        amber: 'bg-amber-500',
         red: 'bg-red-500',
         gray: 'bg-gray-200',
     };

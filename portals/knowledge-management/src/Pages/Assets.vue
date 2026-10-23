@@ -32,106 +32,106 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
+    import Pagination from '@common/portal/Pagination.vue';
     import Tabs from '@common/portal/Tabs.vue';
-    import { useQuery } from '@pinia/colada';
+    import { ComputerDesktopIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useAssetsData } from './loaders.js';
 
-    // The route data loader resolves page 1 of every filter tab (all/checked out/
-    // returned) together, so any other page is fetched (and cached) client-side.
+    const EMPTY_STATES = {
+        all: { heading: 'No assets found', description: 'No assets have been assigned to your account.' },
+        checked_out: {
+            heading: 'No assets currently checked out',
+            description: "You don't currently have any assets checked out.",
+        },
+        returned: { heading: 'No returned assets', description: 'No assets have been returned yet.' },
+    };
+
+    // The route data loader resolves page 1 of every filter tab (all/checked out/returned) together, so any other page
+    // is fetched on demand.
     const { data: initialData } = useAssetsData();
 
     const activeFilter = ref('all');
-    const currentPage = ref(1);
 
-    const tabs = computed(() => [
+    const tabs = [
         { value: 'all', label: 'All' },
         { value: 'checked_out', label: 'Checked Out' },
         { value: 'returned', label: 'Returned' },
-    ]);
+    ];
 
-    const pageQuery = useQuery({
-        key: () => ['knowledge-management', 'assets', activeFilter.value, currentPage.value],
-        query: () => apiGet('/assets', { filter: activeFilter.value, page: currentPage.value }),
-        enabled: () => currentPage.value > 1,
+    const { currentPage, shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope: computed(() => initialData.value?.[activeFilter.value] ?? null),
+        usesInitialEnvelope: (page) => page === 1,
+        key: (page) => ['knowledge-management', 'assets', activeFilter.value, page],
+        query: (page) => apiGet('/assets', { filter: activeFilter.value, page }),
     });
-
-    function firstPageFor(filter) {
-        return initialData.value?.[filter] ?? null;
-    }
-
-    const currentEnvelope = computed(() =>
-        currentPage.value > 1 ? (pageQuery.data.value ?? null) : firstPageFor(activeFilter.value),
-    );
-
-    // Keeps the previous filter/page visible while a new one loads.
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
-
-    // Only true before the first paint; filter/page switches keep showing `shownEnvelope`.
-    const loading = computed(() => shownEnvelope.value === null);
-
-    const loadingEnvelope = computed(() => currentPage.value > 1 && pageQuery.isLoading.value);
-    const loadingPage = computed(() => (loadingEnvelope.value ? currentPage.value : null));
-
-    const assets = computed(() => shownEnvelope.value?.data ?? []);
-    const counts = computed(() => initialData.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
-
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
 
     watch(activeFilter, () => {
         currentPage.value = 1;
     });
 
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
-        }
-    }
+    const assets = computed(() => shownEnvelope.value?.data ?? []);
+    const counts = computed(() => initialData.value?.counts ?? { total: 0, checked_out: 0, returned: 0 });
+    const emptyState = computed(() => EMPTY_STATES[activeFilter.value] ?? EMPTY_STATES.all);
 </script>
 
 <template>
     <Page>
         <template #heading>Assets</template>
-        <template #description> View your assigned hardware and equipment </template>
+        <template #description>View your assigned hardware and equipment</template>
 
         <template #breadcrumbs>
             <Breadcrumbs :currentCrumb="'Assets'" />
         </template>
 
-        <AssetStatCards :counts="counts" />
+        <template v-if="shownEnvelope">
+            <AssetStatCards :counts="counts" />
 
-        <div class="flex flex-col gap-y-4">
-            <Tabs v-model="activeFilter" :tabs="tabs" label="Asset filter tabs" id-prefix="assets" />
+            <div class="flex flex-col gap-y-4">
+                <Tabs v-model="activeFilter" :tabs="tabs" label="Asset filter tabs" id-prefix="assets" />
 
-            <AssetTable
-                :assets="assets"
-                :loading="loading"
-                :loading-page="loadingPage"
-                :active-filter="activeFilter"
-                :current-page="currentPage"
-                :last-page="lastPage"
-                :from-item="fromItem"
-                :to-item="toItem"
-                :total-items="totalItems"
-                @fetchPage="fetchPage"
-            />
-        </div>
+                <AssetTable
+                    :id="`assets-panel-${activeFilter}`"
+                    role="tabpanel"
+                    :aria-labelledby="`assets-tab-${activeFilter}`"
+                    :assets="assets"
+                    :loading="isFetching"
+                >
+                    <template v-if="loadFailed || assets.length === 0" #empty>
+                        <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
+                            <template #heading>Could not load assets</template>
+                            <template #description>Something went wrong while loading these results.</template>
+                            <template #actions>
+                                <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
+                            </template>
+                        </EmptyState>
+
+                        <EmptyState role="status" v-else :icon="ComputerDesktopIcon" :contained="false">
+                            <template #heading>{{ emptyState.heading }}</template>
+                            <template #description>{{ emptyState.description }}</template>
+                        </EmptyState>
+                    </template>
+
+                    <template v-if="!loadFailed && assets.length > 0" #footer>
+                        <Pagination v-bind="pagination" />
+                    </template>
+                </AssetTable>
+            </div>
+        </template>
+
+        <EmptyState v-else :icon="ComputerDesktopIcon">
+            <template #heading>There are no assets to display.</template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'home' }" color="gray" size="md"> Return Home </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

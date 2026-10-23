@@ -53,7 +53,7 @@
     const toneConfig = computed(() => {
         const map = {
             neutral: { bg: 'bg-white', labelColor: 'text-gray-500', valueColor: 'text-gray-900' },
-            warning: { bg: 'bg-orange-50', labelColor: 'text-orange-600', valueColor: 'text-orange-600' },
+            warning: { bg: 'bg-amber-50', labelColor: 'text-amber-700', valueColor: 'text-amber-700' },
             success: { bg: 'bg-green-50', labelColor: 'text-green-600', valueColor: 'text-green-700' },
             danger: { bg: 'bg-red-50', labelColor: 'text-red-600', valueColor: 'text-red-600' },
         };

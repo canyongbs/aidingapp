@@ -43,5 +43,5 @@ export const DEFAULT_SORT = SORT_OPTIONS[0].value;
  * The badge colour for an advisory status, by whether it is still active or has been resolved.
  */
 export function getStatusColor(status) {
-    return status?.classification === 'resolved' ? 'success' : 'blue';
+    return status?.classification === 'resolved' ? 'success' : 'info';
 }

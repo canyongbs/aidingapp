@@ -38,10 +38,11 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { useQuery } from '@pinia/colada';
+    import { ExclamationTriangleIcon, InboxIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
     import PipelineSelect from '../Components/Projects/PipelineSelect.vue';
     import ProjectPipelineTable from '../Components/Projects/ProjectPipelineTable.vue';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useProjectData } from './loaders.js';
 
@@ -54,7 +55,6 @@
     );
 
     const selectedPipelineId = ref(null);
-    const currentPage = ref(1);
 
     watch(
         pipelines,
@@ -66,55 +66,23 @@
         { immediate: true },
     );
 
+    const { currentPage, shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope,
+        usesInitialEnvelope: (page) => selectedPipelineId.value === initialPipelineId.value && page === 1,
+        key: (page) => ['knowledge-management', 'project', project.value?.id, selectedPipelineId.value, page],
+        query: (page) => apiGet(`/projects/${project.value.id}`, { pipeline: selectedPipelineId.value, page }),
+        enabled: () => Boolean(project.value && selectedPipelineId.value),
+    });
+
     watch(selectedPipelineId, (value, previousValue) => {
         if (previousValue !== null && value !== previousValue) {
             currentPage.value = 1;
         }
     });
 
-    const pageQuery = useQuery({
-        key: () => ['knowledge-management', 'project', project.value?.id, selectedPipelineId.value, currentPage.value],
-        query: () =>
-            apiGet(`/projects/${project.value.id}`, {
-                pipeline: selectedPipelineId.value,
-                page: currentPage.value,
-            }),
-        enabled: () =>
-            Boolean(project.value && selectedPipelineId.value) &&
-            (selectedPipelineId.value !== initialPipelineId.value || currentPage.value > 1),
-    });
-
-    const currentEnvelope = computed(() =>
-        selectedPipelineId.value === initialPipelineId.value && currentPage.value === 1
-            ? (initialEnvelope.value ?? null)
-            : (pageQuery.data.value ?? null),
+    const groups = computed(
+        () => shownEnvelope.value?.data?.pipelines?.find((pipeline) => Array.isArray(pipeline.groups))?.groups ?? [],
     );
-
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
-
-    const displayedPipeline = computed(
-        () => shownEnvelope.value?.data?.pipelines?.find((pipeline) => Array.isArray(pipeline.groups)) ?? null,
-    );
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
-    const loadingPage = computed(() => (pageQuery.isLoading.value ? currentPage.value : null));
-
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
-        }
-    }
 
     const breadcrumbs = computed(() => [{ name: 'Projects', route: 'projects' }]);
     const currentCrumb = computed(() => project.value?.name ?? 'Not Found');
@@ -136,23 +104,28 @@
             description="Milestone progress represents all work required to complete the milestone. Internal tasks may contribute to progress even when they are not visible in the portal."
         />
 
-        <ProjectPipelineTable :groups="displayedPipeline?.groups ?? []" :loading="loadingPage !== null">
+        <ProjectPipelineTable :groups="groups" :loading="isFetching">
             <template v-if="pipelines.length > 1" #toolbar>
                 <PipelineSelect v-model="selectedPipelineId" :pipelines="pipelines" />
             </template>
 
-            <template #footer>
-                <Pagination
-                    :current-page="currentPage"
-                    :last-page="lastPage"
-                    :from-item="fromItem"
-                    :to-item="toItem"
-                    :total-items="totalItems"
-                    :loading-page="loadingPage"
-                    @fetchPreviousPage="fetchPage(currentPage - 1)"
-                    @fetchNextPage="fetchPage(currentPage + 1)"
-                    @fetchPage="fetchPage"
-                />
+            <template v-if="loadFailed || groups.length === 0" #empty>
+                <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
+                    <template #heading>Could not load pipeline tasks</template>
+                    <template #description>Something went wrong while loading these results.</template>
+                    <template #actions>
+                        <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
+                    </template>
+                </EmptyState>
+
+                <EmptyState role="status" v-else :icon="InboxIcon" :contained="false">
+                    <template #heading>No pipeline tasks</template>
+                    <template #description>There are no tasks to display for this pipeline yet.</template>
+                </EmptyState>
+            </template>
+
+            <template v-if="!loadFailed && groups.length > 0" #footer>
+                <Pagination v-bind="pagination" />
             </template>
         </ProjectPipelineTable>
     </Page>

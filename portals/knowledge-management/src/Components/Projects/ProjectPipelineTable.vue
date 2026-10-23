@@ -39,7 +39,6 @@
     import BaseTableHeader from '@common/BaseTableHeader.vue';
     import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
     import BaseTableRow from '@common/BaseTableRow.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
     import { ChartPieIcon } from '@heroicons/vue/20/solid';
     import { ClipboardDocumentIcon, InboxIcon } from '@heroicons/vue/24/outline';
     import { defineProps } from 'vue';
@@ -63,14 +62,11 @@
             <slot name="toolbar" />
         </template>
 
-        <template v-if="groups.length === 0" #empty>
-            <EmptyState role="status" :icon="InboxIcon" :contained="false">
-                <template #heading>No pipeline tasks</template>
-                <template #description>There are no tasks to display for this pipeline yet.</template>
-            </EmptyState>
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
         </template>
 
-        <template v-if="$slots.footer && groups.length > 0" #footer>
+        <template v-if="$slots.footer" #footer>
             <slot name="footer" />
         </template>
 

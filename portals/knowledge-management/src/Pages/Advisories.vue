@@ -46,10 +46,10 @@
         ExclamationTriangleIcon,
         MagnifyingGlassIcon,
     } from '@heroicons/vue/24/outline';
-    import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
     import AdvisoriesTable from '../Components/Advisories/AdvisoriesTable.vue';
     import { DEFAULT_SORT, SORT_OPTIONS } from '../Components/Advisories/advisoryPresentation.js';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useAdvisoriesData } from './loaders.js';
 
@@ -59,13 +59,42 @@
     const { data: initialData } = useAdvisoriesData();
 
     const classification = ref(DEFAULT_CLASSIFICATION);
-    const currentPage = ref(1);
     const search = ref('');
     const severity = ref('');
     const status = ref('');
     const sort = ref(DEFAULT_SORT);
 
     const appliedSearch = computed(() => search.value.trim());
+
+    const isFiltered = computed(() => appliedSearch.value !== '' || severity.value !== '' || status.value !== '');
+
+    const { currentPage, shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope: initialData,
+        usesInitialEnvelope: (page) =>
+            classification.value === DEFAULT_CLASSIFICATION &&
+            page === 1 &&
+            !isFiltered.value &&
+            sort.value === DEFAULT_SORT,
+        key: (page) => [
+            'knowledge-management',
+            'advisories',
+            classification.value,
+            page,
+            appliedSearch.value,
+            severity.value,
+            status.value,
+            sort.value,
+        ],
+        query: (page) =>
+            apiGet('/advisories', {
+                classification: classification.value,
+                page,
+                search: appliedSearch.value || undefined,
+                severity: severity.value || undefined,
+                status: status.value || undefined,
+                sort: sort.value,
+            }),
+    });
 
     // Each tab has its own statuses, so a status picked on one tab can never match on the other.
     watch(classification, () => {
@@ -76,64 +105,8 @@
         currentPage.value = 1;
     });
 
-    const isFiltered = computed(() => appliedSearch.value !== '' || severity.value !== '' || status.value !== '');
-
-    const usesInitialData = computed(
-        () =>
-            classification.value === DEFAULT_CLASSIFICATION &&
-            currentPage.value === 1 &&
-            !isFiltered.value &&
-            sort.value === DEFAULT_SORT,
-    );
-
-    const pageQuery = useQuery({
-        key: () => [
-            'knowledge-management',
-            'advisories',
-            classification.value,
-            currentPage.value,
-            appliedSearch.value,
-            severity.value,
-            status.value,
-            sort.value,
-        ],
-        query: () =>
-            apiGet('/advisories', {
-                classification: classification.value,
-                page: currentPage.value,
-                search: appliedSearch.value || undefined,
-                severity: severity.value || undefined,
-                status: status.value || undefined,
-                sort: sort.value,
-            }),
-        enabled: () => !usesInitialData.value,
-    });
-
-    const currentEnvelope = computed(() =>
-        usesInitialData.value ? (initialData.value ?? null) : (pageQuery.data.value ?? null),
-    );
-
-    // Keeps the previous results visible while a new tab, page, search, or filter loads.
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
-
     const advisories = computed(() => shownEnvelope.value?.data ?? []);
     const counts = computed(() => shownEnvelope.value?.counts ?? { open: 0, resolved: 0 });
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
-    const isFetching = computed(() => !usesInitialData.value && pageQuery.isLoading.value);
-    const loadingPage = computed(() => (isFetching.value ? currentPage.value : null));
-    const loadFailed = computed(() => !usesInitialData.value && !isFetching.value && Boolean(pageQuery.error.value));
 
     const tabs = computed(() => [
         { value: 'open', label: 'Active', badge: counts.value.open },
@@ -159,12 +132,6 @@
         search.value = '';
         severity.value = '';
         status.value = '';
-    }
-
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
-        }
     }
 </script>
 
@@ -231,7 +198,7 @@
                             <template #heading>Could not load advisories</template>
                             <template #description>Something went wrong while loading these results.</template>
                             <template #actions>
-                                <BaseButton color="gray" size="md" @click="pageQuery.refetch()">Try again</BaseButton>
+                                <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
                             </template>
                         </EmptyState>
 
@@ -270,17 +237,7 @@
                     </template>
 
                     <template v-if="!showsEmptyState" #footer>
-                        <Pagination
-                            :current-page="currentPage"
-                            :last-page="lastPage"
-                            :from-item="fromItem"
-                            :to-item="toItem"
-                            :total-items="totalItems"
-                            :loading-page="loadingPage"
-                            @fetchPreviousPage="fetchPage(currentPage - 1)"
-                            @fetchNextPage="fetchPage(currentPage + 1)"
-                            @fetchPage="fetchPage"
-                        />
+                        <Pagination v-bind="pagination" />
                     </template>
                 </AdvisoriesTable>
             </div>

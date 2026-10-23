@@ -39,65 +39,19 @@
     import BaseTableCellText from '@common/BaseTableCellText.vue';
     import BaseTableHeader from '@common/BaseTableHeader.vue';
     import BaseTableHeaderCell from '@common/BaseTableHeaderCell.vue';
-    import BaseTableLoadingState from '@common/BaseTableLoadingState.vue';
     import BaseTableRow from '@common/BaseTableRow.vue';
-    import EmptyState from '@common/portal/EmptyState.vue';
-    import Pagination from '@common/portal/Pagination.vue';
-    import { ComputerDesktopIcon } from '@heroicons/vue/24/outline';
-    import { computed, defineEmits, defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
 
-    const props = defineProps({
+    defineProps({
         assets: {
             type: Array,
             required: true,
         },
         loading: {
             type: Boolean,
-            required: true,
-        },
-        loadingPage: {
-            type: Number,
-            default: null,
-        },
-        activeFilter: {
-            type: String,
-            required: true,
-        },
-        currentPage: {
-            type: Number,
-            required: true,
-        },
-        lastPage: {
-            type: Number,
-            required: true,
-        },
-        fromItem: {
-            type: Number,
-            required: true,
-        },
-        toItem: {
-            type: Number,
-            required: true,
-        },
-        totalItems: {
-            type: Number,
-            required: true,
+            default: false,
         },
     });
-
-    const EMPTY_STATES = {
-        returned: { heading: 'No returned assets', description: 'No assets have been returned yet.' },
-        checked_out: {
-            heading: 'No assets currently checked out',
-            description: "You don't currently have any assets checked out.",
-        },
-        all: { heading: 'No assets found', description: 'No assets have been assigned to your account.' },
-    };
-
-    const emptyState = computed(() => EMPTY_STATES[props.activeFilter] ?? EMPTY_STATES.all);
-
-    const emit = defineEmits(['fetchPage']);
 
     function serialDisplay(asset) {
         const serial = asset?.serial_number;
@@ -106,98 +60,56 @@
 </script>
 
 <template>
-    <Transition name="assets-fade" mode="out-in">
-        <BaseTableLoadingState
-            v-if="loading"
-            key="skeleton"
-            :columns="6"
-            :rows="7"
-            label="Loading assets, please wait…"
-            class="mt-1"
-        />
+    <BaseTable :loading="loading">
+        <template v-if="$slots.toolbar" #toolbar>
+            <slot name="toolbar" />
+        </template>
 
-        <BaseTable
-            v-else
-            key="table"
-            :id="`assets-panel-${activeFilter}`"
-            :aria-labelledby="`assets-tab-${activeFilter}`"
-            role="tabpanel"
-            aria-live="polite"
-            :loading="loadingPage !== null"
-        >
-            <template v-if="assets.length === 0" #empty>
-                <EmptyState role="status" :icon="ComputerDesktopIcon" :contained="false">
-                    <template #heading>{{ emptyState.heading }}</template>
-                    <template #description>{{ emptyState.description }}</template>
-                </EmptyState>
-            </template>
+        <template v-if="$slots.empty" #empty>
+            <slot name="empty" />
+        </template>
 
-            <template v-if="assets.length > 0" #footer>
-                <Pagination
-                    :current-page="currentPage"
-                    :last-page="lastPage"
-                    :from-item="fromItem"
-                    :to-item="toItem"
-                    :total-items="totalItems"
-                    :loading-page="loadingPage"
-                    @fetchPreviousPage="emit('fetchPage', currentPage - 1)"
-                    @fetchNextPage="emit('fetchPage', currentPage + 1)"
-                    @fetchPage="emit('fetchPage', $event)"
-                />
-            </template>
+        <template v-if="$slots.footer" #footer>
+            <slot name="footer" />
+        </template>
 
-            <BaseTableHeader>
-                <tr>
-                    <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
-                    <BaseTableHeaderCell>Type</BaseTableHeaderCell>
-                    <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
-                    <BaseTableHeaderCell>Status</BaseTableHeaderCell>
-                    <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
-                    <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
-                </tr>
-            </BaseTableHeader>
-            <BaseTableBody>
-                <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
-                    <BaseTableCell>
-                        <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
-                    </BaseTableCell>
+        <BaseTableHeader>
+            <tr>
+                <BaseTableHeaderCell class="w-64">Name</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Type</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Serial Number</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Status</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Checkout Date</BaseTableHeaderCell>
+                <BaseTableHeaderCell>Return Date</BaseTableHeaderCell>
+            </tr>
+        </BaseTableHeader>
+        <BaseTableBody>
+            <BaseTableRow v-for="(item, idx) in assets" :key="item.id" :delay="idx * 30">
+                <BaseTableCell>
+                    <BaseTableCellText :text="item.asset?.name" :sub-text="item.asset?.description" />
+                </BaseTableCell>
 
-                    <BaseTableCell class="text-sm text-gray-600">
-                        {{ item.asset?.type?.name ?? '—' }}
-                    </BaseTableCell>
+                <BaseTableCell class="text-sm text-gray-600">
+                    {{ item.asset?.type?.name ?? '—' }}
+                </BaseTableCell>
 
-                    <BaseTableCell>
-                        <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
-                    </BaseTableCell>
+                <BaseTableCell>
+                    <BaseBadge color="gray" class="font-mono">{{ serialDisplay(item.asset) }}</BaseBadge>
+                </BaseTableCell>
 
-                    <BaseTableCell>
-                        <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
-                        <BaseBadge v-else color="warning">Checked Out</BaseBadge>
-                    </BaseTableCell>
+                <BaseTableCell>
+                    <BaseBadge v-if="item.status === 'returned'" color="success">Returned</BaseBadge>
+                    <BaseBadge v-else color="warning">Checked Out</BaseBadge>
+                </BaseTableCell>
 
-                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                        {{ formatDateTime(item.checked_out_at) ?? '—' }}
-                    </BaseTableCell>
+                <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                    {{ formatDateTime(item.checked_out_at) ?? '—' }}
+                </BaseTableCell>
 
-                    <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
-                        {{ formatDateTime(item.checked_in_at) ?? '' }}
-                    </BaseTableCell>
-                </BaseTableRow>
-            </BaseTableBody>
-        </BaseTable>
-    </Transition>
+                <BaseTableCell class="whitespace-nowrap text-sm text-gray-600">
+                    {{ formatDateTime(item.checked_in_at) ?? '' }}
+                </BaseTableCell>
+            </BaseTableRow>
+        </BaseTableBody>
+    </BaseTable>
 </template>
-
-<style>
-    .assets-fade-enter-active,
-    .assets-fade-leave-active {
-        transition:
-            opacity 0.16s ease,
-            transform 0.16s ease;
-    }
-    .assets-fade-enter-from,
-    .assets-fade-leave-to {
-        opacity: 0;
-        transform: translateY(5px);
-    }
-</style>

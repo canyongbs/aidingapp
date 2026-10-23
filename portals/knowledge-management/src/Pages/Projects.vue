@@ -32,51 +32,28 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
+    import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { useQuery } from '@pinia/colada';
-    import { computed, ref, watch } from 'vue';
+    import { ExclamationTriangleIcon, FolderIcon } from '@heroicons/vue/24/outline';
+    import { computed } from 'vue';
     import ProjectsTable from '../Components/Projects/ProjectsTable.vue';
+    import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useProjectsData } from './loaders.js';
 
     const { data: initialData } = useProjectsData();
-    const currentPage = ref(1);
 
-    const pageQuery = useQuery({
-        key: () => ['knowledge-management', 'projects', currentPage.value],
-        query: () => apiGet('/projects', { page: currentPage.value }),
-        enabled: () => currentPage.value > 1,
+    const { shownEnvelope, isFetching, loadFailed, pagination, refetch } = usePaginatedEnvelope({
+        initialEnvelope: initialData,
+        usesInitialEnvelope: (page) => page === 1,
+        key: (page) => ['knowledge-management', 'projects', page],
+        query: (page) => apiGet('/projects', { page }),
     });
 
-    const currentEnvelope = computed(() =>
-        currentPage.value > 1 ? (pageQuery.data.value ?? null) : (initialData.value ?? null),
-    );
-
-    const shownEnvelope = ref(null);
-    watch(
-        currentEnvelope,
-        (envelope) => {
-            if (envelope) {
-                shownEnvelope.value = envelope;
-            }
-        },
-        { immediate: true },
-    );
-
     const projects = computed(() => shownEnvelope.value?.data ?? []);
-    const lastPage = computed(() => shownEnvelope.value?.meta?.last_page ?? 1);
-    const fromItem = computed(() => shownEnvelope.value?.meta?.from ?? 0);
-    const toItem = computed(() => shownEnvelope.value?.meta?.to ?? 0);
-    const totalItems = computed(() => shownEnvelope.value?.meta?.total ?? 0);
-    const loadingPage = computed(() => (currentPage.value > 1 && pageQuery.isLoading.value ? currentPage.value : null));
-
-    function fetchPage(page) {
-        if (page !== currentPage.value) {
-            currentPage.value = page;
-        }
-    }
 </script>
 
 <template>
@@ -88,19 +65,24 @@
             <Breadcrumbs :currentCrumb="'Projects'" />
         </template>
 
-        <ProjectsTable :projects="projects">
-            <template #footer>
-                <Pagination
-                    :current-page="currentPage"
-                    :last-page="lastPage"
-                    :from-item="fromItem"
-                    :to-item="toItem"
-                    :total-items="totalItems"
-                    :loading-page="loadingPage"
-                    @fetchPreviousPage="fetchPage(currentPage - 1)"
-                    @fetchNextPage="fetchPage(currentPage + 1)"
-                    @fetchPage="fetchPage"
-                />
+        <ProjectsTable :projects="projects" :loading="isFetching">
+            <template v-if="loadFailed || projects.length === 0" #empty>
+                <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
+                    <template #heading>Could not load projects</template>
+                    <template #description>Something went wrong while loading these results.</template>
+                    <template #actions>
+                        <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
+                    </template>
+                </EmptyState>
+
+                <EmptyState role="status" v-else :icon="FolderIcon" :contained="false">
+                    <template #heading>No projects to display</template>
+                    <template #description>You don't currently have visibility into any projects.</template>
+                </EmptyState>
+            </template>
+
+            <template v-if="!loadFailed && projects.length > 0" #footer>
+                <Pagination v-bind="pagination" />
             </template>
         </ProjectsTable>
     </Page>

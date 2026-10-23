@@ -59,7 +59,7 @@ const STATUSES = {
     degraded: {
         label: 'Degraded',
         tone: 'warning',
-        color: 'orange',
+        color: 'amber',
         icon: ExclamationTriangleIcon,
         description: 'This monitor is reachable, but some checks failed within the last 24 hours.',
         noteTitle: 'Service degraded',

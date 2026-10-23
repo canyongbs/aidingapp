@@ -42,6 +42,7 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
+    import { ArrowDownTrayIcon } from '@heroicons/vue/24/outline';
     import { ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
     import BaseDetailSection from '../Components/ui/BaseDetailSection.vue';
@@ -275,15 +276,7 @@
                                 download
                                 class="inline-flex w-fit items-center space-x-2 rounded-lg border border-gray-100 bg-white px-2 py-1.5 text-sm transition hover:bg-gray-200"
                             >
-                                <svg
-                                    class="h-4 w-4 shrink-0 opacity-70"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path d="M12 3v12m0 0l4-4m-4 4l-4-4M5 21h14" />
-                                </svg>
+                                <ArrowDownTrayIcon class="size-4 shrink-0 opacity-70" aria-hidden="true" />
                                 <span class="truncate text-gray-900">{{ mediaItem.name }}</span>
                             </a>
                         </li>
