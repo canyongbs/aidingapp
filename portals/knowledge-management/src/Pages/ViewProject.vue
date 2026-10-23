@@ -131,7 +131,6 @@
         </template>
 
         <BaseCallout
-            role="note"
             size="sm"
             tone="info"
             title="About milestone progress"

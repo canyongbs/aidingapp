@@ -185,6 +185,7 @@
 
         <template v-if="summary && summary.total_count > 0">
             <BaseCallout
+                role="status"
                 :tone="summaryStatus.tone"
                 :icon="summaryStatus.icon"
                 :title="summaryCopy.title"

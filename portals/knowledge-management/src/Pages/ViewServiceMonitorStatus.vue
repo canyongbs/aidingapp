@@ -194,7 +194,6 @@
         </div>
 
         <BaseCallout
-            role="note"
             size="sm"
             :tone="statusConfig.tone"
             :icon="monitor.status === 'operational' ? ShieldCheckIcon : ShieldExclamationIcon"

@@ -175,7 +175,7 @@ describe('ranking', function () {
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
 
-        livewire(ListAdvisorySeverities::class)
+        Livewire::test(ListAdvisorySeverities::class)
             ->assertCanSeeTableRecords([$critical, $minor], inOrder: true);
     });
 
@@ -183,7 +183,7 @@ describe('ranking', function () {
         $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
         $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
 
-        livewire(ListAdvisorySeverities::class)
+        Livewire::test(ListAdvisorySeverities::class)
             ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
 
         expect($minor->refresh()->sort)->toBe(1)
@@ -196,7 +196,7 @@ describe('ranking', function () {
 
         actingAs(User::factory()->create()->givePermissionTo('settings.view-any'));
 
-        livewire(ListAdvisorySeverities::class)
+        Livewire::test(ListAdvisorySeverities::class)
             ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
 
         expect($minor->refresh()->sort)->toBe(2)
@@ -209,7 +209,7 @@ describe('ranking', function () {
 
         AdvisorySeveritySortFeature::deactivate();
 
-        livewire(ListAdvisorySeverities::class)
+        Livewire::test(ListAdvisorySeverities::class)
             ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
 
         expect($minor->refresh()->sort)->toBe(2)

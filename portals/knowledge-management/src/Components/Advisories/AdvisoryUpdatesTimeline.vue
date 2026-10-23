@@ -32,6 +32,7 @@
 </COPYRIGHT>
 -->
 <script setup>
+    import { defineProps } from 'vue';
     import formatDateTime from '../../Services/FormatDateTime.js';
 
     defineProps({
