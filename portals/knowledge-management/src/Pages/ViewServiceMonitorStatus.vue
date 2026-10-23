@@ -41,7 +41,6 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { ChartBarIcon } from '@heroicons/vue/24/outline';
     import { ShieldCheckIcon, ShieldExclamationIcon } from '@heroicons/vue/24/solid';
@@ -209,18 +208,16 @@
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="'Not Found'" />
         </template>
 
-        <PageCard>
-            <EmptyState>
-                <template #heading>Monitor Not Found</template>
-                <template #description>
-                    The monitor you are looking for does not exist or you no longer have access to it.
-                </template>
-                <template #actions>
-                    <BaseButton tag="router-link" :to="{ name: 'status' }" color="gray" size="md">
-                        Return to Status
-                    </BaseButton>
-                </template>
-            </EmptyState>
-        </PageCard>
+        <EmptyState>
+            <template #heading>Monitor Not Found</template>
+            <template #description>
+                The monitor you are looking for does not exist or you no longer have access to it.
+            </template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'status' }" color="gray" size="md">
+                    Return to Status
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

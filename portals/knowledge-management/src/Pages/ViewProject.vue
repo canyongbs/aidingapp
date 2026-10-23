@@ -37,7 +37,6 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import { useQuery } from '@pinia/colada';
     import { computed, ref, watch } from 'vue';
@@ -165,18 +164,16 @@
             <Breadcrumbs :currentCrumb="'Not Found'" />
         </template>
 
-        <PageCard>
-            <EmptyState>
-                <template #heading>Project Not Found</template>
-                <template #description>
-                    The project you are looking for does not exist or you no longer have access to it.
-                </template>
-                <template #actions>
-                    <BaseButton tag="router-link" :to="{ name: 'projects' }" color="gray" size="md">
-                        Return to Projects
-                    </BaseButton>
-                </template>
-            </EmptyState>
-        </PageCard>
+        <EmptyState>
+            <template #heading>Project Not Found</template>
+            <template #description>
+                The project you are looking for does not exist or you no longer have access to it.
+            </template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'projects' }" color="gray" size="md">
+                    Return to Projects
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

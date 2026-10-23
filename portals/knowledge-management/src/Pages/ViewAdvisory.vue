@@ -38,7 +38,6 @@
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
-    import PageCard from '@common/portal/PageCard.vue';
     import { ArrowLeftIcon } from '@heroicons/vue/16/solid';
     import { computed } from 'vue';
     import { getStatusColor } from '../Components/Advisories/advisoryPresentation.js';
@@ -107,18 +106,16 @@
             <Breadcrumbs :breadcrumbs="breadcrumbs" :currentCrumb="'Not Found'" />
         </template>
 
-        <PageCard>
-            <EmptyState>
-                <template #heading>Advisory Not Found</template>
-                <template #description>
-                    The advisory you are looking for does not exist or you no longer have access to it.
-                </template>
-                <template #actions>
-                    <BaseButton tag="router-link" :to="{ name: 'advisories' }" color="gray" size="md">
-                        Return to Advisories
-                    </BaseButton>
-                </template>
-            </EmptyState>
-        </PageCard>
+        <EmptyState>
+            <template #heading>Advisory Not Found</template>
+            <template #description>
+                The advisory you are looking for does not exist or you no longer have access to it.
+            </template>
+            <template #actions>
+                <BaseButton tag="router-link" :to="{ name: 'advisories' }" color="gray" size="md">
+                    Return to Advisories
+                </BaseButton>
+            </template>
+        </EmptyState>
     </Page>
 </template>

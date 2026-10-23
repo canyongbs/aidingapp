@@ -152,9 +152,7 @@
 
     const statusOptions = computed(() => [
         { value: '', label: 'All statuses' },
-        ...(shownEnvelope.value?.statuses ?? [])
-            .filter((option) => option.classification === classification.value)
-            .map((option) => ({ value: option.id, label: option.name })),
+        ...(shownEnvelope.value?.statuses ?? []).map((option) => ({ value: option.id, label: option.name })),
     ]);
 
     function clearFilters() {

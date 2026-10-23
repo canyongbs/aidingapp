@@ -88,7 +88,7 @@
                 :key="`${group.milestone_id ?? 'no-milestone'}-${groupIndex}`"
             >
                 <tr class="bg-gray-50/70">
-                    <td colspan="4" class="px-4 py-2">
+                    <td colspan="4" class="px-4 py-2 sm:px-6">
                         <div class="flex items-center justify-between gap-2">
                             <span class="text-sm font-semibold text-gray-700">{{ group.milestone_title }}</span>
                             <BaseBadge v-if="group.progress_percentage !== null" color="gray" :icon="ChartPieIcon">
