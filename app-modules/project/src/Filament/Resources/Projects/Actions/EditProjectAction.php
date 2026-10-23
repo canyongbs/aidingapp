@@ -34,53 +34,20 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Actions;
 
 use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
-use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashboardNavigation;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use AidingApp\Project\Models\Project;
-use CanyonGBS\Common\Filament\Actions\ArchiveAction;
-use Filament\Actions\ViewAction;
-use Filament\Resources\Pages\EditRecord;
-use Filament\Schemas\Schema;
-use Illuminate\Contracts\Support\Htmlable;
+use Filament\Actions\EditAction;
 
-class EditProject extends EditRecord
+class EditProjectAction
 {
-    use HasProjectDashboardNavigation;
-
-    protected static string $resource = ProjectResource::class;
-
-    protected static ?string $navigationLabel = 'Edit';
-
-    public function getTitle(): string | Htmlable
+    public static function make(string $name = 'edit'): EditAction
     {
-        $record = $this->getRecord();
-
-        assert($record instanceof Project);
-
-        return __('filament-panels::resources/pages/edit-record.title', [
-            'label' => $record->name,
-        ]);
-    }
-
-    public function form(Schema $schema): Schema
-    {
-        return $schema
-            ->components(ProjectForm::components(isEdit: true));
-    }
-
-    protected function mutateFormDataBeforeSave(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
-    }
-
-    protected function getHeaderActions(): array
-    {
-        return [
-            ViewAction::make(),
-            ArchiveAction::make(),
-        ];
+        return EditAction::make($name)
+            ->label('Edit Project')
+            ->authorize('update')
+            ->schema(ProjectForm::components())
+            ->mutateDataUsing(fn (array $data): array => ProjectForm::mutateDataForSave($data))
+            ->slideOver();
     }
 }
