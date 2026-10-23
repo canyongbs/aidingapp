@@ -250,9 +250,9 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
 });
 
 // TODO: Cleanup Task (email-template-name-uniqueness): delete this describe and the tests within
-describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function () {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
             $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(3)]);
             $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinutes(2)]);
             $third = EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL', 'created_at' => now()->subMinute()]);
@@ -271,8 +271,8 @@ describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_u
         });
     });
 
-    it('leaves soft-deleted duplicates untouched', function () {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+    it('leaves soft-deleted duplicates untouched', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
             $kept = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
             $trashed = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
             $trashed->delete();
@@ -285,8 +285,8 @@ describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_u
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () {
-        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function () {
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
             $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
             $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
 
