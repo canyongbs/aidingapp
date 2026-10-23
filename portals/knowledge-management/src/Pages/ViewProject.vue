@@ -38,8 +38,9 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { ExclamationTriangleIcon, InboxIcon } from '@heroicons/vue/24/outline';
+    import { InboxIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import PipelineSelect from '../Components/Projects/PipelineSelect.vue';
     import ProjectPipelineTable from '../Components/Projects/ProjectPipelineTable.vue';
     import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
@@ -110,13 +111,7 @@
             </template>
 
             <template v-if="loadFailed || groups.length === 0" #empty>
-                <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
-                    <template #heading>Could not load pipeline tasks</template>
-                    <template #description>Something went wrong while loading these results.</template>
-                    <template #actions>
-                        <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
-                    </template>
-                </EmptyState>
+                <LoadFailedState v-if="loadFailed" heading="Could not load pipeline tasks" @retry="refetch" />
 
                 <EmptyState role="status" v-else :icon="InboxIcon" :contained="false">
                     <template #heading>No pipeline tasks</template>
@@ -124,7 +119,7 @@
                 </EmptyState>
             </template>
 
-            <template v-if="!loadFailed && groups.length > 0" #footer>
+            <template v-if="!loadFailed && pagination.totalItems > 0" #footer>
                 <Pagination v-bind="pagination" />
             </template>
         </ProjectPipelineTable>

@@ -41,14 +41,11 @@
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import Tabs from '@common/portal/Tabs.vue';
-    import {
-        ClipboardDocumentCheckIcon,
-        ExclamationTriangleIcon,
-        MagnifyingGlassIcon,
-    } from '@heroicons/vue/24/outline';
+    import { ClipboardDocumentCheckIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
     import AdvisoriesTable from '../Components/Advisories/AdvisoriesTable.vue';
     import { DEFAULT_SORT, SORT_OPTIONS } from '../Components/Advisories/advisoryPresentation.js';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useAdvisoriesData } from './loaders.js';
@@ -194,13 +191,7 @@
                     </template>
 
                     <template v-if="showsEmptyState" #empty>
-                        <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
-                            <template #heading>Could not load advisories</template>
-                            <template #description>Something went wrong while loading these results.</template>
-                            <template #actions>
-                                <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
-                            </template>
-                        </EmptyState>
+                        <LoadFailedState v-if="loadFailed" heading="Could not load advisories" @retry="refetch" />
 
                         <EmptyState
                             role="status"

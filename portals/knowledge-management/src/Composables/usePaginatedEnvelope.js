@@ -35,8 +35,9 @@ import { useQuery } from '@pinia/colada';
 import { computed, ref, watch } from 'vue';
 
 /**
- * A paginated API envelope (`data` plus Laravel's `meta`) whose default view arrives via a route data loader, with every
- * other page or filter fetched on demand. The last loaded envelope stays shown while the next one loads.
+ * A paginated API envelope whose default view arrives via a route data loader, with every other page or filter fetched
+ * on demand. The last loaded envelope stays shown while the next one loads. Envelopes are either an API resource
+ * collection (`data` plus `meta`) or a plain Laravel paginator.
  *
  * `pagination` holds the props and listeners for the common `Pagination` component, so it can be bound with `v-bind`.
  *
@@ -46,10 +47,17 @@ import { computed, ref, watch } from 'vue';
  * @param {(page: number) => Array} options.key The query key for this page of the current view.
  * @param {(page: number) => Promise<object>} options.query Fetches this page of the current view.
  * @param {() => boolean} [options.enabled] Whether the current view can be fetched yet.
+ * @param {import('vue').Ref<number>} [options.currentPage] The current page, for pages that keep it outside the
+ *     composable (such as in the URL). Defaults to a local ref starting at page 1.
  */
-export function usePaginatedEnvelope({ initialEnvelope, usesInitialEnvelope, key, query, enabled = () => true }) {
-    const currentPage = ref(1);
-
+export function usePaginatedEnvelope({
+    initialEnvelope,
+    usesInitialEnvelope,
+    key,
+    query,
+    enabled = () => true,
+    currentPage = ref(1),
+}) {
     const usesInitial = computed(() => usesInitialEnvelope(currentPage.value));
 
     const pageQuery = useQuery({
@@ -78,12 +86,14 @@ export function usePaginatedEnvelope({ initialEnvelope, usesInitialEnvelope, key
         currentPage.value = page;
     }
 
+    const meta = computed(() => shownEnvelope.value?.meta ?? shownEnvelope.value);
+
     const pagination = computed(() => ({
         currentPage: currentPage.value,
-        lastPage: shownEnvelope.value?.meta?.last_page ?? 1,
-        fromItem: shownEnvelope.value?.meta?.from ?? 0,
-        toItem: shownEnvelope.value?.meta?.to ?? 0,
-        totalItems: shownEnvelope.value?.meta?.total ?? 0,
+        lastPage: meta.value?.last_page ?? 1,
+        fromItem: meta.value?.from ?? 0,
+        toItem: meta.value?.to ?? 0,
+        totalItems: meta.value?.total ?? 0,
         loadingPage: isFetching.value ? currentPage.value : null,
         onFetchPage: fetchPage,
         onFetchPreviousPage: () => fetchPage(currentPage.value - 1),

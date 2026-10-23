@@ -38,10 +38,11 @@
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
     import Tabs from '@common/portal/Tabs.vue';
-    import { ComputerDesktopIcon, ExclamationTriangleIcon } from '@heroicons/vue/24/outline';
+    import { ComputerDesktopIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
     import AssetStatCards from '../Components/Assets/AssetStatCards.vue';
     import AssetTable from '../Components/Assets/AssetTable.vue';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
     import { useAssetsData } from './loaders.js';
@@ -106,13 +107,7 @@
                     :loading="isFetching"
                 >
                     <template v-if="loadFailed || assets.length === 0" #empty>
-                        <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
-                            <template #heading>Could not load assets</template>
-                            <template #description>Something went wrong while loading these results.</template>
-                            <template #actions>
-                                <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
-                            </template>
-                        </EmptyState>
+                        <LoadFailedState v-if="loadFailed" heading="Could not load assets" @retry="refetch" />
 
                         <EmptyState role="status" v-else :icon="ComputerDesktopIcon" :contained="false">
                             <template #heading>{{ emptyState.heading }}</template>

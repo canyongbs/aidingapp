@@ -32,13 +32,13 @@
 </COPYRIGHT>
 -->
 <script setup>
-    import BaseButton from '@common/BaseButton.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { ExclamationTriangleIcon, FolderIcon } from '@heroicons/vue/24/outline';
+    import { FolderIcon } from '@heroicons/vue/24/outline';
     import { computed } from 'vue';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import ProjectsTable from '../Components/Projects/ProjectsTable.vue';
     import { usePaginatedEnvelope } from '../Composables/usePaginatedEnvelope.js';
     import { apiGet } from '../Services/api.js';
@@ -67,13 +67,7 @@
 
         <ProjectsTable :projects="projects" :loading="isFetching">
             <template v-if="loadFailed || projects.length === 0" #empty>
-                <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
-                    <template #heading>Could not load projects</template>
-                    <template #description>Something went wrong while loading these results.</template>
-                    <template #actions>
-                        <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
-                    </template>
-                </EmptyState>
+                <LoadFailedState v-if="loadFailed" heading="Could not load projects" @retry="refetch" />
 
                 <EmptyState role="status" v-else :icon="FolderIcon" :contained="false">
                     <template #heading>No projects to display</template>

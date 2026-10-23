@@ -40,8 +40,9 @@
     import EmptyState from '@common/portal/EmptyState.vue';
     import Page from '@common/portal/Page.vue';
     import Pagination from '@common/portal/Pagination.vue';
-    import { ExclamationTriangleIcon, MagnifyingGlassIcon, SignalIcon } from '@heroicons/vue/24/outline';
+    import { MagnifyingGlassIcon, SignalIcon } from '@heroicons/vue/24/outline';
     import { computed, ref, watch } from 'vue';
+    import LoadFailedState from '../Components/LoadFailedState.vue';
     import ServiceMonitorsTable from '../Components/ServiceMonitors/ServiceMonitorsTable.vue';
     import ServiceMonitorStatusCounts from '../Components/ServiceMonitors/ServiceMonitorStatusCounts.vue';
     import { getStatus } from '../Components/ServiceMonitors/serviceMonitorStatuses.js';
@@ -191,13 +192,7 @@
                 </template>
 
                 <template v-if="loadFailed || monitors.length === 0" #empty>
-                    <EmptyState role="status" v-if="loadFailed" :icon="ExclamationTriangleIcon" :contained="false">
-                        <template #heading>Could not load monitors</template>
-                        <template #description>Something went wrong while loading these results.</template>
-                        <template #actions>
-                            <BaseButton color="gray" size="md" @click="refetch">Try again</BaseButton>
-                        </template>
-                    </EmptyState>
+                    <LoadFailedState v-if="loadFailed" heading="Could not load monitors" @retry="refetch" />
 
                     <EmptyState role="status" v-else :icon="MagnifyingGlassIcon" :contained="false">
                         <template #heading>No monitors match your search</template>
