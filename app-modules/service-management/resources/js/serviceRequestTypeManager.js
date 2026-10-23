@@ -62,6 +62,11 @@ document.addEventListener('alpine:init', () => {
             draggedId: null,
             draggedSourceCategoryId: null, // owning category of the dragged type placement
             ghostElement: null,
+            ghostListener: null,
+            dropLine: null,
+            dropLineTransform: null,
+            dropLineWidth: null,
+            nestTarget: null,
         },
 
         init() {
@@ -951,7 +956,8 @@ document.addEventListener('alpine:init', () => {
 
             this.createDragGhost(event.target);
 
-            document.addEventListener('dragover', this.updateGhostPosition.bind(this));
+            this.dragData.ghostListener = (event) => this.updateGhostPosition(event);
+            document.addEventListener('dragover', this.dragData.ghostListener);
         },
 
         handleDragEnd(event) {
@@ -1008,24 +1014,25 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
 
-            const dropPosition = this.determineDropPosition(event.currentTarget, event);
-
-            if (dropPosition) {
-                event.dataTransfer.dropEffect = 'move';
-            } else {
-                event.dataTransfer.dropEffect = 'none';
+            // `dragover` bubbles from a type to its container, which listens too. The innermost
+            // target resolves the same drop position, so the outer listeners have nothing to add.
+            if (event.isHandledByServiceRequestTypeManager) {
+                return;
             }
 
-            this.updateGhostPosition(event);
+            event.isHandledByServiceRequestTypeManager = true;
 
-            this.updateDropIndicators(event);
+            const dropPosition = this.determineDropPosition(event.currentTarget, event);
+
+            event.dataTransfer.dropEffect = dropPosition ? 'move' : 'none';
+
+            this.updateDropIndicators(dropPosition);
         },
 
         handleDragEnter(event) {
+            // Required for the element to accept a drop. The indicators are drawn by the
+            // `dragover` event that immediately follows.
             event.preventDefault();
-            if (!this.dragData.isDragging) return;
-
-            this.updateDropIndicators(event);
         },
 
         handleDragLeave(event) {
@@ -1144,59 +1151,101 @@ document.addEventListener('alpine:init', () => {
                     font-size: 14px;
                     font-weight: 500;
                     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-                    backdrop-filter: blur(4px);
-                    left: -9999px;
-                    top: -9999px;
+                    left: 0;
+                    top: 0;
+                    transform: translate(-9999px, -9999px);
+                    will-change: transform;
                 `;
 
-            document.body.appendChild(ghost);
+            this.mountDragOverlay(ghost);
             this.dragData.ghostElement = ghost;
+        },
+
+        // The panel's CSS has `:has()` rules that make Chrome restyle the whole document whenever
+        // anything inside `<body>` is inserted, removed, re-classed, or restyled. Overlays that
+        // move on every `dragover` are mounted outside `<body>` so updating them stays cheap.
+        mountDragOverlay(element) {
+            document.documentElement.appendChild(element);
         },
 
         updateGhostPosition(event) {
             if (this.dragData.ghostElement) {
                 const x = event.clientX + 15;
                 const y = event.clientY - 10;
-                this.dragData.ghostElement.style.left = x + 'px';
-                this.dragData.ghostElement.style.top = y + 'px';
+                this.dragData.ghostElement.style.transform = `translate(${x}px, ${y}px)`;
             }
         },
 
-        updateDropIndicators(event) {
-            this.cleanupDropIndicators();
+        // `dragover` fires continuously, so only touch elements inside `<body>` when the drop
+        // position actually changes (see `mountDragOverlay()`).
+        updateDropIndicators(dropPosition) {
+            const nestTarget =
+                dropPosition?.type === 'inside' && dropPosition.target.classList.contains('category-item')
+                    ? dropPosition.target
+                    : null;
 
-            const target = event.currentTarget;
-            const dropPosition = this.determineDropPosition(target, event);
+            this.setNestTarget(nestTarget);
 
-            if (!dropPosition) {
+            if (dropPosition?.type === 'insert') {
+                this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+            } else {
+                this.hideInsertionLine();
+            }
+        },
+
+        setNestTarget(target) {
+            if (this.dragData.nestTarget === target) {
                 return;
             }
 
-            if (dropPosition.type === 'inside') {
-                if (dropPosition.target.classList.contains('category-item')) {
-                    dropPosition.target.classList.add(
-                        'nest-target',
-                        'bg-primary-500/10',
-                        'border-primary-500/50',
-                        'border-2',
-                        'rounded-lg',
-                        'relative',
-                    );
-                }
-            } else if (dropPosition.type === 'insert') {
-                this.showInsertionLine(dropPosition.container, dropPosition.insertIndex);
+            this.dragData.nestTarget?.classList.remove(
+                'nest-target',
+                'bg-primary-500/10',
+                'border-primary-500/50',
+                'border-2',
+                'relative',
+            );
+
+            target?.classList.add(
+                'nest-target',
+                'bg-primary-500/10',
+                'border-primary-500/50',
+                'border-2',
+                'rounded-lg',
+                'relative',
+            );
+
+            this.dragData.nestTarget = target;
+        },
+
+        // A single line is reused for the whole drag and moved with a transform.
+        getDropLine() {
+            if (!this.dragData.dropLine) {
+                const line = document.createElement('div');
+                line.className = 'drop-line';
+                line.style.visibility = 'hidden';
+                this.mountDragOverlay(line);
+
+                this.dragData.dropLine = line;
+                this.dragData.dropLineTransform = null;
+                this.dragData.dropLineWidth = null;
+            }
+
+            return this.dragData.dropLine;
+        },
+
+        hideInsertionLine() {
+            if (this.dragData.dropLine && this.dragData.dropLine.style.visibility !== 'hidden') {
+                this.dragData.dropLine.style.visibility = 'hidden';
             }
         },
 
         showInsertionLine(container, insertIndex) {
-            this.cleanupInsertionLines();
-
             let children = Array.from(container.children).filter(
                 (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
+                    child.classList.contains('category-wrapper') ||
+                    child.classList.contains('category-item') ||
+                    child.classList.contains('type-item'),
             );
 
             const draggedElement = this.dragData.draggedElement;
@@ -1229,24 +1278,31 @@ document.addEventListener('alpine:init', () => {
                 yPosition = 10;
             }
 
-            const line = document.createElement('div');
-            line.className = 'insertion-line drop-line';
-            line.style.top = yPosition + 'px';
+            const line = this.getDropLine();
+            const transform = `translate(${containerRect.left}px, ${containerRect.top + yPosition}px)`;
+            const width = `${containerRect.width}px`;
 
-            container.appendChild(line);
-        },
+            if (this.dragData.dropLineTransform !== transform) {
+                line.style.transform = transform;
+                this.dragData.dropLineTransform = transform;
+            }
 
-        cleanupInsertionLines() {
-            document.querySelectorAll('.insertion-line').forEach((line) => line.remove());
+            if (this.dragData.dropLineWidth !== width) {
+                line.style.width = width;
+                this.dragData.dropLineWidth = width;
+            }
+
+            if (line.style.visibility === 'hidden') {
+                line.style.visibility = '';
+            }
         },
 
         calculateInsertionPosition(container, mouseY) {
             let children = Array.from(container.children).filter(
                 (child) =>
-                    !child.classList.contains('insertion-line') &&
-                    (child.classList.contains('category-wrapper') ||
-                        child.classList.contains('category-item') ||
-                        child.classList.contains('type-item')),
+                    child.classList.contains('category-wrapper') ||
+                    child.classList.contains('category-item') ||
+                    child.classList.contains('type-item'),
             );
 
             const draggedElement = this.dragData.draggedElement;
@@ -1438,21 +1494,20 @@ document.addEventListener('alpine:init', () => {
         },
 
         cleanupDropIndicators() {
-            this.cleanupInsertionLines();
-            document.querySelectorAll('.nest-target').forEach((target) => {
-                target.classList.remove(
-                    'nest-target',
-                    'bg-primary-500/10',
-                    'border-primary-500/50',
-                    'border-2',
-                    'relative',
-                );
-            });
+            this.setNestTarget(null);
+            this.hideInsertionLine();
         },
 
         cleanupDragVisuals() {
             this.cleanupDropIndicators();
-            document.removeEventListener('dragover', this.updateGhostPosition);
+
+            this.dragData.dropLine?.remove();
+            this.dragData.dropLine = null;
+
+            if (this.dragData.ghostListener) {
+                document.removeEventListener('dragover', this.dragData.ghostListener);
+                this.dragData.ghostListener = null;
+            }
         },
 
         getParentIdFromPosition(position) {
