@@ -36,7 +36,7 @@
         'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.';
 @endphp
 
-<span class="inline-flex items-center gap-x-1.5">
+<span class="inline-flex items-center gap-x-1.5 align-middle">
     <span tabindex="0" x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }">
         <x-filament::icon icon="heroicon-m-lock-closed" class="h-4 w-4 text-gray-400 dark:text-gray-500" />
         <span class="fi-sr-only">{{ $managedTooltip }}</span>
