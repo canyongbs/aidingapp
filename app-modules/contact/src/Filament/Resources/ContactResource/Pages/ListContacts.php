@@ -37,6 +37,8 @@
 namespace AidingApp\Contact\Filament\Resources\ContactResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactResource;
+use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactIdentifiersColumn;
+use AidingApp\Contact\Filament\Resources\ContactResource\Tables\Columns\ContactNameColumn;
 use AidingApp\Contact\Imports\ContactImporter;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Filament\Actions\BulkEngagementAction;
@@ -46,7 +48,7 @@ use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\ImportAction;
 use Filament\Resources\Pages\ListRecords;
-use Filament\Tables\Columns\ViewColumn;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -58,6 +60,9 @@ class ListContacts extends ListRecords
     public function table(Table $table): Table
     {
         return $table
+            ->recordUrl(fn (Contact $record): ?string => ContactResource::canView($record)
+                ? ContactResource::getUrl('view', ['record' => $record])
+                : null)
             ->modifyQueryUsing(fn (Builder $query): Builder => $query
                 ->with(['type', 'organization'])
                 ->withCount([
@@ -69,20 +74,19 @@ class ListContacts extends ListRecords
                     ),
                 ]))
             ->columns([
-                ViewColumn::make('contact')
-                    ->label('Contact')
-                    ->disabledClick()
-                    ->view('filament.tables.columns.contact.contact')
-                    ->searchable(['full_name', 'email']),
-                ViewColumn::make('classification')
+                ContactNameColumn::make(),
+                TextColumn::make('type.name')
                     ->label('Classification')
-                    ->view('filament.tables.columns.contact.classification'),
-                ViewColumn::make('identifiers')
-                    ->label('Identifiers')
-                    ->view('filament.tables.columns.contact.identifiers'),
-                ViewColumn::make('history')
+                    ->badge()
+                    ->color(fn (Contact $record): string => $record->type->color->value)
+                    ->description(fn (Contact $record): ?string => $record->organization?->name),
+                ContactIdentifiersColumn::make(),
+                TextColumn::make('open_service_requests_count')
                     ->label('History')
-                    ->view('filament.tables.columns.contact.history'),
+                    ->badge()
+                    ->formatStateUsing(fn (int $state): string => "{$state} Open")
+                    ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
+                    ->description(fn (Contact $record): string => "{$record->service_requests_count} Total"),
             ])
             ->filters([
                 SelectFilter::make('type_id')

@@ -32,50 +32,14 @@
     </COPYRIGHT>
 --}}
 @php
-    $record = $getRecord();
-
-    $employeeId = $record->employee_id;
-    $studentId = $record->student_id;
+    $managedTooltip =
+        'This is a User\'s managed non-administrative account for the self-service portal. The information displayed is synchronized directly from the User record.';
 @endphp
 
-<div class="fi-ta-text grid w-full gap-y-1 text-sm text-gray-500 dark:text-gray-400">
-    @if (filled($employeeId))
-        <div class="flex items-center gap-x-1.5">
-            <span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Employee ID:</span>
-                {{ $employeeId }}
-            </span>
-
-            @include(
-                'filament.tables.columns.contact.partials.copy-button',
-                [
-                    'value' => $employeeId,
-                    'label' => 'Copy employee ID',
-                    'message' => 'Employee ID copied',
-                ]
-            )
-        </div>
-    @endif
-
-    @if (filled($studentId))
-        <div class="flex items-center gap-x-1.5">
-            <span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Student ID:</span>
-                {{ $studentId }}
-            </span>
-
-            @include(
-                'filament.tables.columns.contact.partials.copy-button',
-                [
-                    'value' => $studentId,
-                    'label' => 'Copy student ID',
-                    'message' => 'Student ID copied',
-                ]
-            )
-        </div>
-    @endif
-
-    @if (blank($employeeId) && blank($studentId))
-        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
-    @endif
-</div>
+<span class="inline-flex items-center gap-x-1.5">
+    <span tabindex="0" x-tooltip="{ content: @js($managedTooltip), theme: $store.theme }">
+        <x-filament::icon icon="heroicon-m-lock-closed" class="h-4 w-4 text-gray-400 dark:text-gray-500" />
+        <span class="fi-sr-only">{{ $managedTooltip }}</span>
+    </span>
+    <span>{{ $name }}</span>
+</span>
