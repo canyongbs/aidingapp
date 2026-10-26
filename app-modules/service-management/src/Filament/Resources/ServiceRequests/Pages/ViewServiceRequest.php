@@ -66,6 +66,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 
 class ViewServiceRequest extends ViewRecord
@@ -83,6 +84,12 @@ class ViewServiceRequest extends ViewRecord
         parent::mount($record);
 
         $this->tab = (ServiceRequestTab::tryFrom($this->tab ?? '') ?? ServiceRequestTab::default())->value;
+    }
+
+    #[On('service-request-status-changed')]
+    public function refreshServiceRequest(): void
+    {
+        $this->getRecord()->refresh();
     }
 
     public function infolist(Schema $schema): Schema

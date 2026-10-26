@@ -498,6 +498,21 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
             ->assertSeeLivewire(ServiceRequestUpdates::class);
     });
 
+    it('refreshes the header status when an update changes the status', function (): void {
+        asSuperAdmin();
+
+        $serviceRequest = ServiceRequest::factory()->create();
+        $newStatus = ServiceRequestStatus::factory()->create(['name' => 'Awaiting Vendor Reply']);
+
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertDontSeeText('Awaiting Vendor Reply');
+
+        $serviceRequest->update(['status_id' => $newStatus->getKey()]);
+
+        $component->dispatch('service-request-status-changed')
+            ->assertSeeText('Awaiting Vendor Reply');
+    });
+
     it('renders the relation manager for the chats tab', function (): void {
         asSuperAdmin();
 

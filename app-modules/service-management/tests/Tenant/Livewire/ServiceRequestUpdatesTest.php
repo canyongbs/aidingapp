@@ -206,6 +206,7 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified()
+        ->assertDispatched('service-request-status-changed')
         ->assertSet('data.update', null)
         ->assertSeeText('We are looking into this.');
 

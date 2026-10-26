@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Livewire;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Actions\DraftServiceRequestUpdateWithAiAction;
-use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusSelect;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusToggleButtons;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestUpdateUploadsFileUpload;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestUpdateVisibilityToggleButtons;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -50,7 +50,7 @@ use Filament\Actions\Contracts\HasActions;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Textarea;
 use Filament\Notifications\Notification;
-use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Section;
 use Filament\Schemas\Concerns\InteractsWithSchemas;
 use Filament\Schemas\Concerns\RestrictsFileUploadsToSchemaComponents;
 use Filament\Schemas\Contracts\HasSchemas;
@@ -95,21 +95,22 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
     {
         return $schema
             ->components([
-                Textarea::make('update')
-                    ->label('Add an update')
-                    ->placeholder('Write an update…')
-                    ->rows(4)
-                    ->autosize()
-                    ->required()
-                    ->string()
-                    ->hintAction(DraftServiceRequestUpdateWithAiAction::make()),
-                Grid::make(['default' => 1, 'md' => 2])
+                Section::make('New Update')
                     ->schema([
+                        Textarea::make('update')
+                            ->label('Update Details')
+                            ->placeholder('Write an update…')
+                            ->rows(4)
+                            ->autosize()
+                            ->required()
+                            ->string()
+                            ->hintAction(DraftServiceRequestUpdateWithAiAction::make()),
                         ServiceRequestUpdateVisibilityToggleButtons::make(),
-                        ServiceRequestStatusSelect::make(selectedId: $this->serviceRequest->status_id)
+                        ServiceRequestStatusToggleButtons::make(selectedId: $this->serviceRequest->status_id)
+                            ->label('Simultaneously Update Overall Status')
                             ->visible(fn (): bool => $this->canUpdateServiceRequest()),
+                        ServiceRequestUpdateUploadsFileUpload::make(),
                     ]),
-                ServiceRequestUpdateUploadsFileUpload::make(),
             ])
             ->model(ServiceRequestUpdate::class)
             ->statePath('data');
@@ -121,7 +122,9 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
         $data = $this->form->getState();
 
-        DB::transaction(function () use ($data): void {
+        $hasStatusChanged = false;
+
+        DB::transaction(function () use ($data, &$hasStatusChanged): void {
             $serviceRequestUpdate = new ServiceRequestUpdate();
             $serviceRequestUpdate->update = $data['update'];
             $serviceRequestUpdate->internal = $data['internal'];
@@ -132,8 +135,13 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
             if (filled($data['status_id'] ?? null) && $this->canUpdateServiceRequest()) {
                 $this->serviceRequest->update(['status_id' => $data['status_id']]);
+                $hasStatusChanged = $this->serviceRequest->wasChanged('status_id');
             }
         });
+
+        if ($hasStatusChanged) {
+            $this->dispatch('service-request-status-changed');
+        }
 
         Notification::make()
             ->title($data['internal'] ? 'Internal note added' : 'Update sent')
