@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\Projects\Pages\Concerns\HasProjectDashb
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\ProjectFile;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -54,6 +55,7 @@ use Filament\Schemas\Schema;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
 
 class ManageFiles extends ManageRelatedRecords
@@ -176,7 +178,16 @@ class ManageFiles extends ManageRelatedRecords
                     ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.retention_date', $direction)),
                 TextColumn::make('createdBy.full_name')
                     ->label('Created By')
-                    ->sortable(query: fn ($query, $direction) => $query->orderBy('project_files.created_by_id', $direction)),
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        foreach (['first_name', 'last_name'] as $nameColumn) {
+                            $query->orderBy(
+                                User::query()->select($nameColumn)->whereColumn((new User())->getQualifiedKeyName(), 'project_files.created_by_id'),
+                                $direction,
+                            );
+                        }
+
+                        return $query;
+                    }),
             ])
             ->headerActions([
                 CreateAction::make()

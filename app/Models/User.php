@@ -119,6 +119,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     /** @use InteractsWithMedia<\App\Models\Media> */
     use InteractsWithMedia;
 
+    /** Two parts plus a space must fit managed contacts' 255-character full_name. */
+    public const NAME_PART_MAX_LENGTH = 127;
+
     protected $hidden = [
         'remember_token',
         'password',

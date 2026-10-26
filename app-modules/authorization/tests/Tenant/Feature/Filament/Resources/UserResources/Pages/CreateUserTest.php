@@ -212,7 +212,7 @@ test('CreateUser validates the inputs', function (array $data, array $errors): v
             ['first_name' => 'required'],
         ],
         'first_name max' => [
-            ['first_name' => str()->random(256)],
+            ['first_name' => str()->random(128)],
             ['first_name' => 'max'],
         ],
         'last name required' => [
@@ -220,7 +220,7 @@ test('CreateUser validates the inputs', function (array $data, array $errors): v
             ['last_name' => 'required'],
         ],
         'last_name max' => [
-            ['last_name' => str()->random(256)],
+            ['last_name' => str()->random(128)],
             ['last_name' => 'max'],
         ],
         'preferred_name max' => [

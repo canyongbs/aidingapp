@@ -33,6 +33,9 @@
 
 </COPYRIGHT>
 */
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Services\ManagedContactService;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\UserResource;
@@ -41,6 +44,7 @@ use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -369,7 +373,7 @@ test('EditUser validates the inputs', function (array $data, array $errors): voi
             ['first_name' => 'required'],
         ],
         'first_name max' => [
-            ['first_name' => str()->random(256)],
+            ['first_name' => str()->random(128)],
             ['first_name' => 'max'],
         ],
         'last name required' => [
@@ -377,7 +381,7 @@ test('EditUser validates the inputs', function (array $data, array $errors): voi
             ['last_name' => 'required'],
         ],
         'last_name max' => [
-            ['last_name' => str()->random(256)],
+            ['last_name' => str()->random(128)],
             ['last_name' => 'max'],
         ],
         'preferred_name max' => [
@@ -491,4 +495,38 @@ it('prevents assigning duplicate email to a user', function (): void {
         ->fillForm($request)
         ->call('save')
         ->assertHasFormErrors(['email' => 'A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user\'s account.']);
+});
+
+test('EditUser accepts the longest names that still fit a managed contact full name', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    $firstName = str_repeat('a', User::NAME_PART_MAX_LENGTH);
+    $lastName = str_repeat('b', User::NAME_PART_MAX_LENGTH);
+
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => $firstName, 'last_name' => $lastName])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh()->full_name)->toBe("{$firstName} {$lastName}");
+});
+
+test('EditUser does not persist user changes when synchronizing the managed contact fails', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    Event::listen('eloquent.saving: ' . Contact::class, fn () => throw new RuntimeException('Contact sync failed.'));
+
+    expect(fn () => Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => 'Changed'])
+        ->call('save'))
+        ->toThrow(RuntimeException::class);
+
+    expect($user->fresh()->first_name)->toBe('Original')
+        ->and($contact->fresh()->first_name)->toBe('Original');
 });

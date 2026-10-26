@@ -63,6 +63,8 @@ class EditUser extends EditRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     protected bool $isManagedContact = false;
 
     protected ?string $managedContactTypeId = null;
@@ -76,12 +78,12 @@ class EditUser extends EditRecord
                         TextInput::make('first_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
+                            ->maxLength(User::NAME_PART_MAX_LENGTH)
                             ->disabled(fn (User $record) => $record->isAdmin()),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
-                            ->maxLength(255)
+                            ->maxLength(User::NAME_PART_MAX_LENGTH)
                             ->disabled(fn (User $record) => $record->isAdmin()),
                         TextEntry::make('presence_status')
                             ->label('Presence')

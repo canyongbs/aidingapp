@@ -36,9 +36,11 @@
 
 use AidingApp\Report\Filament\Widgets\ServiceRequestFeedbackTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Models\User;
 use Livewire\Livewire;
 
 it('returns service request feedbacks within the given date range', function (): void {
@@ -163,3 +165,36 @@ it('filters service request feedbacks by date and type', function (): void {
         ->assertSee($feedbackTwo->serviceRequest->service_request_number)
         ->assertSee($feedbackThree->serviceRequest->service_request_number);
 });
+
+it('searches the assigned to column by full name, including a quoted phrase', function (string $search): void {
+    $matchingRequest = ServiceRequest::factory()->create();
+    $otherRequest = ServiceRequest::factory()->create();
+
+    foreach ([[$matchingRequest, 'Avery', 'Smith'], [$otherRequest, 'Jordan', 'Lee']] as [$serviceRequest, $firstName, $lastName]) {
+        $assignee = User::factory()->create(['first_name' => $firstName, 'last_name' => $lastName]);
+
+        $serviceRequest->priority->type->managerUsers()->attach($assignee);
+
+        ServiceRequestAssignment::factory()->active()->create([
+            'service_request_id' => $serviceRequest->getKey(),
+            'user_id' => $assignee->getKey(),
+        ]);
+    }
+
+    $matching = ServiceRequestFeedback::factory()->state(['service_request_id' => $matchingRequest->getKey()])->create();
+    $other = ServiceRequestFeedback::factory()->state(['service_request_id' => $otherRequest->getKey()])->create();
+
+    Livewire::test(ServiceRequestFeedbackTable::class, [
+        'cacheTag' => 'report-service-request-feedback-assigned-to-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other]);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+    'quoted full name' => '"Avery Smith"',
+]);

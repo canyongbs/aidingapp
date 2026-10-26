@@ -40,6 +40,7 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseItems\KnowledgeBaseI
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use AidingApp\Report\Filament\Exports\KnowledgeBaseArticlesExporter;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
+use App\Models\Scopes\WhereFullNameLike;
 use Filament\Actions\ExportAction;
 use Filament\Forms\Components\DatePicker;
 use Filament\Tables\Columns\IconColumn;
@@ -113,7 +114,10 @@ class KnowledgeBaseArticlesTable extends BaseWidget
                     ->url(fn (KnowledgeBaseItem $record): string => KnowledgeBaseItemResource::getUrl('view', ['record' => $record])),
                 TextColumn::make('managers.full_name')
                     ->label('Manager')
-                    ->searchable(['first_name', 'last_name']),
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'managers',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    )),
                 TextColumn::make('portal_view_count')
                     ->label('Views')
                     ->sortable(),

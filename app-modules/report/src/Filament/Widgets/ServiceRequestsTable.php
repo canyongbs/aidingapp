@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use Filament\Actions\ExportAction;
 use Filament\Tables\Columns\TextColumn;
@@ -138,7 +139,10 @@ class ServiceRequestsTable extends BaseWidget
                     ->description(fn (ServiceRequest $record): ?string => $record->respondent->organization->name ?? null),
                 TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned To')
-                    ->searchable(['first_name', 'last_name'])
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
                     ->placeholder('Unassigned'),
                 TextColumn::make('created_at')
                     ->label('Date/Time Opened')
@@ -191,9 +195,12 @@ class ServiceRequestsTable extends BaseWidget
                     ->preload(),
                 SelectFilter::make('assigned_to')
                     ->label('Assigned To')
-                    ->relationship('assignedTo.user', 'first_name', fn (Builder $query): Builder => $query->tap(new OrderByFullName()))
+                    ->relationship('assignedTo.user', 'first_name', fn (Builder $query, ?string $search = null): Builder => $query
+                        ->tap(new OrderByFullName())
+                        ->when(filled($search), fn (Builder $query): Builder => $query->tap(new WhereFullNameLike($search))))
                     ->getOptionLabelFromRecordUsing(fn (User $record): string => $record->full_name)
-                    ->searchable(['first_name', 'last_name'])
+                    // Empty column list: the relationship query above does the full-name matching.
+                    ->searchable([])
                     ->preload(),
             ])
             ->headerActions([

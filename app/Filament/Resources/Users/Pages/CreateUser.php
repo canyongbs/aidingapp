@@ -59,6 +59,8 @@ class CreateUser extends CreateRecord
 {
     protected static string $resource = UserResource::class;
 
+    protected ?bool $hasDatabaseTransactions = true;
+
     protected bool $isManagedContact = false;
 
     protected ?string $managedContactTypeId = null;
@@ -72,11 +74,11 @@ class CreateUser extends CreateRecord
                         TextInput::make('first_name')
                             ->required()
                             ->string()
-                            ->maxLength(255),
+                            ->maxLength(User::NAME_PART_MAX_LENGTH),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
-                            ->maxLength(255),
+                            ->maxLength(User::NAME_PART_MAX_LENGTH),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),
