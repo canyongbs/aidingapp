@@ -57,7 +57,7 @@ class SearchUsers
             ->when(filled($searchTerm), function (Builder $query) use ($searchTerm): void {
                 $searchTermLower = Str::lower($searchTerm);
 
-                $query->where(function (Builder $query) use ($searchTerm, $searchTermLower) {
+                $query->where(function (Builder $query) use ($searchTerm, $searchTermLower): void {
                     $query->tap(new WhereFullNameLike($searchTerm))
                         ->orWhere(DB::raw('lower(email)'), 'like', "%{$searchTermLower}%");
                 });

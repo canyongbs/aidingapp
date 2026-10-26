@@ -199,7 +199,7 @@ it('can filter users by name', function (): void {
     expect($response['data'][0]['name'])->toBe($matchingUser->full_name);
 });
 
-it('can filter users by multiple names', function (array $filter) {
+it('can filter users by multiple names', function (array $filter): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -218,7 +218,7 @@ it('can filter users by multiple names', function (array $filter) {
     'array' => [['name' => ['John', 'Jane']]],
 ]);
 
-it('can filter users by department', function () {
+it('can filter users by department', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);

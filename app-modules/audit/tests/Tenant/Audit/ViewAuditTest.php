@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 
 test('The correct details are displayed on the ViewAudit page')->todo();
 
-test('ViewAudit shows the full name of a User change agent', function () {
+test('ViewAudit shows the full name of a User change agent', function (): void {
     $viewer = User::factory()->create();
     $viewer->givePermissionTo(['audit.view-any', 'audit.*.view']);
 
@@ -63,7 +63,7 @@ test('ViewAudit shows the full name of a User change agent', function () {
         ->assertSchemaStateSet(['user.full_name' => 'Jordan Blake']);
 });
 
-test('ViewAudit shows the name of a SystemUser change agent', function () {
+test('ViewAudit shows the name of a SystemUser change agent', function (): void {
     $viewer = User::factory()->create();
     $viewer->givePermissionTo(['audit.view-any', 'audit.*.view']);
 

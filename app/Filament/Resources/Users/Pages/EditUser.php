@@ -79,19 +79,19 @@ class EditUser extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(User::NAME_PART_MAX_LENGTH)
-                            ->disabled(fn (User $record) => $record->isAdmin()),
+                            ->disabled(fn (User $record): bool => $record->isAdmin()),
                         TextInput::make('last_name')
                             ->required()
                             ->string()
                             ->maxLength(User::NAME_PART_MAX_LENGTH)
-                            ->disabled(fn (User $record) => $record->isAdmin()),
+                            ->disabled(fn (User $record): bool => $record->isAdmin()),
                         TextEntry::make('presence_status')
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
                             ->badge()
-                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
-                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
+                            ->color(fn (User $record): string => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record): string => $record->presenceStatus()->getLabel()),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),

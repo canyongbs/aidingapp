@@ -123,7 +123,7 @@ it('substitutes the recipient name in the body and subject while the relabeled c
     expect($subject)->toContain('Jane Recipient');
 });
 
-it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody) {
+it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody): void {
     $user = User::factory()->create(['first_name' => 'Staff', 'last_name' => 'Recipient']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();

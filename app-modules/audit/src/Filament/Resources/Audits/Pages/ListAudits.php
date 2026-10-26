@@ -94,7 +94,7 @@ class ListAudits extends ListRecords
                     ->label('Change Agent')
                     ->options(fn (): array => [
                         'Users' => User::query()->get()->pluck('full_name', 'id')
-                            ->mapWithKeys(fn (string $name, string $id) => ["user:{$id}" => $name])
+                            ->mapWithKeys(fn (string $name, string $id): array => ["user:{$id}" => $name])
                             ->all(),
                         'System Users' => SystemUser::query()->pluck('name', 'id')
                             ->mapWithKeys(fn (string $name, string $id): array => ["system_user:{$id}" => $name])

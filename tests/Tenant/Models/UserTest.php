@@ -95,21 +95,21 @@ describe('push subscriptions', function (): void {
     });
 });
 
-describe('full name', function () {
-    it('combines the first and last name', function () {
+describe('full name', function (): void {
+    it('combines the first and last name', function (): void {
         $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
 
         expect($user->full_name)->toBe('Jordan Blake')
             ->and($user->getFilamentName())->toBe('Jordan Blake');
     });
 
-    it('trims the full name when a part is blank', function () {
+    it('trims the full name when a part is blank', function (): void {
         $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => '']);
 
         expect($user->full_name)->toBe('Jordan');
     });
 
-    it('orders users by first name then last name', function () {
+    it('orders users by first name then last name', function (): void {
         User::factory()->create(['first_name' => 'Zed', 'last_name' => 'Adams']);
         User::factory()->create(['first_name' => 'Amy', 'last_name' => 'Young']);
         User::factory()->create(['first_name' => 'Amy', 'last_name' => 'Baker']);
@@ -120,7 +120,7 @@ describe('full name', function () {
             ->toBe(['Zed Adams', 'Amy Young', 'Amy Baker']);
     });
 
-    it('searches users by their full name case-insensitively', function () {
+    it('searches users by their full name case-insensitively', function (): void {
         $matching = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Blake']);
         User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Smith']);
 
@@ -128,7 +128,7 @@ describe('full name', function () {
             ->toBe([$matching->getKey()]);
     });
 
-    it('keeps the legacy name column populated until the column has been dropped', function () {
+    it('keeps the legacy name column populated until the column has been dropped', function (): void {
         UserFullNameFeature::deactivate();
 
         $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
@@ -138,7 +138,7 @@ describe('full name', function () {
         expect($user->getAttributes())->toHaveKey('name', 'Jordan Blake');
     });
 
-    it('does not write the legacy name column once it has been dropped', function () {
+    it('does not write the legacy name column once it has been dropped', function (): void {
         $user = User::factory()->make(['first_name' => 'Jordan', 'last_name' => 'Blake']);
 
         app(UserObserver::class)->saving($user);

@@ -46,7 +46,7 @@ beforeEach(function (): void {
     $settings->save();
 });
 
-it('returns users matching the search query by name', function () {
+it('returns users matching the search query by name', function (): void {
     $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe', 'email' => 'johndoe@example.com']);
@@ -59,7 +59,7 @@ it('returns users matching the search query by name', function () {
         ->assertJsonPath('data.0.name', 'John Doe');
 });
 
-it('searches users case insensitively by name', function () {
+it('searches users case insensitively by name', function (): void {
     $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe', 'email' => 'johndoe@example.com']);
@@ -71,7 +71,7 @@ it('searches users case insensitively by name', function () {
         ->assertJsonPath('data.0.name', 'John Doe');
 });
 
-it('searches users case insensitively by email', function () {
+it('searches users case insensitively by email', function (): void {
     $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     User::factory()->create(['first_name' => 'Target', 'last_name' => 'User', 'email' => 'John.Doe@Example.com']);
@@ -83,7 +83,7 @@ it('searches users case insensitively by email', function () {
         ->assertJsonPath('data.0.email', 'John.Doe@Example.com');
 });
 
-it('returns users matching the search query by email', function () {
+it('returns users matching the search query by email', function (): void {
     $user = User::factory()->create(['first_name' => 'Searcher', 'email' => 'searcher@example.com']);
 
     $matchingUser = User::factory()->create(['first_name' => 'Matching', 'last_name' => 'User', 'email' => 'john@example.com']);
@@ -96,7 +96,7 @@ it('returns users matching the search query by email', function () {
         ->assertJsonPath('data.0.email', 'john@example.com');
 });
 
-it('excludes the current user from search results', function () {
+it('excludes the current user from search results', function (): void {
     $user = User::factory()->create(['first_name' => 'Current', 'last_name' => 'User', 'email' => 'current@example.com']);
     $otherUser = User::factory()->create(['first_name' => 'Other', 'last_name' => 'User', 'email' => 'other@example.com']);
 

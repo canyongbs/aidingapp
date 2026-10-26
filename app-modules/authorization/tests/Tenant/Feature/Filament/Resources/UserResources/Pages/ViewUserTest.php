@@ -130,7 +130,7 @@ test('ViewUser displays the record\'s current field values', function (): void {
         ]);
 });
 
-test('ViewUser shows first and last name fields', function () {
+test('ViewUser shows first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();

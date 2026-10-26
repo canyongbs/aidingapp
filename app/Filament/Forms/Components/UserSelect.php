@@ -68,7 +68,7 @@ class UserSelect extends Select
         parent::relationship(
             $name,
             $titleAttribute ?? 'first_name',
-            function (Builder $query, UserSelect $component) use ($modifyQueryUsing) {
+            function (Builder $query, UserSelect $component) use ($modifyQueryUsing): void {
                 if ($component->shouldFilterAdmins()) {
                     $alreadySelected = [];
 

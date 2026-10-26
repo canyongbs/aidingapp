@@ -129,7 +129,7 @@ class ServiceRequestFeedbackTable extends BaseWidget
                         'serviceRequest.assignedTo.user',
                         fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
                     ))
-                    ->badge(fn (ServiceRequestFeedback $record) => is_null($record->serviceRequest->assignedTo))
+                    ->badge(fn (ServiceRequestFeedback $record): bool => is_null($record->serviceRequest->assignedTo))
                     ->default('Unassigned'),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')

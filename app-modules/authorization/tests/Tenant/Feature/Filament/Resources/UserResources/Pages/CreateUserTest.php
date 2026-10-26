@@ -80,7 +80,7 @@ test('CreateUser is gated with proper access control', function (): void {
     ]);
 });
 
-test('CreateUser shows and requires first and last name fields', function () {
+test('CreateUser shows and requires first and last name fields', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)

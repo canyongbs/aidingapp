@@ -41,7 +41,6 @@ use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\WhereFullNameLike;
-use CanyonGBS\Common\Filament\Actions\ArchiveAction;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;

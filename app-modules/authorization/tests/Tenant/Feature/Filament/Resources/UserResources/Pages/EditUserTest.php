@@ -279,7 +279,7 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function ():
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser shows and requires first and last name fields', function () {
+test('EditUser shows and requires first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
