@@ -38,10 +38,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\Pages\Man
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceRequestPriorityRequestFactory;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\EditServiceRequestPriorityRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -241,6 +243,42 @@ it('validates required fields when editing a service request priority', function
     ])
         ->callTableAction('edit', record: $priority, data: ['name' => null])
         ->assertHasTableActionErrors(['name' => 'required']);
+});
+
+it('can create an SLA from the service request priority form', function (): void {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    asSuperAdmin();
+
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callAction([
+            TestAction::make('create')->table(),
+            TestAction::make('createOption')->schemaComponent('sla_id'),
+        ], data: ['name' => 'Gold Support'])
+        ->assertHasNoFormErrors();
+
+    expect(Sla::query()->where('name', 'Gold Support')->exists())->toBeTrue();
+});
+
+it('validates the SLA name is unique case-insensitively when creating an SLA from the service request priority form', function (): void {
+    $serviceRequestType = ServiceRequestType::factory()->create();
+
+    Sla::query()->create(['name' => 'Gold Support']);
+
+    asSuperAdmin();
+
+    Livewire::test(ManageServiceRequestTypePriorities::class, [
+        'record' => $serviceRequestType->getRouteKey(),
+    ])
+        ->callAction([
+            TestAction::make('create')->table(),
+            TestAction::make('createOption')->schemaComponent('sla_id'),
+        ], data: ['name' => 'GOLD SUPPORT'])
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect(Sla::query()->count())->toBe(1);
 });
 
 test('ManageServiceRequestTypePriorities is gated with proper access control', function (): void {

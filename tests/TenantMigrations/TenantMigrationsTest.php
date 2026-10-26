@@ -39,11 +39,13 @@ use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\SlaNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
@@ -243,6 +245,75 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
                     expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
                 }
             }
+        });
+    });
+});
+
+// TODO: Cleanup Task (sla-name-uniqueness): delete this describe and the tests within
+describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertSla = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('slas')->insert([
+            'id' => $id,
+            'name' => $name,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $firstId = $insertSla('Gold Support', now()->subMinutes(3));
+            $secondId = $insertSla('gold support', now()->subMinutes(2));
+            $thirdId = $insertSla('GOLD SUPPORT', now()->subMinute());
+            $existingSuffixedId = $insertSla('Gold Support-2', now()->subMinutes(4));
+            $uniqueId = $insertSla('Silver Support', now()->subMinutes(5));
+
+            expect(SlaNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('slas')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Gold Support')
+                ->and($name($secondId))->toBe('gold support-3')
+                ->and($name($thirdId))->toBe('GOLD SUPPORT-4')
+                ->and($name($existingSuffixedId))->toBe('Gold Support-2')
+                ->and($name($uniqueId))->toBe('Silver Support')
+                ->and(SlaNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched and allows their names to be reused', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $keptId = $insertSla('Gold Support', now()->subMinutes(2));
+            $trashedId = $insertSla('gold support', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $keptId)->value('name'))->toBe('Gold Support')
+                ->and(DB::table('slas')->where('id', $trashedId)->value('name'))->toBe('gold support');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed SLAs at the database level', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertSla('Gold Support', now());
+
+            expect(fn (): string => $insertSla('GOLD SUPPORT', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
         });
     });
 });

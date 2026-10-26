@@ -42,12 +42,14 @@ use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\ListSlas;
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\RelationManagers\ServiceRequestPrioritiesRelationManager;
 use AidingApp\ServiceManagement\Models\Sla;
 use App\Enums\ServiceManagementAdministrationNavigationGroup;
+use App\Features\SlaNameUniquenessFeature;
 use App\Filament\Clusters\ServiceManagementAdministration;
 use App\Filament\Forms\Components\SecondsDurationInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 use UnitEnum;
 
 class SlaResource extends Resource
@@ -73,6 +75,10 @@ class SlaResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
+                    ->when(
+                        SlaNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    )
                     ->columnSpanFull(),
                 Textarea::make('description')
                     ->columnSpanFull(),
