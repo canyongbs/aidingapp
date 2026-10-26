@@ -211,15 +211,16 @@
 
         <style>
             .drop-line {
-                position: absolute;
+                position: fixed;
+                top: 0;
                 left: 0;
-                right: 0;
                 height: 2px;
                 background: rgb(248, 162, 8);
                 border-radius: 1px;
                 box-shadow: 0 0 6px rgba(248, 162, 8, 0.5);
                 z-index: 1000;
                 pointer-events: none;
+                will-change: transform;
             }
 
             .drop-line::before,
