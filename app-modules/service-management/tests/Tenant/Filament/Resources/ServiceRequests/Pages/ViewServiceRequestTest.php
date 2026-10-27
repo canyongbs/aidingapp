@@ -504,13 +504,17 @@ describe('tabs', function () use ($serviceRequestManagedBy): void {
         $serviceRequest = ServiceRequest::factory()->create();
         $newStatus = ServiceRequestStatus::factory()->create(['name' => 'Awaiting Vendor Reply']);
 
-        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertDontSeeText('Awaiting Vendor Reply');
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()]);
+
+        expect(\Tests\infolistState($component->instance(), ['status.name']))
+            ->toEqual(['status.name' => $serviceRequest->status->name]);
 
         $serviceRequest->update(['status_id' => $newStatus->getKey()]);
 
-        $component->dispatch('service-request-status-changed')
-            ->assertSeeText('Awaiting Vendor Reply');
+        $component->dispatch('service-request-status-changed');
+
+        expect(\Tests\infolistState($component->instance(), ['status.name']))
+            ->toEqual(['status.name' => $newStatus->name]);
     });
 
     it('renders the relation manager for the chats tab', function (): void {
