@@ -46,6 +46,8 @@ use App\Models\User;
 use App\Settings\DisplaySettings;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Field;
+use Filament\Schemas\Components\Section;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
@@ -224,6 +226,45 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
     'internal' => true,
 ]);
 
+it('does not signal a status change when the status is left as is', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id)
+        ->fillForm(['update' => 'No status change here.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
+
+    assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'No status change here.']);
+});
+
+it('groups the update fields in a section with the expected labels', function () use ($openServiceRequest): void {
+    $schema = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $openServiceRequest()])
+        ->instance()
+        ->form;
+
+    $section = $schema->getComponents()[0];
+
+    assert($section instanceof Section);
+
+    $labels = [];
+
+    foreach ($section->getDefaultChildComponents() as $component) {
+        if ($component instanceof Field) {
+            $labels[$component->getName()] = $component->getLabel();
+        }
+    }
+
+    expect($schema->getComponents())->toHaveCount(1)
+        ->and($section->getHeading())->toBe('New Update')
+        ->and($labels)->toMatchArray([
+            'update' => 'Update Details',
+            'internal' => 'Visibility',
+            'status_id' => 'Simultaneously Update Overall Status',
+        ]);
+});
+
 it('attaches uploaded files to the update', function () use ($openServiceRequest): void {
     Storage::fake('s3');
 
@@ -344,7 +385,8 @@ describe('authorization', function () use ($openServiceRequest): void {
                 'status_id' => $status->getKey(),
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotDispatched('service-request-status-changed');
 
         assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'Update from a non-manager.']);
 
