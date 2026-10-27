@@ -221,20 +221,10 @@
 
         @if ($canCreateUpdates || $isClosed)
             <x-slot name="footer">
-                <div class="mt-4 border-t border-gray-200 pt-6 dark:border-white/10">
+                <div class="mt-4">
                     @if ($canCreateUpdates)
-                        <form wire:submit="create" class="flex flex-col gap-y-4">
+                        <form wire:submit="create">
                             {{ $this->form }}
-
-                            <div class="flex">
-                                <x-filament::button
-                                    type="submit"
-                                    :color="($data['internal'] ?? false) ? 'warning' : 'primary'"
-                                    icon="heroicon-m-paper-airplane"
-                                >
-                                    {{ $data['internal'] ?? false ? 'Add internal note' : 'Send update' }}
-                                </x-filament::button>
-                            </div>
                         </form>
                     @else
                         <x-filament::callout
