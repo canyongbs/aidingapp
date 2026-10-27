@@ -146,7 +146,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                         $assignedTo = $record->assignedTo;
 
                         return match (true) {
-                            $assignedTo instanceof User => $assignedTo->name,
+                            $assignedTo instanceof User => $assignedTo->full_name,
                             $assignedTo instanceof Contact => $assignedTo->full_name,
                             default => null,
                         };

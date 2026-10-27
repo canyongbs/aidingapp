@@ -265,7 +265,7 @@ describe('columns', function () {
             ->assertCanSeeTableRecords([$entry])
             ->assertTableColumnStateSet('assignedTo', $expectedName, $entry);
     })->with([
-        'user' => [fn (): array => [$user = User::factory()->create(['name' => 'Assigned User']), $user->name]],
+        'user' => [fn (): array => [$user = User::factory()->create(['first_name' => 'Assigned', 'last_name' => 'User']), $user->full_name]],
         'contact' => [fn (): array => [$contact = Contact::factory()->create(), $contact->full_name]],
     ]);
 
@@ -273,7 +273,7 @@ describe('columns', function () {
         $project = Project::factory()->create();
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
-            ->assertTableColumnExists('createdBy.name', fn (Column $column): bool => $column->isToggledHiddenByDefault())
+            ->assertTableColumnExists('createdBy.full_name', fn (Column $column): bool => $column->isToggledHiddenByDefault())
             ->assertTableColumnExists('assets', fn (Column $column): bool => $column->isToggledHiddenByDefault())
             ->assertTableColumnExists('serviceRequests', fn (Column $column): bool => $column->isToggledHiddenByDefault());
     });
