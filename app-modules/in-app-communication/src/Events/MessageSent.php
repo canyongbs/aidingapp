@@ -68,7 +68,7 @@ class MessageSent implements ShouldBroadcastNow
         $author = $this->message->author;
 
         $authorName = match (true) {
-            $author instanceof User => $author->name,
+            $author instanceof User => $author->full_name,
             $author instanceof Contact => $author->full_name,
             default => 'Unknown',
         };

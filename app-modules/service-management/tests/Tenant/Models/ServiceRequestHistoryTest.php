@@ -203,7 +203,7 @@ it('returns "System" as actorName when no actor is associated', function (): voi
 });
 
 it('returns the User name as actorName when the actor is a User', function (): void {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);
@@ -221,7 +221,7 @@ it('returns the Contact full_name as actorName when the actor is a Contact', fun
 });
 
 it('returns the name of a soft-deleted User as actorName', function (): void {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);

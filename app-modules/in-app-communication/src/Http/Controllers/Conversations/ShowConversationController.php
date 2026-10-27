@@ -93,7 +93,7 @@ class ShowConversationController extends Controller
             $otherUser = $otherParticipant?->participant;
 
             $displayName = match (true) {
-                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof User => $otherUser->full_name,
                 $otherUser instanceof Contact => $otherUser->full_name,
                 default => 'Unknown User',
             };

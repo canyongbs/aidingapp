@@ -37,6 +37,7 @@
 namespace App\Observers;
 
 use AidingApp\Contact\Services\ManagedContactService;
+use App\Features\UserFullNameFeature;
 use App\Models\User;
 
 class UserObserver
@@ -44,6 +45,13 @@ class UserObserver
     public function __construct(
         protected ManagedContactService $managedContactService,
     ) {}
+
+    public function saving(User $user): void
+    {
+        if (! UserFullNameFeature::active()) {
+            $user->setAttribute('name', $user->full_name);
+        }
+    }
 
     public function saved(User $user): void
     {

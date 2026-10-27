@@ -49,7 +49,7 @@
             <div
                 class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-gray-100 text-xs font-medium text-gray-600 ring-2 ring-white dark:bg-gray-700 dark:text-gray-300 dark:ring-gray-800"
                 x-tooltip="{
-                    content: @js($hiddenManagers->pluck('name')->implode(', ')),
+                    content: @js($hiddenManagers->pluck('full_name')->implode(', ')),
                     theme: $store.theme,
                 }"
             >

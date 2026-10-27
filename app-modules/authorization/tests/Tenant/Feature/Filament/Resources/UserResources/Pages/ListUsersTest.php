@@ -326,8 +326,8 @@ it('excludes archived groups from the bulk assign groups selection', function ()
 it('can search users by name', function (): void {
     asSuperAdmin();
 
-    $matchingUser = User::factory()->create(['name' => 'John Doe']);
-    $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
+    $matchingUser = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    $nonMatchingUser = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
 
     Livewire::test(ListUsers::class)
         ->searchTable('John Doe')
@@ -354,11 +354,11 @@ describe('name column', function (): void {
         $user = User::factory()->create(['last_activity_at' => now()]);
 
         $component = Livewire::test(ListUsers::class)
-            ->assertTableColumnHasExtraAttributes('name', [
-                'aria-label' => "{$user->name} (Presence: Online)",
+            ->assertTableColumnHasExtraAttributes('full_name', [
+                'aria-label' => "{$user->full_name} (Presence: Online)",
             ], $user);
 
-        $column = $component->instance()->getTable()->getColumn('name');
+        $column = $component->instance()->getTable()->getColumn('full_name');
         $column->record($user);
 
         expect($column->getTooltip())->toBe('Presence: Online');
@@ -369,7 +369,7 @@ describe('name column', function (): void {
 
         $user = User::factory()->create();
 
-        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('full_name');
         $column->record($user);
 
         expect($column->getDescriptionBelow()->getData())->toMatchArray([

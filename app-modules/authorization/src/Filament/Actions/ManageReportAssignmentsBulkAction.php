@@ -39,6 +39,8 @@ namespace AidingApp\Authorization\Filament\Actions;
 use AidingApp\Department\Models\Department;
 use AidingApp\Report\Models\ReportDepartmentAccess;
 use AidingApp\Report\Models\ReportUserAccess;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Actions\BulkAction;
@@ -57,7 +59,7 @@ class ManageReportAssignmentsBulkAction
     {
         $usersQuery = User::query()
             ->tap(new WithoutAnyAdmin())
-            ->orderBy('name');
+            ->tap(new OrderByFullName());
 
         $departmentsQuery = Department::query()
             ->orderBy('name');
@@ -76,20 +78,23 @@ class ManageReportAssignmentsBulkAction
                     ->options(
                         fn (): array => $usersQuery
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $usersQuery
-                            ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
+                            ->tap(new WhereFullNameLike($search))
                             ->limit(50)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     )
                     ->getOptionLabelsUsing(
                         fn (array $values): array => $usersQuery
                             ->whereKey($values)
-                            ->pluck('name', 'id')
+                            ->get()
+                            ->pluck('full_name', 'id')
                             ->all(),
                     ),
                 Select::make('departments')

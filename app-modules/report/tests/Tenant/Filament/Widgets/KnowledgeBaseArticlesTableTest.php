@@ -313,3 +313,28 @@ it('filters records by updated_at using the table-level updated after filter', f
         ->assertCanSeeTableRecords(collect([$recentlyUpdatedArticle]))
         ->assertCanNotSeeTableRecords(collect([$staleArticle]));
 });
+
+it('searches the manager column by full name, including a quoted phrase', function (string $search): void {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $matching = KnowledgeBaseItem::factory()->state(['status_id' => $status->id, 'category_id' => $category->id])->create();
+    $other = KnowledgeBaseItem::factory()->state(['status_id' => $status->id, 'category_id' => $category->id])->create();
+
+    $matching->managers()->attach(User::factory()->create(['first_name' => 'Avery', 'last_name' => 'Smith']));
+    $other->managers()->attach(User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Lee']));
+
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-manager-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other]);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+    'quoted full name' => '"Avery Smith"',
+]);

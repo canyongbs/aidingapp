@@ -52,6 +52,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\BulkActionGroup;
@@ -66,7 +68,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
 
 class ListServiceRequests extends ListRecords
@@ -227,12 +228,12 @@ class ListServiceRequests extends ListRecords
                     ->preload()
                     ->options(fn (): array => [
                         '' => ['unassigned' => 'Unassigned'],
-                        'Assigned to' => User::query()->limit(50)->pluck('name', 'id')->toArray(), // Initially load 50 users
+                        'Assigned to' => User::query()->tap(new OrderByFullName())->limit(50)->get()->pluck('full_name', 'id')->toArray(), // Initially load 50 users
                     ])
                     ->getOptionLabelUsing(fn (string $value): ?string => $value === 'unassigned'
                         ? 'Unassigned'
-                        : User::query()->whereKey($value)->value('name'))
-                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
+                        : User::query()->find($value)?->full_name)
+                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->tap(new WhereFullNameLike($search))->tap(new OrderByFullName())->take(50)->get()->pluck('full_name', 'id')->toArray()])
                     ->query(
                         fn (Builder $query, array $data) => $query
                             ->when(

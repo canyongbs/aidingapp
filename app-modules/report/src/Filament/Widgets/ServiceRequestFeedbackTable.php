@@ -39,6 +39,7 @@ namespace AidingApp\Report\Filament\Widgets;
 use AidingApp\Report\Filament\Widgets\Concerns\InteractsWithPageFilters;
 use AidingApp\ServiceManagement\Enums\SlaComplianceStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
+use App\Models\Scopes\WhereFullNameLike;
 use Carbon\Carbon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -123,9 +124,12 @@ class ServiceRequestFeedbackTable extends BaseWidget
                     ->getStateUsing(
                         fn (ServiceRequestFeedback $record) => $record->serviceRequest->respondent->{$record->serviceRequest->respondent::displayNameKey()}
                     ),
-                TextColumn::make('serviceRequest.assignedTo.user.name')
+                TextColumn::make('serviceRequest.assignedTo.user.full_name')
                     ->label('Assigned To')
-                    ->searchable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'serviceRequest.assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
                     ->badge(fn (ServiceRequestFeedback $record): bool => is_null($record->serviceRequest->assignedTo))
                     ->default('Unassigned'),
                 IconColumn::make('response_sla_compliance')

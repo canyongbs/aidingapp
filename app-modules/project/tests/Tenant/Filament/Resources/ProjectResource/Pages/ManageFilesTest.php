@@ -121,37 +121,29 @@ it('can list files', function (): void {
         ->assertCanSeeTableRecords($project->files);
 });
 
-it('can sort files by created by', function (): void {
+it('can sort files alphabetically by the created by full name', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
 
-    $firstUser = User::factory()->create();
-    $secondUser = User::factory()->create();
-    $thirdUser = User::factory()->create();
+    $zoe = User::factory()->create(['first_name' => 'Zoe', 'last_name' => 'Adams']);
+    $bellaYoung = User::factory()->create(['first_name' => 'Bella', 'last_name' => 'Young']);
+    $bellaAdams = User::factory()->create(['first_name' => 'Bella', 'last_name' => 'Adams']);
 
-    $firstFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $secondUser->getKey(),
-        'last_updated_by_id' => $secondUser->getKey(),
-    ]);
-    $secondFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $thirdUser->getKey(),
-        'last_updated_by_id' => $thirdUser->getKey(),
-    ]);
-    $thirdFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $firstUser->getKey(),
-        'last_updated_by_id' => $firstUser->getKey(),
-    ]);
-
-    $expectedOrder = collect([$firstFile, $secondFile, $thirdFile])
-        ->sortBy('created_by_id')
-        ->values();
+    [$zoeFile, $bellaYoungFile, $bellaAdamsFile] = collect([$zoe, $bellaYoung, $bellaAdams])
+        ->map(fn (User $user): ProjectFile => ProjectFile::factory()->for($project)->create([
+            'created_by_id' => $user->getKey(),
+            'last_updated_by_id' => $user->getKey(),
+        ]))
+        ->all();
 
     Livewire::test(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
-        ->sortTable('createdBy.name', 'asc')
-        ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
+        ->sortTable('createdBy.full_name', 'asc')
+        ->assertCanSeeTableRecords([$bellaAdamsFile, $bellaYoungFile, $zoeFile], inOrder: true)
+        ->sortTable('createdBy.full_name', 'desc')
+        ->assertCanSeeTableRecords([$zoeFile, $bellaYoungFile, $bellaAdamsFile], inOrder: true);
 });
 
 it('can validate create files inputs', function (array $data, string $errors): void {

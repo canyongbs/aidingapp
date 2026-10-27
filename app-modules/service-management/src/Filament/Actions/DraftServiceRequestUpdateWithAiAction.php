@@ -102,7 +102,7 @@ class DraftServiceRequestUpdateWithAiAction extends Action
                     ->get()
                     ->map(function (ServiceRequestUpdate $update): string {
                         $createdByName = match ($update->createdBy::class) {
-                            User::class => $update->createdBy->name,
+                            User::class => $update->createdBy->full_name,
                             Contact::class => $update->createdBy->full_name,
                             ServiceRequest::class => 'AI',
                             default => 'Unknown',
