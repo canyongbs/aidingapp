@@ -236,8 +236,8 @@ describe('status filter', function (): void {
     });
 });
 
-describe('columns', function () {
-    it('renders the assigned to column before the stage column', function () {
+describe('columns', function (): void {
+    it('renders the assigned to column before the stage column', function (): void {
         $project = Project::factory()->create();
 
         $widget = Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
@@ -249,7 +249,7 @@ describe('columns', function () {
             ->toBeLessThan(array_search('pipelineStage.name', $columns, true));
     });
 
-    it('renders the name of the user or contact assigned to a task', function (Closure $makeAssignee) {
+    it('renders the name of the user or contact assigned to a task', function (Closure $makeAssignee): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
         $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
@@ -269,7 +269,7 @@ describe('columns', function () {
         'contact' => [fn (): array => [$contact = Contact::factory()->create(), $contact->full_name]],
     ]);
 
-    it('hides the created by, assets, and tickets columns by default', function () {
+    it('hides the created by, assets, and tickets columns by default', function (): void {
         $project = Project::factory()->create();
 
         Livewire::test(ProjectWorkPipelineWidget::class, ['record' => $project])
