@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Widgets;
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Actions\CreateProjectMilestoneAction;
 use AidingApp\Project\Filament\Concerns\HasPipelineSwitcherAction;
@@ -48,6 +49,7 @@ use AidingApp\Project\Models\PipelineEntry;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\ProjectMilestone;
 use AidingApp\Project\Models\Scopes\ActivePipelineFirst;
+use App\Models\User;
 use Filament\Actions\Action;
 use Filament\Actions\CreateAction;
 use Filament\Forms\Components\Repeater;
@@ -134,16 +136,34 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->disabledClick(fn (PipelineEntry $record): bool => $this->isPlaceholderRecord($record))
                     ->action(fn (PipelineEntry $record) => $this->openPipelineEntry($record)),
 
+                TextColumn::make('assignedTo')
+                    ->label('Assigned To')
+                    ->state(function (PipelineEntry $record): ?string {
+                        if ($this->isPlaceholderRecord($record)) {
+                            return null;
+                        }
+
+                        $assignedTo = $record->assignedTo;
+
+                        return match (true) {
+                            $assignedTo instanceof User => $assignedTo->full_name,
+                            $assignedTo instanceof Contact => $assignedTo->full_name,
+                            default => null,
+                        };
+                    })
+                    ->placeholder('N/A'),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
                     ->badge()
                     ->placeholder('N/A'),
                 ViewColumn::make('assets')
                     ->label('Assets')
-                    ->view('project::filament.tables.columns.pipeline-entry.assets'),
+                    ->view('project::filament.tables.columns.pipeline-entry.assets')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 ViewColumn::make('serviceRequests')
                     ->label('Tickets')
-                    ->view('project::filament.tables.columns.pipeline-entry.tickets'),
+                    ->view('project::filament.tables.columns.pipeline-entry.tickets')
+                    ->toggleable(isToggledHiddenByDefault: true),
                 IconColumn::make('is_visible_to_guests')
                     ->label('Customer Visible')
                     ->boolean(),
@@ -159,7 +179,8 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->sortable(),
                 TextColumn::make('createdBy.full_name')
                     ->label('Created By')
-                    ->placeholder('N/A'),
+                    ->placeholder('N/A')
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('classification')
@@ -404,6 +425,7 @@ class ProjectWorkPipelineWidget extends TableWidget
         }
 
         $eagerLoad = [
+            'assignedTo',
             'assets',
             'serviceRequests',
             'pipelineStage.pipeline.project',
@@ -427,7 +449,7 @@ class ProjectWorkPipelineWidget extends TableWidget
         // PipelineEntry is hydrated with only these attributes: any attribute used by a
         // table column or closure but omitted here will silently resolve to null instead
         // of raising an error, so this list must include every attribute the table uses.
-        $columns = ['id', 'name', 'pipeline_stage_id', 'project_milestone_id', 'is_visible_to_guests', 'start_date', 'due', 'created_by'];
+        $columns = ['id', 'name', 'pipeline_stage_id', 'project_milestone_id', 'is_visible_to_guests', 'start_date', 'due', 'created_by', 'assigned_to_id', 'assigned_to_type'];
 
         $entries = PipelineEntry::query()
             ->whereHas('pipelineStage', fn (Builder $query): Builder => $query->where('pipeline_id', $pipeline->getKey()))
