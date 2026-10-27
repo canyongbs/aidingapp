@@ -52,7 +52,7 @@ class ProductFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => $this->faker->word(),
+            'name' => $this->faker->unique()->word(),
             'url' => $this->faker->url(),
             'description' => $this->faker->paragraph(),
             'version' => $this->faker->numerify('#.#.#'),

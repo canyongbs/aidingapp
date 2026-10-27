@@ -46,10 +46,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use OwenIt\Auditing\Contracts\Auditable;
 
-#[ObservedBy(ProductObserver::class)]
 /**
  * @mixin IdeHelperProduct
  */
+#[ObservedBy(ProductObserver::class)]
 class Product extends BaseModel implements Auditable
 {
     use AuditableTrait;

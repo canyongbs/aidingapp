@@ -37,7 +37,9 @@
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\SlaNameUniquenessFeature;
 use App\Models\SystemUser;
@@ -245,6 +247,63 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
                     expect(Permission::where('name', $name)->where('guard_name', $guard)->count())->toBe(1);
                 }
             }
+        });
+    });
+});
+
+// TODO: Cleanup Task (product-name-uniqueness): delete this describe and the tests within
+describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
+            $first = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(3)]);
+            $second = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinutes(2)]);
+            $third = Product::factory()->create(['name' => 'AIDING APP', 'created_at' => now()->subMinute()]);
+            $unique = Product::factory()->create(['name' => 'Advising App', 'created_at' => now()->subMinutes(4)]);
+
+            expect(ProductNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Aiding App')
+                ->and($second->refresh()->name)->toBe('aiding app-2')
+                ->and($third->refresh()->name)->toBe('AIDING APP-3')
+                ->and($unique->refresh()->name)->toBe('Advising App')
+                ->and(ProductNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function (): void {
+        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
+            $kept = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(2)]);
+            $trashed = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Aiding App')
+                ->and($trashed->refresh()->name)->toBe('aiding app');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
+        isolatedMigration('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
+            $first = Product::factory()->create(['name' => 'Aiding App', 'created_at' => now()->subMinutes(2)]);
+            $second = Product::factory()->create(['name' => 'aiding app', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('aiding app-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/license-management/database/migrations/2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique.php']);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('aiding app')
+                ->and(ProductNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });

@@ -31,51 +31,17 @@
     
     </COPYRIGHT>
 --}}
-@php
-    $record = $getRecord();
-
-    $employeeId = $record->employee_id;
-    $studentId = $record->student_id;
-@endphp
-
-<div class="fi-ta-text grid w-full gap-y-1 text-sm text-gray-500 dark:text-gray-400">
-    @if (filled($employeeId))
-        <div class="flex items-center gap-x-1.5">
-            <span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Employee ID:</span>
-                {{ $employeeId }}
-            </span>
-
-            @include(
-                'filament.tables.columns.contact.partials.copy-button',
-                [
-                    'value' => $employeeId,
-                    'label' => 'Copy employee ID',
-                    'message' => 'Employee ID copied',
-                ]
-            )
-        </div>
-    @endif
-
-    @if (filled($studentId))
-        <div class="flex items-center gap-x-1.5">
-            <span>
-                <span class="font-medium text-gray-700 dark:text-gray-300">Student ID:</span>
-                {{ $studentId }}
-            </span>
-
-            @include(
-                'filament.tables.columns.contact.partials.copy-button',
-                [
-                    'value' => $studentId,
-                    'label' => 'Copy student ID',
-                    'message' => 'Student ID copied',
-                ]
-            )
-        </div>
-    @endif
-
-    @if (blank($employeeId) && blank($studentId))
-        <span class="text-gray-400 dark:text-gray-500">&mdash;</span>
-    @endif
-</div>
+<span class="inline-flex items-center gap-x-1.5 text-gray-500 dark:text-gray-400">
+    <span>
+        <span class="font-medium text-gray-700 dark:text-gray-300">{{ $label }}</span>
+        {{ $value }}
+    </span>
+    @include(
+        'filament.tables.columns.contact.partials.copy-button',
+        [
+            'value' => $value,
+            'label' => $tooltip,
+            'message' => $copyMessage,
+        ]
+    )
+</span>
