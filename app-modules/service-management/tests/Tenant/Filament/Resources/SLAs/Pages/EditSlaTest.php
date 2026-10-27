@@ -35,13 +35,44 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\EditSla;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\SlaRequestFactory;
 use App\Features\SlaNameUniquenessFeature;
+use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
+use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
+
+it('can render the edit SLA page', function (): void {
+    asSuperAdmin();
+
+    $sla = Sla::query()->create(['name' => 'Gold Support']);
+
+    get(SlaResource::getUrl('edit', ['record' => $sla]))->assertSuccessful();
+});
+
+it('displays the SLA data', function (): void {
+    asSuperAdmin();
+
+    $sla = Sla::query()->create([
+        'name' => 'Gold Support',
+        'description' => 'Priority support for gold customers.',
+        'terms' => 'Responses are provided within business hours.',
+    ]);
+
+    Livewire::test(EditSla::class, [
+        'record' => $sla->getRouteKey(),
+    ])
+        ->assertSchemaStateSet([
+            'name' => 'Gold Support',
+            'description' => 'Priority support for gold customers.',
+            'terms' => 'Responses are provided within business hours.',
+        ]);
+});
 
 it('can update an SLA', function (): void {
     asSuperAdmin();
@@ -73,6 +104,23 @@ it('allows saving with the same name as the current record', function (): void {
         ->assertHasNoFormErrors();
 
     expect($sla->refresh()->name)->toBe('GOLD SUPPORT');
+});
+
+it('allows renaming to the name of a soft-deleted SLA', function (): void {
+    asSuperAdmin();
+
+    Sla::query()->create(['name' => 'Gold Support'])->delete();
+
+    $sla = Sla::query()->create(['name' => 'Silver Support']);
+
+    Livewire::test(EditSla::class, [
+        'record' => $sla->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Gold Support'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($sla->refresh()->name)->toBe('Gold Support');
 });
 
 it('validates the inputs', function (SlaRequestFactory $data, array $errors): void {
@@ -109,36 +157,47 @@ it('validates the inputs', function (SlaRequestFactory $data, array $errors): vo
     ],
 ]);
 
-it('allows renaming to the name of a soft-deleted SLA', function (): void {
-    asSuperAdmin();
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        SlaNameUniquenessFeature::deactivate();
 
-    Sla::query()->create(['name' => 'Gold Support'])->delete();
+        asSuperAdmin();
 
-    $sla = Sla::query()->create(['name' => 'Silver Support']);
+        Sla::query()->create(['name' => 'Gold Support']);
 
-    Livewire::test(EditSla::class, [
-        'record' => $sla->getRouteKey(),
-    ])
-        ->fillForm(['name' => 'Gold Support'])
-        ->call('save')
-        ->assertHasNoFormErrors();
+        $sla = Sla::query()->create(['name' => 'Silver Support']);
 
-    expect($sla->refresh()->name)->toBe('Gold Support');
+        expect(fn () => Livewire::test(EditSla::class, [
+            'record' => $sla->getRouteKey(),
+        ])
+            ->fillForm(['name' => 'Gold Support'])
+            ->call('save'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });
 
-it('does not apply the unique form rule when the feature is disabled', function (): void {
-    SlaNameUniquenessFeature::deactivate();
+describe('authorization', function (): void {
+    it('denies access to the edit page without the `settings.*.update` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+        actingAs($user);
 
-    asSuperAdmin();
+        $sla = Sla::query()->create(['name' => 'Gold Support']);
 
-    Sla::query()->create(['name' => 'Gold Support']);
+        get(SlaResource::getUrl('edit', ['record' => $sla]))->assertForbidden();
 
-    $sla = Sla::query()->create(['name' => 'Silver Support']);
+        Livewire::test(EditSla::class, ['record' => $sla->getRouteKey()])->assertForbidden();
+    });
 
-    expect(fn () => Livewire::test(EditSla::class, [
-        'record' => $sla->getRouteKey(),
-    ])
-        ->fillForm(['name' => 'Gold Support'])
-        ->call('save'))
-        ->toThrow(UniqueConstraintViolationException::class);
+    it('allows access to the edit page with the `settings.*.update` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo(['settings.view-any', 'settings.*.update']);
+        actingAs($user);
+
+        $sla = Sla::query()->create(['name' => 'Gold Support']);
+
+        get(SlaResource::getUrl('edit', ['record' => $sla]))->assertSuccessful();
+
+        Livewire::test(EditSla::class, ['record' => $sla->getRouteKey()])->assertSuccessful();
+    });
 });

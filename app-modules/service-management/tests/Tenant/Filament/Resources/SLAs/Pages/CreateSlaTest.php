@@ -35,19 +35,32 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\SLAs\Pages\CreateSla;
+use AidingApp\ServiceManagement\Filament\Resources\SLAs\SlaResource;
 use AidingApp\ServiceManagement\Models\Sla;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\SlaRequestFactory;
 use App\Features\SlaNameUniquenessFeature;
+use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
+use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
+use function Pest\Laravel\assertDatabaseMissing;
+use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
+
+it('can render the create SLA page', function (): void {
+    asSuperAdmin();
+
+    get(SlaResource::getUrl('create'))->assertSuccessful();
+});
 
 it('can create an SLA', function (): void {
     asSuperAdmin();
 
     $request = SlaRequestFactory::new()->create();
+
+    assertDatabaseMissing(Sla::class, ['name' => $request['name']]);
 
     Livewire::test(CreateSla::class)
         ->fillForm($request)
@@ -55,6 +68,22 @@ it('can create an SLA', function (): void {
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(Sla::class, $request);
+});
+
+it('allows reusing the name of a soft-deleted SLA', function (): void {
+    asSuperAdmin();
+
+    Sla::query()->create(['name' => 'Gold Support'])->delete();
+
+    $request = SlaRequestFactory::new()->state(['name' => 'gold support'])->create();
+
+    Livewire::test(CreateSla::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    expect(Sla::query()->where('name', 'gold support')->count())->toBe(1)
+        ->and(Sla::onlyTrashed()->where('name', 'Gold Support')->exists())->toBeTrue();
 });
 
 it('validates the inputs', function (SlaRequestFactory $data, array $errors): void {
@@ -87,33 +116,41 @@ it('validates the inputs', function (SlaRequestFactory $data, array $errors): vo
     ],
 ]);
 
-it('allows reusing the name of a soft-deleted SLA', function (): void {
-    asSuperAdmin();
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        SlaNameUniquenessFeature::deactivate();
 
-    Sla::query()->create(['name' => 'Gold Support'])->delete();
+        asSuperAdmin();
 
-    $request = SlaRequestFactory::new()->state(['name' => 'gold support'])->create();
+        Sla::query()->create(['name' => 'Gold Support']);
 
-    Livewire::test(CreateSla::class)
-        ->fillForm($request)
-        ->call('create')
-        ->assertHasNoFormErrors();
+        $request = SlaRequestFactory::new()->state(['name' => 'Gold Support'])->create();
 
-    expect(Sla::query()->where('name', 'gold support')->count())->toBe(1)
-        ->and(Sla::onlyTrashed()->where('name', 'Gold Support')->exists())->toBeTrue();
+        expect(fn () => Livewire::test(CreateSla::class)
+            ->fillForm($request)
+            ->call('create'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });
 
-it('does not apply the unique form rule when the feature is disabled', function (): void {
-    SlaNameUniquenessFeature::deactivate();
+describe('authorization', function (): void {
+    it('denies access to the create page without the `settings.create` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo('settings.view-any');
+        actingAs($user);
 
-    asSuperAdmin();
+        get(SlaResource::getUrl('create'))->assertForbidden();
 
-    Sla::query()->create(['name' => 'Gold Support']);
+        Livewire::test(CreateSla::class)->assertForbidden();
+    });
 
-    $request = SlaRequestFactory::new()->state(['name' => 'Gold Support'])->create();
+    it('allows access to the create page with the `settings.create` permission', function (): void {
+        $user = User::factory()->create();
+        $user->givePermissionTo(['settings.view-any', 'settings.create']);
+        actingAs($user);
 
-    expect(fn () => Livewire::test(CreateSla::class)
-        ->fillForm($request)
-        ->call('create'))
-        ->toThrow(UniqueConstraintViolationException::class);
+        get(SlaResource::getUrl('create'))->assertSuccessful();
+
+        Livewire::test(CreateSla::class)->assertSuccessful();
+    });
 });

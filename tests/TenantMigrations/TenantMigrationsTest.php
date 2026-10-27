@@ -375,4 +375,24 @@ describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', fun
                 ->toThrow(UniqueConstraintViolationException::class);
         });
     });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertSla): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertSla): void {
+            $firstId = $insertSla('Gold Support', now()->subMinutes(2));
+            $secondId = $insertSla('gold support', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support-2');
+
+            DB::table('slas')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support')
+                ->and(SlaNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
 });

@@ -41,7 +41,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-// TODO: Cleanup Task (sla-name-uniqueness): if no other migration uses this trait, restore the PHPStan ignore annotation for `trait.unused` here.
+// @phpstan-ignore trait.unused
 trait FixesDuplicateNames
 {
     /**

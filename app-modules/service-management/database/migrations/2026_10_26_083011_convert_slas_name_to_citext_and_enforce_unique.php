@@ -43,7 +43,11 @@ use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
-    // TODO: Cleanup Task (sla-name-uniqueness): remove the `FixesDuplicateNames` trait, the `fixDuplicates()` / `revertDuplicates()` calls, and the `$chunkSize` / `$usesSoftDeletes` properties. Keep the citext conversion and the unique index.
+    /*
+     * TODO: Cleanup Task (sla-name-uniqueness): after SlaNameUniquenessFeature is removed:
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - keep the citext column conversion and the unique index, they are permanent
+     */
     use FixesDuplicateNames;
 
     private string $table = 'slas';
