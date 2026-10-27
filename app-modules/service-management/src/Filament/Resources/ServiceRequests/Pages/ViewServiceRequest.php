@@ -86,11 +86,12 @@ class ViewServiceRequest extends ViewRecord
         $this->tab = (ServiceRequestTab::tryFrom($this->tab ?? '') ?? ServiceRequestTab::default())->value;
     }
 
+    /**
+     * Re-renders the page so the header reflects the new status. The record is re-fetched from the
+     * database on every Livewire request, so it does not need to be refreshed here.
+     */
     #[On('service-request-status-changed')]
-    public function refreshServiceRequest(): void
-    {
-        $this->getRecord()->refresh();
-    }
+    public function refreshServiceRequest(): void {}
 
     public function infolist(Schema $schema): Schema
     {

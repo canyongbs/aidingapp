@@ -39,6 +39,7 @@ namespace AidingApp\ServiceManagement\Livewire;
 use AidingApp\Ai\Models\AiAssistant;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Filament\Actions\DraftServiceRequestUpdateWithAiAction;
+use AidingApp\ServiceManagement\Filament\Actions\SendServiceRequestUpdateAction;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestStatusToggleButtons;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestUpdateUploadsFileUpload;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Schemas\Components\ServiceRequestUpdateVisibilityToggleButtons;
@@ -81,6 +82,12 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
     #[Locked]
     public int $visibleUpdatesLimit = 50;
 
+    /**
+     * The service request status the composer's status field was last synced to.
+     */
+    #[Locked]
+    public ?string $composerStatusId = null;
+
     /** @var array<string, mixed>|null */
     public ?array $data = [];
 
@@ -91,11 +98,17 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
         $this->resetComposer();
     }
 
+    public function hydrate(): void
+    {
+        $this->syncComposerStatus();
+    }
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Section::make('New Update')
+                    ->key('newUpdate', isInheritable: false)
                     ->schema([
                         Textarea::make('update')
                             ->label('Update Details')
@@ -110,6 +123,9 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
                             ->label('Simultaneously Update Overall Status')
                             ->visible(fn (): bool => $this->canUpdateServiceRequest()),
                         ServiceRequestUpdateUploadsFileUpload::make(),
+                    ])
+                    ->footer([
+                        SendServiceRequestUpdateAction::make(),
                     ]),
             ])
             ->model(ServiceRequestUpdate::class)
@@ -122,9 +138,7 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
         $data = $this->form->getState();
 
-        $hasStatusChanged = false;
-
-        DB::transaction(function () use ($data, &$hasStatusChanged): void {
+        $hasStatusChanged = DB::transaction(function () use ($data): bool {
             $serviceRequestUpdate = new ServiceRequestUpdate();
             $serviceRequestUpdate->update = $data['update'];
             $serviceRequestUpdate->internal = $data['internal'];
@@ -135,8 +149,11 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
             if (filled($data['status_id'] ?? null) && $this->canUpdateServiceRequest()) {
                 $this->serviceRequest->update(['status_id' => $data['status_id']]);
-                $hasStatusChanged = $this->serviceRequest->wasChanged('status_id');
+
+                return $this->serviceRequest->wasChanged('status_id');
             }
+
+            return false;
         });
 
         if ($hasStatusChanged) {
@@ -214,10 +231,26 @@ class ServiceRequestUpdates extends Component implements HasActions, HasSchemas
 
     protected function resetComposer(): void
     {
+        $this->composerStatusId = $this->serviceRequest->status_id;
+
         $this->form->fill([
             'internal' => false,
-            'status_id' => $this->serviceRequest->status_id,
+            'status_id' => $this->composerStatusId,
         ]);
+    }
+
+    /**
+     * Follows status changes made elsewhere (header action, assignments, other users) until the user
+     * picks a status, so submitting an update never reverts the status to a stale preselection.
+     */
+    protected function syncComposerStatus(): void
+    {
+        if (($this->data['status_id'] ?? null) !== $this->composerStatusId) {
+            return;
+        }
+
+        $this->composerStatusId = $this->serviceRequest->status_id;
+        $this->data['status_id'] = $this->composerStatusId;
     }
 
     protected function getAiAvatarUrl(): string

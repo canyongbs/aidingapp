@@ -46,8 +46,6 @@ use App\Models\User;
 use App\Settings\DisplaySettings;
 use Carbon\CarbonImmutable;
 use Filament\Actions\Testing\TestAction;
-use Filament\Forms\Components\Field;
-use Filament\Schemas\Components\Section;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Vite;
@@ -239,30 +237,66 @@ it('does not signal a status change when the status is left as is', function () 
     assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'No status change here.']);
 });
 
-it('groups the update fields in a section with the expected labels', function () use ($openServiceRequest): void {
-    $schema = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $openServiceRequest()])
-        ->instance()
-        ->form;
+it('labels the send action by the update visibility', function (bool $isInternal, string $label, string $color) use ($openServiceRequest): void {
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $openServiceRequest()])
+        ->fillForm(['internal' => (int) $isInternal])
+        ->assertActionHasLabel(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $label)
+        ->assertActionHasColor(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $color);
+})->with([
+    'visible to customer' => [false, 'Send update', 'primary'],
+    'internal' => [true, 'Add internal note', 'warning'],
+]);
 
-    $section = $schema->getComponents()[0];
+it('does not revert a status changed elsewhere since the composer loaded', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
 
-    assert($section instanceof Section);
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest]);
 
-    $labels = [];
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
 
-    foreach ($section->getDefaultChildComponents() as $component) {
-        if ($component instanceof Field) {
-            $labels[$component->getName()] = $component->getLabel();
-        }
-    }
+    $component
+        ->fillForm(['update' => 'Replying without touching the status.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
 
-    expect($schema->getComponents())->toHaveCount(1)
-        ->and($section->getHeading())->toBe('New Update')
-        ->and($labels)->toMatchArray([
-            'update' => 'Update Details',
-            'internal' => 'Visibility',
-            'status_id' => 'Simultaneously Update Overall Status',
-        ]);
+    expect($serviceRequest->refresh()->status_id)->toBe($changedStatus->getKey());
+});
+
+it('follows a status changed elsewhere while the composer status is untouched', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $changedStatus->getKey());
+});
+
+it('keeps the status the user picked when the status is changed elsewhere', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $pickedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->fillForm(['status_id' => $pickedStatus->getKey()]);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $pickedStatus->getKey())
+        ->fillForm(['update' => 'Applying the status I picked.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertDispatched('service-request-status-changed');
+
+    expect($serviceRequest->refresh()->status_id)->toBe($pickedStatus->getKey());
 });
 
 it('attaches uploaded files to the update', function () use ($openServiceRequest): void {
