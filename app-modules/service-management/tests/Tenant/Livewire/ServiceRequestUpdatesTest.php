@@ -206,6 +206,7 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
         ->call('create')
         ->assertHasNoFormErrors()
         ->assertNotified()
+        ->assertDispatched('service-request-status-changed')
         ->assertSet('data.update', null)
         ->assertSeeText('We are looking into this.');
 
@@ -222,6 +223,81 @@ it('can create an update', function (bool $isInternal) use ($openServiceRequest)
     'visible to customer' => false,
     'internal' => true,
 ]);
+
+it('does not signal a status change when the status is left as is', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id)
+        ->fillForm(['update' => 'No status change here.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
+
+    assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'No status change here.']);
+});
+
+it('labels the send action by the update visibility', function (bool $isInternal, string $label, string $color) use ($openServiceRequest): void {
+    Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $openServiceRequest()])
+        ->fillForm(['internal' => (int) $isInternal])
+        ->assertActionHasLabel(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $label)
+        ->assertActionHasColor(TestAction::make('sendUpdate')->schemaComponent('newUpdate'), $color);
+})->with([
+    'visible to customer' => [false, 'Send update', 'primary'],
+    'internal' => [true, 'Add internal note', 'warning'],
+]);
+
+it('does not revert a status changed elsewhere since the composer loaded', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest]);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->fillForm(['update' => 'Replying without touching the status.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertNotDispatched('service-request-status-changed');
+
+    expect($serviceRequest->refresh()->status_id)->toBe($changedStatus->getKey());
+});
+
+it('follows a status changed elsewhere while the composer status is untouched', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->assertSet('data.status_id', $serviceRequest->status_id);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $changedStatus->getKey());
+});
+
+it('keeps the status the user picked when the status is changed elsewhere', function () use ($openServiceRequest): void {
+    $serviceRequest = $openServiceRequest();
+    $pickedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+    $changedStatus = ServiceRequestStatus::factory()->create(['classification' => SystemServiceRequestClassification::InProgress]);
+
+    $component = Livewire::test(ServiceRequestUpdates::class, ['serviceRequest' => $serviceRequest])
+        ->fillForm(['status_id' => $pickedStatus->getKey()]);
+
+    $serviceRequest->update(['status_id' => $changedStatus->getKey()]);
+
+    $component
+        ->call('$refresh')
+        ->assertSet('data.status_id', $pickedStatus->getKey())
+        ->fillForm(['update' => 'Applying the status I picked.'])
+        ->call('create')
+        ->assertHasNoFormErrors()
+        ->assertDispatched('service-request-status-changed');
+
+    expect($serviceRequest->refresh()->status_id)->toBe($pickedStatus->getKey());
+});
 
 it('attaches uploaded files to the update', function () use ($openServiceRequest): void {
     Storage::fake('s3');
@@ -343,7 +419,8 @@ describe('authorization', function () use ($openServiceRequest): void {
                 'status_id' => $status->getKey(),
             ])
             ->call('create')
-            ->assertHasNoFormErrors();
+            ->assertHasNoFormErrors()
+            ->assertNotDispatched('service-request-status-changed');
 
         assertDatabaseHas(ServiceRequestUpdate::class, ['update' => 'Update from a non-manager.']);
 

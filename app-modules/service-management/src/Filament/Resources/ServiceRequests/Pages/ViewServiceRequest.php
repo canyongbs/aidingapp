@@ -59,6 +59,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Illuminate\Support\Facades\Gate;
+use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 
 class ViewServiceRequest extends ViewRecord
@@ -77,6 +78,13 @@ class ViewServiceRequest extends ViewRecord
                 $this->getInfolistContentComponent(),
             ]);
     }
+
+    /**
+     * Re-renders the page so the header reflects the new status. The record is re-fetched from the
+     * database on every Livewire request, so it does not need to be refreshed here.
+     */
+    #[On('service-request-status-changed')]
+    public function refreshServiceRequest(): void {}
 
     public function infolist(Schema $schema): Schema
     {
