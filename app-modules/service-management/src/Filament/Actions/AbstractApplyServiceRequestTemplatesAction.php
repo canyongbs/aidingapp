@@ -195,7 +195,7 @@ abstract class AbstractApplyServiceRequestTemplatesAction extends Action
 
         $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
-        $sourceTemplates = $sourceTemplates->map(function (mixed $sourceTemplate) use ($mergeTags) {
+        $sourceTemplates = $sourceTemplates->map(function (mixed $sourceTemplate) use ($mergeTags): array {
             return [
                 'type' => $sourceTemplate->type->value,
                 'role' => $sourceTemplate->role->value,

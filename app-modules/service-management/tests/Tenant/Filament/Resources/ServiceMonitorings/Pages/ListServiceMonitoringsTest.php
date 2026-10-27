@@ -48,7 +48,7 @@ use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceMonitoring = false;
@@ -74,7 +74,7 @@ it('is gated with proper access control', function () {
     get(ListServiceMonitorings::getUrl())->assertSuccessful();
 });
 
-test('can list records', function () {
+test('can list records', function (): void {
     asSuperAdmin();
 
     $records = ServiceMonitoringTarget::factory()->count(5)->create();
@@ -85,7 +85,7 @@ test('can list records', function () {
         ->assertSuccessful();
 });
 
-test('bulk delete ServiceMonitorings', function () {
+test('bulk delete ServiceMonitorings', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTargets = ServiceMonitoringTarget::factory()->count(10)->create();
@@ -98,7 +98,7 @@ test('bulk delete ServiceMonitorings', function () {
     }
 });
 
-it('only shows the bulk delete action to a user with the service_monitoring.delete permission', function () {
+it('only shows the bulk delete action to a user with the service_monitoring.delete permission', function (): void {
     ServiceMonitoringTarget::factory(15)->create();
 
     $user = User::factory()
@@ -116,7 +116,7 @@ it('only shows the bulk delete action to a user with the service_monitoring.dele
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-test('a confidential service monitoring is still listed for an admin', function () {
+test('a confidential service monitoring is still listed for an admin', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
@@ -126,7 +126,7 @@ test('a confidential service monitoring is still listed for an admin', function 
         ->assertSuccessful();
 });
 
-test('a confidential service monitoring is hidden from the list for a non-granted, non-admin user', function () {
+test('a confidential service monitoring is hidden from the list for a non-granted, non-admin user', function (): void {
     $creator = User::factory()->create();
     $publicTarget = ServiceMonitoringTarget::factory()->for($creator, 'createdBy')->create(['is_confidential' => false]);
     $confidentialTarget = ServiceMonitoringTarget::factory()->confidential()->for($creator, 'createdBy')->create();
@@ -148,7 +148,7 @@ test('a confidential service monitoring is hidden from the list for a non-grante
         ->assertSuccessful();
 });
 
-test('the name column shows a lock icon and tooltip only for confidential service monitors', function () {
+test('the name column shows a lock icon and tooltip only for confidential service monitors', function (): void {
     asSuperAdmin();
 
     $publicTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);

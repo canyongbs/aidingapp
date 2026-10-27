@@ -45,7 +45,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-test('CreateUser is gated with proper access control', function () {
+test('CreateUser is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -68,19 +68,19 @@ test('CreateUser is gated with proper access control', function () {
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ])
         ->call('create')
         ->assertHasNoFormErrors();
 
     assertDatabaseHas(User::class, [
-        'name' => 'Jordan Blake',
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 });
 
-test('CreateUser shows and requires first and last name fields when the full name feature is active', function () {
+test('CreateUser shows and requires first and last name fields', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
@@ -98,35 +98,33 @@ test('CreateUser shows and requires first and last name fields when the full nam
         ]);
 });
 
-test('CreateUser requires an email address', function () {
+test('CreateUser requires an email address', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
-            'name' => 'No Email',
             'email' => null,
         ])
         ->call('create')
         ->assertHasFormErrors(['email' => 'required']);
 });
 
-test('CreateUser rejects an invalid email address', function () {
+test('CreateUser rejects an invalid email address', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
-            'name' => 'Bad Email',
             'email' => 'not-an-email',
         ])
         ->call('create')
         ->assertHasFormErrors(['email' => 'email']);
 });
 
-test('CreateUser rejects a duplicate email case-insensitively', function () {
+test('CreateUser rejects a duplicate email case-insensitively', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'taken@example.com']);
@@ -135,14 +133,13 @@ test('CreateUser rejects a duplicate email case-insensitively', function () {
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
-            'name' => 'Duplicate Email',
             'email' => 'Taken@Example.com',
         ])
         ->call('create')
         ->assertHasFormErrors(['email']);
 });
 
-test('CreateUser rejects reusing a soft-deleted user email', function () {
+test('CreateUser rejects reusing a soft-deleted user email', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'archived@example.com'])->delete();
@@ -151,7 +148,6 @@ test('CreateUser rejects reusing a soft-deleted user email', function () {
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
-            'name' => 'Reuse Attempt',
             'email' => 'Archived@Example.com',
         ])
         ->call('create')
@@ -160,7 +156,7 @@ test('CreateUser rejects reusing a soft-deleted user email', function () {
     expect(User::withTrashed()->where('email', 'archived@example.com')->count())->toBe(1);
 });
 
-test('CreateUser sends the set password notification to a non-external user', function () {
+test('CreateUser sends the set password notification to a non-external user', function (): void {
     asSuperAdmin();
 
     Notification::fake();
@@ -169,7 +165,6 @@ test('CreateUser sends the set password notification to a non-external user', fu
         ->fillForm([
             'first_name' => 'Internal',
             'last_name' => 'User',
-            'name' => 'Internal User',
             'email' => 'internal@example.com',
             'is_external' => false,
         ])
@@ -181,7 +176,7 @@ test('CreateUser sends the set password notification to a non-external user', fu
     Notification::assertSentTo($created, SetPasswordNotification::class);
 });
 
-test('CreateUser does not send the set password notification to an external user', function () {
+test('CreateUser does not send the set password notification to an external user', function (): void {
     asSuperAdmin();
 
     Notification::fake();
@@ -190,7 +185,6 @@ test('CreateUser does not send the set password notification to an external user
         ->fillForm([
             'first_name' => 'External',
             'last_name' => 'User',
-            'name' => 'External User',
             'email' => 'external@example.com',
             'is_external' => true,
         ])
@@ -202,7 +196,7 @@ test('CreateUser does not send the set password notification to an external user
     Notification::assertNotSentTo($created, SetPasswordNotification::class);
 });
 
-test('CreateUser validates the inputs', function ($data, $errors) {
+test('CreateUser validates the inputs', function (array $data, array $errors): void {
     asSuperAdmin();
 
     $request = User::factory()->state($data)->make()->toArray();
@@ -218,7 +212,7 @@ test('CreateUser validates the inputs', function ($data, $errors) {
             ['first_name' => 'required'],
         ],
         'first_name max' => [
-            ['first_name' => str()->random(256)],
+            ['first_name' => str()->random(128)],
             ['first_name' => 'max'],
         ],
         'last name required' => [
@@ -226,7 +220,7 @@ test('CreateUser validates the inputs', function ($data, $errors) {
             ['last_name' => 'required'],
         ],
         'last_name max' => [
-            ['last_name' => str()->random(256)],
+            ['last_name' => str()->random(128)],
             ['last_name' => 'max'],
         ],
         'preferred_name max' => [

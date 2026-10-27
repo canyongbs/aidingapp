@@ -41,7 +41,7 @@ use Illuminate\Http\Response;
 
 use function Pest\Laravel\actingAs;
 
-it('updates last_activity_at on a standard page request', function () {
+it('updates last_activity_at on a standard page request', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -50,14 +50,14 @@ it('updates last_activity_at on a standard page request', function () {
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 
     expect($user->last_activity_at)->not->toBeNull();
 });
 
-it('does not update last_activity_at for livewire requests with no calls or updates', function () {
+it('does not update last_activity_at for livewire requests with no calls or updates', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -75,14 +75,14 @@ it('does not update last_activity_at for livewire requests with no calls or upda
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 
     expect($user->last_activity_at)->toBeNull();
 });
 
-it('updates last_activity_at for livewire requests with calls', function () {
+it('updates last_activity_at for livewire requests with calls', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -102,14 +102,14 @@ it('updates last_activity_at for livewire requests with calls', function () {
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 
     expect($user->last_activity_at)->not->toBeNull();
 });
 
-it('updates last_activity_at for livewire requests with updates', function () {
+it('updates last_activity_at for livewire requests with updates', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -127,14 +127,14 @@ it('updates last_activity_at for livewire requests with updates', function () {
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 
     expect($user->last_activity_at)->not->toBeNull();
 });
 
-it('does not update last_activity_at for livewire requests that just update chart data', function () {
+it('does not update last_activity_at for livewire requests that just update chart data', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -169,14 +169,14 @@ it('does not update last_activity_at for livewire requests that just update char
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 
     expect($user->last_activity_at)->toBeNull();
 });
 
-it('updates last_activity_at for livewire requests with calls batched with updates to chart data', function () {
+it('updates last_activity_at for livewire requests with calls batched with updates to chart data', function (): void {
     $user = User::factory()->create(['last_activity_at' => null]);
 
     actingAs($user);
@@ -201,7 +201,7 @@ it('updates last_activity_at for livewire requests with calls batched with updat
     $request->setUserResolver(fn () => $user);
 
     $middleware = new TrackPresence();
-    $middleware->handle($request, fn () => new Response());
+    $middleware->handle($request, fn (): Response => new Response());
 
     $user->refresh();
 

@@ -49,7 +49,23 @@ use function Pest\Laravel\get;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\travelTo;
 
-test('returns all service monitoring targets with latest history when portal is enabled', function () {
+use Symfony\Component\HttpFoundation\Response;
+
+/**
+ * @param array<string, mixed> $query
+ *
+ * @return TestResponse<Response>
+ */
+$getServiceMonitorStatuses = function (array $query = []): TestResponse {
+    $settings = app(PortalSettings::class);
+    $settings->knowledge_management_portal_enabled = true;
+    $settings->save();
+    actingAs(Contact::factory()->create());
+
+    return getJson(URL::route('api.portal.status', $query, absolute: false));
+};
+
+test('returns all service monitoring targets with latest history when portal is enabled', function (): void {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -82,7 +98,7 @@ test('returns all service monitoring targets with latest history when portal is 
     expect($response->json('data'))->toHaveCount(3);
 });
 
-test('excludes confidential service monitoring targets unless the contact is granted access', function () {
+test('excludes confidential service monitoring targets unless the contact is granted access', function (): void {
     $settings = app(PortalSettings::class);
 
     $settings->knowledge_management_portal_enabled = true;
@@ -109,21 +125,7 @@ test('excludes confidential service monitoring targets unless the contact is gra
     expect($response->json('data'))->toHaveCount(2);
 });
 
-/**
- * @param array<string, mixed> $query
- */
-function getServiceMonitorStatuses(array $query = []): TestResponse
-{
-    $settings = app(PortalSettings::class);
-    $settings->knowledge_management_portal_enabled = true;
-    $settings->save();
-
-    actingAs(Contact::factory()->create());
-
-    return getJson(URL::route('api.portal.status', $query, absolute: false));
-}
-
-it('lists service monitors with their status, uptime, and daily history', function () {
+it('lists service monitors with their status, uptime, and daily history', function () use ($getServiceMonitorStatuses): void {
     // Midday, so checks a few minutes old still land in today's history bucket.
     travelTo(today()->setTime(12, 0));
 
@@ -137,7 +139,7 @@ it('lists service monitors with their status, uptime, and daily history', functi
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subDays(29)->subHours(12)]);
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subMinutes(2)]);
 
-    getServiceMonitorStatuses()
+    $getServiceMonitorStatuses()
         ->assertOk()
         ->assertJsonPath('data.0.id', $serviceMonitoringTarget->getKey())
         ->assertJsonPath('data.0.name', 'Customer Website')
@@ -155,7 +157,7 @@ it('lists service monitors with their status, uptime, and daily history', functi
         ->assertJsonPath('meta.total', 1);
 });
 
-it('summarizes every service monitor the contact can see, regardless of the search', function () {
+it('summarizes every service monitor the contact can see, regardless of the search', function () use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $operationalTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Operational Monitor']);
@@ -167,7 +169,7 @@ it('summarizes every service monitor the contact can see, regardless of the sear
     ServiceMonitoringTarget::factory()->create(['name' => 'Unchecked Monitor']);
     ServiceMonitoringTarget::factory()->confidential()->create(['name' => 'Confidential Monitor']);
 
-    getServiceMonitorStatuses(['search' => 'Operational'])
+    $getServiceMonitorStatuses(['search' => 'Operational'])
         ->assertOk()
         ->assertJsonCount(1, 'data')
         ->assertJsonPath('summary.status', 'degraded')
@@ -181,33 +183,33 @@ it('summarizes every service monitor the contact can see, regardless of the sear
         ->assertJsonPath('summary.last_checked_at', now()->subMinutes(5)->toIso8601String());
 });
 
-it('summarizes the service monitors as operational when none have issues', function () {
+it('summarizes the service monitors as operational when none have issues', function () use ($getServiceMonitorStatuses): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create();
 
     ServiceMonitoringTarget::factory()->create();
 
-    getServiceMonitorStatuses()
+    $getServiceMonitorStatuses()
         ->assertOk()
         ->assertJsonPath('summary.status', 'operational');
 });
 
-it('summarizes the service monitors as unknown when none have been checked', function () {
+it('summarizes the service monitors as unknown when none have been checked', function () use ($getServiceMonitorStatuses): void {
     ServiceMonitoringTarget::factory()->count(2)->create();
 
-    getServiceMonitorStatuses()
+    $getServiceMonitorStatuses()
         ->assertOk()
         ->assertJsonPath('summary.status', 'unknown')
         ->assertJsonPath('summary.total_count', 2)
         ->assertJsonPath('summary.last_checked_at', null);
 });
 
-it('can search by name and description', function () {
+it('can search by name and description', function () use ($getServiceMonitorStatuses): void {
     $matchingNameTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Student Portal', 'description' => null]);
     $matchingDescriptionTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Website', 'description' => 'The public portal']);
     $otherTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Email', 'description' => 'Outbound mail']);
 
-    getServiceMonitorStatuses(['search' => 'PORTAL'])
+    $getServiceMonitorStatuses(['search' => 'PORTAL'])
         ->assertOk()
         ->assertJsonCount(2, 'data')
         ->assertJsonFragment(['id' => $matchingNameTarget->getKey()])
@@ -215,7 +217,7 @@ it('can search by name and description', function () {
         ->assertJsonMissing(['id' => $otherTarget->getKey()]);
 });
 
-it('can sort by column', function (string $sort, string $direction, array $expectedOrder) {
+it('can sort by column', function (string $sort, string $direction, array $expectedOrder) use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $targets = collect([
@@ -236,9 +238,9 @@ it('can sort by column', function (string $sort, string $direction, array $expec
         return $serviceMonitoringTarget;
     });
 
-    $response = getServiceMonitorStatuses(['sort' => $sort, 'direction' => $direction])->assertOk();
+    $response = $getServiceMonitorStatuses(['sort' => $sort, 'direction' => $direction])->assertOk();
 
-    expect(collect($response->json('data'))->pluck('name')->all())->toBe($expectedOrder);
+    expect($response->collect('data')->pluck('name')->all())->toBe($expectedOrder);
 })->with([
     'name ascending' => ['name', 'asc', ['Alpha', 'Bravo', 'Charlie', 'Delta']],
     'name descending' => ['name', 'desc', ['Delta', 'Charlie', 'Bravo', 'Alpha']],
@@ -254,7 +256,7 @@ it('can sort by column', function (string $sort, string $direction, array $expec
     'frequency descending' => ['frequency', 'desc', ['Charlie', 'Alpha', 'Delta', 'Bravo']],
 ]);
 
-it('includes the uptime of each monitor whether or not the list is sorted by it', function (string $sort) {
+it('includes the uptime of each monitor whether or not the list is sorted by it', function (string $sort) use ($getServiceMonitorStatuses): void {
     freezeTime();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -262,14 +264,14 @@ it('includes the uptime of each monitor whether or not the list is sorted by it'
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subDays(29)->subHours(12)]);
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()->subHour()]);
 
-    getServiceMonitorStatuses(['sort' => $sort])
+    $getServiceMonitorStatuses(['sort' => $sort])
         ->assertOk()
         ->assertJsonPath('data.0.thirty_day_uptime_percentage', 50)
         ->assertJsonPath('data.0.twelve_month_uptime_percentage', null);
 })->with(['name', 'status', 'thirty_day_uptime', 'twelve_month_uptime']);
 
-it('validates the inputs', function (array $query, string $error) {
-    getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
+it('validates the inputs', function (array $query, string $error) use ($getServiceMonitorStatuses): void {
+    $getServiceMonitorStatuses($query)->assertJsonValidationErrors($error);
 })->with([
     'search string' => [['search' => ['portal']], 'search'],
     'sort enum' => [['sort' => 'domain'], 'sort'],
@@ -277,12 +279,12 @@ it('validates the inputs', function (array $query, string $error) {
     'timezone max' => [['timezone' => str_repeat('a', 256)], 'timezone'],
 ]);
 
-it('does not reject a timezone the date extension cannot resolve by name', function () {
-    getServiceMonitorStatuses(['timezone' => 'Asia/Calcutta'])->assertOk();
+it('does not reject a timezone the date extension cannot resolve by name', function () use ($getServiceMonitorStatuses): void {
+    $getServiceMonitorStatuses(['timezone' => 'Asia/Calcutta'])->assertOk();
 });
 
-describe('authorization', function () {
-    it('requires contact authentication', function () {
+describe('authorization', function () use ($getServiceMonitorStatuses): void {
+    it('requires contact authentication', function (): void {
         $settings = app(PortalSettings::class);
         $settings->knowledge_management_portal_enabled = true;
         $settings->save();
@@ -290,11 +292,11 @@ describe('authorization', function () {
         getJson(URL::route('api.portal.status', absolute: false))->assertUnauthorized();
     });
 
-    it('denies access without the service monitoring add-on', function () {
+    it('denies access without the service monitoring add-on', function () use ($getServiceMonitorStatuses): void {
         $licenseSettings = app(LicenseSettings::class);
         $licenseSettings->data->addons->serviceMonitoring = false;
         $licenseSettings->save();
 
-        getServiceMonitorStatuses()->assertForbidden();
+        $getServiceMonitorStatuses()->assertForbidden();
     });
 });

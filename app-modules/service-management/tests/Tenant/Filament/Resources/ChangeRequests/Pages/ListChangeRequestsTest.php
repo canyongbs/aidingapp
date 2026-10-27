@@ -51,7 +51,7 @@ testResourceRequiresPermissionForAccess(
     feature: 'changeManagement'
 );
 
-it('only shows the bulk delete action to a user with the change_request.delete permission', function () {
+it('only shows the bulk delete action to a user with the change_request.delete permission', function (): void {
     ChangeRequest::factory(15)->create();
 
     $user = User::factory()

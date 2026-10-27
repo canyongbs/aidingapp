@@ -117,7 +117,7 @@ class ProjectMilestone extends Model implements Auditable
         $hasActiveTask = $this->pipelineEntries()->withoutArchived()->exists();
 
         if (! $hasActiveTask && ! $this->isArchived()) {
-            $this->archiveQuietly();
+            $this->archive();
         }
     }
 

@@ -42,11 +42,11 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
+        DB::transaction(function (): void {
             DB::table('advisory_updates')->delete();
             DB::table('advisories')->delete();
 
-            Schema::table('advisory_updates', function (Blueprint $table) {
+            Schema::table('advisory_updates', function (Blueprint $table): void {
                 $table->string('title');
                 $table->timestamp('date');
                 $table->index(['advisory_id', 'date']);
@@ -56,8 +56,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('advisory_updates', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('advisory_updates', function (Blueprint $table): void {
                 $table->dropIndex(['advisory_id', 'date']);
                 $table->dropColumn(['title', 'date']);
             });

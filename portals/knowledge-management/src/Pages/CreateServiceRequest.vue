@@ -33,6 +33,7 @@
 -->
 <script setup>
     import BaseButton from '@common/BaseButton.vue';
+    import LoadingSpinner from '@common/LoadingSpinner.vue';
     import Breadcrumbs from '@common/portal/Breadcrumbs.vue';
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
@@ -493,7 +494,7 @@
         </template>
 
         <PageCard>
-            <main class="grid gap-4" v-if="submittedSuccess">
+            <div class="grid gap-4" v-if="submittedSuccess">
                 <template v-if="wasAiResolved">
                     <p>Great! We're glad the AI was able to resolve your issue.</p>
                     <p class="text-sm text-gray-600">
@@ -508,29 +509,12 @@
                 <BaseButton tag="router-link" :to="{ name: 'create-service-request' }" color="gray" size="md">
                     Submit Another Request
                 </BaseButton>
-            </main>
+            </div>
 
-            <main class="grid gap-4" v-else>
+            <div class="grid gap-4" v-else>
                 <div v-if="isGeneratingQuestions || isEvaluatingAiResolution" class="flex items-center justify-center">
                     <div role="status" aria-live="polite" class="pointer-events-auto flex items-center gap-3 px-4 py-2">
-                        <svg
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="animate-spin h-4 w-4 text-brand-600"
-                        >
-                            <path
-                                clip-rule="evenodd"
-                                d="M12 19C15.866 19 19 15.866 19 12C19 8.13401 15.866 5 12 5C8.13401 5 5 8.13401 5 12C5 15.866 8.13401 19 12 19ZM12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z"
-                                fill-rule="evenodd"
-                                fill="currentColor"
-                                opacity="0.2"
-                            ></path>
-                            <path
-                                d="M2 12C2 6.47715 6.47715 2 12 2V5C8.13401 5 5 8.13401 5 12H2Z"
-                                fill="currentColor"
-                            ></path>
-                        </svg>
+                        <LoadingSpinner size="sm" class="text-brand-600" />
 
                         <span v-if="isGeneratingQuestions" class="text-sm text-gray-700"
                             >Generating {{ numberOfClarifyingQuestions === 1 ? 'question' : 'questions' }}…</span
@@ -573,7 +557,7 @@
                 >
                     <FormKitSchema :schema="schema" :data="data" />
                 </div>
-            </main>
+            </div>
         </PageCard>
     </Page>
 </template>

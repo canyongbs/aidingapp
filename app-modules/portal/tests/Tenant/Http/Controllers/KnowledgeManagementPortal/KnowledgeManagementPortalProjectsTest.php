@@ -44,7 +44,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -54,7 +54,7 @@ beforeEach(function () {
     $licenseSettings->save();
 });
 
-it('returns `has_projects` as false when the contact has no assigned projects', function () {
+it('returns `has_projects` as false when the contact has no assigned projects', function (): void {
     $contact = Contact::factory()->create();
 
     actingAs($contact, 'contact');
@@ -66,7 +66,7 @@ it('returns `has_projects` as false when the contact has no assigned projects', 
     $response->assertJsonPath('has_projects', false);
 });
 
-it('returns `has_projects` as true when the contact is a direct project guest', function () {
+it('returns `has_projects` as true when the contact is a direct project guest', function (): void {
     $contact = Contact::factory()->create();
 
     $project = Project::factory()->create();
@@ -81,7 +81,7 @@ it('returns `has_projects` as true when the contact is a direct project guest', 
     $response->assertJsonPath('has_projects', true);
 });
 
-it('returns `has_projects` as true when the contact organization is a project guest', function () {
+it('returns `has_projects` as true when the contact organization is a project guest', function (): void {
     $organization = Organization::factory()->create();
     $contact = Contact::factory()->for($organization)->create();
     $project = Project::factory()->create();
@@ -95,7 +95,7 @@ it('returns `has_projects` as true when the contact organization is a project gu
     $response->assertJsonPath('has_projects', true);
 });
 
-it('returns `has_projects` as false when Project Management is not licensed', function () {
+it('returns `has_projects` as false when Project Management is not licensed', function (): void {
     $licenseSettings = app(LicenseSettings::class);
     $licenseSettings->data->addons->projectManagement = false;
     $licenseSettings->save();
@@ -112,13 +112,13 @@ it('returns `has_projects` as false when Project Management is not licensed', fu
     $response->assertJsonPath('has_projects', false);
 });
 
-it('renders the portal projects route', function () {
+it('renders the portal projects route', function (): void {
     $response = get(route('portal.projects'));
 
     $response->assertSuccessful();
 });
 
-it('renders the portal project show route', function () {
+it('renders the portal project show route', function (): void {
     $project = Project::factory()->create();
     $response = get(route('portal.projects.show', ['project' => $project->id]));
 

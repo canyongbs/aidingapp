@@ -45,7 +45,7 @@ use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\post;
 use function Pest\Laravel\withoutMiddleware;
 
-it('requires Olympus Key authentication', function () {
+it('requires Olympus Key authentication', function (): void {
     post(
         route('otp-code.generate'),
         [
@@ -55,7 +55,7 @@ it('requires Olympus Key authentication', function () {
         ->assertForbidden();
 });
 
-it('returns 422 for a non-existing user', function () {
+it('returns 422 for a non-existing user', function (): void {
     $email = fake()->safeEmail();
 
     withoutMiddleware(CheckOlympusKey::class)
@@ -71,7 +71,7 @@ it('returns 422 for a non-existing user', function () {
     assertDatabaseCount(OtpLoginCode::class, 0);
 });
 
-it('can generate an OTP login code for an existing user', function () {
+it('can generate an OTP login code for an existing user', function (): void {
     $user = User::factory()->create();
 
     withoutMiddleware(CheckOlympusKey::class)
@@ -91,7 +91,7 @@ it('can generate an OTP login code for an existing user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('returns 422 for a soft-deleted user', function () {
+it('returns 422 for a soft-deleted user', function (): void {
     $user = User::factory()->create();
 
     $user->delete();
@@ -111,7 +111,7 @@ it('returns 422 for a soft-deleted user', function () {
     assertDatabaseCount(OtpLoginCode::class, 0);
 });
 
-it('deletes existing OTP codes for a user', function () {
+it('deletes existing OTP codes for a user', function (): void {
     $user = User::factory()->create();
 
     $existingOtpCode = OtpLoginCode::factory()->create(['user_id' => $user->id]);
@@ -135,7 +135,7 @@ it('deletes existing OTP codes for a user', function () {
     expect($otpCode->user_id)->toEqual($user->id);
 });
 
-it('sends OTP code notification to the provided email', function () {
+it('sends OTP code notification to the provided email', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -157,7 +157,7 @@ it('sends OTP code notification to the provided email', function () {
     );
 });
 
-it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, array $errors) {
+it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, array $errors): void {
     withoutMiddleware(CheckOlympusKey::class)
         ->post(
             route('otp-code.generate'),
@@ -180,7 +180,7 @@ it('requires valid data', function (GenerateOtpLoginCodeRequestFactory $data, ar
         ],
     );
 
-it('throttles repeated OTP code requests for the same user', function () {
+it('throttles repeated OTP code requests for the same user', function (): void {
     $user = User::factory()->create();
 
     withoutMiddleware(CheckOlympusKey::class)

@@ -49,6 +49,7 @@ use AidingApp\Notification\Models\OutboundEmailMessageId;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
 use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\ServiceRequestEmailTemplateType;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\ServiceRequestNotificationChannel;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeAssignmentTypes;
 use AidingApp\ServiceManagement\Enums\ServiceRequestTypeEmailTemplateRole;
@@ -63,7 +64,6 @@ use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Actions\Paths\ModulePath;
 use App\Models\Tenant;
 use App\Models\User;
-use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Mail\Events\MessageSending;
 use Illuminate\Support\Facades\Event;
@@ -82,8 +82,8 @@ use Spatie\Multitenancy\Events\MadeTenantCurrentEvent;
 
 use function Tests\enablePreference;
 
-describe('Spam and virus detection', function () {
-    it('handles spam verdict failure properly', function () {
+describe('Spam and virus detection', function (): void {
+    it('handles spam verdict failure properly', function (): void {
         Storage::fake('s3');
         Storage::fake('s3-inbound-email');
 
@@ -95,8 +95,7 @@ describe('Spam and virus detection', function () {
 
         Storage::disk('s3-inbound-email')->putFileAs('', $file, 's3_email_spam');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -106,16 +105,16 @@ describe('Spam and virus detection', function () {
             $mock
                 ->shouldReceive('fail')
                 ->once()
-                ->withArgs(function (Throwable $e) {
-                    $invadedException = invade($e);
-
-                    return $e instanceof SesS3InboundSpamOrVirusDetected
-                        && $invadedException->spamVerdict === 'FAIL'
-                        && $invadedException->virusVerdict === 'PASS';
+                ->withArgs(function (Throwable $exception): bool {
+                    return $exception instanceof SesS3InboundSpamOrVirusDetected
+                        && $exception->context()['spam_verdict'] === 'FAIL'
+                        && $exception->context()['virus_verdict'] === 'PASS';
                 });
         });
 
-        invade($mock)->emailFilePath = 's3_email_spam';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email_spam');
 
         $mock->handle();
 
@@ -123,7 +122,7 @@ describe('Spam and virus detection', function () {
         assertDatabaseCount(EngagementResponse::class, 0);
     });
 
-    it('handles virus verdict failure properly', function () {
+    it('handles virus verdict failure properly', function (): void {
         Storage::fake('s3');
         Storage::fake('s3-inbound-email');
 
@@ -135,8 +134,7 @@ describe('Spam and virus detection', function () {
 
         Storage::disk('s3-inbound-email')->putFileAs('', $file, 's3_email_virus');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -146,16 +144,16 @@ describe('Spam and virus detection', function () {
             $mock
                 ->shouldReceive('fail')
                 ->once()
-                ->withArgs(function (Throwable $e) {
-                    $invadedException = invade($e);
-
-                    return $e instanceof SesS3InboundSpamOrVirusDetected
-                        && $invadedException->spamVerdict === 'PASS'
-                        && $invadedException->virusVerdict === 'FAIL';
+                ->withArgs(function (Throwable $exception): bool {
+                    return $exception instanceof SesS3InboundSpamOrVirusDetected
+                        && $exception->context()['spam_verdict'] === 'PASS'
+                        && $exception->context()['virus_verdict'] === 'FAIL';
                 });
         });
 
-        invade($mock)->emailFilePath = 's3_email_virus';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email_virus');
 
         $mock->handle();
 
@@ -164,12 +162,10 @@ describe('Spam and virus detection', function () {
     });
 });
 
-describe('Engagement response processing', function () {
-    it('properly handles not finding a Contact match for emails that should be an EngagementResponse', function () {
+describe('Engagement response processing', function (): void {
+    it('properly handles not finding a Contact match for emails that should be an EngagementResponse', function (): void {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -179,8 +175,7 @@ describe('Engagement response processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -188,7 +183,9 @@ describe('Engagement response processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -203,18 +200,16 @@ describe('Engagement response processing', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('properly creates an EngagementResponse for an inbound email', function () {
+    it('properly creates an EngagementResponse for an inbound email', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $tenant = Tenant::query()->first();
 
@@ -222,7 +217,7 @@ describe('Engagement response processing', function () {
 
         $contact = null;
 
-        $tenant->execute(function () use (&$contact) {
+        $tenant->execute(function () use (&$contact): void {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -238,8 +233,7 @@ describe('Engagement response processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -247,13 +241,15 @@ describe('Engagement response processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () use ($contact, $modulePath) {
+        $tenant->execute(function () use ($contact, $modulePath): void {
             assertDatabaseHas(EngagementResponse::class, [
                 'subject' => 'This is a test',
                 'sender_id' => $contact->getKey(),
@@ -266,18 +262,16 @@ describe('Engagement response processing', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('handles attachments properly', function () {
+    it('handles attachments properly', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $tenant = Tenant::query()->first();
 
@@ -285,7 +279,7 @@ describe('Engagement response processing', function () {
 
         $contact = null;
 
-        $tenant->execute(function () use (&$contact) {
+        $tenant->execute(function () use (&$contact): void {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -301,8 +295,7 @@ describe('Engagement response processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -310,13 +303,15 @@ describe('Engagement response processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () use ($contact, $modulePath) {
+        $tenant->execute(function () use ($contact, $modulePath): void {
             $engagementResponses = EngagementResponse::all();
 
             expect($engagementResponses)->toHaveCount(1);
@@ -340,18 +335,16 @@ describe('Engagement response processing', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sets createdBy on media attachments', function () {
+    it('sets createdBy on media attachments', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $tenant = Tenant::query()->first();
 
@@ -359,7 +352,7 @@ describe('Engagement response processing', function () {
 
         $contact = null;
 
-        $tenant->execute(function () use (&$contact) {
+        $tenant->execute(function () use (&$contact): void {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -375,8 +368,7 @@ describe('Engagement response processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -384,11 +376,13 @@ describe('Engagement response processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () use ($contact) {
+        $tenant->execute(function () use ($contact): void {
             $engagementResponse = EngagementResponse::first();
 
             assert($engagementResponse instanceof EngagementResponse);
@@ -407,12 +401,10 @@ describe('Engagement response processing', function () {
     });
 });
 
-describe('Failed job handling', function () {
-    it('handles exceptions correctly in the failed method', function (?Exception $exception, string $expectedPath) {
+describe('Failed job handling', function (): void {
+    it('handles exceptions correctly in the failed method', function (?Exception $exception, string $expectedPath): void {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -435,17 +427,15 @@ describe('Failed job handling', function () {
         'spam exception' => [new SesS3InboundSpamOrVirusDetected('s3_email', 'FAIL', 'PASS'), '/spam-or-virus-detected'],
         'virus exception' => [new SesS3InboundSpamOrVirusDetected('s3_email', 'PASS', 'FAIL'), '/spam-or-virus-detected'],
         'unable to retrieve content exception' => [new UnableToRetrieveContentFromSesS3EmailPayload('s3_email'), '/failed'],
-        'unable to find service request type exception' => [fn () => new SesS3InboundServiceRequestTypeNotFound('s3_email', TenantServiceRequestTypeDomain::factory()->createQuietly(['tenant_id' => Tenant::query()->firstOrFail()])), '/failed'],
+        'unable to find service request type exception' => [fn (): SesS3InboundServiceRequestTypeNotFound => new SesS3InboundServiceRequestTypeNotFound('s3_email', TenantServiceRequestTypeDomain::factory()->createQuietly(['tenant_id' => Tenant::query()->firstOrFail()])), '/failed'],
     ]);
 });
 
-describe('Service Request Type Service Request creation from inbound email', function () {
-    it('properly handles being unable to find the ServiceRequestType', function () {
+describe('Service Request Type Service Request creation from inbound email', function (): void {
+    it('properly handles being unable to find the ServiceRequestType', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestTypeDomain] = $tenant->execute(function () use ($tenant) {
+        [$contact, $serviceRequestTypeDomain] = $tenant->execute(function () use ($tenant): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -462,8 +452,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -472,8 +460,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content, $serviceRequestTypeDomain) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content, $serviceRequestTypeDomain): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -483,16 +470,16 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $mock
                 ->shouldReceive('fail')
                 ->once()
-                ->withArgs(function (Throwable $e) use ($serviceRequestTypeDomain) {
-                    $invadedException = invade($e);
-
-                    return $e instanceof SesS3InboundServiceRequestTypeNotFound
-                        && $invadedException->file === 's3_email'
-                        && $invadedException->serviceRequestTypeDomain->is($serviceRequestTypeDomain);
+                ->withArgs(function (Throwable $exception) use ($serviceRequestTypeDomain): bool {
+                    return $exception instanceof SesS3InboundServiceRequestTypeNotFound
+                        && invade($exception)->__get('file') === 's3_email'
+                        && invade($exception)->__get('serviceRequestTypeDomain')->is($serviceRequestTypeDomain);
                 });
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -505,12 +492,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         assertDatabaseEmpty(ServiceRequest::class);
     });
 
-    it('handles is_email_automatic_creation_enabled being disabled properly', function () {
+    it('handles is_email_automatic_creation_enabled being disabled properly', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -534,8 +519,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -544,8 +527,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -553,7 +535,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -568,21 +552,19 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization', function () {
+    it('sends ineligible email when no contact is found for a service request and we cannot match the email to an organization', function (): void {
         $notificationFake = Notification::fake();
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                 Notification::swap($notificationFake);
             }
         );
 
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $serviceRequestType = ServiceRequestType::factory()
                 ->has(
                     TenantServiceRequestTypeDomain::factory()->state([
@@ -609,8 +591,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -619,8 +599,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -628,7 +607,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -648,27 +629,25 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $notificationFake->assertSentOnDemand(
             IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                 return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
             }
         );
     });
 
-    it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled', function () {
+    it('sends ineligible email when no contact is found for a service request and is_email_automatic_creation_contact_create_enabled is disabled', function (): void {
         $notificationFake = Notification::fake();
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                 Notification::swap($notificationFake);
             }
         );
 
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             Organization::factory()->create([
                 'domains' => ['canyongbs.com'],
             ]);
@@ -699,8 +678,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -709,8 +686,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -718,7 +694,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -738,22 +716,20 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $notificationFake->assertSentOnDemand(
             IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                 return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
             }
         );
     });
 
-    it('ineligible email includes proper bcc to provided email when set', function () {
+    it('ineligible email includes proper bcc to provided email when set', function (): void {
         Event::fake([MessageSending::class]);
 
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
         $bccEmail = fake()->safeEmail();
 
-        $tenant->execute(function () use ($bccEmail) {
+        $tenant->execute(function () use ($bccEmail): void {
             Organization::factory()->create([
                 'domains' => ['canyongbs.com'],
             ]);
@@ -785,8 +761,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -795,8 +769,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -804,7 +777,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -822,9 +797,8 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->assertMissing('s3_email');
 
-        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($bccEmail) {
-            $bcc = collect($event->message->getBcc())
-                ->map(fn ($address) => is_array($address) ? $address[0] : $address);
+        Event::assertDispatched(MessageSending::class, function (MessageSending $event) use ($bccEmail): true {
+            $bcc = $event->message->getBcc();
 
             expect($bcc)->toHaveCount(1)
                 ->and($bcc[0]->getAddress())->toBe($bccEmail);
@@ -833,12 +807,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         });
     });
 
-    it('creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled', function () {
+    it('creates a new contact for a service request when is_email_automatic_creation_contact_create_enabled is enabled', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$organization, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$organization, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             seed(ContactTypeSeeder::class);
 
             $organization = Organization::factory()->create([
@@ -873,8 +845,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -883,8 +853,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -892,7 +861,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -927,12 +898,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('properly creates a service request for a matching contact', function () {
+    it('properly creates a service request for a matching contact', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -965,8 +934,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -975,8 +942,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -984,7 +950,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -1011,12 +979,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('round robin assigns the created service request to a manager of the type', function () {
+    it('round robin assigns the created service request to a manager of the type', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$manager, $serviceRequestType] = $tenant->execute(function () {
+        [$manager, $serviceRequestType] = $tenant->execute(function (): array {
             Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1052,8 +1018,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1062,8 +1026,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1071,7 +1034,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -1079,7 +1044,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $serviceRequest = ServiceRequest::query()->sole();
 
-        expect($serviceRequest->assignedTo)->not->toBeNull()
+        expect($serviceRequest->assignedTo)->not()->toBeNull()
             ->and($serviceRequest->assignedTo->user_id)->toBe($manager->getKey())
             ->and($serviceRequest->assignedTo->status)->toBe(ServiceRequestAssignmentStatus::Active)
             ->and($serviceRequestType->fresh()->last_assigned_id)->toBe($manager->getKey());
@@ -1087,12 +1052,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('individually assigns the created service request to the configured user', function () {
+    it('individually assigns the created service request to the configured user', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$individual, $serviceRequestType] = $tenant->execute(function () {
+        [$individual, $serviceRequestType] = $tenant->execute(function (): array {
             Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1129,8 +1092,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1139,8 +1100,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1148,7 +1108,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -1156,26 +1118,24 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $serviceRequest = ServiceRequest::query()->sole();
 
-        expect($serviceRequest->assignedTo)->not->toBeNull()
+        expect($serviceRequest->assignedTo)->not()->toBeNull()
             ->and($serviceRequest->assignedTo->user_id)->toBe($individual->getKey())
             ->and($serviceRequest->assignedTo->status)->toBe(ServiceRequestAssignmentStatus::Active);
 
         $filesystem->assertMissing('s3_email');
     });
 
-    it('notifies managers of the type when a service request is created from inbound email', function () {
+    it('notifies managers of the type when a service request is created from inbound email', function (): void {
         $notificationFake = Notification::fake();
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                 Notification::swap($notificationFake);
             }
         );
 
         $tenant = Tenant::query()->firstOrFail();
-
-        assert($tenant instanceof Tenant);
 
         $manager = $tenant->execute(function () {
             Contact::factory()->create([
@@ -1219,8 +1179,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1229,8 +1187,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1238,7 +1195,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -1247,12 +1206,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('routes forward-only mail on the SES delivery recipient when the To header is the original mailbox', function () {
+    it('routes forward-only mail on the SES delivery recipient when the To header is the original mailbox', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1285,8 +1242,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forward_only_service_request'));
@@ -1295,8 +1250,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1304,7 +1258,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -1331,12 +1287,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('properly creates a service request for emails with attachments', function () {
+    it('properly creates a service request for emails with attachments', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1371,12 +1325,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -1386,8 +1338,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1395,7 +1346,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -1428,12 +1381,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sets createdBy on media attachments', function () {
+    it('sets createdBy and records media attachments as request submissions', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -1468,12 +1419,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -1483,8 +1432,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -1492,7 +1440,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -1508,19 +1458,18 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         foreach ($media as $item) {
             expect($item->created_by_id)->toBe($contact->getKey())
-                ->and($item->created_by_type)->toBe($contact->getMorphClass());
+                ->and($item->created_by_type)->toBe($contact->getMorphClass())
+                ->and(ServiceRequestFileUploadType::fromMedia($item))->toBe(ServiceRequestFileUploadType::RequestSubmission);
         }
 
         $filesystem->assertMissing('s3_email');
     });
 
-    describe('email_automatic_creation_contact_create_condition', function () {
-        it('None condition creates a new contact and service request when no contact exists and contact creation is enabled', function () {
+    describe('email_automatic_creation_contact_create_condition', function (): void {
+        it('None condition creates a new contact and service request when no contact exists and contact creation is enabled', function (): void {
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            [$serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            [$serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
                 seed(ContactTypeSeeder::class);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -1552,8 +1501,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1562,8 +1509,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -1571,7 +1517,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             $filesystem->assertExists('s3_email');
 
@@ -1614,21 +1562,19 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $filesystem->assertMissing('s3_email');
         });
 
-        it('None condition does not create a new contact or service request when is_email_automatic_creation_contact_create_enabled is disabled', function () {
+        it('None condition does not create a new contact or service request when is_email_automatic_creation_contact_create_enabled is disabled', function (): void {
             $notificationFake = Notification::fake();
 
             Event::listen(
                 MadeTenantCurrentEvent::class,
-                function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+                function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                     Notification::swap($notificationFake);
                 }
             );
 
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            $tenant->execute(function () {
+            $tenant->execute(function (): void {
                 seed(ContactTypeSeeder::class);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -1658,8 +1604,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1668,8 +1612,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -1677,7 +1620,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             $filesystem->assertExists('s3_email');
 
@@ -1695,18 +1640,16 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $notificationFake->assertSentOnDemand(
                 IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                     return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
                 }
             );
         });
 
-        it('None condition creates a service request for an existing contact when contact is not empty', function () {
+        it('None condition creates a service request for an existing contact when contact is not empty', function (): void {
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
                 $contact = Contact::factory()->create([
                     'email' => 'kevin.ullyott@canyongbs.com',
                 ]);
@@ -1740,8 +1683,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1750,8 +1691,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -1759,7 +1699,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             $filesystem->assertExists('s3_email');
 
@@ -1790,21 +1732,19 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $filesystem->assertMissing('s3_email');
         });
 
-        it('IfEligible condition sends an ineligible notification when no contact exists and no matching organization is found', function () {
+        it('IfEligible condition sends an ineligible notification when no contact exists and no matching organization is found', function (): void {
             $notificationFake = Notification::fake();
 
             Event::listen(
                 MadeTenantCurrentEvent::class,
-                function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+                function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                     Notification::swap($notificationFake);
                 }
             );
 
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            $tenant->execute(function () {
+            $tenant->execute(function (): void {
                 $serviceRequestType = ServiceRequestType::factory()
                     ->has(
                         TenantServiceRequestTypeDomain::factory()->state([
@@ -1832,8 +1772,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1842,8 +1780,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -1851,7 +1788,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             assertDatabaseEmpty(Contact::class);
 
@@ -1867,27 +1806,25 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $notificationFake->assertSentOnDemand(
                 IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                     return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
                 }
             );
         });
 
-        it('IfEligible condition sends an ineligible notification when no contact exists and contact creation is disabled even if a matching organization exists', function () {
+        it('IfEligible condition sends an ineligible notification when no contact exists and contact creation is disabled even if a matching organization exists', function (): void {
             $notificationFake = Notification::fake();
 
             Event::listen(
                 MadeTenantCurrentEvent::class,
-                function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+                function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                     Notification::swap($notificationFake);
                 }
             );
 
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            $tenant->execute(function () {
+            $tenant->execute(function (): void {
                 Organization::factory()->create([
                     'domains' => ['canyongbs.com'],
                 ]);
@@ -1919,8 +1856,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -1929,8 +1864,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -1938,7 +1872,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             assertDatabaseEmpty(Contact::class);
 
@@ -1954,18 +1890,16 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $notificationFake->assertSentOnDemand(
                 IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+                function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                     return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
                 }
             );
         });
 
-        it('IfEligible condition creates a new contact linked to the matched organization when no contact exists and contact creation is enabled', function () {
+        it('IfEligible condition creates a new contact linked to the matched organization when no contact exists and contact creation is enabled', function (): void {
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            [$organization, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            [$organization, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
                 seed(ContactTypeSeeder::class);
 
                 $organization = Organization::factory()->create([
@@ -2001,8 +1935,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -2011,8 +1943,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -2020,7 +1951,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             assertDatabaseEmpty(Contact::class);
 
@@ -2061,12 +1994,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
             $filesystem->assertMissing('s3_email');
         });
 
-        it('IfEligible condition creates a service request for an existing contact when contact is not empty', function () {
+        it('IfEligible condition creates a service request for an existing contact when contact is not empty', function (): void {
             $tenant = Tenant::query()->firstOrFail();
 
-            assert($tenant instanceof Tenant);
-
-            [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+            [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
                 $contact = Contact::factory()->create([
                     'email' => 'kevin.ullyott@canyongbs.com',
                 ]);
@@ -2100,8 +2031,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
             Storage::fake('s3');
             $filesystem = Storage::fake('s3-inbound-email');
 
-            assert($filesystem instanceof FilesystemAdapter);
-
             $modulePath = resolve(ModulePath::class);
 
             $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
@@ -2110,8 +2039,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $filesystem->putFileAs('', $file, 's3_email');
 
-            /** @var ProcessSesS3InboundEmail $mock */
-            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+            $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
                 $mock
                     ->shouldAllowMockingProtectedMethods()
                     ->shouldReceive('getContent')
@@ -2119,7 +2047,9 @@ describe('Service Request Type Service Request creation from inbound email', fun
                     ->andReturn($content);
             });
 
-            invade($mock)->emailFilePath = 's3_email';
+            assert($mock instanceof ProcessSesS3InboundEmail);
+
+            invade($mock)->__set('emailFilePath', 's3_email');
 
             $filesystem->assertExists('s3_email');
 
@@ -2152,13 +2082,11 @@ describe('Service Request Type Service Request creation from inbound email', fun
     });
 });
 
-describe('Forwarded email Service Request creation', function () {
-    it('creates a service request for the original sender when an email is forwarded to the type address', function (string $fixture, string $expectedSubject, string $expectedBodyContains, string $forwarderWrapperContains) {
+describe('Forwarded email Service Request creation', function (): void {
+    it('creates a service request for the original sender when an email is forwarded to the type address', function (string $fixture, string $expectedSubject, string $expectedBodyContains, string $forwarderWrapperContains): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$originalContact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$originalContact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $originalContact = Contact::factory()->create([
                 'email' => 'student@example.com',
             ]);
@@ -2191,8 +2119,6 @@ describe('Forwarded email Service Request creation', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', "tests/Landlord/Fixtures/{$fixture}"));
@@ -2201,8 +2127,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2210,7 +2135,9 @@ describe('Forwarded email Service Request creation', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2229,7 +2156,7 @@ describe('Forwarded email Service Request creation', function () {
 
         expect($serviceRequest->title)->toBe($expectedSubject)
             ->and($serviceRequest->close_details)->toContain($expectedBodyContains)
-            ->and($serviceRequest->close_details)->not->toContain($forwarderWrapperContains)
+            ->and($serviceRequest->close_details)->not()->toContain($forwarderWrapperContains)
             ->and($serviceRequest->respondent->is($originalContact))->toBeTrue()
             ->and($serviceRequest->priority->is($assignedPriority))->toBeTrue();
 
@@ -2243,10 +2170,8 @@ describe('Forwarded email Service Request creation', function () {
         'nested Fwd/FW subject' => ['s3_email_forwarded_nested_subject', 'Account help', 'cannot sign in to my account', 'Passing this along'],
     ]);
 
-    it('creates a new contact for the original sender, not the forwarder, when contact creation is enabled', function () {
+    it('creates a new contact for the original sender, not the forwarder, when contact creation is enabled', function (): void {
         $tenant = Tenant::query()->firstOrFail();
-
-        assert($tenant instanceof Tenant);
 
         $assignedPriority = $tenant->execute(function () {
             seed(ContactTypeSeeder::class);
@@ -2280,8 +2205,6 @@ describe('Forwarded email Service Request creation', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forwarded_gmail'));
@@ -2290,8 +2213,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2299,7 +2221,9 @@ describe('Forwarded email Service Request creation', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         assertDatabaseEmpty(Contact::class);
 
@@ -2329,10 +2253,8 @@ describe('Forwarded email Service Request creation', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('evaluates organization eligibility against the original sender domain, not the forwarder domain', function () {
+    it('evaluates organization eligibility against the original sender domain, not the forwarder domain', function (): void {
         $tenant = Tenant::query()->firstOrFail();
-
-        assert($tenant instanceof Tenant);
 
         $organization = $tenant->execute(function () {
             seed(ContactTypeSeeder::class);
@@ -2371,8 +2293,6 @@ describe('Forwarded email Service Request creation', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forwarded_gmail'));
@@ -2381,8 +2301,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2390,7 +2309,9 @@ describe('Forwarded email Service Request creation', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2408,21 +2329,19 @@ describe('Forwarded email Service Request creation', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sends the ineligible notification to the original sender when their domain is not eligible', function () {
+    it('sends the ineligible notification to the original sender when their domain is not eligible', function (): void {
         $notificationFake = Notification::fake();
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($notificationFake) {
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
                 Notification::swap($notificationFake);
             }
         );
 
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             // Organization matches only the forwarder's domain, so the original sender is ineligible.
             Organization::factory()->create([
                 'domains' => ['school.edu'],
@@ -2455,8 +2374,6 @@ describe('Forwarded email Service Request creation', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forwarded_gmail'));
@@ -2465,8 +2382,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2474,7 +2390,9 @@ describe('Forwarded email Service Request creation', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2485,7 +2403,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $notificationFake->assertSentOnDemand(
             IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
-            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable) {
+            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
                 return $notifiable->routes['mail'] === 'student@example.com';
             }
         );
@@ -2493,10 +2411,8 @@ describe('Forwarded email Service Request creation', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('falls back to the forwarder when a forward cannot be confidently parsed', function () {
+    it('falls back to the forwarder when a forward cannot be confidently parsed', function (): void {
         $tenant = Tenant::query()->firstOrFail();
-
-        assert($tenant instanceof Tenant);
 
         $forwarderContact = $tenant->execute(function () {
             $forwarderContact = Contact::factory()->create([
@@ -2531,8 +2447,6 @@ describe('Forwarded email Service Request creation', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_forwarded_unparseable'));
@@ -2541,8 +2455,7 @@ describe('Forwarded email Service Request creation', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2550,7 +2463,9 @@ describe('Forwarded email Service Request creation', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2568,12 +2483,10 @@ describe('Forwarded email Service Request creation', function () {
     });
 });
 
-describe('Legacy inbound email handling', function () {
-    it('creates an UnmatchedInboundCommunication for a legacy bare-tenant address', function () {
+describe('Legacy inbound email handling', function (): void {
+    it('creates an UnmatchedInboundCommunication for a legacy bare-tenant address', function (): void {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -2583,8 +2496,7 @@ describe('Legacy inbound email handling', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2592,7 +2504,9 @@ describe('Legacy inbound email handling', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2613,13 +2527,11 @@ describe('Legacy inbound email handling', function () {
     });
 });
 
-describe('Service request reply threading', function () {
-    it('creates a ServiceRequestUpdate for an SR reply with valid In-Reply-To header', function () {
+describe('Service request reply threading', function (): void {
+    it('creates a ServiceRequestUpdate for an SR reply with valid In-Reply-To header', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -2640,8 +2552,6 @@ describe('Service request reply threading', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
@@ -2656,8 +2566,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2665,7 +2574,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2682,12 +2593,10 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('reopens a closed service request when a reply arrives', function () {
+    it('reopens a closed service request when a reply arrives', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest, $expectedOpenStatus] = $tenant->execute(function () {
+        [$contact, $serviceRequest, $expectedOpenStatus] = $tenant->execute(function (): array {
             $expectedOpenStatus = ServiceRequestStatus::query()
                 ->where('classification', SystemServiceRequestClassification::Open)
                 ->orderBy('sort')
@@ -2718,8 +2627,6 @@ describe('Service request reply threading', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
@@ -2734,8 +2641,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2743,7 +2649,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -2756,22 +2664,19 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('handles attachments properly', function () {
+    it('handles attachments properly', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-        assert($filesystem instanceof FilesystemAdapter);
 
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -2805,8 +2710,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2814,7 +2718,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $filesystem->assertExists('s3_email');
 
@@ -2822,7 +2728,7 @@ describe('Service request reply threading', function () {
 
         $tenant->makeCurrent();
 
-        $tenant->execute(function () use ($contact, $serviceRequest) {
+        $tenant->execute(function () use ($contact, $serviceRequest): void {
             assertDatabaseCount(ServiceRequestUpdate::class, 1);
 
             $serviceRequestUpdate = ServiceRequestUpdate::first();
@@ -2855,22 +2761,19 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('sets createdBy on media attachments for SR reply', function () {
+    it('sets createdBy and does not record an upload type on media attachments for SR reply', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-        assert($filesystem instanceof FilesystemAdapter);
 
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -2904,8 +2807,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2913,13 +2815,15 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
         $tenant->makeCurrent();
 
-        $tenant->execute(function () use ($contact) {
+        $tenant->execute(function () use ($contact): void {
             $serviceRequestUpdate = ServiceRequestUpdate::first();
 
             assert($serviceRequestUpdate instanceof ServiceRequestUpdate);
@@ -2930,19 +2834,18 @@ describe('Service request reply threading', function () {
 
             foreach ($media as $item) {
                 expect($item->created_by_id)->toBe($contact->getKey())
-                    ->and($item->created_by_type)->toBe($contact->getMorphClass());
+                    ->and($item->created_by_type)->toBe($contact->getMorphClass())
+                    ->and($item->hasCustomProperty(ServiceRequestFileUploadType::CUSTOM_PROPERTY))->toBeFalse();
             }
         });
 
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply matches sender case-insensitively against respondent', function () {
+    it('SR reply matches sender case-insensitively against respondent', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'Kevin.Ullyott@CanyonGBS.com',
             ]);
@@ -2963,8 +2866,6 @@ describe('Service request reply threading', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         // Fixture sender is kevin.ullyott@canyongbs.com (lowercase), contact has mixed case
@@ -2980,8 +2881,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -2989,7 +2889,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3004,12 +2906,10 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply rejects sender that does not match SR respondent', function () {
+    it('SR reply rejects sender that does not match SR respondent', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        $rawMessageId = $tenant->execute(function () {
+        $rawMessageId = $tenant->execute(function (): string {
             // Contact email does NOT match the fixture sender (kevin.ullyott@canyongbs.com)
             $contact = Contact::factory()->create([
                 'email' => 'someone.else@example.com',
@@ -3031,8 +2931,6 @@ describe('Service request reply threading', function () {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $modulePath = resolve(ModulePath::class);
 
         $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_sr_reply'));
@@ -3047,8 +2945,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3056,7 +2953,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3067,11 +2966,9 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply returns early when no matching ServiceRequest found from headers', function () {
+    it('SR reply returns early when no matching ServiceRequest found from headers', function (): void {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3082,8 +2979,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3091,7 +2987,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3104,12 +3002,10 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply resolves via plus-addressed SR number in To address', function () {
+    it('SR reply resolves via plus-addressed SR number in To address', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3123,8 +3019,6 @@ describe('Service request reply threading', function () {
 
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3143,8 +3037,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3152,7 +3045,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3169,12 +3064,10 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply resolves via body reference when no plus-code or headers match', function () {
+    it('SR reply resolves via body reference when no plus-code or headers match', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3188,8 +3081,6 @@ describe('Service request reply threading', function () {
 
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3216,8 +3107,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3225,7 +3115,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3242,11 +3134,9 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply falls through all strategies gracefully when none match', function () {
+    it('SR reply falls through all strategies gracefully when none match', function (): void {
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3261,8 +3151,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3270,7 +3159,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3283,12 +3174,10 @@ describe('Service request reply threading', function () {
         $filesystem->assertMissing('s3_email');
     });
 
-    it('SR reply resolves from References header when In-Reply-To has no match', function () {
+    it('SR reply resolves from References header when In-Reply-To has no match', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3309,8 +3198,6 @@ describe('Service request reply threading', function () {
 
         Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3333,8 +3220,7 @@ describe('Service request reply threading', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3342,7 +3228,9 @@ describe('Service request reply threading', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
@@ -3359,27 +3247,23 @@ describe('Service request reply threading', function () {
     });
 });
 
-describe('Inline attachment processing', function () {
-    it('stores inline images in inline_attachments collection for EngagementResponse', function () {
+describe('Inline attachment processing', function (): void {
+    it('stores inline images in inline_attachments collection for EngagementResponse', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
 
-        assert($filesystem instanceof FilesystemAdapter);
-
         $tenant = Tenant::query()->firstOrFail();
-
-        assert($tenant instanceof Tenant);
 
         $contact = null;
 
-        $tenant->execute(function () use (&$contact) {
+        $tenant->execute(function () use (&$contact): void {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3395,8 +3279,7 @@ describe('Inline attachment processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3404,18 +3287,20 @@ describe('Inline attachment processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $engagementResponse = EngagementResponse::first();
 
             assert($engagementResponse instanceof EngagementResponse);
 
             $inlineAttachments = $engagementResponse->getMedia('inline_attachments');
 
-            expect($engagementResponse->content)->not->toContain('cid:')
+            expect($engagementResponse->content)->not()->toContain('cid:')
                 ->and($engagementResponse->getMedia('attachments'))->toHaveCount(0)
                 ->and($inlineAttachments)->toHaveCount(1)
                 ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
@@ -3423,18 +3308,16 @@ describe('Inline attachment processing', function () {
         });
     });
 
-    it('stores inline images as media on UnmatchedInboundCommunication when no contact is found', function () {
+    it('stores inline images as media on UnmatchedInboundCommunication when no contact is found', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3444,8 +3327,7 @@ describe('Inline attachment processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3453,38 +3335,38 @@ describe('Inline attachment processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
         $tenant = Tenant::query()->firstOrFail();
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $unmatchedCommunication = UnmatchedInboundCommunication::first();
 
             assert($unmatchedCommunication instanceof UnmatchedInboundCommunication);
 
             $inlineAttachments = $unmatchedCommunication->getMedia('inline_attachments');
 
-            expect($unmatchedCommunication->body)->not->toContain('cid:')
+            expect($unmatchedCommunication->body)->not()->toContain('cid:')
                 ->and($inlineAttachments)->toHaveCount(1)
                 ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
                 ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
         });
     });
 
-    it('stores inline images as media on UnmatchedInboundCommunication for legacy address emails', function () {
+    it('stores inline images as media on UnmatchedInboundCommunication for legacy address emails', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3494,8 +3376,7 @@ describe('Inline attachment processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3503,44 +3384,42 @@ describe('Inline attachment processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
         $tenant = Tenant::query()->firstOrFail();
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $unmatchedCommunication = UnmatchedInboundCommunication::first();
 
             assert($unmatchedCommunication instanceof UnmatchedInboundCommunication);
 
             $inlineAttachments = $unmatchedCommunication->getMedia('inline_attachments');
 
-            expect($unmatchedCommunication->body)->not->toContain('cid:')
+            expect($unmatchedCommunication->body)->not()->toContain('cid:')
                 ->and($inlineAttachments)->toHaveCount(1)
                 ->and($inlineAttachments->first()->getCustomProperty('cid'))->toBe('3b6f9726-978c-4746-98b5-d49b79a34ba9')
                 ->and($inlineAttachments->first()->file_name)->toBe('Outlook-xx50f3o5.png');
         });
     });
 
-    it('stores inline images as media in inline_attachments on ServiceRequestUpdate', function () {
+    it('stores inline images as media in inline_attachments on ServiceRequestUpdate', function (): void {
         $fakeStorage = Storage::fake('s3');
         $filesystem = Storage::fake('s3-inbound-email');
 
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
 
-        assert($filesystem instanceof FilesystemAdapter);
-
-        [$contact, $serviceRequest] = $tenant->execute(function () {
+        [$contact, $serviceRequest] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3572,8 +3451,7 @@ describe('Inline attachment processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3581,11 +3459,13 @@ describe('Inline attachment processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $serviceRequestUpdate = ServiceRequestUpdate::first();
 
             assert($serviceRequestUpdate instanceof ServiceRequestUpdate);
@@ -3599,12 +3479,10 @@ describe('Inline attachment processing', function () {
         });
     });
 
-    it('stores inline images as media in inline_attachments on ServiceRequest created from email', function () {
+    it('stores inline images as media in inline_attachments on ServiceRequest created from email', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
-        assert($tenant instanceof Tenant);
-
-        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function () {
+        [$contact, $serviceRequestType, $assignedPriority] = $tenant->execute(function (): array {
             $contact = Contact::factory()->create([
                 'email' => 'kevin.ullyott@canyongbs.com',
             ]);
@@ -3639,12 +3517,10 @@ describe('Inline attachment processing', function () {
 
         Event::listen(
             MadeTenantCurrentEvent::class,
-            function (MadeTenantCurrentEvent $event) use ($fakeStorage) {
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
                 Storage::set('s3', $fakeStorage);
             }
         );
-
-        assert($filesystem instanceof FilesystemAdapter);
 
         $modulePath = resolve(ModulePath::class);
 
@@ -3654,8 +3530,7 @@ describe('Inline attachment processing', function () {
 
         $filesystem->putFileAs('', $file, 's3_email');
 
-        /** @var ProcessSesS3InboundEmail $mock */
-        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content) {
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
             $mock
                 ->shouldAllowMockingProtectedMethods()
                 ->shouldReceive('getContent')
@@ -3663,11 +3538,13 @@ describe('Inline attachment processing', function () {
                 ->andReturn($content);
         });
 
-        invade($mock)->emailFilePath = 's3_email';
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
 
         $mock->handle();
 
-        $tenant->execute(function () {
+        $tenant->execute(function (): void {
             $serviceRequest = ServiceRequest::first();
 
             assert($serviceRequest instanceof ServiceRequest);

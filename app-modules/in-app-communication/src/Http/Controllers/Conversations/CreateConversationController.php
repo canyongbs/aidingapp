@@ -91,9 +91,9 @@ class CreateConversationController extends Controller
             $avatarUrl = null;
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn ($otherParticipant) => $otherParticipant->participant_id !== $request->user()->getKey());
+                ->first(fn ($otherParticipant): bool => $otherParticipant->participant_id !== $request->user()->getKey());
             $otherUser = $otherParticipant?->participant;
-            $displayName = $otherUser instanceof User ? $otherUser->name : 'Unknown User';
+            $displayName = $otherUser instanceof User ? $otherUser->full_name : 'Unknown User';
             $avatarUrl = $otherUser instanceof User ? Filament::getUserAvatarUrl($otherUser) : null;
         }
 

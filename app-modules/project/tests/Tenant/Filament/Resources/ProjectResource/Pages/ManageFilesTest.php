@@ -55,7 +55,7 @@ use function Pest\Laravel\get;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -77,7 +77,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->projectManagement = false;
@@ -108,7 +108,7 @@ it('is gated with proper access control', function () {
     get(ManageFiles::getUrl(['record' => $project]))->assertSuccessful();
 });
 
-it('can list files', function () {
+it('can list files', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -121,40 +121,32 @@ it('can list files', function () {
         ->assertCanSeeTableRecords($project->files);
 });
 
-it('can sort files by created by', function () {
+it('can sort files alphabetically by the created by full name', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
 
-    $firstUser = User::factory()->create();
-    $secondUser = User::factory()->create();
-    $thirdUser = User::factory()->create();
+    $zoe = User::factory()->create(['first_name' => 'Zoe', 'last_name' => 'Adams']);
+    $bellaYoung = User::factory()->create(['first_name' => 'Bella', 'last_name' => 'Young']);
+    $bellaAdams = User::factory()->create(['first_name' => 'Bella', 'last_name' => 'Adams']);
 
-    $firstFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $secondUser->getKey(),
-        'last_updated_by_id' => $secondUser->getKey(),
-    ]);
-    $secondFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $thirdUser->getKey(),
-        'last_updated_by_id' => $thirdUser->getKey(),
-    ]);
-    $thirdFile = ProjectFile::factory()->for($project)->create([
-        'created_by_id' => $firstUser->getKey(),
-        'last_updated_by_id' => $firstUser->getKey(),
-    ]);
-
-    $expectedOrder = collect([$firstFile, $secondFile, $thirdFile])
-        ->sortBy('created_by_id')
-        ->values();
+    [$zoeFile, $bellaYoungFile, $bellaAdamsFile] = collect([$zoe, $bellaYoung, $bellaAdams])
+        ->map(fn (User $user): ProjectFile => ProjectFile::factory()->for($project)->create([
+            'created_by_id' => $user->getKey(),
+            'last_updated_by_id' => $user->getKey(),
+        ]))
+        ->all();
 
     Livewire::test(ManageFiles::class, [
         'record' => $project->getRouteKey(),
     ])
-        ->sortTable('createdBy.name', 'asc')
-        ->assertCanSeeTableRecords($expectedOrder, inOrder: true);
+        ->sortTable('createdBy.full_name', 'asc')
+        ->assertCanSeeTableRecords([$bellaAdamsFile, $bellaYoungFile, $zoeFile], inOrder: true)
+        ->sortTable('createdBy.full_name', 'desc')
+        ->assertCanSeeTableRecords([$zoeFile, $bellaYoungFile, $bellaAdamsFile], inOrder: true);
 });
 
-it('can validate create files inputs', function ($data, $errors) {
+it('can validate create files inputs', function (array $data, string $errors): void {
     asSuperAdmin();
     Storage::fake('s3');
 
@@ -176,7 +168,7 @@ it('can validate create files inputs', function ($data, $errors) {
     '`description` is max 255 characters' => [['description' => str_repeat('a', 256)], 'description', 'The description may not be greater than 255 characters.'],
 ]);
 
-it('can create files', function () {
+it('can create files', function (): void {
     asSuperAdmin();
     Storage::fake('s3');
 
@@ -195,7 +187,7 @@ it('can create files', function () {
     assertCount(1, ProjectFile::all());
 });
 
-it('can edit files', function () {
+it('can edit files', function (): void {
     asSuperAdmin();
     Storage::fake('s3');
 
@@ -225,7 +217,7 @@ it('can edit files', function () {
     );
 });
 
-it('correctly prunes ProjectFiles based on retention_date', function () {
+it('correctly prunes ProjectFiles based on retention_date', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -253,7 +245,7 @@ it('correctly prunes ProjectFiles based on retention_date', function () {
     assertModelExists($futureRetentionDateFile);
 });
 
-it('prunes expired ProjectFiles when the model pruning job runs', function () {
+it('prunes expired ProjectFiles when the model pruning job runs', function (): void {
     $project = Project::factory()->create();
 
     $expiredFile = ProjectFile::factory()->create([

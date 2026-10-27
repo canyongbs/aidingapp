@@ -56,7 +56,7 @@ use function Pest\Laravel\get;
 
 // Permission Tests
 
-test('EditKnowledgeBaseItem is gated with proper access control', function () {
+test('EditKnowledgeBaseItem is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -86,7 +86,7 @@ test('EditKnowledgeBaseItem is gated with proper access control', function () {
     // TODO Restore testing the edit form
 });
 
-test('EditKnowledgeBaseItem is gated with proper feature access control', function () {
+test('EditKnowledgeBaseItem is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -126,7 +126,7 @@ test('EditKnowledgeBaseItem is gated with proper feature access control', functi
     // TODO Restore testing the edit form
 });
 
-test('managers UserSelect does not show admin users in options by default', function () {
+test('managers UserSelect does not show admin users in options by default', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('knowledge_base_item.view-any');
     $actor->givePermissionTo('knowledge_base_item.*.update');
@@ -145,14 +145,14 @@ test('managers UserSelect does not show admin users in options by default', func
     Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            $options = $field->getSearchResults($regularUser->name);
-            $adminOptions = $field->getSearchResults($adminUser->name);
+            $options = $field->getSearchResults($regularUser->full_name);
+            $adminOptions = $field->getSearchResults($adminUser->full_name);
 
             return ! empty($options) && empty($adminOptions);
         });
 });
 
-test('managers UserSelect shows a pre-selected admin user so they can be deselected', function () {
+test('managers UserSelect shows a pre-selected admin user so they can be deselected', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('knowledge_base_item.view-any');
     $actor->givePermissionTo('knowledge_base_item.*.update');
@@ -171,13 +171,13 @@ test('managers UserSelect shows a pre-selected admin user so they can be deselec
     Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
-            $options = $field->getSearchResults($adminUser->name);
+            $options = $field->getSearchResults($adminUser->full_name);
 
             return ! empty($options);
         });
 });
 
-test('managers UserSelect shows all users including admins when filter_admins_from_selection config is false', function () {
+test('managers UserSelect shows all users including admins when filter_admins_from_selection config is false', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
@@ -197,13 +197,13 @@ test('managers UserSelect shows all users including admins when filter_admins_fr
     Livewire::test(EditKnowledgeBaseItem::class, ['record' => $knowledgeBaseItem->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('properties.manager_ids', function (UserSelect $field) use ($adminUser): bool {
-            $options = $field->getSearchResults($adminUser->name);
+            $options = $field->getSearchResults($adminUser->full_name);
 
             return ! empty($options);
         });
 });
 
-test('managers UserSelect shows all users including admins when withoutAdminFilter is used', function () {
+test('managers UserSelect shows all users including admins when withoutAdminFilter is used', function (): void {
     $adminUser = User::factory()->create();
     $adminUser->assignRole(Authenticatable::SUPER_ADMIN_ROLE);
 
@@ -215,10 +215,10 @@ test('managers UserSelect shows all users including admins when withoutAdminFilt
         ->withoutAdminFilter()
         ->relationship('managers', 'name');
 
-    expect(invade($field)->filterAdmins)->toBeFalse();
+    expect(invade($field)->__get('filterAdmins'))->toBeFalse();
 });
 
-test('file attachments can be uploaded and saved on the edit page', function () {
+test('file attachments can be uploaded and saved on the edit page', function (): void {
     Storage::fake('s3');
 
     $settings = app(LicenseSettings::class);

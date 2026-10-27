@@ -44,13 +44,14 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 
 use function Pest\Laravel\travelBack;
 use function Pest\Laravel\travelTo;
 use function Tests\asSuperAdmin;
 
-test('workload assigner assigns to user with fewest active requests', function () {
+test('workload assigner assigns to user with fewest active requests', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -64,11 +65,11 @@ test('workload assigner assigns to user with fewest active requests', function (
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
 
     // Give the first two users 2 active assignments each
     foreach ($users->take(2) as $user) {
-        for ($i = 0; $i < 2; $i++) {
+        for ($index = 0; $index < 2; $index++) {
             $existingRequest = ServiceRequest::factory()->state([
                 'status_id' => ServiceRequestStatus::factory()->create([
                     'classification' => SystemServiceRequestClassification::Open,
@@ -104,7 +105,7 @@ test('workload assigner assigns to user with fewest active requests', function (
     expect($serviceRequestType->refresh()->last_assigned_id)->toBe($thirdUser->getKey());
 });
 
-test('workload assigner distributes evenly when all managers have same workload', function () {
+test('workload assigner distributes evenly when all managers have same workload', function (): void {
     asSuperAdmin();
 
     $department = Department::factory()
@@ -118,7 +119,7 @@ test('workload assigner distributes evenly when all managers have same workload'
         ])
         ->create();
 
-    $users = $department->users()->orderBy('name')->orderBy('id')->get();
+    $users = $department->users()->tap(new OrderByFullName())->orderBy('id')->get();
 
     travelTo(now()->subSeconds(count($users)));
 
@@ -143,7 +144,7 @@ test('workload assigner distributes evenly when all managers have same workload'
     travelBack();
 });
 
-it('assigns to a manager through group membership', function () {
+it('assigns to a manager through group membership', function (): void {
     asSuperAdmin();
 
     $manager = User::factory()->create();
@@ -169,12 +170,12 @@ it('assigns to a manager through group membership', function () {
     expect($serviceRequest->assignedTo?->user_id)->toBe($manager->getKey());
 });
 
-it('does not count inactive assignments toward a manager\'s workload', function () {
+it('does not count inactive assignments toward a manager\'s workload', function (): void {
     asSuperAdmin();
 
-    $alice = User::factory()->create(['name' => 'Alice']);
-    $bob = User::factory()->create(['name' => 'Bob']);
-    $carol = User::factory()->create(['name' => 'Carol']);
+    $alice = User::factory()->create(['first_name' => 'Alice']);
+    $bob = User::factory()->create(['first_name' => 'Bob']);
+    $carol = User::factory()->create(['first_name' => 'Carol']);
 
     $serviceRequestType = ServiceRequestType::factory()
         ->state(['assignment_type' => ServiceRequestTypeAssignmentTypes::Workload])
@@ -222,7 +223,7 @@ it('does not count inactive assignments toward a manager\'s workload', function 
     expect($serviceRequest->assignedTo?->user_id)->toBe($bob->getKey());
 });
 
-test('workload assigner does not assign when no managers exist', function () {
+test('workload assigner does not assign when no managers exist', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->state([

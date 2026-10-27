@@ -47,7 +47,7 @@ use Illuminate\Support\Facades\Notification;
 
 use function Tests\asSuperAdmin;
 
-it('can assign a pipeline entry to a user', function () {
+it('can assign a pipeline entry to a user', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -64,11 +64,11 @@ it('can assign a pipeline entry to a user', function () {
     ]);
 
     expect($entry->assignedTo)->toBeInstanceOf(User::class);
-    expect($entry->assignedTo->id)->toBe($user->id);
+    expect($entry->assignedTo->getKey())->toBe($user->id);
     expect($entry->assigned_to_type)->toBe('user');
 });
 
-it('can assign a pipeline entry to a contact', function () {
+it('can assign a pipeline entry to a contact', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();
@@ -85,11 +85,11 @@ it('can assign a pipeline entry to a contact', function () {
     ]);
 
     expect($entry->assignedTo)->toBeInstanceOf(Contact::class);
-    expect($entry->assignedTo->id)->toBe($contact->id);
+    expect($entry->assignedTo->getKey())->toBe($contact->id);
     expect($entry->assigned_to_type)->toBe('contact');
 });
 
-it('can belong to a milestone', function () {
+it('can belong to a milestone', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -110,7 +110,7 @@ it('can belong to a milestone', function () {
         ->and($milestone->pipelineEntries->pluck('id')->all())->toContain($entry->id);
 });
 
-it('can have related assets', function () {
+it('can have related assets', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -131,7 +131,7 @@ it('can have related assets', function () {
         ->toBe($assets->pluck('id')->sort()->values()->toArray());
 });
 
-it('can have related service requests', function () {
+it('can have related service requests', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -152,7 +152,7 @@ it('can have related service requests', function () {
         ->toBe($serviceRequests->pluck('id')->sort()->values()->toArray());
 });
 
-it('defaults is_visible_to_guests to true', function () {
+it('defaults is_visible_to_guests to true', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -167,7 +167,7 @@ it('defaults is_visible_to_guests to true', function () {
     expect($entry->is_visible_to_guests)->toBeTrue();
 });
 
-it('can set is_visible_to_guests to false', function () {
+it('can set is_visible_to_guests to false', function (): void {
     asSuperAdmin();
 
     $pipeline = Pipeline::factory()
@@ -183,7 +183,7 @@ it('can set is_visible_to_guests to false', function () {
     expect($entry->is_visible_to_guests)->toBeFalse();
 });
 
-it('can change and clear its milestone', function () {
+it('can change and clear its milestone', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -209,7 +209,7 @@ it('can change and clear its milestone', function () {
     expect($entry->fresh()->milestone)->toBeNull();
 });
 
-it('does not send notification when assigned to a contact', function () {
+it('does not send notification when assigned to a contact', function (): void {
     asSuperAdmin();
 
     $contact = Contact::factory()->create();

@@ -41,13 +41,13 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-it('resolves a public article by its public ID locator', function () {
+it('resolves a public article by its public ID locator', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
     $article = KnowledgeBaseItem::factory()->for($category, 'category')->create([
         'public' => true,
@@ -65,7 +65,17 @@ it('resolves a public article by its public ID locator', function () {
         ->assertJsonPath('category.publicId', $category->public_id);
 });
 
-it('returns the helpful vote percentage', function () {
+it('does not show a private article', function (): void {
+    $article = KnowledgeBaseItem::factory()->create(['public' => false, 'portal_view_count' => 0]);
+
+    getJson(route('api.portal.article.show-canonical', [
+        'article' => "private-article-{$article->public_id}",
+    ]))->assertNotFound();
+
+    expect($article->refresh()->portal_view_count)->toBe(0);
+});
+
+it('returns the helpful vote percentage', function (): void {
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
 
     KnowledgeBaseArticleVote::factory()
@@ -86,7 +96,7 @@ it('returns the helpful vote percentage', function () {
         ->assertJsonPath('helpful_vote_percentage', 67);
 });
 
-it('rejects the legacy article API when the category does not exist', function () {
+it('rejects the legacy article API when the category does not exist', function (): void {
     $article = KnowledgeBaseItem::factory()->create(['public' => true]);
 
     getJson(route('api.portal.article.show', [
@@ -95,7 +105,7 @@ it('rejects the legacy article API when the category does not exist', function (
     ]))->assertNotFound();
 });
 
-it('resolves an article via the legacy category-slug route', function () {
+it('resolves an article via the legacy category-slug route', function (): void {
     $category = KnowledgeBaseCategory::factory()->create();
     $article = KnowledgeBaseItem::factory()->for($category, 'category')->create(['public' => true]);
 

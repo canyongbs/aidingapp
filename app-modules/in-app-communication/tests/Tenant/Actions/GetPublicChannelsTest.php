@@ -38,7 +38,7 @@ use AidingApp\InAppCommunication\Actions\GetPublicChannels;
 use AidingApp\InAppCommunication\Models\Conversation;
 use App\Models\User;
 
-it('never lists a confidential channel', function () {
+it('never lists a confidential channel', function (): void {
     $user = User::factory()->create();
 
     $confidential = Conversation::factory()->confidential()->create([

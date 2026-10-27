@@ -40,6 +40,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestAssignmentStatus;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use Illuminate\Contracts\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\Builder;
@@ -61,7 +62,7 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
             $lowestServiceRequest = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
-                    'serviceRequests as service_request_count' => function (Builder $query) {
+                    'serviceRequests as service_request_count' => function (Builder $query): void {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
                     },
                 ])
@@ -70,12 +71,12 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
 
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
-                ->where(function (QueryBuilder $query) {
+                ->where(function (QueryBuilder $query): void {
                     $query->selectRaw('count(*)')
                         ->from('service_requests')
                         ->join('service_request_assignments', 'service_request_assignments.service_request_id', '=', 'service_requests.id')
                         ->whereColumn('users.id', 'service_request_assignments.user_id')
-                        ->whereExists(function (QueryBuilder $query) {
+                        ->whereExists(function (QueryBuilder $query): void {
                             $query->selectRaw('*')
                                 ->from('service_request_statuses')
                                 ->whereColumn('service_requests.status_id', 'service_request_statuses.id')
@@ -86,23 +87,20 @@ class WorkloadAssigner extends ServiceRequestTypeAssigner
                         ->whereNull('service_request_assignments.deleted_at')
                         ->where('service_request_assignments.status', ServiceRequestAssignmentStatus::Active);
                 }, '<=', $lowestServiceRequest)
-                ->where('name', '>=', $lastAssignee->name)
-                ->where(fn (Builder $query) => $query
-                    ->where('name', '!=', $lastAssignee->name)
-                    ->orWhere('users.id', '>', $lastAssignee->id))
-                ->orderBy('name')->orderBy('id')->first();
+                ->whereRaw('(users.first_name, users.last_name, users.id) > (?, ?, ?)', [$lastAssignee->first_name, $lastAssignee->last_name, $lastAssignee->getKey()])
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {
             $user = User::query()
                 ->tap(new ManagesServiceRequestType($serviceRequestType->getKey()))
                 ->withCount([
-                    'serviceRequests as service_request_count' => function (Builder $query) {
+                    'serviceRequests as service_request_count' => function (Builder $query): void {
                         $query->whereRelation('status', 'classification', '!=', SystemServiceRequestClassification::Closed);
                     },
                 ])
                 ->orderBy('service_request_count', 'asc')
-                ->orderBy('name')->orderBy('id')->first();
+                ->tap(new OrderByFullName())->orderBy('id')->first();
         }
 
         if ($user === null) {

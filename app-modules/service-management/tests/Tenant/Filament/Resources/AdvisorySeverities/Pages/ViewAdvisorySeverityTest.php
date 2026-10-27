@@ -35,13 +35,15 @@
 */
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySeverityResource;
+use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ViewAdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewAdvisorySeverity page', function () {
+test('The correct details are displayed on the ViewAdvisorySeverity page', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -51,24 +53,17 @@ test('The correct details are displayed on the ViewAdvisorySeverity page', funct
 
     $advisorySeverity = AdvisorySeverity::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            AdvisorySeverityResource::getUrl('view', [
-                'record' => $advisorySeverity,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewAdvisorySeverity::class, ['record' => $advisorySeverity->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeInOrder(
-            [
-                'Name',
-                $advisorySeverity->name,
-                'Color',
-                $advisorySeverity->getRgb,
-            ]
-        );
+        ->assertSchemaStateSet([
+            'name' => $advisorySeverity->name,
+            'rgb_color' => $advisorySeverity->rgb_color,
+        ]);
 });
 
-test('ViewAdvisorySeverity is gated with proper access control', function () {
+test('ViewAdvisorySeverity is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisorySeverity = AdvisorySeverity::factory()->create();

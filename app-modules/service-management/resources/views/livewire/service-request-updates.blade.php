@@ -76,7 +76,7 @@
                             $author = $update->createdBy;
 
                             [$authorName, $authorRole, $authorUrl] = match (true) {
-                                $author instanceof User => [$author->name, 'Service Provider', UserResource::getUrl('view', ['record' => $author])],
+                                $author instanceof User => [$author->full_name, 'Service Provider', UserResource::getUrl('view', ['record' => $author])],
                                 $author instanceof Contact => [$author->full_name, 'Customer', ContactResource::getUrl('view', ['record' => $author])],
                                 $author instanceof SystemUser => [$author->name, 'System', null],
                                 $author instanceof ServiceRequest => ['AI Assistant', 'AI', null],

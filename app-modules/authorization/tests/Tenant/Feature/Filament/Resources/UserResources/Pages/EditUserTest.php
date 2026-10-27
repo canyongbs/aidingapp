@@ -33,6 +33,9 @@
 
 </COPYRIGHT>
 */
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Services\ManagedContactService;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\UserResource;
@@ -41,6 +44,7 @@ use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -50,7 +54,7 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
-it('renders impersonate button for non super admin users when user is super admin', function () {
+it('renders impersonate button for non super admin users when user is super admin', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -64,7 +68,7 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertActionVisible(Impersonate::class);
 });
 
-it('does not render impersonate button for super admin users at all', function () {
+it('does not render impersonate button for super admin users at all', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -80,7 +84,7 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertActionHidden(Impersonate::class);
 });
 
-it('allows super admin user to impersonate', function () {
+it('allows super admin user to impersonate', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -98,7 +102,7 @@ it('allows super admin user to impersonate', function () {
     expect(auth()->id())->toBe($user->id);
 });
 
-it('allows user with permission to impersonate', function () {
+it('allows user with permission to impersonate', function (): void {
     $first = User::factory()->create();
     $first->givePermissionTo('user.view-any', 'user.*.view', 'user.*.update');
     asSuperAdmin($first);
@@ -117,7 +121,7 @@ it('allows user with permission to impersonate', function () {
     expect(auth()->id())->toBe($second->id);
 });
 
-it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function () {
+it('does not allow a user which does not have the SaaS Global Admin role to assign SaaS Global Admin role to other users', function (): void {
     $user = User::factory()->create();
     $user->givePermissionTo(
         'role.view-any',
@@ -145,14 +149,14 @@ it('does not allow a user which does not have the SaaS Global Admin role to assi
         'pageClass' => EditUser::class,
     ])
         ->mountTableAction(AttachAction::class)
-        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select): bool {
             $options = $select->getSearchResults(Authenticatable::SUPER_ADMIN_ROLE);
 
             return empty($options);
         });
 });
 
-test('EditUser is gated with proper access control', function () {
+test('EditUser is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $record = User::factory()->create();
@@ -178,7 +182,6 @@ test('EditUser is gated with proper access control', function () {
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ])
         ->call('save')
@@ -186,12 +189,13 @@ test('EditUser is gated with proper access control', function () {
 
     assertDatabaseHas(User::class, [
         'id' => $record->getKey(),
-        'name' => 'Jordan Blake',
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 });
 
-test('EditUser requires an email address', function () {
+test('EditUser requires an email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -200,14 +204,13 @@ test('EditUser requires an email address', function () {
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
-            'name' => 'No Email',
             'email' => null,
         ])
         ->call('save')
         ->assertHasFormErrors(['email' => 'required']);
 });
 
-test('EditUser rejects an invalid email address', function () {
+test('EditUser rejects an invalid email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -216,14 +219,13 @@ test('EditUser rejects an invalid email address', function () {
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
-            'name' => 'Bad Email',
             'email' => 'not-an-email',
         ])
         ->call('save')
         ->assertHasFormErrors(['email' => 'email']);
 });
 
-test('EditUser allows saving with its own unchanged email address', function () {
+test('EditUser allows saving with its own unchanged email address', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create(['email' => 'unchanged@example.com']);
@@ -232,7 +234,6 @@ test('EditUser allows saving with its own unchanged email address', function () 
         ->fillForm([
             'first_name' => 'Still',
             'last_name' => 'Here',
-            'name' => 'Still Here',
             'email' => 'unchanged@example.com',
         ])
         ->call('save')
@@ -244,7 +245,7 @@ test('EditUser allows saving with its own unchanged email address', function () 
     ]);
 });
 
-test('EditUser rejects a duplicate email belonging to another user case-insensitively', function () {
+test('EditUser rejects a duplicate email belonging to another user case-insensitively', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'taken@example.com']);
@@ -255,14 +256,13 @@ test('EditUser rejects a duplicate email belonging to another user case-insensit
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
-            'name' => 'Duplicate Email',
             'email' => 'Taken@Example.com',
         ])
         ->call('save')
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser rejects reusing another soft-deleted user\'s email', function () {
+test('EditUser rejects reusing another soft-deleted user\'s email', function (): void {
     asSuperAdmin();
 
     User::factory()->create(['email' => 'archived@example.com'])->delete();
@@ -273,14 +273,13 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function () 
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
-            'name' => 'Reuse Attempt',
             'email' => 'Archived@Example.com',
         ])
         ->call('save')
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser shows and requires first and last name fields when the full name feature is active', function () {
+test('EditUser shows and requires first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -299,7 +298,7 @@ test('EditUser shows and requires first and last name fields when the full name 
         ]);
 });
 
-test('EditUser disables demographic and contact fields when editing an admin record', function () {
+test('EditUser disables demographic and contact fields when editing an admin record', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -308,13 +307,12 @@ test('EditUser disables demographic and contact fields when editing an admin rec
     Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
-        ->assertFormFieldDisabled('name')
         ->assertFormFieldDisabled('job_title')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('is_external');
 });
 
-test('EditUser enables demographic and contact fields when editing a non-admin record', function () {
+test('EditUser enables demographic and contact fields when editing a non-admin record', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -327,7 +325,7 @@ test('EditUser enables demographic and contact fields when editing a non-admin r
         ->assertFormFieldEnabled('is_external');
 });
 
-test('delete action visible with proper access control', function () {
+test('delete action visible with proper access control', function (): void {
     $user = User::factory()->create();
 
     $anotherUser = User::factory()->create();
@@ -350,7 +348,7 @@ test('delete action visible with proper access control', function () {
         ->assertActionVisible(DeleteAction::class);
 });
 
-test('EditUser validates the inputs', function ($data, $errors) {
+test('EditUser validates the inputs', function (array $data, array $errors): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -375,7 +373,7 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['first_name' => 'required'],
         ],
         'first_name max' => [
-            ['first_name' => str()->random(256)],
+            ['first_name' => str()->random(128)],
             ['first_name' => 'max'],
         ],
         'last name required' => [
@@ -383,7 +381,7 @@ test('EditUser validates the inputs', function ($data, $errors) {
             ['last_name' => 'required'],
         ],
         'last_name max' => [
-            ['last_name' => str()->random(256)],
+            ['last_name' => str()->random(128)],
             ['last_name' => 'max'],
         ],
         'preferred_name max' => [
@@ -461,7 +459,7 @@ test('EditUser validates the inputs', function ($data, $errors) {
     ]
 );
 
-it('prevents assigning an email that belongs to a soft-deleted user', function () {
+it('prevents assigning an email that belongs to a soft-deleted user', function (): void {
     $user = User::factory()->create();
     $deletedUser = User::factory()->state(['deleted_at' => now()])->create();
 
@@ -480,7 +478,7 @@ it('prevents assigning an email that belongs to a soft-deleted user', function (
         ->assertHasFormErrors(['email' => 'An archived user with this email address already exists. Please contact an administrator to restore this user or use a different email address.']);
 });
 
-it('prevents assigning duplicate email to a user', function () {
+it('prevents assigning duplicate email to a user', function (): void {
     $user = User::factory()->create();
     $anotherUser = User::factory()->create();
 
@@ -497,4 +495,38 @@ it('prevents assigning duplicate email to a user', function () {
         ->fillForm($request)
         ->call('save')
         ->assertHasFormErrors(['email' => 'A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user\'s account.']);
+});
+
+test('EditUser accepts the longest names that still fit a managed contact full name', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    $firstName = str_repeat('a', User::NAME_PART_MAX_LENGTH);
+    $lastName = str_repeat('b', User::NAME_PART_MAX_LENGTH);
+
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => $firstName, 'last_name' => $lastName])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh()->full_name)->toBe("{$firstName} {$lastName}");
+});
+
+test('EditUser does not persist user changes when synchronizing the managed contact fails', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    Event::listen('eloquent.saving: ' . Contact::class, fn () => throw new RuntimeException('Contact sync failed.'));
+
+    expect(fn () => Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => 'Changed'])
+        ->call('save'))
+        ->toThrow(RuntimeException::class);
+
+    expect($user->fresh()->first_name)->toBe('Original')
+        ->and($contact->fresh()->first_name)->toBe('Original');
 });

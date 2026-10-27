@@ -107,7 +107,7 @@ class PruneEphemeralMessages implements ShouldQueue, ShouldBeUnique
             ->select('conversation_participants.*')
             ->selectSub($remainingForParticipant, 'remaining_count')
             ->lazyById()
-            ->each(function (ConversationParticipant $participant) use ($conversation) {
+            ->each(function (ConversationParticipant $participant) use ($conversation): void {
                 $remaining = (int) $participant->getAttribute('remaining_count');
 
                 if ($participant->unread_count <= $remaining) {

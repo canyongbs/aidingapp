@@ -72,7 +72,7 @@ class ParticipantUpdated implements ShouldBroadcastNow
             'participant_type' => $this->participant->participant_type,
             'participant' => $participantModel instanceof User ? [
                 'id' => $participantModel->getKey(),
-                'name' => $participantModel->name,
+                'name' => $participantModel->full_name,
                 'avatar_url' => Filament::getUserAvatarUrl($participantModel),
             ] : null,
             'is_manager' => $this->participant->is_manager,

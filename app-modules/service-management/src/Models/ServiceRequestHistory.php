@@ -222,7 +222,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
             return 'Deleted user';
         }
 
-        return $actor->getAttribute('name') ?? $actor->getAttribute('full_name') ?? 'System';
+        return $actor->getAttribute('full_name') ?? $actor->getAttribute('name') ?? 'System';
     }
 
     public function snapshotStatus(): ?ServiceRequestStatus
@@ -252,7 +252,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     protected function newValuesFormatted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['new_values'], true) ?? []),
+            get: fn (mixed $value, array $attributes): array => $this->formatValues(json_decode($attributes['new_values'], true) ?? []),
         );
     }
 
@@ -262,7 +262,7 @@ class ServiceRequestHistory extends BaseModel implements ProvidesATimeline
     protected function originalValuesFormatted(): Attribute
     {
         return Attribute::make(
-            get: fn (mixed $value, array $attributes) => $this->formatValues(json_decode($attributes['original_values'], true) ?? []),
+            get: fn (mixed $value, array $attributes): array => $this->formatValues(json_decode($attributes['original_values'], true) ?? []),
         );
     }
 

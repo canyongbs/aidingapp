@@ -43,7 +43,7 @@ use Illuminate\Support\Facades\Event;
 
 beforeEach(fn () => Event::fake());
 
-it('marks conversation as read for a participant', function () {
+it('marks conversation as read for a participant', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -67,7 +67,7 @@ it('marks conversation as read for a participant', function () {
     expect($participant->last_read_at)->not->toBeNull();
 });
 
-it('updates existing `last_read_at` timestamp', function () {
+it('updates existing `last_read_at` timestamp', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
     $oldTimestamp = now()->subHour();
@@ -88,7 +88,7 @@ it('updates existing `last_read_at` timestamp', function () {
     expect($participant->last_read_at->isAfter($oldTimestamp))->toBeTrue();
 });
 
-it('returns false when participant does not exist', function () {
+it('returns false when participant does not exist', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -100,7 +100,7 @@ it('returns false when participant does not exist', function () {
     expect($result)->toBeFalse();
 });
 
-it('only marks the specified user as read', function () {
+it('only marks the specified user as read', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();
@@ -129,7 +129,7 @@ it('only marks the specified user as read', function () {
     expect($participant2->last_read_at)->toBeNull();
 });
 
-it('resets `unread_count` to zero', function () {
+it('resets `unread_count` to zero', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -151,7 +151,7 @@ it('resets `unread_count` to zero', function () {
     expect($participant->unread_count)->toBe(0);
 });
 
-it('broadcasts `UnreadCountUpdated` event', function () {
+it('broadcasts `UnreadCountUpdated` event', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user = User::factory()->create();
 
@@ -166,14 +166,14 @@ it('broadcasts `UnreadCountUpdated` event', function () {
         user: $user,
     );
 
-    Event::assertDispatched(UnreadCountUpdated::class, function ($event) use ($conversation, $user) {
+    Event::assertDispatched(UnreadCountUpdated::class, function (UnreadCountUpdated $event) use ($conversation, $user): bool {
         return $event->userId === $user->getKey()
             && $event->conversationId === $conversation->getKey()
             && $event->unreadCount === 0;
     });
 });
 
-it('only resets `unread_count` for the specified user', function () {
+it('only resets `unread_count` for the specified user', function (): void {
     $conversation = Conversation::factory()->channel()->create();
     $user1 = User::factory()->create();
     $user2 = User::factory()->create();

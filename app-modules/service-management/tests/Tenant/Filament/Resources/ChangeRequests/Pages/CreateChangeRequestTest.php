@@ -45,7 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\assertDatabaseHas;
 use function Tests\asSuperAdmin;
 
-test('CreateChangeRequest end_time field is disabled', function () {
+test('CreateChangeRequest end_time field is disabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateChangeRequest::class)
@@ -53,7 +53,7 @@ test('CreateChangeRequest end_time field is disabled', function () {
         ->assertFormFieldIsDisabled('end_time');
 });
 
-test('CreateChangeRequest calculates end_time from start_time and duration and saves successfully', function () {
+test('CreateChangeRequest calculates end_time from start_time and duration and saves successfully', function (): void {
     asSuperAdmin();
 
     ChangeRequestStatus::factory()->create([
@@ -93,7 +93,7 @@ test('CreateChangeRequest calculates end_time from start_time and duration and s
         ->firstOrFail();
 
     assertDatabaseHas(ChangeRequest::class, [
-        'id' => $changeRequest?->getKey(),
+        'id' => $changeRequest->getKey(),
         'title' => 'Database Migration Rollout',
         'change_request_type_id' => $changeRequestType->getKey(),
     ]);

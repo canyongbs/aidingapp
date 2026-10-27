@@ -74,7 +74,7 @@ class ShowPortalProjectController
         abort_if(filled($requestedPipelineId) && ! $selectedPipeline, Response::HTTP_NOT_FOUND);
 
         if (! $selectedPipeline) {
-            return $this->response($portalProject, $pipelines, null, collect(), $this->emptyMeta());
+            return $this->response($portalProject, $pipelines, null, new Collection(), $this->emptyMeta());
         }
 
         $entries = $selectedPipeline->entries()

@@ -44,14 +44,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render the manage notification settings page', function () {
+it('can render the manage notification settings page', function (): void {
     asSuperAdmin();
 
     get(ManageNotificationSettings::getUrl())
         ->assertOk();
 });
 
-it('requires proper permissions to access', function () {
+it('requires proper permissions to access', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -65,7 +65,7 @@ it('requires proper permissions to access', function () {
         ->assertOk();
 });
 
-it('validates the inputs', function () {
+it('validates the inputs', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageNotificationSettings::class)
@@ -74,7 +74,7 @@ it('validates the inputs', function () {
         ->assertHasFormErrors(['from_name' => 'max']);
 });
 
-it('loads existing data into the form', function () {
+it('loads existing data into the form', function (): void {
     asSuperAdmin();
 
     $settings = app(NotificationSettings::class);
@@ -84,7 +84,7 @@ it('loads existing data into the form', function () {
     Livewire::test(ManageNotificationSettings::class)->assertSchemaStateSet(['from_name' => 'Existing From Name']);
 });
 
-it('can update the notification settings', function () {
+it('can update the notification settings', function (): void {
     asSuperAdmin();
 
     Livewire::test(ManageNotificationSettings::class)
@@ -101,7 +101,7 @@ it('can update the notification settings', function () {
         ->and($settings->primary_color)->toBe(Color::Blue);
 });
 
-it('requires proper permissions to update settings', function () {
+it('requires proper permissions to update settings', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');

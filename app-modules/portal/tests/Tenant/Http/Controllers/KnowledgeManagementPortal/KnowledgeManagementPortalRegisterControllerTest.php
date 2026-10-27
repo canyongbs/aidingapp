@@ -46,13 +46,13 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\postJson;
 use function Pest\Laravel\withHeader;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-test('it registers a new portal contact for matching organization domain', function () {
+test('it registers a new portal contact for matching organization domain', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -68,7 +68,7 @@ test('it registers a new portal contact for matching organization domain', funct
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
 
@@ -96,14 +96,14 @@ test('it registers a new portal contact for matching organization domain', funct
     $contact = Contact::query()->where('email', 'new.contact@example.com')->first();
 
     expect($contact)
-        ->not->toBeNull()
+        ->not()->toBeNull()
         ->and($contact?->full_name)->toBe('New Contact')
         ->and($contact?->organization_id)->toBe($organization->id);
 
-    expect($response->json('token'))->not->toBeEmpty();
+    expect($response->json('token'))->not()->toBeEmpty();
 });
 
-test('it does not rotate the csrf token shared with the admin panel', function () {
+test('it does not rotate the csrf token shared with the admin panel', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -119,7 +119,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
 
@@ -137,7 +137,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
 
     $token = session()->token();
 
-    expect($token)->not->toBeEmpty();
+    expect($token)->not()->toBeEmpty();
 
     withHeader('Referer', 'https://' . $host)
         ->postJson($url, [
@@ -153,7 +153,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
         ->and(auth('contact')->check())->toBeTrue();
 });
 
-test('it returns expired flag when portal authentication is expired', function () {
+test('it returns expired flag when portal authentication is expired', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -165,7 +165,7 @@ test('it returns expired flag when portal authentication is expired', function (
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now()->subDay()->subMinute(),
     ]);
 
@@ -190,7 +190,7 @@ test('it returns expired flag when portal authentication is expired', function (
     expect(Contact::query()->where('email', 'expired.user@test.example.com')->exists())->toBeFalse();
 });
 
-test('it forbids registration when email domain does not match an enabled organization', function () {
+test('it forbids registration when email domain does not match an enabled organization', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -202,7 +202,7 @@ test('it forbids registration when email domain does not match an enabled organi
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($plainCode),
+        'code' => Hash::make((string) $plainCode),
         'created_at' => now(),
     ]);
 
@@ -223,7 +223,7 @@ test('it forbids registration when email domain does not match an enabled organi
     $response->assertForbidden();
 });
 
-test('it normalizes stored www domain and allows only base-domain email registration', function () {
+test('it normalizes stored www domain and allows only base-domain email registration', function (): void {
     ContactType::factory()->create([
         'is_default' => true,
     ]);
@@ -239,7 +239,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
 
     $allowedAuthentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($allowedCode),
+        'code' => Hash::make((string) $allowedCode),
         'created_at' => now(),
     ]);
 
@@ -266,7 +266,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
 
     $blockedAuthentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make($blockedCode),
+        'code' => Hash::make((string) $blockedCode),
         'created_at' => now(),
     ]);
 
@@ -287,7 +287,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
     $blockedResponse->assertForbidden();
 });
 
-test('it returns validation error when code is invalid', function () {
+test('it returns validation error when code is invalid', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -297,7 +297,7 @@ test('it returns validation error when code is invalid', function () {
 
     $authentication = PortalAuthentication::factory()->create([
         'portal_type' => PortalType::KnowledgeManagement,
-        'code' => Hash::make(444444),
+        'code' => Hash::make((string) 444444),
         'created_at' => now(),
     ]);
 
@@ -320,7 +320,7 @@ test('it returns validation error when code is invalid', function () {
         ->assertJsonValidationErrors(['code']);
 });
 
-test('it generates registration url for unknown contact when organization domain matches', function () {
+test('it generates registration url for unknown contact when organization domain matches', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -343,12 +343,12 @@ test('it generates registration url for unknown contact when organization domain
 
     $authentication = PortalAuthentication::query()->latest('id')->first();
 
-    expect($authentication)->not->toBeNull()
+    expect($authentication)->not()->toBeNull()
         ->and($authentication?->portal_type)->toBe(PortalType::KnowledgeManagement)
         ->and($authentication?->educatable_id)->toBeNull();
 });
 
-test('it generates spa registration url for unknown contact when organization domain matches', function () {
+test('it generates spa registration url for unknown contact when organization domain matches', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -371,7 +371,7 @@ test('it generates spa registration url for unknown contact when organization do
 
     $authentication = PortalAuthentication::query()->latest('id')->first();
 
-    expect($authentication)->not->toBeNull()
+    expect($authentication)->not()->toBeNull()
         ->and($authentication?->portal_type)->toBe(PortalType::KnowledgeManagement)
         ->and($authentication?->educatable_id)->toBeNull();
 });

@@ -43,38 +43,34 @@ use Illuminate\Support\HtmlString;
  *
  * @return array<string, mixed>
  */
-function tiptapDoc(array $content): array
-{
+$tiptapDoc = function (array $content): array {
     return ['type' => 'doc', 'content' => $content];
-}
+};
 
 /**
  * @param  array<int, array<string, mixed>>  $content
  *
  * @return array<string, mixed>
  */
-function tiptapParagraph(array $content): array
-{
+$tiptapParagraph = function (array $content): array {
     return ['type' => 'paragraph', 'content' => $content];
-}
+};
 
 /** @return array<string, string> */
-function tiptapText(string $text): array
-{
+$tiptapText = function (string $text): array {
     return ['type' => 'text', 'text' => $text];
-}
+};
 
 /** @return array<string, mixed> */
-function tiptapMergeTag(string $id): array
-{
+$tiptapMergeTag = function (string $id): array {
     return ['type' => 'mergeTag', 'attrs' => ['id' => $id]];
-}
+};
 
-it('returns the body as html', function () {
+it('returns the body as html', function () use ($tiptapDoc, $tiptapParagraph, $tiptapText): void {
     $engagement = Engagement::factory()->email()->create([
-        'body' => tiptapDoc([
-            tiptapParagraph([
-                tiptapText('Hello world'),
+        'body' => $tiptapDoc([
+            $tiptapParagraph([
+                $tiptapText('Hello world'),
             ]),
         ]),
     ]);
@@ -87,7 +83,7 @@ it('returns the body as html', function () {
         ->toBe('<p>Hello world</p>');
 });
 
-it('resolves merge tags in the body html', function () {
+it('resolves merge tags in the body html', function () use ($tiptapDoc, $tiptapParagraph, $tiptapText, $tiptapMergeTag): void {
     $contact = Contact::factory()->create([
         'full_name' => 'Jane Doe',
     ]);
@@ -95,11 +91,11 @@ it('resolves merge tags in the body html', function () {
     $engagement = Engagement::factory()->email()->create([
         'recipient_id' => $contact->getKey(),
         'recipient_type' => $contact->getMorphClass(),
-        'body' => tiptapDoc([
-            tiptapParagraph([
-                tiptapText('Dear '),
-                tiptapMergeTag('contact full name'),
-                tiptapText(', welcome!'),
+        'body' => $tiptapDoc([
+            $tiptapParagraph([
+                $tiptapText('Dear '),
+                $tiptapMergeTag('contact full name'),
+                $tiptapText(', welcome!'),
             ]),
         ]),
     ]);
@@ -108,19 +104,19 @@ it('resolves merge tags in the body html', function () {
         ->toBe('<p>Dear <span data-type="mergeTag" data-id="contact full name">Jane Doe</span>, welcome!</p>');
 });
 
-it('resolves contact merge tags in the body', function () {
+it('resolves contact merge tags in the body', function () use ($tiptapDoc, $tiptapParagraph, $tiptapText, $tiptapMergeTag): void {
     $contact = Contact::factory()->create();
 
     $engagement = Engagement::factory()->email()->create([
         'recipient_id' => $contact->getKey(),
         'recipient_type' => $contact->getMorphClass(),
-        'body' => tiptapDoc([
-            tiptapParagraph([
-                tiptapText('To: '),
-                tiptapMergeTag('contact full name'),
-                tiptapText(' ('),
-                tiptapMergeTag('contact email'),
-                tiptapText(')'),
+        'body' => $tiptapDoc([
+            $tiptapParagraph([
+                $tiptapText('To: '),
+                $tiptapMergeTag('contact full name'),
+                $tiptapText(' ('),
+                $tiptapMergeTag('contact email'),
+                $tiptapText(')'),
             ]),
         ]),
     ]);

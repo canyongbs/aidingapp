@@ -51,8 +51,7 @@ use App\Models\User;
  *
  * @return array<string, mixed>
  */
-function mergeTagBody(array $tagIds): array
-{
+$mergeTagBody = function (array $tagIds): array {
     $content = [['type' => 'text', 'text' => 'Hello ']];
 
     foreach ($tagIds as $tagId) {
@@ -64,9 +63,9 @@ function mergeTagBody(array $tagIds): array
         'type' => 'doc',
         'content' => [['type' => 'paragraph', 'content' => $content]],
     ];
-}
+};
 
-it('exposes the expected merge tags with stable keys and friendly labels in order', function () {
+it('exposes the expected merge tags with stable keys and friendly labels in order', function (): void {
     $mergeTags = ServiceRequestTypeEmailTemplate::getMergeTags();
 
     expect(array_keys($mergeTags))->toBe([
@@ -91,7 +90,7 @@ it('exposes the expected merge tags with stable keys and friendly labels in orde
     expect($mergeTags['assigned staff name'])->toBe('assigned manager');
 });
 
-it('substitutes the recipient name in the body and subject while the relabeled contact merge tag still resolves', function () {
+it('substitutes the recipient name in the body and subject while the relabeled contact merge tag still resolves', function () use ($mergeTagBody): void {
     $contact = Contact::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -107,8 +106,8 @@ it('substitutes the recipient name in the body and subject while the relabeled c
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-            'body' => mergeTagBody(['recipient name', 'contact name']),
-            'subject' => mergeTagBody(['recipient name']),
+            'body' => $mergeTagBody(['recipient name', 'contact name']),
+            'subject' => $mergeTagBody(['recipient name']),
         ])
         ->create();
 
@@ -124,8 +123,8 @@ it('substitutes the recipient name in the body and subject while the relabeled c
     expect($subject)->toContain('Jane Recipient');
 });
 
-it('renders the staff recipient full name into a staff notification body', function () {
-    $user = User::factory()->create(['name' => 'Staff Recipient']);
+it('renders the staff recipient full name into a staff notification body', function () use ($mergeTagBody): void {
+    $user = User::factory()->create(['first_name' => 'Staff', 'last_name' => 'Recipient']);
 
     $serviceRequestType = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();
@@ -136,7 +135,7 @@ it('renders the staff recipient full name into a staff notification body', funct
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Manager,
-            'body' => mergeTagBody(['recipient name']),
+            'body' => $mergeTagBody(['recipient name']),
         ])
         ->create();
 
@@ -145,7 +144,7 @@ it('renders the staff recipient full name into a staff notification body', funct
     expect($message->viewData['content'])->toContain('Staff Recipient');
 });
 
-it('renders the contact recipient full name into an educatable notification body', function () {
+it('renders the contact recipient full name into an educatable notification body', function () use ($mergeTagBody): void {
     $contact = Contact::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -160,7 +159,7 @@ it('renders the contact recipient full name into an educatable notification body
         ->state([
             'type' => ServiceRequestEmailTemplateType::Created,
             'role' => ServiceRequestTypeEmailTemplateRole::Customer,
-            'body' => mergeTagBody(['recipient name']),
+            'body' => $mergeTagBody(['recipient name']),
         ])
         ->create();
 

@@ -52,7 +52,7 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
     public function handle(): void
     {
         UnmatchedInboundCommunication::query()
-            ->chunkById(100, function (Collection $communications) {
+            ->chunkById(100, function (Collection $communications): void {
                 foreach ($communications as $communication) {
                     match ($communication->type) {
                         EngagementResponseType::Email => $this->processEmail($communication),
@@ -68,7 +68,7 @@ class UnmatchedInboundCommunicationsJob implements ShouldQueue
             ->get();
 
         if ($contacts->isNotEmpty()) {
-            $contacts->each(function (Contact $contact) use ($communication) {
+            $contacts->each(function (Contact $contact) use ($communication): void {
                 $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $communication->subject,

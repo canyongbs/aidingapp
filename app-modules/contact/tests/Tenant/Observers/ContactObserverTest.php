@@ -38,10 +38,12 @@ use AidingApp\Contact\Actions\MatchContactToOrganization;
 use AidingApp\Contact\Models\Contact;
 use Mockery\MockInterface;
 
-it('delegates organization matching when a contact is created', function () {
+use function Pest\Laravel\mock;
+
+it('delegates organization matching when a contact is created', function (): void {
     $contact = Contact::factory()->make();
 
-    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+    mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
         $mock->shouldReceive('__invoke')
             ->once()
             ->with($contact);
@@ -50,10 +52,10 @@ it('delegates organization matching when a contact is created', function () {
     $contact->save();
 });
 
-it('delegates organization matching when a contact is updated', function () {
+it('delegates organization matching when a contact is updated', function (): void {
     $contact = Contact::factory()->createQuietly();
 
-    $this->mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
+    mock(MatchContactToOrganization::class, function (MockInterface $mock) use ($contact): void {
         $mock->shouldReceive('__invoke')
             ->once()
             ->with($contact);
@@ -63,7 +65,7 @@ it('delegates organization matching when a contact is updated', function () {
     $contact->save();
 });
 
-it('clears the bounce flag when the email changes', function () {
+it('clears the bounce flag when the email changes', function (): void {
     $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
 
     expect($contact->email_bounce)->toBeTrue();
@@ -73,7 +75,7 @@ it('clears the bounce flag when the email changes', function () {
     expect($contact->fresh()->email_bounce)->toBeFalse();
 });
 
-it('leaves the bounce flag true when another attribute changes', function () {
+it('leaves the bounce flag true when another attribute changes', function (): void {
     $contact = Contact::factory()->bounced()->create(['first_name' => 'Original']);
 
     expect($contact->email_bounce)->toBeTrue();
@@ -83,7 +85,7 @@ it('leaves the bounce flag true when another attribute changes', function () {
     expect($contact->fresh()->email_bounce)->toBeTrue();
 });
 
-it('leaves the bounce flag true when the email is set to the same value', function () {
+it('leaves the bounce flag true when the email is set to the same value', function (): void {
     $contact = Contact::factory()->bounced()->create(['email' => 'same@example.com']);
 
     expect($contact->email_bounce)->toBeTrue();
@@ -93,7 +95,7 @@ it('leaves the bounce flag true when the email is set to the same value', functi
     expect($contact->fresh()->email_bounce)->toBeTrue();
 });
 
-it('keeps an explicit `email_bounce` value set in the same save as the email change', function () {
+it('keeps an explicit `email_bounce` value set in the same save as the email change', function (): void {
     $contact = Contact::factory()->create(['email' => 'original@example.com', 'email_bounce' => false]);
 
     expect($contact->email_bounce)->toBeFalse();
@@ -106,7 +108,7 @@ it('keeps an explicit `email_bounce` value set in the same save as the email cha
     expect($contact->fresh()->email_bounce)->toBeTrue();
 });
 
-it('cannot keep an already-true `email_bounce` reasserted in the same save as the email change (known limitation)', function () {
+it('cannot keep an already-true `email_bounce` reasserted in the same save as the email change (known limitation)', function (): void {
     $contact = Contact::factory()->bounced()->create(['email' => 'original@example.com']);
 
     expect($contact->email_bounce)->toBeTrue();

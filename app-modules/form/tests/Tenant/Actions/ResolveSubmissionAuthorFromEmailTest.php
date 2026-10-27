@@ -37,7 +37,7 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Form\Actions\ResolveSubmissionAuthorFromEmail;
 
-it('resolves a contact regardless of the email case', function (string $lookup) {
+it('resolves a contact regardless of the email case', function (string $lookup): void {
     $contact = Contact::factory()->create(['email' => 'Author@Example.com']);
 
     $resolved = app(ResolveSubmissionAuthorFromEmail::class)($lookup);
@@ -51,12 +51,12 @@ it('resolves a contact regardless of the email case', function (string $lookup) 
     'exact case' => 'Author@Example.com',
 ]);
 
-it('returns null when no contact matches the email', function () {
+it('returns null when no contact matches the email', function (): void {
     Contact::factory()->create(['email' => 'someone@example.com']);
 
     expect(app(ResolveSubmissionAuthorFromEmail::class)('nobody@example.com'))->toBeNull();
 });
 
-it('returns null for a blank email', function () {
+it('returns null for a blank email', function (): void {
     expect(app(ResolveSubmissionAuthorFromEmail::class)(null))->toBeNull();
 });

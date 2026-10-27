@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('cannot render without proper permission.', function () {
+it('cannot render without proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -55,7 +55,7 @@ it('cannot render without proper permission.', function () {
         ->assertForbidden();
 });
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -69,7 +69,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('validates the inputs', function (CreateProjectRequestFactory $data, array $errors) {
+it('validates the inputs', function (CreateProjectRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $request = CreateProjectRequestFactory::new($data)->create();
@@ -125,7 +125,7 @@ it('validates the inputs', function (CreateProjectRequestFactory $data, array $e
     ]
 );
 
-it('can create a record', function () {
+it('can create a record', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -157,7 +157,7 @@ it('can create a record', function () {
     );
 });
 
-it('can create a record with target completion date', function () {
+it('can create a record with target completion date', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('project.view-any');
@@ -184,7 +184,7 @@ it('can create a record with target completion date', function () {
     );
 });
 
-it('stores null target_completion_date when indefinite is selected', function () {
+it('stores null target_completion_date when indefinite is selected', function (): void {
     asSuperAdmin();
 
     $request = CreateProjectRequestFactory::new()->create();

@@ -38,19 +38,26 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Settings\PortalSettings;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Settings\LicenseSettings;
 use Illuminate\Support\Facades\Crypt;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\postJson;
 
 use Symfony\Component\HttpFoundation\Response;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
+    $portalSettings->knowledge_management_portal_service_management = true;
     $portalSettings->save();
+
+    $licenseSettings = app(LicenseSettings::class);
+    $licenseSettings->data->addons->serviceManagement = true;
+    $licenseSettings->save();
 });
 
-it('stores an encrypted secret and returns only its id', function () {
+it('stores an encrypted secret and returns only its id', function (): void {
     $contact = Contact::factory()->create();
 
     $response = actingAs($contact, 'contact')->postJson(
@@ -64,14 +71,14 @@ it('stores an encrypted secret and returns only its id', function () {
 
     $secret = Secret::query()->findOrFail($response->json('id'));
 
-    expect($secret->value)->not->toBe('service-request-password')
+    expect($secret->value)->not()->toBe('service-request-password')
         ->and(Crypt::decryptString($secret->value))->toBe('service-request-password')
         ->and($secret->author->is($contact))->toBeTrue()
         ->and($secret->related_id)->toBeNull();
 });
 
-it('denies unauthenticated secret storage', function () {
-    $this->postJson(
+it('denies unauthenticated secret storage', function (): void {
+    postJson(
         route('api.portal.service-request.store-secret'),
         ['value' => 'service-request-password'],
     )->assertUnauthorized();
@@ -79,7 +86,7 @@ it('denies unauthenticated secret storage', function () {
     expect(Secret::query()->exists())->toBeFalse();
 });
 
-it('replaces an unattached secret owned by the contact', function () {
+it('replaces an unattached secret owned by the contact', function (): void {
     $contact = Contact::factory()->create();
     $previousSecret = Secret::factory()->for($contact, 'author')->create();
 
@@ -101,7 +108,7 @@ it('replaces an unattached secret owned by the contact', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('retries replacing an unattached secret with the same id', function () {
+it('retries replacing an unattached secret with the same id', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -121,7 +128,7 @@ it('retries replacing an unattached secret with the same id', function () {
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('clears an unattached secret owned by the contact', function () {
+it('clears an unattached secret owned by the contact', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -138,7 +145,7 @@ it('clears an unattached secret owned by the contact', function () {
     expect($secret->fresh())->toBeNull();
 });
 
-it('retries clearing an unattached secret', function () {
+it('retries clearing an unattached secret', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
 
@@ -157,7 +164,7 @@ it('retries clearing an unattached secret', function () {
     expect($secret->fresh())->toBeNull();
 });
 
-it('does not replace a secret owned by another contact', function () {
+it('does not replace a secret owned by another contact', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()->for(Contact::factory(), 'author')->create();
 
@@ -169,11 +176,11 @@ it('does not replace a secret owned by another contact', function () {
         ],
     )->assertUnprocessable();
 
-    expect($secret->fresh())->not->toBeNull()
+    expect($secret->fresh())->not()->toBeNull()
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('does not replace a secret that is already attached', function () {
+it('does not replace a secret that is already attached', function (): void {
     $contact = Contact::factory()->create();
     $secret = Secret::factory()
         ->for($contact, 'author')
@@ -188,11 +195,11 @@ it('does not replace a secret that is already attached', function () {
         ],
     )->assertUnprocessable();
 
-    expect($secret->fresh())->not->toBeNull()
+    expect($secret->fresh())->not()->toBeNull()
         ->and(Secret::query()->count())->toBe(1);
 });
 
-it('rate limits secret storage per contact', function () {
+it('rate limits secret storage per contact', function (): void {
     $contact = Contact::factory()->create();
 
     foreach (range(1, 30) as $attempt) {

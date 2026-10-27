@@ -43,8 +43,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('project_milestones', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->dropConstrainedForeignId('status_id');
             });
 
@@ -54,8 +54,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::create('project_milestone_statuses', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::create('project_milestone_statuses', function (Blueprint $table): void {
                 $table->uuid('id')->primary();
                 $table->string('name');
                 $table->string('description')->nullable();
@@ -65,7 +65,7 @@ return new class () extends Migration {
                 $table->uniqueIndex('name')->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
 
-            Schema::table('project_milestones', function (Blueprint $table) {
+            Schema::table('project_milestones', function (Blueprint $table): void {
                 $table->foreignUuid('status_id')->nullable()->constrained('project_milestone_statuses');
             });
         });

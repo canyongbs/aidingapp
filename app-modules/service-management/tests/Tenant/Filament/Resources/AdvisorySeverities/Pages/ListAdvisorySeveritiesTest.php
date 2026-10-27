@@ -37,6 +37,7 @@ use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySe
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Pages\ListAdvisorySeverities;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteBulkAction;
@@ -48,7 +49,7 @@ use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
 
-test('ListAdvisorySeverities is gated with proper access control', function () {
+test('ListAdvisorySeverities is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -64,7 +65,7 @@ test('ListAdvisorySeverities is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('it is gated with proper feature access control', function () {
+test('it is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->advisoryManagement = false;
@@ -90,7 +91,7 @@ test('it is gated with proper feature access control', function () {
     get(ListAdvisorySeverities::getUrl())->assertSuccessful();
 });
 
-test('can list records', function () {
+test('can list records', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -108,7 +109,7 @@ test('can list records', function () {
         ->assertSuccessful();
 });
 
-test('bulk delete AdvisorySeverities', function () {
+test('bulk delete AdvisorySeverities', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -126,7 +127,7 @@ test('bulk delete AdvisorySeverities', function () {
     }
 });
 
-test('prevent deletion of AdvisorySeverity if it has associated Advisories', function () {
+test('prevent deletion of AdvisorySeverity if it has associated Advisories', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -147,7 +148,7 @@ test('prevent deletion of AdvisorySeverity if it has associated Advisories', fun
     }
 });
 
-it('only shows the bulk delete action to a user with the settings.delete permission', function () {
+it('only shows the bulk delete action to a user with the settings.delete permission', function (): void {
     AdvisorySeverity::factory(15)->create();
 
     $user = User::factory()
@@ -163,4 +164,55 @@ it('only shows the bulk delete action to a user with the settings.delete permiss
 
     Livewire::test(ListAdvisorySeverities::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+describe('ranking', function (): void {
+    beforeEach(function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('settings.view-any', 'settings.*.update'));
+    });
+
+    it('lists severities in rank order', function (): void {
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+
+        Livewire::test(ListAdvisorySeverities::class)
+            ->assertCanSeeTableRecords([$critical, $minor], inOrder: true);
+    });
+
+    it('can rank severities by reordering them', function (): void {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        Livewire::test(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(1)
+            ->and($critical->refresh()->sort)->toBe(2);
+    });
+
+    it('cannot rank severities without permission to update them', function (): void {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        actingAs(User::factory()->create()->givePermissionTo('settings.view-any'));
+
+        Livewire::test(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(2)
+            ->and($critical->refresh()->sort)->toBe(1);
+    });
+
+    it('does not reorder severities when `AdvisorySeveritySortFeature` is inactive', function (): void {
+        $critical = AdvisorySeverity::factory()->create(['sort' => 1]);
+        $minor = AdvisorySeverity::factory()->create(['sort' => 2]);
+
+        AdvisorySeveritySortFeature::deactivate();
+
+        Livewire::test(ListAdvisorySeverities::class)
+            ->call('reorderTable', [$minor->getKey(), $critical->getKey()]);
+
+        expect($minor->refresh()->sort)->toBe(2)
+            ->and($critical->refresh()->sort)->toBe(1);
+    });
 });

@@ -45,7 +45,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = false;
     $settings->data->addons->feedbackManagement = false;
@@ -75,7 +75,7 @@ it('is gated with proper access control', function () {
     Livewire::test(ServiceRequestFeedback::class)->assertOk();
 });
 
-it('grants access to a user belonging to a department that has been granted access', function () {
+it('grants access to a user belonging to a department that has been granted access', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->data->addons->feedbackManagement = true;

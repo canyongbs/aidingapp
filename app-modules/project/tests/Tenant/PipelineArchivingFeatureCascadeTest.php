@@ -45,7 +45,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('archives a milestone once it has no remaining non-archived linked task', function () {
+it('archives a milestone once it has no remaining non-archived linked task', function (): void {
     $milestone = ProjectMilestone::factory()->create();
     $entry = PipelineEntry::factory()->create(['project_milestone_id' => $milestone->getKey()]);
 
@@ -54,7 +54,7 @@ it('archives a milestone once it has no remaining non-archived linked task', fun
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('leaves a milestone with no linked tasks untouched', function () {
+it('leaves a milestone with no linked tasks untouched', function (): void {
     $milestone = ProjectMilestone::factory()->create();
 
     $milestone->reevaluateArchivedState();
@@ -62,7 +62,7 @@ it('leaves a milestone with no linked tasks untouched', function () {
     expect($milestone->refresh()->isArchived())->toBeFalse();
 });
 
-it('keeps a milestone active while it still has a non-archived task', function () {
+it('keeps a milestone active while it still has a non-archived task', function (): void {
     $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
     $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $stage->pipeline_id]);
 
@@ -78,7 +78,7 @@ it('keeps a milestone active while it still has a non-archived task', function (
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('archives all of a pipeline\'s tasks when the pipeline is archived', function () {
+it('archives all of a pipeline\'s tasks when the pipeline is archived', function (): void {
     $pipeline = Pipeline::factory()->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
     // Entries are created without an assignee: assignment is orthogonal to archiving,
@@ -94,10 +94,12 @@ it('archives all of a pipeline\'s tasks when the pipeline is archived', function
 
     $pipeline->archive();
 
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+    $entries->each(function (PipelineEntry $entry): void {
+        expect($entry->refresh()->isArchived())->toBeTrue();
+    });
 });
 
-it('archives a milestone linked only to tasks in the archived pipeline', function () {
+it('archives a milestone linked only to tasks in the archived pipeline', function (): void {
     $pipeline = Pipeline::factory()->create();
     $stage = PipelineStage::factory()->for($pipeline)->create();
     $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
@@ -108,7 +110,7 @@ it('archives a milestone linked only to tasks in the archived pipeline', functio
     expect($milestone->refresh()->isArchived())->toBeTrue();
 });
 
-it('archives a pipeline\'s milestones without tasks when the pipeline is archived', function () {
+it('archives a pipeline\'s milestones without tasks when the pipeline is archived', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $otherPipeline = Pipeline::factory()->for($project)->create();
@@ -122,16 +124,18 @@ it('archives a pipeline\'s milestones without tasks when the pipeline is archive
         ->and($otherPipelineMilestone->refresh()->isArchived())->toBeFalse();
 });
 
-it('archives a pipeline\'s stages when the pipeline is archived', function () {
+it('archives a pipeline\'s stages when the pipeline is archived', function (): void {
     $pipeline = Pipeline::factory()->create();
     $stages = PipelineStage::factory()->count(2)->for($pipeline)->create();
 
     $pipeline->archive();
 
-    $stages->each(fn (PipelineStage $stage) => expect($stage->refresh()->isArchived())->toBeTrue());
+    $stages->each(function (PipelineStage $stage): void {
+        expect($stage->refresh()->isArchived())->toBeTrue();
+    });
 });
 
-it('archives a stage\'s non-archived tasks when the stage is archived', function () {
+it('archives a stage\'s non-archived tasks when the stage is archived', function (): void {
     $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
     $entries = PipelineEntry::factory()
         ->count(3)
@@ -152,11 +156,13 @@ it('archives a stage\'s non-archived tasks when the stage is archived', function
     $stage->archive();
 
     expect($stage->refresh()->isArchived())->toBeTrue();
-    $entries->each(fn (PipelineEntry $entry) => expect($entry->refresh()->isArchived())->toBeTrue());
+    $entries->each(function (PipelineEntry $entry): void {
+        expect($entry->refresh()->isArchived())->toBeTrue();
+    });
     expect($preArchived->refresh()->isArchived())->toBeTrue();
 });
 
-it('rolls back the whole cascade when a child archive fails through the switcher', function () {
+it('rolls back the whole cascade when a child archive fails through the switcher', function (): void {
     asSuperAdmin(User::factory()->create());
 
     $project = Project::factory()->create();
@@ -182,4 +188,62 @@ it('rolls back the whole cascade when a child archive fails through the switcher
 
     expect($pipeline->refresh()->isArchived())->toBeFalse()
         ->and($stage->refresh()->isArchived())->toBeFalse();
+});
+
+it('records one `archived` audit on the pipeline, its stages, tasks, and milestones when the pipeline is archived', function (): void {
+    $pipeline = Pipeline::factory()->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => $milestone->getKey(),
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $emptyMilestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+
+    $audited = [$pipeline, $stage, $entry, $milestone, $emptyMilestone];
+
+    foreach ($audited as $model) {
+        expect($model->audits()->where('event', 'archived')->exists())->toBeFalse();
+    }
+
+    $pipeline->archive();
+
+    foreach ($audited as $model) {
+        expect($model->audits()->where('event', 'archived')->count())->toBe(1);
+    }
+});
+
+it('records one `archived` audit on each non-archived task when the stage is archived', function (): void {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $entries = PipelineEntry::factory()
+        ->count(2)
+        ->for($stage, 'pipelineStage')
+        ->create(['assigned_to_id' => null, 'assigned_to_type' => null]);
+
+    foreach ($entries as $entry) {
+        expect($entry->audits()->where('event', 'archived')->exists())->toBeFalse();
+    }
+
+    $stage->archive();
+
+    foreach ($entries as $entry) {
+        expect($entry->audits()->where('event', 'archived')->count())->toBe(1);
+    }
+});
+
+it('records one `archived` audit on a milestone when its last non-archived task is archived', function (): void {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $stage->pipeline_id]);
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => $milestone->getKey(),
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+
+    expect($milestone->audits()->where('event', 'archived')->exists())->toBeFalse();
+
+    $entry->archive();
+
+    expect($milestone->audits()->where('event', 'archived')->count())->toBe(1);
 });

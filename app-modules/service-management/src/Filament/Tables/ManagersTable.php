@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Tables;
 
 use AidingApp\ServiceManagement\Models\Scopes\ManagesServiceRequestType;
+use App\Filament\Tables\Columns\UserFullNameColumn;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
@@ -69,13 +70,11 @@ class ManagersTable
                 );
             })
             ->columns([
-                TextColumn::make('name')
-                    ->label('Name')
-                    ->searchable()
-                    ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                    ->iconColor(fn (User $record) => $record->presenceStatus()->getColor())
-                    ->tooltip(fn (User $record) => $record->presenceStatus()->getLabel())
-                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->name . ' (' . $record->presenceStatus()->getLabel() . ')']),
+                UserFullNameColumn::make()
+                    ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                    ->iconColor(fn (User $record): string => $record->presenceStatus()->getColor())
+                    ->tooltip(fn (User $record): string => $record->presenceStatus()->getLabel())
+                    ->extraAttributes(fn (User $record): array => ['aria-label' => $record->full_name . ' (' . $record->presenceStatus()->getLabel() . ')']),
                 TextColumn::make('department.name')
                     ->label('Department')
                     ->searchable(),

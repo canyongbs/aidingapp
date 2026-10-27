@@ -50,7 +50,7 @@ use function PHPUnit\Framework\assertCount;
 use function PHPUnit\Framework\assertEmpty;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the CreateServiceRequestType page', function () {
+test('A successful action on the CreateServiceRequestType page', function (): void {
     asSuperAdmin()
         ->get(
             ServiceRequestTypeResource::getUrl('create')
@@ -69,7 +69,7 @@ test('A successful action on the CreateServiceRequestType page', function () {
     assertDatabaseHas(ServiceRequestType::class, $editRequest);
 });
 
-test('CreateServiceRequestType requires valid data', function ($data, $errors) {
+test('CreateServiceRequestType requires valid data', function (CreateServiceRequestTypeRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceRequestType::class)
@@ -87,7 +87,7 @@ test('CreateServiceRequestType requires valid data', function ($data, $errors) {
 
 // Permission Tests
 
-test('CreateServiceRequestType is gated with proper access control', function () {
+test('CreateServiceRequestType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -118,7 +118,7 @@ test('CreateServiceRequestType is gated with proper access control', function ()
     assertDatabaseHas(ServiceRequestType::class, $request->toArray());
 });
 
-test('CreateServiceRequestType is gated with proper feature access control', function () {
+test('CreateServiceRequestType is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -159,7 +159,7 @@ test('CreateServiceRequestType is gated with proper feature access control', fun
     assertDatabaseHas(ServiceRequestType::class, $request->toArray());
 });
 
-test('CreateServiceRequestType is creating default_category when form saved', function () {
+test('CreateServiceRequestType is creating default_category when form saved', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceRequestType::class)

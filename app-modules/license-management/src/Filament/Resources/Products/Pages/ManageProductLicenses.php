@@ -101,14 +101,14 @@ class ManageProductLicenses extends ManageRelatedRecords
                     ->native(false)
                     ->live()
                     ->afterStateUpdated(
-                        fn (Get $get, Set $set) => $get('start_date') > $get('expiration_date') ? $set('expiration_date', '') : ''
+                        fn (Get $get, Set $set): mixed => $get('start_date') > $get('expiration_date') ? $set('expiration_date', '') : ''
                     ),
                 Group::make([
                     Checkbox::make('license_does_not_expire')
                         ->label('License Does Not Expire')
                         ->live()
-                        ->afterStateHydrated(function (Set $set, mixed $state, ?ProductLicense $record) {
-                            if ($record && is_null($record->expiration_date)) {
+                        ->afterStateHydrated(function (Set $set, mixed $state, ?ProductLicense $record): void {
+                            if ($record instanceof ProductLicense && is_null($record->expiration_date)) {
                                 $set('license_does_not_expire', true);
                             }
                         }),
@@ -116,9 +116,9 @@ class ManageProductLicenses extends ManageRelatedRecords
                         ->label('Expiration Date')
                         ->default('No Expiration')
                         ->closeOnDateSelection()
-                        ->required(fn (Get $get) => ! $get('license_does_not_expire'))
-                        ->disabled(fn (Get $get) => $get('license_does_not_expire'))
-                        ->minDate(fn (Get $get) => $get('start_date'))
+                        ->required(fn (Get $get): bool => ! $get('license_does_not_expire'))
+                        ->disabled(fn (Get $get): mixed => $get('license_does_not_expire'))
+                        ->minDate(fn (Get $get): mixed => $get('start_date'))
                         ->after('start_date')
                         ->live(onBlur: true)
                         ->native(false),

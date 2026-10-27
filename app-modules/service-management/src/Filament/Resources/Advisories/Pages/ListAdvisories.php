@@ -37,13 +37,17 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
+use AidingApp\ServiceManagement\Filament\Resources\Advisories\Schemas\AdvisoryForm;
 use AidingApp\ServiceManagement\Models\Advisory;
+use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListAdvisories extends ListRecords
 {
@@ -60,7 +64,13 @@ class ListAdvisories extends ListRecords
                 TextColumn::make('severity.name')
                     ->label('Severity')
                     ->badge()
-                    ->color(fn (Advisory $record): string => $record->severity->color->value),
+                    ->color(fn (Advisory $record): string => $record->severity->color->value)
+                    ->sortable(AdvisorySeveritySortFeature::active(), fn (Builder $query, string $direction): Builder => $query->orderBy(
+                        AdvisorySeverity::query()
+                            ->select('advisory_severities.sort')
+                            ->whereColumn('advisory_severities.id', 'advisories.severity_id'),
+                        $direction,
+                    )),
                 TextColumn::make('status.name')
                     ->label('Status')
                     ->searchable()
@@ -70,9 +80,7 @@ class ListAdvisories extends ListRecords
                     ->searchable()
                     ->sortable(),
             ])
-            ->recordUrl(fn (Advisory $record): ?string => AdvisoryResource::can('view', $record)
-                ? AdvisoryResource::getUrl('view', ['record' => $record])
-                : null)
+            ->recordUrl($this->advisoryViewUrl(...))
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
@@ -84,7 +92,24 @@ class ListAdvisories extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->slideOver()
+                ->successRedirectUrl($this->advisoryViewUrl(...))
+                ->fillForm(fn (): array => [
+                    'assigned_department_id' => auth()->user()?->department?->getKey(),
+                ])
+                ->schema([
+                    AdvisoryForm::propertiesSection(),
+                    AdvisoryForm::trackingSection(),
+                    AdvisoryForm::assignmentSection(),
+                ]),
         ];
+    }
+
+    protected function advisoryViewUrl(Advisory $record): ?string
+    {
+        return AdvisoryResource::can('view', $record)
+            ? AdvisoryResource::getUrl('view', ['record' => $record])
+            : null;
     }
 }

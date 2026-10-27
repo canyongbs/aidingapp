@@ -39,14 +39,13 @@ use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\Scopes\WithCurrentStatus;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 
-function findWithCurrentStatus(ServiceMonitoringTarget $serviceMonitoringTarget): ServiceMonitoringTarget
-{
+$findWithCurrentStatus = function (ServiceMonitoringTarget $serviceMonitoringTarget): ServiceMonitoringTarget {
     return ServiceMonitoringTarget::query()
         ->tap(new WithCurrentStatus())
         ->findOrFail($serviceMonitoringTarget->getKey());
-}
+};
 
-it('resolves the current status from the latest check and the checks within the last 24 hours', function (array $checks, ServiceMonitoringStatus $status) {
+it('resolves the current status from the latest check and the checks within the last 24 hours', function (array $checks, ServiceMonitoringStatus $status) use ($findWithCurrentStatus): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     foreach ($checks as $hoursAgo => $succeeded) {
@@ -56,7 +55,7 @@ it('resolves the current status from the latest check and the checks within the 
             ->create();
     }
 
-    expect(findWithCurrentStatus($serviceMonitoringTarget)->getCurrentStatus())->toBe($status);
+    expect($findWithCurrentStatus($serviceMonitoringTarget)->getCurrentStatus())->toBe($status);
 })->with([
     'no checks' => [[], ServiceMonitoringStatus::Unknown],
     'every check succeeded' => [[3 => true, 2 => true, 1 => true], ServiceMonitoringStatus::Operational],
@@ -65,23 +64,23 @@ it('resolves the current status from the latest check and the checks within the 
     'earlier check failed over 24 hours ago' => [[25 => false, 2 => true, 1 => true], ServiceMonitoringStatus::Operational],
 ]);
 
-it('selects when the target was last checked', function () {
+it('selects when the target was last checked', function () use ($findWithCurrentStatus): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subHours(2)]);
     $latestCheck = HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subMinutes(5)]);
 
-    expect(findWithCurrentStatus($serviceMonitoringTarget)->getLastCheckedAt()->toDateTimeString())
+    expect($findWithCurrentStatus($serviceMonitoringTarget)->getLastCheckedAt()->toDateTimeString())
         ->toBe($latestCheck->created_at->toDateTimeString());
 });
 
-it('does not consider the checks of other targets', function () {
+it('does not consider the checks of other targets', function () use ($findWithCurrentStatus): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
     $check = HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subHours(2)]);
 
     HistoricalServiceMonitoring::factory()->failed()->create(['created_at' => now()->subHour()]);
 
-    $serviceMonitoringTarget = findWithCurrentStatus($serviceMonitoringTarget);
+    $serviceMonitoringTarget = $findWithCurrentStatus($serviceMonitoringTarget);
 
     expect($serviceMonitoringTarget->getCurrentStatus())->toBe(ServiceMonitoringStatus::Operational)
         ->and($serviceMonitoringTarget->getLastCheckedAt()->toDateTimeString())->toBe($check->created_at->toDateTimeString());

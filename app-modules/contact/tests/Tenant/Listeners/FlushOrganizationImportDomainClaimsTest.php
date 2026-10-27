@@ -42,11 +42,11 @@ use Filament\Actions\Imports\Events\ImportCompleted;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
-beforeEach(function () {
+beforeEach(function (): void {
     Cache::flush();
 });
 
-it('flushes the domain claims when an organization import completes', function () {
+it('flushes the domain claims when an organization import completes', function (): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
     $import->importer = OrganizationImporter::class;
@@ -62,7 +62,7 @@ it('flushes the domain claims when an organization import completes', function (
     expect(Cache::tags([$tag])->has('shared.edu'))->toBeFalse();
 });
 
-it('leaves the claims untouched for a different importer', function () {
+it('leaves the claims untouched for a different importer', function (): void {
     $import = new Import();
     $import->id = (string) Str::uuid();
     $import->importer = ContactImporter::class;

@@ -44,25 +44,10 @@ use App\Models\User;
 
 use function Tests\asSuperAdmin;
 
-function referenceServiceRequestStatus(string $reference, ServiceRequestStatus $status): void
-{
-    match ($reference) {
-        'service requests' => ServiceRequest::factory()->for($status, 'status')->create(),
-        'a trashed service request' => tap(ServiceRequest::factory()->for($status, 'status')->create())->delete(),
-        'a draft service request' => ServiceRequest::factory()->for($status, 'status')->create()->forceFill(['is_draft' => true])->save(),
-        'a service request type automated status' => ServiceRequestType::factory()->for($status, 'automatedStatus')->create(),
-        'a trashed service request type' => tap(ServiceRequestType::factory()->for($status, 'automatedStatus')->create())->delete(),
-        'status periods' => ServiceRequestStatusPeriod::factory()->for($status, 'status')->create(),
-        'service request assignments' => createServiceRequestAssignmentForStatus($status),
-    };
-}
-
-function createServiceRequestAssignmentForStatus(ServiceRequestStatus $status): ServiceRequestAssignment
-{
+$createServiceRequestAssignmentForStatus = function (ServiceRequestStatus $status): ServiceRequestAssignment {
     $type = ServiceRequestType::factory()->create();
     $manager = User::factory()->create();
     $type->managerUsers()->attach($manager);
-
     $serviceRequest = ServiceRequest::factory()
         ->for(ServiceRequestPriority::factory()->for($type, 'type'), 'priority')
         ->create();
@@ -72,9 +57,22 @@ function createServiceRequestAssignmentForStatus(ServiceRequestStatus $status): 
         ->for($manager, 'user')
         ->for($status, 'serviceRequestStatus')
         ->create();
-}
+};
 
-it('allows archiving a service request status that is not in use', function () {
+$referenceServiceRequestStatus = function (string $reference, ServiceRequestStatus $status) use ($createServiceRequestAssignmentForStatus): void {
+    match ($reference) {
+        'service requests' => ServiceRequest::factory()->for($status, 'status')->create(),
+        'a trashed service request' => tap(ServiceRequest::factory()->for($status, 'status')->create())->delete(),
+        'a draft service request' => ServiceRequest::factory()->for($status, 'status')->create()->forceFill(['is_draft' => true])->save(),
+        'a service request type automated status' => ServiceRequestType::factory()->for($status, 'automatedStatus')->create(),
+        'a trashed service request type' => tap(ServiceRequestType::factory()->for($status, 'automatedStatus')->create())->delete(),
+        'status periods' => ServiceRequestStatusPeriod::factory()->for($status, 'status')->create(),
+        'service request assignments' => $createServiceRequestAssignmentForStatus($status),
+        default => throw new InvalidArgumentException("Unknown service request status reference: {$reference}"),
+    };
+};
+
+it('allows archiving a service request status that is not in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -85,7 +83,7 @@ it('allows archiving a service request status that is not in use', function () {
         ->and($user->can('archive', $status))->toBeTrue();
 });
 
-it('allows archiving a service request status that is in use', function () {
+it('allows archiving a service request status that is in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -98,7 +96,7 @@ it('allows archiving a service request status that is in use', function () {
         ->and($user->can('archive', $status))->toBeTrue();
 });
 
-it('denies archiving a system protected service request status', function () {
+it('denies archiving a system protected service request status', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -108,7 +106,7 @@ it('denies archiving a system protected service request status', function () {
     expect($user->can('archive', $status))->toBeFalse();
 });
 
-it('denies archiving a service request status that is already archived', function () {
+it('denies archiving a service request status that is already archived', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -119,14 +117,14 @@ it('denies archiving a service request status that is already archived', functio
         ->and($user->can('archive', $status))->toBeFalse();
 });
 
-it('denies deleting a service request status that is in use', function (string $reference) {
+it('denies deleting a service request status that is in use', function (string $reference) use ($referenceServiceRequestStatus): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
 
     $status = ServiceRequestStatus::factory()->open()->create();
 
-    referenceServiceRequestStatus($reference, $status);
+    $referenceServiceRequestStatus($reference, $status);
 
     expect($status->isInUse())->toBeTrue()
         ->and($user->can('delete', $status))->toBeFalse()
@@ -138,7 +136,7 @@ it('denies deleting a service request status that is in use', function (string $
     'status periods',
 ]);
 
-it('allows deleting a service request status that is not in use', function () {
+it('allows deleting a service request status that is not in use', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -149,7 +147,7 @@ it('allows deleting a service request status that is not in use', function () {
         ->and($user->can('forceDelete', $status))->toBeTrue();
 });
 
-it('denies deleting a system protected service request status', function () {
+it('denies deleting a system protected service request status', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -160,10 +158,10 @@ it('denies deleting a system protected service request status', function () {
         ->and($user->can('forceDelete', $status))->toBeFalse();
 });
 
-it('counts a soft deleted or draft record as still using the status', function (string $reference) {
+it('counts a soft deleted or draft record as still using the status', function (string $reference) use ($referenceServiceRequestStatus): void {
     $status = ServiceRequestStatus::factory()->open()->create();
 
-    referenceServiceRequestStatus($reference, $status);
+    $referenceServiceRequestStatus($reference, $status);
 
     expect($status->isInUse())->toBeTrue();
 })->with([

@@ -73,9 +73,11 @@ use Database\Factories\UserFactory;
 use DateTimeInterface;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Models\Contracts\HasAvatar;
+use Filament\Models\Contracts\HasName;
 use Filament\Panel;
 use Illuminate\Contracts\Translation\HasLocalePreference;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -97,7 +99,7 @@ use Staudenmeir\EloquentHasManyDeep\HasRelationships;
  * @mixin IdeHelperUser
  */
 #[ObservedBy([UserObserver::class])]
-class User extends Authenticatable implements HasLocalePreference, FilamentUser, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource, ReceivesBrowserNotifications
+class User extends Authenticatable implements HasLocalePreference, FilamentUser, HasName, Auditable, HasMedia, HasAvatar, CanBeNotified, HasFilamentResource, ReceivesBrowserNotifications
 {
     /** @use HasFactory<UserFactory> */
     use HasFactory;
@@ -117,6 +119,9 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     /** @use InteractsWithMedia<\App\Models\Media> */
     use InteractsWithMedia;
 
+    /** Two parts plus a space must fit managed contacts' 255-character full_name. */
+    public const NAME_PART_MAX_LENGTH = 127;
+
     protected $hidden = [
         'remember_token',
         'password',
@@ -131,7 +136,6 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     protected $fillable = [
         'emplid',
-        'name',
         'email',
         'password',
         'locale',
@@ -170,7 +174,8 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public array $orderable = [
         'id',
         'emplid',
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'email_verified_at',
         'locale',
@@ -182,7 +187,8 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     public array $filterable = [
         'id',
         'emplid',
-        'name',
+        'first_name',
+        'last_name',
         'email',
         'email_verified_at',
         'roles.title',
@@ -336,12 +342,17 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
 
     public static function displayNameKey(): string
     {
-        return 'name';
+        return 'full_name';
+    }
+
+    public function getFilamentName(): string
+    {
+        return $this->full_name;
     }
 
     public function getDynamicContext(): string
     {
-        $context = "My name is {$this->name}";
+        $context = "My name is {$this->full_name}";
 
         if ($this->job_title) {
             $context .= " and I am a {$this->job_title}";
@@ -439,6 +450,14 @@ class User extends Authenticatable implements HasLocalePreference, FilamentUser,
     protected function serializeDate(DateTimeInterface $date): string
     {
         return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
+    }
+
+    /**
+     * @return Attribute<string, never>
+     */
+    protected function fullName(): Attribute
+    {
+        return Attribute::get(fn (): string => trim("{$this->first_name} {$this->last_name}"));
     }
 
     protected function lastActivityAt(): ?Carbon

@@ -44,91 +44,88 @@ use Illuminate\Support\Str;
 
 use function Tests\loadFixtureFromModule;
 
-function makeSesBounceEventData(string $bounceType, string $emailAddress): SesEventData
-{
+$makeSesBounceEventData = function (string $bounceType, string $emailAddress): SesEventData {
     $bounce = loadFixtureFromModule('integration-aws-ses-event-handling', 'Bounce');
-
     data_set($bounce, 'bounce.bounceType', $bounceType);
     data_set($bounce, 'bounce.bouncedRecipients.0.emailAddress', $emailAddress);
     data_set($bounce, 'mail.tags.app_message_id.0', (string) Str::uuid());
-
     $sns = loadFixtureFromModule('integration-aws-ses-event-handling', 'sns-notification');
     $sns['Message'] = json_encode($bounce);
 
     return SesEventData::fromRequest(Request::create('/', 'POST', content: json_encode($sns)));
-}
+};
 
-it('flags a contact whose email permanently bounced', function () {
+it('flags a contact whose email permanently bounced', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'recipient@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($contact->refresh()->email_bounce)->toBeTrue();
 });
 
-it('flags a contact whose email matches a differently cased address', function () {
+it('flags a contact whose email matches a differently cased address', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'Recipient@Example.com',
     ]);
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'recipient@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($contact->refresh()->email_bounce)->toBeTrue();
 });
 
-it('does not flag a contact for a transient bounce', function () {
+it('does not flag a contact for a transient bounce', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Transient', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Transient', 'recipient@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($contact->refresh()->email_bounce)->toBeFalse();
 });
 
-it('does not flag a contact for an undetermined bounce', function () {
+it('does not flag a contact for an undetermined bounce', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Undetermined', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Undetermined', 'recipient@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($contact->refresh()->email_bounce)->toBeFalse();
 });
 
-it('does nothing when no contact matches the bounced address', function () {
+it('does nothing when no contact matches the bounced address', function () use ($makeSesBounceEventData): void {
     $other = Contact::factory()->create([
         'email' => 'someone-else@example.com',
     ]);
 
     expect($other->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'unknown@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'unknown@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($other->refresh()->email_bounce)->toBeFalse();
 });
 
-it('flags a soft-deleted contact with the bounced address so the flag survives a restore', function () {
+it('flags a soft-deleted contact with the bounced address so the flag survives a restore', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
@@ -136,7 +133,7 @@ it('flags a soft-deleted contact with the bounced address so the flag survives a
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'recipient@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
@@ -145,7 +142,7 @@ it('flags a soft-deleted contact with the bounced address so the flag survives a
     expect($contact->refresh()->email_bounce)->toBeTrue();
 });
 
-it('does not flag the new address of a contact who already replaced the bounced address', function () {
+it('does not flag the new address of a contact who already replaced the bounced address', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'old-address@example.com',
     ]);
@@ -155,25 +152,25 @@ it('does not flag the new address of a contact who already replaced the bounced 
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'old-address@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'old-address@example.com');
 
     (new SaveBouncedContactEmail())->handle(new SesBounceEvent($data));
 
     expect($contact->refresh()->email_bounce)->toBeFalse();
 });
 
-it('flags the contact when the bounce event is dispatched through the event system', function () {
+it('flags the contact when the bounce event is dispatched through the event system', function () use ($makeSesBounceEventData): void {
     $contact = Contact::factory()->create([
         'email' => 'recipient@example.com',
     ]);
 
     expect($contact->email_bounce)->toBeFalse();
 
-    $data = makeSesBounceEventData('Permanent', 'recipient@example.com');
+    $data = $makeSesBounceEventData('Permanent', 'recipient@example.com');
 
     $handled = 0;
 
-    app()->bind(SaveBouncedContactEmail::class, function () use (&$handled) {
+    app()->bind(SaveBouncedContactEmail::class, function () use (&$handled): SaveBouncedContactEmail {
         return new class ($handled) extends SaveBouncedContactEmail {
             public function __construct(private int &$handled) {}
 

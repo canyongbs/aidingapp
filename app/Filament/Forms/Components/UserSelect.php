@@ -36,10 +36,14 @@
 
 namespace App\Filament\Forms\Components;
 
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\Scopes\WithoutAnyAdmin;
+use App\Models\User;
 use Closure;
 use Filament\Forms\Components\Select;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class UserSelect extends Select
 {
@@ -49,7 +53,7 @@ class UserSelect extends Select
     {
         parent::setUp();
 
-        $this->searchable(['name', 'email']);
+        $this->searchable(['first_name', 'last_name', 'email']);
     }
 
     public function withoutAdminFilter(): static
@@ -61,10 +65,10 @@ class UserSelect extends Select
 
     public function relationship(string|Closure|null $name = null, string|Closure|null $titleAttribute = null, ?Closure $modifyQueryUsing = null, bool $ignoreRecord = false): static
     {
-        return parent::relationship(
+        parent::relationship(
             $name,
-            $titleAttribute ?? 'name',
-            function (Builder $query, UserSelect $component) use ($modifyQueryUsing) {
+            $titleAttribute ?? 'first_name',
+            function (Builder $query, UserSelect $component) use ($modifyQueryUsing): void {
                 if ($component->shouldFilterAdmins()) {
                     $alreadySelected = [];
 
@@ -77,7 +81,7 @@ class UserSelect extends Select
                         $alreadySelected = $record->{$relationshipName}()
                             ->getQuery()
                             ->pluck($qualifiedKey)
-                            ->map(fn ($variable) => (string) $variable)
+                            ->map(fn ($variable): string => (string) $variable)
                             ->toArray();
                     }
 
@@ -85,7 +89,7 @@ class UserSelect extends Select
                     $stateSelected = array_filter(is_array($state) ? $state : [$state]);
                     $alreadySelected = array_values(array_unique(array_merge($alreadySelected, $stateSelected)));
 
-                    $query->where(function (Builder $query) use ($alreadySelected) {
+                    $query->where(function (Builder $query) use ($alreadySelected): void {
                         $query->tap(new WithoutAnyAdmin());
 
                         if (! empty($alreadySelected)) {
@@ -94,11 +98,29 @@ class UserSelect extends Select
                     });
                 }
 
+                $query->tap(new OrderByFullName());
+
                 if ($modifyQueryUsing) {
                     $modifyQueryUsing($query);
                 }
             },
             $ignoreRecord,
+        );
+
+        return $this->getOptionLabelFromRecordUsing(fn (User $record): string => $record->full_name);
+    }
+
+    /**
+     * @param Builder<User> $query
+     *
+     * @return Builder<User>
+     */
+    public function applySearchConstraint(Builder $query, string $search): Builder
+    {
+        return $query->where(
+            fn (Builder $query) => $query
+                ->tap(new WhereFullNameLike($search))
+                ->orWhereRaw('LOWER(' . $query->qualifyColumn('email') . ') LIKE ?', ['%' . Str::lower($search) . '%']),
         );
     }
 

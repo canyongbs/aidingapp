@@ -55,4 +55,14 @@ class AdvisoryUpdateFactory extends Factory
             'date' => $this->faker->dateTime(),
         ];
     }
+
+    public function public(): static
+    {
+        return $this->state(['internal' => false]);
+    }
+
+    public function internal(): static
+    {
+        return $this->state(['internal' => true]);
+    }
 }

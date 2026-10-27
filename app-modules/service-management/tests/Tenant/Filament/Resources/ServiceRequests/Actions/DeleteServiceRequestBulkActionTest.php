@@ -46,7 +46,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('it can bulk delete service requests as super admin', function () {
+test('it can bulk delete service requests as super admin', function (): void {
     asSuperAdmin();
 
     $openStatus = ServiceRequestStatus::factory()->open()->create();
@@ -60,12 +60,12 @@ test('it can bulk delete service requests as super admin', function () {
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
-test('it can bulk delete service requests as a department manager', function () {
+test('it can bulk delete service requests as a department manager', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -96,12 +96,12 @@ test('it can bulk delete service requests as a department manager', function () 
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
-test('it can bulk delete service requests as a direct user manager', function () {
+test('it can bulk delete service requests as a direct user manager', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -128,12 +128,12 @@ test('it can bulk delete service requests as a direct user manager', function ()
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->toBeNull();
     }
 });
 
-test('it cannot bulk delete service requests the user does not manage', function () {
+test('it cannot bulk delete service requests the user does not manage', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('service_request.view-any');
@@ -149,7 +149,7 @@ test('it cannot bulk delete service requests the user does not manage', function
         ->assertSuccessful()
         ->callTableBulkAction('delete', $serviceRequests);
 
-    foreach ($serviceRequests as $sr) {
-        expect(ServiceRequest::find($sr->getKey()))->not->toBeNull();
+    foreach ($serviceRequests as $serviceRequest) {
+        expect(ServiceRequest::find($serviceRequest->getKey()))->not()->toBeNull();
     }
 });

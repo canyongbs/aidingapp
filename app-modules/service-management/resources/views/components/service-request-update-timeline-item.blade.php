@@ -52,7 +52,7 @@
 
     $actorName = match (true) {
         $createdBy instanceof ServiceRequest => 'Assistant',
-        $createdBy instanceof User => $createdBy->name,
+        $createdBy instanceof User => $createdBy->full_name,
         $createdBy instanceof Contact => $createdBy->full_name,
         filled($record->created_by_id) => 'Deleted user',
         default => 'Unknown',

@@ -44,7 +44,7 @@ use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
 
-it('writes a single Created history row when a service request is created', function () {
+it('writes a single Created history row when a service request is created', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -52,7 +52,7 @@ it('writes a single Created history row when a service request is created', func
     $serviceRequest = ServiceRequest::factory()->create();
 
     $createdRows = $serviceRequest->histories
-        ->filter(fn (ServiceRequestHistory $row) => $row->isCreatedEvent())
+        ->filter(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent())
         ->values();
 
     expect($createdRows)->toHaveCount(1);
@@ -67,18 +67,18 @@ it('writes a single Created history row when a service request is created', func
         ->and($createdRow->actor_type)->toBe($user->getMorphClass());
 });
 
-it('does not write field-change history rows on the initial save', function () {
+it('does not write field-change history rows on the initial save', function (): void {
     actingAs(User::factory()->create());
 
     $serviceRequest = ServiceRequest::factory()->create();
 
     $fieldRows = $serviceRequest->histories
-        ->reject(fn (ServiceRequestHistory $row) => $row->isCreatedEvent());
+        ->reject(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent());
 
     expect($fieldRows)->toHaveCount(0);
 });
 
-it('writes one history row per real field changed on subsequent saves', function () {
+it('writes one history row per real field changed on subsequent saves', function (): void {
     actingAs(User::factory()->create());
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -99,7 +99,7 @@ it('writes one history row per real field changed on subsequent saves', function
 
     $fieldRows = $serviceRequest->histories()
         ->get()
-        ->reject(fn (ServiceRequestHistory $row) => $row->isCreatedEvent())
+        ->reject(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent())
         ->values();
 
     expect($fieldRows)->toHaveCount(2);
@@ -118,7 +118,7 @@ it('writes one history row per real field changed on subsequent saves', function
     }
 });
 
-it('filters bookkeeping keys from field-change history rows', function () {
+it('filters bookkeeping keys from field-change history rows', function (): void {
     actingAs(User::factory()->create());
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -131,7 +131,7 @@ it('filters bookkeeping keys from field-change history rows', function () {
 
     $rowFields = $serviceRequest->histories()
         ->get()
-        ->reject(fn (ServiceRequestHistory $row) => $row->isCreatedEvent())
+        ->reject(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent())
         ->map(fn (ServiceRequestHistory $row) => array_key_first($row->new_values))
         ->all();
 
@@ -142,7 +142,7 @@ it('filters bookkeeping keys from field-change history rows', function () {
         ->and($rowFields)->not->toContain('updated_at');
 });
 
-it('records the authenticated user as the actor on field-change rows', function () {
+it('records the authenticated user as the actor on field-change rows', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -159,7 +159,7 @@ it('records the authenticated user as the actor on field-change rows', function 
 
     $fieldRow = $serviceRequest->histories()
         ->get()
-        ->reject(fn (ServiceRequestHistory $row) => $row->isCreatedEvent())
+        ->reject(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent())
         ->first();
 
     expect($fieldRow)->not->toBeNull()
@@ -167,7 +167,7 @@ it('records the authenticated user as the actor on field-change rows', function 
         ->and($fieldRow->actor_type)->toBe($user->getMorphClass());
 });
 
-it('renders specific event titles for known field changes', function () {
+it('renders specific event titles for known field changes', function (): void {
     $cases = [
         'status_id' => 'Status Updated',
         'priority_id' => 'Priority Updated',
@@ -188,7 +188,7 @@ it('renders specific event titles for known field changes', function () {
     }
 });
 
-it('renders the Created event title for rows with empty original values and a snapshot in new values', function () {
+it('renders the Created event title for rows with empty original values and a snapshot in new values', function (): void {
     $created = new ServiceRequestHistory([
         'original_values' => [],
         'new_values' => ['status_id' => 'abc', 'priority_id' => 'def'],
@@ -198,12 +198,12 @@ it('renders the Created event title for rows with empty original values and a sn
         ->and($created->isCreatedEvent())->toBeTrue();
 });
 
-it('returns "System" as actorName when no actor is associated', function () {
+it('returns "System" as actorName when no actor is associated', function (): void {
     expect((new ServiceRequestHistory())->actorName())->toBe('System');
 });
 
-it('returns the User name as actorName when the actor is a User', function () {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+it('returns the User name as actorName when the actor is a User', function (): void {
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);
@@ -211,7 +211,7 @@ it('returns the User name as actorName when the actor is a User', function () {
     expect($history->actorName())->toBe('Heather Sheridan');
 });
 
-it('returns the Contact full_name as actorName when the actor is a Contact', function () {
+it('returns the Contact full_name as actorName when the actor is a Contact', function (): void {
     $contact = Contact::factory()->create();
 
     $history = new ServiceRequestHistory();
@@ -220,8 +220,8 @@ it('returns the Contact full_name as actorName when the actor is a Contact', fun
     expect($history->actorName())->toBe($contact->full_name);
 });
 
-it('returns the name of a soft-deleted User as actorName', function () {
-    $user = User::factory()->state(['name' => 'Heather Sheridan'])->create();
+it('returns the name of a soft-deleted User as actorName', function (): void {
+    $user = User::factory()->state(['first_name' => 'Heather', 'last_name' => 'Sheridan'])->create();
 
     $history = new ServiceRequestHistory();
     $history->actor()->associate($user);
@@ -232,7 +232,7 @@ it('returns the name of a soft-deleted User as actorName', function () {
         ->and($history->actorName())->toBe('Heather Sheridan');
 });
 
-it('returns "Deleted user" as actorName when the actor no longer exists', function () {
+it('returns "Deleted user" as actorName when the actor no longer exists', function (): void {
     $history = new ServiceRequestHistory([
         'actor_type' => (new User())->getMorphClass(),
         'actor_id' => Str::uuid()->toString(),
@@ -241,7 +241,7 @@ it('returns "Deleted user" as actorName when the actor no longer exists', functi
     expect($history->actorName())->toBe('Deleted user');
 });
 
-it('returns the removed assignee name for Assignment Removed rows', function (?string $snapshotName, string $expectedName) {
+it('returns the removed assignee name for Assignment Removed rows', function (?string $snapshotName, string $expectedName): void {
     $history = new ServiceRequestHistory([
         'original_values' => ['removed_assignment' => $snapshotName],
         'new_values' => ['removed_assignment' => null],
@@ -254,13 +254,13 @@ it('returns the removed assignee name for Assignment Removed rows', function (?s
     'assignee already deleted' => [null, 'Deleted user'],
 ]);
 
-it('resolves snapshot helpers from new_values for Created rows', function () {
+it('resolves snapshot helpers from new_values for Created rows', function (): void {
     actingAs(User::factory()->create());
 
     $serviceRequest = ServiceRequest::factory()->create();
 
     $createdRow = $serviceRequest->histories
-        ->first(fn (ServiceRequestHistory $row) => $row->isCreatedEvent());
+        ->first(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent());
 
     expect($createdRow)->not->toBeNull()
         ->and($createdRow->snapshotStatus()?->getKey())->toBe($serviceRequest->status_id)
@@ -268,13 +268,13 @@ it('resolves snapshot helpers from new_values for Created rows', function () {
         ->and($createdRow->snapshotType()?->getKey())->toBe($serviceRequest->priority->type_id);
 });
 
-it('resolves soft-deleted records in snapshot helpers', function () {
+it('resolves soft-deleted records in snapshot helpers', function (): void {
     actingAs(User::factory()->create());
 
     $serviceRequest = ServiceRequest::factory()->create();
 
     $createdRow = $serviceRequest->histories
-        ->first(fn (ServiceRequestHistory $row) => $row->isCreatedEvent());
+        ->first(fn (ServiceRequestHistory $row): bool => $row->isCreatedEvent());
 
     $serviceRequest->status->delete();
     $serviceRequest->priority->type->delete();
@@ -287,7 +287,7 @@ it('resolves soft-deleted records in snapshot helpers', function () {
         ->and($createdRow->snapshotType()?->getKey())->toBe($serviceRequest->priority->type_id);
 });
 
-it('formats references to soft-deleted records by name and missing records as "Unknown"', function () {
+it('formats references to soft-deleted records by name and missing records as "Unknown"', function (): void {
     $deletedStatus = ServiceRequestStatus::factory()->create(['name' => 'Retired Status']);
     $deletedStatus->delete();
 
@@ -302,7 +302,7 @@ it('formats references to soft-deleted records by name and missing records as "U
         ->and($history->new_values_formatted)->toBe(['Status' => 'Retired Status']);
 });
 
-it('returns empty getUpdates for the Created event', function () {
+it('returns empty getUpdates for the Created event', function (): void {
     $created = new ServiceRequestHistory([
         'original_values' => [],
         'new_values' => ['status_id' => 'abc', 'priority_id' => 'def'],

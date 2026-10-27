@@ -42,12 +42,11 @@ use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Events\QueryExecuted;
-use Illuminate\Queue\Middleware\WithoutOverlapping;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Queue;
 
-it('matches unaffiliated contacts only to the targeted organization', function () {
+it('matches unaffiliated contacts only to the targeted organization', function (): void {
     Queue::fake([MatchUnaffiliatedContactsJob::class]);
     $organization = Organization::factory()->create([
         'domains' => [],
@@ -80,7 +79,7 @@ it('matches unaffiliated contacts only to the targeted organization', function (
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
-it('matches unaffiliated contacts to any matching organization during reconciliation', function () {
+it('matches unaffiliated contacts to any matching organization during reconciliation', function (): void {
     Queue::fake([MatchUnaffiliatedContactsJob::class]);
     $organization = Organization::factory()->create([
         'domains' => [],
@@ -117,7 +116,7 @@ it('matches unaffiliated contacts to any matching organization during reconcilia
         ->and($assignedContact->refresh()->organization_id)->toBe($otherOrganization->getKey());
 });
 
-it('skips unmatched domains without per-contact lookups or locks', function (bool $targeted) {
+it('skips unmatched domains without per-contact lookups or locks', function (bool $targeted): void {
     $organization = Organization::factory()->create(['domains' => []]);
     $matchingContact = Contact::factory()->create([
         'email' => 'person@EXAMPLE.COM',
@@ -152,7 +151,7 @@ it('skips unmatched domains without per-contact lookups or locks', function (boo
     'targeted sweep' => true,
 ]);
 
-it('verifies current organization domains after the candidate snapshot', function (bool $targeted) {
+it('verifies current organization domains after the candidate snapshot', function (bool $targeted): void {
     $organization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->create([
         'email' => 'person@example.com',
@@ -179,7 +178,7 @@ it('verifies current organization domains after the candidate snapshot', functio
     'targeted sweep' => true,
 ]);
 
-it('does not scan contacts when there are no candidate domains', function () {
+it('does not scan contacts when there are no candidate domains', function (): void {
     Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->create([
         'email' => 'person@example.com',
@@ -201,7 +200,7 @@ it('does not scan contacts when there are no candidate domains', function () {
         ->and($contact->refresh()->organization_id)->toBeNull();
 });
 
-it('does not match contacts when the targeted organization has been deleted', function (bool $forceDelete) {
+it('does not match contacts when the targeted organization has been deleted', function (bool $forceDelete): void {
     $organization = Organization::factory()->create(['domains' => []]);
     $otherOrganization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->create([
@@ -229,11 +228,9 @@ it('does not match contacts when the targeted organization has been deleted', fu
     'permanently deleted' => true,
 ]);
 
-it('does not run reconciliation when another reconciliation for the tenant holds the lock', function () {
+it('does not run reconciliation when another reconciliation for the tenant holds the lock', function (): void {
     $job = new MatchUnaffiliatedContactsJob();
     $middleware = $job->middleware()[0];
-
-    assert($middleware instanceof WithoutOverlapping);
 
     $tenant = Tenant::current();
     assert($tenant instanceof Tenant);

@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Filament\Tables\ManagersTable;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Models\User;
 
-it('includes direct manager users of the type and excludes non-managers', function () {
+it('includes direct manager users of the type and excludes non-managers', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $manager = User::factory()->create();
@@ -54,7 +54,7 @@ it('includes direct manager users of the type and excludes non-managers', functi
         ->and($ids->all())->not->toContain($nonManager->getKey());
 });
 
-it('includes users that belong to a manager department of the type', function () {
+it('includes users that belong to a manager department of the type', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $department = Department::factory()->create();
@@ -71,7 +71,7 @@ it('includes users that belong to a manager department of the type', function ()
         ->and($ids->all())->not->toContain($nonManager->getKey());
 });
 
-it('includes users that belong to a manager group of the type', function () {
+it('includes users that belong to a manager group of the type', function (): void {
     $type = ServiceRequestType::factory()->create();
     $group = Group::factory()->create();
     $type->managerGroups()->attach($group);
@@ -87,7 +87,7 @@ it('includes users that belong to a manager group of the type', function () {
         ->and($ids->all())->not->toContain($nonManager->getKey());
 });
 
-it('excludes the given excludeUserId', function () {
+it('excludes the given excludeUserId', function (): void {
     $type = ServiceRequestType::factory()->create();
 
     $current = User::factory()->create();

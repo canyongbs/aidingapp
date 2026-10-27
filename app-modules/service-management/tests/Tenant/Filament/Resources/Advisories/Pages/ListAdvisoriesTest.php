@@ -34,10 +34,12 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\AdvisoryResource;
 use AidingApp\ServiceManagement\Filament\Resources\Advisories\Pages\ListAdvisories;
 use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\AdvisoryRequestFactory;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CanyonGBS\Common\Enums\Color;
@@ -46,10 +48,13 @@ use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertSoftDeleted;
 use function Pest\Laravel\get;
+use function PHPUnit\Framework\assertCount;
+use function Tests\asSuperAdmin;
 
-test('ListAdvisories is gated with proper access control', function () {
+test('ListAdvisories is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -65,7 +70,7 @@ test('ListAdvisories is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->advisoryManagement = false;
@@ -91,7 +96,7 @@ it('is gated with proper access control', function () {
     get(ListAdvisories::getUrl())->assertSuccessful();
 });
 
-test('can list records', function () {
+test('can list records', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -109,7 +114,7 @@ test('can list records', function () {
         ->assertSuccessful();
 });
 
-test('bulk delete Advisories', function () {
+test('bulk delete Advisories', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -127,7 +132,7 @@ test('bulk delete Advisories', function () {
     }
 });
 
-it('only shows the bulk delete action to a user with the advisory.delete permission', function () {
+it('only shows the bulk delete action to a user with the advisory.delete permission', function (): void {
     Advisory::factory(15)->create();
 
     $user = User::factory()
@@ -145,7 +150,7 @@ it('only shows the bulk delete action to a user with the advisory.delete permiss
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-it('links each row to the advisory view page', function () {
+it('links each row to the advisory view page', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any', 'advisory.*.view');
@@ -162,7 +167,7 @@ it('links each row to the advisory view page', function () {
     expect($url)->toBe(AdvisoryResource::getUrl('view', ['record' => $advisory]));
 });
 
-it('does not link a row when the user cannot view the advisory', function () {
+it('does not link a row when the user cannot view the advisory', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any');
@@ -179,7 +184,7 @@ it('does not link a row when the user cannot view the advisory', function () {
     expect($url)->toBeNull();
 });
 
-it('renders the severity column as a badge using the severity color', function () {
+it('renders the severity column as a badge using the severity color', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('advisory.view-any');
@@ -187,7 +192,7 @@ it('renders the severity column as a badge using the severity color', function (
     actingAs($user);
 
     $advisory = Advisory::factory()
-        ->for(AdvisorySeverity::factory()->state(['color' => Color::Red]), 'severity')
+        ->for(AdvisorySeverity::factory()->color(Color::Red), 'severity')
         ->create();
 
     $column = Livewire::test(ListAdvisories::class)
@@ -198,4 +203,171 @@ it('renders the severity column as a badge using the severity color', function (
 
     expect($column->isBadge())->toBeTrue()
         ->and($column->getColor($advisory->severity->name))->toBe(Color::Red->value);
+});
+
+it('can sort advisories by severity rank', function (): void {
+    actingAs(User::factory()->create()->givePermissionTo('advisory.view-any'));
+
+    $minorAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 2]), 'severity')->create();
+    $criticalAdvisory = Advisory::factory()->for(AdvisorySeverity::factory()->state(['sort' => 1]), 'severity')->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->sortTable('severity.name')
+        ->assertCanSeeTableRecords([$criticalAdvisory, $minorAdvisory], inOrder: true)
+        ->sortTable('severity.name', 'desc')
+        ->assertCanSeeTableRecords([$minorAdvisory, $criticalAdvisory], inOrder: true);
+});
+
+test('advisories can be created from the list page create modal with proper access control', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+
+    Livewire::test(ListAdvisories::class)
+        ->assertSuccessful()
+        ->assertActionHidden('create');
+
+    $user->givePermissionTo('advisory.create');
+
+    $request = AdvisoryRequestFactory::new()->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->assertActionVisible('create')
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors();
+
+    assertCount(1, Advisory::all());
+
+    assertDatabaseHas(Advisory::class, $request);
+});
+
+test('creating an advisory from the list page modal is gated by the advisory management feature', function (): void {
+    $settings = app(LicenseSettings::class);
+
+    $settings->data->addons->advisoryManagement = false;
+    $settings->save();
+
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any');
+    $user->givePermissionTo('advisory.create');
+
+    Livewire::test(ListAdvisories::class)
+        ->assertForbidden();
+
+    $settings->data->addons->advisoryManagement = true;
+    $settings->save();
+
+    $request = AdvisoryRequestFactory::new()->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->assertSuccessful()
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors();
+
+    assertDatabaseHas(Advisory::class, $request);
+});
+
+test('the create advisory modal validates the inputs', function (AdvisoryRequestFactory $data, array $errors): void {
+    asSuperAdmin();
+
+    $request = AdvisoryRequestFactory::new($data)->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->callAction('create', $request)
+        ->assertHasActionErrors($errors);
+})->with(
+    [
+        'title required' => [
+            AdvisoryRequestFactory::new()->without('title'),
+            ['title' => 'required'],
+        ],
+        'title string' => [
+            AdvisoryRequestFactory::new()->state(['title' => 1]),
+            ['title' => 'string'],
+        ],
+        'title max' => [
+            AdvisoryRequestFactory::new()->state(['title' => str()->random(256)]),
+            ['title' => 'max'],
+        ],
+        'description required' => [
+            AdvisoryRequestFactory::new()->without('description'),
+            ['description' => 'required'],
+        ],
+        'description max' => [
+            AdvisoryRequestFactory::new()->state(['description' => str()->random(65536)]),
+            ['description' => 'max'],
+        ],
+        'severity_id missing' => [
+            AdvisoryRequestFactory::new()->without('severity_id'),
+            ['severity_id' => 'required'],
+        ],
+        'severity_id does not exist' => [
+            AdvisoryRequestFactory::new()->state(['severity_id' => fake()->uuid()]),
+            ['severity_id' => 'in'],
+        ],
+        'status_id missing' => [
+            AdvisoryRequestFactory::new()->without('status_id'),
+            ['status_id' => 'required'],
+        ],
+        'status_id does not exist' => [
+            AdvisoryRequestFactory::new()->state(['status_id' => fake()->uuid()]),
+            ['status_id' => 'in'],
+        ],
+        'assigned_department_id does not exist' => [
+            AdvisoryRequestFactory::new()->state(['assigned_department_id' => fake()->uuid()]),
+            ['assigned_department_id' => 'in'],
+        ],
+    ]
+);
+
+test('creating an advisory redirects a user who can view it to the new advisory', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any', 'advisory.create', 'advisory.*.view');
+
+    $request = AdvisoryRequestFactory::new()->create();
+
+    $component = Livewire::test(ListAdvisories::class)
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors();
+
+    $advisory = Advisory::query()->where('title', $request['title'])->sole();
+
+    $component->assertRedirect(AdvisoryResource::getUrl('view', ['record' => $advisory]));
+});
+
+test('creating an advisory keeps a user who cannot view it on the list page', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any', 'advisory.create');
+
+    $request = AdvisoryRequestFactory::new()->create();
+
+    Livewire::test(ListAdvisories::class)
+        ->callAction('create', $request)
+        ->assertHasNoActionErrors()
+        ->assertNoRedirect();
+});
+
+test('the create advisory modal defaults the assigned department to the current user department', function (): void {
+    $department = Department::factory()->create();
+
+    $user = User::factory()->for($department)->create();
+
+    actingAs($user);
+
+    $user->givePermissionTo('advisory.view-any', 'advisory.create');
+
+    Livewire::test(ListAdvisories::class)
+        ->mountAction('create')
+        ->assertSchemaStateSet(['assigned_department_id' => $department->getKey()]);
 });

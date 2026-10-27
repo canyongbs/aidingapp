@@ -37,6 +37,7 @@ use App\Filament\Resources\Users\Pages\ViewUser;
 use App\Filament\Resources\Users\UserResource;
 use App\Models\Authenticatable;
 use App\Models\User;
+use Illuminate\Support\Carbon;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -45,7 +46,7 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
-it('renders impersonate button for non super admin users when user is super admin', function () {
+it('renders impersonate button for non super admin users when user is super admin', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -57,7 +58,7 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertActionVisible(Impersonate::class);
 });
 
-it('does not render impersonate button for super admin users at all', function () {
+it('does not render impersonate button for super admin users at all', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -71,7 +72,7 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertActionHidden(Impersonate::class);
 });
 
-it('allows super admin user to impersonate', function () {
+it('allows super admin user to impersonate', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -87,7 +88,7 @@ it('allows super admin user to impersonate', function () {
     expect(auth()->id())->toBe($user->id);
 });
 
-test('ViewUser is gated with proper access control', function () {
+test('ViewUser is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $record = User::factory()->create();
@@ -112,13 +113,12 @@ test('ViewUser is gated with proper access control', function () {
         ->assertSuccessful();
 });
 
-test('ViewUser displays the record\'s current field values', function () {
+test('ViewUser displays the record\'s current field values', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create([
         'first_name' => 'Jordan',
         'last_name' => 'Blake',
-        'name' => 'Jordan Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 
@@ -126,12 +126,11 @@ test('ViewUser displays the record\'s current field values', function () {
         ->assertFormSet([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ]);
 });
 
-test('ViewUser shows first and last name fields when the full name feature is active', function () {
+test('ViewUser shows first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -141,7 +140,7 @@ test('ViewUser shows first and last name fields when the full name feature is ac
         ->assertFormFieldIsVisible('last_name');
 });
 
-test('ViewUser disables all editable fields', function () {
+test('ViewUser disables all editable fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -149,12 +148,11 @@ test('ViewUser disables all editable fields', function () {
     Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
-        ->assertFormFieldDisabled('name')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('job_title');
 });
 
-test('ViewUser hides the Department section for admin records', function () {
+test('ViewUser hides the Department section for admin records', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -164,7 +162,7 @@ test('ViewUser hides the Department section for admin records', function () {
         ->assertFormFieldIsHidden('department_id');
 });
 
-test('ViewUser shows the Department section for non-admin records', function () {
+test('ViewUser shows the Department section for non-admin records', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -173,18 +171,20 @@ test('ViewUser shows the Department section for non-admin records', function () 
         ->assertFormFieldIsVisible('department_id');
 });
 
-test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function () {
+test('ViewUser displays Created At and Updated At in the acting user\'s configured timezone with the date and time split across two lines', function (): void {
     $actingUser = User::factory()->create(['timezone' => 'America/New_York']);
     asSuperAdmin($actingUser);
 
     $record = User::factory()->create();
     $record->timestamps = false;
-    $record->created_at = '2026-01-15 12:00:00';
+    $record->created_at = Carbon::parse('2026-01-15 12:00:00');
     $record->save();
 
-    Livewire::test(ViewUser::class, ['record' => $record->getKey()])
-        ->assertSuccessful()
-        ->assertSee('Jan 15, 2026')
-        ->assertSee('7:00 am (EST)')
-        ->assertSee('fi-datetime-description', false);
+    $component = Livewire::test(ViewUser::class, ['record' => $record->getKey()])
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/parent::*'))
+        ->toContain('Jan 15, 2026', '7:00 am (EST)')
+        ->and(\Tests\htmlText($component->html(), '//*[contains(@class, "fi-datetime-description")]/@class'))
+        ->toContain('fi-datetime-description');
 });

@@ -44,7 +44,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('lists the finished conversations for the service request', function () {
+it('lists the finished conversations for the service request', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -62,7 +62,7 @@ it('lists the finished conversations for the service request', function () {
         ->assertCanSeeTableRecords([$finished]);
 });
 
-it('does not list conversations that have not finished', function () {
+it('does not list conversations that have not finished', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -79,7 +79,7 @@ it('does not list conversations that have not finished', function () {
         ->assertCanNotSeeTableRecords([$unfinished]);
 });
 
-it('does not list conversations belonging to another service request', function () {
+it('does not list conversations belonging to another service request', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -97,7 +97,7 @@ it('does not list conversations belonging to another service request', function 
         ->assertCanNotSeeTableRecords([$otherConversation]);
 });
 
-it('sorts the most recently finished conversation first', function () {
+it('sorts the most recently finished conversation first', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -120,7 +120,7 @@ it('sorts the most recently finished conversation first', function () {
         ->assertCanSeeTableRecords([$newer, $older], inOrder: true);
 });
 
-it('links each conversation to its transcript', function () {
+it('links each conversation to its transcript', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -130,19 +130,21 @@ it('links each conversation to its transcript', function () {
         ->finished()
         ->create();
 
-    Livewire::test(ServiceRequestConversationsRelationManager::class, [
+    $component = Livewire::test(ServiceRequestConversationsRelationManager::class, [
         'ownerRecord' => $serviceRequest,
         'pageClass' => ViewServiceRequest::class,
     ])
-        ->assertSuccessful()
-        ->assertSeeHtml(ServiceRequestResource::getUrl('view-live-chat-transcript', [
+        ->assertSuccessful();
+
+    expect($component->instance()->getTable()->getRecordUrl($conversation))
+        ->toBe(ServiceRequestResource::getUrl('view-live-chat-transcript', [
             'record' => $serviceRequest,
             'conversation' => $conversation,
         ]));
 });
 
-describe('authorization', function () {
-    it('is not viewable when the `RealtimeChat` feature is disabled', function () {
+describe('authorization', function (): void {
+    it('is not viewable when the `RealtimeChat` feature is disabled', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();

@@ -40,53 +40,52 @@ use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Validator as ValidatorInstance;
 
-function validateAuthenticationCode(OtpLoginCode $authentication, string $code): ValidatorInstance
-{
+$validateAuthenticationCode = function (OtpLoginCode $authentication, string $code): ValidatorInstance {
     return Validator::make(
         ['code' => $code],
         ['code' => [new ValidAuthenticationCode($authentication)]],
     );
-}
+};
 
-it('passes for the correct code', function () {
+it('passes for the correct code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
-    expect(validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
+    expect($validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
 });
 
-it('fails for an incorrect code', function () {
+it('fails for an incorrect code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
-    $validator = validateAuthenticationCode($authentication, '654321');
+    $validator = $validateAuthenticationCode($authentication, '654321');
 
     expect($validator->passes())->toBeFalse();
     expect($validator->errors()->first('code'))->toBe('The provided code is invalid.');
 });
 
-it('locks the record after the maximum failed attempts and then rejects even the correct code', function () {
+it('locks the record after the maximum failed attempts and then rejects even the correct code', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS) as $attempt) {
-        expect(validateAuthenticationCode($authentication, '654321')->passes())->toBeFalse();
+        expect($validateAuthenticationCode($authentication, '654321')->passes())->toBeFalse();
     }
 
-    $validator = validateAuthenticationCode($authentication, '123456');
+    $validator = $validateAuthenticationCode($authentication, '123456');
 
     expect($validator->passes())->toBeFalse();
     expect($validator->errors()->first('code'))->toBe('Too many invalid attempts. Please request a new code.');
 });
 
-it('clears the failed-attempt counter after a successful validation', function () {
+it('clears the failed-attempt counter after a successful validation', function () use ($validateAuthenticationCode): void {
     $authentication = OtpLoginCode::factory()->withCode(123456)->create();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS - 1) as $attempt) {
-        expect(validateAuthenticationCode($authentication, '654321')->passes())->toBeFalse();
+        expect($validateAuthenticationCode($authentication, '654321')->passes())->toBeFalse();
     }
 
-    expect(validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
+    expect($validateAuthenticationCode($authentication, '123456')->passes())->toBeTrue();
 
     foreach (range(1, AuthenticationCodeRateLimiter::MAX_ATTEMPTS - 1) as $attempt) {
-        $validator = validateAuthenticationCode($authentication, '654321');
+        $validator = $validateAuthenticationCode($authentication, '654321');
 
         expect($validator->passes())->toBeFalse();
         expect($validator->errors()->first('code'))->toBe('The provided code is invalid.');

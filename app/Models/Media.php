@@ -88,7 +88,7 @@ class Media extends SpatieMedia
         }
 
         return match (true) {
-            $creator instanceof User => (string) $creator->name,
+            $creator instanceof User => (string) $creator->full_name,
             $creator instanceof Contact => trim("{$creator->first_name} {$creator->last_name}") ?: 'N/A',
             default => 'N/A',
         };

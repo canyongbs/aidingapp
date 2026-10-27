@@ -36,14 +36,20 @@
 
 namespace AidingApp\ServiceManagement\Filament\Resources\ServiceRequests;
 
+use AidingApp\ServiceManagement\Enums\ServiceRequestTab;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ListServiceRequests;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewLiveChatTranscript;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\ViewServiceRequest;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignedToRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\AssignmentHistoryRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\CreatedByRelationManager;
+use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\RelationManagers\ServiceRequestConversationsRelationManager;
 use AidingApp\ServiceManagement\Models\Scopes\AccessibleServiceRequests;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Enums\NavigationGroup;
 use App\Models\User;
+use Filament\Resources\RelationManagers\RelationGroup;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -97,6 +103,18 @@ class ServiceRequestResource extends Resource
     public static function getGlobalSearchResultUrl(Model $record): ?string
     {
         return static::getUrl('view', ['record' => $record]);
+    }
+
+    public static function getRelations(): array
+    {
+        return [
+            ServiceRequestTab::Assignments->value => RelationGroup::make(ServiceRequestTab::Assignments->getLabel(), [
+                AssignedToRelationManager::class,
+                AssignmentHistoryRelationManager::class,
+                CreatedByRelationManager::class,
+            ]),
+            ServiceRequestTab::Chats->value => ServiceRequestConversationsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

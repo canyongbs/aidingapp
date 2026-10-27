@@ -76,14 +76,9 @@ class ViewUser extends ViewRecord
                             ->label('Presence')
                             ->state(fn (User $record): PresenceStatus => $record->presenceStatus())
                             ->badge()
-                            ->color(fn (User $record) => $record->presenceStatus()->getColor())
-                            ->icon(fn (User $record) => $record->presenceStatus()->getIcon())
-                            ->formatStateUsing(fn (User $record) => $record->presenceStatus()->getLabel()),
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated(),
+                            ->color(fn (User $record): string => $record->presenceStatus()->getColor())
+                            ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
+                            ->formatStateUsing(fn (User $record): string => $record->presenceStatus()->getLabel()),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),
@@ -200,7 +195,7 @@ class ViewUser extends ViewRecord
                             ->relationship('department', 'name')
                             ->disabled(),
                     ])
-                    ->hidden(fn (?User $record) => $record?->isAdmin() ?? false),
+                    ->hidden(fn (?User $record): bool => $record?->isAdmin() ?? false),
             ]);
     }
 

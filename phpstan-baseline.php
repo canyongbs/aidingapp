@@ -362,7 +362,7 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Match expression does not handle remaining value\\: string$#',
     'identifier' => 'match.unhandled',
-    'count' => 2,
+    'count' => 1,
     'path' => __DIR__ . '/app-modules/contact/src/Filament/Resources/ContactResource/RelationManagers/EngagementsRelationManager.php',
 ];
 $ignoreErrors[] = [
@@ -908,7 +908,7 @@ $ignoreErrors[] = [
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property AidingApp\\\\Form\\\\Models\\\\Submission\\:\\:\\$requester\\.$#',
     'identifier' => 'property.notFound',
-    'count' => 2,
+    'count' => 1,
     'path' => __DIR__ . '/app-modules/form/src/Notifications/FormSubmissionRequestNotification.php',
 ];
 $ignoreErrors[] = [
@@ -1068,12 +1068,6 @@ $ignoreErrors[] = [
     'path' => __DIR__ . '/app-modules/inventory-management/src/Models/Scopes/ClassifiedAs.php',
 ];
 $ignoreErrors[] = [
-    'message' => '#^Using nullsafe property access "\\?\\-\\>id" on left side of \\?\\? is unnecessary\\. Use \\-\\> instead\\.$#',
-    'identifier' => 'nullsafe.neverNull',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/knowledge-base/database/factories/KnowledgeBaseItemFactory.php',
-];
-$ignoreErrors[] = [
     'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
     'identifier' => 'Common.noStrtolower',
     'count' => 1,
@@ -1180,12 +1174,6 @@ $ignoreErrors[] = [
     'identifier' => 'nullCoalesce.property',
     'count' => 1,
     'path' => __DIR__ . '/app-modules/notification/src/Notifications/Messages/MailMessage.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Avoid strtolower\\(\\) as it is not multibyte\\-safe\\. Use Laravel\'s Str\\:\\:lower\\(\\) instead, or mb_strtolower\\(\\) if a framework\\-free alternative is required\\. If you are certain you specifically need strtolower\\(\\), add an inline ignore for this rule \\(// @phpstan\\-ignore Common\\.noStrtolower\\)\\.$#',
-    'identifier' => 'Common.noStrtolower',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/portal/src/Actions/FindOrganizationByEmailDomain.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Action class "AidingApp\\\\Portal\\\\Actions\\\\GenerateAiResolutionPrompt" defines disallowed public method "execute"\\. Only "__invoke" and "__construct" may be public on action classes\\.$#',
@@ -1918,12 +1906,6 @@ $ignoreErrors[] = [
     'identifier' => 'method.notFound',
     'count' => 2,
     'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ChangeRequests/Pages/EditChangeRequest.php',
-];
-$ignoreErrors[] = [
-    'message' => '#^Dead catch \\- Illuminate\\\\Database\\\\QueryException is never thrown in the try block\\.$#',
-    'identifier' => 'catch.neverThrown',
-    'count' => 1,
-    'path' => __DIR__ . '/app-modules/service-management/src/Filament/Resources/ServiceRequestStatuses/Pages/ListServiceRequestStatuses.php',
 ];
 $ignoreErrors[] = [
     'message' => '#^Access to an undefined property Filament\\\\Resources\\\\Pages\\\\Page\\:\\:\\$record\\.$#',

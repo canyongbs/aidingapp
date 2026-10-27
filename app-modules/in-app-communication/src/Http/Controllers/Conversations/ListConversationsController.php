@@ -130,7 +130,7 @@ class ListConversationsController extends Controller
     protected function formatConversations(Collection $items, string $currentUserId): array
     {
         $dmConversationIds = $items
-            ->filter(fn (Conversation $conversation) => $conversation->type === ConversationType::Direct)
+            ->filter(fn (Conversation $conversation): bool => $conversation->type === ConversationType::Direct)
             ->pluck('id')
             ->all();
 
@@ -171,7 +171,7 @@ class ListConversationsController extends Controller
                 $otherModel = $otherParticipant?->participant;
 
                 $displayName = match (true) {
-                    $otherModel instanceof User => $otherModel->name,
+                    $otherModel instanceof User => $otherModel->full_name,
                     $otherModel instanceof Contact => $otherModel->full_name,
                     default => 'Unknown User',
                 };
@@ -197,7 +197,7 @@ class ListConversationsController extends Controller
                     'id' => $conversation->latestMessage->getKey(),
                     'content' => $conversation->latestMessage->content,
                     'author_id' => $conversation->latestMessage->author_id,
-                    'author_name' => $conversation->latestMessage->author instanceof User ? $conversation->latestMessage->author->name : null,
+                    'author_name' => $conversation->latestMessage->author instanceof User ? $conversation->latestMessage->author->full_name : null,
                     'created_at' => $conversation->latestMessage->created_at->toIso8601String(),
                 ] : null,
                 'participant_count' => $participantCount,

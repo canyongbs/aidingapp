@@ -39,7 +39,7 @@ use App\Models\User;
 use App\Settings\NotificationSettings;
 use Illuminate\Support\Facades\Notification;
 
-it('sets the mail from name based on settings fromName if set', function () {
+it('sets the mail from name based on settings fromName if set', function (): void {
     Notification::fake();
 
     $user = User::factory()->create();
@@ -50,13 +50,13 @@ it('sets the mail from name based on settings fromName if set', function () {
 
     $notificationSetting->save();
 
-    $notification = new TestEmailSettingFromNameNotification($notificationSetting);
+    $notification = new TestEmailSettingFromNameNotification();
 
     $user->notify($notification);
 
     Notification::assertSentTo(
         $user,
-        function (TestEmailSettingFromNameNotification $notification, array $channels) use ($notificationSetting, $user) {
+        function (TestEmailSettingFromNameNotification $notification, array $channels) use ($notificationSetting, $user): bool {
             $mailMessage = $notification->toMail($user);
 
             return $mailMessage->from[1] === $notificationSetting->from_name;

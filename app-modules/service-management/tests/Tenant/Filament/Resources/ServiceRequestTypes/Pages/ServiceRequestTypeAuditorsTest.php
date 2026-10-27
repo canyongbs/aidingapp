@@ -49,7 +49,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the ManageServiceRequestTypeAuditors page', function () {
+test('A successful action on the ManageServiceRequestTypeAuditors page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -61,7 +61,7 @@ test('A successful action on the ManageServiceRequestTypeAuditors page', functio
         ->assertSuccessful();
 });
 
-it('can attach auditor users to a service request type', function () {
+it('can attach auditor users to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
@@ -81,7 +81,7 @@ it('can attach auditor users to a service request type', function () {
         ->toContain($user->getKey());
 });
 
-it('can attach auditor departments to a service request type', function () {
+it('can attach auditor departments to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $department = Department::factory()->create();
@@ -101,7 +101,7 @@ it('can attach auditor departments to a service request type', function () {
         ->toContain($department->getKey());
 });
 
-it('can attach auditor groups to a service request type', function () {
+it('can attach auditor groups to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
     $group = Group::factory()->create();
 
@@ -120,7 +120,7 @@ it('can attach auditor groups to a service request type', function () {
         ->toContain($group->getKey());
 });
 
-it('can attach auditor users, departments, and groups to a service request type', function () {
+it('can attach auditor users, departments, and groups to a service request type', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $user = User::factory()->create();
@@ -149,7 +149,7 @@ it('can attach auditor users, departments, and groups to a service request type'
 
 // Permission Tests
 
-test('ManageServiceRequestTypeAuditors is gated with proper access control', function () {
+test('ManageServiceRequestTypeAuditors is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -192,7 +192,7 @@ test('ManageServiceRequestTypeAuditors is gated with proper access control', fun
         ->toContain($auditorUser->getKey());
 });
 
-test('ManageServiceRequestTypeAuditors is gated with proper feature access control', function () {
+test('ManageServiceRequestTypeAuditors is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -247,7 +247,7 @@ test('ManageServiceRequestTypeAuditors is gated with proper feature access contr
 
 // UserSelect (auditorUsers field) admin-filtering tests
 
-it('auditorUsers UserSelect does not show admin users in options by default', function () {
+it('auditorUsers UserSelect does not show admin users in options by default', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -258,12 +258,12 @@ it('auditorUsers UserSelect does not show admin users in options by default', fu
     Livewire::test(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
-it('auditorUsers UserSelect shows a pre-selected admin user so they can be deselected', function () {
+it('auditorUsers UserSelect shows a pre-selected admin user so they can be deselected', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -274,11 +274,11 @@ it('auditorUsers UserSelect shows a pre-selected admin user so they can be desel
     Livewire::test(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
-it('auditorUsers UserSelect shows all users when filter_admins_from_selection config is false', function () {
+it('auditorUsers UserSelect shows all users when filter_admins_from_selection config is false', function (): void {
     Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 
@@ -289,6 +289,6 @@ it('auditorUsers UserSelect shows all users when filter_admins_from_selection co
     Livewire::test(ManageServiceRequestTypeAuditors::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('auditorUsers', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });

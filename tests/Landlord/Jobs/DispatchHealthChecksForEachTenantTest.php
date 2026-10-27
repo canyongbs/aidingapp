@@ -38,7 +38,7 @@ use App\Jobs\DispatchHealthChecksForEachTenant;
 use App\Jobs\RunHealthChecks;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches `RunHealthChecks` for each eligible tenant', function () {
+it('dispatches `RunHealthChecks` for each eligible tenant', function (): void {
     Queue::fake();
 
     (new DispatchHealthChecksForEachTenant())->handle();

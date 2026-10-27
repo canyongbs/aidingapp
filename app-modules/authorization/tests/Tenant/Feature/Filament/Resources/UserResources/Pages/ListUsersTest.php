@@ -43,6 +43,7 @@ use App\Filament\Resources\Users\Pages\ListUsers;
 use App\Models\Authenticatable;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
+use Filament\Forms\Components\Select;
 use Filament\Support\Enums\VerticalAlignment;
 use Illuminate\Contracts\Support\Htmlable;
 use Lab404\Impersonate\Services\ImpersonateManager;
@@ -56,7 +57,7 @@ use STS\FilamentImpersonate\Actions\Impersonate;
 
 use function Tests\asSuperAdmin;
 
-it('renders impersonate button for non super admin users when user is super admin', function () {
+it('renders impersonate button for non super admin users when user is super admin', function (): void {
     asSuperAdmin();
 
     $user = User::factory()->create();
@@ -69,7 +70,7 @@ it('renders impersonate button for non super admin users when user is super admi
         ->assertTableActionVisible(Impersonate::class, $user);
 });
 
-it('does not render impersonate button for super admin users when user is not super admin', function () {
+it('does not render impersonate button for super admin users when user is not super admin', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -87,7 +88,7 @@ it('does not render impersonate button for super admin users when user is not su
         ->assertCanNotSeeTableRecords([$superAdmin]);
 });
 
-it('does not render impersonate button for super admin users at all', function () {
+it('does not render impersonate button for super admin users at all', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -102,7 +103,7 @@ it('does not render impersonate button for super admin users at all', function (
         ->assertTableActionHidden(Impersonate::class, $superAdmin);
 });
 
-it('does not render impersonate button for super admin users even if user is also a Super Admin', function () {
+it('does not render impersonate button for super admin users even if user is also a Super Admin', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -121,7 +122,7 @@ it('does not render impersonate button for super admin users even if user is als
         ->assertTableActionHidden(Impersonate::class, $superAdmin);
 });
 
-it('allows super admin user to impersonate', function () {
+it('allows super admin user to impersonate', function (): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -138,7 +139,7 @@ it('allows super admin user to impersonate', function () {
         ->and(auth()->id())->toBe($user->id);
 });
 
-it('allows a user to leave impersonate', function () {
+it('allows a user to leave impersonate', function (): void {
     $first = User::factory()->create();
     asSuperAdmin($first);
 
@@ -155,7 +156,7 @@ it('allows a user to leave impersonate', function () {
         ->and(auth()->id())->toBe($first->id);
 });
 
-it('can filter users by departments', function () {
+it('can filter users by departments', function (): void {
     asSuperAdmin();
 
     $department1 = Department::factory()->create();
@@ -187,7 +188,7 @@ it('can filter users by departments', function () {
         ->assertCanNotSeeTableRecords($userWithoutDepartment);
 });
 
-it('shows the import and export header actions to a user with the user.import permission', function () {
+it('shows the import and export header actions to a user with the user.import permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('user.view-any', 'user.*.view', 'user.import');
@@ -198,7 +199,7 @@ it('shows the import and export header actions to a user with the user.import pe
         ->assertActionVisible('export');
 });
 
-it('hides the import and export header actions from a user without the user.import permission', function () {
+it('hides the import and export header actions from a user without the user.import permission', function (): void {
     $user = User::factory()
         ->create()
         ->givePermissionTo('user.view-any', 'user.*.view');
@@ -209,7 +210,7 @@ it('hides the import and export header actions from a user without the user.impo
         ->assertActionHidden('export');
 });
 
-it('only shows the bulk delete action to a user with the user.delete permission', function () {
+it('only shows the bulk delete action to a user with the user.delete permission', function (): void {
     User::factory(15)->create();
 
     $user = User::factory()
@@ -227,7 +228,7 @@ it('only shows the bulk delete action to a user with the user.delete permission'
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
 
-it('can assign groups to multiple users via the bulk action', function () {
+it('can assign groups to multiple users via the bulk action', function (): void {
     asSuperAdmin();
 
     $existingGroup = Group::factory()->create();
@@ -244,7 +245,7 @@ it('can assign groups to multiple users via the bulk action', function () {
         ])
         ->assertHasNoTableBulkActionErrors();
 
-    $users->each(function (User $user) use ($newGroup) {
+    $users->each(function (User $user) use ($newGroup): void {
         assertDatabaseHas('group_user', [
             'user_id' => $user->getKey(),
             'group_id' => $newGroup->getKey(),
@@ -257,7 +258,7 @@ it('can assign groups to multiple users via the bulk action', function () {
     ]);
 });
 
-it('replaces existing group assignments when replace is enabled on the bulk action', function () {
+it('replaces existing group assignments when replace is enabled on the bulk action', function (): void {
     asSuperAdmin();
 
     $existingGroup = Group::factory()->create();
@@ -284,7 +285,7 @@ it('replaces existing group assignments when replace is enabled on the bulk acti
     ]);
 });
 
-it('only shows the bulk assign groups action to a user with the user.*.update permission', function () {
+it('only shows the bulk assign groups action to a user with the user.*.update permission', function (): void {
     User::factory(5)->create();
 
     $user = User::factory()
@@ -302,7 +303,7 @@ it('only shows the bulk assign groups action to a user with the user.*.update pe
         ->assertActionVisible(TestAction::make('assign_groups')->table()->bulk());
 });
 
-it('excludes archived groups from the bulk assign groups selection', function () {
+it('excludes archived groups from the bulk assign groups selection', function (): void {
     asSuperAdmin();
 
     $activeGroup = Group::factory()->create();
@@ -319,14 +320,14 @@ it('excludes archived groups from the bulk assign groups selection', function ()
     assert($groupsSelect instanceof Select);
 
     expect($groupsSelect->getOptions())->toHaveKey($activeGroup->getKey());
-    expect($groupsSelect->getOptions())->not->toHaveKey($archivedGroup->getKey());
+    expect($groupsSelect->getOptions())->not()->toHaveKey($archivedGroup->getKey());
 });
 
-it('can search users by name', function () {
+it('can search users by name', function (): void {
     asSuperAdmin();
 
-    $matchingUser = User::factory()->create(['name' => 'John Doe']);
-    $nonMatchingUser = User::factory()->create(['name' => 'Jane Smith']);
+    $matchingUser = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    $nonMatchingUser = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
 
     Livewire::test(ListUsers::class)
         ->searchTable('John Doe')
@@ -334,7 +335,7 @@ it('can search users by name', function () {
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
 });
 
-it('can search users by email', function () {
+it('can search users by email', function (): void {
     asSuperAdmin();
 
     $matchingUser = User::factory()->create(['email' => 'searchable@example.com']);
@@ -346,29 +347,29 @@ it('can search users by email', function () {
         ->assertCanNotSeeTableRecords([$nonMatchingUser]);
 });
 
-describe('name column', function () {
-    it('shows the Online presence label in the tooltip and aria-label for an active user', function () {
+describe('name column', function (): void {
+    it('shows the Online presence label in the tooltip and aria-label for an active user', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['last_activity_at' => now()]);
 
         $component = Livewire::test(ListUsers::class)
-            ->assertTableColumnHasExtraAttributes('name', [
-                'aria-label' => "{$user->name} (Presence: Online)",
+            ->assertTableColumnHasExtraAttributes('full_name', [
+                'aria-label' => "{$user->full_name} (Presence: Online)",
             ], $user);
 
-        $column = $component->instance()->getTable()->getColumn('name');
+        $column = $component->instance()->getTable()->getColumn('full_name');
         $column->record($user);
 
         expect($column->getTooltip())->toBe('Presence: Online');
     });
 
-    it('shows the copy email tooltip and message on the email description', function () {
+    it('shows the copy email tooltip and message on the email description', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create();
 
-        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('name');
+        $column = Livewire::test(ListUsers::class)->instance()->getTable()->getColumn('full_name');
         $column->record($user);
 
         expect($column->getDescriptionBelow()->getData())->toMatchArray([
@@ -379,8 +380,8 @@ describe('name column', function () {
     });
 });
 
-describe('service details column', function () {
-    it('shows the job title as the state when it is set', function () {
+describe('service details column', function (): void {
+    it('shows the job title as the state when it is set', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['job_title' => 'Software Engineer']);
@@ -391,7 +392,7 @@ describe('service details column', function () {
             ->assertTableColumnHasDescription('job_title', null, $user);
     });
 
-    it('shows the placeholder and does not center the column when the job title and service areas are both blank', function () {
+    it('shows the placeholder and does not center the column when the job title and service areas are both blank', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['job_title' => null]);
@@ -407,7 +408,7 @@ describe('service details column', function () {
             ->and($column->getVerticalAlignment())->toBeNull();
     });
 
-    it('renders the service details badge and centers the column when the job title is blank but service areas exist', function () {
+    it('renders the service details badge and centers the column when the job title is blank but service areas exist', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['job_title' => null]);
@@ -423,11 +424,11 @@ describe('service details column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('1 Service Area');
     });
 
-    it('renders the service details tooltip as HTML listing manager and auditor service areas', function () {
+    it('renders the service details tooltip as HTML listing manager and auditor service areas', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['job_title' => null]);
@@ -445,11 +446,11 @@ describe('service details column', function () {
 
         expect($tooltip)->toBeInstanceOf(Htmlable::class)
             ->and($tooltip->toHtml())->toBe('Manager (Agent): ' . e($managedType->name) . '<br />Auditor: ' . e($auditedType->name))
-            ->and($tooltip->toHtml())->not->toContain('<script>')
-            ->and($tooltip->toHtml())->not->toContain('<b>');
+            ->and($tooltip->toHtml())->not()->toContain('<script>')
+            ->and($tooltip->toHtml())->not()->toContain('<b>');
     });
 
-    it('matches scoped service areas from direct, department, and group assignments without double counting', function () {
+    it('matches scoped service areas from direct, department, and group assignments without double counting', function (): void {
         asSuperAdmin();
 
         $department = Department::factory()->create();
@@ -496,8 +497,8 @@ describe('service details column', function () {
     });
 });
 
-describe('associations column', function () {
-    it('shows the building icon only when the user has a department', function () {
+describe('associations column', function (): void {
+    it('shows the building icon only when the user has a department', function (): void {
         asSuperAdmin();
 
         $department = Department::factory()->create();
@@ -513,7 +514,7 @@ describe('associations column', function () {
         expect($column->getIcon($column->getState()))->toBeNull();
     });
 
-    it('centers the column and shows the department tooltip when only the department is populated', function () {
+    it('centers the column and shows the department tooltip when only the department is populated', function (): void {
         asSuperAdmin();
 
         $department = Department::factory()->create();
@@ -526,7 +527,7 @@ describe('associations column', function () {
             ->and($column->getTooltip())->toBe("Department: {$department->name}");
     });
 
-    it('renders the groups badge and centers the column when there is no department but groups exist', function () {
+    it('renders the groups badge and centers the column when there is no department but groups exist', function (): void {
         asSuperAdmin();
 
         $group = Group::factory()->create(['name' => 'VIP']);
@@ -542,11 +543,11 @@ describe('associations column', function () {
 
         $description = $column->getDescriptionBelow();
 
-        expect($description)->not->toBeNull()
+        expect($description)->not()->toBeNull()
             ->and($description->getData()['label'])->toBe('VIP');
     });
 
-    it('does not center the column when both the department and groups are populated', function () {
+    it('does not center the column when both the department and groups are populated', function (): void {
         asSuperAdmin();
 
         $department = Department::factory()->create();
@@ -561,8 +562,8 @@ describe('associations column', function () {
     });
 });
 
-describe('last login column', function () {
-    it('shows Never as the placeholder when the user has never logged in', function () {
+describe('last login column', function (): void {
+    it('shows Never as the placeholder when the user has never logged in', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['last_logged_in_at' => null]);
@@ -576,7 +577,7 @@ describe('last login column', function () {
         expect($column->getPlaceholder())->toBe('Never');
     });
 
-    it('shows the last login date and time in the display timezone', function () {
+    it('shows the last login date and time in the display timezone', function (): void {
         asSuperAdmin();
 
         $user = User::factory()->create(['last_logged_in_at' => now()]);
@@ -594,8 +595,8 @@ describe('last login column', function () {
     });
 });
 
-describe('hidden column search', function () {
-    it('can search users by preferred name', function () {
+describe('hidden column search', function (): void {
+    it('can search users by preferred name', function (): void {
         asSuperAdmin();
 
         $matchingUser = User::factory()->create(['preferred_name' => 'Ace']);
@@ -607,7 +608,7 @@ describe('hidden column search', function () {
             ->assertCanNotSeeTableRecords([$nonMatchingUser]);
     });
 
-    it('can search users by work extension', function () {
+    it('can search users by work extension', function (): void {
         asSuperAdmin();
 
         $matchingUser = User::factory()->create(['work_extension' => 12345]);

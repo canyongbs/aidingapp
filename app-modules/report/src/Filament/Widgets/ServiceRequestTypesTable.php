@@ -86,35 +86,35 @@ class ServiceRequestTypesTable extends BaseWidget
             ->query(
                 function () use ($startDate, $endDate, $types) {
                     $query = ServiceRequestType::withCount([
-                        'serviceRequests' => function (Builder $query) use ($startDate, $endDate) {
+                        'serviceRequests' => function (Builder $query) use ($startDate, $endDate): void {
                             $query->when(
-                                $startDate && $endDate,
+                                $startDate instanceof Carbon && $endDate instanceof Carbon,
                                 fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
                             );
                         },
                     ])
                         ->withCount([
-                            'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate) {
+                            'serviceRequests as incident_count' => function (Builder $query) use ($startDate, $endDate): void {
                                 $query->where('service_requests.category', 'incident');
                                 $query->when(
-                                    $startDate && $endDate,
+                                    $startDate instanceof Carbon && $endDate instanceof Carbon,
                                     fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
                                 );
                             },
                         ])
                         ->withCount([
-                            'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate) {
+                            'serviceRequests as request_count' => function (Builder $query) use ($startDate, $endDate): void {
                                 $query->where('service_requests.category', 'request');
                                 $query->when(
-                                    $startDate && $endDate,
+                                    $startDate instanceof Carbon && $endDate instanceof Carbon,
                                     fn (Builder $query): Builder => $query->whereBetween('service_requests.created_at', [$startDate, $endDate])
                                 );
                             },
                         ]);
 
-                    if ($startDate && $endDate) {
+                    if ($startDate instanceof Carbon && $endDate instanceof Carbon) {
                         $query->withAvg([
-                            'serviceRequests as service_requests_avg_time_to_resolution' => function (Builder $query) use ($startDate, $endDate) {
+                            'serviceRequests as service_requests_avg_time_to_resolution' => function (Builder $query) use ($startDate, $endDate): void {
                                 $query->whereBetween('service_requests.created_at', [$startDate, $endDate]);
                             },
                         ], 'time_to_resolution');
@@ -140,7 +140,7 @@ class ServiceRequestTypesTable extends BaseWidget
                 TextColumn::make('request_count')
                     ->label('Requests'),
                 TextColumn::make('service_requests_avg_time_to_resolution')
-                    ->formatStateUsing(function (?float $state) {
+                    ->formatStateUsing(function (?float $state): string {
                         $interval = Carbon::now()->diffAsCarbonInterval(Carbon::now()->addSeconds((float) $state));
                         $days = $interval->d;
                         $hours = $interval->h;

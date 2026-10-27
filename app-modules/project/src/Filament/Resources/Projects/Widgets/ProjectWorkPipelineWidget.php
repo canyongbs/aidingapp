@@ -177,7 +177,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                     ->date()
                     ->placeholder('N/A')
                     ->sortable(),
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Created By')
                     ->placeholder('N/A')
                     ->toggleable(isToggledHiddenByDefault: true),
@@ -213,7 +213,7 @@ class ProjectWorkPipelineWidget extends TableWidget
             ->paginated([5, 10, 20, 50])
             ->defaultPaginationPageOption(50)
             ->defaultGroup(
-                function () use ($pipeline, $canManageMilestones) {
+                function () use ($pipeline, $canManageMilestones): Group {
                     return Group::make('milestone.title')
                         ->label('Milestone')
                         ->titlePrefixedWithLabel(false)

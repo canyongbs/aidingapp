@@ -40,7 +40,7 @@ use AidingApp\KnowledgeBase\Jobs\DispatchKnowledgeBaseArticleChecks;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Support\Facades\Queue;
 
-it('dispatches a links check and an images check for each article', function () {
+it('dispatches a links check and an images check for each article', function (): void {
     $articles = KnowledgeBaseItem::factory()->count(2)->create();
 
     Queue::fake();

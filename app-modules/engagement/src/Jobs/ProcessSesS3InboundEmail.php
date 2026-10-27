@@ -52,6 +52,7 @@ use AidingApp\ServiceManagement\Actions\CreateServiceRequestAction;
 use AidingApp\ServiceManagement\Actions\ReopenServiceRequestAction;
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\EmailAutomaticCreationContactCreateCondition;
+use AidingApp\ServiceManagement\Enums\ServiceRequestFileUploadType;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
@@ -118,7 +119,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $sender = $parser->getAddresses('from')[0]['address'];
 
-            $classified->each(function (array $entry) use ($parser, $content, $sender) {
+            $classified->each(function (array $entry) use ($parser, $content, $sender): void {
                 $type = $entry['type'];
                 $tenant = $entry['tenant'];
                 $srTypeDomain = $entry['srTypeDomain'] ?? null;
@@ -176,7 +177,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         /** @var Collection<int, array{type: string, tenant: Tenant, srTypeDomain?: TenantServiceRequestTypeDomain, sr_number?: string}> */
         return $this->recipientCandidates($parser)
-            ->map(function (string $address) {
+            ->map(function (string $address): ?array {
                 $localPart = filter_var($address, FILTER_VALIDATE_EMAIL) ? explode('@', $address)[0] : null;
 
                 if ($localPart === null) {
@@ -308,7 +309,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleEngagement(Tenant $tenant, Parser $parser, string $content, string $sender): void
     {
-        $tenant->execute(function () use ($parser, $content, $sender) {
+        $tenant->execute(function () use ($parser, $content, $sender): void {
             $contacts = Contact::query()
                 ->where('email', $sender)
                 ->get();
@@ -322,14 +323,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     'sender' => $sender,
                 ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication): void {
                     $this->storeAttachmentMedia($unmatchedCommunication, $attachment, 'attachments');
                 });
 
                 return;
             }
 
-            $contacts->each(function (Contact $contact) use ($parser, $content) {
+            $contacts->each(function (Contact $contact) use ($parser, $content): void {
                 $engagementResponse = $contact->engagementResponses()
                     ->create([
                         'subject' => $parser->getHeader('subject'),
@@ -339,7 +340,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                         'raw' => $content,
                     ]);
 
-                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact) {
+                collect($parser->getAttachments())->each(function (Attachment $attachment) use ($engagementResponse, $contact): void {
                     $this->storeAttachmentMedia($engagementResponse, $attachment, 'attachments', $contact);
                 });
             });
@@ -348,7 +349,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleServiceRequestReply(Tenant $tenant, Parser $parser, string $sender, ?string $srNumber = null): void
     {
-        $tenant->execute(function () use ($parser, $sender, $srNumber) {
+        $tenant->execute(function () use ($parser, $sender, $srNumber): void {
             $serviceRequest = null;
 
             // Strategy 1: Plus-addressed SR number
@@ -474,7 +475,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleServiceRequestType(TenantServiceRequestTypeDomain $serviceRequestTypeDomain, Parser $parser, string $sender): void
     {
-        $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender) {
+        $serviceRequestTypeDomain->tenant->execute(function () use ($serviceRequestTypeDomain, $parser, $sender): void {
             $serviceRequestType = $serviceRequestTypeDomain->serviceRequestType;
 
             if (is_null($serviceRequestType)) {
@@ -548,7 +549,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             $createServiceRequestAction = app(CreateServiceRequestAction::class);
 
-            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction) {
+            $contacts->each(function (Contact $contact) use ($serviceRequestType, $parser, $effectiveSubject, $effectiveBody, $serviceRequestStatus, $createServiceRequestAction): void {
                 $serviceRequest = $createServiceRequestAction->execute(
                     ServiceRequestDataObject::fromData([
                         'type_id' => $serviceRequestType->getKey(),
@@ -561,7 +562,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 );
 
                 foreach ($parser->getAttachments() as $attachment) {
-                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact);
+                    $this->storeAttachmentMedia($serviceRequest, $attachment, 'uploads', $contact, ServiceRequestFileUploadType::RequestSubmission);
                 }
             });
         });
@@ -723,7 +724,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
     {
-        $tenant->execute(function () use ($parser, $sender) {
+        $tenant->execute(function () use ($parser, $sender): void {
             $unmatchedCommunication = UnmatchedInboundCommunication::create([
                 'type' => EngagementResponseType::Email,
                 'subject' => $parser->getHeader('subject'),
@@ -732,7 +733,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 'sender' => $sender,
             ]);
 
-            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication) {
+            collect($parser->getAttachments())->each(function (Attachment $attachment) use ($unmatchedCommunication): void {
                 $this->storeAttachmentMedia($unmatchedCommunication, $attachment, 'attachments');
             });
         });
@@ -808,6 +809,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         Attachment $attachment,
         string $collection,
         ?Contact $createdBy = null,
+        ?ServiceRequestFileUploadType $uploadType = null,
     ): void {
         try {
             $fileName = $attachment->getFilename();
@@ -831,6 +833,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
 
             if ($createdBy !== null) {
                 $fileAdder->createdBy($createdBy);
+            }
+
+            if (filled($uploadType)) {
+                $fileAdder->withCustomProperties([
+                    ServiceRequestFileUploadType::CUSTOM_PROPERTY => $uploadType->value,
+                ]);
             }
 
             $fileAdder->toMediaCollection($collection);

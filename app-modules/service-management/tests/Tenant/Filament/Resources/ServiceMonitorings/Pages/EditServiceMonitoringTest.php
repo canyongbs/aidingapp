@@ -58,7 +58,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-test('EditServiceMonitoring is gated with proper access control', function () {
+test('EditServiceMonitoring is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceMonitoring = false;
@@ -110,7 +110,7 @@ test('EditServiceMonitoring is gated with proper access control', function () {
         ->and($serviceMonitoringTarget->frequency)->toEqual($request->get('frequency'));
 });
 
-test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
+test('EditServiceMonitoring validates the inputs', function (ServiceMonitoringTargetRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -310,7 +310,7 @@ test('EditServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
-test('EditServiceMonitoring can update a service monitor with basic auth', function () {
+test('EditServiceMonitoring can update a service monitor with basic auth', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -336,7 +336,7 @@ test('EditServiceMonitoring can update a service monitor with basic auth', funct
     ]);
 });
 
-test('EditServiceMonitoring hides auth username and password fields until basic auth type is selected', function () {
+test('EditServiceMonitoring hides auth username and password fields until basic auth type is selected', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -351,7 +351,7 @@ test('EditServiceMonitoring hides auth username and password fields until basic 
         ->assertSchemaComponentVisible('auth_password');
 });
 
-test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function () {
+test('EditServiceMonitoring hydrates existing basic auth credentials so saving without re-entering them succeeds', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -378,7 +378,7 @@ test('EditServiceMonitoring hydrates existing basic auth credentials so saving w
         ->and($serviceMonitoringTarget->auth_password)->toBe('existing-password');
 });
 
-test('EditServiceMonitoring computes the max latency toggle from whether max_latency_ms is set', function () {
+test('EditServiceMonitoring computes the max latency toggle from whether max_latency_ms is set', function (): void {
     // is_max_latency_enabled isn't a real column -- it's derived from max_latency_ms, so this
     // proves the toggle correctly reflects that on hydration in both directions.
     asSuperAdmin();
@@ -400,7 +400,7 @@ test('EditServiceMonitoring computes the max latency toggle from whether max_lat
     ])->assertSchemaStateSet(['is_max_latency_enabled' => false]);
 });
 
-test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is turned off', function () {
+test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is turned off', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()
@@ -419,7 +419,7 @@ test('EditServiceMonitoring clears max_latency_ms when the max latency toggle is
     expect($serviceMonitoringTarget->refresh()->max_latency_ms)->toBeNull();
 });
 
-test('EditServiceMonitoring hides API endpoint fields until the API endpoint monitor type is selected', function () {
+test('EditServiceMonitoring hides API endpoint fields until the API endpoint monitor type is selected', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -440,7 +440,7 @@ test('EditServiceMonitoring hides API endpoint fields until the API endpoint mon
         ->assertSchemaComponentVisible('request_headers');
 });
 
-test('EditServiceMonitoring defaults successful_status_codes to 200 when changing to the API endpoint monitor type', function () {
+test('EditServiceMonitoring defaults successful_status_codes to 200 when changing to the API endpoint monitor type', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -452,7 +452,7 @@ test('EditServiceMonitoring defaults successful_status_codes to 200 when changin
         ->assertFormSet(['successful_status_codes' => [200]]);
 });
 
-test('EditServiceMonitoring preserves successful_status_codes when reselecting the API endpoint monitor type', function () {
+test('EditServiceMonitoring preserves successful_status_codes when reselecting the API endpoint monitor type', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create([
@@ -467,7 +467,7 @@ test('EditServiceMonitoring preserves successful_status_codes when reselecting t
         ->assertFormSet(['successful_status_codes' => [201, 204]]);
 });
 
-test('EditServiceMonitoring shows follow_redirection for every monitor type', function () {
+test('EditServiceMonitoring shows follow_redirection for every monitor type', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -483,7 +483,7 @@ test('EditServiceMonitoring shows follow_redirection for every monitor type', fu
         ->assertSchemaComponentVisible('follow_redirection');
 });
 
-test('EditServiceMonitoring hides the max latency input until the maximum latency toggle is enabled', function () {
+test('EditServiceMonitoring hides the max latency input until the maximum latency toggle is enabled', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create();
@@ -496,7 +496,7 @@ test('EditServiceMonitoring hides the max latency input until the maximum latenc
         ->assertSchemaComponentVisible('max_latency_ms');
 });
 
-test('EditServiceMonitoring hides the request body fields when the HTTP method does not support a body', function () {
+test('EditServiceMonitoring hides the request body fields when the HTTP method does not support a body', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->apiEndpoint()->create(['http_method' => HttpMethod::Get]);
@@ -511,7 +511,7 @@ test('EditServiceMonitoring hides the request body fields when the HTTP method d
         ->assertSchemaComponentVisible('is_request_body_json');
 });
 
-test('EditServiceMonitoring can update a service monitor with an API endpoint monitor', function () {
+test('EditServiceMonitoring can update a service monitor with an API endpoint monitor', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -546,7 +546,7 @@ test('EditServiceMonitoring can update a service monitor with an API endpoint mo
         ]);
 });
 
-test('EditServiceMonitoring hydrates keyword values as comma-separated text', function () {
+test('EditServiceMonitoring hydrates keyword values as comma-separated text', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -564,7 +564,7 @@ test('EditServiceMonitoring hydrates keyword values as comma-separated text', fu
         ]);
 });
 
-test('EditServiceMonitoring deduplicates keyword values case-insensitively', function () {
+test('EditServiceMonitoring deduplicates keyword values case-insensitively', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -583,7 +583,7 @@ test('EditServiceMonitoring deduplicates keyword values case-insensitively', fun
     expect($serviceMonitoringTarget->refresh()->should_contain)->toBe(['Error']);
 });
 
-test('EditServiceMonitoring restores quotes for ambiguous keyword values', function () {
+test('EditServiceMonitoring restores quotes for ambiguous keyword values', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -598,7 +598,7 @@ test('EditServiceMonitoring restores quotes for ambiguous keyword values', funct
     ]);
 });
 
-test('EditServiceMonitoring appends new keyword values to existing lists', function () {
+test('EditServiceMonitoring appends new keyword values to existing lists', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create([
@@ -621,7 +621,7 @@ test('EditServiceMonitoring appends new keyword values to existing lists', funct
         ->and($serviceMonitoringTarget->should_not_contain)->toBe(['test 2', 'test 4']);
 });
 
-test('EditServiceMonitoring hydrates report channels from persisted flags', function (array $attributes, array $expectedChannels) {
+test('EditServiceMonitoring hydrates report channels from persisted flags', function (array $attributes, array $expectedChannels): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -659,7 +659,7 @@ test('EditServiceMonitoring hydrates report channels from persisted flags', func
     ],
 ]);
 
-test('delete action visible with proper access control', function () {
+test('delete action visible with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceMonitoring = true;
@@ -687,7 +687,7 @@ test('delete action visible with proper access control', function () {
         ->assertActionVisible(DeleteAction::class);
 });
 
-test('it will validate multiple valid forms of URL and IP Address', function () {
+test('it will validate multiple valid forms of URL and IP Address', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -740,7 +740,7 @@ test('it will validate multiple valid forms of URL and IP Address', function () 
 
 // UserSelect (user field) admin-filtering tests
 
-test('user UserSelect does not show admin users in options by default on EditServiceMonitoring', function () {
+test('user UserSelect does not show admin users in options by default on EditServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.*.update');
@@ -755,12 +755,12 @@ test('user UserSelect does not show admin users in options by default on EditSer
     Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
-test('user UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function () {
+test('user UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.*.update');
@@ -775,11 +775,11 @@ test('user UserSelect shows a pre-selected admin user so they can be deselected 
     Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
-test('user UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function () {
+test('user UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
@@ -795,13 +795,13 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
     Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
 // report_configurations.daily.report_users UserSelect admin-filtering tests
 
-test('daily report_users UserSelect does not show admin users in options by default on EditServiceMonitoring', function () {
+test('daily report_users UserSelect does not show admin users in options by default on EditServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.*.update');
@@ -823,7 +823,7 @@ test('daily report_users UserSelect does not show admin users in options by defa
         });
 });
 
-test('daily report_users UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function () {
+test('daily report_users UserSelect shows a pre-selected admin user so they can be deselected on EditServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.*.update');
@@ -850,7 +850,7 @@ test('daily report_users UserSelect shows a pre-selected admin user so they can 
         });
 });
 
-test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function () {
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on EditServiceMonitoring', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
@@ -870,7 +870,7 @@ test('daily report_users UserSelect shows all users when filter_admins_from_sele
         });
 });
 
-test('a daily report user who is an admin is still saved when editing', function () {
+test('a daily report user who is an admin is still saved when editing', function (): void {
     asSuperAdmin();
 
     $adminReportUser = User::factory()->create();
@@ -894,7 +894,7 @@ test('a daily report user who is an admin is still saved when editing', function
     expect($configuration->refresh()->reportUsers()->pluck('users.id')->all())->toBe([$adminReportUser->getKey()]);
 });
 
-test('EditServiceMonitoring updates report configurations for multiple frequencies', function () {
+test('EditServiceMonitoring updates report configurations for multiple frequencies', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -927,7 +927,7 @@ test('EditServiceMonitoring updates report configurations for multiple frequenci
         ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$newUser->getKey()]);
 });
 
-test('EditServiceMonitoring keeps a deactivated frequency\'s recipients instead of clearing them', function () {
+test('EditServiceMonitoring keeps a deactivated frequency\'s recipients instead of clearing them', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
@@ -956,7 +956,7 @@ test('EditServiceMonitoring keeps a deactivated frequency\'s recipients instead 
         ->and($daily->reportUsers()->pluck('users.id')->all())->toBe([$reportUser->getKey()]);
 });
 
-test('turning off confidentiality clears previously granted users, departments, and contacts', function () {
+test('turning off confidentiality clears previously granted users, departments, and contacts', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
@@ -990,7 +990,7 @@ test('turning off confidentiality clears previously granted users, departments, 
         ->and($serviceMonitoringTarget->confidentialContacts()->count())->toBe(0);
 });
 
-test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled on the edit page', function () {
+test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled on the edit page', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['is_confidential' => false]);
@@ -1005,7 +1005,7 @@ test('the confidential users, departments, and contacts fields are only visible 
         ->assertSchemaComponentVisible('confidentialContacts');
 });
 
-test('a service monitor cannot be made confidential while a notification recipient has no confidential access', function () {
+test('a service monitor cannot be made confidential while a notification recipient has no confidential access', function (): void {
     asSuperAdmin();
 
     $notifiedUser = User::factory()->create();
@@ -1022,7 +1022,7 @@ test('a service monitor cannot be made confidential while a notification recipie
     expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeFalse();
 });
 
-test('the creator on the notification list satisfies the confidential access rule without an explicit grant', function () {
+test('the creator on the notification list satisfies the confidential access rule without an explicit grant', function (): void {
     asSuperAdmin();
 
     $creator = User::factory()->create();
@@ -1042,7 +1042,7 @@ test('the creator on the notification list satisfies the confidential access rul
     expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeTrue();
 });
 
-test('a notification recipient covered by a granted department satisfies the confidential access rule', function () {
+test('a notification recipient covered by a granted department satisfies the confidential access rule', function (): void {
     asSuperAdmin();
 
     $grantedDepartment = Department::factory()->create();
@@ -1063,7 +1063,7 @@ test('a notification recipient covered by a granted department satisfies the con
     expect($serviceMonitoringTarget->refresh()->is_confidential)->toBeTrue();
 });
 
-test('marking a legacy service monitor confidential backfills the editor as its creator', function () {
+test('marking a legacy service monitor confidential backfills the editor as its creator', function (): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     expect($serviceMonitoringTarget->getAttribute('created_by_id'))->toBeNull();

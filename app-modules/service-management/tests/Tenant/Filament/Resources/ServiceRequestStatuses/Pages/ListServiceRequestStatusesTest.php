@@ -46,9 +46,10 @@ use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\travel;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ListServiceRequestStatuses page', function () {
+test('The correct details are displayed on the ListServiceRequestStatuses page', function (): void {
     ServiceRequestStatus::query()->truncate();
 
     $serviceRequestStatuses = ServiceRequestStatus::factory()
@@ -96,7 +97,7 @@ test('The correct details are displayed on the ListServiceRequestStatuses page',
 
 // Permission Tests
 
-test('ListServiceRequestStatuses is gated with proper access control', function () {
+test('ListServiceRequestStatuses is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -112,7 +113,7 @@ test('ListServiceRequestStatuses is gated with proper access control', function 
         )->assertSuccessful();
 });
 
-test('ListServiceRequestStatuses is gated with proper feature access control', function () {
+test('ListServiceRequestStatuses is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -138,7 +139,7 @@ test('ListServiceRequestStatuses is gated with proper feature access control', f
         )->assertSuccessful();
 });
 
-it('only shows the bulk archive action to a user with the settings.delete permission', function () {
+it('only shows the bulk archive action to a user with the settings.delete permission', function (): void {
     ServiceRequestStatus::factory(15)->create();
 
     $user = User::factory()
@@ -156,8 +157,8 @@ it('only shows the bulk archive action to a user with the settings.delete permis
         ->assertActionVisible(TestAction::make('archive')->table()->bulk());
 });
 
-describe('archiving', function () {
-    it('hides archived service request statuses by default', function () {
+describe('archiving', function (): void {
+    it('hides archived service request statuses by default', function (): void {
         asSuperAdmin();
 
         $active = ServiceRequestStatus::factory()->create();
@@ -168,7 +169,7 @@ describe('archiving', function () {
             ->assertCanNotSeeTableRecords([$archived]);
     });
 
-    it('can list only archived service request statuses through the filter', function () {
+    it('can list only archived service request statuses through the filter', function (): void {
         asSuperAdmin();
 
         $active = ServiceRequestStatus::factory()->create();
@@ -180,7 +181,7 @@ describe('archiving', function () {
             ->assertCanNotSeeTableRecords([$active]);
     });
 
-    it('appends an archived marker to the name of an archived service request status', function () {
+    it('appends an archived marker to the name of an archived service request status', function (): void {
         asSuperAdmin();
 
         $archived = ServiceRequestStatus::factory()->archived()->create();
@@ -190,7 +191,7 @@ describe('archiving', function () {
             ->assertTableColumnFormattedStateSet('name', "{$archived->name} (Archived)", $archived);
     });
 
-    it('does not append an archived marker to the name of an active service request status', function () {
+    it('does not append an archived marker to the name of an active service request status', function (): void {
         asSuperAdmin();
 
         $active = ServiceRequestStatus::factory()->create();
@@ -199,22 +200,26 @@ describe('archiving', function () {
             ->assertTableColumnFormattedStateSet('name', $active->name, $active);
     });
 
-    it('can archive service request statuses from the bulk action', function () {
+    it('can archive service request statuses from the bulk action', function (): void {
         asSuperAdmin();
 
         $statuses = ServiceRequestStatus::factory()->count(3)->create();
 
-        $statuses->each(fn (ServiceRequestStatus $status) => expect($status->isArchived())->toBeFalse());
+        $statuses->each(function (ServiceRequestStatus $status): void {
+            expect($status->isArchived())->toBeFalse();
+        });
 
         Livewire::test(ListServiceRequestStatuses::class)
             ->selectTableRecords($statuses->modelKeys())
             ->callAction(TestAction::make('archive')->table()->bulk());
 
-        $statuses->each(fn (ServiceRequestStatus $status) => expect($status->refresh()->isArchived())->toBeTrue()
-            ->and($status->trashed())->toBeFalse());
+        $statuses->each(function (ServiceRequestStatus $status): void {
+            expect($status->refresh()->isArchived())->toBeTrue()
+                ->and($status->trashed())->toBeFalse();
+        });
     });
 
-    it('does not archive a system protected service request status through the bulk action', function () {
+    it('does not archive a system protected service request status through the bulk action', function (): void {
         asSuperAdmin();
 
         $protected = ServiceRequestStatus::factory()->systemProtected()->create();
@@ -231,7 +236,7 @@ describe('archiving', function () {
             ->and($archivable->refresh()->isArchived())->toBeTrue();
     });
 
-    it('can unarchive a service request status from the row action', function () {
+    it('can unarchive a service request status from the row action', function (): void {
         asSuperAdmin();
 
         $archived = ServiceRequestStatus::factory()->archived()->create();
@@ -245,14 +250,14 @@ describe('archiving', function () {
         expect($archived->refresh()->isArchived())->toBeFalse();
     });
 
-    it('does not re-archive a service request status that is already archived', function () {
+    it('does not re-archive a service request status that is already archived', function (): void {
         asSuperAdmin();
 
         $archived = ServiceRequestStatus::factory()->archived()->create();
 
         $originalArchivedAt = $archived->archived_at;
 
-        $this->travel(1)->minutes();
+        travel(1)->minutes();
 
         Livewire::test(ListServiceRequestStatuses::class)
             ->filterTable('archived', false)
@@ -262,7 +267,7 @@ describe('archiving', function () {
         expect($archived->refresh()->archived_at->toDateTimeString())->toBe($originalArchivedAt->toDateTimeString());
     });
 
-    it('warns that bulk archiving will not stop service request type automations', function () {
+    it('warns that bulk archiving will not stop service request type automations', function (): void {
         asSuperAdmin();
 
         $automated = ServiceRequestStatus::factory()->create();
@@ -280,7 +285,7 @@ describe('archiving', function () {
             ->toBe('2 of the selected statuses are used for automatic status changes by 2 service request types: Password Reset, VPN Access Request. Archiving will not stop that automation.');
     });
 
-    it('does not warn when no selected status is automated by a service request type', function () {
+    it('does not warn when no selected status is automated by a service request type', function (): void {
         asSuperAdmin();
 
         $statuses = ServiceRequestStatus::factory()->count(2)->create();
@@ -290,10 +295,10 @@ describe('archiving', function () {
             ->mountAction(TestAction::make('archive')->table()->bulk());
 
         expect($component->instance()->getMountedAction()->getModalDescription())
-            ->not->toContain('automatic status changes');
+            ->not()->toContain('automatic status changes');
     });
 
-    it('does not offer the bulk delete action', function () {
+    it('does not offer the bulk delete action', function (): void {
         asSuperAdmin();
 
         ServiceRequestStatus::factory()->create();

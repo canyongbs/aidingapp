@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Department\Models\Department;
 use AidingApp\ServiceManagement\Enums\ServiceMonitoringReportFrequency;
 use App\Filament\Forms\Components\UserSelect;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Filament\Forms\Components\CheckboxList;
@@ -73,15 +74,16 @@ class ReportFrequencySection
                                 $alreadySelected = array_map('strval', array_filter((array) $component->getState()));
 
                                 return User::query()
-                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected) {
+                                    ->when($component->shouldFilterAdmins(), fn (Builder $query) => $query->where(function (Builder $query) use ($alreadySelected): void {
                                         $query->tap(new WithoutAnyAdmin());
 
                                         if (filled($alreadySelected)) {
                                             $query->orWhereIn('id', $alreadySelected);
                                         }
                                     }))
-                                    ->orderBy('name')
-                                    ->pluck('name', 'id')
+                                    ->tap(new OrderByFullName())
+                                    ->get()
+                                    ->pluck('full_name', 'id')
                                     ->all();
                             }),
                         Select::make("{$prefix}.report_departments")

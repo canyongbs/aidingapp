@@ -49,6 +49,8 @@ use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class DraftKnowledgeBaseItemWithAiAction extends Action
@@ -61,7 +63,7 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (Page $livewire) => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
+            ->modalContent(fn (Page $livewire): Factory|View => view('knowledge-base::filament.actions.draft-with-ai-modal-content-knowledge-base', [
                 // @phpstan-ignore-next-line
                 'recordTitle' => $livewire->data['title'],
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()
@@ -76,10 +78,10 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Get $get, Set $set, Page $livewire) {
+            ->action(function (array $data, Get $get, Set $set, Page $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
-                $userName = auth()->user()->name;
+                $userName = auth()->user()->full_name;
                 $userJobTitle = auth()->user()->job_title ?? 'staff member';
                 $clientName = app(LicenseSettings::class)->data->subscription->clientName;
                 // @phpstan-ignore-next-line

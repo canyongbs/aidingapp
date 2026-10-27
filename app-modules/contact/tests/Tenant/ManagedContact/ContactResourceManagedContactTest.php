@@ -45,13 +45,12 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-function makeManagedContact(): Contact
-{
+$makeManagedContact = function (): Contact {
     $type = ContactType::factory()->create();
     $managedUser = User::factory()->create();
 
     return app(ManagedContactService::class)->enable($managedUser, $type->getKey());
-}
+};
 
 dataset('contactSectionEditActions', [
     'demographic information' => ['editDemographicInformation', 'demographicInformation'],
@@ -62,13 +61,13 @@ dataset('contactSectionEditActions', [
     'customer information' => ['editCustomerInformation', 'customerInformation'],
 ]);
 
-it('does not render standalone view or edit actions in the list', function () {
+it('does not render standalone view or edit actions in the list', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
     actingAs($user);
 
-    $managed = makeManagedContact();
+    $managed = $makeManagedContact();
     $unmanaged = Contact::factory()->create();
 
     Livewire::test(ListContacts::class)
@@ -78,20 +77,20 @@ it('does not render standalone view or edit actions in the list', function () {
         ->assertActionDoesNotExist(TestAction::make('edit')->table($unmanaged));
 });
 
-it('shows a lock action instead of the section edit actions on the view page of a managed contact', function (string $action, string $component) {
+it('shows a lock action instead of the section edit actions on the view page of a managed contact', function (string $action, string $component) use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
     actingAs($user);
 
-    $managed = makeManagedContact();
+    $managed = $makeManagedContact();
 
     Livewire::test(ViewContact::class, ['record' => $managed->getKey()])
         ->assertActionVisible('managed')
         ->assertActionDoesNotExist(TestAction::make($action)->schemaComponent($component));
 })->with('contactSectionEditActions');
 
-it('shows the section edit actions on the view page of an unmanaged contact', function (string $action, string $component) {
+it('shows the section edit actions on the view page of an unmanaged contact', function (string $action, string $component): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
@@ -104,11 +103,11 @@ it('shows the section edit actions on the view page of an unmanaged contact', fu
         ->assertActionDoesNotExist('managed');
 })->with('contactSectionEditActions');
 
-it('denies the update ability for a managed contact via the policy', function () {
+it('denies the update ability for a managed contact via the policy', function () use ($makeManagedContact): void {
     $user = User::factory()->create()
         ->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.update');
 
-    $managed = makeManagedContact();
+    $managed = $makeManagedContact();
     $unmanaged = Contact::factory()->create();
 
     expect($user->can('update', $managed))->toBeFalse()

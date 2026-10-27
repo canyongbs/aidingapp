@@ -41,7 +41,20 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
-it('does nothing when service request is not a draft', function () {
+$createStaleDraft = function (): ServiceRequest {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
+    $draft = ServiceRequest::factory()->create([
+        'is_draft' => true,
+        'title' => 'Test Title',
+        'close_details' => 'Test Description',
+        'priority_id' => $priority->getKey(),
+    ]);
+
+    return $draft;
+};
+
+it('does nothing when service request is not a draft', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -62,7 +75,7 @@ it('does nothing when service request is not a draft', function () {
         ->and($serviceRequest->service_request_number)->toBe($originalNumber);
 });
 
-it('does nothing when required form fields are missing and no submission exists', function () {
+it('does nothing when required form fields are missing and no submission exists', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -91,7 +104,7 @@ it('does nothing when required form fields are missing and no submission exists'
     expect($draft->is_draft)->toBeTrue();
 });
 
-it('does nothing when required form fields are not filled', function () {
+it('does nothing when required form fields are not filled', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -125,7 +138,7 @@ it('does nothing when required form fields are not filled', function () {
     expect($draft->is_draft)->toBeTrue();
 });
 
-it('does nothing when required form field has empty response', function () {
+it('does nothing when required form field has empty response', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -168,8 +181,8 @@ it('does nothing when required form field has empty response', function () {
     expect($draft->is_draft)->toBeTrue();
 });
 
-it('submits draft when all conditions are met with no form', function () {
-    $draft = createStaleDraft();
+it('submits draft when all conditions are met with no form', function () use ($createStaleDraft): void {
+    $draft = $createStaleDraft();
 
     (new AutoSubmitStaleDraftServiceRequest($draft->getKey()))->handle();
 
@@ -180,7 +193,7 @@ it('submits draft when all conditions are met with no form', function () {
         ->and($draft->status)->not->toBeNull();
 });
 
-it('submits draft when form has only optional fields', function () {
+it('submits draft when form has only optional fields', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -209,7 +222,7 @@ it('submits draft when form has only optional fields', function () {
     expect($draft->is_draft)->toBeFalse();
 });
 
-it('submits draft when all required form fields are filled', function () {
+it('submits draft when all required form fields are filled', function (): void {
     $type = ServiceRequestType::factory()->create();
     $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
 
@@ -260,18 +273,3 @@ it('submits draft when all required form fields are filled', function () {
         ->and($draft->service_request_number)->not->toBeNull()
         ->and($draft->status)->not->toBeNull();
 });
-
-function createStaleDraft(): ServiceRequest
-{
-    $type = ServiceRequestType::factory()->create();
-    $priority = ServiceRequestPriority::factory()->create(['type_id' => $type->getKey()]);
-
-    $draft = ServiceRequest::factory()->create([
-        'is_draft' => true,
-        'title' => 'Test Title',
-        'close_details' => 'Test Description',
-        'priority_id' => $priority->getKey(),
-    ]);
-
-    return $draft;
-}

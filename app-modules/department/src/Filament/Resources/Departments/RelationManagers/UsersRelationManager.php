@@ -37,6 +37,7 @@
 namespace AidingApp\Department\Filament\Resources\Departments\RelationManagers;
 
 use App\Filament\Tables\Columns\IdColumn;
+use App\Filament\Tables\Columns\UserFullNameColumn;
 use App\Models\Scopes\WithoutAnyAdmin;
 use App\Models\User;
 use Closure;
@@ -59,7 +60,10 @@ class UsersRelationManager extends RelationManager
     {
         return $schema
             ->components([
-                TextInput::make('name')
+                TextInput::make('first_name')
+                    ->required()
+                    ->maxLength(255),
+                TextInput::make('last_name')
                     ->required()
                     ->maxLength(255),
             ]);
@@ -70,19 +74,19 @@ class UsersRelationManager extends RelationManager
         return $table
             ->columns([
                 IdColumn::make(),
-                TextColumn::make('name'),
+                UserFullNameColumn::make(),
                 TextColumn::make('email'),
             ])
             ->headerActions([
                 AssociateAction::make()
                     ->label('Add user to this department')
-                    ->recordSelectOptionsQuery(function (Builder $query) {
+                    ->recordSelectOptionsQuery(function (Builder $query): void {
                         $query->tap(new WithoutAnyAdmin());
                     })
                     ->form(fn (AssociateAction $action): array => [
                         $action->getRecordSelect()
                             ->rules([
-                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail) {
+                                fn (): Closure => function (string $attribute, mixed $value, Closure $fail): void {
                                     if (User::findOrFail($value)->department()->count() > 0) {
                                         $fail('This user already belongs to a department.');
                                     }

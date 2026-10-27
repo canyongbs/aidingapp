@@ -57,7 +57,7 @@ use function PHPUnit\Framework\assertEquals;
 
 // Permission Tests
 
-test('EditKnowledgeBaseCategory is gated with proper access control', function () {
+test('EditKnowledgeBaseCategory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create();
@@ -96,7 +96,7 @@ test('EditKnowledgeBaseCategory is gated with proper access control', function (
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
 
-test('EditKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('EditKnowledgeBaseCategory is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;
@@ -145,7 +145,7 @@ test('EditKnowledgeBaseCategory is gated with proper feature access control', fu
     assertEquals($request['name'], $knowledgeBaseCategory->fresh()->name);
 });
 
-test('can create subcategory', function () {
+test('can create subcategory', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -174,7 +174,7 @@ test('can create subcategory', function () {
         ->toEqual(1);
 });
 
-test('exclude already attached subcategories in search', function () {
+test('exclude already attached subcategories in search', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -197,14 +197,14 @@ test('exclude already attached subcategories in search', function () {
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->mountTableAction(AssociateAction::class)
-        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory) {
+        ->assertFormFieldExists('recordId', 'mountedActionSchema0', function (Select $select) use ($knowledgeBaseSubCategory, $newknowledgeBaseCategory): bool {
             $options = $select->getOptions();
 
             return in_array($newknowledgeBaseCategory->getKey(), array_keys($options)) && ! in_array($knowledgeBaseSubCategory->getKey(), array_keys($options));
         });
 });
 
-test('can attach subcategories into categories', function () {
+test('can attach subcategories into categories', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any');
@@ -228,13 +228,10 @@ test('can attach subcategories into categories', function () {
             data: ['recordId' => $knowledgeBaseSubCategory->getKey()]
         )->assertSuccessful();
 
-    expect($knowledgeBaseCategory->refresh())
-        ->subCategories
-        ->pluck('id')
-        ->toContain($knowledgeBaseSubCategory->getKey());
+    expect($knowledgeBaseCategory->refresh()->subCategories->pluck('id'))->toContain($knowledgeBaseSubCategory->getKey());
 });
 
-test('only shows the subcategories bulk delete action to a user with the settings delete permission', function () {
+test('only shows the subcategories bulk delete action to a user with the settings delete permission', function (): void {
     $user = User::factory()->create();
 
     $user->givePermissionTo('settings.view-any', 'settings.*.update');

@@ -45,7 +45,7 @@ use Illuminate\Support\Testing\Fakes\PendingBatchFake;
 
 use function Pest\Laravel\assertDatabaseCount;
 
-it('will create an engagement batch', function () {
+it('will create an engagement batch', function (): void {
     Bus::fake();
 
     assertDatabaseCount(EngagementBatch::class, 0);
@@ -63,12 +63,7 @@ it('will create an engagement batch', function () {
 
     assertDatabaseCount(EngagementBatch::class, 1);
 
-    expect(EngagementBatch::first())
-        ->user->is($data['user'])->toBeTrue()
-        ->channel->toBe($data['channel'])
-        ->subject->toBe($data['subject'])
-        ->body->toMatchArray($data['body'])
-        ->scheduled_at->startOfSecond()->eq(Carbon::parse($data['scheduledAt'])->startOfSecond())->toBeTrue();
+    expect(EngagementBatch::first()->user->is($data['user']))->toBeTrue()->and(EngagementBatch::first()->channel)->toBe($data['channel'])->and(EngagementBatch::first()->subject)->toBe($data['subject'])->and(EngagementBatch::first()->body)->toMatchArray($data['body'])->and(EngagementBatch::first()->scheduled_at->startOfSecond()->eq(Carbon::parse($data['scheduledAt'])->startOfSecond()))->toBeTrue();
 
     Bus::assertBatched(fn (PendingBatchFake $batch): bool => $batch->jobs->count() === 10);
 });

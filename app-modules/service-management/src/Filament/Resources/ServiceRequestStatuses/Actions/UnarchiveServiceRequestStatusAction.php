@@ -59,7 +59,7 @@ class UnarchiveServiceRequestStatusAction
             ->modalIcon(Heroicon::OutlinedArchiveBoxArrowDown)
             ->visible(fn (ServiceRequestStatus $record): bool => $record->isArchived())
             ->authorize(fn (ServiceRequestStatus $record): bool => ServiceRequestStatusResource::can('restore', $record))
-            ->action(fn (ServiceRequestStatus $record) => $record->unarchive())
+            ->action(fn (ServiceRequestStatus $record): bool => $record->unarchive())
             ->successNotificationTitle('Unarchived');
     }
 }

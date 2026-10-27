@@ -43,7 +43,7 @@ use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Facades\Crypt;
 use Illuminate\Validation\ValidationException;
 
-it('re-encrypts a secret with the service request key and associates it to the service request', function () {
+it('re-encrypts a secret with the service request key and associates it to the service request', function (): void {
     $contact = Contact::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create([
@@ -55,13 +55,13 @@ it('re-encrypts a secret with the service request key and associates it to the s
     $secret->refresh();
 
     expect($secret->related->is($serviceRequest))->toBeTrue()
-        ->and($serviceRequest->refresh()->secret_key)->toBeString()->not->toBeEmpty()
+        ->and($serviceRequest->refresh()->secret_key)->toBeString()->not()->toBeEmpty()
         ->and(fn (): string => Crypt::decryptString($secret->value))->toThrow(DecryptException::class)
         ->and(app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)->decryptString($secret->value))
         ->toBe('service-request-password');
 });
 
-it('rejects duplicate secret ids', function () {
+it('rejects duplicate secret ids', function (): void {
     $contact = Contact::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();
     $secret = Secret::factory()->for($contact, 'author')->create();
@@ -76,7 +76,7 @@ it('rejects duplicate secret ids', function () {
         ->and($secret->refresh()->related_id)->toBeNull();
 });
 
-it('rejects secrets that are not available to the author', function () {
+it('rejects secrets that are not available to the author', function (): void {
     $contact = Contact::factory()->create();
     $otherContact = Contact::factory()->create();
     $serviceRequest = ServiceRequest::factory()->create();

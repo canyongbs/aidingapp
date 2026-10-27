@@ -45,13 +45,13 @@ use function Pest\Laravel\assertNotSoftDeleted;
 use function Pest\Laravel\assertSoftDeleted;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin();
 
     Event::fake([ServiceRequestTypeCatalogUpdated::class]);
 });
 
-it('files a type under another area', function () {
+it('files a type under another area', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
@@ -64,7 +64,7 @@ it('files a type under another area', function () {
         ->toBe(collect([$catA->id, $catB->id])->sort()->values()->all());
 });
 
-it('stores a distinct per-area sort on each membership', function () {
+it('stores a distinct per-area sort on each membership', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
@@ -81,7 +81,7 @@ it('stores a distinct per-area sort on each membership', function () {
         ->and($shared->categories->firstWhere('id', $catB->id)->pivot->sort)->toBe(2);
 });
 
-it('detaches a single membership when a type is removed from one of its areas', function () {
+it('detaches a single membership when a type is removed from one of its areas', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
@@ -97,7 +97,7 @@ it('detaches a single membership when a type is removed from one of its areas', 
     expect($type->fresh()->categories->pluck('id')->all())->toBe([$catA->id]);
 });
 
-it('does not remove a type from its only area', function () {
+it('does not remove a type from its only area', function (): void {
     $category = ServiceRequestTypeCategory::factory()->create();
 
     $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create();
@@ -109,7 +109,7 @@ it('does not remove a type from its only area', function () {
     expect($type->fresh()->categories->pluck('id')->all())->toBe([$category->id]);
 });
 
-it('uncategorizes a type moved out of its only area', function () {
+it('uncategorizes a type moved out of its only area', function (): void {
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
 
     $type = ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create(['name' => 'Loose', 'sort' => 1]);
@@ -120,7 +120,7 @@ it('uncategorizes a type moved out of its only area', function () {
     expect($type->fresh()->categories)->toBeEmpty();
 });
 
-it('does not uncategorize a type filed under several areas', function () {
+it('does not uncategorize a type filed under several areas', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
@@ -137,7 +137,7 @@ it('does not uncategorize a type filed under several areas', function () {
     expect($type->fresh()->categories)->toHaveCount(2);
 });
 
-it('keeps a shared type when one of its areas is deleted', function () {
+it('keeps a shared type when one of its areas is deleted', function (): void {
     $catA = ServiceRequestTypeCategory::factory()->create(['name' => 'A', 'sort' => 1]);
     $catB = ServiceRequestTypeCategory::factory()->create(['name' => 'B', 'sort' => 2]);
 
@@ -156,7 +156,7 @@ it('keeps a shared type when one of its areas is deleted', function () {
     expect($type->fresh()->categories->pluck('id')->all())->toBe([$catA->id]);
 });
 
-it('orders types within a category by their per-area sort when reading the tree', function () {
+it('orders types within a category by their per-area sort when reading the tree', function (): void {
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Area', 'sort' => 1]);
 
     $first = ServiceRequestType::factory()->create(['name' => 'First', 'sort' => 1]);
@@ -173,13 +173,14 @@ it('orders types within a category by their per-area sort when reading the tree'
     $types = $data['categories'][0]['types'];
 
     expect(array_column($types, 'id'))->toBe([$first->id, $second->id]);
+    assert(is_array($types));
 
     // The emitted sort reflects the per-area pivot sort, not the type's global sort.
     expect(collect($types)->firstWhere('id', $first->id)['sort'])->toBe(1)
         ->and(collect($types)->firstWhere('id', $second->id)['sort'])->toBe(2);
 });
 
-it('creates an uncategorized type with no memberships', function () {
+it('creates an uncategorized type with no memberships', function (): void {
     Livewire::test(ListServiceRequestTypes::class)
         ->call('createType', 'Loner');
 
@@ -188,7 +189,7 @@ it('creates an uncategorized type with no memberships', function () {
     expect($type->categories)->toBeEmpty();
 });
 
-it('stores the per-area sort for a newly created type', function () {
+it('stores the per-area sort for a newly created type', function (): void {
     $category = ServiceRequestTypeCategory::factory()->create(['name' => 'Area', 'sort' => 1]);
 
     ServiceRequestType::factory()->hasAttached($category, ['sort' => 1], 'categories')->create(['name' => 'First', 'sort' => 1]);

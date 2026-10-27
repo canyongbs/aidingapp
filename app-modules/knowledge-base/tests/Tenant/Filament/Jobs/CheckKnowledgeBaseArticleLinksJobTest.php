@@ -38,7 +38,7 @@ use AidingApp\KnowledgeBase\Jobs\CheckKnowledgeBaseArticleLinksJob;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
 use Illuminate\Support\Facades\Http;
 
-test('it clears broken links when article has no content', function () {
+test('it clears broken links when article has no content', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => null,
@@ -59,7 +59,7 @@ test('it clears broken links when article has no content', function () {
     Http::assertNothingSent();
 });
 
-test('it clears broken links when article has no urls', function () {
+test('it clears broken links when article has no urls', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -85,7 +85,7 @@ test('it clears broken links when article has no urls', function () {
     Http::assertNothingSent();
 });
 
-test('it detects broken links when url returns client error', function () {
+test('it detects broken links when url returns client error', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -120,7 +120,7 @@ test('it detects broken links when url returns client error', function () {
     expect($knowledgeBaseItem->broken_links)->toContain('https://example.com/broken-page');
 });
 
-test('it detects broken links when url returns server error', function () {
+test('it detects broken links when url returns server error', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -155,7 +155,7 @@ test('it detects broken links when url returns server error', function () {
     expect($knowledgeBaseItem->broken_links)->toContain('https://example.com/server-error');
 });
 
-test('it marks no broken links when all urls return success', function () {
+test('it marks no broken links when all urls return success', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -190,7 +190,7 @@ test('it marks no broken links when all urls return success', function () {
     expect($knowledgeBaseItem->broken_links)->toBeNull();
 });
 
-test('it detects only the broken urls when article has mix of valid and broken links', function () {
+test('it detects only the broken urls when article has mix of valid and broken links', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -234,7 +234,7 @@ test('it detects only the broken urls when article has mix of valid and broken l
     expect($knowledgeBaseItem->broken_links)->not->toContain('https://example.com/valid');
 });
 
-test('it ignores links with ip address hosts', function () {
+test('it ignores links with ip address hosts', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -269,7 +269,7 @@ test('it ignores links with ip address hosts', function () {
     Http::assertNothingSent();
 });
 
-test('it ignores relative links without hosts', function () {
+test('it ignores relative links without hosts', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()
         ->state([
             'article_details' => [
@@ -304,7 +304,7 @@ test('it ignores relative links without hosts', function () {
     Http::assertNothingSent();
 });
 
-test('it has correct unique id and unique for values', function () {
+test('it has correct unique id and unique for values', function (): void {
     $knowledgeBaseItem = KnowledgeBaseItem::factory()->create();
 
     $job = new CheckKnowledgeBaseArticleLinksJob($knowledgeBaseItem);

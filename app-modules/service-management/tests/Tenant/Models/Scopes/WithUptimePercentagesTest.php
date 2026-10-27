@@ -38,14 +38,13 @@ use AidingApp\ServiceManagement\Models\HistoricalServiceMonitoring;
 use AidingApp\ServiceManagement\Models\Scopes\WithUptimePercentages;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 
-function findWithUptimePercentages(ServiceMonitoringTarget $serviceMonitoringTarget): ServiceMonitoringTarget
-{
+$findWithUptimePercentages = function (ServiceMonitoringTarget $serviceMonitoringTarget): ServiceMonitoringTarget {
     return ServiceMonitoringTarget::query()
         ->tap(new WithUptimePercentages(['one_day_uptime' => 1, 'seven_day_uptime' => 7]))
         ->findOrFail($serviceMonitoringTarget->getKey());
-}
+};
 
-it('selects the percentage of successful checks within each period', function () {
+it('selects the percentage of successful checks within each period', function () use ($findWithUptimePercentages): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()->subDays(6)->subHour()]);
@@ -53,25 +52,25 @@ it('selects the percentage of successful checks within each period', function ()
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subHours(10)]);
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subHour()]);
 
-    $serviceMonitoringTarget = findWithUptimePercentages($serviceMonitoringTarget);
+    $serviceMonitoringTarget = $findWithUptimePercentages($serviceMonitoringTarget);
 
     expect($serviceMonitoringTarget->getSelectedUptimePercentage('one_day_uptime'))->toBe(66.67)
         ->and($serviceMonitoringTarget->getSelectedUptimePercentage('seven_day_uptime'))->toBe(50.0);
 });
 
-it('selects `null` when the target has not been checked for most of the period', function () {
+it('selects `null` when the target has not been checked for most of the period', function () use ($findWithUptimePercentages): void {
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->create(['created_at' => now()->subDays(3)]);
 
-    $serviceMonitoringTarget = findWithUptimePercentages($serviceMonitoringTarget);
+    $serviceMonitoringTarget = $findWithUptimePercentages($serviceMonitoringTarget);
 
     expect($serviceMonitoringTarget->getSelectedUptimePercentage('one_day_uptime'))->toBeNull()
         ->and($serviceMonitoringTarget->getSelectedUptimePercentage('seven_day_uptime'))->toBeNull();
 });
 
-it('selects `null` when the target has never been checked', function () {
-    $serviceMonitoringTarget = findWithUptimePercentages(ServiceMonitoringTarget::factory()->create());
+it('selects `null` when the target has never been checked', function () use ($findWithUptimePercentages): void {
+    $serviceMonitoringTarget = $findWithUptimePercentages(ServiceMonitoringTarget::factory()->create());
 
     expect($serviceMonitoringTarget->getSelectedUptimePercentage('one_day_uptime'))->toBeNull()
         ->and($serviceMonitoringTarget->getSelectedUptimePercentage('seven_day_uptime'))->toBeNull();

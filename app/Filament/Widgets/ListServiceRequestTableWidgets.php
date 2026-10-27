@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\WhereFullNameLike;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -79,7 +80,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->label('Service Request #')
                     ->searchable(['service_request_number', 'title'])
                     ->sortable()
-                    ->url(fn (ServiceRequest $record) => ServiceRequestResource::getUrl('view', ['record' => $record]))
+                    ->url(fn (ServiceRequest $record): string => ServiceRequestResource::getUrl('view', ['record' => $record]))
                     ->color('primary')
                     ->description(fn (ServiceRequest $record): string => Str::limit($record->title, 40)),
                 TextColumn::make('status.name')
@@ -99,10 +100,13 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
+                    ->sortable(['first_name', 'last_name'])
                     ->toggleable(),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')
@@ -120,7 +124,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
             ->filters([
                 SelectFilter::make('priority')
                     ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
-                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record): string => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 SelectFilter::make('status')
@@ -139,7 +143,7 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     ->preload(),
             ])
             ->recordActions([
-                Action::make('View')->url(function (ServiceRequest $serviceRequest) {
+                Action::make('View')->url(function (ServiceRequest $serviceRequest): string {
                     return ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
                 }),
             ])

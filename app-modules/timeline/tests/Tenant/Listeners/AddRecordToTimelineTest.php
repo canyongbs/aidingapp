@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Models\EngagementResponse;
 use AidingApp\Timeline\Events\TimelineableRecordCreated;
@@ -41,9 +42,11 @@ use AidingApp\Timeline\Listeners\AddRecordToTimeline;
 use AidingApp\Timeline\Models\Timeline;
 use Illuminate\Support\Facades\Cache;
 
-it('busts the timeline cache for the associated educatable', function () {
+it('busts the timeline cache for the associated educatable', function (): void {
     // Given we have a timelineable record, like an EngagementResponse
     $initialResponse = EngagementResponse::factory()->create();
+
+    assert($initialResponse->sender instanceof Contact);
 
     // And our educatable has a timeline synced cache key
     cache()->put(
@@ -71,7 +74,7 @@ it('busts the timeline cache for the associated educatable', function () {
     ))->toBeFalse();
 });
 
-it('should add the specified record to the timeline', function () {
+it('should add the specified record to the timeline', function (): void {
     // Given we have no records in the timeline
     expect(Timeline::count())->toBe(0);
 

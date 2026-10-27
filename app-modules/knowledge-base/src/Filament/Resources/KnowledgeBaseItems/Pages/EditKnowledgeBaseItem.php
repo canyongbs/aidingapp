@@ -70,16 +70,7 @@ class EditKnowledgeBaseItem extends EditRecord
     protected static string $resource = KnowledgeBaseItemResource::class;
 
     #[Url]
-    public ?string $tab = null;
-
-    public function mount(int | string $record): void
-    {
-        parent::mount($record);
-
-        if (! in_array($this->tab, ['resource', 'properties'])) {
-            $this->tab = 'resource';
-        }
-    }
+    public ?string $tab = 'resource';
 
     public function form(Schema $schema): Schema
     {
@@ -122,7 +113,7 @@ class EditKnowledgeBaseItem extends EditRecord
                                     ->suffixAction(
                                         BaseAction::make('saveArticleTitle')
                                             ->icon('heroicon-o-check')
-                                            ->action(function (KnowledgeBaseItem $record, string $state) {
+                                            ->action(function (KnowledgeBaseItem $record, string $state): void {
                                                 if ($record->title === $state) {
                                                     return;
                                                 }

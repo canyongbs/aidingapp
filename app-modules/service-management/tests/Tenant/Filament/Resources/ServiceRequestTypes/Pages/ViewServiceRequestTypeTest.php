@@ -46,25 +46,17 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewServiceRequestType page', function () {
+test('The correct details are displayed on the ViewServiceRequestType page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestTypeResource::getUrl('view', [
-                'record' => $serviceRequestType,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewServiceRequestType::class, ['record' => $serviceRequestType->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $serviceRequestType->name,
-            ]
-        );
+        ->assertSchemaStateSet(['name' => $serviceRequestType->name]);
 });
 
-test('The ViewServiceRequestType page lists every area the type belongs to', function () {
+test('The ViewServiceRequestType page lists every area the type belongs to', function (): void {
     $areaA = ServiceRequestTypeCategory::factory()->create(['name' => 'Billing']);
     $areaB = ServiceRequestTypeCategory::factory()->create(['name' => 'Housing']);
 
@@ -85,7 +77,7 @@ test('The ViewServiceRequestType page lists every area the type belongs to', fun
         ]);
 });
 
-test('The ViewServiceRequestType page shows a placeholder when the type has no area', function () {
+test('The ViewServiceRequestType page shows a placeholder when the type has no area', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -101,7 +93,7 @@ test('The ViewServiceRequestType page shows a placeholder when the type has no a
 
 // Permission Tests
 
-test('ViewServiceRequestType is gated with proper access control', function () {
+test('ViewServiceRequestType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -124,7 +116,7 @@ test('ViewServiceRequestType is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('ViewServiceRequestType is gated with proper feature access control', function () {
+test('ViewServiceRequestType is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;

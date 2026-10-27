@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\Page
 
 use AidingApp\ServiceManagement\Filament\Resources\AdvisorySeverities\AdvisorySeverityResource;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
+use App\Features\AdvisorySeveritySortFeature;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
 use Filament\Actions\DeleteBulkAction;
@@ -65,6 +66,10 @@ class ListAdvisorySeverities extends ListRecords
                 ColorColumn::make('rgb_color')
                     ->label('Color'),
             ])
+            ->when(AdvisorySeveritySortFeature::active(), fn (Table $table): Table => $table
+                ->description('Severities are ranked from highest (top) to lowest (bottom). The portal sorts advisories by this ranking.')
+                ->defaultSort('sort')
+                ->reorderable('sort'))
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -72,7 +77,7 @@ class ListAdvisorySeverities extends ListRecords
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records): void {
                             /** @var Collection<int, AdvisorySeverity> $records */
                             $deletedAdvisorySeveritiesCount = AdvisorySeverity::query()
                                 ->whereKey($records)

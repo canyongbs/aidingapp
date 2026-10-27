@@ -51,12 +51,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\patchJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     config()->set('audit.enabled', false);
     Queue::fake();
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $serviceRequest = ServiceRequest::factory()->create(['status_id' => ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open])]);
     $updateRequestData = UpdateServiceRequestRequestFactory::new()->create();
 
@@ -84,7 +84,7 @@ it('is gated with proper access control', function () {
         ->assertOk();
 });
 
-it('updates a service request', function () {
+it('updates a service request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -123,7 +123,7 @@ it('updates a service request', function () {
     }
 });
 
-it('updates a service request with an assignment', function () {
+it('updates a service request with an assignment', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -139,7 +139,7 @@ it('updates a service request with an assignment', function () {
 
     expect($response['data']['assignee'])->toBe([
         'id' => $assigneeUser->id,
-        'name' => $assigneeUser->name,
+        'name' => $assigneeUser->full_name,
     ]);
 
     $assignment = ServiceRequestAssignment::where('service_request_id', $serviceRequest->id)
@@ -147,12 +147,12 @@ it('updates a service request with an assignment', function () {
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->first();
 
-    expect($assignment)->not->toBeNull();
+    expect($assignment)->not()->toBeNull();
     expect($assignment->assigned_by_id)->toBe($user->id);
     expect($assignment->assigned_by_type)->toBe($user->getMorphClass());
 });
 
-it('denies update on a closed service request', function () {
+it('denies update on a closed service request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -168,7 +168,7 @@ it('denies update on a closed service request', function () {
     $response->assertForbidden();
 });
 
-it('validates', function (array $requestAttributes, string $invalidAttribute, string $validationMessage) {
+it('validates', function (array $requestAttributes, string $invalidAttribute, string $validationMessage): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -192,7 +192,7 @@ it('validates', function (array $requestAttributes, string $invalidAttribute, st
     '`category` max 255 characters' => [['category' => str_repeat('a', 256)], 'category', 'The category may not be greater than 255 characters.'],
 ]);
 
-it('returns correct service request fields after update', function (string $responseKey, Closure $getExpected) {
+it('returns correct service request fields after update', function (string $responseKey, Closure $getExpected): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -205,13 +205,13 @@ it('returns correct service request fields after update', function (string $resp
 
     expect($response['data'][$responseKey])->toBe($getExpected($serviceRequest->fresh()));
 })->with([
-    '`id`' => ['id', fn (ServiceRequest $sr) => $sr->id],
-    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $sr) => $sr->service_request_number],
-    '`title`' => ['title', fn (ServiceRequest $sr) => $sr->title],
-    '`category`' => ['category', fn (ServiceRequest $sr) => $sr->category->value],
+    '`id`' => ['id', fn (ServiceRequest $serviceRequest) => $serviceRequest->id],
+    '`service_request_number`' => ['service_request_number', fn (ServiceRequest $serviceRequest) => $serviceRequest->service_request_number],
+    '`title`' => ['title', fn (ServiceRequest $serviceRequest) => $serviceRequest->title],
+    '`category`' => ['category', fn (ServiceRequest $serviceRequest) => $serviceRequest->category->value],
 ]);
 
-it('updates close_details', function () {
+it('updates close_details', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -227,7 +227,7 @@ it('updates close_details', function () {
     expect($response['data']['close_details'])->toBe($newCloseDetails);
 });
 
-it('returns correct status relationship structure after update', function () {
+it('returns correct status relationship structure after update', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -246,7 +246,7 @@ it('returns correct status relationship structure after update', function () {
     ]);
 });
 
-it('returns correct priority relationship structure after update', function () {
+it('returns correct priority relationship structure after update', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -265,7 +265,7 @@ it('returns correct priority relationship structure after update', function () {
     ]);
 });
 
-it('returns null assignee when no assignment exists', function () {
+it('returns null assignee when no assignment exists', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -280,7 +280,7 @@ it('returns null assignee when no assignment exists', function () {
     expect($response['data']['assignee'])->toBeNull();
 });
 
-it('rejects assigning a user who is not a manager of the service request type', function () {
+it('rejects assigning a user who is not a manager of the service request type', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -297,7 +297,7 @@ it('rejects assigning a user who is not a manager of the service request type', 
     ]);
 });
 
-it('allows assigning a direct manager user of the service request type', function () {
+it('allows assigning a direct manager user of the service request type', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -314,7 +314,7 @@ it('allows assigning a direct manager user of the service request type', functio
     expect($response['data']['assignee']['id'])->toBe($managerUser->id);
 });
 
-it('allows assigning a user whose department manages the service request type', function () {
+it('allows assigning a user whose department manages the service request type', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -333,7 +333,7 @@ it('allows assigning a user whose department manages the service request type', 
     expect($response['data']['assignee']['id'])->toBe($managerUser->id);
 });
 
-it('returns 200 with unchanged data when an empty body is sent', function () {
+it('returns 200 with unchanged data when an empty body is sent', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -350,7 +350,7 @@ it('returns 200 with unchanged data when an empty body is sent', function () {
     expect($response['data']['close_details'])->toBe($serviceRequest->close_details);
 });
 
-it('does not modify fields that are not included in the request', function () {
+it('does not modify fields that are not included in the request', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
     Sanctum::actingAs($user, ['api']);
@@ -373,8 +373,8 @@ it('does not modify fields that are not included in the request', function () {
     expect($response['data']['close_details'])->toBe($originalCloseDetails);
 });
 
-describe('archiving', function () {
-    it('rejects assigning an archived status', function () {
+describe('archiving', function (): void {
+    it('rejects assigning an archived status', function (): void {
         $user = SystemUser::factory()->create();
         $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
         Sanctum::actingAs($user, ['api']);
@@ -392,7 +392,7 @@ describe('archiving', function () {
         expect($serviceRequest->fresh()->status_id)->toBe($openStatus->getKey());
     });
 
-    it('accepts the status a service request is already on even when archived', function () {
+    it('accepts the status a service request is already on even when archived', function (): void {
         $user = SystemUser::factory()->create();
         $user->givePermissionTo(['service_request.view-any', 'service_request.*.update']);
         Sanctum::actingAs($user, ['api']);

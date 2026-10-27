@@ -76,8 +76,8 @@ if (! function_exists('createServiceRequestWithAssignment')) {
     }
 }
 
-describe('Customer', function () {
-    it('sends customer update notification when preference is enabled and update is not internal', function () {
+describe('Customer', function (): void {
+    it('sends customer update notification when preference is enabled and update is not internal', function (): void {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -88,12 +88,12 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification): bool {
             return is_null($notification->emailTemplate);
         });
     });
 
-    it('sends customer update notification with template when template exists', function () {
+    it('sends customer update notification with template when template exists', function (): void {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -108,12 +108,12 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) use ($template) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification) use ($template) {
             return $notification->emailTemplate?->is($template);
         });
     });
 
-    it('sends customer update notification without template when no template exists', function () {
+    it('sends customer update notification without template when no template exists', function (): void {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -124,12 +124,12 @@ describe('Customer', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function ($notification) {
+        Notification::assertSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class, function (SendEducatableServiceRequestUpdatedNotification $notification): bool {
             return is_null($notification->emailTemplate);
         });
     });
 
-    it('does not send customer update notification when preference is disabled', function () {
+    it('does not send customer update notification when preference is disabled', function (): void {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -143,7 +143,7 @@ describe('Customer', function () {
         Notification::assertNotSentTo($serviceRequest->respondent, SendEducatableServiceRequestUpdatedNotification::class);
     });
 
-    it('does not send customer update notification when update is internal', function () {
+    it('does not send customer update notification when update is internal', function (): void {
         Notification::fake();
 
         $type = ServiceRequestType::factory()->create();
@@ -158,8 +158,8 @@ describe('Customer', function () {
     });
 });
 
-describe('Manager', function () {
-    it('sends manager update email with template when template exists', function () {
+describe('Manager', function (): void {
+    it('sends manager update email with template when template exists', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -185,12 +185,12 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template): bool {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('sends manager update email without template when no template exists', function () {
+    it('sends manager update email without template when no template exists', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -208,12 +208,12 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('does not send manager update email when preference is disabled', function () {
+    it('does not send manager update email when preference is disabled', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -230,7 +230,7 @@ describe('Manager', function () {
         Notification::assertNotSentTo($manager, ServiceRequestUpdated::class);
     });
 
-    it('sends manager update database notification when preference is enabled', function () {
+    it('sends manager update database notification when preference is enabled', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -244,12 +244,12 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 
-    it('does not send manager update database notification when preference is disabled', function () {
+    it('does not send manager update database notification when preference is disabled', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -263,12 +263,12 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 
-    it('sends manager update email for internal updates when preference is enabled', function () {
+    it('sends manager update email for internal updates when preference is enabled', function (): void {
         Notification::fake();
 
         $manager = User::factory()->create();
@@ -282,14 +282,14 @@ describe('Manager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
 
-        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($manager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === MailChannel::class;
         });
     });
 });
 
-describe('Auditor', function () {
-    it('sends auditor update email with template when template exists', function () {
+describe('Auditor', function (): void {
+    it('sends auditor update email with template when template exists', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -315,12 +315,12 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template): bool {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('sends auditor update email without template when no template exists', function () {
+    it('sends auditor update email without template when no template exists', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -334,12 +334,12 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('does not send auditor update email when preference is disabled', function () {
+    it('does not send auditor update email when preference is disabled', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -356,7 +356,7 @@ describe('Auditor', function () {
         Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class);
     });
 
-    it('sends auditor update database notification when preference is enabled', function () {
+    it('sends auditor update database notification when preference is enabled', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -370,12 +370,12 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 
-    it('does not send auditor update database notification when preference is disabled', function () {
+    it('does not send auditor update database notification when preference is disabled', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -389,12 +389,12 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 
-    it('sends auditor update email for internal updates when preference is enabled', function () {
+    it('sends auditor update email for internal updates when preference is enabled', function (): void {
         Notification::fake();
 
         $auditor = User::factory()->create();
@@ -408,14 +408,14 @@ describe('Auditor', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => true]);
 
-        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($auditor, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === MailChannel::class;
         });
     });
 });
 
-describe('AssignedManager', function () {
-    it('sends assigned manager update email with template when template exists', function () {
+describe('AssignedManager', function (): void {
+    it('sends assigned manager update email with template when template exists', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -436,12 +436,12 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) use ($template) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($template): bool {
             return $notification->emailTemplate?->is($template) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('sends assigned manager update email without template when no template exists', function () {
+    it('sends assigned manager update email without template when no template exists', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -454,12 +454,12 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return is_null($notification->emailTemplate) && $notification->channel === MailChannel::class;
         });
     });
 
-    it('does not send assigned manager update email when preference is disabled', function () {
+    it('does not send assigned manager update email when preference is disabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -473,12 +473,12 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === MailChannel::class;
         });
     });
 
-    it('sends assigned manager update database notification when preference is enabled', function () {
+    it('sends assigned manager update database notification when preference is enabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -491,12 +491,12 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 
-    it('does not send assigned manager update database notification when preference is disabled', function () {
+    it('does not send assigned manager update database notification when preference is disabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -510,14 +510,14 @@ describe('AssignedManager', function () {
 
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
-        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function ($notification) {
+        Notification::assertNotSentTo($assignedManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification): bool {
             return $notification->channel === DatabaseChannel::class;
         });
     });
 });
 
-describe('Deduplication', function () {
-    it('assigned manager only receives one update email when both manager and assigned manager email preferences are enabled', function () {
+describe('Deduplication', function (): void {
+    it('assigned manager only receives one update email when both manager and assigned manager email preferences are enabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -542,17 +542,17 @@ describe('Deduplication', function () {
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
         $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestUpdated::class)
-            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+            ->filter(fn ($notification): bool => $notification->channel === MailChannel::class);
 
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($assignedManagerTemplate))->toBeTrue();
 
-        Notification::assertSentTo($otherManager, ServiceRequestUpdated::class, function ($notification) use ($managerTemplate) {
+        Notification::assertSentTo($otherManager, ServiceRequestUpdated::class, function (ServiceRequestUpdated $notification) use ($managerTemplate): bool {
             return $notification->channel === MailChannel::class && $notification->emailTemplate?->is($managerTemplate);
         });
     });
 
-    it('assigned manager only receives one update database notification when both manager and assigned manager notification preferences are enabled', function () {
+    it('assigned manager only receives one update database notification when both manager and assigned manager notification preferences are enabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -569,12 +569,12 @@ describe('Deduplication', function () {
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
         $assignedManagerDbNotifications = Notification::sent($assignedManager, ServiceRequestUpdated::class)
-            ->filter(fn ($notification) => $notification->channel === DatabaseChannel::class);
+            ->filter(fn ($notification): bool => $notification->channel === DatabaseChannel::class);
 
         expect($assignedManagerDbNotifications)->toHaveCount(1);
     });
 
-    it('assigned manager receives the manager broadcast when assigned manager preference is disabled', function () {
+    it('assigned manager receives the manager broadcast when assigned manager preference is disabled', function (): void {
         Notification::fake();
 
         $assignedManager = User::factory()->create();
@@ -593,7 +593,7 @@ describe('Deduplication', function () {
         ServiceRequestUpdate::factory()->for($serviceRequest, 'serviceRequest')->create(['internal' => false]);
 
         $assignedManagerEmails = Notification::sent($assignedManager, ServiceRequestUpdated::class)
-            ->filter(fn ($notification) => $notification->channel === MailChannel::class);
+            ->filter(fn ($notification): bool => $notification->channel === MailChannel::class);
 
         expect($assignedManagerEmails)->toHaveCount(1);
         expect($assignedManagerEmails->first()->emailTemplate?->is($managerTemplate))->toBeTrue();

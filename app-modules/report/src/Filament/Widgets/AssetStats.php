@@ -62,7 +62,7 @@ class AssetStats extends StatsOverviewReportWidget
             )),
             Stat::make('In Maintenance', Number::abbreviate(
                 Cache::tags(["{{$this->cacheTag}}"])->remember('assets-in-maintenance-count', now()->addHours(24), function (): int {
-                    return Asset::query()->whereHas('maintenanceActivities', function (Builder $query) {
+                    return Asset::query()->whereHas('maintenanceActivities', function (Builder $query): void {
                         $query->whereNotIn('status', [MaintenanceActivityStatus::Completed, MaintenanceActivityStatus::Canceled]);
                     })->count();
                 }),
@@ -70,7 +70,7 @@ class AssetStats extends StatsOverviewReportWidget
             )),
             Stat::make('Checked Out', Number::abbreviate(
                 Cache::tags(["{{$this->cacheTag}}"])->remember('assets-checked-out-count', now()->addHours(24), function (): int {
-                    return Asset::query()->whereHas('checkOuts', function (Builder $query) {
+                    return Asset::query()->whereHas('checkOuts', function (Builder $query): void {
                         $query->whereNull('asset_check_in_id');
                     })->count();
                 }),
@@ -79,10 +79,10 @@ class AssetStats extends StatsOverviewReportWidget
             Stat::make('Bench Stock', Number::abbreviate(
                 Cache::tags(["{{$this->cacheTag}}"])->remember('bench-stock-count', now()->addHours(24), function (): int {
                     return Asset::query()
-                        ->whereDoesntHave('checkOuts', function (Builder $query) {
+                        ->whereDoesntHave('checkOuts', function (Builder $query): void {
                             $query->whereNull('asset_check_in_id');
                         })
-                        ->whereDoesntHave('maintenanceActivities', function (Builder $query) {
+                        ->whereDoesntHave('maintenanceActivities', function (Builder $query): void {
                             $query->whereNotIn('status', [MaintenanceActivityStatus::Completed, MaintenanceActivityStatus::Canceled]);
                         })
                         ->count();

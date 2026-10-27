@@ -52,6 +52,8 @@ use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\OrderByFullName;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
 use Filament\Actions\BulkActionGroup;
@@ -66,7 +68,6 @@ use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Expression;
 use Illuminate\Support\Collection;
 
 class ListServiceRequests extends ListRecords
@@ -160,7 +161,7 @@ class ListServiceRequests extends ListRecords
             ->filters([
                 SelectFilter::make('priority')
                     ->relationship('priority', 'name', fn (Builder $query) => $query->with('type')->whereRelation('type', 'deleted_at'))
-                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record) => "{$record->type->name} - {$record->name}")
+                    ->getOptionLabelFromRecordUsing(fn (ServiceRequestPriority $record): string => "{$record->type->name} - {$record->name}")
                     ->multiple()
                     ->preload(),
                 Filter::make('type')
@@ -168,7 +169,7 @@ class ListServiceRequests extends ListRecords
                     ->schema([
                         SelectTree::make('types')
                             ->label('Type')
-                            ->getTreeUsing(fn () => static::buildTypeTreeOptions())
+                            ->getTreeUsing(fn (): array => static::buildTypeTreeOptions())
                             ->multiple()
                             ->placeholder('All'),
                     ])
@@ -225,29 +226,29 @@ class ListServiceRequests extends ListRecords
                 SelectFilter::make('assignedTo')
                     ->searchable()
                     ->preload()
-                    ->options(fn () => [
+                    ->options(fn (): array => [
                         '' => ['unassigned' => 'Unassigned'],
-                        'Assigned to' => User::query()->limit(50)->pluck('name', 'id')->toArray(), // Initially load 50 users
+                        'Assigned to' => User::query()->tap(new OrderByFullName())->limit(50)->get()->pluck('full_name', 'id')->toArray(), // Initially load 50 users
                     ])
                     ->getOptionLabelUsing(fn (string $value): ?string => $value === 'unassigned'
                         ? 'Unassigned'
-                        : User::query()->whereKey($value)->value('name'))
-                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->where(new Expression('lower(name)'), 'like', '%' . strtolower($search) . '%')->take(50)->pluck('name', 'id')->toArray()])
+                        : User::query()->find($value)?->full_name)
+                    ->getSearchResultsUsing(fn (string $search): array => ['Assigned To' => User::query()->tap(new WhereFullNameLike($search))->tap(new OrderByFullName())->take(50)->get()->pluck('full_name', 'id')->toArray()])
                     ->query(
                         fn (Builder $query, array $data) => $query
                             ->when(
                                 empty($data['value']),
-                                fn (Builder $baseQuery) => $baseQuery
+                                fn (Builder $baseQuery): Builder => $baseQuery
                             )
                             ->when(
                                 $data['value'] === 'unassigned',
-                                fn (Builder $baseQuery) => $baseQuery->whereDoesntHave('assignedTo', function (Builder $query) {
+                                fn (Builder $baseQuery) => $baseQuery->whereDoesntHave('assignedTo', function (Builder $query): void {
                                     $query->where('status', ServiceRequestAssignmentStatus::Active);
                                 })
                             )
                             ->when(
                                 ! empty($data['value']) && $data['value'] !== 'unassigned',
-                                fn (Builder $baseQuery) => $baseQuery->whereHas('assignedTo', function (Builder $assignedToQuery) use ($data) {
+                                fn (Builder $baseQuery) => $baseQuery->whereHas('assignedTo', function (Builder $assignedToQuery) use ($data): void {
                                     $assignedToQuery
                                         ->whereHas('user', fn (Builder $userQuery) => $userQuery->where('id', $data['value']));
                                 })
@@ -260,10 +261,10 @@ class ListServiceRequests extends ListRecords
                     ChangeServiceRequestStatusBulkAction::make(),
                     AddServiceRequestUpdateBulkAction::make(),
                     DeleteBulkAction::make()
-                        ->action(function (Collection $records) {
+                        ->action(function (Collection $records): void {
                             $deletedRecordsCount = ServiceRequest::query()
                                 ->whereKey($records)
-                                ->when(! auth()->user()->isSuperAdmin(), function (Builder $query) {
+                                ->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
                                     $user = auth()->user();
                                     assert($user instanceof User);
 
@@ -329,13 +330,13 @@ class ListServiceRequests extends ListRecords
             ->values());
 
         $tree = collect($categories->get('', collect()))
-            ->map(fn (ServiceRequestTypeCategory $category) => static::buildCategoryNode($category, $categories, $typesByCategory))
-            ->filter(fn (array $node) => ! empty($node['children']))
+            ->map(fn (ServiceRequestTypeCategory $category): array => static::buildCategoryNode($category, $categories, $typesByCategory))
+            ->filter(fn (array $node): bool => ! empty($node['children']))
             ->values()
             ->all();
 
         $uncategorizedTypes = collect($uncategorizedTypes)
-            ->map(fn (ServiceRequestType $type) => [
+            ->map(fn (ServiceRequestType $type): array => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
                 'children' => [],
@@ -400,13 +401,13 @@ class ListServiceRequests extends ListRecords
         Collection $typesByCategory,
     ): array {
         $childCategories = $categoriesByParent->get($category->getKey(), collect())
-            ->map(fn (ServiceRequestTypeCategory $child) => static::buildCategoryNode($child, $categoriesByParent, $typesByCategory))
-            ->filter(fn (array $node) => ! empty($node['children']))
+            ->map(fn (ServiceRequestTypeCategory $child): array => static::buildCategoryNode($child, $categoriesByParent, $typesByCategory))
+            ->filter(fn (array $node): bool => ! empty($node['children']))
             ->values()
             ->all();
 
         $childTypes = $typesByCategory->get($category->getKey(), collect())
-            ->map(fn (ServiceRequestType $type) => [
+            ->map(fn (ServiceRequestType $type): array => [
                 'name' => $type->name,
                 'value' => $type->getKey(),
                 'children' => [],

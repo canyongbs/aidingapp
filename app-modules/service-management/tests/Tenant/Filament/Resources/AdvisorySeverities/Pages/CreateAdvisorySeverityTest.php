@@ -46,7 +46,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('CreateAdvisorySeverity is gated with proper access control', function () {
+test('CreateAdvisorySeverity is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -77,7 +77,7 @@ test('CreateAdvisorySeverity is gated with proper access control', function () {
     assertDatabaseHas(AdvisorySeverity::class, $request);
 });
 
-test('CreateAdvisorySeverity validates the inputs', function ($data, $errors) {
+test('CreateAdvisorySeverity validates the inputs', function (AdvisorySeverityRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $request = AdvisorySeverityRequestFactory::new($data)->create();

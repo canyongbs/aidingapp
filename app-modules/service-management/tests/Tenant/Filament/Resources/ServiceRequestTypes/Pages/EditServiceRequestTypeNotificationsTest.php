@@ -50,10 +50,11 @@ use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Tests\asSuperAdmin;
 
-function allNotificationSettings(bool $enabled = false): array
-{
+/**
+ * @return array<string, mixed>
+ */
+$allNotificationSettings = function (bool $enabled = false): array {
     $settings = [];
-
     $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
 
     foreach (ServiceRequestEmailTemplateType::cases() as $templateType) {
@@ -81,15 +82,14 @@ function allNotificationSettings(bool $enabled = false): array
     }
 
     return $settings;
-}
+};
 
 /**
  * Counts how many preference rows should exist when all visible checkboxes are saved.
  * SurveyResponse contributes exactly 1 row (Customer × Email); all other SurveyResponse
  * combinations are excluded by the blade $shouldShow logic.
  */
-function expectedTotalPreferenceCount(): int
-{
+$expectedTotalPreferenceCount = function (): int {
     $roles = count(ServiceRequestTypeEmailTemplateRole::cases());
     $nonSurveyEvents = count(ServiceRequestEmailTemplateType::cases()) - 1;
     $channels = count(ServiceRequestNotificationChannel::cases());
@@ -97,9 +97,9 @@ function expectedTotalPreferenceCount(): int
     $surveyTotal = 1;
 
     return $nonSurveyTotal + $surveyTotal;
-}
+};
 
-test('A successful action on the EditServiceRequestTypeNotifications page', function () {
+test('A successful action on the EditServiceRequestTypeNotifications page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -117,7 +117,7 @@ test('A successful action on the EditServiceRequestTypeNotifications page', func
         ->assertHasNoFormErrors();
 });
 
-test('form is pre-filled with enabled preferences loaded from the pivot table', function () {
+test('form is pre-filled with enabled preferences loaded from the pivot table', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     ServiceRequestTypeEmailPreference::create([
@@ -145,7 +145,7 @@ test('form is pre-filled with enabled preferences loaded from the pivot table', 
         ->assertSet('data.settings.is_customers_service_request_closed_notification_enabled', false);
 });
 
-test('form is pre-filled with assigned manager preferences loaded from the pivot table', function () {
+test('form is pre-filled with assigned manager preferences loaded from the pivot table', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     ServiceRequestTypeEmailPreference::create([
@@ -164,7 +164,7 @@ test('form is pre-filled with assigned manager preferences loaded from the pivot
         ->assertSet('data.settings.is_assigned_managers_service_request_assigned_email_enabled', true);
 });
 
-test('saving creates a new preference row for a single combination', function () {
+test('saving creates a new preference row for a single combination', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -189,7 +189,7 @@ test('saving creates a new preference row for a single combination', function ()
     ]);
 });
 
-test('saving upserts all visible matrix combinations into the pivot table', function () {
+test('saving upserts all visible matrix combinations into the pivot table', function () use ($allNotificationSettings, $expectedTotalPreferenceCount): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -197,11 +197,11 @@ test('saving upserts all visible matrix combinations into the pivot table', func
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    assertDatabaseCount('service_request_type_email_preference', expectedTotalPreferenceCount());
+    assertDatabaseCount('service_request_type_email_preference', $expectedTotalPreferenceCount());
 
     $surveyHiddenRoleSlugs = ['managers', 'auditors', 'assigned_managers'];
 
@@ -235,7 +235,7 @@ test('saving upserts all visible matrix combinations into the pivot table', func
     }
 });
 
-test('saving updates an existing enabled preference to disabled', function () {
+test('saving updates an existing enabled preference to disabled', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     ServiceRequestTypeEmailPreference::create([
@@ -268,7 +268,7 @@ test('saving updates an existing enabled preference to disabled', function () {
     ]);
 });
 
-test('saving updates an existing disabled preference to enabled', function () {
+test('saving updates an existing disabled preference to enabled', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     ServiceRequestTypeEmailPreference::create([
@@ -301,7 +301,7 @@ test('saving updates an existing disabled preference to enabled', function () {
     ]);
 });
 
-test('survey response email preference is only stored for the customer role', function () {
+test('survey response email preference is only stored for the customer role', function () use ($allNotificationSettings): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -309,7 +309,7 @@ test('survey response email preference is only stored for the customer role', fu
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -338,7 +338,7 @@ test('survey response email preference is only stored for the customer role', fu
     }
 });
 
-test('survey response notification channel is never written to the pivot table for any role', function () {
+test('survey response notification channel is never written to the pivot table for any role', function () use ($allNotificationSettings): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin();
@@ -346,7 +346,7 @@ test('survey response notification channel is never written to the pivot table f
     Livewire::test(EditServiceRequestTypeNotifications::class, [
         'record' => $serviceRequestType->getRouteKey(),
     ])
-        ->fillForm(['settings' => allNotificationSettings(enabled: true)])
+        ->fillForm(['settings' => $allNotificationSettings(enabled: true)])
         ->call('save')
         ->assertHasNoFormErrors();
 
@@ -360,7 +360,7 @@ test('survey response notification channel is never written to the pivot table f
     }
 });
 
-test('EditServiceRequestTypeNotifications is gated with proper access control', function () {
+test('EditServiceRequestTypeNotifications is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -409,7 +409,7 @@ test('EditServiceRequestTypeNotifications is gated with proper access control', 
     ]);
 });
 
-test('EditServiceRequestTypeNotifications is gated with proper feature access control', function () {
+test('EditServiceRequestTypeNotifications is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;

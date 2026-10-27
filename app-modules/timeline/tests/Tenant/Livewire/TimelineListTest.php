@@ -47,7 +47,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('renders the timeline records for the given record', function () {
+it('renders the timeline records for the given record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -55,30 +55,26 @@ it('renders the timeline records for the given record', function () {
     $update = ServiceRequestUpdate::factory()
         ->for($serviceRequest, 'serviceRequest')
         ->create(['update' => 'A distinctive timeline entry']);
-
-    Livewire::test(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
-    ])
-        ->assertSuccessful()
-        ->assertSee($update->update);
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain($update->update);
 });
 
-it('shows the empty state message when there is nothing to timeline', function () {
+it('shows the empty state message when there is nothing to timeline', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
-
-    Livewire::test(TimelineList::class, [
+    $renderedTimeline = Livewire::test(TimelineList::class, [
         'record' => $serviceRequest,
         'modelsToTimeline' => [ServiceRequestUpdate::class],
         'emptyStateMessage' => 'Nothing has happened yet.',
-    ])
-        ->assertSuccessful()
-        ->assertSee('Nothing has happened yet.');
+    ])->assertSuccessful();
+    expect(\Tests\htmlText($renderedTimeline->html(), '//div[contains(@class, "border-dashed")]/span'))->toContain('Nothing has happened yet.');
 });
 
-it('loads one page of records at a time and flags that more remain', function () {
+it('loads one page of records at a time and flags that more remain', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -93,14 +89,18 @@ it('loads one page of records at a time and flags that more remain', function ()
         'modelsToTimeline' => [ServiceRequestUpdate::class],
     ])->assertSuccessful();
 
-    expect($component->get('timelineRecords'))->toHaveCount(5)
-        ->and($component->get('hasMorePages'))->toBeTrue();
+    $instance = $component->instance();
+
+    assert($instance instanceof TimelineList);
+
+    expect($instance->timelineRecords)->toHaveCount(5)
+        ->and($instance->hasMorePages)->toBeTrue();
 
     $component->call('loadTimelineRecords')
         ->assertSuccessful();
 });
 
-it('refuses to open a record from another entity timeline', function () {
+it('refuses to open a record from another entity timeline', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -118,7 +118,7 @@ it('refuses to open a record from another entity timeline', function () {
         ->assertStatus(404);
 });
 
-it('refuses to open a record of a type this timeline does not display', function () {
+it('refuses to open a record of a type this timeline does not display', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -135,7 +135,7 @@ it('refuses to open a record of a type this timeline does not display', function
         ->assertStatus(404);
 });
 
-it('returns a 404 when the view action is mounted without a record', function () {
+it('returns a 404 when the view action is mounted without a record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -152,7 +152,7 @@ it('returns a 404 when the view action is mounted without a record', function ()
         ->assertStatus(404);
 });
 
-it('keeps the opened record selected when more timeline records are loaded', function () {
+it('keeps the opened record selected when more timeline records are loaded', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -172,7 +172,7 @@ it('keeps the opened record selected when more timeline records are loaded', fun
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-it('opens the slide over for a timeline record', function () {
+it('opens the slide over for a timeline record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -190,7 +190,7 @@ it('opens the slide over for a timeline record', function () {
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-it('opens the slide over for a soft-deleted timeline record', function () {
+it('opens the slide over for a soft-deleted timeline record', function (): void {
     asSuperAdmin();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -215,11 +215,11 @@ it('opens the slide over for a soft-deleted timeline record', function () {
         ->assertSet('currentRecordToView.id', $update->getKey());
 });
 
-describe('related people', function () {
-    it('shows a soft-deleted person by name', function () {
+describe('related people', function (): void {
+    it('shows a soft-deleted person by name', function (): void {
         asSuperAdmin();
 
-        $performer = User::factory()->create(['name' => 'Jane Doe']);
+        $performer = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
 
         $checkOut = AssetCheckOut::factory()->create([
             'checked_out_by_type' => $performer->getMorphClass(),
@@ -229,36 +229,32 @@ describe('related people', function () {
         $performer->delete();
 
         expect($performer->refresh()->trashed())->toBeTrue();
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe')
-            ->assertDontSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Deleted user');
     });
 
-    it('shows `Deleted user` when the person no longer exists', function () {
+    it('shows `Deleted user` when the person no longer exists', function (): void {
         asSuperAdmin();
 
         $checkOut = AssetCheckOut::factory()->create([
             'checked_out_by_type' => (new User())->getMorphClass(),
             'checked_out_by_id' => Str::uuid()->toString(),
         ]);
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $checkOut->asset,
             'modelsToTimeline' => [AssetCheckOut::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Deleted user');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Deleted user');
     });
 
-    it('shows the soft-deleted creator of an engagement by name', function () {
+    it('shows the soft-deleted creator of an engagement by name', function (): void {
         asSuperAdmin();
 
-        $creator = User::factory()->create(['name' => 'Jane Doe']);
+        $creator = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
         $contact = Contact::factory()->create();
 
         Engagement::factory()
@@ -269,12 +265,10 @@ describe('related people', function () {
         $creator->delete();
 
         expect($creator->refresh()->trashed())->toBeTrue();
-
-        Livewire::test(TimelineList::class, [
+        $renderedTimeline = Livewire::test(TimelineList::class, [
             'record' => $contact,
             'modelsToTimeline' => [Engagement::class],
-        ])
-            ->assertSuccessful()
-            ->assertSeeText('Jane Doe');
+        ])->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 });

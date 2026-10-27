@@ -46,13 +46,13 @@ use Illuminate\Support\Facades\URL;
 
 use function Pest\Laravel\postJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
 });
 
-test('it sends authentication for an existing contact', function () {
+test('it sends authentication for an existing contact', function (): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([
@@ -79,7 +79,7 @@ test('it sends authentication for an existing contact', function () {
         ->not->toBeNull()
         ->and($authentication?->educatable_id)->toBe($contact->getKey());
 
-    Notification::assertSentOnDemand(AuthenticatePortalNotification::class, function (AuthenticatePortalNotification $notification, array $channels, object $notifiable) use ($contact, $authentication) {
+    Notification::assertSentOnDemand(AuthenticatePortalNotification::class, function (AuthenticatePortalNotification $notification, array $channels, object $notifiable) use ($contact, $authentication): bool {
         $mailRoute = $notifiable->routes['mail'];
 
         // When a Contact exists, the mail route is ['email@example.com' => 'Display Name']
@@ -91,7 +91,7 @@ test('it sends authentication for an existing contact', function () {
     });
 });
 
-test('it resolves an existing contact when the email case differs', function () {
+test('it resolves an existing contact when the email case differs', function (): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([
@@ -115,7 +115,7 @@ test('it resolves an existing contact when the email case differs', function () 
         ->and($authentication?->educatable_id)->toBe($contact->getKey());
 });
 
-test('it allows registration flow when email domain matches an organization domain', function () {
+test('it allows registration flow when email domain matches an organization domain', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -143,7 +143,7 @@ test('it allows registration flow when email domain matches an organization doma
         ->and($authentication?->educatable_id)->toBeNull();
 });
 
-test('it generates spa registration url when requested for unknown contact', function () {
+test('it generates spa registration url when requested for unknown contact', function (): void {
     Organization::factory()->create([
         'is_contact_generation_enabled' => true,
         'domains' => [
@@ -165,7 +165,7 @@ test('it generates spa registration url when requested for unknown contact', fun
     expect($response->json('authentication_url'))->toContain('/portal/register/');
 });
 
-test('it returns validation error when contact and organization domain are not found', function () {
+test('it returns validation error when contact and organization domain are not found', function (): void {
     $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
 
     $response = postJson($url, [
@@ -177,7 +177,7 @@ test('it returns validation error when contact and organization domain are not f
         ->assertJsonValidationErrors(['email']);
 });
 
-test('it throttles repeated authentication requests for the same contact', function () {
+test('it throttles repeated authentication requests for the same contact', function (): void {
     $contact = Contact::factory()->create([
         'email' => 'contact@example.com',
     ]);
@@ -193,7 +193,7 @@ test('it throttles repeated authentication requests for the same contact', funct
     expect(PortalAuthentication::query()->count())->toBe(1);
 });
 
-test('it invalidates a contact\'s prior authentication when a new code is requested', function () {
+test('it invalidates a contact\'s prior authentication when a new code is requested', function (): void {
     Notification::fake();
 
     $contact = Contact::factory()->create([

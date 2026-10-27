@@ -131,7 +131,7 @@ class AutoSubmitStaleDraftServiceRequest implements ShouldQueue, ShouldBeUnique
         $filledFieldIds = $this->getFilledFieldIds($submission);
 
         return $requiredFields->every(
-            fn ($field) => in_array($field->getKey(), $filledFieldIds)
+            fn ($field): bool => in_array($field->getKey(), $filledFieldIds)
         );
     }
 

@@ -68,7 +68,7 @@ class MessageSent implements ShouldBroadcastNow
         $author = $this->message->author;
 
         $authorName = match (true) {
-            $author instanceof User => $author->name,
+            $author instanceof User => $author->full_name,
             $author instanceof Contact => $author->full_name,
             default => 'Unknown',
         };
@@ -98,7 +98,7 @@ class MessageSent implements ShouldBroadcastNow
             ->pluck('participant_id');
 
         $channels = $participantIds->map(
-            fn (string $id) => new PrivateChannel("user.{$id}")
+            fn (string $id): PrivateChannel => new PrivateChannel("user.{$id}")
         )->all();
 
         $channels[] = new PrivateChannel("conversation.{$this->message->conversation_id}");

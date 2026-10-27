@@ -40,7 +40,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('removes password fields from stale form data', function () {
+it('removes password fields from stale form data', function (): void {
     $type = ServiceRequestType::factory()->create();
     $form = ServiceRequestForm::factory()->for($type, 'type')->create();
     $passwordField = new ServiceRequestFormField([

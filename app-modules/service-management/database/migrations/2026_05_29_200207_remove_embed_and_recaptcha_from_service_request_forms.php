@@ -42,8 +42,8 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_forms', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_forms', function (Blueprint $table): void {
                 $table->dropUnique('service_request_forms_name_unique');
 
                 $table->dropColumn([
@@ -60,8 +60,8 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_forms', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_forms', function (Blueprint $table): void {
                 $table->string('name')->nullable();
                 $table->boolean('embed_enabled')->default(false);
                 $table->json('allowed_domains')->nullable(); // @phpstan-ignore Common.jsonColumnInMigration

@@ -42,13 +42,15 @@ use AidingApp\ServiceManagement\Models\Advisory;
 use AidingApp\ServiceManagement\Models\AdvisorySeverity;
 use AidingApp\ServiceManagement\Models\AdvisoryStatus;
 use App\Models\User;
+use CanyonGBS\Common\Enums\Color;
 use Filament\Actions\Testing\TestAction;
+use Filament\Infolists\Components\TextEntry;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewAdvisory page', function () {
+test('The correct details are displayed on the ViewAdvisory page', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -58,33 +60,44 @@ test('The correct details are displayed on the ViewAdvisory page', function () {
 
     $advisory = Advisory::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            AdvisoryResource::getUrl('view', [
-                'record' => $advisory,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeInOrder(
-            [
-                'Properties',
-                'Title',
-                $advisory->title,
-                'Description',
-                $advisory->description,
-                'Tracking Details',
-                'Severity',
-                $advisory->severity->name,
-                'Status',
-                $advisory->status->name,
-                'Assignment',
-                'Department',
-                $advisory->assignedDepartment->name,
-            ]
-        );
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewAdvisory::class, ['record' => $advisory->getRouteKey()])
+        ->assertSuccessful();
+
+    $expected = [
+        'title' => $advisory->title,
+        'description' => $advisory->description,
+        'severity.name' => $advisory->severity->name,
+        'status.name' => $advisory->status->name,
+        'assignedDepartment.name' => $advisory->assignedDepartment->name,
+    ];
+
+    expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected);
 });
 
-test('the Tracking Details status refreshes when an advisory update changes the status', function () {
+test('the Severity entry renders as a badge using the severity color', function (): void {
+    asSuperAdmin();
+
+    $advisory = Advisory::factory()
+        ->for(AdvisorySeverity::factory()->color(Color::Red), 'severity')
+        ->create();
+
+    $entry = Livewire::test(ViewAdvisory::class, [
+        'record' => $advisory->getRouteKey(),
+    ])
+        ->assertSuccessful()
+        ->instance()
+        ->getSchema('infolist')
+        ->getComponent(fn ($component): bool => $component instanceof TextEntry && $component->getName() === 'severity.name');
+
+    expect($entry)
+        ->not->toBeNull()
+        ->and($entry->isBadge())->toBeTrue()
+        ->and($entry->getColor($advisory->severity->name))->toBe(Color::Red->value);
+});
+
+test('the Tracking Details status refreshes when an advisory update changes the status', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -102,18 +115,20 @@ test('the Tracking Details status refreshes when an advisory update changes the 
     $component = Livewire::test(ViewAdvisory::class, [
         'record' => $advisory->getRouteKey(),
     ])
-        ->assertSuccessful()
-        ->assertSee($originalStatus->name);
+        ->assertSuccessful();
+
+    expect(\Tests\infolistState($component->instance(), ['status.name']))
+        ->toBe(['status.name' => $originalStatus->name]);
 
     $advisory->update(['status_id' => $newStatus->getKey()]);
 
-    $component
-        ->dispatch('advisory-updated')
-        ->assertSee($newStatus->name)
-        ->assertDontSee($originalStatus->name);
+    $component->dispatch('advisory-updated');
+
+    expect(\Tests\infolistState($component->instance(), ['status.name']))
+        ->toBe(['status.name' => $newStatus->name]);
 });
 
-test('ViewAdvisory is gated with proper access control', function () {
+test('ViewAdvisory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -128,7 +143,7 @@ test('ViewAdvisory is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('the Properties section edit action is gated with proper access control', function () {
+test('the Properties section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -151,7 +166,7 @@ test('the Properties section edit action is gated with proper access control', f
         ->assertActionVisible(TestAction::make('editProperties')->schemaComponent('properties'));
 });
 
-test('the Properties section can be updated', function () {
+test('the Properties section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -171,12 +186,10 @@ test('the Properties section can be updated', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($advisory->fresh())
-        ->title->toEqual('Updated Title')
-        ->description->toEqual('Updated Description');
+    expect($advisory->fresh()->title)->toEqual('Updated Title')->and($advisory->fresh()->description)->toEqual('Updated Description');
 });
 
-test('the Properties section validates the inputs', function () {
+test('the Properties section validates the inputs', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -200,7 +213,7 @@ test('the Properties section validates the inputs', function () {
         ]);
 });
 
-test('the Tracking Details section edit action is gated with proper access control', function () {
+test('the Tracking Details section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -223,7 +236,7 @@ test('the Tracking Details section edit action is gated with proper access contr
         ->assertActionVisible(TestAction::make('editTrackingDetails')->schemaComponent('trackingDetails'));
 });
 
-test('the Tracking Details section can be updated', function () {
+test('the Tracking Details section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -246,12 +259,10 @@ test('the Tracking Details section can be updated', function () {
         ])
         ->assertHasNoFormErrors();
 
-    expect($advisory->fresh())
-        ->severity_id->toEqual($severity->getKey())
-        ->status_id->toEqual($status->getKey());
+    expect($advisory->fresh()->severity_id)->toEqual($severity->getKey())->and($advisory->fresh()->status_id)->toEqual($status->getKey());
 });
 
-test('the Status entry reflects the new value immediately after updating the Tracking Details section', function () {
+test('the Status entry reflects the new value immediately after updating the Tracking Details section', function (): void {
     $user = User::factory()->create();
 
     $oldStatus = AdvisoryStatus::factory()->create();
@@ -285,7 +296,7 @@ test('the Status entry reflects the new value immediately after updating the Tra
         ->assertDontSee($oldStatus->name);
 });
 
-test('the Tracking Details section validates the inputs', function ($overrides, $errors) {
+test('the Tracking Details section validates the inputs', function (array $overrides, array $errors): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -328,7 +339,7 @@ test('the Tracking Details section validates the inputs', function ($overrides, 
     ],
 ]);
 
-test('the Assignment section edit action is gated with proper access control', function () {
+test('the Assignment section edit action is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -351,7 +362,7 @@ test('the Assignment section edit action is gated with proper access control', f
         ->assertActionVisible(TestAction::make('editAssignment')->schemaComponent('assignment'));
 });
 
-test('the Assignment section can be updated', function () {
+test('the Assignment section can be updated', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -375,7 +386,7 @@ test('the Assignment section can be updated', function () {
     expect($advisory->fresh()->assigned_department_id)->toEqual($department->getKey());
 });
 
-test('the Assignment section validates the department exists', function () {
+test('the Assignment section validates the department exists', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();
@@ -397,7 +408,7 @@ test('the Assignment section validates the department exists', function () {
         ]);
 });
 
-test('the advisory updates are only embedded for users who can view them', function () {
+test('the advisory updates are only embedded for users who can view them', function (): void {
     $user = User::factory()->create();
 
     $advisory = Advisory::factory()->create();

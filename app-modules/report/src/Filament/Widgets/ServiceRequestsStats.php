@@ -67,7 +67,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
 
         $applyFilters = function (Builder $query) use ($startDate, $endDate, $types) {
             return $query
-                ->when($startDate && $endDate, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]))
+                ->when($startDate instanceof Carbon && $endDate instanceof Carbon, fn (Builder $query): Builder => $query->whereBetween('created_at', [$startDate, $endDate]))
                 ->when($types, fn (Builder $query): Builder => $query->whereHas('priority.type', fn (Builder $query) => $query->whereIn('id', $types)));
         };
 
@@ -120,7 +120,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         $currentOpenServiceRequests = $currentOpenServiceRequestsQuery->count();
 
         $serviceRequestsCreatedBeforeIntervalStartQuery = ServiceRequest::query()
-            ->with(['histories' => function ($query) use ($intervalStart) {
+            ->with(['histories' => function ($query) use ($intervalStart): void {
                 $query->whereBetween('created_at', [$intervalStart, now()])
                     ->whereRaw("original_values->>'status_id' IS NOT NULL")  // Checks if status_id was actually changed
                     ->orderBy('created_at', 'asc')
@@ -133,7 +133,7 @@ class ServiceRequestsStats extends StatsOverviewReportWidget
         }
         $serviceRequestsCreatedBeforeIntervalStart = $serviceRequestsCreatedBeforeIntervalStartQuery->get();
 
-        $openServiceRequestsAtIntervalCount = $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds) {
+        $openServiceRequestsAtIntervalCount = $serviceRequestsCreatedBeforeIntervalStart->filter(function (ServiceRequest $serviceRequest) use ($openStatusIds): bool {
             return $this->wasOpenAtIntervalStart($serviceRequest, $openStatusIds);
         })->count();
 

@@ -43,7 +43,7 @@ class CreateContactSourcesTable extends Migration
 {
     public function up(): void
     {
-        Schema::create('contact_sources', function (Blueprint $table) {
+        Schema::create('contact_sources', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->string('name');

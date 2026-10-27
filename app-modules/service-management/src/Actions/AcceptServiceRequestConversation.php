@@ -53,7 +53,7 @@ class AcceptServiceRequestConversation
             return;
         }
 
-        DB::transaction(function () use ($serviceRequestConversation) {
+        DB::transaction(function () use ($serviceRequestConversation): void {
             $agent = $serviceRequestConversation->user;
             $contact = $serviceRequestConversation->contact;
 

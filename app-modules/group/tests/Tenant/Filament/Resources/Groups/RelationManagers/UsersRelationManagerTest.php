@@ -50,7 +50,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-it('can associate multiple users with a group', function () {
+it('can associate multiple users with a group', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
     $users = User::factory()->count(3)->create();
@@ -68,7 +68,7 @@ it('can associate multiple users with a group', function () {
         ->toEqualCanonicalizing($users->modelKeys());
 });
 
-it('does not show admin users in the associate users selection by default', function () {
+it('does not show admin users in the associate users selection by default', function (): void {
     asSuperAdmin();
 
     $group = Group::factory()->create();
@@ -99,7 +99,7 @@ it('does not show admin users in the associate users selection by default', func
         ->and($adminUsers->every(fn (User $user): bool => empty($recordSelect->getSearchResults($user->email))))->toBeTrue();
 });
 
-it('allows admin users in the associate users selection when admin filtering is disabled', function () {
+it('allows admin users in the associate users selection when admin filtering is disabled', function (): void {
     Config::set('app.filter_admins_from_selection', false);
     asSuperAdmin();
 
@@ -129,7 +129,7 @@ it('allows admin users in the associate users selection when admin filtering is 
     expect($adminUsers->every(fn (User $user): bool => ! empty($recordSelect->getSearchResults($user->email))))->toBeTrue();
 });
 
-it('does not associate an admin user when admin filtering is enabled', function () {
+it('does not associate an admin user when admin filtering is enabled', function (): void {
     asSuperAdmin();
 
     $group = Group::factory()->create();
@@ -147,7 +147,7 @@ it('does not associate an admin user when admin filtering is enabled', function 
     expect($group->users()->whereKey($adminUser->getKey())->exists())->toBeFalse();
 });
 
-it('can detach a user from a group', function () {
+it('can detach a user from a group', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
     $user = User::factory()->create();
@@ -161,7 +161,7 @@ it('can detach a user from a group', function () {
     expect($group->users()->whereKey($user->getKey())->exists())->toBeFalse();
 });
 
-it('can bulk detach users from a group', function () {
+it('can bulk detach users from a group', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
     $users = User::factory()->count(2)->create();
@@ -177,8 +177,8 @@ it('can bulk detach users from a group', function () {
     expect($group->users()->exists())->toBeFalse();
 });
 
-describe('authorization', function () {
-    it('hides membership actions without the `group.*.update` permission', function () {
+describe('authorization', function (): void {
+    it('hides membership actions without the `group.*.update` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo(['group.view-any', 'group.*.view', 'user.view-any']);
         actingAs($user);

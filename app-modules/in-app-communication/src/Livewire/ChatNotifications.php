@@ -72,7 +72,7 @@ class ChatNotifications extends Component
         return Conversation::query()
             ->select('conversations.*')
             ->selectRaw('conversation_participants.unread_count as unread_count')
-            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId) {
+            ->join('conversation_participants', function (JoinClause $join) use ($userType, $userId): void {
                 $join->on('conversation_participants.conversation_id', '=', 'conversations.id')
                     ->where('conversation_participants.participant_type', '=', $userType)
                     ->where('conversation_participants.participant_id', '=', $userId);
@@ -92,7 +92,7 @@ class ChatNotifications extends Component
                     ->limit(1)
             )
             ->get()
-            ->map(fn (Conversation $conversation) => $this->formatNotification($conversation, $user));
+            ->map(fn (Conversation $conversation): array => $this->formatNotification($conversation, $user));
     }
 
     public function getTotalUnreadCount(): int
@@ -135,11 +135,11 @@ class ChatNotifications extends Component
             $displayName = $conversation->name ?? 'Unnamed Channel';
         } else {
             $otherParticipant = $conversation->conversationParticipants
-                ->first(fn (ConversationParticipant $participant) => $participant->participant_id !== $currentUser->getKey());
+                ->first(fn (ConversationParticipant $participant): bool => $participant->participant_id !== $currentUser->getKey());
             $otherUser = $otherParticipant?->participant;
 
             $displayName = match (true) {
-                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof User => $otherUser->full_name,
                 $otherUser instanceof Contact => $otherUser->full_name,
                 default => 'Unknown User',
             };
@@ -176,7 +176,7 @@ class ChatNotifications extends Component
             'avatar_url' => $avatarUrl,
             'is_contact_conversation' => $isContactConversation,
             'message_preview' => $messagePreview,
-            'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->name : null,
+            'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->full_name : null,
             'created_at' => $latestMessage?->created_at?->diffForHumans(),
         ];
     }

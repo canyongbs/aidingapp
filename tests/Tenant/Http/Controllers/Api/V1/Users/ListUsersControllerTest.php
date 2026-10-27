@@ -45,12 +45,12 @@ use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\getJson;
 
-beforeEach(function () {
+beforeEach(function (): void {
     // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
     config()->set('audit.enabled', false);
 });
 
-it('is gated with proper access control', function () {
+it('is gated with proper access control', function (): void {
     $user = SystemUser::factory()->create();
     Sanctum::actingAs($user, ['api']);
     getJson(route('api.v1.users.index', [], false))
@@ -63,7 +63,7 @@ it('is gated with proper access control', function () {
         ->assertOk();
 });
 
-it('returns a paginated list of users', function () {
+it('returns a paginated list of users', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -81,7 +81,7 @@ it('returns a paginated list of users', function () {
     expect($response['data'])->toHaveCount(3);
 });
 
-it('returns correct user fields', function (string $responseKey, Closure $getExpected) {
+it('returns correct user fields', function (string $responseKey, Closure $getExpected): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -94,11 +94,11 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     expect($response['data'][0][$responseKey])->toBe($getExpected($targetUser));
 })->with([
     '`id`' => ['id',    fn (User $user) => $user->id],
-    '`name`' => ['name',  fn (User $user) => $user->name],
+    '`name`' => ['name',  fn (User $user) => $user->full_name],
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
-it('returns correct roles relationship structure', function () {
+it('returns correct roles relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -113,7 +113,7 @@ it('returns correct roles relationship structure', function () {
     expect($response['data'][0]['roles'])->toBe([$role->name]);
 });
 
-it('returns correct department relationship structure', function () {
+it('returns correct department relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -131,7 +131,7 @@ it('returns correct department relationship structure', function () {
     ]);
 });
 
-it('returns null department when no department is assigned', function () {
+it('returns null department when no department is assigned', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -144,7 +144,7 @@ it('returns null department when no department is assigned', function () {
     expect($response['data'][0]['department'])->toBeNull();
 });
 
-it('returns correct permissions relationship structure', function () {
+it('returns correct permissions relationship structure', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -162,7 +162,7 @@ it('returns correct permissions relationship structure', function () {
     expect($response['data'][0]['permissions'])->toBe([$permission->name]);
 });
 
-it('excludes users with admin roles from the list', function (string $adminRole) {
+it('excludes users with admin roles from the list', function (string $adminRole): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -182,24 +182,43 @@ it('excludes users with admin roles from the list', function (string $adminRole)
     'AI Admin' => [Authenticatable::AI_ADMIN_ROLE],
 ]);
 
-it('can filter users by name', function () {
+it('can filter users by name', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
 
-    $matchingUser = User::factory()->create(['name' => 'John Doe']);
-    User::factory()->create(['name' => 'Jane Smith']);
-    User::factory()->create(['name' => 'Alice Brown']);
+    $matchingUser = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+    User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Brown']);
 
     $response = getJson(route('api.v1.users.index', ['filter' => ['name' => 'John']], false));
     $response->assertOk();
 
     expect($response['meta']['total'])->toBe(1);
     expect($response['data'][0]['id'])->toBe($matchingUser->id);
-    expect($response['data'][0]['name'])->toBe($matchingUser->name);
+    expect($response['data'][0]['name'])->toBe($matchingUser->full_name);
 });
 
-it('can filter users by department', function () {
+it('can filter users by multiple names', function (array $filter): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('user.view-any');
+    Sanctum::actingAs($user, ['api']);
+
+    $john = User::factory()->create(['first_name' => 'John', 'last_name' => 'Doe']);
+    $jane = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Smith']);
+    User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Brown']);
+
+    $response = getJson(route('api.v1.users.index', ['filter' => $filter], false));
+    $response->assertOk();
+
+    expect($response['meta']['total'])->toBe(2)
+        ->and($response->json('data.*.id'))->toEqualCanonicalizing([$john->id, $jane->id]);
+})->with([
+    'comma separated' => [['name' => 'John,Jane']],
+    'array' => [['name' => ['John', 'Jane']]],
+]);
+
+it('can filter users by department', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -227,11 +246,11 @@ it('can filter users by department', function () {
 });
 
 dataset('user_sorts', [
-    '`name`' => ['name',  ['name' => 'Alpha User'],          ['name' => 'Zulu User'],          'name',  'Alpha User',          'Zulu User'],
+    '`name`' => ['name',  ['first_name' => 'Alpha', 'last_name' => 'User'], ['first_name' => 'Zulu', 'last_name' => 'User'], 'name',  'Alpha User',          'Zulu User'],
     '`email`' => ['email', ['email' => 'alpha@example.com'],  ['email' => 'zulu@example.com'],  'email', 'alpha@example.com',  'zulu@example.com'],
 ]);
 
-it('can sort users by all attributes ascending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue) {
+it('can sort users by all attributes ascending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);
@@ -246,7 +265,7 @@ it('can sort users by all attributes ascending', function (string $requestKey, a
     expect($response['data'][1][$responseKey])->toBe($responseSecondValue);
 })->with('user_sorts');
 
-it('can sort users by all attributes descending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue) {
+it('can sort users by all attributes descending', function (string $requestKey, array $firstAttributes, array $secondAttributes, string $responseKey, mixed $responseFirstValue, mixed $responseSecondValue): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('user.view-any');
     Sanctum::actingAs($user, ['api']);

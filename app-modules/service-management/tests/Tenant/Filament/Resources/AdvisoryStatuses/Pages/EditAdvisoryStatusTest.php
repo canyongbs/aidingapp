@@ -45,7 +45,7 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('EditAdvisoryStatus is gated with proper access control', function () {
+test('EditAdvisoryStatus is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisoryStatus = AdvisoryStatus::factory()->create();
@@ -85,7 +85,7 @@ test('EditAdvisoryStatus is gated with proper access control', function () {
         ->and($advisoryStatus->fresh()->classification)->toEqual($request->get('classification'));
 });
 
-test('EditAdvisoryStatus validates the inputs', function ($data, $errors) {
+test('EditAdvisoryStatus validates the inputs', function (AdvisoryStatusRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $advisoryStatus = AdvisoryStatus::factory()->create();
@@ -119,7 +119,7 @@ test('EditAdvisoryStatus validates the inputs', function ($data, $errors) {
     ]
 );
 
-test('delete action visible with proper access control', function () {
+test('delete action visible with proper access control', function (): void {
     $user = User::factory()->create();
 
     $advisoryStatus = AdvisoryStatus::factory()->create();

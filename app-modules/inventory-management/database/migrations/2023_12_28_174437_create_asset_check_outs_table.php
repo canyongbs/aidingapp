@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        Schema::create('asset_check_outs', function (Blueprint $table) {
+        Schema::create('asset_check_outs', function (Blueprint $table): void {
             $table->uuid('id')->primary();
 
             $table->foreignUuid('asset_id')->constrained('assets');

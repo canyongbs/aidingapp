@@ -35,37 +35,32 @@
 */
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
+use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\ViewContactType;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-test('The correct details are displayed on the ViewContactType page', function () {
+test('The correct details are displayed on the ViewContactType page', function (): void {
     $contactType = ContactType::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ContactTypeResource::getUrl('view', [
-                'record' => $contactType,
-            ])
-        )
+    asSuperAdmin();
+
+    Livewire::test(ViewContactType::class, ['record' => $contactType->getRouteKey()])
         ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Name',
-                $contactType->name,
-                'Color',
-                $contactType->color->getLabel(),
-                'Default',
-            ]
-        );
+        ->assertSchemaStateSet([
+            'name' => $contactType->name,
+            'color' => $contactType->color,
+            'is_default' => $contactType->is_default,
+        ]);
 });
 
 // Permission Tests
 
-test('ViewContactType is gated with proper access control', function () {
+test('ViewContactType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $contactType = ContactType::factory()->create();

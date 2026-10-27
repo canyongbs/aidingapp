@@ -97,11 +97,11 @@ class UploadsMediaCollection extends MediaCollection
     {
         $this->maxFileSizeInMb = $maxFileSizeInMb;
 
-        $this->accepts['size'] = fn (File $file) => $file->size <= $maxFileSizeInMb * 1000 * 1000;
+        $this->accepts['size'] = fn (File $file): bool => $file->size <= $maxFileSizeInMb * 1000 * 1000;
 
         $this->acceptsFile(
             fn (File $file) => collect($this->accepts)
-                ->reduce(fn (bool $carry, callable $rule) => $carry && $rule($file), true)
+                ->reduce(fn (bool $carry, callable $rule): bool => $carry && $rule($file), true)
         );
 
         return $this;

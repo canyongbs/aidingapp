@@ -65,8 +65,11 @@ class LocalDevelopmentSeeder extends Seeder
             $user = User::where('email', $email)->first();
 
             if (is_null($user)) {
+                $name = str($email)->replace('.', ' ')->before('@')->title();
+
                 $user = User::factory()->create([
-                    'name' => str($email)->replace('.', ' ')->before('@')->title(),
+                    'first_name' => $name->before(' '),
+                    'last_name' => $name->after(' '),
                     'email' => $email,
                     'password' => Hash::make('password'),
                     'is_external' => true,

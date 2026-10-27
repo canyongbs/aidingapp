@@ -108,7 +108,7 @@ class ServiceRequestUpdateResource extends Resource
                     ->label('Related To')
                     ->sortable(query: function (Builder $query, string $direction, ServiceRequestUpdate $record): Builder {
                         return $query->join('service_requests', 'service_request_updates.service_request_id', '=', 'service_requests.id')
-                            ->join('contacts', function (JoinClause $join) {
+                            ->join('contacts', function (JoinClause $join): void {
                                 $join->on('service_requests.respondent_id', '=', 'contacts.id');
                             })
                             ->orderBy('full', $direction);

@@ -46,7 +46,7 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render with proper permission', function () {
+it('can render with proper permission', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -75,7 +75,7 @@ it('can render with proper permission', function () {
         ->assertSuccessful();
 });
 
-it('renders the kanban board', function () {
+it('renders the kanban board', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -84,15 +84,17 @@ it('renders the kanban board', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Drag pipeline task here');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//*[@data-stage]//*[contains(@class, "border-dashed")]'))
+        ->toContain('Drag pipeline task here');
 });
 
-it('returns 404 if the project route parameter does not match the pipeline\'s project', function () {
+it('returns 404 if the project route parameter does not match the pipeline\'s project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -110,7 +112,7 @@ it('returns 404 if the project route parameter does not match the pipeline\'s pr
         ->assertNotFound();
 });
 
-it('shows a back to project link', function () {
+it('shows a back to project link', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -119,15 +121,17 @@ it('shows a back to project link', function () {
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create();
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Back to Project');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//a[normalize-space()="Back to Project"]'))
+        ->toBe('Back to Project');
 });
 
-it('shows the selected pipeline name on the pipeline switcher trigger', function () {
+it('shows the selected pipeline name on the pipeline switcher trigger', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -136,15 +140,17 @@ it('shows the selected pipeline name on the pipeline switcher trigger', function
         ->has(PipelineStage::factory()->count(1), 'stages')
         ->create(['name' => 'Onboarding Pipeline']);
 
-    get(ManagePipelineEntries::getUrl([
+    $response = get(ManagePipelineEntries::getUrl([
         'record' => $pipeline->getRouteKey(),
         'project' => $project->getRouteKey(),
     ]))
-        ->assertSuccessful()
-        ->assertSee('Onboarding Pipeline');
+        ->assertSuccessful();
+
+    expect(\Tests\htmlText((string) $response->getContent(), '//button'))
+        ->toContain('Onboarding Pipeline');
 });
 
-it('can switch to a different pipeline within the same project via the select pipeline action', function () {
+it('can switch to a different pipeline within the same project via the select pipeline action', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -169,7 +175,7 @@ it('can switch to a different pipeline within the same project via the select pi
         ]));
 });
 
-it('rejects switching to a pipeline that does not belong to the project', function () {
+it('rejects switching to a pipeline that does not belong to the project', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -191,7 +197,7 @@ it('rejects switching to a pipeline that does not belong to the project', functi
         ->assertNotified('Invalid pipeline selection');
 });
 
-it('hides the pipeline resource sub navigation', function () {
+it('hides the pipeline resource sub navigation', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

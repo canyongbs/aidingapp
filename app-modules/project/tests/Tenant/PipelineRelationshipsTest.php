@@ -40,7 +40,7 @@ use AidingApp\Project\Models\ProjectMilestone;
 
 use function Tests\asSuperAdmin;
 
-it('has many milestones', function () {
+it('has many milestones', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -62,5 +62,5 @@ it('has many milestones', function () {
 
     expect($pipeline->milestones->pluck('id')->sort()->values()->all())
         ->toBe($milestones->pluck('id')->sort()->values()->all())
-        ->not->toContain($otherMilestone->id);
+        ->not()->toContain($otherMilestone->id);
 });

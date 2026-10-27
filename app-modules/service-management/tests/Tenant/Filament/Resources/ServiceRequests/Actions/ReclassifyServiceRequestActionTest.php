@@ -50,7 +50,9 @@ use AidingApp\ServiceManagement\Services\ServiceRequestType\RoundRobinAssigner;
 use AidingApp\ServiceManagement\Services\ServiceRequestType\WorkloadAssigner;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\Select;
 use Filament\Notifications\Notification;
+use Illuminate\Support\Collection;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -58,7 +60,7 @@ use function Tests\asSuperAdmin;
 
 // Authorization
 
-test('reclassify action is visible for manager department member with update permission', function () {
+test('reclassify action is visible for manager department member with update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -90,7 +92,7 @@ test('reclassify action is visible for manager department member with update per
         ->assertActionVisible('reclassify');
 });
 
-test('reclassify action is hidden for user without update permission', function () {
+test('reclassify action is hidden for user without update permission', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -122,7 +124,7 @@ test('reclassify action is hidden for user without update permission', function 
         ->assertActionHidden('reclassify');
 });
 
-test('reclassify action is hidden on closed service requests', function () {
+test('reclassify action is hidden on closed service requests', function (): void {
     $user = User::factory()->create();
 
     $department = Department::factory()->create();
@@ -156,7 +158,7 @@ test('reclassify action is hidden on closed service requests', function () {
 
 // Validation
 
-test('reclassify requires type_id', function () {
+test('reclassify requires type_id', function (): void {
     $serviceRequest = ServiceRequest::factory()
         ->for(
             ServiceRequestStatus::factory()->state([
@@ -179,7 +181,7 @@ test('reclassify requires type_id', function () {
         ->assertHasFormErrors(['type_id' => 'required']);
 });
 
-test('reclassify requires priority_id', function () {
+test('reclassify requires priority_id', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
@@ -207,7 +209,7 @@ test('reclassify requires priority_id', function () {
         ->assertHasFormErrors(['priority_id' => 'required']);
 });
 
-test('reclassify requires assignment_method', function () {
+test('reclassify requires assignment_method', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
@@ -239,7 +241,7 @@ test('reclassify requires assignment_method', function () {
         ->assertHasFormErrors(['assignment_method' => 'required']);
 });
 
-test('reclassify with override but missing assign_to produces validation error', function () {
+test('reclassify with override but missing assign_to produces validation error', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
@@ -274,7 +276,7 @@ test('reclassify with override but missing assign_to produces validation error',
 
 // Form Behavior / Options
 
-test('type options exclude the current service request type', function () {
+test('type options exclude the current service request type', function (): void {
     $currentType = ServiceRequestType::factory()->create();
     $otherType = ServiceRequestType::factory()->create();
 
@@ -295,7 +297,7 @@ test('type options exclude the current service request type', function () {
         ->mountAction('reclassify')
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($currentType, $otherType): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -315,7 +317,7 @@ test('type options exclude the current service request type', function () {
         });
 });
 
-test('type options exclude archived service request types', function () {
+test('type options exclude archived service request types', function (): void {
     $currentType = ServiceRequestType::factory()->create();
     $archivedType = ServiceRequestType::factory()->create([
         'archived_at' => now(),
@@ -339,7 +341,7 @@ test('type options exclude archived service request types', function () {
         ->mountAction('reclassify')
         ->assertFormFieldExists('type_id', function (SelectTree $field) use ($archivedType, $activeType): bool {
             $flattenedValues = collect($field->getTree())
-                ->pipe(function ($tree): array {
+                ->pipe(function (Collection $tree): array {
                     $flatten = function (array $nodes) use (&$flatten): array {
                         $values = [];
 
@@ -359,19 +361,19 @@ test('type options exclude archived service request types', function () {
         });
 });
 
-test('override assign_to only lists eligible managers for selected type', function () {
+test('override assign_to only lists eligible managers for selected type', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
-    $eligibleDirectManager = User::factory()->create(['name' => 'Eligible Direct']);
+    $eligibleDirectManager = User::factory()->create(['first_name' => 'Eligible', 'last_name' => 'Direct']);
     $newType->managerUsers()->attach($eligibleDirectManager);
 
-    $eligibleDepartmentManager = User::factory()->create(['name' => 'Eligible Department']);
+    $eligibleDepartmentManager = User::factory()->create(['first_name' => 'Eligible', 'last_name' => 'Department']);
     $department = Department::factory()->create();
     $eligibleDepartmentManager->department()->associate($department)->save();
     $newType->managerDepartments()->attach($department);
 
-    $ineligibleUser = User::factory()->create(['name' => 'Ineligible User']);
+    $ineligibleUser = User::factory()->create(['first_name' => 'Ineligible', 'last_name' => 'User']);
 
     $serviceRequest = ServiceRequest::factory()->state([
         'status_id' => ServiceRequestStatus::factory()->create([
@@ -392,7 +394,7 @@ test('override assign_to only lists eligible managers for selected type', functi
             'type_id' => $newType->getKey(),
             'assignment_method' => 'override',
         ])
-        ->assertFormFieldExists('assign_to', function ($field) use ($eligibleDirectManager, $eligibleDepartmentManager, $ineligibleUser): bool {
+        ->assertFormFieldExists('assign_to', function (Select $field) use ($eligibleDirectManager, $eligibleDepartmentManager, $ineligibleUser): bool {
             $options = $field->getOptions();
 
             return isset($options[$eligibleDirectManager->getKey()])
@@ -401,7 +403,7 @@ test('override assign_to only lists eligible managers for selected type', functi
         });
 });
 
-test('selecting a new type auto-selects priority with matching name', function () {
+test('selecting a new type auto-selects priority with matching name', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
@@ -434,7 +436,7 @@ test('selecting a new type auto-selects priority with matching name', function (
         ->assertSchemaStateSet(['priority_id' => $matchingPriority->getKey()]);
 });
 
-test('selecting a new type clears priority when no matching name exists', function () {
+test('selecting a new type clears priority when no matching name exists', function (): void {
     $originalType = ServiceRequestType::factory()->create();
     $newType = ServiceRequestType::factory()->create();
 
@@ -467,7 +469,7 @@ test('selecting a new type clears priority when no matching name exists', functi
 
 // Happy Path
 
-test('reclassify with default assignment updates priority_id', function () {
+test('reclassify with default assignment updates priority_id', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -506,7 +508,7 @@ test('reclassify with default assignment updates priority_id', function () {
     expect($serviceRequest->refresh()->priority_id)->toBe($newPriority->getKey());
 });
 
-test('reclassify with override assignment creates manual assignment to selected user', function () {
+test('reclassify with override assignment creates manual assignment to selected user', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -560,13 +562,13 @@ test('reclassify with override assignment creates manual assignment to selected 
         ->where('status', ServiceRequestAssignmentStatus::Active)
         ->first();
 
-    expect($assignment)->not->toBeNull();
+    expect($assignment)->not()->toBeNull();
     expect($assignment->user_id)->toBe($eligibleAgent->getKey());
     expect($assignment->assigned_by_id)->toBe($actor->getKey());
     expect($assignment->assigned_by_type)->toBe((new User())->getMorphClass());
 });
 
-test('reclassify marks the existing active assignment inactive instead of deleting it', function () {
+test('reclassify marks the existing active assignment inactive instead of deleting it', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -622,7 +624,7 @@ test('reclassify marks the existing active assignment inactive instead of deleti
         ->and($serviceRequest->refresh()->assignedTo)->toBeNull();
 });
 
-test('reclassify records an `Assignment Removed` history entry when it leaves the service request unassigned', function () {
+test('reclassify records an `Assignment Removed` history entry when it leaves the service request unassigned', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -639,7 +641,7 @@ test('reclassify records an `Assignment Removed` history entry when it leaves th
         'type_id' => $newType->getKey(),
     ]);
 
-    $previousAssignee = User::factory()->create(['name' => 'Jane Doe']);
+    $previousAssignee = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
     $originalType->managerUsers()->attach($previousAssignee);
 
     $serviceRequest = ServiceRequest::factory()->state([
@@ -680,7 +682,7 @@ test('reclassify records an `Assignment Removed` history entry when it leaves th
         ->and($removalHistory->actor_type)->toBe($actor->getMorphClass());
 });
 
-test('reclassify does not record an `Assignment Removed` history entry when it reassigns the service request', function () {
+test('reclassify does not record an `Assignment Removed` history entry when it reassigns the service request', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -733,7 +735,7 @@ test('reclassify does not record an `Assignment Removed` history entry when it r
         ->and($serviceRequest->histories()->get()->contains(fn (ServiceRequestHistory $history): bool => $history->isAssignmentRemovedEvent()))->toBeFalse();
 });
 
-test('reclassify with default assignment invokes the correct assigner class', function (ServiceRequestTypeAssignmentTypes $assignmentType, ?string $assignerClass) {
+test('reclassify with default assignment invokes the correct assigner class', function (ServiceRequestTypeAssignmentTypes $assignmentType, ?string $assignerClass): void {
     $manager = User::factory()->create();
 
     $originalType = ServiceRequestType::factory()->create([
@@ -791,7 +793,7 @@ test('reclassify with default assignment invokes the correct assigner class', fu
     'workload' => [ServiceRequestTypeAssignmentTypes::Workload, WorkloadAssigner::class],
 ]);
 
-test('reclassify with individual assignment end-to-end assigns correct user', function () {
+test('reclassify with individual assignment end-to-end assigns correct user', function (): void {
     $manager = User::factory()->create();
 
     $originalType = ServiceRequestType::factory()->create([
@@ -840,7 +842,7 @@ test('reclassify with individual assignment end-to-end assigns correct user', fu
 
 // Error Handling
 
-test('reclassify rolls back changes on failure and shows error notification', function () {
+test('reclassify rolls back changes on failure and shows error notification', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);
@@ -888,7 +890,7 @@ test('reclassify rolls back changes on failure and shows error notification', fu
     expect($serviceRequest->refresh()->priority_id)->toBe($originalPriority->getKey());
 });
 
-test('reclassify shows success notification on completion', function () {
+test('reclassify shows success notification on completion', function (): void {
     $originalType = ServiceRequestType::factory()->create([
         'assignment_type' => ServiceRequestTypeAssignmentTypes::None,
     ]);

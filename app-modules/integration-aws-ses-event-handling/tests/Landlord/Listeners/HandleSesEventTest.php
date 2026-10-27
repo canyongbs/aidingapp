@@ -43,11 +43,11 @@ use function Pest\Laravel\withHeaders;
 use function Pest\Laravel\withoutMiddleware;
 use function Tests\loadFixtureFromModule;
 
-beforeEach(function () {
+beforeEach(function (): void {
     withoutMiddleware(VerifyAwsSnsRequest::class);
 });
 
-it('correctly handles the incoming SES event', function (string $event, EmailMessageEventType $eventType) {
+it('correctly handles the incoming SES event', function (string $event, EmailMessageEventType $eventType): void {
     /** @var Tenant $tenant */
     $tenant = Tenant::query()->first();
 
@@ -63,7 +63,7 @@ it('correctly handles the incoming SES event', function (string $event, EmailMes
     data_set($messageContent, 'mail.tags.tenant_id.0', $tenant->getKey());
     $snsData['Message'] = json_encode($messageContent);
 
-    $tenant->execute(function () use ($emailMessage) {
+    $tenant->execute(function () use ($emailMessage): void {
         expect($emailMessage->events()->count())->toBe(0);
     });
 
@@ -86,7 +86,7 @@ it('correctly handles the incoming SES event', function (string $event, EmailMes
 
     $response->assertOk();
 
-    $tenant->execute(function () use ($emailMessage, $eventType) {
+    $tenant->execute(function () use ($emailMessage, $eventType): void {
         // The email message should have the apppriate email message event created based on the event
         $emailMessage->refresh();
 

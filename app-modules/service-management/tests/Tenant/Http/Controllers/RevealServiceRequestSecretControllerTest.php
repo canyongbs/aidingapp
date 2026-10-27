@@ -49,21 +49,12 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\postJson;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
-    $settings = app(LicenseSettings::class);
-    $settings->data->addons->serviceManagement = true;
-    $settings->save();
-});
-
-function revealableSecretFor(User $manager, bool $isAssigned = true): Secret
-{
+$revealableSecretFor = function (User $manager, bool $isAssigned = true): Secret {
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerUsers()->attach($manager);
-
     $serviceRequest = ServiceRequest::factory()
         ->for(ServiceRequestPriority::factory()->for($serviceRequestType, 'type'), 'priority')
         ->create();
-
     $serviceRequest->secret_key = Crypt::encryptString(
         'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
     );
@@ -83,11 +74,17 @@ function revealableSecretFor(User $manager, bool $isAssigned = true): Secret
             'value' => app(ResolveServiceRequestSecretEncrypter::class)($serviceRequest)
                 ->encryptString('service-request-password'),
         ]);
-}
+};
 
-it('reveals a secret to the assigned manager', function () {
+beforeEach(function (): void {
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+});
+
+it('reveals a secret to the assigned manager', function () use ($revealableSecretFor): void {
     $manager = user(permissions: ['service_request.*.update']);
-    $secret = revealableSecretFor($manager);
+    $secret = $revealableSecretFor($manager);
 
     actingAs($manager);
 
@@ -99,9 +96,9 @@ it('reveals a secret to the assigned manager', function () {
         ->assertExactJson(['value' => 'service-request-password']);
 });
 
-it('denies an unassigned service request secret to a super admin', function () {
+it('denies an unassigned service request secret to a super admin', function () use ($revealableSecretFor): void {
     $superAdmin = User::factory()->create();
-    $secret = revealableSecretFor($superAdmin, isAssigned: false);
+    $secret = $revealableSecretFor($superAdmin, isAssigned: false);
 
     asSuperAdmin($superAdmin);
 
@@ -110,10 +107,13 @@ it('denies an unassigned service request secret to a super admin', function () {
     ])->assertForbidden();
 });
 
-it('denies a secret to a manager who is not assigned to the service request', function () {
+it('denies a secret to a manager who is not assigned to the service request', function () use ($revealableSecretFor): void {
     $assignedManager = user(permissions: ['service_request.*.update']);
-    $secret = revealableSecretFor($assignedManager);
+    $secret = $revealableSecretFor($assignedManager);
     $otherManager = user(permissions: ['service_request.*.update']);
+
+    assert($secret->related instanceof ServiceRequest);
+
     $secret->related->priority->type->managerUsers()->attach($otherManager);
 
     actingAs($otherManager);
@@ -123,7 +123,7 @@ it('denies a secret to a manager who is not assigned to the service request', fu
     ])->assertForbidden();
 });
 
-it('does not reveal an unattached secret', function () {
+it('does not reveal an unattached secret', function (): void {
     $manager = user(permissions: ['service_request.*.update']);
     $secret = Secret::factory()->for($manager, 'author')->create();
 
@@ -134,8 +134,8 @@ it('does not reveal an unattached secret', function () {
     ])->assertNotFound();
 });
 
-it('denies unauthenticated secret reveals', function () {
-    $secret = revealableSecretFor(user(permissions: ['service_request.*.update']));
+it('denies unauthenticated secret reveals', function () use ($revealableSecretFor): void {
+    $secret = $revealableSecretFor(user(permissions: ['service_request.*.update']));
 
     postJson(route('service-request.reveal-secret'), [
         'secret_id' => $secret->getKey(),

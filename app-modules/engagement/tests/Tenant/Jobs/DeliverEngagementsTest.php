@@ -34,13 +34,14 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use Illuminate\Support\Facades\Notification;
 
-it('will send engagements that have been scheduled for a past date and have not been dispatched', function () {
+it('will send engagements that have been scheduled for a past date and have not been dispatched', function (): void {
     Notification::fake();
 
     $engagement = Engagement::factory()->create([
@@ -55,7 +56,7 @@ it('will send engagements that have been scheduled for a past date and have not 
     );
 });
 
-it('will send engagements that have not been scheduled but have not been dispatched', function () {
+it('will send engagements that have not been scheduled but have not been dispatched', function (): void {
     Notification::fake();
 
     $engagement = Engagement::factory()->deliverNow()->create();
@@ -68,7 +69,7 @@ it('will send engagements that have not been scheduled but have not been dispatc
     );
 });
 
-it('will not send engagements that have been scheduled for a future date', function () {
+it('will not send engagements that have been scheduled for a future date', function (): void {
     Notification::fake();
 
     $engagement = Engagement::factory()->create([
@@ -83,7 +84,7 @@ it('will not send engagements that have been scheduled for a future date', funct
     );
 });
 
-it('will not send engagements that have already been dispatched', function () {
+it('will not send engagements that have already been dispatched', function (): void {
     Notification::fake();
 
     $engagement = Engagement::factory()->create([
@@ -99,12 +100,15 @@ it('will not send engagements that have already been dispatched', function () {
     );
 });
 
-it('suppresses a scheduled engagement when the recipient bounces before delivery and still marks it dispatched', function () {
+it('suppresses a scheduled engagement when the recipient bounces before delivery and still marks it dispatched', function (): void {
     $engagement = Engagement::factory()->create([
         'scheduled_at' => now()->subMinute(),
     ]);
 
     $contact = $engagement->recipient;
+
+    assert($contact instanceof Contact);
+
     $contact->update(['email_bounce' => true]);
 
     expect($engagement->dispatched_at)->toBeNull();
@@ -113,7 +117,7 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
 
     $engagement->refresh();
 
-    expect($engagement->dispatched_at)->not->toBeNull();
+    expect($engagement->dispatched_at)->not()->toBeNull();
     expect($engagement->dispatch_failed_at)->toBeNull();
 
     $events = $engagement->latestEmailMessage->events;

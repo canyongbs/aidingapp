@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "025f99722d9f9155139b5f9753f5ac51",
+    "content-hash": "a12991af64c66c15d6c4d3d8695b27fb",
     "packages": [
         {
             "name": "ably/ably-php",
@@ -1599,16 +1599,16 @@
         },
         {
             "name": "canyongbs/common",
-            "version": "2.42.0",
+            "version": "2.46.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/canyongbs/common.git",
-                "reference": "e6d0560d1b5c9ad09f98fa3fc55d49310e22ce29"
+                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/canyongbs/common/zipball/e6d0560d1b5c9ad09f98fa3fc55d49310e22ce29",
-                "reference": "e6d0560d1b5c9ad09f98fa3fc55d49310e22ce29",
+                "url": "https://api.github.com/repos/canyongbs/common/zipball/9e05a7a4b9e0476c65da256ae0511280eee350bc",
+                "reference": "9e05a7a4b9e0476c65da256ae0511280eee350bc",
                 "shasum": ""
             },
             "require": {
@@ -1616,10 +1616,10 @@
                 "internachi/modular": "^3.0",
                 "internachi/modularize": "^1.1",
                 "laravel-notification-channels/webpush": "^11.0",
-                "laravel/framework": "^12.0|^13.0",
+                "laravel/framework": "^12.15|^13.0",
                 "laravel/pennant": "^1.0",
                 "laravel/prompts": "^0.3",
-                "owen-it/laravel-auditing": "^14.0",
+                "owen-it/laravel-auditing": "^14.0.5",
                 "php": "8.4.*|8.5.*",
                 "spatie/laravel-health": "^1.40",
                 "tapp/filament-timezone-field": "^3.0",
@@ -1666,9 +1666,9 @@
             ],
             "support": {
                 "issues": "https://github.com/canyongbs/common/issues",
-                "source": "https://github.com/canyongbs/common/tree/2.42.0"
+                "source": "https://github.com/canyongbs/common/tree/2.46.1"
             },
-            "time": "2026-09-30T10:31:36+00:00"
+            "time": "2026-10-26T15:37:46+00:00"
         },
         {
             "name": "canyongbs/model-state-machine",

@@ -42,12 +42,12 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     public function up(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_types', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->timestamp('archived_at')->nullable();
             });
 
-            Schema::table('service_request_forms', function (Blueprint $table) {
+            Schema::table('service_request_forms', function (Blueprint $table): void {
                 $table->timestamp('archived_at')->nullable();
             });
         });
@@ -55,12 +55,12 @@ return new class () extends Migration {
 
     public function down(): void
     {
-        DB::transaction(function () {
-            Schema::table('service_request_forms', function (Blueprint $table) {
+        DB::transaction(function (): void {
+            Schema::table('service_request_forms', function (Blueprint $table): void {
                 $table->dropColumn('archived_at');
             });
 
-            Schema::table('service_request_types', function (Blueprint $table) {
+            Schema::table('service_request_types', function (Blueprint $table): void {
                 $table->dropColumn('archived_at');
             });
         });

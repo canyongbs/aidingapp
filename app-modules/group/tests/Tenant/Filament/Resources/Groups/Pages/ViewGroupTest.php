@@ -44,14 +44,14 @@ use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 use function Tests\asSuperAdmin;
 
-it('can render the view group page', function () {
+it('can render the view group page', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
     get(GroupResource::getUrl('view', ['record' => $group]))->assertSuccessful();
 });
 
-it('displays the group data', function () {
+it('displays the group data', function (): void {
     asSuperAdmin();
     $group = Group::factory()->create();
 
@@ -62,8 +62,8 @@ it('displays the group data', function () {
         ]);
 });
 
-describe('authorization', function () {
-    it('denies access without the `group.*.view` permission', function () {
+describe('authorization', function (): void {
+    it('denies access without the `group.*.view` permission', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('group.view-any');
         actingAs($user);

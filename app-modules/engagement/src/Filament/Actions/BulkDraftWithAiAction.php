@@ -49,6 +49,8 @@ use Filament\Notifications\Notification;
 use Filament\Resources\Pages\Page;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Vite;
 
 class BulkDraftWithAiAction extends Action
@@ -66,7 +68,7 @@ class BulkDraftWithAiAction extends Action
             ->label('Draft with AI Assistant')
             ->link()
             ->icon('heroicon-m-pencil')
-            ->modalContent(fn (Page $livewire) => view('engagement::filament.actions.draft-with-ai-modal-content', [
+            ->modalContent(fn (Page $livewire): Factory|View => view('engagement::filament.actions.draft-with-ai-modal-content', [
                 'recordTitle' => $livewire::getResource()::getPluralModelLabel(),
                 'avatarUrl' => AiAssistant::query()->where('is_default', true)->first()
                     ?->getFirstTemporaryUrl(now()->addHour(), 'avatar', 'avatar-height-250px') ?: Vite::asset('resources/images/canyon-ai-headshot.jpg'),
@@ -80,10 +82,10 @@ class BulkDraftWithAiAction extends Action
                     ->placeholder('What do you want to write about?')
                     ->required(),
             ])
-            ->action(function (array $data, Set $set, Page $livewire) {
+            ->action(function (array $data, Set $set, Page $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
-                $userName = auth()->user()->name;
+                $userName = auth()->user()->full_name;
                 $userJobTitle = auth()->user()->job_title ?? 'staff member';
                 $clientName = app(LicenseSettings::class)->data->subscription->clientName;
                 $educatableLabel = $livewire::getResource()::getPluralModelLabel();

@@ -45,7 +45,7 @@ use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
-it('returns all knowledge base articles without filters', function () {
+it('returns all knowledge base articles without filters', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -61,7 +61,7 @@ it('returns all knowledge base articles without filters', function () {
         ->assertCanSeeTableRecords($articles);
 });
 
-it('filters articles by category from page filter', function () {
+it('filters articles by category from page filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create();
     $categoryB = KnowledgeBaseCategory::factory()->create();
@@ -86,14 +86,14 @@ it('filters articles by category from page filter', function () {
         ->assertCanNotSeeTableRecords($articlesB);
 });
 
-it('has an export action', function () {
+it('has an export action', function (): void {
     Livewire::test(KnowledgeBaseArticlesTable::class, [
         'cacheTag' => 'test-kb-articles-table-export',
         'pageFilters' => [],
     ])->assertTableActionExists(ExportAction::class);
 });
 
-it('can start an export and send a notification', function () {
+it('can start an export and send a notification', function (): void {
     Storage::fake('s3');
 
     actingAs(User::factory()->create());
@@ -106,7 +106,7 @@ it('can start an export and send a notification', function () {
         ->assertNotified();
 });
 
-it('filters records by status using the table-level status filter', function () {
+it('filters records by status using the table-level status filter', function (): void {
     $statusA = KnowledgeBaseStatus::factory()->create(['name' => 'Published']);
     $statusB = KnowledgeBaseStatus::factory()->create(['name' => 'Draft']);
     $category = KnowledgeBaseCategory::factory()->create();
@@ -133,7 +133,7 @@ it('filters records by status using the table-level status filter', function () 
         ->assertCanNotSeeTableRecords(collect([$publishedArticle]));
 });
 
-it('filters records by category using the table-level category filter', function () {
+it('filters records by category using the table-level category filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $categoryA = KnowledgeBaseCategory::factory()->create();
     $categoryB = KnowledgeBaseCategory::factory()->create();
@@ -160,7 +160,7 @@ it('filters records by category using the table-level category filter', function
         ->assertCanNotSeeTableRecords(collect([$articleA]));
 });
 
-it('filters records by public using the table-level public filter', function () {
+it('filters records by public using the table-level public filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -188,7 +188,7 @@ it('filters records by public using the table-level public filter', function () 
         ->assertCanNotSeeTableRecords(collect([$publicArticle]));
 });
 
-it('filters records by created_at using the table-level created after filter', function () {
+it('filters records by created_at using the table-level created after filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -213,7 +213,7 @@ it('filters records by created_at using the table-level created after filter', f
         ->assertCanNotSeeTableRecords(collect([$oldArticle]));
 });
 
-it('defaults to sorting by updated_at in descending order', function () {
+it('defaults to sorting by updated_at in descending order', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -236,7 +236,7 @@ it('defaults to sorting by updated_at in descending order', function () {
         ->assertCanSeeTableRecords([$recentlyUpdatedArticle, $olderUpdatedArticle], inOrder: true);
 });
 
-it('allows sorting records by portal_view_count descending, overriding the default updated_at sort', function () {
+it('allows sorting records by portal_view_count descending, overriding the default updated_at sort', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -262,7 +262,7 @@ it('allows sorting records by portal_view_count descending, overriding the defau
         ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentUpdate], inOrder: true);
 });
 
-it('allows sorting records by updated_at ascending, overriding the default updated_at sort', function () {
+it('allows sorting records by updated_at ascending, overriding the default updated_at sort', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -288,7 +288,7 @@ it('allows sorting records by updated_at ascending, overriding the default updat
         ->assertCanSeeTableRecords([$highViewsOlderUpdate, $lowViewsRecentlyUpdated], inOrder: true);
 });
 
-it('filters records by updated_at using the table-level updated after filter', function () {
+it('filters records by updated_at using the table-level updated after filter', function (): void {
     $status = KnowledgeBaseStatus::factory()->create();
     $category = KnowledgeBaseCategory::factory()->create();
 
@@ -313,3 +313,28 @@ it('filters records by updated_at using the table-level updated after filter', f
         ->assertCanSeeTableRecords(collect([$recentlyUpdatedArticle]))
         ->assertCanNotSeeTableRecords(collect([$staleArticle]));
 });
+
+it('searches the manager column by full name, including a quoted phrase', function (string $search): void {
+    $status = KnowledgeBaseStatus::factory()->create();
+    $category = KnowledgeBaseCategory::factory()->create();
+
+    $matching = KnowledgeBaseItem::factory()->state(['status_id' => $status->id, 'category_id' => $category->id])->create();
+    $other = KnowledgeBaseItem::factory()->state(['status_id' => $status->id, 'category_id' => $category->id])->create();
+
+    $matching->managers()->attach(User::factory()->create(['first_name' => 'Avery', 'last_name' => 'Smith']));
+    $other->managers()->attach(User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Lee']));
+
+    Livewire::test(KnowledgeBaseArticlesTable::class, [
+        'cacheTag' => 'test-kb-articles-table-manager-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other]);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+    'quoted full name' => '"Avery Smith"',
+]);

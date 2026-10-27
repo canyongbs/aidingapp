@@ -41,7 +41,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-it('excludes password fields from the assistant clarification prompt', function () {
+it('excludes password fields from the assistant clarification prompt', function (): void {
     $type = ServiceRequestType::factory()->create();
     $form = ServiceRequestForm::factory()->for($type, 'type')->create();
 
@@ -76,5 +76,5 @@ it('excludes password fields from the assistant clarification prompt', function 
     );
 
     expect($prompt)->toContain('Visible response', 'Visible answer')
-        ->not->toContain('Private credential', $secretId);
+        ->not()->toContain('Private credential', $secretId);
 });

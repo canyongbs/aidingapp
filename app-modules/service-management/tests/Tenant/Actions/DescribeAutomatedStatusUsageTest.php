@@ -38,65 +38,64 @@ use AidingApp\ServiceManagement\Actions\DescribeAutomatedStatusUsage;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 
-function describeUsageOf(ServiceRequestStatus ...$statuses): ?string
-{
+$describeUsageOf = function (ServiceRequestStatus ...$statuses): ?string {
     return app(DescribeAutomatedStatusUsage::class)(
         ServiceRequestStatus::query()->whereKey(array_map(fn (ServiceRequestStatus $status): string => $status->getKey(), $statuses)),
     );
-}
+};
 
-it('does not warn when no service request type automates the status', function () {
+it('does not warn when no service request type automates the status', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
-    expect(describeUsageOf($status))->toBeNull();
+    expect($describeUsageOf($status))->toBeNull();
 });
 
-it('names the single type automating one status', function () {
+it('names the single type automating one status', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => 'VPN Access Request']);
 
-    expect(describeUsageOf($status))->toBe(
+    expect($describeUsageOf($status))->toBe(
         'This status is used for automatic status changes by 1 service request type: VPN Access Request. Archiving will not stop that automation.'
     );
 });
 
-it('names every type automating one status in alphabetical order', function () {
+it('names every type automating one status in alphabetical order', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => 'Password Reset']);
     ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => 'Hardware Repair']);
 
-    expect(describeUsageOf($status))->toBe(
+    expect($describeUsageOf($status))->toBe(
         'This status is used for automatic status changes by 2 service request types: Hardware Repair, Password Reset. Archiving will not stop that automation.'
     );
 });
 
-it('caps the named types and counts the remainder', function () {
+it('caps the named types and counts the remainder', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     foreach (['A Type', 'B Type', 'C Type', 'D Type', 'E Type'] as $name) {
         ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => $name]);
     }
 
-    expect(describeUsageOf($status))->toBe(
+    expect($describeUsageOf($status))->toBe(
         'This status is used for automatic status changes by 5 service request types: A Type, B Type, C Type and 2 others. Archiving will not stop that automation.'
     );
 });
 
-it('uses the singular form when exactly one type is unnamed', function () {
+it('uses the singular form when exactly one type is unnamed', function () use ($describeUsageOf): void {
     $status = ServiceRequestStatus::factory()->create();
 
     foreach (['A Type', 'B Type', 'C Type', 'D Type'] as $name) {
         ServiceRequestType::factory()->for($status, 'automatedStatus')->create(['name' => $name]);
     }
 
-    expect(describeUsageOf($status))->toBe(
+    expect($describeUsageOf($status))->toBe(
         'This status is used for automatic status changes by 4 service request types: A Type, B Type, C Type and 1 other. Archiving will not stop that automation.'
     );
 });
 
-it('counts how many of several statuses are automated', function () {
+it('counts how many of several statuses are automated', function () use ($describeUsageOf): void {
     $automated = ServiceRequestStatus::factory()->create();
     $alsoAutomated = ServiceRequestStatus::factory()->create();
     $notAutomated = ServiceRequestStatus::factory()->create();
@@ -104,24 +103,24 @@ it('counts how many of several statuses are automated', function () {
     ServiceRequestType::factory()->for($automated, 'automatedStatus')->create(['name' => 'Password Reset']);
     ServiceRequestType::factory()->for($alsoAutomated, 'automatedStatus')->create(['name' => 'VPN Access Request']);
 
-    expect(describeUsageOf($automated, $alsoAutomated, $notAutomated))->toBe(
+    expect($describeUsageOf($automated, $alsoAutomated, $notAutomated))->toBe(
         '2 of the selected statuses are used for automatic status changes by 2 service request types: Password Reset, VPN Access Request. Archiving will not stop that automation.'
     );
 });
 
-it('uses the singular verb when only one of several statuses is automated', function () {
+it('uses the singular verb when only one of several statuses is automated', function () use ($describeUsageOf): void {
     $automated = ServiceRequestStatus::factory()->create();
     $notAutomated = ServiceRequestStatus::factory()->create();
 
     ServiceRequestType::factory()->for($automated, 'automatedStatus')->create(['name' => 'Password Reset']);
 
-    expect(describeUsageOf($automated, $notAutomated))->toBe(
+    expect($describeUsageOf($automated, $notAutomated))->toBe(
         '1 of the selected statuses is used for automatic status changes by 1 service request type: Password Reset. Archiving will not stop that automation.'
     );
 });
 
-it('does not warn when none of several statuses are automated', function () {
+it('does not warn when none of several statuses are automated', function () use ($describeUsageOf): void {
     $statuses = ServiceRequestStatus::factory()->count(3)->create();
 
-    expect(describeUsageOf(...$statuses->all()))->toBeNull();
+    expect($describeUsageOf(...$statuses->all()))->toBeNull();
 });

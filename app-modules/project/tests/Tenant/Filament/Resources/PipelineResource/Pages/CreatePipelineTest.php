@@ -47,7 +47,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-it('can render with proper permission.', function () {
+it('can render with proper permission.', function (): void {
     $user = User::factory()->create();
 
     actingAs($user);
@@ -66,7 +66,7 @@ it('can render with proper permission.', function () {
         ->assertSuccessful();
 });
 
-it('can validate create pipeline inputs', function ($data, $errors) {
+it('can validate create pipeline inputs', function (CreatePipelineRequestFactory $data, array $errors): void {
     $superAdmin = User::factory()->create();
     asSuperAdmin($superAdmin);
 
@@ -97,7 +97,7 @@ it('can validate create pipeline inputs', function ($data, $errors) {
     ],
 ]);
 
-it('can create pipelines', function () {
+it('can create pipelines', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $superAdmin = User::factory()->create();
@@ -120,7 +120,7 @@ it('can create pipelines', function () {
     $undoRepeaterFake();
 });
 
-it('defaults new pipeline stages to planning', function () {
+it('defaults new pipeline stages to planning', function (): void {
     $undoRepeaterFake = Repeater::fake();
 
     $superAdmin = User::factory()->create();

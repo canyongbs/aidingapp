@@ -43,7 +43,7 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('creates a linked managed contact when the toggle is enabled', function () {
+it('creates a linked managed contact when the toggle is enabled', function (): void {
     asSuperAdmin();
 
     $type = ContactType::factory()->create();
@@ -52,7 +52,6 @@ it('creates a linked managed contact when the toggle is enabled', function () {
         ->fillForm([
             'first_name' => 'Manny',
             'last_name' => 'Ged',
-            'name' => 'Manny Ged',
             'email' => 'manny@example.com',
             'is_managed_contact' => true,
             'managed_contact_type_id' => $type->getKey(),
@@ -71,14 +70,13 @@ it('creates a linked managed contact when the toggle is enabled', function () {
         ->and($contact->type_id)->toBe($type->getKey());
 });
 
-it('does not create a managed contact when the toggle is disabled', function () {
+it('does not create a managed contact when the toggle is disabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'Plain',
             'last_name' => 'User',
-            'name' => 'Plain User',
             'email' => 'plain@example.com',
             'is_managed_contact' => false,
         ])
@@ -90,14 +88,13 @@ it('does not create a managed contact when the toggle is disabled', function () 
     expect($user->managedContact()->exists())->toBeFalse();
 });
 
-it('requires a contact type when managed contact is enabled', function () {
+it('requires a contact type when managed contact is enabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateUser::class)
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Type',
-            'name' => 'No Type',
             'email' => 'notype@example.com',
             'is_managed_contact' => true,
             'managed_contact_type_id' => null,
@@ -106,7 +103,7 @@ it('requires a contact type when managed contact is enabled', function () {
         ->assertHasFormErrors(['managed_contact_type_id' => 'required']);
 });
 
-it('enables and then disables a managed contact from the edit page', function () {
+it('enables and then disables a managed contact from the edit page', function (): void {
     asSuperAdmin();
 
     $type = ContactType::factory()->create();
@@ -133,7 +130,7 @@ it('enables and then disables a managed contact from the edit page', function ()
     expect($user->fresh()->managedContact()->exists())->toBeFalse();
 });
 
-it('hydrates the managed contact toggle on the edit page', function () {
+it('hydrates the managed contact toggle on the edit page', function (): void {
     asSuperAdmin();
 
     $type = ContactType::factory()->create();
@@ -155,7 +152,7 @@ it('hydrates the managed contact toggle on the edit page', function () {
         ]);
 });
 
-it('synchronizes edited user fields to the managed contact from the edit page', function () {
+it('synchronizes edited user fields to the managed contact from the edit page', function (): void {
     asSuperAdmin();
 
     $type = ContactType::factory()->create();
@@ -168,7 +165,6 @@ it('synchronizes edited user fields to the managed contact from the edit page', 
         ->fillForm([
             'first_name' => 'Edited',
             'last_name' => 'Person',
-            'name' => 'Edited Person',
             'preferred_name' => 'Eddie',
             'school' => null,
             'program' => 'Nursing',
@@ -189,7 +185,7 @@ it('synchronizes edited user fields to the managed contact from the edit page', 
         ->and($contact->type_id)->toBe($type->getKey());
 });
 
-it('updates the managed contact type from the edit page', function () {
+it('updates the managed contact type from the edit page', function (): void {
     asSuperAdmin();
 
     $type = ContactType::factory()->create();

@@ -65,6 +65,8 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\Column;
 use Filament\View\PanelsRenderHook;
 use Illuminate\Contracts\Support\Htmlable;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\PreventRequestForgery;
@@ -91,8 +93,8 @@ class AdminPanelProvider extends PanelProvider
         Field::configureUsing(fn ($field) => $field->translateLabel());
         Entry::configureUsing(fn ($entry) => $entry->translateLabel());
         Column::configureUsing(fn ($column) => $column->translateLabel());
-        ExportAction::configureUsing(fn (ExportAction $action) => $action->maxRows(100000));
-        ImportAction::configureUsing(fn (ImportAction $action) => $action->maxRows(100000));
+        ExportAction::configureUsing(fn (ExportAction $action): ExportAction => $action->maxRows(100000));
+        ImportAction::configureUsing(fn (ImportAction $action): ImportAction => $action->maxRows(100000));
     }
 
     public function panel(Panel $panel): Panel
@@ -165,13 +167,13 @@ class AdminPanelProvider extends PanelProvider
                     }),
                 MenuItem::make()
                     ->label('Profile Settings')
-                    ->url(fn () => ProfileSettings::getUrl())
+                    ->url(fn (): string => ProfileSettings::getUrl())
                     ->icon('heroicon-s-cog-6-tooth'),
                 Action::make('about')
                     ->label('About')
                     ->modalHeading('Aiding App® by Canyon GBS')
                     ->modalDescription('Version ' . config('sentry.release'))
-                    ->modalContent(fn () => view('components.about-modal'))
+                    ->modalContent(fn (): Factory|View => view('components.about-modal'))
                     ->modalFooterActions([])
                     ->modalWidth(Width::Small)
                     ->icon('heroicon-s-information-circle'),
@@ -201,7 +203,7 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 PanelsRenderHook::TOPBAR_AFTER,
                 function (): ?Htmlable {
-                    $showBanner = Cache::remember('azure_credentials_expiring', now()->addDay(), function () {
+                    $showBanner = Cache::remember('azure_credentials_expiring', now()->addDay(), function (): bool {
                         $credentialsCheck = HealthCheckResultHistoryItem::where('check_name', app(AzureCredentialsExpiringCheck::class)->getName())
                             ->latest()
                             ->first();

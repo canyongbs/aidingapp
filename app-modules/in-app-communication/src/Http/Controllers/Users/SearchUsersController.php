@@ -62,9 +62,9 @@ class SearchUsersController extends Controller
         $users = app(SearchUsers::class)(
             excludeUser: $request->user(),
             searchTerm: $searchTerm ?: null,
-        )->map(fn (User $user) => [
+        )->map(fn (User $user): array => [
             'id' => $user->getKey(),
-            'name' => $user->name,
+            'name' => $user->full_name,
             'email' => $user->email,
             'avatar_url' => Filament::getUserAvatarUrl($user),
         ]);

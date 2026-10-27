@@ -49,7 +49,7 @@ use function Pest\Laravel\assertDatabaseHas;
 use function PHPUnit\Framework\assertEquals;
 use function Tests\asSuperAdmin;
 
-test('A successful action on the EditServiceRequestType page', function () {
+test('A successful action on the EditServiceRequestType page', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     asSuperAdmin()
@@ -75,7 +75,7 @@ test('A successful action on the EditServiceRequestType page', function () {
     assertEquals($editRequest['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType requires valid data', function ($data, $errors) {
+test('EditServiceRequestType requires valid data', function (EditServiceRequestTypeRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -100,7 +100,7 @@ test('EditServiceRequestType requires valid data', function ($data, $errors) {
 
 // Permission Tests
 
-test('EditServiceRequestType is gated with proper access control', function () {
+test('EditServiceRequestType is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequestType = ServiceRequestType::factory()->create();
@@ -139,7 +139,7 @@ test('EditServiceRequestType is gated with proper access control', function () {
     assertEquals($request['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType is gated with proper feature access control', function () {
+test('EditServiceRequestType is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -188,7 +188,7 @@ test('EditServiceRequestType is gated with proper feature access control', funct
     assertEquals($request['name'], $serviceRequestType->fresh()->name);
 });
 
-test('EditServiceRequestType is updating default_category when form saved', function () {
+test('EditServiceRequestType is updating default_category when form saved', function (): void {
     asSuperAdmin();
 
     $serviceRequestType = ServiceRequestType::factory()->create([

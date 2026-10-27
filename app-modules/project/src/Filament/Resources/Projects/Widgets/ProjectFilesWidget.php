@@ -77,7 +77,7 @@ class ProjectFilesWidget extends TableWidget
                 IdColumn::make(),
                 TextColumn::make('description'),
                 IconColumn::make('media')
-                    ->tooltip(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
+                    ->tooltip(fn (ProjectFile $record): string => match ($record->getMedia('file')->first()?->mime_type) {
                         default => 'File',
                         'image/png' => 'Image (.png)',
                         'image/jpeg' => 'Image (.jpeg)',
@@ -96,7 +96,7 @@ class ProjectFilesWidget extends TableWidget
                         'video/mp4' => 'MP4',
                         'application/zip' => 'Zip File',
                     })
-                    ->icon(fn (ProjectFile $record) => match ($record->getMedia('file')->first()?->mime_type) {
+                    ->icon(fn (ProjectFile $record): string => match ($record->getMedia('file')->first()?->mime_type) {
                         default => 'heroicon-m-paper-clip',
                         'image/png' => 'heroicon-m-photo',
                         'image/jpeg' => 'heroicon-m-camera',
@@ -122,7 +122,7 @@ class ProjectFilesWidget extends TableWidget
                     ->label('Retention Date')
                     ->placeholder('N/A')
                     ->dateTime(),
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Created By')
                     ->placeholder('N/A'),
             ])

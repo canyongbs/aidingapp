@@ -53,7 +53,7 @@ use function PHPUnit\Framework\assertCount;
 
 // Permission Tests
 
-test('CreateKnowledgeBaseCategory is gated with proper access control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     actingAs($user)
@@ -84,7 +84,7 @@ test('CreateKnowledgeBaseCategory is gated with proper access control', function
     assertDatabaseHas(KnowledgeBaseCategory::class, $request->toArray());
 });
 
-test('CreateKnowledgeBaseCategory is gated with proper feature access control', function () {
+test('CreateKnowledgeBaseCategory is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->knowledgeManagement = false;

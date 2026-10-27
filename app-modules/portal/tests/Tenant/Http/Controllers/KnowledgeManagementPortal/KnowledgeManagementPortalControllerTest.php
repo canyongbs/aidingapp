@@ -40,7 +40,7 @@ use AidingApp\Portal\Settings\PortalSettings;
 
 use function Pest\Laravel\getJson;
 
-it('returns the configured category tab order', function () {
+it('returns the configured category tab order', function (): void {
     $portalSettings = app(PortalSettings::class);
     $portalSettings->knowledge_management_portal_enabled = true;
     $portalSettings->save();

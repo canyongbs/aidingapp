@@ -44,7 +44,19 @@ use App\Models\User;
 use App\Settings\DisplaySettings;
 use Carbon\CarbonInterface;
 
-it('routes notifications to the expected channels', function (string $channel, array $expectedChannels) {
+$createHistoryAt = function (ServiceMonitoringTarget $target, bool $succeeded, float $responseTime, CarbonInterface $createdAt): void {
+    $history = $target->histories()->create([
+        'response' => $succeeded ? 200 : 500,
+        'response_time' => $responseTime,
+        'succeeded' => $succeeded,
+    ]);
+    $history->forceFill([
+        'created_at' => $createdAt,
+        'updated_at' => $createdAt,
+    ])->saveQuietly();
+};
+
+it('routes notifications to the expected channels', function (string $channel, array $expectedChannels): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification(
@@ -60,7 +72,7 @@ it('routes notifications to the expected channels', function (string $channel, a
     'both' => ['both', ['database', 'mail']],
 ]);
 
-it('throws an error for an unsupported channel', function () {
+it('throws an error for an unsupported channel', function (): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification(
@@ -69,11 +81,11 @@ it('throws an error for an unsupported channel', function () {
         'unsupported-channel',
     );
 
-    expect(fn () => $notification->via(User::factory()->create()))
+    expect(fn (): array => $notification->via(User::factory()->create()))
         ->toThrow(InvalidArgumentException::class, 'Unsupported notification channel: unsupported-channel');
 });
 
-it('returns N/A statistics when no checks exist in the reporting period', function () {
+it('returns N/A statistics when no checks exist in the reporting period', function (): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -87,7 +99,7 @@ it('returns N/A statistics when no checks exist in the reporting period', functi
         ->and($databaseMessage['body'])->toContain('No incidents were detected during this reporting period.');
 });
 
-it('returns N/A statistics when no checks exist in the reporting period for mail notification', function () {
+it('returns N/A statistics when no checks exist in the reporting period for mail notification', function (): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
@@ -104,28 +116,18 @@ it('returns N/A statistics when no checks exist in the reporting period for mail
         ->and($viewData['incidentSummary'])->toBe('No incidents were detected during this reporting period.');
 });
 
-it('builds expected report statistics and incident summary in the mail payload', function () {
+it('builds expected report statistics and incident summary in the mail payload', function () use ($createHistoryAt): void {
     $target = ServiceMonitoringTarget::factory()->create(['name' => 'External Status API']);
     $frequency = ServiceMonitoringReportFrequency::Daily;
 
-    [$localStart, $localEnd] = match ($frequency) {
-        ServiceMonitoringReportFrequency::Daily => [
-            now()->copy()->subDay()->startOfDay(),
-            now()->copy()->subDay()->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Weekly => [
-            now()->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
-            now()->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Monthly => [
-            now()->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-            now()->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
-        ],
-    };
+    [$localStart, $localEnd] = [
+        now()->copy()->subDay()->startOfDay(),
+        now()->copy()->subDay()->endOfDay(),
+    ];
 
-    createHistoryAt($target, true, 0.50, $localStart->copy()->addHours(1)->utc());
-    createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
-    createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
+    $createHistoryAt($target, true, 0.50, $localStart->copy()->addHours(1)->utc());
+    $createHistoryAt($target, true, 1.00, $localStart->copy()->addHours(12)->utc());
+    $createHistoryAt($target, false, 1.50, $localEnd->copy()->subHour()->utc());
 
     $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
@@ -140,7 +142,7 @@ it('builds expected report statistics and incident summary in the mail payload',
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
 });
 
-it('uses tenant display timezone boundaries for daily reports', function () {
+it('uses tenant display timezone boundaries for daily reports', function () use ($createHistoryAt): void {
     app(DisplaySettings::class)->timezone = 'America/New_York';
     app(DisplaySettings::class)->save();
 
@@ -149,25 +151,15 @@ it('uses tenant display timezone boundaries for daily reports', function () {
 
     $localNow = now()->setTimezone('America/New_York');
 
-    [$localStart, $localEnd] = match ($frequency) {
-        ServiceMonitoringReportFrequency::Daily => [
-            $localNow->copy()->subDay()->startOfDay(),
-            $localNow->copy()->subDay()->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Weekly => [
-            $localNow->copy()->subWeek()->startOfWeek(CarbonInterface::MONDAY)->startOfDay(),
-            $localNow->copy()->subWeek()->endOfWeek(CarbonInterface::SUNDAY)->endOfDay(),
-        ],
-        ServiceMonitoringReportFrequency::Monthly => [
-            $localNow->copy()->subMonthNoOverflow()->startOfMonth()->startOfDay(),
-            $localNow->copy()->subMonthNoOverflow()->endOfMonth()->endOfDay(),
-        ],
-    };
+    [$localStart, $localEnd] = [
+        $localNow->copy()->subDay()->startOfDay(),
+        $localNow->copy()->subDay()->endOfDay(),
+    ];
 
-    createHistoryAt($target, true, 0.50, $localStart->copy()->utc());
-    createHistoryAt($target, false, 1.50, $localEnd->copy()->utc());
-    createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
-    createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
+    $createHistoryAt($target, true, 0.50, $localStart->copy()->utc());
+    $createHistoryAt($target, false, 1.50, $localEnd->copy()->utc());
+    $createHistoryAt($target, true, 2.00, $localStart->copy()->utc()->subSecond());
+    $createHistoryAt($target, false, 2.50, $localEnd->copy()->utc()->addSecond());
 
     $notification = new ServiceMonitoringReportNotification($target, $frequency, MailChannel::class);
     $mailMessage = $notification->toMail(User::factory()->create())->toArray();
@@ -182,7 +174,7 @@ it('uses tenant display timezone boundaries for daily reports', function () {
         ->and($viewData['incidentSummary'])->toBe('1 incident was detected during this reporting period.');
 });
 
-it('suppresses delivery to a user without confidential access to a confidential target', function () {
+it('suppresses delivery to a user without confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $user = User::factory()->create();
 
@@ -191,7 +183,7 @@ it('suppresses delivery to a user without confidential access to a confidential 
     expect($notification->via($user))->toBe([]);
 });
 
-it('delivers to a user granted confidential access to a confidential target', function () {
+it('delivers to a user granted confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $user = User::factory()->create();
     $target->confidentialUsers()->attach($user->getKey());
@@ -201,7 +193,7 @@ it('delivers to a user granted confidential access to a confidential target', fu
     expect($notification->via($user))->toBe(['mail']);
 });
 
-it('suppresses delivery to a contact without confidential access to a confidential target', function () {
+it('suppresses delivery to a contact without confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $contact = Contact::factory()->create();
 
@@ -210,7 +202,7 @@ it('suppresses delivery to a contact without confidential access to a confidenti
     expect($notification->via($contact))->toBe([]);
 });
 
-it('delivers to a contact granted confidential access to a confidential target', function () {
+it('delivers to a contact granted confidential access to a confidential target', function (): void {
     $target = ServiceMonitoringTarget::factory()->confidential()->create();
     $contact = Contact::factory()->create();
     $target->confidentialContacts()->attach($contact->getKey());
@@ -220,7 +212,7 @@ it('delivers to a contact granted confidential access to a confidential target',
     expect($notification->via($contact))->toBe(['mail']);
 });
 
-it('restores a notification through a real serialize/unserialize round trip', function () {
+it('restores a notification through a real serialize/unserialize round trip', function (): void {
     $target = ServiceMonitoringTarget::factory()->create();
 
     $notification = new ServiceMonitoringReportNotification($target, ServiceMonitoringReportFrequency::Weekly, MailChannel::class);
@@ -231,21 +223,3 @@ it('restores a notification through a real serialize/unserialize round trip', fu
         ->and($restored->frequency)->toBe(ServiceMonitoringReportFrequency::Weekly)
         ->and($restored->channel)->toBe(MailChannel::class);
 });
-
-function createHistoryAt(
-    ServiceMonitoringTarget $target,
-    bool $succeeded,
-    float $responseTime,
-    CarbonInterface $createdAt,
-): void {
-    $history = $target->histories()->create([
-        'response' => $succeeded ? 200 : 500,
-        'response_time' => $responseTime,
-        'succeeded' => $succeeded,
-    ]);
-
-    $history->forceFill([
-        'created_at' => $createdAt,
-        'updated_at' => $createdAt,
-    ])->saveQuietly();
-}

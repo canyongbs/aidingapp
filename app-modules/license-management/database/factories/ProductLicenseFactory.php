@@ -67,7 +67,7 @@ class ProductLicenseFactory extends Factory
 
     public function pending(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'start_date' => now()->addDays(5),
             'expiration_date' => now()->addDays(30),
         ]);
@@ -75,7 +75,7 @@ class ProductLicenseFactory extends Factory
 
     public function active(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'start_date' => now()->subDays(5),
             'expiration_date' => now()->addDays(10),
         ]);
@@ -83,7 +83,7 @@ class ProductLicenseFactory extends Factory
 
     public function expired(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'start_date' => now()->subDays(30),
             'expiration_date' => now()->subDays(10),
         ]);
@@ -91,7 +91,7 @@ class ProductLicenseFactory extends Factory
 
     public function noExpiration(): static
     {
-        return $this->state(fn () => [
+        return $this->state(fn (): array => [
             'start_date' => now()->subDays(5),
             'expiration_date' => null,
         ]);

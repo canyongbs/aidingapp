@@ -45,20 +45,23 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\Sla;
 use App\Models\User;
 use Carbon\CarbonImmutable;
+use Illuminate\Contracts\Support\Htmlable;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\Storage;
 
-it('excludes its secret key from serialization and audits', function () {
+use function Pest\Laravel\travelTo;
+
+it('excludes its secret key from serialization and audits', function (): void {
     $serviceRequest = ServiceRequest::factory()->create([
         'secret_key' => 'encrypted-secret-key',
     ]);
 
     $audit = $serviceRequest->audits()->latest()->firstOrFail();
 
-    expect($serviceRequest->toArray())->not->toHaveKey('secret_key')
-        ->and($audit->new_values)->not->toHaveKey('secret_key')
-        ->and($audit->old_values)->not->toHaveKey('secret_key');
+    expect($serviceRequest->toArray())->not()->toHaveKey('secret_key')
+        ->and($audit->new_values)->not()->toHaveKey('secret_key')
+        ->and($audit->old_values)->not()->toHaveKey('secret_key');
 });
 
 if (! function_exists('recentUpdateCreatorInfo')) {
@@ -68,7 +71,7 @@ if (! function_exists('recentUpdateCreatorInfo')) {
     }
 }
 
-it('renders a contact update as Customer with the organization on its own line', function () {
+it('renders a contact update as Customer with the organization on its own line', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $contact = Contact::factory()
@@ -83,7 +86,7 @@ it('renders a contact update as Customer with the organization on its own line',
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Jane Doe - Customer<br>Acme Corp');
 });
 
-it('renders a contact update with no organization as Customer only, without an N/A line', function () {
+it('renders a contact update with no organization as Customer only, without an N/A line', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     $contact = Contact::factory()
@@ -95,14 +98,17 @@ it('renders a contact update with no organization as Customer only, without an N
         ->for($contact, 'createdBy')
         ->create();
 
+    $formatted = $serviceRequest->getRecentUpdateFormatted();
+    $html = $formatted instanceof Htmlable ? $formatted->toHtml() : $formatted;
+
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Jane Doe - Customer')
-        ->and((string) $serviceRequest->getRecentUpdateFormatted())->not->toContain('N/A');
+        ->and($html)->not()->toContain('N/A');
 });
 
-it('renders a user update as Service Provider, unchanged', function () {
+it('renders a user update as Service Provider, unchanged', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    $user = User::factory()->state(['name' => 'Sam Staff'])->create();
+    $user = User::factory()->state(['first_name' => 'Sam', 'last_name' => 'Staff'])->create();
 
     ServiceRequestUpdate::factory()
         ->for($serviceRequest)
@@ -112,7 +118,7 @@ it('renders a user update as Service Provider, unchanged', function () {
     expect(recentUpdateCreatorInfo($serviceRequest))->toBe('Sam Staff - Service Provider');
 });
 
-it('appends the file-attachment note when the update has uploads', function () {
+it('appends the file-attachment note when the update has uploads', function (): void {
     Storage::fake('s3');
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -124,12 +130,15 @@ it('appends the file-attachment note when the update has uploads', function () {
 
     $update->addMedia(UploadedFile::fake()->image('report.png'))->toMediaCollection('uploads');
 
-    expect((string) $serviceRequest->getRecentUpdateFormatted())
+    $formatted = $serviceRequest->getRecentUpdateFormatted();
+    $html = $formatted instanceof Htmlable ? $formatted->toHtml() : $formatted;
+
+    expect($html)
         ->toContain('<br><br>Note: Files were attached with this update. Please login the service portal to see the files.');
 });
 
-describe('SLA waiting exclusion', function () {
-    it('excludes waiting and closed time from the resolution seconds when the feature is active', function () {
+describe('SLA waiting exclusion', function (): void {
+    it('excludes waiting and closed time from the resolution seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -139,23 +148,23 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(180));
+        travelTo($start->addSeconds(180));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // Total window is 180s; the 50s waiting span is excluded, the closed span is zero-length.
         expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(130);
     });
 
-    it('excludes waiting time from the latest response seconds when the feature is active', function () {
+    it('excludes waiting time from the latest response seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -164,20 +173,20 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
         // Window is 150s with no inbound update; the 50s waiting span is excluded.
         expect($serviceRequest->fresh()->getLatestResponseSeconds())->toBe(100);
     });
 
-    it('recomputes the stored time to resolution from the ledger on close when the feature is active', function () {
+    it('recomputes the stored time to resolution from the ledger on close when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -186,20 +195,20 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // 150s window minus the 50s waiting span.
         expect($serviceRequest->fresh()->time_to_resolution)->toBe(100);
     });
 
-    it('reports the resolution SLA as compliant once waiting time is excluded', function () {
+    it('reports the resolution SLA as compliant once waiting time is excluded', function (): void {
         Notification::fake();
 
         $sla = Sla::create([
@@ -217,26 +226,26 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create([
             'status_id' => $open->getKey(),
             'priority_id' => $priority->getKey(),
         ]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(180));
+        travelTo($start->addSeconds(180));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // The raw 180s exceeds the 150s SLA, but excluding the 50s waiting span brings it to 130s.
         expect($serviceRequest->fresh()->getResolutionSlaComplianceStatus())->toBe(SlaComplianceStatus::Compliant);
     });
 
-    it('excludes time spent closed before a reopen from the resolution seconds when the feature is active', function () {
+    it('excludes time spent closed before a reopen from the resolution seconds when the feature is active', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -245,23 +254,23 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
-        $this->travelTo($start->addSeconds(200));
+        travelTo($start->addSeconds(200));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(300));
+        travelTo($start->addSeconds(300));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // The 300s window excludes the 100s the request spent closed before it was reopened.
         expect($serviceRequest->fresh()->getResolutionSeconds())->toBe(200);
     });
 
-    it('persists the excluded time to resolution column after a reopen and re-close cycle', function () {
+    it('persists the excluded time to resolution column after a reopen and re-close cycle', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -270,23 +279,23 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
-        $this->travelTo($start->addSeconds(200));
+        travelTo($start->addSeconds(200));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(300));
+        travelTo($start->addSeconds(300));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // Re-close persists 300s elapsed minus the 100s spent closed before the reopen.
         expect((int) $serviceRequest->fresh()->time_to_resolution)->toBe(200);
     });
 
-    it('accounts for every second across all classifications (the ledger tiles the timeline)', function () {
+    it('accounts for every second across all classifications (the ledger tiles the timeline)', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -296,16 +305,16 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $waiting->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(180));
+        travelTo($start->addSeconds(180));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         $serviceRequest = $serviceRequest->fresh();
@@ -330,7 +339,7 @@ describe('SLA waiting exclusion', function () {
             ->and($serviceRequest->getExcludedSecondsBetween($start, $end, $classifications))->toBe(180);
     });
 
-    it('anchors the resolved time to the first status change of the trailing closed run', function () {
+    it('anchors the resolved time to the first status change of the trailing closed run', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -339,13 +348,13 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $resolved->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // Both trailing statuses are Closed-classified, so resolution stays at the first close (100s), not 150s.
@@ -353,7 +362,7 @@ describe('SLA waiting exclusion', function () {
             ->toBe($start->addSeconds(100)->toDateTimeString());
     });
 
-    it('resets the resolved time to the latest close when a request was reopened', function () {
+    it('resets the resolved time to the latest close when a request was reopened', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -362,16 +371,16 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
-        $this->travelTo($start->addSeconds(200));
+        travelTo($start->addSeconds(200));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $inProgress->getKey()]);
 
-        $this->travelTo($start->addSeconds(300));
+        travelTo($start->addSeconds(300));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // The intervening reopen breaks the earlier closed run, so resolution is the final close (300s).
@@ -379,7 +388,7 @@ describe('SLA waiting exclusion', function () {
             ->toBe($start->addSeconds(300)->toDateTimeString());
     });
 
-    it('caps the response seconds at the first close when moving between two closed statuses', function () {
+    it('caps the response seconds at the first close when moving between two closed statuses', function (): void {
         Notification::fake();
 
         $open = ServiceRequestStatus::factory()->open()->create();
@@ -388,19 +397,19 @@ describe('SLA waiting exclusion', function () {
 
         $start = CarbonImmutable::parse('2026-01-01 00:00:00');
 
-        $this->travelTo($start);
+        travelTo($start);
         $serviceRequest = ServiceRequest::factory()->create(['status_id' => $open->getKey()]);
 
-        $this->travelTo($start->addSeconds(50));
+        travelTo($start->addSeconds(50));
         ServiceRequestUpdate::factory()
             ->for($serviceRequest)
             ->for(Contact::factory()->create(), 'createdBy')
             ->create(['internal' => false]);
 
-        $this->travelTo($start->addSeconds(100));
+        travelTo($start->addSeconds(100));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $resolved->getKey()]);
 
-        $this->travelTo($start->addSeconds(150));
+        travelTo($start->addSeconds(150));
         ServiceRequest::query()->findOrFail($serviceRequest->getKey())->update(['status_id' => $closed->getKey()]);
 
         // Response runs from the inbound update (50s) to the first close (100s); the trailing

@@ -40,7 +40,9 @@ use Illuminate\Support\Facades\Exceptions;
 
 use function Pest\Laravel\withoutExceptionHandling;
 
-test('All permissions are normalized', function (string $guard) {
+use PHPUnit\Framework\Assert;
+
+test('All permissions are normalized', function (string $guard): void {
     Exceptions::fake();
 
     $permissionsMatrix = PermissionsMatrix::make('test')
@@ -56,10 +58,10 @@ test('All permissions are normalized', function (string $guard) {
             str_contains($exception->getMessage(), 'Permissions discovered which are not normalized:')
             || str_contains($exception->getMessage(), 'Permission discovered which is not normalized:')
         ) {
-            $this->fail('Permission normalization issue: ' . $exception->getMessage());
+            Assert::fail('Permission normalization issue: ' . $exception->getMessage());
         }
 
-        $this->fail('Unexpected exception thrown during permissions normalization: ' . $exception->getMessage());
+        Assert::fail('Unexpected exception thrown during permissions normalization: ' . $exception->getMessage());
     });
 })
     ->with([

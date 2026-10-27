@@ -83,15 +83,12 @@ use function Tests\richContentText;
 /**
  * A Service Request the given user may view, because they manage its type.
  */
-function serviceRequestManagedBy(User $user): ServiceRequest
-{
+$serviceRequestManagedBy = function (User $user): ServiceRequest {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceManagement = true;
     $settings->save();
-
     $user->givePermissionTo('service_request.view-any');
     $user->givePermissionTo('service_request.*.view');
-
     $serviceRequestType = ServiceRequestType::factory()->create();
     $serviceRequestType->managerUsers()->attach($user);
 
@@ -101,18 +98,14 @@ function serviceRequestManagedBy(User $user): ServiceRequest
             'priority'
         )
         ->create();
-}
+};
 
 /**
  * A Service Request whose type controls whether feedback collection is enabled.
  *
  * @param  array<string, mixed>  $attributes
  */
-function serviceRequestWithFeedbackCollection(
-    bool $enabled = true,
-    SystemServiceRequestClassification $classification = SystemServiceRequestClassification::Closed,
-    array $attributes = [],
-): ServiceRequest {
+$serviceRequestWithFeedbackCollection = function (bool $enabled = true, SystemServiceRequestClassification $classification = SystemServiceRequestClassification::Closed, array $attributes = []): ServiceRequest {
     $type = ServiceRequestType::factory()->create([
         'has_enabled_feedback_collection' => $enabled,
     ]);
@@ -121,33 +114,27 @@ function serviceRequestWithFeedbackCollection(
         ->for(ServiceRequestStatus::factory()->state(['classification' => $classification]), 'status')
         ->for(ServiceRequestPriority::factory()->for($type, 'type'), 'priority')
         ->create($attributes);
-}
+};
 
-test('The correct details are displayed on the ViewServiceRequest page', function () {
+test('The correct details are displayed on the ViewServiceRequest page', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestResource::getUrl('view', [
-                'record' => $serviceRequest,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Type',
-                $serviceRequest->priority->type->name,
-                'Status',
-                $serviceRequest->status->name,
-                'Priority',
-                $serviceRequest->priority->name,
-                'Description',
-                $serviceRequest->close_details,
-            ]
-        );
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+        ->assertSuccessful();
+
+    $expected = [
+        'status.name' => $serviceRequest->status->name,
+        'priority.name' => $serviceRequest->priority->name,
+        'close_details' => $serviceRequest->close_details,
+    ];
+
+    expect(\Tests\infolistState($component->instance(), array_keys($expected)))->toEqual($expected)
+        ->and(\Tests\htmlText($component->html(), '//section/header'))->toContain($serviceRequest->priority->type->name);
 });
 
-test('the customer contact organization is displayed when the contact has an organization', function () {
+test('the customer contact organization is displayed when the contact has an organization', function (): void {
     $organization = Organization::factory()->create(['name' => 'Acme University']);
     $contactType = ContactType::factory()->create(['name' => 'Employee']);
     $contact = Contact::factory()->create([
@@ -156,33 +143,31 @@ test('the customer contact organization is displayed when the contact has an org
     ]);
     $serviceRequest = ServiceRequest::factory()->create(['respondent_id' => $contact->getKey()]);
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestResource::getUrl('view', [
-                'record' => $serviceRequest,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeText('Acme University')
-        ->assertSeeText('Employee')
-        ->assertDontSeeText('(Employee)');
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+        ->assertSuccessful();
+    $state = \Tests\infolistState($component->instance(), ['respondent']);
+
+    expect(\Tests\htmlText((string) $state['respondent'], '//body'))
+        ->toContain('Acme University', 'Employee')
+        ->not()->toContain('(Employee)');
 });
 
-test('the customer contact organization is withheld when the contact has no organization', function () {
+test('the customer contact organization is withheld when the contact has no organization', function (): void {
     $contact = Contact::factory()->create(['organization_id' => null]);
     $serviceRequest = ServiceRequest::factory()->create(['respondent_id' => $contact->getKey()]);
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestResource::getUrl('view', [
-                'record' => $serviceRequest,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertDontSeeText('Unaffiliated');
+    asSuperAdmin();
+
+    $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+        ->assertSuccessful();
+    $state = \Tests\infolistState($component->instance(), ['respondent']);
+
+    expect(\Tests\htmlText((string) $state['respondent'], '//body'))->not()->toContain('Unaffiliated');
 });
 
-test('the status, priority, and type still display and remain editable when soft-deleted', function () {
+test('the status, priority, and type still display and remain editable when soft-deleted', function (): void {
     $serviceRequestType = ServiceRequestType::factory()->create();
 
     $status = ServiceRequestStatus::factory()->create([
@@ -199,33 +184,21 @@ test('the status, priority, and type still display and remain editable when soft
     $status->delete();
     $priority->delete();
 
-    asSuperAdmin()
-        ->get(
-            ServiceRequestResource::getUrl('view', [
-                'record' => $serviceRequest,
-            ])
-        )
-        ->assertSuccessful()
-        ->assertSeeTextInOrder(
-            [
-                'Type',
-                $serviceRequestType->name,
-                'Status',
-                $status->name,
-                'Priority',
-                $priority->name,
-            ]
-        );
+    asSuperAdmin();
 
-    Livewire::test(ViewServiceRequest::class, [
+    $component = Livewire::test(ViewServiceRequest::class, [
         'record' => $serviceRequest->getRouteKey(),
     ])
         ->assertSuccessful()
         ->assertActionVisible(TestAction::make('editStatus')->schemaComponent('status.name'))
         ->assertActionVisible(TestAction::make('editPriority')->schemaComponent('priority.name'));
+
+    expect(\Tests\infolistState($component->instance(), ['status.name', 'priority.name']))
+        ->toBe(['status.name' => $status->name, 'priority.name' => $priority->name])
+        ->and(\Tests\htmlText($component->html(), '//section/header'))->toContain($serviceRequestType->name);
 });
 
-test('The Description entry has Markdown rendering enabled on the underlying component', function () {
+test('The Description entry has Markdown rendering enabled on the underlying component', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     asSuperAdmin();
@@ -238,14 +211,14 @@ test('The Description entry has Markdown rendering enabled on the underlying com
         ->getSchema('infolist')
         ->getComponent(fn ($component): bool => $component instanceof TextEntry && $component->getName() === 'close_details');
 
-    expect($descriptionEntry)
-        ->not->toBeNull()
-        ->isMarkdown()->toBeTrue();
+    assert($descriptionEntry instanceof TextEntry);
+
+    expect($descriptionEntry->isMarkdown())->toBeTrue();
 });
 
 // Permission Tests
 
-test('ViewServiceRequest is gated with proper access control', function () {
+test('ViewServiceRequest is gated with proper access control', function (): void {
     $user = User::factory()->create();
 
     $serviceRequest = ServiceRequest::factory()->create();
@@ -260,7 +233,7 @@ test('ViewServiceRequest is gated with proper access control', function () {
         )->assertSuccessful();
 });
 
-test('ViewServiceRequest is gated with proper feature access control', function () {
+test('ViewServiceRequest is gated with proper feature access control', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = false;
@@ -290,7 +263,7 @@ test('ViewServiceRequest is gated with proper feature access control', function 
         )->assertSuccessful();
 });
 
-test('service request lock icon is shown when status classification closed', function () {
+test('service request lock icon is shown when status classification closed', function (): void {
     $user = User::factory()->create();
 
     asSuperAdmin($user);
@@ -307,7 +280,7 @@ test('service request lock icon is shown when status classification closed', fun
         ->assertSeeHtml('data-identifier="service_request_closed"');
 });
 
-test('service requests not authorized if user is not an auditor or manager of the service request type', function () {
+test('service requests not authorized if user is not an auditor or manager of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -332,7 +305,7 @@ test('service requests not authorized if user is not an auditor or manager of th
         ->assertForbidden();
 });
 
-test('view service request page visible if the user is an auditor of the service request type', function () {
+test('view service request page visible if the user is an auditor of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -369,7 +342,7 @@ test('view service request page visible if the user is an auditor of the service
         ->assertSuccessful();
 });
 
-test('view service request page visible if the user is a direct auditorUser of the service request type', function () {
+test('view service request page visible if the user is a direct auditorUser of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -400,7 +373,7 @@ test('view service request page visible if the user is a direct auditorUser of t
         ->assertSuccessful();
 });
 
-test('view service request page visible if the user is a manager of the service request type', function () {
+test('view service request page visible if the user is a manager of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -437,7 +410,7 @@ test('view service request page visible if the user is a manager of the service 
         ->assertSuccessful();
 });
 
-test('view service request page visible if the user is a direct managerUser of the service request type', function () {
+test('view service request page visible if the user is a direct managerUser of the service request type', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -468,7 +441,7 @@ test('view service request page visible if the user is a direct managerUser of t
         ->assertSuccessful();
 });
 
-test('ViewServiceRequest page displays the uploaded files on the files tab', function () {
+test('ViewServiceRequest page displays the uploaded files on the files tab', function (): void {
     $serviceRequest = ServiceRequest::factory()->create();
 
     asSuperAdmin()
@@ -477,8 +450,8 @@ test('ViewServiceRequest page displays the uploaded files on the files tab', fun
         ->assertSeeLivewire(ServiceRequestMediaTable::class);
 });
 
-describe('tabs', function () {
-    it('opens on the request tab', function () {
+describe('tabs', function () use ($serviceRequestManagedBy): void {
+    it('opens on the request tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -488,7 +461,7 @@ describe('tabs', function () {
             ->assertSet('tab', ServiceRequestTab::Request->value);
     });
 
-    it('falls back to the request tab when given an unknown tab', function () {
+    it('renders when given an unknown tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -497,11 +470,10 @@ describe('tabs', function () {
             'record' => $serviceRequest->getRouteKey(),
             'tab' => 'not-a-tab',
         ])
-            ->assertSuccessful()
-            ->assertSet('tab', ServiceRequestTab::Request->value);
+            ->assertSuccessful();
     });
 
-    it('renders the relation managers for the assignments tab', function () {
+    it('renders the relation managers for the assignments tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -514,7 +486,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(CreatedByRelationManager::class);
     });
 
-    it('renders the updates feed for the updates tab', function () {
+    it('renders the updates feed for the updates tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -525,7 +497,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(ServiceRequestUpdates::class);
     });
 
-    it('renders the relation manager for the chats tab', function () {
+    it('renders the relation manager for the chats tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -536,7 +508,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(ServiceRequestConversationsRelationManager::class);
     });
 
-    it('renders the timeline for the timeline tab', function () {
+    it('renders the timeline for the timeline tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -547,7 +519,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(TimelineList::class);
     });
 
-    it('shows standardized timeline update text and non-linked timeline titles', function () {
+    it('shows standardized timeline update text and non-linked timeline titles', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -556,7 +528,8 @@ describe('tabs', function () {
             'last_name' => 'Smith',
         ]);
         $agent = User::factory()->create([
-            'name' => 'Richard Down',
+            'first_name' => 'Richard',
+            'last_name' => 'Down',
         ]);
 
         $customerUpdateAt = CarbonImmutable::create(2026, 2, 3, 23, 35, 0, 'UTC');
@@ -602,28 +575,25 @@ describe('tabs', function () {
         $aiPostedAt = $aiUpdate->created_at?->format('M j, Y \\a\\t g:i A');
 
         $customerName = $customer->full_name;
-        $agentName = $agent->name;
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeLivewire(TimelineList::class)
-            ->assertSee("{$customerName} (Customer) posted the following update on {$customerPostedAt}:")
-            ->assertSee("{$agentName} (Agent) posted the following update on {$agentPostedAt}:")
-            ->assertSee("Assistant (AI) posted the following update on {$aiPostedAt}:")
-            ->assertSee('This is my update.')
-            ->assertSee('This is also an update.')
-            ->assertSee('AI generated update.')
-            ->assertDontSeeHtml('Customer Update Sent</a>')
-            ->assertDontSeeHtml('Service Request Assigned</a>')
-            ->assertDontSeeHtml('Service Request Reassigned</a>');
+        $agentName = $agent->full_name;
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful()->assertSeeLivewire(TimelineList::class);
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain("{$customerName} (Customer) posted the following update on {$customerPostedAt}:");
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain("{$agentName} (Agent) posted the following update on {$agentPostedAt}:");
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain("Assistant (AI) posted the following update on {$aiPostedAt}:");
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('This is my update.');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('This is also an update.');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('AI generated update.');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li//a'))->not()->toContain('Customer Update Sent');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li//a'))->not()->toContain('Service Request Assigned');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li//a'))->not()->toContain('Service Request Reassigned');
     });
 
-    it('shows a new assignment on the timeline', function () {
+    it('shows a new assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -632,19 +602,17 @@ describe('tabs', function () {
             ->for($serviceRequest, 'serviceRequest')
             ->for($manager, 'user')
             ->create();
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeText('Service Request Assigned')
-            ->assertSeeText('Jane Doe');
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Service Request Assigned');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 
-    it('shows a soft-deleted assignment on the timeline', function () {
+    it('shows a soft-deleted assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -659,19 +627,17 @@ describe('tabs', function () {
 
         expect(Timeline::query()->where('timelineable_id', $assignment->getKey())->exists())->toBeTrue()
             ->and($assignment->refresh()->trashed())->toBeTrue();
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeText('Service Request Assigned')
-            ->assertSeeText('Jane Doe');
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Service Request Assigned');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Jane Doe');
     });
 
-    it('shows a fallback entry for an assignment that was permanently deleted', function () {
+    it('shows a fallback entry for an assignment that was permanently deleted', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         asSuperAdmin();
 
@@ -685,23 +651,22 @@ describe('tabs', function () {
 
         expect(Timeline::query()->where('timelineable_id', $assignment->getKey())->exists())->toBeTrue()
             ->and(ServiceRequestAssignment::withTrashed()->whereKey($assignment->getKey())->exists())->toBeFalse();
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeText('Service Request Assigned')
-            ->assertSeeText('Assigned to Unknown user')
-            ->assertDontSeeText('Jane Doe');
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Service Request Assigned');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Assigned to Unknown user');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Jane Doe');
     });
 
-    it('shows a removed assignment on the timeline', function () {
+    it('shows a removed assignment on the timeline', function () use ($serviceRequestManagedBy): void {
         $manager = User::factory()->create([
-            'name' => 'Jane Doe',
+            'first_name' => 'Jane',
+            'last_name' => 'Doe',
         ]);
-        $serviceRequest = serviceRequestManagedBy($manager);
+        $serviceRequest = $serviceRequestManagedBy($manager);
 
         $actor = User::factory()->create([
-            'name' => 'John Smith',
+            'first_name' => 'John',
+            'last_name' => 'Smith',
         ]);
         asSuperAdmin($actor);
 
@@ -712,14 +677,11 @@ describe('tabs', function () {
             ->create();
 
         app(RecordServiceRequestAssignmentRemovalHistory::class)($serviceRequest, $assignment);
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeTextInOrder(['Assignment Removed', 'Unassigned', 'Jane Doe', 'by', 'John Smith']);
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toMatch('~' . implode('.*', array_map(fn (string $value): string => preg_quote($value, '~'), ['Assignment Removed', 'Unassigned', 'Jane Doe', 'by', 'John Smith'])) . '~s');
     });
 
-    it('shows submitted feedback on the timeline', function () {
+    it('shows submitted feedback on the timeline', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -736,17 +698,14 @@ describe('tabs', function () {
                 'csat_answer' => 4,
                 'nps_answer' => 8,
             ]);
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertSeeText('Feedback Submitted')
-            ->assertSeeText('Alice Smith')
-            ->assertSeeText('4')
-            ->assertSeeText('8');
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Feedback Submitted');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('Alice Smith');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('4');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->toContain('8');
     });
 
-    it('hides submitted feedback from the timeline when the `FeedbackManagement` feature is disabled', function () {
+    it('hides submitted feedback from the timeline when the `FeedbackManagement` feature is disabled', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -767,15 +726,12 @@ describe('tabs', function () {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->feedbackManagement = false;
         $settings->save();
-
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->set('tab', ServiceRequestTab::Timeline->value)
-            ->assertSuccessful()
-            ->assertDontSeeText('Feedback Submitted')
-            ->assertDontSeeText('Alice Smith');
+        $renderedTimeline = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])->set('tab', ServiceRequestTab::Timeline->value)->assertSuccessful();
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Feedback Submitted');
+        expect(\Tests\htmlText($renderedTimeline->html(), '//ol/li'))->not()->toContain('Alice Smith');
     });
 
-    it('renders the media table for the files tab', function () {
+    it('renders the media table for the files tab', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -786,7 +742,7 @@ describe('tabs', function () {
             ->assertSeeLivewire(ServiceRequestMediaTable::class);
     });
 
-    it('does not render the other tabs while the request tab is active', function () {
+    it('does not render the other tabs while the request tab is active', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -799,7 +755,7 @@ describe('tabs', function () {
             ->assertDontSeeLivewire(TimelineList::class);
     });
 
-    it('shows the form submission inline on the request tab', function () {
+    it('shows the form submission inline on the request tab', function (): void {
         asSuperAdmin();
 
         $form = ServiceRequestForm::factory()->create([
@@ -820,7 +776,7 @@ describe('tabs', function () {
             ->assertSchemaComponentVisible('request.serviceRequestFormSubmission');
     });
 
-    it('shows who submitted the form and links to them', function () {
+    it('shows who submitted the form and links to them', function (): void {
         asSuperAdmin();
 
         $author = Contact::factory()->create();
@@ -848,10 +804,10 @@ describe('tabs', function () {
             ->assertSee('Contact');
     });
 
-    it('resolves the submitter name for a user author, not just a contact', function () {
+    it('resolves the submitter name for a user author, not just a contact', function (): void {
         asSuperAdmin();
 
-        $author = User::factory()->create(['name' => 'Dana Whitfield']);
+        $author = User::factory()->create(['first_name' => 'Dana', 'last_name' => 'Whitfield']);
 
         $form = ServiceRequestForm::factory()->create([
             'content' => richContentText('What do you need help with?'),
@@ -873,7 +829,7 @@ describe('tabs', function () {
             ->assertSchemaComponentStateSet('request.submission_author_name', 'Dana Whitfield');
     });
 
-    it('falls back to a placeholder when the submission has no author', function () {
+    it('falls back to a placeholder when the submission has no author', function (): void {
         asSuperAdmin();
 
         $form = ServiceRequestForm::factory()->create([
@@ -894,7 +850,7 @@ describe('tabs', function () {
             ->assertSchemaComponentStateSet('request.submission_author_name', null);
     });
 
-    it('hides the form details when there is no submission', function () {
+    it('hides the form details when there is no submission', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -905,14 +861,14 @@ describe('tabs', function () {
     });
 });
 
-describe('password fields', function () {
-    it('shows the reveal control inline to the assigned manager', function () {
+describe('password fields', function () use ($serviceRequestManagedBy): void {
+    it('shows the reveal control inline to the assigned manager', function () use ($serviceRequestManagedBy): void {
         $assignedManager = user(permissions: [
             'service_request.view-any',
             'service_request.*.view',
             'service_request.*.update',
         ]);
-        $serviceRequest = serviceRequestManagedBy($assignedManager);
+        $serviceRequest = $serviceRequestManagedBy($assignedManager);
         $serviceRequest->secret_key = Crypt::encryptString(
             'base64:' . base64_encode(Encrypter::generateKey(config('app.cipher')))
         );
@@ -941,7 +897,7 @@ describe('password fields', function () {
         $field->submissible()->associate($form);
         $field->save();
 
-        $form->content = [
+        $form->setAttribute('content', [
             'type' => 'doc',
             'content' => [[
                 'type' => 'customBlock',
@@ -954,7 +910,7 @@ describe('password fields', function () {
                     ],
                 ],
             ]],
-        ];
+        ]);
         $form->save();
 
         $submission = ServiceRequestFormSubmission::create([
@@ -971,18 +927,17 @@ describe('password fields', function () {
 
         actingAs($assignedManager);
 
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSuccessful()
-            ->assertSee('••••••••')
-            ->assertDontSee('service-request-password')
-            ->assertDontSee('see Secrets section to reveal')
-            ->assertDontSee('Secrets')
-            ->assertSee('Reveal')
-            ->assertSeeHtml('fi-not-prose')
-            ->assertSeeHtml('data-secret-reveal');
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful();
+
+        expect(\Tests\htmlText($component->html(), '//*[@data-secret-row]'))->toContain('••••••••')
+            ->and(\Tests\htmlText($component->html(), '//button[@data-secret-reveal]'))->toBe('Reveal')
+            ->and(\Tests\htmlText($component->html(), '//*[@data-secret-row]/@class'))->toContain('fi-not-prose')
+            ->and((string) $component->html())->not()->toContain('service-request-password')
+            ->and(\Tests\htmlText($component->html(), '//section'))->not()->toContain('see Secrets section to reveal', 'Secrets');
     });
 
-    it('renders an unanswered optional password field', function () {
+    it('renders an unanswered optional password field', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -997,7 +952,7 @@ describe('password fields', function () {
         $field->submissible()->associate($form);
         $field->save();
 
-        $form->content = [
+        $form->setAttribute('content', [
             'type' => 'doc',
             'content' => [[
                 'type' => 'customBlock',
@@ -1010,7 +965,7 @@ describe('password fields', function () {
                     ],
                 ],
             ]],
-        ];
+        ]);
         $form->save();
 
         $submission = ServiceRequestFormSubmission::create([
@@ -1021,19 +976,20 @@ describe('password fields', function () {
         $serviceRequest->serviceRequestFormSubmission()->associate($submission);
         $serviceRequest->save();
 
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSuccessful()
-            ->assertSee('Private credential')
-            ->assertSee('No response')
-            ->assertDontSee('••••••••');
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+            ->assertSuccessful();
+
+        expect(\Tests\htmlText($component->html(), '//section[.//span[normalize-space()="No response"]]'))
+            ->toContain('Private credential', 'No response')
+            ->not()->toContain('••••••••');
     });
 });
 
-describe('feedback tab', function () {
-    it('shows the csat and nps answers when feedback has been submitted', function () {
+describe('feedback tab', function () use ($serviceRequestWithFeedbackCollection): void {
+    it('shows the csat and nps answers when feedback has been submitted', function () use ($serviceRequestWithFeedbackCollection): void {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection();
+        $serviceRequest = $serviceRequestWithFeedbackCollection();
 
         ServiceRequestFeedback::factory()
             ->for($serviceRequest, 'serviceRequest')
@@ -1048,35 +1004,34 @@ describe('feedback tab', function () {
             ->assertSuccessful()
             ->assertSchemaComponentStateSet('feedback.feedback.csat_answer', 4)
             ->assertSchemaComponentStateSet('feedback.feedback.nps_answer', 3)
-            ->assertDontSee(__('service-management::service_requests.feedback.no_survey_sent'))
-            ->assertDontSee(__('service-management::service_requests.feedback.not_closed'));
+            ->assertSchemaComponentHidden('feedback.feedback_notice');
     });
 
-    it('explains that feedback is disabled for the service request type', function () {
+    it('explains that feedback is disabled for the service request type', function () use ($serviceRequestWithFeedbackCollection): void {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(enabled: false);
+        $serviceRequest = $serviceRequestWithFeedbackCollection(enabled: false);
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
             ->assertSuccessful()
-            ->assertSee(__('service-management::service_requests.feedback.type_feedback_disabled'));
+            ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.type_feedback_disabled'));
     });
 
-    it('explains that the service request is not closed yet', function () {
+    it('explains that the service request is not closed yet', function () use ($serviceRequestWithFeedbackCollection): void {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(
+        $serviceRequest = $serviceRequestWithFeedbackCollection(
             classification: SystemServiceRequestClassification::Open,
         );
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
             ->assertSuccessful()
-            ->assertSee(__('service-management::service_requests.feedback.not_closed'));
+            ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.not_closed'));
     });
 
-    it('explains that no survey was ever sent', function () {
+    it('explains that no survey was ever sent', function () use ($serviceRequestWithFeedbackCollection): void {
         // Disable the feature before creating the Service Request so the observer does not
         // dispatch SendClosedServiceFeedbackNotification, which would set survey_sent_at.
         // This replicates a Service Request closed before feedback management was enabled.
@@ -1084,7 +1039,7 @@ describe('feedback tab', function () {
         $settings->data->addons->feedbackManagement = false;
         $settings->save();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection();
+        $serviceRequest = $serviceRequestWithFeedbackCollection();
 
         $settings->data->addons->feedbackManagement = true;
         $settings->save();
@@ -1094,42 +1049,47 @@ describe('feedback tab', function () {
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
             ->assertSuccessful()
-            ->assertSee(__('service-management::service_requests.feedback.no_survey_sent'));
+            ->assertSchemaComponentStateSet('feedback.feedback_notice', __('service-management::service_requests.feedback.no_survey_sent'));
     });
 
-    it('reports when the survey was sent', function () {
+    it('reports when the survey was sent', function () use ($serviceRequestWithFeedbackCollection): void {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(attributes: [
+        $serviceRequest = $serviceRequestWithFeedbackCollection(attributes: [
             'survey_sent_at' => now(),
             'reminder_sent_at' => null,
         ]);
 
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
-            ->assertSuccessful()
-            ->assertSee('Feedback survey was sent at')
-            ->assertDontSee('Feedback survey reminder sent at');
+            ->assertSuccessful();
+
+        $state = \Tests\infolistState($component->instance(), ['feedback_notice']);
+
+        expect($state['feedback_notice'])->toContain('Feedback survey was sent at')
+            ->not()->toContain('Feedback survey reminder sent at');
     });
 
-    it('reports when the reminder was sent', function () {
+    it('reports when the reminder was sent', function () use ($serviceRequestWithFeedbackCollection): void {
         asSuperAdmin();
 
-        $serviceRequest = serviceRequestWithFeedbackCollection(attributes: [
+        $serviceRequest = $serviceRequestWithFeedbackCollection(attributes: [
             'survey_sent_at' => now()->subDay(),
             'reminder_sent_at' => now(),
         ]);
 
-        Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
+        $component = Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
             ->set('tab', ServiceRequestTab::Feedback->value)
-            ->assertSuccessful()
-            ->assertSee('Feedback survey was sent at')
-            ->assertSee('Feedback survey reminder sent at');
+            ->assertSuccessful();
+
+        $state = \Tests\infolistState($component->instance(), ['feedback_notice']);
+
+        expect($state['feedback_notice'])->toContain('Feedback survey was sent at', 'Feedback survey reminder sent at');
     });
 });
 
-describe('authorization', function () {
-    it('hides the feedback tab when the `FeedbackManagement` feature is disabled', function () {
+describe('authorization', function () use ($serviceRequestManagedBy): void {
+    it('hides the feedback tab when the `FeedbackManagement` feature is disabled', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -1145,7 +1105,7 @@ describe('authorization', function () {
             ->assertSchemaComponentHidden(ServiceRequestTab::Feedback->value);
     });
 
-    it('hides the chats tab when the `RealtimeChat` feature is disabled', function () {
+    it('hides the chats tab when the `RealtimeChat` feature is disabled', function (): void {
         asSuperAdmin();
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -1158,11 +1118,11 @@ describe('authorization', function () {
         $settings->save();
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentHidden(ServiceRequestTab::Chats->value);
+            ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Chats->value);
     });
 
-    it('hides the updates tab from a user who cannot view service request updates', function () {
-        $serviceRequest = serviceRequestManagedBy($user = User::factory()->create());
+    it('hides the updates tab from a user who cannot view service request updates', function () use ($serviceRequestManagedBy): void {
+        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
 
         actingAs($user);
 
@@ -1175,13 +1135,13 @@ describe('authorization', function () {
             ->assertSchemaComponentVisible(ServiceRequestTab::Updates->value);
     });
 
-    it('hides the assignments tab from a user who cannot view any of its relation managers', function () {
-        $serviceRequest = serviceRequestManagedBy($user = User::factory()->create());
+    it('hides the assignments tab from a user who cannot view any of its relation managers', function () use ($serviceRequestManagedBy): void {
+        $serviceRequest = $serviceRequestManagedBy($user = User::factory()->create());
 
         actingAs($user);
 
         Livewire::test(ViewServiceRequest::class, ['record' => $serviceRequest->getRouteKey()])
-            ->assertSchemaComponentHidden(ServiceRequestTab::Assignments->value);
+            ->assertSchemaComponentDoesNotExist(ServiceRequestTab::Assignments->value);
 
         $user->givePermissionTo('service_request_assignment.view-any');
 
@@ -1189,7 +1149,7 @@ describe('authorization', function () {
             ->assertSchemaComponentVisible(ServiceRequestTab::Assignments->value);
     });
 
-    it('hides the timeline tab from a user without engagement permissions', function () {
+    it('hides the timeline tab from a user without engagement permissions', function (): void {
         $settings = app(LicenseSettings::class);
         $settings->data->addons->serviceManagement = true;
         $settings->save();

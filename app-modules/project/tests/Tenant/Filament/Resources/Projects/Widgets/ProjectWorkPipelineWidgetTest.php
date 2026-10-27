@@ -49,11 +49,11 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
-beforeEach(function () {
+beforeEach(function (): void {
     asSuperAdmin(User::factory()->create());
 });
 
-it('defaults the widget to the oldest non-archived pipeline', function () {
+it('defaults the widget to the oldest non-archived pipeline', function (): void {
     $project = Project::factory()->create();
     $oldest = Pipeline::factory()->for($project)->create();
     $newer = Pipeline::factory()->for($project)->create();
@@ -63,7 +63,7 @@ it('defaults the widget to the oldest non-archived pipeline', function () {
         ->assertSet('selectedPipelineId', $newer->getKey());
 });
 
-it('archives the checked pipeline and cascades to its tasks', function () {
+it('archives the checked pipeline and cascades to its tasks', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     $other = Pipeline::factory()->for($project)->create();
@@ -75,7 +75,7 @@ it('archives the checked pipeline and cascades to its tasks', function () {
         ->and($active->refresh()->isArchived())->toBeFalse();
 });
 
-it('archives the checked pipeline through the switcher footer archive action', function () {
+it('archives the checked pipeline through the switcher footer archive action', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     $other = Pipeline::factory()->for($project)->create();
@@ -91,7 +91,7 @@ it('archives the checked pipeline through the switcher footer archive action', f
         ->and($other->refresh()->isArchived())->toBeFalse();
 });
 
-it('keeps the switcher modal open after archiving when other pipelines remain', function () {
+it('keeps the switcher modal open after archiving when other pipelines remain', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     Pipeline::factory()->for($project)->create();
@@ -104,7 +104,7 @@ it('keeps the switcher modal open after archiving when other pipelines remain', 
         ->assertActionMounted('selectPipeline');
 });
 
-it('closes the switcher modal after archiving the last remaining pipeline', function () {
+it('closes the switcher modal after archiving the last remaining pipeline', function (): void {
     $project = Project::factory()->create();
     $only = Pipeline::factory()->for($project)->create();
 
@@ -116,7 +116,7 @@ it('closes the switcher modal after archiving the last remaining pipeline', func
         ->assertActionNotMounted();
 });
 
-it('re-selects the oldest remaining pipeline after archiving the active one', function () {
+it('re-selects the oldest remaining pipeline after archiving the active one', function (): void {
     $project = Project::factory()->create();
     $active = Pipeline::factory()->for($project)->create();
     $next = Pipeline::factory()->for($project)->create();
@@ -127,7 +127,7 @@ it('re-selects the oldest remaining pipeline after archiving the active one', fu
         ->assertSet('selectedPipelineId', $next->getKey());
 });
 
-it('clears the selection when the last pipeline is archived', function () {
+it('clears the selection when the last pipeline is archived', function (): void {
     $project = Project::factory()->create();
     $only = Pipeline::factory()->for($project)->create();
 
@@ -136,7 +136,7 @@ it('clears the selection when the last pipeline is archived', function () {
         ->assertSet('selectedPipelineId', null);
 });
 
-it('excludes archived tasks from the pipeline board', function () {
+it('excludes archived tasks from the pipeline board', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
@@ -156,7 +156,7 @@ it('excludes archived tasks from the pipeline board', function () {
         ->assertCanNotSeeTableRecords([$archived]);
 });
 
-it('renders a task as having no associated milestone when its milestone has been soft-deleted', function () {
+it('renders a task as having no associated milestone when its milestone has been soft-deleted', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
@@ -176,7 +176,7 @@ it('renders a task as having no associated milestone when its milestone has been
         ->assertDontSee($milestone->title);
 });
 
-it('calculates progress for unassociated pipeline tasks', function () {
+it('calculates progress for unassociated pipeline tasks', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Complete]);
@@ -191,7 +191,7 @@ it('calculates progress for unassociated pipeline tasks', function () {
         ->assertSee('Progress: 100%');
 });
 
-it('does not provide a row-level edit action because task editing is accessed through the name column', function () {
+it('does not provide a row-level edit action because task editing is accessed through the name column', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
@@ -201,8 +201,8 @@ it('does not provide a row-level edit action because task editing is accessed th
         ->assertTableActionDoesNotExist('edit', record: $entry);
 });
 
-describe('status filter', function () {
-    it('defaults to showing all non-complete classifications and hiding complete tasks', function () {
+describe('status filter', function (): void {
+    it('defaults to showing all non-complete classifications and hiding complete tasks', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
 
@@ -219,7 +219,7 @@ describe('status filter', function () {
             ->assertCanNotSeeTableRecords([$completeTask]);
     });
 
-    it('can filter tasks by stage classification', function () {
+    it('can filter tasks by stage classification', function (): void {
         $project = Project::factory()->create();
         $pipeline = Pipeline::factory()->for($project)->create();
 
@@ -244,7 +244,7 @@ describe('columns', function () {
             ->assertTableColumnExists('assignedTo', fn (Column $column): bool => $column->getLabel() === 'Assigned To')
             ->assertTableColumnExists('pipelineStage.name', fn (Column $column): bool => $column->getLabel() === 'Stage');
 
-            $columns = array_keys($widget->instance()->getTable()->getColumns());
+        $columns = array_keys($widget->instance()->getTable()->getColumns());
         expect(array_search('assignedTo', $columns, true))
             ->toBeLessThan(array_search('pipelineStage.name', $columns, true));
     });
@@ -279,7 +279,7 @@ describe('columns', function () {
     });
 });
 
-it('archives a pipeline task from its slide-over modal', function () {
+it('archives a pipeline task from its slide-over modal', function (): void {
     $project = Project::factory()->create();
     $pipeline = Pipeline::factory()->for($project)->create();
     $stage = PipelineStage::factory()->for($pipeline)->create(['classification' => PipelineStageClassification::Planning]);
@@ -297,8 +297,8 @@ it('archives a pipeline task from its slide-over modal', function () {
     expect($entry->refresh()->isArchived())->toBeTrue();
 });
 
-describe('archive authorization', function () {
-    it('does not archive when the acting user lacks the pipeline delete ability', function () {
+describe('archive authorization', function (): void {
+    it('does not archive when the acting user lacks the pipeline delete ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('pipeline.view-any');
         $user->refresh();
@@ -313,7 +313,7 @@ describe('archive authorization', function () {
         expect($pipeline->refresh()->isArchived())->toBeFalse();
     });
 
-    it('hides the footer archive control from a user lacking the pipeline delete ability', function () {
+    it('hides the footer archive control from a user lacking the pipeline delete ability', function (): void {
         $user = User::factory()->create();
         $user->givePermissionTo('pipeline.view-any');
         $user->refresh();
@@ -328,8 +328,8 @@ describe('archive authorization', function () {
     });
 });
 
-describe('task access authorization', function () {
-    it('opens pipeline task details for a project auditor', function () {
+describe('task access authorization', function (): void {
+    it('opens pipeline task details for a project auditor', function (): void {
         $auditor = User::factory()->create();
         $auditor->givePermissionTo('project.*.view');
         $auditor->refresh();
@@ -350,7 +350,7 @@ describe('task access authorization', function () {
             ->assertActionHidden('editPipelineEntry');
     });
 
-    it('opens an editable pipeline task form for a project manager', function () {
+    it('opens an editable pipeline task form for a project manager', function (): void {
         $manager = User::factory()->create();
         $manager->givePermissionTo(['project.*.view', 'project.*.update']);
         $manager->refresh();

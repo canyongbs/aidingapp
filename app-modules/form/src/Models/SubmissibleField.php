@@ -62,7 +62,7 @@ abstract class SubmissibleField extends BaseModel
     abstract public function step(): BelongsTo;
 
     /**
-     * @return Attribute<string, never>
+     * @return Attribute<bool, never>
      */
     protected function isRequired(): Attribute
     {

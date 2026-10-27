@@ -57,7 +57,7 @@ use function Pest\Laravel\assertDatabaseMissing;
 use function PHPUnit\Framework\assertCount;
 use function Tests\asSuperAdmin;
 
-test('CreateServiceMonitoring is gated with proper access control', function () {
+test('CreateServiceMonitoring is gated with proper access control', function (): void {
     $settings = app(LicenseSettings::class);
     $settings->data->addons->serviceMonitoring = false;
     $settings->save();
@@ -93,7 +93,7 @@ test('CreateServiceMonitoring is gated with proper access control', function () 
     assertDatabaseHas(ServiceMonitoringTarget::class, $request);
 });
 
-test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
+test('CreateServiceMonitoring validates the inputs', function (ServiceMonitoringTargetRequestFactory $data, array $errors): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new($data)->create();
@@ -365,7 +365,7 @@ test('CreateServiceMonitoring validates the inputs', function ($data, $errors) {
     ]
 );
 
-test('CreateServiceMonitor can create a service monitor with basic auth', function () {
+test('CreateServiceMonitor can create a service monitor with basic auth', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->basicAuth()->create();
@@ -387,7 +387,7 @@ test('CreateServiceMonitor can create a service monitor with basic auth', functi
     ]);
 });
 
-test('CreateServiceMonitor hides auth username and password fields until basic auth type is selected', function () {
+test('CreateServiceMonitor hides auth username and password fields until basic auth type is selected', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -399,7 +399,7 @@ test('CreateServiceMonitor hides auth username and password fields until basic a
         ->assertSchemaComponentVisible('auth_password');
 });
 
-test('CreateServiceMonitor hides API endpoint fields until the API endpoint monitor type is selected', function () {
+test('CreateServiceMonitor hides API endpoint fields until the API endpoint monitor type is selected', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -416,7 +416,7 @@ test('CreateServiceMonitor hides API endpoint fields until the API endpoint moni
         ->assertSchemaComponentVisible('request_headers');
 });
 
-test('CreateServiceMonitor defaults successful_status_codes to 200 when the API endpoint monitor type is selected', function () {
+test('CreateServiceMonitor defaults successful_status_codes to 200 when the API endpoint monitor type is selected', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -424,7 +424,7 @@ test('CreateServiceMonitor defaults successful_status_codes to 200 when the API 
         ->assertFormSet(['successful_status_codes' => [200]]);
 });
 
-test('CreateServiceMonitor shows follow_redirection for every monitor type', function () {
+test('CreateServiceMonitor shows follow_redirection for every monitor type', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -436,7 +436,7 @@ test('CreateServiceMonitor shows follow_redirection for every monitor type', fun
         ->assertSchemaComponentVisible('follow_redirection');
 });
 
-test('CreateServiceMonitor hides the max latency input until the maximum latency toggle is enabled', function () {
+test('CreateServiceMonitor hides the max latency input until the maximum latency toggle is enabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -446,7 +446,7 @@ test('CreateServiceMonitor hides the max latency input until the maximum latency
         ->assertSchemaComponentVisible('max_latency_ms');
 });
 
-test('CreateServiceMonitor hides the request body fields when the HTTP method does not support a body', function () {
+test('CreateServiceMonitor hides the request body fields when the HTTP method does not support a body', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -461,7 +461,7 @@ test('CreateServiceMonitor hides the request body fields when the HTTP method do
         ->assertSchemaComponentVisible('is_request_body_json');
 });
 
-test('CreateServiceMonitor can create a service monitor with an API endpoint monitor', function () {
+test('CreateServiceMonitor can create a service monitor with an API endpoint monitor', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()
@@ -494,22 +494,22 @@ test('CreateServiceMonitor can create a service monitor with an API endpoint mon
         ]);
 });
 
-test('CreateServiceMonitor with notification group User or Department', function () {
+test('CreateServiceMonitor with notification group User or Department', function (): void {
     asSuperAdmin();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
-    expect($serviceMonitoringTarget->departments())->exists()->toBeFalse();
-    expect($serviceMonitoringTarget->users())->exists()->toBeFalse();
+    expect($serviceMonitoringTarget->departments()->exists())->toBeFalse();
+    expect($serviceMonitoringTarget->users()->exists())->toBeFalse();
 
     $serviceMonitoringTarget->departments()->attach(Department::factory()->create());
     $serviceMonitoringTarget->users()->attach(User::factory()->create());
 
-    expect($serviceMonitoringTarget->departments())->exists()->toBeTrue();
-    expect($serviceMonitoringTarget->users())->exists()->toBeTrue();
+    expect($serviceMonitoringTarget->departments()->exists())->toBeTrue();
+    expect($serviceMonitoringTarget->users()->exists())->toBeTrue();
 });
 
-test('it will validate multiple valid forms of URL and IP Address', function () {
+test('it will validate multiple valid forms of URL and IP Address', function (): void {
     asSuperAdmin();
 
     $validUrls = [
@@ -556,7 +556,7 @@ test('it will validate multiple valid forms of URL and IP Address', function () 
 
 // UserSelect (user field) admin-filtering tests
 
-test('user UserSelect does not show admin users in options by default on CreateServiceMonitoring', function () {
+test('user UserSelect does not show admin users in options by default on CreateServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.create');
@@ -569,12 +569,12 @@ test('user UserSelect does not show admin users in options by default on CreateS
     Livewire::test(CreateServiceMonitoring::class)
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($regularUser, $adminUser): bool {
-            return ! empty($field->getSearchResults($regularUser->name))
-                && empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($regularUser->full_name))
+                && empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
-test('user UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function () {
+test('user UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
@@ -588,13 +588,13 @@ test('user UserSelect shows all users when filter_admins_from_selection config i
     Livewire::test(CreateServiceMonitoring::class)
         ->assertSuccessful()
         ->assertFormFieldExists('user', function (UserSelect $field) use ($adminUser): bool {
-            return ! empty($field->getSearchResults($adminUser->name));
+            return ! empty($field->getSearchResults($adminUser->full_name));
         });
 });
 
 // report_configurations.daily.report_users UserSelect admin-filtering tests
 
-test('daily report_users UserSelect does not show admin users in options by default on CreateServiceMonitoring', function () {
+test('daily report_users UserSelect does not show admin users in options by default on CreateServiceMonitoring', function (): void {
     $actor = User::factory()->create();
     $actor->givePermissionTo('service_monitoring.view-any');
     $actor->givePermissionTo('service_monitoring.create');
@@ -614,7 +614,7 @@ test('daily report_users UserSelect does not show admin users in options by defa
         });
 });
 
-test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function () {
+test('daily report_users UserSelect shows all users when filter_admins_from_selection config is false on CreateServiceMonitoring', function (): void {
     Config::set('app.filter_admins_from_selection', false);
 
     $actor = User::factory()->create();
@@ -632,7 +632,7 @@ test('daily report_users UserSelect shows all users when filter_admins_from_sele
         });
 });
 
-test('creating a confidential service monitor persists the granted users, departments, and contacts', function () {
+test('creating a confidential service monitor persists the granted users, departments, and contacts', function (): void {
     asSuperAdmin();
 
     $grantedUser = User::factory()->create();
@@ -663,7 +663,7 @@ test('creating a confidential service monitor persists the granted users, depart
     expect($serviceMonitoringTarget->confidentialContacts()->count())->toBe(1);
 });
 
-test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled', function () {
+test('the confidential users, departments, and contacts fields are only visible when confidentiality is enabled', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -676,7 +676,7 @@ test('the confidential users, departments, and contacts fields are only visible 
         ->assertSchemaComponentVisible('confidentialContacts');
 });
 
-test('a confidential service monitor cannot be created while a notification recipient has no confidential access', function () {
+test('a confidential service monitor cannot be created while a notification recipient has no confidential access', function (): void {
     asSuperAdmin();
 
     $notifiedUser = User::factory()->create();
@@ -693,7 +693,7 @@ test('a confidential service monitor cannot be created while a notification reci
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });
 
-test('creating a service monitor persists report configurations for multiple frequencies', function () {
+test('creating a service monitor persists report configurations for multiple frequencies', function (): void {
     asSuperAdmin();
 
     $dailyUser = User::factory()->create();
@@ -736,7 +736,7 @@ test('creating a service monitor persists report configurations for multiple fre
     expect($monthly->is_active)->toBeFalse();
 });
 
-test('the Recipients section for a frequency is only visible while that frequency is active', function () {
+test('the Recipients section for a frequency is only visible while that frequency is active', function (): void {
     asSuperAdmin();
 
     Livewire::test(CreateServiceMonitoring::class)
@@ -747,7 +747,7 @@ test('the Recipients section for a frequency is only visible while that frequenc
         ->assertDontSee('report_configurations.daily.report_channels', escape: false);
 });
 
-test('a service monitor cannot be created with an active reporting frequency and no channel selected', function () {
+test('a service monitor cannot be created with an active reporting frequency and no channel selected', function (): void {
     asSuperAdmin();
 
     $dailyUser = User::factory()->create();
@@ -769,7 +769,7 @@ test('a service monitor cannot be created with an active reporting frequency and
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });
 
-test('a service monitor can be created with an active reporting frequency once a channel is selected', function () {
+test('a service monitor can be created with an active reporting frequency once a channel is selected', function (): void {
     asSuperAdmin();
 
     $dailyUser = User::factory()->create();
@@ -792,7 +792,7 @@ test('a service monitor can be created with an active reporting frequency once a
     expect(ServiceMonitoringTarget::query()->where('name', $request['name'])->exists())->toBeTrue();
 });
 
-test('a confidential service monitor cannot be created while a report recipient has no confidential access', function () {
+test('a confidential service monitor cannot be created while a report recipient has no confidential access', function (): void {
     asSuperAdmin();
 
     $reportUser = User::factory()->create();
@@ -814,7 +814,7 @@ test('a confidential service monitor cannot be created while a report recipient 
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });
 
-test('a confidential service monitor can be created when a report recipient has confidential access', function () {
+test('a confidential service monitor can be created when a report recipient has confidential access', function (): void {
     asSuperAdmin();
 
     $reportUser = User::factory()->create();
@@ -838,7 +838,7 @@ test('a confidential service monitor can be created when a report recipient has 
     expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
 });
 
-test('a confidential service monitor cannot be created while a report contact has no confidential access', function () {
+test('a confidential service monitor cannot be created while a report contact has no confidential access', function (): void {
     asSuperAdmin();
 
     $reportContact = Contact::factory()->create();
@@ -861,7 +861,7 @@ test('a confidential service monitor cannot be created while a report contact ha
     expect(ServiceMonitoringTarget::query()->exists())->toBeFalse();
 });
 
-test('a confidential service monitor can be created when a report contact has confidential access', function () {
+test('a confidential service monitor can be created when a report contact has confidential access', function (): void {
     asSuperAdmin();
 
     $reportContact = Contact::factory()->create();
@@ -885,7 +885,7 @@ test('a confidential service monitor can be created when a report contact has co
     expect(ServiceMonitoringTarget::query()->exists())->toBeTrue();
 });
 
-test('a service monitor saves keyword match values arrays', function () {
+test('a service monitor saves keyword match values arrays', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -909,7 +909,7 @@ test('a service monitor saves keyword match values arrays', function () {
         ->and($serviceMonitoringTarget->should_not_contain)->toBe(['outage ""now""']);
 });
 
-test('a service monitor saves comma-separated `should_contain` values as an array', function () {
+test('a service monitor saves comma-separated `should_contain` values as an array', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -931,7 +931,7 @@ test('a service monitor saves comma-separated `should_contain` values as an arra
     expect($serviceMonitoringTarget->should_contain)->toBe(['test1', 'test2']);
 });
 
-test('a service monitor preserves double quotes in quoted `should_contain` values', function () {
+test('a service monitor preserves double quotes in quoted `should_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -958,7 +958,7 @@ test('a service monitor preserves double quotes in quoted `should_contain` value
     ]);
 });
 
-test('a service monitor saves comma-separated `should_not_contain` values as an array', function () {
+test('a service monitor saves comma-separated `should_not_contain` values as an array', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -980,7 +980,7 @@ test('a service monitor saves comma-separated `should_not_contain` values as an 
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test1', 'test2']);
 });
 
-test('a service monitor saves comma-separated `should_contain` values with spaces as an array', function () {
+test('a service monitor saves comma-separated `should_contain` values with spaces as an array', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1002,7 +1002,7 @@ test('a service monitor saves comma-separated `should_contain` values with space
     expect($serviceMonitoringTarget->should_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor saves comma-separated `should_not_contain` values with spaces as an array', function () {
+test('a service monitor saves comma-separated `should_not_contain` values with spaces as an array', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1024,7 +1024,7 @@ test('a service monitor saves comma-separated `should_not_contain` values with s
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor removes leading and trailing whitespace from `should_contain` values', function () {
+test('a service monitor removes leading and trailing whitespace from `should_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1046,7 +1046,7 @@ test('a service monitor removes leading and trailing whitespace from `should_con
     expect($serviceMonitoringTarget->should_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor removes leading and trailing whitespace from `should_not_contain` values', function () {
+test('a service monitor removes leading and trailing whitespace from `should_not_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1068,7 +1068,7 @@ test('a service monitor removes leading and trailing whitespace from `should_not
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor ignores empty entries from extra commas in `should_contain` values', function () {
+test('a service monitor ignores empty entries from extra commas in `should_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1090,7 +1090,7 @@ test('a service monitor ignores empty entries from extra commas in `should_conta
     expect($serviceMonitoringTarget->should_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor ignores empty entries from extra commas in `should_not_contain` values', function () {
+test('a service monitor ignores empty entries from extra commas in `should_not_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1112,7 +1112,7 @@ test('a service monitor ignores empty entries from extra commas in `should_not_c
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1', 'test 2']);
 });
 
-test('a service monitor preserves commas inside quoted `should_contain` values', function () {
+test('a service monitor preserves commas inside quoted `should_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1134,7 +1134,7 @@ test('a service monitor preserves commas inside quoted `should_contain` values',
     expect($serviceMonitoringTarget->should_contain)->toBe(['test 1, test 2', 'test 3']);
 });
 
-test('a service monitor preserves commas inside quoted `should_not_contain` values', function () {
+test('a service monitor preserves commas inside quoted `should_not_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1156,7 +1156,7 @@ test('a service monitor preserves commas inside quoted `should_not_contain` valu
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1, test 2', 'test 3']);
 });
 
-test('a service monitor saves unique `should_contain` values', function () {
+test('a service monitor saves unique `should_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1178,7 +1178,7 @@ test('a service monitor saves unique `should_contain` values', function () {
     expect($serviceMonitoringTarget->should_contain)->toBe(['test 1']);
 });
 
-test('a service monitor saves unique `should_not_contain` values', function () {
+test('a service monitor saves unique `should_not_contain` values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();
@@ -1200,7 +1200,7 @@ test('a service monitor saves unique `should_not_contain` values', function () {
     expect($serviceMonitoringTarget->should_not_contain)->toBe(['test 1']);
 });
 
-test('a service monitor saves case-insensitively unique keyword values', function () {
+test('a service monitor saves case-insensitively unique keyword values', function (): void {
     asSuperAdmin();
 
     $request = ServiceMonitoringTargetRequestFactory::new()->create();

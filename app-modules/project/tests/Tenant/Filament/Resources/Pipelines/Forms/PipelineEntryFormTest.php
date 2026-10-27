@@ -47,10 +47,10 @@ use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
-it('formats the related milestone label with its task count and completion percentage', function (int $tasksCount, int $completedTasksCount, string $expected) {
+it('formats the related milestone label with its task count and completion percentage', function (int $tasksCount, int $completedTasksCount, string $expected): void {
     $milestone = ProjectMilestone::factory()->make(['title' => 'Wash the Car']);
-    $milestone->tasks_count = $tasksCount;
-    $milestone->completed_tasks_count = $completedTasksCount;
+    $milestone->setAttribute('tasks_count', $tasksCount);
+    $milestone->setAttribute('completed_tasks_count', $completedTasksCount);
 
     expect(PipelineEntryForm::milestoneLabel($milestone))->toBe($expected);
 })->with([
@@ -59,7 +59,7 @@ it('formats the related milestone label with its task count and completion perce
     'multiple tasks, some complete' => [4, 1, 'Wash the Car (4 Tasks) 25% Complete'],
 ]);
 
-it('lists related milestone options preloaded, searchable, alphabetically ordered, and formatted with task counts and completion percentage', function () {
+it('lists related milestone options preloaded, searchable, alphabetically ordered, and formatted with task counts and completion percentage', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -127,7 +127,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
                     $buildTheHouse->getKey() => 'Build the House (0 Tasks) 0% Complete',
                     $buildTheSolution->getKey() => 'Build the Solution (2 Tasks) 50% Complete',
                     $washTheCar->getKey() => 'Wash the Car (4 Tasks) 25% Complete',
-                ])->and($options)->not->toHaveKey($otherProjectMilestone->getKey());
+                ])->and($options)->not()->toHaveKey($otherProjectMilestone->getKey());
 
                 return $select->isSearchable()
                     && $select->isPreloaded()
@@ -136,7 +136,7 @@ it('lists related milestone options preloaded, searchable, alphabetically ordere
         );
 });
 
-it('only lists milestones that belong to the entry\'s pipeline', function () {
+it('only lists milestones that belong to the entry\'s pipeline', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -162,7 +162,7 @@ it('only lists milestones that belong to the entry\'s pipeline', function () {
         );
 });
 
-it('still resolves the label and keeps the option selectable for an archived milestone still related to an entry', function () {
+it('still resolves the label and keeps the option selectable for an archived milestone still related to an entry', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();
@@ -204,7 +204,7 @@ it('still resolves the label and keeps the option selectable for an archived mil
         );
 });
 
-it('excludes an archived milestone with no related entries from the options', function () {
+it('excludes an archived milestone with no related entries from the options', function (): void {
     asSuperAdmin();
 
     $project = Project::factory()->create();

@@ -54,13 +54,13 @@ $modulesPath = dirname(__DIR__, 3) . '/app-modules';
 $modules = (new ModuleRegistry(
     modules_path: $modulesPath,
     modules_loader: fn () => collect(glob($modulesPath . '/*/composer.json'))
-        ->map(fn (string $path) => ModuleConfig::fromComposerFile(
+        ->map(fn (string $path): ModuleConfig => ModuleConfig::fromComposerFile(
             new SplFileInfo($path, dirname($path), $path)
         ))
-        ->keyBy(fn (ModuleConfig $module) => $module->name),
+        ->keyBy(fn (ModuleConfig $module): string => $module->name),
 ))->modules();
 
-$modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
+$modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels): void {
     arch("All {$module->name} Models should not use HasVersion4Uuids trait")
         ->expect($module->namespace() . 'Models')
         ->extending(Model::class)
@@ -68,7 +68,7 @@ $modules->each(function (ModuleConfig $module) use ($legacyV4UuidModels) {
         ->ignoring($legacyV4UuidModels);
 });
 
-test('Legacy models must not use HasUuids (UUIDv7)', function () {
+test('Legacy models must not use HasUuids (UUIDv7)', function (): void {
     $legacyModels = require __DIR__ . '/legacy-v4-uuid-models.php';
 
     foreach ($legacyModels as $class) {

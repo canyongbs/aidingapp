@@ -42,7 +42,7 @@ use Illuminate\Support\Facades\URL;
 use function Pest\Laravel\actingAs;
 use function Pest\Laravel\get;
 
-test('portal returns a null display_timezone for a guest', function () {
+test('portal returns a null display_timezone for a guest', function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -54,7 +54,7 @@ test('portal returns a null display_timezone for a guest', function () {
     $response->assertJsonPath('display_timezone', null);
 });
 
-test('portal returns a null display_timezone for a contact that is not managed', function () {
+test('portal returns a null display_timezone for a contact that is not managed', function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();
@@ -70,7 +70,7 @@ test('portal returns a null display_timezone for a contact that is not managed',
     $response->assertJsonPath('display_timezone', null);
 });
 
-test('portal returns the managing user timezone for a managed contact', function () {
+test('portal returns the managing user timezone for a managed contact', function (): void {
     $settings = app(PortalSettings::class);
     $settings->knowledge_management_portal_enabled = true;
     $settings->save();

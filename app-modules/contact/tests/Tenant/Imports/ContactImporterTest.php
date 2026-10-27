@@ -45,8 +45,7 @@ use Illuminate\Support\Str;
 /**
  * @param  array<string, mixed>  $row
  */
-function runContactImport(array $row, ?Import $import = null): void
-{
+$runContactImport = function (array $row, ?Import $import = null): void {
     ContactType::factory()->create([
         'name' => 'Default',
         'is_default' => true,
@@ -57,26 +56,23 @@ function runContactImport(array $row, ?Import $import = null): void
         $import->id = (string) Str::uuid();
         $import->user()->associate(User::factory()->create());
     }
-
     $columnMap = collect(array_keys($row))
         ->mapWithKeys(fn (string $key): array => [$key => $key])
         ->all();
-
     $importer = new ContactImporter(
         import: $import,
         columnMap: $columnMap,
         options: [],
     );
-
     $importer($row);
-}
+};
 
-it('associates an imported contact with the matching organization', function () {
+it('associates an imported contact with the matching organization', function () use ($runContactImport): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
 
-    runContactImport([
+    $runContactImport([
         'first_name' => 'First',
         'last_name' => 'Last',
         'full_name' => 'First Last',
@@ -89,7 +85,7 @@ it('associates an imported contact with the matching organization', function () 
     expect($contact->organization_id)->toBe($organization->getKey());
 });
 
-it('preserves an existing organization when importing a contact', function () {
+it('preserves an existing organization when importing a contact', function () use ($runContactImport): void {
     $organization = Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);
@@ -100,7 +96,7 @@ it('preserves an existing organization when importing a contact', function () {
         ->for($otherOrganization, 'organization')
         ->create(['email' => 'person@example.com', 'first_name' => 'Original']);
 
-    runContactImport([
+    $runContactImport([
         'first_name' => 'Updated',
         'last_name' => 'Last',
         'full_name' => 'Updated Last',

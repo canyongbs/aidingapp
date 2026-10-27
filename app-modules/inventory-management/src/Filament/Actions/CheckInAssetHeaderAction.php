@@ -55,7 +55,7 @@ class CheckInAssetHeaderAction extends Action
 
         $this->label(__('Check In'));
 
-        $this->modalHeading(function () {
+        $this->modalHeading(function (): string {
             assert($this->getRecord() instanceof Asset);
 
             return __("Check in {$this->getRecord()->name}");
@@ -63,7 +63,7 @@ class CheckInAssetHeaderAction extends Action
 
         $this->modalSubmitActionLabel(__('Done'));
 
-        $this->successNotificationTitle(function () {
+        $this->successNotificationTitle(function (): string {
             assert($this->getRecord() instanceof Asset);
 
             return __("Successfully checked in {$this->getRecord()->name}");
