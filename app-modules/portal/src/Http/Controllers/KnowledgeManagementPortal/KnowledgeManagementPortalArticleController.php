@@ -141,6 +141,8 @@ class KnowledgeManagementPortalArticleController extends Controller
 
     private function response(KnowledgeBaseItem $article): JsonResponse
     {
+        abort_unless($article->public, 404);
+
         $category = $article->category;
 
         if (! auth()->guard('contact')->check() && ! session()->has('guest_id')) {
@@ -163,10 +165,6 @@ class KnowledgeManagementPortalArticleController extends Controller
 
         if ($totalVotes > 0) {
             $helpfulVotePercentage = round(($helpfulVotes / $totalVotes) * 100, 0);
-        }
-
-        if (! $article->public) {
-            return response()->json([], 401);
         }
 
         $content = $article->article_details ? $article->renderRichContent('article_details') : '';
