@@ -56,6 +56,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Schemas\Co
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Rules\ValidServiceMonitoringKeywordValues;
+use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Rules\ValidUrl;
 use Filament\Forms\Components\Select;
@@ -67,6 +68,7 @@ use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateServiceMonitoring extends CreateRecord
 {
@@ -86,6 +88,10 @@ class CreateServiceMonitoring extends CreateRecord
                             ->string()
                             ->required()
                             ->maxLength(255)
+                            ->when(
+                                ServiceMonitoringTargetNameUniquenessFeature::active(),
+                                fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                            )
                             ->columnSpanFull(),
                         Textarea::make('description')
                             ->label('Description')
