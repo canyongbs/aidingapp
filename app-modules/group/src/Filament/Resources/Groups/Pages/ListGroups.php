@@ -72,7 +72,6 @@ class ListGroups extends ListRecords
                     ->sortable(),
                 TextColumn::make('createdBy.full_name')
                     ->label('Created By')
-                    ->placeholder('N/A')
                     ->sortable(['first_name', 'last_name']),
             ])
             ->recordActions([
