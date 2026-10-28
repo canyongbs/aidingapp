@@ -176,7 +176,7 @@ it('returns correct assignee relationship structure', function (): void {
 
     expect($response['data']['assignee'])->toBe([
         'id' => $assigneeUser->id,
-        'name' => $assigneeUser->name,
+        'name' => $assigneeUser->full_name,
     ]);
 });
 

@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Actions\ResolveServiceRequestSecretEncrypter;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestFeedback;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -699,3 +700,41 @@ describe('archiving', function (): void {
             ->assertSuccessful();
     });
 });
+
+test('ServiceRequestsRelationManager searches the assigned to column by full name, including a quoted phrase', function (string $search): void {
+    asSuperAdmin();
+
+    $settings = app(LicenseSettings::class);
+    $settings->data->addons->serviceManagement = true;
+    $settings->save();
+
+    $contact = Contact::factory()->create();
+
+    $matching = ServiceRequest::factory()->state(['respondent_id' => $contact->getKey()])->create();
+    $other = ServiceRequest::factory()->state(['respondent_id' => $contact->getKey()])->create();
+
+    foreach ([[$matching, 'Avery', 'Smith'], [$other, 'Jordan', 'Lee']] as [$serviceRequest, $firstName, $lastName]) {
+        $assignee = User::factory()->create(['first_name' => $firstName, 'last_name' => $lastName]);
+
+        $serviceRequest->priority->type->managerUsers()->attach($assignee);
+
+        ServiceRequestAssignment::factory()->active()->create([
+            'service_request_id' => $serviceRequest->getKey(),
+            'user_id' => $assignee->getKey(),
+        ]);
+    }
+
+    Livewire::test(ServiceRequestsRelationManager::class, [
+        'ownerRecord' => $contact,
+        'pageClass' => ViewContact::class,
+    ])
+        ->searchTable($search)
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other]);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+    'quoted full name' => '"Avery Smith"',
+]);

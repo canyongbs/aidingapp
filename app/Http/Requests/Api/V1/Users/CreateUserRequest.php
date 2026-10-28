@@ -39,6 +39,7 @@ namespace App\Http\Requests\Api\V1\Users;
 use AidingApp\Authorization\Models\Role;
 use AidingApp\Department\Models\Department;
 use App\Models\Authenticatable;
+use App\Models\User;
 use App\Rules\EmailNotInUseOrSoftDeleted;
 use Illuminate\Database\Query\Expression;
 use Illuminate\Foundation\Http\FormRequest;
@@ -73,8 +74,8 @@ class CreateUserRequest extends FormRequest
             'department' => ['nullable', 'string', 'max:255'],
             'roles' => ['nullable', 'array'],
             'roles.*' => ['string', 'max:255'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH],
+            'last_name' => ['required', 'string', 'max:' . User::NAME_PART_MAX_LENGTH],
             'preferred_name' => ['nullable', 'string', 'max:255'],
             'employee_id' => ['nullable', 'string', 'max:255'],
             'student_id' => ['nullable', 'string', 'max:255'],

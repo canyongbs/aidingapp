@@ -52,7 +52,7 @@ class KnowledgeBaseArticlesExporter extends Exporter
                 ->label('Article Title'),
             ExportColumn::make('managers_list')
                 ->label('Manager')
-                ->state(fn (KnowledgeBaseItem $record): string => $record->managers->pluck('name')->join(', ')),
+                ->state(fn (KnowledgeBaseItem $record): string => $record->managers->pluck('full_name')->join(', ')),
             ExportColumn::make('portal_view_count')
                 ->label('Views'),
             ExportColumn::make('rating')

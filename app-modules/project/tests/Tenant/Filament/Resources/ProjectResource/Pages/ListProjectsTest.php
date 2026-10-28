@@ -265,7 +265,7 @@ it('displays project name, manager(s), department, start date, target date, and 
 
     $project = Project::factory()
         ->for($department)
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create([
             'start_date' => '2026-01-15',
             'target_completion_date' => null,
@@ -304,7 +304,7 @@ it('displays project name, manager(s), department, start date, target date, and 
         ->assertTableColumnStateSet('progress', 50, $project)
         ->assertTableColumnExists(
             'managers',
-            fn (Column $column): bool => $column->getState()->pluck('name')->all() === ['Casey Manager'],
+            fn (Column $column): bool => $column->getState()->pluck('full_name')->all() === ['Casey Manager'],
             $project,
         )
         ->assertTableColumnExists(
@@ -352,14 +352,14 @@ it('can search projects by project name, manager name, and department name', fun
 
     $matchingByName = Project::factory()->create(['name' => 'Onboarding Revamp']);
     $matchingByManager = Project::factory()->create(['name' => 'Unrelated Project']);
-    $manager = User::factory()->create(['name' => 'Jordan Searchable']);
+    $manager = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Searchable']);
     $matchingByManager->managerUsers()->attach($manager->getKey());
 
     $department = Department::factory()->create(['name' => 'Searchable Department']);
     $matchingByDepartment = Project::factory()->for($department)->create(['name' => 'Another Project']);
 
     $otherDepartment = Department::factory()->create(['name' => 'Other Department']);
-    User::factory()->for($otherDepartment)->create(['name' => 'Taylor Delegate']);
+    User::factory()->for($otherDepartment)->create(['first_name' => 'Taylor', 'last_name' => 'Delegate']);
 
     $matchingByDepartmentManager = Project::factory()
         ->hasAttached($otherDepartment, relationship: 'managerDepartments')
@@ -393,7 +393,7 @@ it('caps the manager avatars it renders but keeps every manager searchable', fun
 
     $project = Project::factory()
         ->hasAttached(User::factory()->count(24), relationship: 'managerUsers')
-        ->hasAttached(User::factory()->state(['name' => 'Wilhelmina Ashgrove']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Wilhelmina', 'last_name' => 'Ashgrove']), relationship: 'managerUsers')
         ->create(['name' => 'Crowded Project']);
 
     Livewire::test(ListProjects::class)
@@ -475,7 +475,7 @@ it('ranks a project named Test above a project managed by someone named Test', f
     asSuperAdmin();
 
     $managedByTest = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test']), relationship: 'managerUsers')
         ->create(['name' => 'Something Else']);
 
     $namedTest = Project::factory()->create(['name' => 'Test']);
@@ -493,7 +493,7 @@ it('ranks project name matches above manager matches, and manager matches above 
         ->create(['name' => 'Gamma']);
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Beta']);
 
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
@@ -510,7 +510,7 @@ it('ranks project name matches first when the search words are given in another 
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Alpha']);
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Onboarding Manager']);
@@ -524,7 +524,7 @@ it('ranks project name matches first when the search is a quoted phrase', functi
     asSuperAdmin();
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Casey Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Casey', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Alpha']);
 
     $matchingByName = Project::factory()->create(['name' => 'Zulu Casey Manager Report']);
@@ -550,7 +550,7 @@ it('sorts by the selected column instead of search relevance when a sort is appl
     $matchingByName = Project::factory()->create(['name' => 'Test Alpha']);
 
     $matchingByManager = Project::factory()
-        ->hasAttached(User::factory()->state(['name' => 'Test Manager']), relationship: 'managerUsers')
+        ->hasAttached(User::factory()->state(['first_name' => 'Test', 'last_name' => 'Manager']), relationship: 'managerUsers')
         ->create(['name' => 'Zulu Project']);
 
     Livewire::test(ListProjects::class)

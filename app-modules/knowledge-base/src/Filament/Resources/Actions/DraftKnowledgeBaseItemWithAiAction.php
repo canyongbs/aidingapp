@@ -81,7 +81,7 @@ class DraftKnowledgeBaseItemWithAiAction extends Action
             ->action(function (array $data, Get $get, Set $set, Page $livewire): void {
                 $model = app(AiIntegratedAssistantSettings::class)->getDefaultModel();
 
-                $userName = auth()->user()->name;
+                $userName = auth()->user()->full_name;
                 $userJobTitle = auth()->user()->job_title ?? 'staff member';
                 $clientName = app(LicenseSettings::class)->data->subscription->clientName;
                 // @phpstan-ignore-next-line

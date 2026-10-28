@@ -119,7 +119,6 @@ test('ViewUser displays the record\'s current field values', function (): void {
     $record = User::factory()->create([
         'first_name' => 'Jordan',
         'last_name' => 'Blake',
-        'name' => 'Jordan Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 
@@ -127,12 +126,11 @@ test('ViewUser displays the record\'s current field values', function (): void {
         ->assertFormSet([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ]);
 });
 
-test('ViewUser shows first and last name fields when the full name feature is active', function (): void {
+test('ViewUser shows first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -150,7 +148,6 @@ test('ViewUser disables all editable fields', function (): void {
     Livewire::test(ViewUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
-        ->assertFormFieldDisabled('name')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('job_title');
 });

@@ -82,7 +82,7 @@ it('creates a new user with all fields, department and roles', function () use (
 
     expect($user->first_name)->toBe('Jonathan')
         ->and($user->last_name)->toBe('Smith')
-        ->and($user->name)->toBe('Jonathan Smith')
+        ->and($user->full_name)->toBe('Jonathan Smith')
         ->and($user->job_title)->toBe('Advisor')
         ->and($user->work_number)->toBe('+1 555 123 4567')
         ->and($user->work_extension)->toBe(123)

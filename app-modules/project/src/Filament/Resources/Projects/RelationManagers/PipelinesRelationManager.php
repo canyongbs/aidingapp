@@ -67,7 +67,7 @@ class PipelinesRelationManager extends RelationManager
             })
             ->columns([
                 TextColumn::make('name'),
-                TextColumn::make('createdBy.name')->label('Created By'),
+                TextColumn::make('createdBy.full_name')->label('Created By'),
             ])
             ->headerActions([
                 CreateAction::make()

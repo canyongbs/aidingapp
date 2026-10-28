@@ -124,7 +124,7 @@ class PipelineEntryForm
 
                     $record = $modelClass::query()->find($state);
 
-                    return $record instanceof Contact ? $record->full_name : $record?->name;
+                    return $record instanceof Contact || $record instanceof User ? $record->full_name : null;
                 })
                 ->visible(fn (Get $get): bool => filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none')
                 ->dehydrateStateUsing(fn (Get $get, mixed $state): mixed => (filled($get('assigned_to_type')) && $get('assigned_to_type') !== 'none') ? $state : null)

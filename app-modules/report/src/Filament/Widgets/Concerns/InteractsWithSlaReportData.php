@@ -63,7 +63,7 @@ trait InteractsWithSlaReportData
             'status:id,classification',
             'priority.sla:id,response_seconds,resolution_seconds',
             'priority.type:id,name',
-            'assignedTo.user:id,name',
+            'assignedTo.user:id,first_name,last_name',
             'latestInboundServiceRequestUpdate.createdBy:id',
             'latestOutboundServiceRequestUpdate.createdBy:id',
             'statusPeriods:id,service_request_id,service_request_status_id,classification,started_at,created_at',

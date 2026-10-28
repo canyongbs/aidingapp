@@ -40,6 +40,7 @@ use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
 use App\Filament\Tables\Columns\IdColumn;
+use App\Models\Scopes\WhereFullNameLike;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\CreateAction;
@@ -76,11 +77,11 @@ class ListProjects extends ListRecords
                         return $query
                             ->whereHas(
                                 'managerUsers',
-                                fn (Builder $query) => $query->where('name', 'ilike', "%{$search}%"),
+                                fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
                             )
                             ->orWhereHas(
                                 'managerDepartments.users',
-                                fn (Builder $query) => $query->where('name', 'ilike', "%{$search}%"),
+                                fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
                             );
                     }),
                 TextColumn::make('department.name')
@@ -142,8 +143,8 @@ class ListProjects extends ListRecords
                 };
 
                 $nameMatch = $matchesEveryWord('projects.name');
-                $managerUserMatch = $matchesEveryWord('users.name');
-                $managerDepartmentUserMatch = $matchesEveryWord('users.name');
+                $managerUserMatch = $matchesEveryWord("(users.first_name || ' ' || users.last_name)");
+                $managerDepartmentUserMatch = $matchesEveryWord("(users.first_name || ' ' || users.last_name)");
                 $departmentMatch = $matchesEveryWord('departments.name');
 
                 return $query

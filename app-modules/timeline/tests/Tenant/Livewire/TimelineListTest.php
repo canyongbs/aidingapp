@@ -219,7 +219,7 @@ describe('related people', function (): void {
     it('shows a soft-deleted person by name', function (): void {
         asSuperAdmin();
 
-        $performer = User::factory()->create(['name' => 'Jane Doe']);
+        $performer = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
 
         $checkOut = AssetCheckOut::factory()->create([
             'checked_out_by_type' => $performer->getMorphClass(),
@@ -254,7 +254,7 @@ describe('related people', function (): void {
     it('shows the soft-deleted creator of an engagement by name', function (): void {
         asSuperAdmin();
 
-        $creator = User::factory()->create(['name' => 'Jane Doe']);
+        $creator = User::factory()->create(['first_name' => 'Jane', 'last_name' => 'Doe']);
         $contact = Contact::factory()->create();
 
         Engagement::factory()

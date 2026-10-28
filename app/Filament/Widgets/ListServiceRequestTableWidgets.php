@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\EducatableSort;
+use App\Models\Scopes\WhereFullNameLike;
 use Filament\Actions\Action;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
@@ -99,10 +100,13 @@ class ListServiceRequestTableWidgets extends BaseWidget
                     )
                     ->sortable(query: fn (Builder $query, string $direction): Builder => $query->tap(new EducatableSort($direction)))
                     ->toggleable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable()
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
+                    ->sortable(['first_name', 'last_name'])
                     ->toggleable(),
                 IconColumn::make('response_sla_compliance')
                     ->label('SLA Response')

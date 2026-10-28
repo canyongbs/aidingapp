@@ -31,6 +31,7 @@
     
     </COPYRIGHT>
 --}}
+@use('\AidingApp\Contact\Models\Contact')
 <x-filament-widgets::widget class="h-full">
     <x-filament::section divided>
         <x-slot name="heading">Project Access</x-slot>
@@ -80,7 +81,7 @@
                 <div class="flex flex-wrap gap-4">
                     @foreach ($this->guests as $item)
                         @php
-                            $isContact = $item instanceof \AidingApp\Contact\Models\Contact;
+                            $isContact = $item instanceof Contact;
                             $name = $isContact ? $item->full_name : $item->name;
                             $initials = $isContact
                                 ? strtoupper(substr($item->first_name ?? '', 0, 1) . substr($item->last_name ?? '', 0, 1))

@@ -64,7 +64,7 @@ trait HasAssetCheckOutInfolist
                 }),
             Fieldset::make('Involved Parties')
                 ->schema([
-                    TextEntry::make('checkedOutBy.name')
+                    TextEntry::make('checkedOutBy.full_name')
                         ->label('Performed By')
                         ->url(fn (AssetCheckOut $record): ?string => $record->checkedOutBy ? UserResource::getUrl('view', ['record' => $record->checkedOutBy]) : null)
                         ->placeholder('Deleted user')

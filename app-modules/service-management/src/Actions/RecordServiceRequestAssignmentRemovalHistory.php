@@ -48,7 +48,7 @@ class RecordServiceRequestAssignmentRemovalHistory
 
         $serviceRequest->histories()->create([
             'original_values' => [
-                'removed_assignment' => User::withTrashed()->find($removedAssignment->user_id)?->name,
+                'removed_assignment' => User::withTrashed()->find($removedAssignment->user_id)?->full_name,
             ],
             'new_values' => ['removed_assignment' => null],
             'actor_type' => $actor?->getMorphClass(),

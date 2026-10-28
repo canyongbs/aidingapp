@@ -36,6 +36,7 @@
 
 namespace AidingApp\InAppCommunication\Actions;
 
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -56,8 +57,8 @@ class SearchUsers
             ->when(filled($searchTerm), function (Builder $query) use ($searchTerm): void {
                 $searchTermLower = Str::lower($searchTerm);
 
-                $query->where(function (Builder $query) use ($searchTermLower): void {
-                    $query->where(DB::raw('lower(name)'), 'like', "%{$searchTermLower}%")
+                $query->where(function (Builder $query) use ($searchTerm, $searchTermLower): void {
+                    $query->tap(new WhereFullNameLike($searchTerm))
                         ->orWhere(DB::raw('lower(email)'), 'like', "%{$searchTermLower}%");
                 });
             })

@@ -72,7 +72,7 @@ class AlertManagerConcernStatusChanged extends Notification implements ShouldQue
         $link = new HtmlString("<a href='{$url}' target='_blnk' class='underline'>{$knowledgeBaseItem->title}</a>");
 
         return FilamentNotification::make()
-            ->title("The status of a concern has changed from {$this->oldStatus->getLabel()} to {$this->knowledgeBaseItemConcern->status->getLabel()} by {$this->knowledgeBaseItemConcern->lastUpdatedBy->name} on the resource hub article {$link}.")
+            ->title("The status of a concern has changed from {$this->oldStatus->getLabel()} to {$this->knowledgeBaseItemConcern->status->getLabel()} by {$this->knowledgeBaseItemConcern->lastUpdatedBy->full_name} on the resource hub article {$link}.")
             ->getDatabaseMessage();
     }
 }

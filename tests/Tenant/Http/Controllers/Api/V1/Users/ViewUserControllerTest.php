@@ -104,7 +104,7 @@ it('returns correct user fields', function (string $responseKey, Closure $getExp
     expect($response['data'][$responseKey])->toBe($getExpected($targetUser));
 })->with([
     '`id`' => ['id', fn (User $user) => $user->id],
-    '`name`' => ['name', fn (User $user) => $user->name],
+    '`name`' => ['name', fn (User $user) => $user->full_name],
     '`email`' => ['email', fn (User $user) => $user->email],
 ]);
 
