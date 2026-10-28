@@ -197,8 +197,10 @@ describe('ServiceRequest', function (): void {
     test('can search by User uploader name (case-insensitive)', function (string $uploaderName, string $search): void {
         Storage::fake('s3');
 
-        $userAlice = User::factory()->create(['name' => $uploaderName]);
-        $userBob = User::factory()->create(['name' => 'Bob Jones']);
+        [$firstName, $lastName] = explode(' ', $uploaderName, 2);
+
+        $userAlice = User::factory()->create(['first_name' => $firstName, 'last_name' => $lastName]);
+        $userBob = User::factory()->create(['first_name' => 'Bob', 'last_name' => 'Jones']);
 
         $serviceRequest = ServiceRequest::factory()->create();
 
