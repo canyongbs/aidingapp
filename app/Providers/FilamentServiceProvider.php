@@ -63,6 +63,8 @@ use Filament\Schemas\Schema;
 use Filament\Support\Colors\Color;
 use Filament\Support\Facades\FilamentColor;
 use Filament\Support\Facades\FilamentView;
+use Filament\Tables\Columns\ColorColumn;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
@@ -253,6 +255,7 @@ class FilamentServiceProvider extends ServiceProvider
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $column
+                ->placeholder('N/A')
                 ->timezone(function (TextColumn $column) use ($timezone): ?string {
                     if ($column->isDateTime()) {
                         return $timezone;
@@ -277,6 +280,7 @@ class FilamentServiceProvider extends ServiceProvider
             $timezoneLabel = app(DisplaySettings::class)->getTimezoneLabel();
 
             $entry
+                ->placeholder('N/A')
                 ->timezone(function (TextEntry $column) use ($timezone): ?string {
                     if ($column->isDateTime()) {
                         return $timezone;
@@ -301,6 +305,14 @@ class FilamentServiceProvider extends ServiceProvider
                 ->html(function (TextEntry $entry): bool {
                     return $entry->isDateTime();
                 });
+        });
+
+        ColorColumn::configureUsing(function (ColorColumn $column): void {
+            $column->placeholder('N/A');
+        });
+
+        IconColumn::configureUsing(function (IconColumn $column): void {
+            $column->placeholder('N/A');
         });
 
         PhoneInput::configureUsing(function (PhoneInput $phoneInput): void {
