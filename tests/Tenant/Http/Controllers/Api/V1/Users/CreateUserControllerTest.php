@@ -229,7 +229,7 @@ it('sends SetPasswordNotification only to non-external users', function (bool $i
     'external user does not receive notification' => [true, false],
 ]);
 
-it('resolves department case-insensitively', function (string $departmentName, string $input) {
+it('resolves department case-insensitively', function (string $departmentName, string $input): void {
     $department = Department::factory()->create(['name' => $departmentName]);
 
     $user = SystemUser::factory()->create();
@@ -360,7 +360,7 @@ it('returns 422 when a role name does not exist', function (): void {
         ->assertJsonValidationErrors(['roles.0']);
 });
 
-it('reports only the missing role when a multibyte role also resolves', function () {
+it('reports only the missing role when a multibyte role also resolves', function (): void {
     Role::factory()->create(['name' => "\u{00E9}quipe Support", 'guard_name' => 'web']);
 
     $user = SystemUser::factory()->create();
@@ -377,7 +377,6 @@ it('reports only the missing role when a multibyte role also resolves', function
         ->assertJsonValidationErrors(['roles.1'])
         ->assertJsonMissingValidationErrors(['roles.0']);
 });
-
 
 it('rejects admin roles', function (string $roleToCreate, string $roleNameToSend): void {
     Role::firstOrCreate(['name' => $roleToCreate, 'guard_name' => 'web']);

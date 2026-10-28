@@ -44,7 +44,7 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Pest\Livewire\livewire;
 
-it('searches respondent names case insensitively', function (string $firstName, string $search) {
+it('searches respondent names case insensitively', function (string $firstName, string $search): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $status = ServiceRequestStatus::factory()->state([

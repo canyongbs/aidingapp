@@ -163,7 +163,7 @@ describe('ServiceRequest', function (): void {
             ->assertTableColumnStateSet('created_by_name', 'Carol Williams', record: $media);
     });
 
-    test('can search by file name (case-insensitive)', function (string $fileName, string $search) {
+    test('can search by file name (case-insensitive)', function (string $fileName, string $search): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -179,8 +179,8 @@ describe('ServiceRequest', function (): void {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($m) => $m->name === $fileName);
-        $invoice = $allMedia->first(fn ($m) => $m->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($m): bool => $m->name === $fileName);
+        $invoice = $allMedia->first(fn ($m): bool => $m->name === 'invoice');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
@@ -194,7 +194,7 @@ describe('ServiceRequest', function (): void {
         'multibyte uppercase' => ["Rapport-\u{00E9}cole", "\u{00C9}COLE"],
     ]);
 
-    test('can search by User uploader name (case-insensitive)', function (string $uploaderName, string $search) {
+    test('can search by User uploader name (case-insensitive)', function (string $uploaderName, string $search): void {
         Storage::fake('s3');
 
         $userAlice = User::factory()->create(['name' => $uploaderName]);
@@ -232,7 +232,7 @@ describe('ServiceRequest', function (): void {
         'multibyte uppercase' => ["Ren\u{00E9}e Smith", "REN\u{00C9}E"],
     ]);
 
-    test('can search by Contact uploader first name (case-insensitive)', function (string $firstName, string $search) {
+    test('can search by Contact uploader first name (case-insensitive)', function (string $firstName, string $search): void {
         Storage::fake('s3');
 
         asSuperAdmin();

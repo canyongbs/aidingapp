@@ -160,7 +160,7 @@ it('returns all service requests when no date filters are applied', function ():
         ]));
 });
 
-it('searches service requests by contact or organization name case insensitively', function (string $contactName, string $organizationName, string $search) {
+it('searches service requests by contact or organization name case insensitively', function (string $contactName, string $organizationName, string $search): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $contact = Contact::factory()
