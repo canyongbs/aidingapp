@@ -93,6 +93,7 @@ class EditServiceMonitoring extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
+                            // TODO: Cleanup Task (service-monitoring-target-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                             ->when(
                                 ServiceMonitoringTargetNameUniquenessFeature::active(),
                                 fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
