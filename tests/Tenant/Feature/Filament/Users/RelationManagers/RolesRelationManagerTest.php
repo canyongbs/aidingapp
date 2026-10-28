@@ -152,7 +152,7 @@ it('does not display the Saas Global Admin role if the user is not itself a Saas
         ->assertSuccessful();
 });
 
-it('searches attachable roles case insensitively', function (string $roleName, string $search) {
+it('searches attachable roles case insensitively', function (string $roleName, string $search): void {
     $loggedInUser = User::factory()->create();
     $loggedInUser->givePermissionTo(
         'role.view-any',
