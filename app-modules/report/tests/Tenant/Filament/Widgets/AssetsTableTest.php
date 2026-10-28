@@ -307,7 +307,7 @@ it('shows assets ordered by created date descending', function (): void {
         ->assertCanSeeTableRecords(collect([$assetNewest, $assetMiddle, $assetOldest]), inOrder: true);
 });
 
-it('searches asset name filter options case insensitively', function (string $assetName, string $search) {
+it('searches asset name filter options case insensitively', function (string $assetName, string $search): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
 
     $type = AssetType::factory()->create();

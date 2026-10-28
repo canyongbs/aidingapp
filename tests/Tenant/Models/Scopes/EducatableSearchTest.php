@@ -38,7 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Models\Scopes\EducatableSearch;
 
-it('matches related respondent names case insensitively', function (string $firstName, string $search) {
+it('matches related respondent names case insensitively', function (string $firstName, string $search): void {
     $respondent = Contact::factory()->state([
         'first_name' => $firstName,
         'last_name' => 'Example',
