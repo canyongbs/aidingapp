@@ -167,7 +167,7 @@ it('searches attachable roles case insensitively', function (string $roleName, s
     $role = Role::factory()->create(['name' => $roleName, 'guard_name' => 'web']);
     Role::factory()->create(['name' => 'Unrelated Role', 'guard_name' => 'web']);
 
-    livewire(RolesRelationManager::class, [
+    Livewire::test(RolesRelationManager::class, [
         'ownerRecord' => User::factory()->create(),
         'pageClass' => EditUser::class,
     ])

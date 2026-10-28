@@ -179,8 +179,8 @@ describe('ServiceRequest', function (): void {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($m): bool => $m->name === $fileName);
-        $invoice = $allMedia->first(fn ($m): bool => $m->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($media): bool => $media->name === $fileName);
+        $invoice = $allMedia->first(fn ($media): bool => $media->name === 'invoice');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,

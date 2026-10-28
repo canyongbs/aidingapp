@@ -49,8 +49,8 @@ class EducatableSearch
     ) {}
 
     /**
-     * @param Builder<covariant Model> $query
-     */
+       * @param Builder<covariant Model> $query
+       */
     public function __invoke(Builder $query): void
     {
         $search = Str::lower($this->search);
