@@ -58,8 +58,7 @@ class PipelineEntryMilestonesTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('target_date')
-                    ->date()
-                    ->placeholder('N/A'),
+                    ->date(),
             ])
             ->paginated([5])
             ->defaultSort('created_at');

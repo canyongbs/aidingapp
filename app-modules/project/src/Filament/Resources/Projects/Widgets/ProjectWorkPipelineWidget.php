@@ -150,12 +150,10 @@ class ProjectWorkPipelineWidget extends TableWidget
                             $assignedTo instanceof Contact => $assignedTo->full_name,
                             default => null,
                         };
-                    })
-                    ->placeholder('N/A'),
+                    }),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
-                    ->badge()
-                    ->placeholder('N/A'),
+                    ->badge(),
                 ViewColumn::make('assets')
                     ->label('Assets')
                     ->view('project::filament.tables.columns.pipeline-entry.assets')
@@ -170,16 +168,13 @@ class ProjectWorkPipelineWidget extends TableWidget
                 TextColumn::make('start_date')
                     ->label('Start Date')
                     ->date()
-                    ->placeholder('N/A')
                     ->sortable(),
                 TextColumn::make('due')
                     ->label('Target Date')
                     ->date()
-                    ->placeholder('N/A')
                     ->sortable(),
                 TextColumn::make('createdBy.full_name')
                     ->label('Created By')
-                    ->placeholder('N/A')
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
