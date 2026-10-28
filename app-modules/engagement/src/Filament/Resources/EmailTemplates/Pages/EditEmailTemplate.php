@@ -61,6 +61,7 @@ class EditEmailTemplate extends EditRecord
                     ->required()
                     ->maxLength(255)
                     ->autocomplete(false)
+                    // TODO: Cleanup Task (email-template-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
                         EmailTemplateNameUniquenessFeature::active(),
                         fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
