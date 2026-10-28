@@ -34,25 +34,24 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
+namespace AidingApp\Project\Filament\Resources\Projects\Actions;
 
 use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use AidingApp\Project\Models\Project;
+use Filament\Actions\CreateAction;
 
-class CreateProject extends CreateRecord
+class CreateProjectAction
 {
-    protected static string $resource = ProjectResource::class;
-
-    public function form(Schema $schema): Schema
+    public static function make(): CreateAction
     {
-        return $schema
-            ->components(ProjectForm::components());
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
+        return CreateAction::make()
+            ->schema(ProjectForm::components())
+            ->mutateDataUsing(fn (array $data): array => ProjectForm::mutateDataForSave($data))
+            ->createAnother(false)
+            ->slideOver()
+            ->successRedirectUrl(fn (Project $record): ?string => ProjectResource::can('view', $record)
+                ? ProjectResource::getUrl('view', ['record' => $record])
+                : null);
     }
 }

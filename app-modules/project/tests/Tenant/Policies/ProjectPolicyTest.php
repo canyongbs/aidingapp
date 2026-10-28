@@ -40,6 +40,40 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
+it('only allows creating a project with the create permission', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect($user->can('create', Project::class))->toBeFalse();
+
+    $user->givePermissionTo('project.create');
+
+    expect($user->can('create', Project::class))->toBeTrue();
+});
+
+it('only allows the creator, a manager, or a super admin to update a project, and only with the update permission', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    $createdProject = Project::factory()->for($user, 'createdBy')->create();
+    $managedProject = Project::factory()
+        ->for(User::factory(), 'createdBy')
+        ->hasAttached($user, relationship: 'managerUsers')
+        ->create();
+    $otherProject = Project::factory()->for(User::factory(), 'createdBy')->create();
+
+    expect($user->can('update', $createdProject))->toBeFalse()
+        ->and($user->can('update', $managedProject))->toBeFalse();
+
+    $user->givePermissionTo('project.*.update');
+
+    expect($user->can('update', $createdProject))->toBeTrue()
+        ->and($user->can('update', $managedProject))->toBeTrue()
+        ->and($user->can('update', $otherProject))->toBeFalse();
+});
+
 it('does not throw when checking a permission whose project creator has been deleted', function (string $ability): void {
     $creator = User::factory()->create();
 
