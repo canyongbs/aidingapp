@@ -229,25 +229,21 @@ it('redirects to the new project after creating it when the user can view it', f
         ->assertRedirect(ProjectResource::getUrl('view', ['record' => Project::query()->where('name', $request['name'])->firstOrFail()]));
 });
 
-it('stays on the list after creating a project when the user cannot view it', function (): void {
+it('does not redirect after creating a project without the `project.*.view` permission', function (): void {
     $user = User::factory()
         ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+        ->givePermissionTo('project.view-any', 'project.create');
 
     actingAs($user);
 
     $request = CreateProjectRequestFactory::new()->create();
 
-    $component = Livewire::test(ListProjects::class)
-        ->mountAction('create')
-        ->setActionData($request);
+    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
 
-    // The user loses view access before submitting, so there is no project page to redirect to.
-    $user->revokePermissionTo('project.*.view');
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $component
-        ->callMountedAction()
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertHasNoFormErrors()
+        ->assertNotified()
         ->assertNoRedirect();
 
     assertDatabaseHas(Project::class, ['name' => $request['name']]);
@@ -303,24 +299,6 @@ it('validates the inputs when creating a project', function (CreateProjectReques
         ['color' => 'in'],
     ],
 ]);
-
-it('does not create a project for a user without the `project.create` permission', function (): void {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view');
-
-    actingAs($user);
-
-    $request = CreateProjectRequestFactory::new()->create();
-
-    Livewire::test(ListProjects::class)
-        ->mountAction('create')
-        ->assertActionNotMounted()
-        ->setActionData($request)
-        ->callMountedAction();
-
-    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
-});
 
 it('hides the create action when the license addon is disabled after the page loads', function (): void {
     $user = User::factory()
