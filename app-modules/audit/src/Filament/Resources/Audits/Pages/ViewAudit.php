@@ -63,8 +63,7 @@ class ViewAudit extends ViewRecord
                                 $record->user instanceof SystemUser => $record->user->name,
                                 default => null,
                             })
-                            ->label('Change Agent (User)')
-                            ->placeholder('N/A'),
+                            ->label('Change Agent (User)'),
                         TextEntry::make('event')
                             ->label('Event'),
                         TextEntry::make('url')
