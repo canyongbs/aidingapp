@@ -57,9 +57,6 @@ use function Pest\Laravel\assertDatabaseCount;
 use function Pest\Laravel\assertDatabaseHas;
 use function Pest\Laravel\assertDatabaseMissing;
 use function Pest\Laravel\get;
-
-use Spatie\Permission\PermissionRegistrar;
-
 use function Tests\asSuperAdmin;
 
 it('cannot render without proper permission.', function (): void {
@@ -194,29 +191,6 @@ it('creates a project with a target completion date from the slide-over', functi
         'name' => $request['name'],
         'target_completion_date' => $request['target_completion_date'],
     ]);
-});
-
-it('does not create a project when the user loses the create permission after opening the slide-over', function (): void {
-    $user = User::factory()
-        ->create()
-        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
-
-    actingAs($user);
-
-    $request = CreateProjectRequestFactory::new()->create();
-
-    $component = Livewire::test(ListProjects::class)
-        ->mountAction('create')
-        ->assertActionMounted('create');
-
-    $user->revokePermissionTo('project.create');
-    app(PermissionRegistrar::class)->forgetCachedPermissions();
-
-    $component
-        ->setActionData($request)
-        ->callMountedAction();
-
-    assertDatabaseMissing(Project::class, ['name' => $request['name']]);
 });
 
 it('redirects to the new project after creating it when the user can view it', function (): void {

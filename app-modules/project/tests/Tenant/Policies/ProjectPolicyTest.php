@@ -40,6 +40,18 @@ use App\Models\User;
 use function Pest\Laravel\actingAs;
 use function Tests\asSuperAdmin;
 
+it('only allows creating a project with the create permission', function (): void {
+    $user = User::factory()->create();
+
+    actingAs($user);
+
+    expect($user->can('create', Project::class))->toBeFalse();
+
+    $user->givePermissionTo('project.create');
+
+    expect($user->can('create', Project::class))->toBeTrue();
+});
+
 it('does not throw when checking a permission whose project creator has been deleted', function (string $ability): void {
     $creator = User::factory()->create();
 
