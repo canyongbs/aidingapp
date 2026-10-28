@@ -150,8 +150,7 @@ class ProjectWorkPipelineWidget extends TableWidget
                             $assignedTo instanceof Contact => $assignedTo->full_name,
                             default => null,
                         };
-                    })
-                    ->placeholder('N/A'),
+                    }),
                 TextColumn::make('pipelineStage.name')
                     ->label('Stage')
                     ->badge(),
