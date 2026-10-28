@@ -41,7 +41,7 @@ use Filament\Actions\EditAction;
 
 class EditProjectAction
 {
-    public static function make(string $name = 'edit'): EditAction
+    public static function make(string $name): EditAction
     {
         return EditAction::make($name)
             ->label('Edit Project')

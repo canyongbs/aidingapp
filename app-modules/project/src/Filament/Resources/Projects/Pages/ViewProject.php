@@ -121,10 +121,7 @@ class ViewProject extends ViewRecord
     }
 
     #[On('projectUpdated')]
-    public function refreshRecord(): void
-    {
-        $this->getRecord()->refresh();
-    }
+    public function refreshRecord(): void {}
 
     protected function getHeaderActions(): array
     {

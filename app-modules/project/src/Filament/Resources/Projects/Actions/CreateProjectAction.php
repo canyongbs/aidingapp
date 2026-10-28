@@ -37,6 +37,8 @@
 namespace AidingApp\Project\Filament\Resources\Projects\Actions;
 
 use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
+use AidingApp\Project\Models\Project;
 use Filament\Actions\CreateAction;
 
 class CreateProjectAction
@@ -44,10 +46,12 @@ class CreateProjectAction
     public static function make(): CreateAction
     {
         return CreateAction::make()
-            ->authorize('create')
             ->schema(ProjectForm::components())
             ->mutateDataUsing(fn (array $data): array => ProjectForm::mutateDataForSave($data))
             ->createAnother(false)
-            ->slideOver();
+            ->slideOver()
+            ->successRedirectUrl(fn (Project $record): ?string => ProjectResource::can('view', $record)
+                ? ProjectResource::getUrl('view', ['record' => $record])
+                : null);
     }
 }

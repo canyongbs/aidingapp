@@ -37,6 +37,7 @@
 use AidingApp\Department\Models\Department;
 use AidingApp\Project\Enums\PipelineStageClassification;
 use AidingApp\Project\Filament\Resources\Projects\Pages\ListProjects;
+use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectAccessWidget;
 use AidingApp\Project\Filament\Resources\Projects\Widgets\ProjectDashboardHeaderWidget;
 use AidingApp\Project\Models\Pipeline;
@@ -148,7 +149,7 @@ it('opens the create form in a slide-over instead of redirecting to a page', fun
     asSuperAdmin();
 
     Livewire::test(ListProjects::class)
-        ->assertActionExists(TestAction::make('create'), fn (Action $action): bool => $action->getUrl() === null)
+        ->assertActionExists(TestAction::make('create'), fn (Action $action): bool => $action->isModalSlideOver())
         ->mountAction('create')
         ->assertActionMounted('create')
         ->assertNoRedirect()
@@ -216,6 +217,40 @@ it('does not create a project when the user loses the create permission after op
         ->callMountedAction();
 
     assertDatabaseMissing(Project::class, ['name' => $request['name']]);
+});
+
+it('redirects to the new project after creating it when the user can view it', function (): void {
+    asSuperAdmin();
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    Livewire::test(ListProjects::class)
+        ->callAction(TestAction::make('create'), $request)
+        ->assertRedirect(ProjectResource::getUrl('view', ['record' => Project::query()->where('name', $request['name'])->firstOrFail()]));
+});
+
+it('stays on the list after creating a project when the user cannot view it', function (): void {
+    $user = User::factory()
+        ->create()
+        ->givePermissionTo('project.view-any', 'project.*.view', 'project.create');
+
+    actingAs($user);
+
+    $request = CreateProjectRequestFactory::new()->create();
+
+    $component = Livewire::test(ListProjects::class)
+        ->mountAction('create')
+        ->setActionData($request);
+
+    // The user loses view access before submitting, so there is no project page to redirect to.
+    $user->revokePermissionTo('project.*.view');
+    app(PermissionRegistrar::class)->forgetCachedPermissions();
+
+    $component
+        ->callMountedAction()
+        ->assertNoRedirect();
+
+    assertDatabaseHas(Project::class, ['name' => $request['name']]);
 });
 
 it('validates the inputs when creating a project', function (CreateProjectRequestFactory $data, array $errors): void {

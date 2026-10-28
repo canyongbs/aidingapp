@@ -59,7 +59,7 @@ it('opens the edit form in a slide-over organized by headings', function (): voi
     $project = Project::factory()->create();
 
     Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
-        ->assertActionExists('editProject', fn (Action $action): bool => $action->getUrl() === null)
+        ->assertActionExists('editProject', fn (Action $action): bool => $action->isModalSlideOver())
         ->mountAction('editProject')
         ->assertActionMounted('editProject')
         ->assertNoRedirect()
@@ -257,24 +257,37 @@ describe('authorization', function (): void {
             ->assertActionHidden('editProject');
     });
 
-    it('does not save for an auditor or an unrelated user even with the `project.*.update` permission', function (): void {
-        $auditor = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
-        $unrelated = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
+    it('does not save when the user stops being a manager and becomes an auditor or unrelated after opening the slide-over', function (bool $becomesAuditor): void {
+        $user = User::factory()->create()->givePermissionTo('project.view-any', 'project.*.view', 'project.*.update');
 
-        $project = Project::factory()->hasAttached($auditor, relationship: 'auditorUsers')->create();
+        actingAs($user);
+
+        $project = Project::factory()
+            ->for(User::factory(), 'createdBy')
+            ->hasAttached($user, relationship: 'managerUsers')
+            ->create();
+
         $request = EditProjectRequestFactory::new()->create();
 
-        foreach ([$auditor, $unrelated] as $user) {
-            actingAs($user);
+        $component = Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
+            ->mountAction('editProject')
+            ->assertActionMounted('editProject');
 
-            Livewire::test(ProjectDashboardHeaderWidget::class, ['record' => $project])
-                ->mountAction('editProject')
-                ->assertActionNotMounted()
-                ->callMountedAction();
+        $project->managerUsers()->detach($user->getKey());
+
+        if ($becomesAuditor) {
+            $project->auditorUsers()->attach($user->getKey());
         }
 
+        $component
+            ->setActionData($request)
+            ->callMountedAction();
+
         assertDatabaseMissing(Project::class, ['id' => $project->getKey(), 'name' => $request['name']]);
-    });
+    })->with([
+        'becomes an auditor' => [true],
+        'becomes unrelated' => [false],
+    ]);
 
     it('does not allow the project record to be swapped from the client', function (): void {
         $project = Project::factory()->create();
