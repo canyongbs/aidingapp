@@ -120,11 +120,9 @@ class ProjectFilesWidget extends TableWidget
                     ->dateTime(),
                 TextColumn::make('retention_date')
                     ->label('Retention Date')
-                    ->placeholder('N/A')
                     ->dateTime(),
                 TextColumn::make('createdBy.full_name')
-                    ->label('Created By')
-                    ->placeholder('N/A'),
+                    ->label('Created By'),
             ])
             ->recordActions([
                 Action::make('download')
