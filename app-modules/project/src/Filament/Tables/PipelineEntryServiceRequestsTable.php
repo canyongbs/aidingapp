@@ -52,8 +52,7 @@ class PipelineEntryServiceRequestsTable
                     ->searchable()
                     ->sortable(),
                 TextColumn::make('title')
-                    ->searchable()
-                    ->placeholder('N/A'),
+                    ->searchable(),
             ])
             ->paginated([5])
             ->defaultSort('created_at');

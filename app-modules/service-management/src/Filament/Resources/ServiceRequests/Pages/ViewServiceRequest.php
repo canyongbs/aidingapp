@@ -146,11 +146,9 @@ class ViewServiceRequest extends ViewRecord
                 ->visible(fn (ServiceRequest $record): bool => $record->feedback()->exists())
                 ->schema([
                     TextEntry::make('feedback.csat_answer')
-                        ->label('Customer Satisfaction (CSAT)')
-                        ->default('N/A'),
+                        ->label('Customer Satisfaction (CSAT)'),
                     TextEntry::make('feedback.nps_answer')
-                        ->label('Net Promoter Score (NPS)')
-                        ->default('N/A'),
+                        ->label('Net Promoter Score (NPS)'),
                 ])
                 ->columns(),
             Section::make()
