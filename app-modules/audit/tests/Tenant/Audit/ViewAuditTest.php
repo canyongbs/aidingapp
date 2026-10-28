@@ -35,12 +35,51 @@
 */
 
 use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
+use AidingApp\Audit\Filament\Resources\Audits\Pages\ViewAudit;
 use AidingApp\Audit\Models\Audit;
+use App\Models\SystemUser;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 
 test('The correct details are displayed on the ViewAudit page')->todo();
+
+test('ViewAudit shows the full name of a User change agent', function (): void {
+    $viewer = User::factory()->create();
+    $viewer->givePermissionTo(['audit.view-any', 'audit.*.view']);
+
+    $agent = User::factory()->create(['first_name' => 'Jordan', 'last_name' => 'Blake']);
+
+    $audit = Audit::factory()->create([
+        'change_agent_type' => $agent->getMorphClass(),
+        'change_agent_id' => $agent->getKey(),
+    ]);
+
+    actingAs($viewer);
+
+    Livewire::test(ViewAudit::class, ['record' => $audit->getKey()])
+        ->assertSuccessful()
+        ->assertSchemaStateSet(['user.full_name' => 'Jordan Blake']);
+});
+
+test('ViewAudit shows the name of a SystemUser change agent', function (): void {
+    $viewer = User::factory()->create();
+    $viewer->givePermissionTo(['audit.view-any', 'audit.*.view']);
+
+    $integration = SystemUser::factory()->create(['name' => 'Integration Service']);
+
+    $audit = Audit::factory()->create([
+        'change_agent_type' => $integration->getMorphClass(),
+        'change_agent_id' => $integration->getKey(),
+    ]);
+
+    actingAs($viewer);
+
+    Livewire::test(ViewAudit::class, ['record' => $audit->getKey()])
+        ->assertSuccessful()
+        ->assertSchemaStateSet(['user.full_name' => 'Integration Service']);
+});
 
 // Permission Tests
 

@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Actions;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseItem;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use Exception;
 use Filament\Actions\BulkAction;
@@ -60,7 +61,7 @@ class AssignManagerBulkAction
             ->schema([
                 Select::make('manager_ids')
                     ->label('Managers')
-                    ->options(fn (): array => User::query()->limit(50)->pluck('name', 'id')->all())
+                    ->options(fn (): array => User::query()->tap(new OrderByFullName())->limit(50)->get()->pluck('full_name', 'id')->all())
                     ->multiple()
                     ->searchable()
                     ->preload()

@@ -70,10 +70,10 @@ class ListGroups extends ListRecords
                     ->label('Created Date')
                     ->date()
                     ->sortable(),
-                TextColumn::make('createdBy.name')
+                TextColumn::make('createdBy.full_name')
                     ->label('Created By')
                     ->placeholder('N/A')
-                    ->sortable(),
+                    ->sortable(['first_name', 'last_name']),
             ])
             ->recordActions([
                 ViewAction::make(),

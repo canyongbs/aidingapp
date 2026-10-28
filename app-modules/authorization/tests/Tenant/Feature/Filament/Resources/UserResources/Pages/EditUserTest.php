@@ -33,6 +33,9 @@
 
 </COPYRIGHT>
 */
+use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Services\ManagedContactService;
 use App\Filament\Resources\Users\Pages\EditUser;
 use App\Filament\Resources\Users\RelationManagers\RolesRelationManager;
 use App\Filament\Resources\Users\UserResource;
@@ -41,6 +44,7 @@ use App\Models\User;
 use Filament\Actions\AttachAction;
 use Filament\Actions\DeleteAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Support\Facades\Event;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
@@ -178,7 +182,6 @@ test('EditUser is gated with proper access control', function (): void {
         ->fillForm([
             'first_name' => 'Jordan',
             'last_name' => 'Blake',
-            'name' => 'Jordan Blake',
             'email' => 'jordan.blake@example.com',
         ])
         ->call('save')
@@ -186,7 +189,8 @@ test('EditUser is gated with proper access control', function (): void {
 
     assertDatabaseHas(User::class, [
         'id' => $record->getKey(),
-        'name' => 'Jordan Blake',
+        'first_name' => 'Jordan',
+        'last_name' => 'Blake',
         'email' => 'jordan.blake@example.com',
     ]);
 });
@@ -200,7 +204,6 @@ test('EditUser requires an email address', function (): void {
         ->fillForm([
             'first_name' => 'No',
             'last_name' => 'Email',
-            'name' => 'No Email',
             'email' => null,
         ])
         ->call('save')
@@ -216,7 +219,6 @@ test('EditUser rejects an invalid email address', function (): void {
         ->fillForm([
             'first_name' => 'Bad',
             'last_name' => 'Email',
-            'name' => 'Bad Email',
             'email' => 'not-an-email',
         ])
         ->call('save')
@@ -232,7 +234,6 @@ test('EditUser allows saving with its own unchanged email address', function ():
         ->fillForm([
             'first_name' => 'Still',
             'last_name' => 'Here',
-            'name' => 'Still Here',
             'email' => 'unchanged@example.com',
         ])
         ->call('save')
@@ -255,7 +256,6 @@ test('EditUser rejects a duplicate email belonging to another user case-insensit
         ->fillForm([
             'first_name' => 'Duplicate',
             'last_name' => 'Email',
-            'name' => 'Duplicate Email',
             'email' => 'Taken@Example.com',
         ])
         ->call('save')
@@ -273,14 +273,13 @@ test('EditUser rejects reusing another soft-deleted user\'s email', function ():
         ->fillForm([
             'first_name' => 'Reuse',
             'last_name' => 'Attempt',
-            'name' => 'Reuse Attempt',
             'email' => 'Archived@Example.com',
         ])
         ->call('save')
         ->assertHasFormErrors(['email']);
 });
 
-test('EditUser shows and requires first and last name fields when the full name feature is active', function (): void {
+test('EditUser shows and requires first and last name fields', function (): void {
     asSuperAdmin();
 
     $record = User::factory()->create();
@@ -308,7 +307,6 @@ test('EditUser disables demographic and contact fields when editing an admin rec
     Livewire::test(EditUser::class, ['record' => $record->getKey()])
         ->assertFormFieldDisabled('first_name')
         ->assertFormFieldDisabled('last_name')
-        ->assertFormFieldDisabled('name')
         ->assertFormFieldDisabled('job_title')
         ->assertFormFieldDisabled('email')
         ->assertFormFieldDisabled('is_external');
@@ -375,7 +373,7 @@ test('EditUser validates the inputs', function (array $data, array $errors): voi
             ['first_name' => 'required'],
         ],
         'first_name max' => [
-            ['first_name' => str()->random(256)],
+            ['first_name' => str()->random(128)],
             ['first_name' => 'max'],
         ],
         'last name required' => [
@@ -383,7 +381,7 @@ test('EditUser validates the inputs', function (array $data, array $errors): voi
             ['last_name' => 'required'],
         ],
         'last_name max' => [
-            ['last_name' => str()->random(256)],
+            ['last_name' => str()->random(128)],
             ['last_name' => 'max'],
         ],
         'preferred_name max' => [
@@ -497,4 +495,38 @@ it('prevents assigning duplicate email to a user', function (): void {
         ->fillForm($request)
         ->call('save')
         ->assertHasFormErrors(['email' => 'A user with this email address already exists. Please use a different email address or contact your administrator if you need to modify this user\'s account.']);
+});
+
+test('EditUser accepts the longest names that still fit a managed contact full name', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create();
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    $firstName = str_repeat('a', User::NAME_PART_MAX_LENGTH);
+    $lastName = str_repeat('b', User::NAME_PART_MAX_LENGTH);
+
+    Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => $firstName, 'last_name' => $lastName])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($contact->fresh()->full_name)->toBe("{$firstName} {$lastName}");
+});
+
+test('EditUser does not persist user changes when synchronizing the managed contact fails', function (): void {
+    asSuperAdmin();
+
+    $user = User::factory()->create(['first_name' => 'Original', 'last_name' => 'Name']);
+    $contact = app(ManagedContactService::class)->enable($user, ContactType::factory()->create()->getKey());
+
+    Event::listen('eloquent.saving: ' . Contact::class, fn () => throw new RuntimeException('Contact sync failed.'));
+
+    expect(fn () => Livewire::test(EditUser::class, ['record' => $user->getKey()])
+        ->fillForm(['first_name' => 'Changed'])
+        ->call('save'))
+        ->toThrow(RuntimeException::class);
+
+    expect($user->fresh()->first_name)->toBe('Original')
+        ->and($contact->fresh()->first_name)->toBe('Original');
 });

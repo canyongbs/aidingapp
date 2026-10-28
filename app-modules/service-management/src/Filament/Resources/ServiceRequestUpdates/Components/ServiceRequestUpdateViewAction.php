@@ -68,7 +68,8 @@ class ServiceRequestUpdateViewAction extends ViewAction
                     $createdBy = $record->createdBy()->withTrashed()->getResults();
 
                     return match (true) {
-                        $createdBy instanceof User, $createdBy instanceof SystemUser => $createdBy->name,
+                        $createdBy instanceof User => $createdBy->full_name,
+                        $createdBy instanceof SystemUser => $createdBy->name,
                         $createdBy instanceof Contact => $createdBy->full_name,
                         $createdBy instanceof ServiceRequest => 'AI',
                         $createdBy === null => filled($record->created_by_id) ? 'Deleted user' : 'Unknown',

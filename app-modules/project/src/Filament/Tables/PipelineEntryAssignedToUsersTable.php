@@ -36,9 +36,12 @@
 
 namespace AidingApp\Project\Filament\Tables;
 
+use App\Filament\Tables\Columns\UserFullNameColumn;
+use App\Models\Scopes\OrderByFullName;
 use App\Models\User;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class PipelineEntryAssignedToUsersTable
 {
@@ -47,14 +50,12 @@ class PipelineEntryAssignedToUsersTable
         return $table
             ->query(fn () => User::query())
             ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable(),
+                UserFullNameColumn::make(),
                 TextColumn::make('email')
                     ->searchable()
                     ->sortable(),
             ])
             ->paginated([5])
-            ->defaultSort('name');
+            ->defaultSort(fn (Builder $query): Builder => $query->tap(new OrderByFullName()));
     }
 }

@@ -139,7 +139,7 @@ class ChatNotifications extends Component
             $otherUser = $otherParticipant?->participant;
 
             $displayName = match (true) {
-                $otherUser instanceof User => $otherUser->name,
+                $otherUser instanceof User => $otherUser->full_name,
                 $otherUser instanceof Contact => $otherUser->full_name,
                 default => 'Unknown User',
             };
@@ -176,7 +176,7 @@ class ChatNotifications extends Component
             'avatar_url' => $avatarUrl,
             'is_contact_conversation' => $isContactConversation,
             'message_preview' => $messagePreview,
-            'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->name : null,
+            'author_name' => $latestMessage?->author instanceof User ? $latestMessage->author->full_name : null,
             'created_at' => $latestMessage?->created_at?->diffForHumans(),
         ];
     }

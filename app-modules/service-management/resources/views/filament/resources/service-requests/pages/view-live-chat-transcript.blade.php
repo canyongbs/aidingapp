@@ -51,7 +51,7 @@
                 $isOwn = $message->author instanceof User;
                 $authorName =
                     $message->author instanceof User
-                        ? $message->author->name
+                        ? $message->author->full_name
                         : ($message->author instanceof Contact
                             ? $message->author->full_name
                             : 'Unknown');

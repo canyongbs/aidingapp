@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Filament\Concerns\CanBeReadOnly;
 use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Authenticatable;
+use App\Models\Scopes\WhereFullNameLike;
 use App\Models\User;
 use Filament\Actions\CreateAction;
 use Filament\Actions\EditAction;
@@ -202,10 +203,13 @@ class ServiceRequestsRelationManager extends RelationManager
                     ->label('Priority')
                     ->searchable()
                     ->sortable(),
-                TextColumn::make('assignedTo.user.name')
+                TextColumn::make('assignedTo.user.full_name')
                     ->label('Assigned to')
-                    ->searchable()
-                    ->sortable(),
+                    ->searchable(query: fn (Builder $query, string $search): Builder => $query->whereHas(
+                        'assignedTo.user',
+                        fn (Builder $query) => $query->tap(new WhereFullNameLike($search)),
+                    ))
+                    ->sortable(['first_name', 'last_name']),
             ])
             ->filters([
                 SelectFilter::make('priority')

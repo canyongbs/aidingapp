@@ -39,6 +39,7 @@ use AidingApp\Report\Filament\Widgets\ServiceRequestsTable;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Enums\SystemServiceRequestClassification;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -208,3 +209,66 @@ it('filters records by category using the table-level category filter', function
         ->assertCanSeeTableRecords(collect([$incidentRequest]))
         ->assertCanNotSeeTableRecords(collect([$requestRequest]));
 });
+
+it('searches the assigned to column by full name, including a quoted phrase', function (string $search): void {
+    $openStatus = ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open])->create();
+
+    $matching = ServiceRequest::factory()->state(['status_id' => $openStatus->getKey()])->create();
+    $other = ServiceRequest::factory()->state(['status_id' => $openStatus->getKey()])->create();
+
+    foreach ([[$matching, 'Avery', 'Smith'], [$other, 'Jordan', 'Lee']] as [$serviceRequest, $firstName, $lastName]) {
+        $assignee = User::factory()->create(['first_name' => $firstName, 'last_name' => $lastName]);
+
+        $serviceRequest->priority->type->managerUsers()->attach($assignee);
+
+        ServiceRequestAssignment::factory()->active()->create([
+            'service_request_id' => $serviceRequest->getKey(),
+            'user_id' => $assignee->getKey(),
+        ]);
+    }
+
+    Livewire::test(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-assigned-to-search',
+        'pageFilters' => [],
+    ])
+        ->searchTable($search)
+        ->assertCountTableRecords(1)
+        ->assertCanSeeTableRecords([$matching])
+        ->assertCanNotSeeTableRecords([$other]);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+    'quoted full name' => '"Avery Smith"',
+]);
+
+it('searches the assigned to filter options by full name', function (string $search): void {
+    $openStatus = ServiceRequestStatus::factory()->state(['classification' => SystemServiceRequestClassification::Open])->create();
+
+    $assignees = collect([['Avery', 'Smith'], ['Jordan', 'Lee']])->map(function (array $name) use ($openStatus): User {
+        $assignee = User::factory()->create(['first_name' => $name[0], 'last_name' => $name[1]]);
+
+        $serviceRequest = ServiceRequest::factory()->state(['status_id' => $openStatus->getKey()])->create();
+        $serviceRequest->priority->type->managerUsers()->attach($assignee);
+
+        ServiceRequestAssignment::factory()->active()->create([
+            'service_request_id' => $serviceRequest->getKey(),
+            'user_id' => $assignee->getKey(),
+        ]);
+
+        return $assignee;
+    });
+
+    $component = Livewire::test(ServiceRequestsTable::class, [
+        'cacheTag' => 'test-service-requests-table-assigned-to-filter-search',
+        'pageFilters' => [],
+    ]);
+
+    $select = $component->instance()->getTableFiltersForm()->getComponentByStatePath('assigned_to.value');
+
+    expect($select->getSearchResults($search))->toBe([$assignees[0]->getKey() => 'Avery Smith']);
+})->with([
+    'first name' => 'Avery',
+    'last name' => 'Smith',
+    'full name' => 'Avery Smith',
+]);

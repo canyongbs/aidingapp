@@ -34,7 +34,7 @@
 <x-filament-widgets::widget>
     <div class="flex flex-col items-center md:flex-row">
         <div class="flex-1">
-            <h1 class="font-medium">Welcome, {{ auth()->user()->name }}</h1>
+            <h1 class="font-medium">Welcome, {{ auth()->user()->full_name }}</h1>
 
             <p class="text-xs">
                 Today is {{ now(auth()->user()->timezone)->format('l, F j, Y') }} and the current time is

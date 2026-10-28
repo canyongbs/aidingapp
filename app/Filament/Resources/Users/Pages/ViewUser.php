@@ -79,11 +79,6 @@ class ViewUser extends ViewRecord
                             ->color(fn (User $record): string => $record->presenceStatus()->getColor())
                             ->icon(fn (User $record): string => $record->presenceStatus()->getIcon())
                             ->formatStateUsing(fn (User $record): string => $record->presenceStatus()->getLabel()),
-                        TextInput::make('name')
-                            ->label('Full Name')
-                            ->maxLength(255)
-                            ->disabled()
-                            ->dehydrated(),
                         TextInput::make('preferred_name')
                             ->string()
                             ->maxLength(255),

@@ -189,3 +189,61 @@ it('rolls back the whole cascade when a child archive fails through the switcher
     expect($pipeline->refresh()->isArchived())->toBeFalse()
         ->and($stage->refresh()->isArchived())->toBeFalse();
 });
+
+it('records one `archived` audit on the pipeline, its stages, tasks, and milestones when the pipeline is archived', function (): void {
+    $pipeline = Pipeline::factory()->create();
+    $stage = PipelineStage::factory()->for($pipeline)->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => $milestone->getKey(),
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+    $emptyMilestone = ProjectMilestone::factory()->create(['pipeline_id' => $pipeline->getKey()]);
+
+    $audited = [$pipeline, $stage, $entry, $milestone, $emptyMilestone];
+
+    foreach ($audited as $model) {
+        expect($model->audits()->where('event', 'archived')->exists())->toBeFalse();
+    }
+
+    $pipeline->archive();
+
+    foreach ($audited as $model) {
+        expect($model->audits()->where('event', 'archived')->count())->toBe(1);
+    }
+});
+
+it('records one `archived` audit on each non-archived task when the stage is archived', function (): void {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $entries = PipelineEntry::factory()
+        ->count(2)
+        ->for($stage, 'pipelineStage')
+        ->create(['assigned_to_id' => null, 'assigned_to_type' => null]);
+
+    foreach ($entries as $entry) {
+        expect($entry->audits()->where('event', 'archived')->exists())->toBeFalse();
+    }
+
+    $stage->archive();
+
+    foreach ($entries as $entry) {
+        expect($entry->audits()->where('event', 'archived')->count())->toBe(1);
+    }
+});
+
+it('records one `archived` audit on a milestone when its last non-archived task is archived', function (): void {
+    $stage = PipelineStage::factory()->for(Pipeline::factory())->create();
+    $milestone = ProjectMilestone::factory()->create(['pipeline_id' => $stage->pipeline_id]);
+    $entry = PipelineEntry::factory()->for($stage, 'pipelineStage')->create([
+        'project_milestone_id' => $milestone->getKey(),
+        'assigned_to_id' => null,
+        'assigned_to_type' => null,
+    ]);
+
+    expect($milestone->audits()->where('event', 'archived')->exists())->toBeFalse();
+
+    $entry->archive();
+
+    expect($milestone->audits()->where('event', 'archived')->count())->toBe(1);
+});

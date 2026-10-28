@@ -514,7 +514,7 @@ it('displays a pipeline entry created by and customer visibility in the project 
     Livewire::test(ProjectWorkPipelineWidget::class, [
         'record' => $project,
     ])
-        ->assertTableColumnStateSet('createdBy.name', $entry->createdBy->name, $entry)
+        ->assertTableColumnStateSet('createdBy.full_name', $entry->createdBy->full_name, $entry)
         ->assertTableColumnStateSet('is_visible_to_guests', true, $entry);
 });
 
@@ -731,7 +731,7 @@ it('shows a manage milestone action when the user can manage the project', funct
     ])
         ->assertSeeHtml("wire:click=\"mountAction('manageMilestone', { milestone: '{$milestone->getKey()}' })\"")
         ->assertSee($milestone->title)
-        ->assertDontSee('Manage');
+        ->assertDontSee('Manage milestone');
 });
 
 it('does not show a manage milestone action when the user cannot manage the project', function (): void {

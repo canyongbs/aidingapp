@@ -38,6 +38,8 @@ namespace AidingApp\Audit\Filament\Resources\Audits\Pages;
 
 use AidingApp\Audit\Filament\Resources\Audits\AuditResource;
 use AidingApp\Audit\Models\Audit;
+use App\Models\SystemUser;
+use App\Models\User;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Pages\ViewRecord;
 use Filament\Schemas\Components\Section;
@@ -55,7 +57,12 @@ class ViewAudit extends ViewRecord
                     ->schema([
                         TextEntry::make('auditable_type')
                             ->label('Auditable'),
-                        TextEntry::make('user.name')
+                        TextEntry::make('user.full_name')
+                            ->state(fn (Audit $record): ?string => match (true) {
+                                $record->user instanceof User => $record->user->full_name,
+                                $record->user instanceof SystemUser => $record->user->name,
+                                default => null,
+                            })
                             ->label('Change Agent (User)')
                             ->placeholder('N/A'),
                         TextEntry::make('event')
