@@ -40,9 +40,9 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use App\Filament\Widgets\ListServiceRequestTableWidgets;
 use App\Models\User;
+use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
-use function Pest\Livewire\livewire;
 
 it('searches respondent names case insensitively', function (string $firstName, string $search): void {
     actingAs(User::factory()->state(['timezone' => 'UTC'])->create());
@@ -75,7 +75,7 @@ it('searches respondent names case insensitively', function (string $firstName, 
         ->state(['title' => 'Unrelated request'])
         ->create();
 
-    livewire(ListServiceRequestTableWidgets::class)
+    Livewire::test(ListServiceRequestTableWidgets::class)
         ->assertCanSeeTableRecords(collect([$matchingRequest, $otherRequest]))
         ->searchTable($search)
         ->assertCanSeeTableRecords(collect([$matchingRequest]))

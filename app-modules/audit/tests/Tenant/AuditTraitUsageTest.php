@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-test('app')
+arch('app')
     ->expect('App\Models')
     ->not->toUse('OwenIt\Auditing\Auditable')
     ->and('AidingApp\ServiceManagement')

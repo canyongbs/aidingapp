@@ -191,7 +191,7 @@ it('searches service requests by contact or organization name case insensitively
         ->state(['title' => 'Unrelated request'])
         ->create();
 
-    livewire(ServiceRequestsTable::class, [
+    Livewire::test(ServiceRequestsTable::class, [
         'cacheTag' => 'test-service-requests-table-related-search',
         'pageFilters' => [],
     ])

@@ -325,7 +325,7 @@ it('searches asset name filter options case insensitively', function (string $as
         ->state(['name' => 'Unrelated Desktop'])
         ->create();
 
-    $select = livewire(AssetsTable::class, [
+    $select = Livewire::test(AssetsTable::class, [
         'cacheTag' => 'test-assets-table-name-search',
     ])
         ->instance()
