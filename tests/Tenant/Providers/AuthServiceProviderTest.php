@@ -78,6 +78,21 @@ describe('API documentation authorization', function (): void {
         get('/docs/api/v1.json')->assertSuccessful();
     });
 
+    it('allows users with `system_user` view permissions to access the API documentation', function (): void {
+        $user = User::factory()
+            ->create()
+            ->givePermissionTo('system_user.view-any', 'system_user.*.view');
+
+        expect(Gate::forUser($user)->allows('viewApiDocs'))->toBeTrue();
+
+        actingAs($user);
+
+        get('/docs/api/v1')
+            ->assertSuccessful();
+
+        get('/docs/api/v1.json')->assertSuccessful();
+    });
+
     it('denies API documentation access to regular users and guests', function (): void {
         $user = User::factory()->create();
 
