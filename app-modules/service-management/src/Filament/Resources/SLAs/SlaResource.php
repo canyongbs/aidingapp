@@ -75,6 +75,7 @@ class SlaResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
+                    // TODO: Cleanup Task (sla-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
                         SlaNameUniquenessFeature::active(),
                         fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
