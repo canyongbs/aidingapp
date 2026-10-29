@@ -39,16 +39,19 @@ use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Tpetry\PostgresqlEnhanced\Schema\Blueprint;
 use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (contact-type-name-uniqueness): after ContactTypeNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
-     * - keep the citext column conversion and the unique index, they are permanent
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, the `MAX_LENGTH` constant, the `buildDeduplicatedValue()` / `existingValueMatchPatterns()` overrides, and the `fixDuplicates()` call
+     * - keep the table lock, the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
+
+    private const int MAX_LENGTH = 255;
 
     private string $table = 'contact_types';
 
@@ -61,6 +64,9 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
+            // Blocks concurrent writes between the duplicate repair and the unique index creation.
+            DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
+
             $this->fixDuplicates();
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE citext");
@@ -81,9 +87,35 @@ return new class () extends Migration {
 
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
+            // Renamed duplicates are intentionally kept: stripping the suffix cannot tell a repaired name from a legitimate one such as "Type-2", nor restore truncated characters.
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
+    }
+
+    /**
+     * Truncates the base name so the suffixed value never exceeds the column length.
+     */
+    protected function buildDeduplicatedValue(string $originalValue, int $counter): string
+    {
+        $suffix = "-{$counter}";
+
+        return mb_substr($originalValue, 0, self::MAX_LENGTH - mb_strlen($suffix)) . $suffix;
+    }
+
+    /**
+     * Truncated candidates no longer share the full base value as a prefix, so long names are matched on a shorter prefix.
+     *
+     * @return array{0: string, 1: string}
+     */
+    protected function existingValueMatchPatterns(string $baseValue): array
+    {
+        $lower = Str::lower($baseValue);
+        $prefixLength = self::MAX_LENGTH - 10;
+
+        if (mb_strlen($lower) <= $prefixLength) {
+            return [$lower, $lower . '-%'];
+        }
+
+        return [$lower, mb_substr($lower, 0, $prefixLength) . '%'];
     }
 };

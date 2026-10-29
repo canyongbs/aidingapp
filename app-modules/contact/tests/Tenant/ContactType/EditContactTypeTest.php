@@ -41,7 +41,9 @@ use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\EditContactTypeRequestFactory;
 use App\Features\ContactTypeNameUniquenessFeature;
 use App\Models\User;
+use CanyonGBS\Common\Enums\Color;
 use Illuminate\Database\UniqueConstraintViolationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Livewire;
 
@@ -168,6 +170,26 @@ test('EditContactType does not apply the unique form rule when the feature is di
         ->fillForm(EditContactTypeRequestFactory::new()->state(['name' => 'Student'])->create())
         ->call('save'))
         ->toThrow(UniqueConstraintViolationException::class);
+});
+
+test('EditContactType does not block unrelated edits on existing duplicates when the feature is disabled', function (): void {
+    ContactTypeNameUniquenessFeature::deactivate();
+
+    DB::statement('DROP INDEX IF EXISTS contact_types_name_unique');
+
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student']);
+    $duplicate = ContactType::factory()->create(['name' => 'STUDENT', 'color' => Color::Green]);
+
+    Livewire::test(EditContactType::class, [
+        'record' => $duplicate->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'STUDENT', 'color' => Color::Blue])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($duplicate->fresh()->color)->toBe(Color::Blue);
 });
 
 // Permission Tests

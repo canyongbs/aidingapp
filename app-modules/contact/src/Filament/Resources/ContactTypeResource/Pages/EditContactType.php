@@ -63,7 +63,7 @@ class EditContactType extends EditRecord
                     // TODO: Cleanup Task (contact-type-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
                     ->when(
                         ContactTypeNameUniquenessFeature::active(),
-                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                     ),
                 ColorSelect::make()
                     ->required(),

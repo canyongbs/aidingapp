@@ -513,7 +513,7 @@ describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_uni
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
+    it('keeps the repaired names on rollback and deactivates the feature flag', function (): void {
         isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
             $first = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(2)]);
             $second = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinute()]);
@@ -528,8 +528,34 @@ describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_uni
             $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect($second->refresh()->name)->toBe('student')
+            expect($second->refresh()->name)->toBe('student-2')
                 ->and(ContactTypeNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('keeps suffixed names within the column length for names at the maximum length', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => str_repeat('a', 255), 'created_at' => now()->subMinutes(2)]);
+            $second = ContactType::factory()->create(['name' => str_repeat('A', 255), 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe(str_repeat('a', 255))
+                ->and($second->refresh()->name)->toBe(str_repeat('A', 253) . '-2');
+        });
+    });
+
+    it('skips a truncated candidate name that is already taken', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            ContactType::factory()->create(['name' => str_repeat('a', 255), 'created_at' => now()->subMinutes(3)]);
+            $second = ContactType::factory()->create(['name' => str_repeat('A', 255), 'created_at' => now()->subMinutes(2)]);
+            ContactType::factory()->create(['name' => str_repeat('a', 253) . '-2', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe(str_repeat('A', 253) . '-3');
         });
     });
 });
