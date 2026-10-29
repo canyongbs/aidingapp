@@ -39,7 +39,9 @@ use AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages\EditContactTy
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Tests\Tenant\ContactType\RequestFactories\EditContactTypeRequestFactory;
+use App\Features\ContactTypeNameUniquenessFeature;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Validation\Rules\Enum;
 use Livewire\Livewire;
 
@@ -101,6 +103,72 @@ test('EditContactType requires valid data', function (EditContactTypeRequestFact
         'color not within enum' => [fn (): EditContactTypeRequestFactory => EditContactTypeRequestFactory::new()->state(['color' => 'not-a-color']), ['color' => Enum::class]],
     ]
 );
+
+test('EditContactType rejects a name that matches another contact type case-insensitively', function (string $name): void {
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student']);
+    $contactType = ContactType::factory()->create(['name' => 'Employee']);
+
+    Livewire::test(EditContactType::class, [
+        'record' => $contactType->getRouteKey(),
+    ])
+        ->fillForm(EditContactTypeRequestFactory::new()->state(['name' => $name])->create())
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+
+    expect($contactType->fresh()->name)->toBe('Employee');
+})->with([
+    'same case' => 'Student',
+    'different case' => 'STUDENT',
+]);
+
+test('EditContactType allows saving a contact type with its own name in a different case', function (): void {
+    asSuperAdmin();
+
+    $contactType = ContactType::factory()->create(['name' => 'Student']);
+
+    Livewire::test(EditContactType::class, [
+        'record' => $contactType->getRouteKey(),
+    ])
+        ->fillForm(EditContactTypeRequestFactory::new()->state(['name' => 'STUDENT'])->create())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($contactType->fresh()->name)->toBe('STUDENT');
+});
+
+test('EditContactType allows using the name of a soft-deleted contact type', function (): void {
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student'])->delete();
+    $contactType = ContactType::factory()->create(['name' => 'Employee']);
+
+    Livewire::test(EditContactType::class, [
+        'record' => $contactType->getRouteKey(),
+    ])
+        ->fillForm(EditContactTypeRequestFactory::new()->state(['name' => 'student'])->create())
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($contactType->fresh()->name)->toBe('student');
+});
+
+test('EditContactType does not apply the unique form rule when the feature is disabled', function (): void {
+    ContactTypeNameUniquenessFeature::deactivate();
+
+    asSuperAdmin();
+
+    ContactType::factory()->create(['name' => 'Student']);
+    $contactType = ContactType::factory()->create(['name' => 'Employee']);
+
+    expect(fn () => Livewire::test(EditContactType::class, [
+        'record' => $contactType->getRouteKey(),
+    ])
+        ->fillForm(EditContactTypeRequestFactory::new()->state(['name' => 'Student'])->create())
+        ->call('save'))
+        ->toThrow(UniqueConstraintViolationException::class);
+});
 
 // Permission Tests
 

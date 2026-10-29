@@ -38,11 +38,13 @@ namespace AidingApp\Contact\Filament\Resources\ContactTypeResource\Pages;
 
 use AidingApp\Contact\Filament\Resources\ContactTypeResource;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactTypeNameUniquenessFeature;
 use CanyonGBS\Common\Filament\Forms\Components\ColorSelect;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateContactType extends CreateRecord
 {
@@ -55,7 +57,12 @@ class CreateContactType extends CreateRecord
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->string(),
+                    ->string()
+                    // TODO: Cleanup Task (contact-type-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        ContactTypeNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
                 ColorSelect::make()
                     ->required(),
                 Toggle::make('is_default')

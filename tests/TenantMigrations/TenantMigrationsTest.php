@@ -37,9 +37,11 @@
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ContactTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
@@ -457,6 +459,77 @@ describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_an
 
             expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website')
                 ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (contact-type-name-uniqueness): delete this describe and the tests within
+describe('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(3)]);
+            $second = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinutes(2)]);
+            $third = ContactType::factory()->create(['name' => 'STUDENT', 'created_at' => now()->subMinute()]);
+            $existingSuffixed = ContactType::factory()->create(['name' => 'Student-2', 'created_at' => now()->subMinutes(4)]);
+            $unique = ContactType::factory()->create(['name' => 'Employee', 'created_at' => now()->subMinutes(5)]);
+
+            expect(ContactTypeNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Student')
+                ->and($second->refresh()->name)->toBe('student-3')
+                ->and($third->refresh()->name)->toBe('STUDENT-4')
+                ->and($existingSuffixed->refresh()->name)->toBe('Student-2')
+                ->and($unique->refresh()->name)->toBe('Employee')
+                ->and(ContactTypeNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $kept = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(2)]);
+            $trashed = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Student')
+                ->and($trashed->refresh()->name)->toBe('student');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed contact types at the database level', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            ContactType::factory()->create(['name' => 'Student']);
+
+            expect(fn () => ContactType::factory()->create(['name' => 'STUDENT']))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
+        isolatedMigration('2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique', function (): void {
+            $first = ContactType::factory()->create(['name' => 'Student', 'created_at' => now()->subMinutes(2)]);
+            $second = ContactType::factory()->create(['name' => 'student', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('student-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/contact/database/migrations/2026_10_29_153800_convert_contact_types_name_to_citext_and_enforce_unique.php']);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('student')
+                ->and(ContactTypeNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });
