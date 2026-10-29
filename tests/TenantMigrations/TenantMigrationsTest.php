@@ -37,9 +37,12 @@
 use AidingApp\Authorization\Models\Permission;
 use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
+use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\SlaNameUniquenessFeature;
 use App\Models\SystemUser;
@@ -251,6 +254,63 @@ describe('2026_10_15_101455_delete_role_group_and_interaction_import_permissions
     });
 });
 
+// TODO: Cleanup Task (email-template-name-uniqueness): delete this describe and the tests within
+describe('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
+            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(3)]);
+            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinutes(2)]);
+            $third = EmailTemplate::factory()->create(['name' => 'WELCOME EMAIL', 'created_at' => now()->subMinute()]);
+            $unique = EmailTemplate::factory()->create(['name' => 'Reminder Email', 'created_at' => now()->subMinutes(4)]);
+
+            expect(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Welcome Email')
+                ->and($second->refresh()->name)->toBe('welcome email-2')
+                ->and($third->refresh()->name)->toBe('WELCOME EMAIL-3')
+                ->and($unique->refresh()->name)->toBe('Reminder Email')
+                ->and(EmailTemplateNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
+            $kept = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
+            $trashed = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Welcome Email')
+                ->and($trashed->refresh()->name)->toBe('welcome email');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function (): void {
+        isolatedMigration('2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique', function (): void {
+            $first = EmailTemplate::factory()->create(['name' => 'Welcome Email', 'created_at' => now()->subMinutes(2)]);
+            $second = EmailTemplate::factory()->create(['name' => 'welcome email', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('welcome email-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => 'app-modules/engagement/database/migrations/2026_10_23_083558_convert_email_templates_name_to_citext_and_enforce_unique.php']);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('welcome email')
+                ->and(EmailTemplateNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
 // TODO: Cleanup Task (product-name-uniqueness): delete this describe and the tests within
 describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique', function (): void {
     it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function (): void {
@@ -393,6 +453,100 @@ describe('2026_10_26_083011_convert_slas_name_to_citext_and_enforce_unique', fun
 
             expect(DB::table('slas')->where('id', $secondId)->value('name'))->toBe('gold support')
                 ->and(SlaNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (service-monitoring-target-name-uniqueness): delete this describe and the tests within
+describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertTarget = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('service_monitoring_targets')->insert([
+            'id' => $id,
+            'name' => $name,
+            'domain' => 'https://example.com',
+            'frequency' => '5_minutes',
+            'monitor_type' => 'availability',
+            'follow_redirection' => true,
+            'auth_type' => 'none',
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertTarget): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
+            $firstId = $insertTarget('Customer Website', now()->subMinutes(3));
+            $secondId = $insertTarget('customer website', now()->subMinutes(2));
+            $thirdId = $insertTarget('CUSTOMER WEBSITE', now()->subMinute());
+            $existingSuffixedId = $insertTarget('Customer Website-2', now()->subMinutes(4));
+            $uniqueId = $insertTarget('Payment API', now()->subMinutes(5));
+
+            expect(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('service_monitoring_targets')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Customer Website')
+                ->and($name($secondId))->toBe('customer website-3')
+                ->and($name($thirdId))->toBe('CUSTOMER WEBSITE-4')
+                ->and($name($existingSuffixedId))->toBe('Customer Website-2')
+                ->and($name($uniqueId))->toBe('Payment API')
+                ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertTarget): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
+            $keptId = $insertTarget('Customer Website', now()->subMinutes(2));
+            $trashedId = $insertTarget('customer website', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_monitoring_targets')->where('id', $keptId)->value('name'))->toBe('Customer Website')
+                ->and(DB::table('service_monitoring_targets')->where('id', $trashedId)->value('name'))->toBe('customer website');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed service monitoring targets at the database level', function () use ($migrationName, $migrationPath, $insertTarget): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertTarget('Customer Website', now());
+
+            expect(fn (): string => $insertTarget('CUSTOMER WEBSITE', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertTarget): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTarget): void {
+            $firstId = $insertTarget('Customer Website', now()->subMinutes(2));
+            $secondId = $insertTarget('customer website', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website-2');
+
+            DB::table('service_monitoring_targets')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website')
+                ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });

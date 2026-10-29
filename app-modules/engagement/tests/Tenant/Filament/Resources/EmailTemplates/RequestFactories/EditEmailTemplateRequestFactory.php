@@ -34,25 +34,18 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Project\Filament\Resources\Projects\Pages;
+namespace AidingApp\Engagement\Tests\Tenant\Filament\Resources\EmailTemplates\RequestFactories;
 
-use AidingApp\Project\Filament\Resources\Projects\Forms\ProjectForm;
-use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
-use Filament\Resources\Pages\CreateRecord;
-use Filament\Schemas\Schema;
+use Worksome\RequestFactories\RequestFactory;
 
-class CreateProject extends CreateRecord
+class EditEmailTemplateRequestFactory extends RequestFactory
 {
-    protected static string $resource = ProjectResource::class;
-
-    public function form(Schema $schema): Schema
+    public function definition(): array
     {
-        return $schema
-            ->components(ProjectForm::components());
-    }
-
-    protected function mutateFormDataBeforeCreate(array $data): array
-    {
-        return ProjectForm::mutateDataForSave($data);
+        return [
+            'name' => $this->faker->unique()->sentence(3),
+            'description' => $this->faker->sentence(),
+            'content' => ['type' => 'doc', 'content' => [['type' => 'paragraph', 'content' => [['type' => 'text', 'text' => $this->faker->paragraph()]]]]],
+        ];
     }
 }

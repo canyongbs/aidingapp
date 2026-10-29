@@ -45,11 +45,13 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
@@ -1081,4 +1083,71 @@ test('marking a legacy service monitor confidential backfills the editor as its 
 
     get(ServiceMonitoringResource::getUrl('view', ['record' => $serviceMonitoringTarget]))
         ->assertSuccessful();
+});
+
+test('EditServiceMonitoring requires a unique name, case-insensitively', function (string $name): void {
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
+
+    Livewire::test(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => $name])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+})->with([
+    'same case' => 'Customer Website',
+    'different case' => 'customer website',
+]);
+
+test('EditServiceMonitoring allows saving with the same name as the current record', function (): void {
+    asSuperAdmin();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    Livewire::test(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'CUSTOMER WEBSITE'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->name)->toBe('CUSTOMER WEBSITE');
+});
+
+test('EditServiceMonitoring allows renaming to the name of a soft-deleted service monitor', function (): void {
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website'])->delete();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
+
+    Livewire::test(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Customer Website'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->refresh()->name)->toBe('Customer Website');
+});
+
+test('EditServiceMonitoring does not apply the unique name rule when the feature is disabled', function (): void {
+    ServiceMonitoringTargetNameUniquenessFeature::deactivate();
+
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create(['name' => 'Payment API']);
+
+    expect(fn () => Livewire::test(EditServiceMonitoring::class, [
+        'record' => $serviceMonitoringTarget->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'Customer Website'])
+        ->call('save'))
+        ->toThrow(UniqueConstraintViolationException::class);
 });

@@ -44,10 +44,12 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\Pages\Crea
 use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMonitoringResource;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
 
@@ -1222,4 +1224,69 @@ test('a service monitor saves case-insensitively unique keyword values', functio
 
     expect($serviceMonitoringTarget->should_contain)->toBe(['Error'])
         ->and($serviceMonitoringTarget->should_not_contain)->toBe(['Warning']);
+});
+
+test('CreateServiceMonitoring requires a unique name, case-insensitively', function (string $name): void {
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['name' => $name])->create();
+
+    Livewire::test(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+})->with([
+    'same case' => 'Customer Website',
+    'different case' => 'CUSTOMER WEBSITE',
+]);
+
+test('CreateServiceMonitoring treats the name of a confidential service monitor the user cannot see as taken', function (): void {
+    ServiceMonitoringTarget::factory()->confidential()->create(['name' => 'Customer Website']);
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('service_monitoring.view-any');
+    $user->givePermissionTo('service_monitoring.create');
+
+    actingAs($user);
+
+    expect(ServiceMonitoringTarget::query()->where('name', 'Customer Website')->exists())->toBeFalse();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['name' => 'customer website'])->create();
+
+    Livewire::test(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+test('CreateServiceMonitoring allows reusing the name of a soft-deleted service monitor', function (): void {
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website'])->delete();
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['name' => 'Customer Website'])->create();
+
+    Livewire::test(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create')
+        ->assertHasNoFormErrors();
+
+    assertDatabaseHas(ServiceMonitoringTarget::class, ['name' => 'Customer Website', 'deleted_at' => null]);
+});
+
+test('CreateServiceMonitoring does not apply the unique name rule when the feature is disabled', function (): void {
+    ServiceMonitoringTargetNameUniquenessFeature::deactivate();
+
+    asSuperAdmin();
+
+    ServiceMonitoringTarget::factory()->create(['name' => 'Customer Website']);
+
+    $request = ServiceMonitoringTargetRequestFactory::new()->state(['name' => 'Customer Website'])->create();
+
+    expect(fn () => Livewire::test(CreateServiceMonitoring::class)
+        ->fillForm($request)
+        ->call('create'))
+        ->toThrow(UniqueConstraintViolationException::class);
 });

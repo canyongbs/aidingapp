@@ -36,6 +36,7 @@
 
 namespace AidingApp\Project\Filament\Resources\Projects\Pages;
 
+use AidingApp\Project\Filament\Resources\Projects\Actions\CreateProjectAction;
 use AidingApp\Project\Filament\Resources\Projects\ProjectResource;
 use AidingApp\Project\Models\Project;
 use AidingApp\Project\Models\Scopes\WithProgressCounts;
@@ -43,7 +44,6 @@ use App\Filament\Tables\Columns\IdColumn;
 use App\Models\Scopes\WhereFullNameLike;
 use CanyonGBS\Common\Filament\Actions\ArchiveBulkAction;
 use Filament\Actions\BulkActionGroup;
-use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ViewColumn;
@@ -201,7 +201,7 @@ class ListProjects extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateProjectAction::make(),
         ];
     }
 }
