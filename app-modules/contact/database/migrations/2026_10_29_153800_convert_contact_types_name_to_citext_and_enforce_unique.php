@@ -113,9 +113,9 @@ return new class () extends Migration {
         $prefixLength = self::MAX_LENGTH - 10;
 
         if (mb_strlen($lower) <= $prefixLength) {
-            return [$lower, $lower . '-%'];
+            return [$lower, addcslashes($lower, '\\%_') . '-%'];
         }
 
-        return [$lower, mb_substr($lower, 0, $prefixLength) . '%'];
+        return [$lower, addcslashes(mb_substr($lower, 0, $prefixLength), '\\%_') . '%'];
     }
 };
