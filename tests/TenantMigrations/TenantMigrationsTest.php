@@ -550,3 +550,96 @@ describe('2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enf
         });
     });
 });
+
+// TODO: Cleanup Task (tag-name-uniqueness): delete this describe and the tests within
+describe('2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_30_104700_convert_tags_name_to_citext_and_enforce_unique';
+    $migrationPath = "database/migrations/{$migrationName}.php";
+
+    $insertTag = function (string $name, CarbonInterface $createdAt, ?string $type = 'knowledge_base_item'): string {
+        $id = (string) Str::uuid();
+
+        DB::table('tags')->insert([
+            'id' => $id,
+            'name' => $name,
+            'type' => $type,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix and keeps the oldest', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $firstId = $insertTag('Billing', now()->subMinutes(3));
+            $secondId = $insertTag('billing', now()->subMinutes(2));
+            $thirdId = $insertTag('BILLING', now()->subMinute());
+            $existingSuffixedId = $insertTag('Billing-2', now()->subMinutes(4));
+            $uniqueId = $insertTag('Shipping', now()->subMinutes(5));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('tags')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Billing')
+                ->and($name($secondId))->toBe('billing-3')
+                ->and($name($thirdId))->toBe('BILLING-4')
+                ->and($name($existingSuffixedId))->toBe('Billing-2')
+                ->and($name($uniqueId))->toBe('Shipping');
+        });
+    });
+
+    it('only resolves duplicate names within the same type', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $knowledgeBaseItemId = $insertTag('Billing', now()->subMinutes(4));
+            $otherTypeId = $insertTag('billing', now()->subMinutes(3), 'other_type');
+            $firstUntypedId = $insertTag('BILLING', now()->subMinutes(2), null);
+            $secondUntypedId = $insertTag('Billing', now()->subMinute(), null);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('tags')->where('id', $id)->value('name');
+
+            expect($name($knowledgeBaseItemId))->toBe('Billing')
+                ->and($name($otherTypeId))->toBe('billing')
+                ->and($name($firstUntypedId))->toBe('BILLING')
+                ->and($name($secondUntypedId))->toBe('Billing-2');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness per type at the database level', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertTag('Billing', now());
+            $insertTag('Billing', now(), 'other_type');
+            $insertTag('Billing', now(), null);
+
+            expect(fn (): string => $insertTag('BILLING', now()))->toThrow(UniqueConstraintViolationException::class)
+                ->and(fn (): string => $insertTag('BILLING', now(), null))->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertTag): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertTag): void {
+            $firstId = $insertTag('Billing', now()->subMinutes(2));
+            $secondId = $insertTag('billing', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('tags')->where('id', $secondId)->value('name'))->toBe('billing-2');
+
+            DB::table('tags')->where('id', $firstId)->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('tags')->where('id', $secondId)->value('name'))->toBe('billing');
+        });
+    });
+});
