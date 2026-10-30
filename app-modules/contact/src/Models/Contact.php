@@ -111,6 +111,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         'email_bounce',
         'status_id',
         'type_id',
+        'organization_id',
         'phone',
         'address',
         'address_2',
