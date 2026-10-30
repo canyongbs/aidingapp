@@ -110,7 +110,7 @@ enum EngagementDisplayStatus implements HasLabel, HasColor
             $status = self::Scheduled;
         }
 
-        $events = $engagement->latestEmailMessage?->events()->orderBy('occurred_at', 'asc')->get();
+        $events = $engagement->latestEmailMessage?->events->sortByOccurrence();
 
         $events?->each(function (EmailMessageEvent $event) use (&$status): void {
             match ($event->type) {

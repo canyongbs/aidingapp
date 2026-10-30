@@ -415,3 +415,44 @@ it('returns the correct case given a particular Engagement', function (Engagemen
         EngagementDisplayStatus::Delayed,
     ],
 ]);
+
+it('orders email events by sub-second occurred_at', function (): void {
+    $engagement = Engagement::factory()->email()->deliverNow()->create();
+
+    $message = EmailMessage::factory()->for($engagement, 'related')->create();
+
+    // Inserted in the opposite order to the expected one, so insertion order would give Sent.
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'type' => EmailMessageEventType::Delivery,
+        'occurred_at' => '2025-03-14 10:15:00.900000',
+    ]));
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'type' => EmailMessageEventType::Send,
+        'occurred_at' => '2025-03-14 10:15:00.100000',
+    ]));
+
+    expect(EngagementDisplayStatus::getStatus($engagement->refresh()))->toBe(EngagementDisplayStatus::Delivered);
+});
+
+it('breaks email occurred_at ties by id', function (): void {
+    $engagement = Engagement::factory()->email()->deliverNow()->create();
+
+    $message = EmailMessage::factory()->for($engagement, 'related')->create();
+
+    // Inserted in the opposite order to the expected one, so insertion order would give Delivered.
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => 'ffffffff-ffff-4fff-bfff-ffffffffffff',
+        'type' => EmailMessageEventType::Send,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+    $message->events()->save(EmailMessageEvent::factory()->make([
+        'id' => '00000000-0000-4000-8000-000000000000',
+        'type' => EmailMessageEventType::Delivery,
+        'occurred_at' => '2025-03-14 10:15:00',
+    ]));
+
+    // Eager-loaded, as a list page would load it.
+    $engagement = Engagement::query()->with('latestEmailMessage.events')->findOrFail($engagement->getKey());
+
+    expect(EngagementDisplayStatus::getStatus($engagement))->toBe(EngagementDisplayStatus::Sent);
+});
