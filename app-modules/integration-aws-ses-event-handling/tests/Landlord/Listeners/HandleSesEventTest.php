@@ -47,7 +47,7 @@ beforeEach(function (): void {
     withoutMiddleware(VerifyAwsSnsRequest::class);
 });
 
-it('correctly handles the incoming SES event', function (string $event, EmailMessageEventType $eventType): void {
+it('correctly handles the incoming SES event', function (string $event, EmailMessageEventType $eventType, string $expectedOccurredAt): void {
     /** @var Tenant $tenant */
     $tenant = Tenant::query()->first();
 
@@ -86,7 +86,7 @@ it('correctly handles the incoming SES event', function (string $event, EmailMes
 
     $response->assertOk();
 
-    $tenant->execute(function () use ($emailMessage, $eventType): void {
+    $tenant->execute(function () use ($emailMessage, $eventType, $expectedOccurredAt): void {
         // The email message should have the apppriate email message event created based on the event
         $emailMessage->refresh();
 
@@ -94,47 +94,58 @@ it('correctly handles the incoming SES event', function (string $event, EmailMes
 
         $event = $emailMessage->events()->first();
 
-        expect($event->type)->toBe($eventType);
+        expect($event->type)->toBe($eventType)
+            ->and($event->occurred_at->format('Y-m-d H:i:s.v'))->toBe($expectedOccurredAt);
     });
 })->with([
     'HandleSesBounceEvent' => [
         'Bounce',
         EmailMessageEventType::Bounce,
+        '2017-08-05 00:41:02.669',
     ],
     'HandleSesClickEvent' => [
         'Click',
         EmailMessageEventType::Click,
+        '2017-08-09 23:51:25.570',
     ],
     'HandleSesComplaintEvent' => [
         'Complaint',
         EmailMessageEventType::Complaint,
+        '2017-08-05 00:41:02.669',
     ],
     'HandleSesDeliveryEvent' => [
         'Delivery',
         EmailMessageEventType::Delivery,
+        '2016-10-19 23:21:04.133',
     ],
     'HandleSesDeliveryDelayEvent' => [
         'DeliveryDelay',
         EmailMessageEventType::DeliveryDelay,
+        '2020-06-16 00:25:40.095',
     ],
     'HandleSesOpenEvent' => [
         'Open',
         EmailMessageEventType::Open,
+        '2017-08-09 22:00:19.652',
     ],
     'HandleSesRejectEvent' => [
         'Reject',
         EmailMessageEventType::Reject,
+        '2016-10-14 17:38:15.211',
     ],
     'HandleSesRenderingFailureEvent' => [
         'RenderingFailure',
         EmailMessageEventType::RenderingFailure,
+        '2018-01-22 18:43:06.197',
     ],
     'HandleSesSendEvent' => [
         'Send',
         EmailMessageEventType::Send,
+        '2016-10-14 05:02:16.645',
     ],
     'HandleSesSubscriptionEvent' => [
         'Subscription',
         EmailMessageEventType::Subscription,
+        '2022-01-12 01:00:17.910',
     ],
 ]);
