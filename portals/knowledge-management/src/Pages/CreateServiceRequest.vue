@@ -38,8 +38,8 @@
     import Page from '@common/portal/Page.vue';
     import PageCard from '@common/portal/PageCard.vue';
     import { createMessage, getNode } from '@formkit/core';
-    import { UserIcon } from '@heroicons/vue/24/outline';
     import { FormKitSchema } from '@formkit/vue';
+    import { UserIcon } from '@heroicons/vue/24/outline';
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
     import { storeToRefs } from 'pinia';
@@ -545,7 +545,9 @@
 
                     <div v-if="totalSteps > 1" class="not-prose">
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-bold text-gray-900">Step {{ currentStep }} of {{ totalSteps }}</span>
+                            <span class="text-sm font-bold text-gray-900"
+                                >Step {{ currentStep }} of {{ totalSteps }}</span
+                            >
                             <span class="text-sm text-gray-500">{{ percentComplete }}% complete</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-gray-200">
