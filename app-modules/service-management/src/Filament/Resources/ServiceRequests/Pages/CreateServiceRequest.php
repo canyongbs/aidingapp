@@ -44,6 +44,7 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
@@ -56,6 +57,8 @@ use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\Authenticatable;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Actions\Action;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
@@ -167,23 +170,16 @@ class CreateServiceRequest extends CreateRecord
                     ]),
                 Section::make('Contact Details')
                     ->schema([
-                        Select::make('respondent_id')
-                            ->relationship(
-                                name: 'respondent',
-                                titleAttribute: 'full_name',
-                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
-                            )
+                        ModalTableSelect::make('respondent_id')
                             ->label('Choose Customer Contact')
+                            ->tableConfiguration(CreateServiceRequestContactsTable::class)
+                            ->getOptionLabelUsing(fn (?string $value): ?string => filled($value)
+                                ? Contact::find($value)?->full_name
+                                : null)
+                            ->selectAction(fn (Action $action): Action => $action
+                                ->modalHeading('Choose Customer Contact')
+                                ->slideOver())
                             ->required()
-                            ->searchable()
-                            ->preload()
-                            ->getOptionLabelFromRecordUsing(function (Contact $record): string {
-                                $label = $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ')';
-
-                                return $record->organization?->name
-                                    ? $label . "\n" . $record->organization->name
-                                    : $label;
-                            })
                             ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Additional Information')
