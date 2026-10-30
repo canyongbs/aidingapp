@@ -530,7 +530,7 @@ test('cannot create service requests if user is manager of any service request t
         )->assertForbidden();
 });
 
-test('displays only service request types managed by the current user', function (): void {
+test('displays all service request types including those the current user does not manage', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -575,11 +575,11 @@ test('displays only service request types managed by the current user', function
                 });
 
             return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
+                in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 
-test('displays only service request types where current user is a direct manager', function (): void {
+test('displays all service request types including those where the current user is not a direct manager', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -618,7 +618,7 @@ test('displays only service request types where current user is a direct manager
                 });
 
             return in_array($serviceRequestTypesWithManagers->getKey(), $flattenedValues, true) &&
-                ! in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
+                in_array($serviceRequestTypesWithoutManagers->getKey(), $flattenedValues, true);
         });
 });
 
@@ -706,7 +706,7 @@ test('create service requests if user is direct manager of any service request t
     assertDatabaseHas(ServiceRequest::class, $request->except(['respondent_id', 'type_id'])->toArray());
 });
 
-test('validate service requests type if user is manager of any service request type', function (): void {
+test('allows selecting a service request type the user does not manage, warning they will lose access', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -728,29 +728,31 @@ test('validate service requests type if user is manager of any service request t
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create());
 
-    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+    $serviceRequestTypeWithoutManagers = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
-
-    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($department): void {
-        $serviceRequest->managerDepartments()->attach($department);
-    });
-
-    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+    $serviceRequestTypeWithManagers = ServiceRequestType::factory()
+        ->hasAttached($department, [], 'managerDepartments')
+        ->create();
 
     Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
+            'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
-                'type_id' => $serviceRequestTypes->first()->getKey(),
+                'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             ])->getKey(),
         ])
+        ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($serviceRequestTypeWithoutManagers->name))
         ->call('create')
-        ->assertHasFormErrors(['type_id']);
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    expect(ServiceRequest::first()->priority->type->is($serviceRequestTypeWithoutManagers))->toBeTrue();
 });
 
-test('validate service requests type if user is direct manager of any service request type', function (): void {
+test('allows selecting a service request type where the user is not a direct manager, warning they will lose access', function (): void {
     $settings = app(LicenseSettings::class);
 
     $settings->data->addons->serviceManagement = true;
@@ -766,26 +768,98 @@ test('validate service requests type if user is direct manager of any service re
 
     $request = collect(CreateServiceRequestRequestFactory::new()->create());
 
-    $serviceRequestTypesWithoutManagers = ServiceRequestType::factory()->count(2)->create();
+    $serviceRequestTypeWithoutManagers = ServiceRequestType::factory()->create();
 
-    $serviceRequestTypesWithManagers = ServiceRequestType::factory()->count(2)->create();
-
-    $serviceRequestTypesWithManagers->each(function (ServiceRequestType $serviceRequest) use ($user): void {
-        $serviceRequest->managerUsers()->attach($user);
-    });
-
-    $serviceRequestTypes = $serviceRequestTypesWithoutManagers->toBase()->merge($serviceRequestTypesWithManagers);
+    $serviceRequestTypeWithManagers = ServiceRequestType::factory()
+        ->hasAttached($user, [], 'managerUsers')
+        ->create();
 
     Livewire::test(CreateServiceRequest::class)
         ->fillForm($request->toArray())
         ->fillForm([
             'respondent_id' => Contact::factory()->create()->getKey(),
+            'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             'priority_id' => ServiceRequestPriority::factory()->create([
-                'type_id' => $serviceRequestTypes->first()->getKey(),
+                'type_id' => $serviceRequestTypeWithoutManagers->getKey(),
             ])->getKey(),
         ])
+        ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($serviceRequestTypeWithoutManagers->name))
         ->call('create')
-        ->assertHasFormErrors(['type_id']);
+        ->assertHasNoFormErrors();
+
+    assertCount(1, ServiceRequest::all());
+
+    expect(ServiceRequest::first()->priority->type->is($serviceRequestTypeWithoutManagers))->toBeTrue();
+});
+
+describe('inaccessible type warning banner', function (): void {
+    beforeEach(function (): void {
+        $settings = app(LicenseSettings::class);
+
+        $settings->data->addons->serviceManagement = true;
+
+        $settings->save();
+    });
+
+    test('is shown when a manager selects a type they neither manage nor audit', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $inaccessibleType = ServiceRequestType::factory()->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($inaccessibleType->name))
+            ->set('data.type_id', $inaccessibleType->getKey())
+            ->assertSee(CreateServiceRequest::inaccessibleTypeWarningMessage($inaccessibleType->name));
+    });
+
+    test('is not shown when the selected type is managed by the user', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        $managedType = ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $managedType->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($managedType->name));
+    });
+
+    test('is not shown when the selected type is audited by the user', function (): void {
+        $user = User::factory()->create();
+
+        $user->givePermissionTo('service_request.view-any');
+        $user->givePermissionTo('service_request.create');
+
+        ServiceRequestType::factory()->hasAttached($user, [], 'managerUsers')->create();
+
+        $auditedType = ServiceRequestType::factory()->hasAttached($user, [], 'auditorUsers')->create();
+
+        actingAs($user);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $auditedType->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($auditedType->name));
+    });
+
+    test('is not shown for a super admin', function (): void {
+        asSuperAdmin();
+
+        $type = ServiceRequestType::factory()->create();
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $type->getKey())
+            ->assertDontSee(CreateServiceRequest::inaccessibleTypeWarningMessage($type->name));
+    });
 });
 
 describe('archiving', function (): void {
