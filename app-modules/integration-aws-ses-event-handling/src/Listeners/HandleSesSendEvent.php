@@ -52,10 +52,11 @@ class HandleSesSendEvent extends HandleSesEvent
             return;
         }
 
+        // SES gives this event no timestamp of its own, and the queue can process events out of order.
         $emailMessage->events()->create([
             'type' => EmailMessageEventType::Send,
             'payload' => $event->data->toArray(),
-            'occurred_at' => now(),
+            'occurred_at' => $event->data->mail->timestamp,
         ]);
     }
 }
