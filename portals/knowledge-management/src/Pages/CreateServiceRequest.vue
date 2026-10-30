@@ -39,11 +39,13 @@
     import PageCard from '@common/portal/PageCard.vue';
     import { createMessage, getNode } from '@formkit/core';
     import { FormKitSchema } from '@formkit/vue';
+    import { UserIcon } from '@heroicons/vue/24/outline';
     import DOMPurify from 'dompurify';
     import { marked } from 'marked';
     import { storeToRefs } from 'pinia';
     import { computed, nextTick, provide, reactive, ref, watch } from 'vue';
     import { useRoute } from 'vue-router';
+    import { usePortalAuth } from '../Composables/usePortalAuth.js';
     import { createPasswordStorageCoordinator, passwordStorageKey } from '../FormKit/passwordStorage.js';
     import wizard from '../FormKit/wizard.js';
     import { apiPost } from '../Services/api.js';
@@ -65,13 +67,19 @@
         }
     }
 
-    let { steps, visitedSteps, activeStep, setStep, wizardPlugin } = wizard();
+    let { steps, visitedSteps, activeStep, currentStep, totalSteps, setStep, wizardPlugin } = wizard();
+
+    const percentComplete = computed(() =>
+        totalSteps.value > 0 ? Math.round((currentStep.value / totalSteps.value) * 100) : 0,
+    );
 
     const route = useRoute();
 
     // The authenticated contact is resolved during portal boot, so it is available
     // synchronously here.
     const { user } = storeToRefs(useAuthStore());
+
+    const { logout } = usePortalAuth();
 
     // The form schema for the selected type arrives via the route data loader.
     const { data: initialData } = useCreateServiceRequestData();
@@ -145,6 +153,9 @@
         steps,
         visitedSteps,
         activeStep,
+        currentStep,
+        totalSteps,
+        percentComplete,
         plugins: [wizardPlugin],
         preparePasswordSubmit: passwordStorage.prepareSubmit,
         setStep: (target) => async () => {
@@ -177,58 +188,6 @@
             }
 
             setStep(target);
-        },
-        setActiveStep: (stepName) => async () => {
-            if (!(await passwordStorage.flushAll())) {
-                return;
-            }
-
-            const stepNames = Object.keys(steps);
-            const targetIndex = stepNames.indexOf(stepName);
-
-            for (let i = 0; i < targetIndex; i++) {
-                const stepToValidate = stepNames[i];
-                const stepNode = getNode(stepToValidate);
-
-                if (stepNode) {
-                    stepNode.walk((node) => {
-                        node.store.set(
-                            createMessage({
-                                key: 'submitted',
-                                value: true,
-                                visible: false,
-                            }),
-                        );
-                    });
-                }
-            }
-
-            nextTick(() => {
-                for (let i = 0; i < targetIndex; i++) {
-                    const step = stepNames[i];
-
-                    if (steps[step].errorCount > 0 || steps[step].blockingCount > 0) {
-                        return;
-                    }
-                }
-
-                data.activeStep = stepName;
-            });
-        },
-        showStepErrors: (stepName) => {
-            return (
-                (steps[stepName].errorCount > 0 || steps[stepName].blockingCount > 0) &&
-                visitedSteps.value &&
-                visitedSteps.value.includes(stepName)
-            );
-        },
-        stepIsValid: (stepName) => {
-            const stepNames = Object.keys(steps);
-            const stepIndex = stepNames.indexOf(stepName);
-            const activeIndex = stepNames.indexOf(activeStep.value);
-            const isPastOrCurrentStep = stepIndex <= activeIndex;
-
-            return isPastOrCurrentStep && steps[stepName].valid && steps[stepName].errorCount === 0;
         },
         isLastStep: () => {
             const stepNames = Object.keys(steps);
@@ -425,7 +384,9 @@
         const groups = sections
             .filter((sectionNode) => sectionNode && sectionNode.$el === 'section')
             .map((section) =>
-                Array.isArray(section.children) ? section.children[0] : Object.values(section.children)[0],
+                (Array.isArray(section.children) ? section.children : Object.values(section.children)).find(
+                    (child) => child && child.$formkit === 'group',
+                ),
             )
             .filter(Boolean);
 
@@ -555,6 +516,49 @@
                     class="prose max-w-none"
                     v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
                 >
+                    <div
+                        v-if="user?.email"
+                        class="not-prose mb-6 flex items-center justify-between gap-4 rounded-lg border border-brand-100 bg-brand-50 px-4 py-3"
+                    >
+                        <div class="flex min-w-0 items-center gap-3">
+                            <span
+                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700"
+                            >
+                                <UserIcon class="h-5 w-5" />
+                            </span>
+                            <div class="min-w-0 text-sm leading-tight">
+                                <p class="text-xs text-gray-500">Signed in as</p>
+                                <p class="truncate font-semibold text-gray-800">{{ user.email }}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <span class="h-6 w-px bg-gray-300"></span>
+                            <button
+                                type="button"
+                                @click="logout"
+                                class="cursor-pointer text-sm font-bold text-brand-600 transition-colors hover:text-brand-800"
+                            >
+                                Sign out
+                            </button>
+                        </div>
+                    </div>
+
+                    <div v-if="totalSteps > 1" class="not-prose">
+                        <div class="mb-2 flex items-center justify-between">
+                            <span class="text-sm font-bold text-gray-900"
+                                >Step {{ currentStep }} of {{ totalSteps }}</span
+                            >
+                            <span class="text-sm text-gray-500">{{ percentComplete }}% complete</span>
+                        </div>
+                        <div class="h-2 w-full rounded-full bg-gray-200">
+                            <div
+                                class="h-2 rounded-full bg-brand-600 transition-all"
+                                :style="{ width: `${(currentStep / totalSteps) * 100}%` }"
+                            ></div>
+                        </div>
+                    </div>
+                    <hr v-if="totalSteps > 1" class="not-prose my-6 border-0 border-t border-gray-200" />
+
                     <FormKitSchema :schema="schema" :data="data" />
                 </div>
             </div>
