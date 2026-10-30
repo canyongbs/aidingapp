@@ -37,9 +37,11 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\MaintenanceProviderResource;
+use App\Features\MaintenanceProviderNameUniquenessFeature;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateMaintenanceProvider extends CreateRecord
 {
@@ -52,7 +54,12 @@ class CreateMaintenanceProvider extends CreateRecord
                 TextInput::make('name')
                     ->required()
                     ->string()
-                    ->maxLength(255),
+                    ->maxLength(255)
+                    // TODO: Cleanup Task (maintenance-provider-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        MaintenanceProviderNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
             ]);
     }
 }

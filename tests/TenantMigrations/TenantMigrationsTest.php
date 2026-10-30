@@ -41,6 +41,7 @@ use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
+use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
@@ -457,6 +458,95 @@ describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_an
 
             expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website')
                 ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (maintenance-provider-name-uniqueness): delete this describe and the tests within
+describe('2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_10_29_112040_convert_maintenance_providers_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/inventory-management/database/migrations/{$migrationName}.php";
+
+    $insertProvider = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('maintenance_providers')->insert([
+            'id' => $id,
+            'name' => $name,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertProvider): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertProvider): void {
+            $firstId = $insertProvider('Acme Repairs', now()->subMinutes(3));
+            $secondId = $insertProvider('acme repairs', now()->subMinutes(2));
+            $thirdId = $insertProvider('ACME REPAIRS', now()->subMinute());
+            $existingSuffixedId = $insertProvider('Acme Repairs-2', now()->subMinutes(4));
+            $uniqueId = $insertProvider('Globex Services', now()->subMinutes(5));
+
+            expect(MaintenanceProviderNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('maintenance_providers')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Acme Repairs')
+                ->and($name($secondId))->toBe('acme repairs-3')
+                ->and($name($thirdId))->toBe('ACME REPAIRS-4')
+                ->and($name($existingSuffixedId))->toBe('Acme Repairs-2')
+                ->and($name($uniqueId))->toBe('Globex Services')
+                ->and(MaintenanceProviderNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertProvider): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertProvider): void {
+            $keptId = $insertProvider('Acme Repairs', now()->subMinutes(2));
+            $trashedId = $insertProvider('acme repairs', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('maintenance_providers')->where('id', $keptId)->value('name'))->toBe('Acme Repairs')
+                ->and(DB::table('maintenance_providers')->where('id', $trashedId)->value('name'))->toBe('acme repairs');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed maintenance providers at the database level', function () use ($migrationName, $migrationPath, $insertProvider): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertProvider): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertProvider('Acme Repairs', now());
+
+            expect(fn (): string => $insertProvider('ACME REPAIRS', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertProvider): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertProvider): void {
+            $firstId = $insertProvider('Acme Repairs', now()->subMinutes(2));
+            $secondId = $insertProvider('acme repairs', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('maintenance_providers')->where('id', $secondId)->value('name'))->toBe('acme repairs-2');
+
+            DB::table('maintenance_providers')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('maintenance_providers')->where('id', $secondId)->value('name'))->toBe('acme repairs')
+                ->and(MaintenanceProviderNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });
