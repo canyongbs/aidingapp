@@ -394,3 +394,34 @@ it('only shows the bulk delete action to a user with the contact.delete permissi
     Livewire::test(ListContacts::class)
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
 });
+
+it('can sort contacts by name', function (): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+    );
+
+    $contacts = collect(['Charlie Brown', 'Alice Smith', 'Bob Jones'])
+        ->map(fn (string $name): Contact => Contact::factory()->create(['full_name' => $name]));
+
+    Livewire::test(ListContacts::class)
+        ->sortTable('full_name')
+        ->assertCanSeeTableRecords($contacts->sortBy('full_name')->values(), inOrder: true)
+        ->sortTable('full_name', 'desc')
+        ->assertCanSeeTableRecords($contacts->sortByDesc('full_name')->values(), inOrder: true);
+});
+
+it('hides the created at and updated at columns by default and allows sorting them', function (string $column): void {
+    actingAs(
+        User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view')
+    );
+
+    $contacts = Contact::factory()->count(3)->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertTableColumnExists($column, fn (TextColumn $column): bool => $column->isToggleable() && $column->isToggledHiddenByDefault() && $column->isSortable())
+        ->assertCanNotRenderTableColumn($column)
+        ->toggleAllTableColumns()
+        ->assertCanRenderTableColumn($column)
+        ->sortTable($column)
+        ->assertCanSeeTableRecords($contacts);
+})->with(['created_at', 'updated_at']);
