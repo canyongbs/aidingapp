@@ -45,6 +45,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 
 use function Pest\Laravel\actingAs;
+use function Pest\Laravel\freezeTime;
 use function Pest\Laravel\getJson;
 use function Pest\Laravel\travelTo;
 
@@ -98,6 +99,9 @@ it('displays the service monitor data', function (): void {
 });
 
 it('can show the history for a different period', function (): void {
+    // Frozen so the check cannot slip into the previous minute bucket if the clock ticks over mid-test.
+    freezeTime();
+
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     HistoricalServiceMonitoring::factory()->for($serviceMonitoringTarget)->failed()->create(['created_at' => now()]);
