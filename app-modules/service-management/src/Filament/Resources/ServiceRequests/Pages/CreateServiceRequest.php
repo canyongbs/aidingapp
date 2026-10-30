@@ -44,7 +44,6 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -52,7 +51,6 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\Authenticatable;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
@@ -61,6 +59,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -83,6 +82,10 @@ class CreateServiceRequest extends CreateRecord
     {
         return $schema
             ->components([
+                Callout::make(fn (Get $get): ?string => $this->getInaccessibleTypeWarning($get('type_id')))
+                    ->warning()
+                    ->visible(fn (Get $get): bool => $this->typeRequiresAffiliationWarning($get('type_id')))
+                    ->columnSpanFull(),
                 Section::make('New Service Request')
                     ->schema([
                         Grid::make(6)
@@ -106,17 +109,8 @@ class CreateServiceRequest extends CreateRecord
                                     ->label('Type')
                                     ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
                                         withoutArchived: true,
-                                        allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
-                                            $user = auth()->user();
-                                            assert($user instanceof User);
-
-                                            $query->tap(new ManagedServiceRequestTypes($user));
-                                        })
-                                            ->pluck('id')
-                                            ->all(),
                                     ))
                                     ->searchable()
-                                    ->rule(new ManagedServiceRequestType())
                                     ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire): void {
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
@@ -192,6 +186,51 @@ class CreateServiceRequest extends CreateRecord
                     ->key('dynamicTypeFields')
                     ->visible(fn (Get $get): bool => filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
             ]);
+    }
+
+    public static function inaccessibleTypeWarningMessage(string $typeName): string
+    {
+        return "This service request will be created in the catalog under {$typeName}. Since you're not a manager or auditor for this type, you won't be able to view the request's details after it's created.";
+    }
+
+    /**
+     * Determine whether the current user should be warned that they will not be able to
+     * view the service request after creating it under the selected type.
+     */
+    protected function typeRequiresAffiliationWarning(?string $typeId): bool
+    {
+        if (blank($typeId)) {
+            return false;
+        }
+
+        $user = auth()->user();
+
+        if (! $user instanceof User || $user->isSuperAdmin()) {
+            return false;
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if (is_null($type)) {
+            return false;
+        }
+
+        return ! $type->isManagedBy($user) && ! $type->isAuditedBy($user);
+    }
+
+    protected function getInaccessibleTypeWarning(?string $typeId): ?string
+    {
+        if (! $this->typeRequiresAffiliationWarning($typeId)) {
+            return null;
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if (is_null($type)) {
+            return null;
+        }
+
+        return self::inaccessibleTypeWarningMessage($type->name);
     }
 
     /**
