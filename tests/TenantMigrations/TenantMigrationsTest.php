@@ -39,6 +39,8 @@ use AidingApp\Authorization\Models\PermissionGroup;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
+use AidingApp\Notification\Models\EmailMessage;
+use AidingApp\Notification\Models\EmailMessageEvent;
 use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
@@ -857,6 +859,28 @@ describe('2026_11_04_100100_convert_pipeline_stages_name_to_citext_and_enforce_u
 
             expect(fn () => PipelineStage::factory()->for($pipeline)->create(['name' => 'REVIEW']))
                 ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+});
+
+describe('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
+    it('keeps fractional seconds on occurred_at', function (): void {
+        isolatedMigration('2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table', function (): void {
+            $message = EmailMessage::factory()->create();
+
+            // New code writes microseconds before the migration has run; Postgres rounds them away.
+            $eventBefore = $message->events()->save(EmailMessageEvent::factory()->make(['occurred_at' => '2026-01-01 10:00:00.123456']));
+
+            expect($eventBefore->refresh()->occurred_at->format('Y-m-d H:i:s.u'))->toBe('2026-01-01 10:00:00.000000');
+
+            $migrate = Artisan::call('migrate', [
+                '--path' => 'app-modules/notification/database/migrations/2026_10_30_002949_increase_occurred_at_precision_on_email_message_events_table.php',
+            ]);
+
+            $eventAfter = $message->events()->save(EmailMessageEvent::factory()->make(['occurred_at' => '2026-01-01 10:00:00.123456']));
+
+            expect($migrate)->toBe(Command::SUCCESS)
+                ->and($eventAfter->refresh()->occurred_at->format('Y-m-d H:i:s.u'))->toBe('2026-01-01 10:00:00.123456');
         });
     });
 });
