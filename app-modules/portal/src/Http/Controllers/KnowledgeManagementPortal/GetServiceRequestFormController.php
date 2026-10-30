@@ -37,7 +37,7 @@
 namespace AidingApp\Portal\Http\Controllers\KnowledgeManagementPortal;
 
 use AidingApp\Ai\Settings\AiClarificationSettings;
-use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Portal\Actions\GeneratePortalServiceRequestFormKitSchema;
 use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
@@ -56,7 +56,7 @@ class GetServiceRequestFormController extends Controller
         $form = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
         return response()->json([
-            'schema' => app(GenerateFormKitSchema::class)($form),
+            'schema' => app(GeneratePortalServiceRequestFormKitSchema::class)($form),
             'category' => $this->breadcrumbCategory($request, $type),
             'number_of_clarifying_questions' => AiClarificationSettings::NUMBER_OF_QUESTIONS,
         ]);
