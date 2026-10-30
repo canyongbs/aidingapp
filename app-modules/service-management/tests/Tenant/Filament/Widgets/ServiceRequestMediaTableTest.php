@@ -163,7 +163,7 @@ describe('ServiceRequest', function (): void {
             ->assertTableColumnStateSet('created_by_name', 'Carol Williams', record: $media);
     });
 
-    test('can search by file name (case-insensitive)', function (): void {
+    test('can search by file name (case-insensitive)', function (string $fileName, string $search): void {
         Storage::fake('s3');
 
         asSuperAdmin();
@@ -171,7 +171,7 @@ describe('ServiceRequest', function (): void {
         $serviceRequest = ServiceRequest::factory()->create();
         $serviceRequest
             ->addMedia(UploadedFile::fake()->image('Annual-Report.png'))
-            ->usingName('Annual-Report')
+            ->usingName($fileName)
             ->toMediaCollection('uploads');
         $serviceRequest
             ->addMedia(UploadedFile::fake()->image('invoice.png'))
@@ -179,22 +179,27 @@ describe('ServiceRequest', function (): void {
             ->toMediaCollection('uploads');
 
         $allMedia = $serviceRequest->getMedia('uploads');
-        $annualReport = $allMedia->first(fn ($mock): bool => $mock->name === 'Annual-Report');
-        $invoice = $allMedia->first(fn ($mock): bool => $mock->name === 'invoice');
+        $annualReport = $allMedia->first(fn ($media): bool => $media->name === $fileName);
+        $invoice = $allMedia->first(fn ($media): bool => $media->name === 'invoice');
 
         Livewire::test(ServiceRequestMediaTable::class, [
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
-            ->searchTable('annual-report')
+            ->searchTable($search)
             ->assertCanSeeTableRecords([$annualReport])
             ->assertCanNotSeeTableRecords([$invoice]);
-    });
+    })->with([
+        'ASCII' => ['Annual-Report', 'annual-report'],
+        'multibyte uppercase' => ["Rapport-\u{00E9}cole", "\u{00C9}COLE"],
+    ]);
 
-    test('can search by User uploader name (case-insensitive)', function (): void {
+    test('can search by User uploader name (case-insensitive)', function (string $uploaderName, string $search): void {
         Storage::fake('s3');
 
-        $userAlice = User::factory()->create(['first_name' => 'Alice', 'last_name' => 'Smith']);
+        [$firstName, $lastName] = explode(' ', $uploaderName, 2);
+
+        $userAlice = User::factory()->create(['first_name' => $firstName, 'last_name' => $lastName]);
         $userBob = User::factory()->create(['first_name' => 'Bob', 'last_name' => 'Jones']);
 
         $serviceRequest = ServiceRequest::factory()->create();
@@ -221,20 +226,23 @@ describe('ServiceRequest', function (): void {
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
-            ->searchTable('alice')
+            ->searchTable($search)
             ->assertCanSeeTableRecords([$aliceMedia])
             ->assertCanNotSeeTableRecords([$bobMedia]);
-    });
+    })->with([
+        'ASCII' => ['Alice Smith', 'alice'],
+        'multibyte uppercase' => ["Ren\u{00E9}e Smith", "REN\u{00C9}E"],
+    ]);
 
-    test('can search by Contact uploader first name (case-insensitive)', function (): void {
+    test('can search by Contact uploader first name (case-insensitive)', function (string $firstName, string $search): void {
         Storage::fake('s3');
 
         asSuperAdmin();
 
         $contactAlice = Contact::factory()->create([
-            'first_name' => 'Alice',
+            'first_name' => $firstName,
             'last_name' => 'Smith',
-            'full_name' => 'Alice Smith',
+            'full_name' => "{$firstName} Smith",
         ]);
         $contactBob = Contact::factory()->create([
             'first_name' => 'Bob',
@@ -262,10 +270,13 @@ describe('ServiceRequest', function (): void {
             'record' => $serviceRequest,
             'collectionName' => 'uploads',
         ])
-            ->searchTable('ALICE')
+            ->searchTable($search)
             ->assertCanSeeTableRecords([$aliceMedia])
             ->assertCanNotSeeTableRecords([$bobMedia]);
-    });
+    })->with([
+        'ASCII' => ['Alice', 'ALICE'],
+        'multibyte uppercase' => ["Ren\u{00E9}e", "REN\u{00C9}E"],
+    ]);
 
     test('can search by Contact uploader last name (case-insensitive)', function (): void {
         Storage::fake('s3');

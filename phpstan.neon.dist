@@ -71,7 +71,9 @@ parameters:
         -
             message: '#Call to an undefined method Pest\\PendingCalls\\TestCall::expect\(\)#'
             identifier: method.notFound
-            path: tests/Tenant/Unit/ArchTest.php
+            paths:
+                - tests/Tenant/Unit/ArchTest.php
+                - app-modules/audit/tests/Tenant/AuditTraitUsageTest.php
         -
             message: '#Anonymous function should return Illuminate\\Database\\Eloquent\\Builder<Illuminate\\Database\\Eloquent\\Model> but returns Illuminate\\Database\\Eloquent\\Builder<.+>#'
             identifier: return.type
