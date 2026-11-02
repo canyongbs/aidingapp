@@ -81,13 +81,16 @@ class CreateServiceRequest extends CreateRecord
 
     protected ?string $heading = '';
 
+    /** @var array<string, string> */
+    protected array $inaccessibleTypeWarnings = [];
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Callout::make(fn (Get $get): ?string => $this->getInaccessibleTypeWarning($get('type_id')))
                     ->warning()
-                    ->visible(fn (Get $get): bool => $this->typeRequiresAffiliationWarning($get('type_id')))
+                    ->visible(fn (Get $get): bool => filled($this->getInaccessibleTypeWarning($get('type_id'))))
                     ->columnSpanFull(),
                 Section::make('New Service Request')
                     ->schema([
@@ -190,40 +193,30 @@ class CreateServiceRequest extends CreateRecord
     }
 
     /**
-     * Determine whether the current user should be warned that they will not be able to
-     * view the service request after creating it under the selected type.
+     * The warning for the selected type, or null when the user can see requests of that type.
+     * Memoized per type so the callout's visibility and content checks share one set of lookups.
      */
-    protected function typeRequiresAffiliationWarning(?string $typeId): bool
+    protected function getInaccessibleTypeWarning(?string $typeId): ?string
     {
         if (blank($typeId)) {
-            return false;
+            return null;
         }
 
+        return $this->inaccessibleTypeWarnings[$typeId] ??= $this->resolveInaccessibleTypeWarning($typeId);
+    }
+
+    protected function resolveInaccessibleTypeWarning(string $typeId): string
+    {
         $user = auth()->user();
 
         if (! $user instanceof User || $user->isSuperAdmin()) {
-            return false;
+            return '';
         }
 
         $type = ServiceRequestType::find($typeId);
 
-        if (is_null($type)) {
-            return false;
-        }
-
-        return ! $type->isManagedBy($user) && ! $type->isAuditedBy($user);
-    }
-
-    protected function getInaccessibleTypeWarning(?string $typeId): ?string
-    {
-        if (! $this->typeRequiresAffiliationWarning($typeId)) {
-            return null;
-        }
-
-        $type = ServiceRequestType::find($typeId);
-
-        if (is_null($type)) {
-            return null;
+        if (is_null($type) || $type->isManagedBy($user) || $type->isAuditedBy($user)) {
+            return '';
         }
 
         return self::inaccessibleTypeWarningMessage($type->name);
