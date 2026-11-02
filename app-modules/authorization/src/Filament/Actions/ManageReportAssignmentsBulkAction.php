@@ -135,12 +135,14 @@ class ManageReportAssignmentsBulkAction
                     ->visible(fn (): bool => ReportGroupAccessFeature::active())
                     ->options(
                         fn (): array => $groupsQuery
+                            ->clone()
                             ->limit(50)
                             ->pluck('name', 'id')
                             ->all(),
                     )
                     ->getSearchResultsUsing(
                         fn (string $search): array => $groupsQuery
+                            ->clone()
                             ->where(new Expression('lower(name)'), 'like', '%' . Str::lower($search) . '%')
                             ->limit(50)
                             ->pluck('name', 'id')
@@ -148,6 +150,7 @@ class ManageReportAssignmentsBulkAction
                     )
                     ->getOptionLabelsUsing(
                         fn (array $values): array => $groupsQuery
+                            ->clone()
                             ->whereKey($values)
                             ->pluck('name', 'id')
                             ->all(),
