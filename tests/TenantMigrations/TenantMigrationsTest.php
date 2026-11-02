@@ -54,6 +54,7 @@ use App\Features\PipelineStageNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
@@ -738,6 +739,126 @@ describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and
 
             expect(DB::table('knowledge_base_categories')->where('id', $numberedId)->value('name'))->toBe('ISO-27001')
                 ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (service-request-type-category-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_service_request_type_categories_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_02_120000_convert_service_request_type_categories_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertCategory = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('service_request_type_categories')->insert([
+            'id' => $id,
+            'name' => $name,
+            'parent_id' => null,
+            'sort' => null,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Support', now()->subMinutes(3));
+            $secondId = $insertCategory('support', now()->subMinutes(2));
+            $thirdId = $insertCategory('SUPPORT', now()->subMinute());
+            $existingSuffixedId = $insertCategory('Support-2', now()->subMinutes(4));
+            $uniqueId = $insertCategory('Billing', now()->subMinutes(5));
+
+            expect(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('service_request_type_categories')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Support')
+                ->and($name($secondId))->toBe('support-3')
+                ->and($name($thirdId))->toBe('SUPPORT-4')
+                ->and($name($existingSuffixedId))->toBe('Support-2')
+                ->and($name($uniqueId))->toBe('Billing')
+                ->and(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $keptId = $insertCategory('Support', now()->subMinutes(2));
+            $trashedId = $insertCategory('support', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $keptId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $trashedId)->value('name'))->toBe('support');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed service request type categories at the database level', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Support', now());
+
+            expect(fn (): string => $insertCategory('SUPPORT', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed service request type category to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Support', now(), now());
+
+            $liveId = $insertCategory('Support', now());
+
+            expect(DB::table('service_request_type_categories')->where('id', $liveId)->value('name'))->toBe('Support');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Support', now()->subMinutes(2));
+            $secondId = $insertCategory('support', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2');
+
+            DB::table('service_request_type_categories')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support')
+                ->and(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-insensitive varchar column on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            $firstId = $insertCategory('Support', now());
+            $secondId = $insertCategory('support', now());
+
+            expect(DB::table('service_request_type_categories')->where('id', $firstId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support');
         });
     });
 });

@@ -43,6 +43,7 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceRequestTypes\ServiceRe
 use AidingApp\ServiceManagement\Models\ServiceRequestCategoryType;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
+use App\Features\ServiceRequestTypeCategoryNameUniquenessFeature;
 use App\Models\Tenant;
 use Closure;
 use Filament\Actions\Action;
@@ -263,9 +264,10 @@ class ListServiceRequestTypes extends ListRecords
     public function renameCategory(string $categoryId, string $name): array
     {
         return $this->mutateCatalog(function () use ($categoryId, $name): void {
-            $name = $this->validateCategoryName($name);
-
             $category = $this->findCategory($categoryId);
+
+            $name = $this->validateCategoryName($name, ignoreCategoryId: $category->getKey());
+
             $category->name = $name;
             $category->save();
         });
@@ -680,11 +682,22 @@ class ListServiceRequestTypes extends ListRecords
         return $type;
     }
 
-    protected function validateCategoryName(string $name): string
+    protected function validateCategoryName(string $name, ?string $ignoreCategoryId = null): string
     {
         $name = trim($name);
 
-        Validator::validate(['name' => $name], ['name' => ['required', 'string', 'max:255']]);
+        $rules = ['required', 'string', 'max:255'];
+
+        // TODO: Cleanup Task (service-request-type-category-name-uniqueness): drop the `if` wrapper and always append the unique rule once the flag is removed.
+        if (ServiceRequestTypeCategoryNameUniquenessFeature::active()) {
+            $rules[] = Rule::unique(ServiceRequestTypeCategory::class, 'name')->ignore($ignoreCategoryId)->withoutTrashed();
+        }
+
+        Validator::validate(
+            ['name' => $name],
+            ['name' => $rules],
+            ['name.unique' => 'The same name is already in use by another service request type category. Please select a different name.'],
+        );
 
         return $name;
     }
