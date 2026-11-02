@@ -205,6 +205,9 @@ class GeneratePortalServiceRequestFormKitSchema
     }
 
     /**
+     * The step title and description are bound through a `for` loop over a literal array, because
+     * FormKit evaluates any string child beginning with `$` as an expression rather than plain text.
+     *
      * @return array<string, mixed>
      */
     protected function stepHeader(SubmissibleStep $step): array
@@ -217,17 +220,19 @@ class GeneratePortalServiceRequestFormKitSchema
             'children' => [
                 [
                     '$el' => 'h2',
+                    'for' => ['stepTitle', [$step->label]],
                     'attrs' => [
                         'class' => 'wizard-title',
                     ],
-                    'children' => $step->label,
+                    'children' => '$stepTitle',
                 ],
                 ...((StepDescriptionFeature::active() && filled($step->description)) ? [[
                     '$el' => 'p',
+                    'for' => ['stepDescription', [$step->description]],
                     'attrs' => [
                         'class' => 'wizard-description',
                     ],
-                    'children' => $step->description,
+                    'children' => '$stepDescription',
                 ]] : []),
             ],
         ];

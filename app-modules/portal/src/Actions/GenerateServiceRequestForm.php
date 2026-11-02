@@ -46,6 +46,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\StepDescriptionFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -89,15 +90,19 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
+        $mainStepDescription = null;
+
         if ($shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
             $firstStep = $form->steps->shift();
 
             /** @var array<int, array<string, mixed>> $firstStepContentData */
             $firstStepContentData = data_get($firstStep, 'content.content', []);
             $content = $content->concat($firstStepContentData);
+
+            $mainStepDescription = StepDescriptionFeature::active() ? $firstStep->description : null;
         }
 
-        $form->steps->prepend($this->formatStep('Main', -1, $content));
+        $form->steps->prepend($this->formatStep('Main', -1, $content, $mainStepDescription));
 
         if (app(AiClarificationSettings::class)->is_enabled
             && $type->is_ai_clarification_enabled) {
@@ -112,10 +117,11 @@ class GenerateServiceRequestForm
     /**
      * @param Collection<int, array<string, mixed>> $content
      */
-    protected function formatStep(string $label, int $order, Collection $content): ServiceRequestFormStep
+    protected function formatStep(string $label, int $order, Collection $content, ?string $description = null): ServiceRequestFormStep
     {
         $step = new ServiceRequestFormStep([
             'label' => $label,
+            'description' => $description,
             'order' => $order,
             'content' => [
                 'content' => $content,

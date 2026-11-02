@@ -44,7 +44,7 @@
 }
 
 .wizard-description {
-    @apply mb-0 max-w-2xl text-sm text-gray-600 wrap-break-word;
+    @apply mb-0 max-w-2xl text-sm text-gray-600 wrap-break-word whitespace-pre-line;
 }
 
 .step-nav {

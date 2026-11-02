@@ -39,6 +39,7 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
+use App\Features\StepDescriptionFeature;
 
 /**
  * @return array<string, mixed>
@@ -180,4 +181,50 @@ it('combines only the first step of a multi-step custom form into Main, keeping 
         ->and($result->steps->first()->label)->toBe('Main')
         ->and($result->steps->first()->content['content'])->toHaveCount(5)
         ->and($result->steps->last()->label)->toBe('Step Two');
+});
+
+it('carries the combined first step description onto the Main step', function () use ($serviceRequestFormStepContent): void {
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_first_step_combined' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => $serviceRequestFormStepContent('Preferred name'),
+    ]);
+
+    $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
+
+    expect($result->steps->first()->label)->toBe('Main')
+        ->and($result->steps->first()->description)->toBe('Tell us about yourself.');
+});
+
+it('does not carry the combined first step description onto the Main step when the `StepDescriptionFeature` flag is inactive', function () use ($serviceRequestFormStepContent): void {
+    StepDescriptionFeature::deactivate();
+
+    $type = ServiceRequestType::factory()->create();
+
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_first_step_combined' => true]);
+
+    $form->steps()->create([
+        'label' => 'Step One',
+        'description' => 'Tell us about yourself.',
+        'sort' => 0,
+        'content' => $serviceRequestFormStepContent('Preferred name'),
+    ]);
+
+    $uploadsMediaCollection = app(ResolveUploadsMediaCollectionForServiceRequest::class)();
+
+    $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
+
+    expect($result->steps->first()->label)->toBe('Main')
+        ->and($result->steps->first()->description)->toBeNull();
 });

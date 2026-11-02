@@ -61,7 +61,14 @@ $findNodesByClass = function (array $schema, string $class) use (&$findNodesByCl
     return $nodes;
 };
 
-it('renders the step title and description above each step of a multi-step form', function () use ($findNodesByClass): void {
+/**
+ * @param array<int, array<string, mixed>> $nodes
+ *
+ * @return array<int, mixed>
+ */
+$boundText = fn (array $nodes): array => array_map(fn (array $node): mixed => $node['for'][1][0], $nodes);
+
+it('renders the step title and description above each step of a multi-step form', function () use ($findNodesByClass, $boundText): void {
     $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
 
     $form->steps()->createMany([
@@ -71,11 +78,11 @@ it('renders the step title and description above each step of a multi-step form'
 
     $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
 
-    expect(array_column($findNodesByClass([$schema], 'wizard-title'), 'children'))->toBe(['Personal Information', 'Review'])
-        ->and(array_column($findNodesByClass([$schema], 'wizard-description'), 'children'))->toBe(['Tell us about yourself.', 'Check your answers.']);
+    expect($boundText($findNodesByClass([$schema], 'wizard-title')))->toBe(['Personal Information', 'Review'])
+        ->and($boundText($findNodesByClass([$schema], 'wizard-description')))->toBe(['Tell us about yourself.', 'Check your answers.']);
 });
 
-it('omits the step description when the step does not have one', function () use ($findNodesByClass): void {
+it('omits the step description when the step does not have one', function () use ($findNodesByClass, $boundText): void {
     $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
 
     $form->steps()->createMany([
@@ -86,7 +93,26 @@ it('omits the step description when the step does not have one', function () use
     $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
 
     expect($findNodesByClass([$schema], 'wizard-header'))->toHaveCount(2)
-        ->and(array_column($findNodesByClass([$schema], 'wizard-description'), 'children'))->toBe(['Tell us about yourself.']);
+        ->and($boundText($findNodesByClass([$schema], 'wizard-description')))->toBe(['Tell us about yourself.']);
+});
+
+it('binds the step title and description as data so FormKit renders them as literal text', function () use ($findNodesByClass, $boundText): void {
+    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+
+    $form->steps()->createMany([
+        ['label' => 'Fees', 'description' => "\$100 maximum per item.\nUse \"quotes\" if needed.", 'sort' => 0],
+        ['label' => 'Review', 'sort' => 1],
+    ]);
+
+    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+
+    $titles = $findNodesByClass([$schema], 'wizard-title');
+    $descriptions = $findNodesByClass([$schema], 'wizard-description');
+
+    expect(array_column($titles, 'children'))->toBe(['$stepTitle', '$stepTitle'])
+        ->and($boundText($titles))->toBe(['Fees', 'Review'])
+        ->and(array_column($descriptions, 'children'))->toBe(['$stepDescription'])
+        ->and($boundText($descriptions))->toBe(["\$100 maximum per item.\nUse \"quotes\" if needed."]);
 });
 
 it('omits the step description when the `StepDescriptionFeature` flag is inactive', function () use ($findNodesByClass): void {
