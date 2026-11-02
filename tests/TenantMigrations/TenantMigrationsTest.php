@@ -467,6 +467,28 @@ describe('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_uniq
         });
     });
 
+    it('reconciles a live and soft-deleted name collision so rollback can restore the global unique constraint', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // Supported post-migration workflow: the partial unique index ignores soft-deleted rows,
+            // so a live row may reuse the exact name of a soft-deleted one.
+            $deleted = SystemUser::factory()->create(['name' => 'Integration Service']);
+            DB::table('system_users')->where('id', $deleted->getKey())->update(['deleted_at' => now()]);
+
+            $live = SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            // The live row keeps the exact name; the soft-deleted collision is suffixed so the
+            // restored global unique constraint can build.
+            expect(DB::table('system_users')->where('id', $live->getKey())->value('name'))->toBe('Integration Service')
+                ->and(DB::table('system_users')->where('id', $deleted->getKey())->value('name'))->toBe('Integration Service-2');
+        });
+    });
+
     it('does not rename a case-variant duplicate system user onto an existing truncated name', function () use ($migrationPath): void {
         isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
             // Regression: a 255-char duplicate renamed with a "-2" suffix is truncated to 253

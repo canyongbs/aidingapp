@@ -45,7 +45,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (system-user-name-uniqueness): after SystemUserNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` / `reconcileDuplicatesAcrossAllRows()` calls
      * - keep the citext column conversion and the partial unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -86,6 +86,11 @@ return new class () extends Migration {
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
 
             $this->revertDuplicates();
+
+            // The partial unique index permits a live row and a soft-deleted row to share an exact
+            // name. Reconcile those collisions before restoring the global unique index, otherwise
+            // rollback fails with a unique-constraint violation on that supported data.
+            $this->reconcileDuplicatesAcrossAllRows();
 
             Schema::table($this->table, function (Blueprint $table): void {
                 $table->unique($this->column, 'system_users_name_unique');
