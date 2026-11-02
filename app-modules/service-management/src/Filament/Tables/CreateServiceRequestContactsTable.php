@@ -43,6 +43,7 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Expression;
 
 class CreateServiceRequestContactsTable
 {
@@ -68,8 +69,8 @@ class CreateServiceRequestContactsTable
                     ->color(fn (Contact $record): string => $record->type->color->value)
                     ->description(fn (Contact $record): ?string => $record->organization?->name)
                     ->searchable(query: fn (Builder $query, string $search): Builder => $query
-                        ->whereHas('type', fn (Builder $query): Builder => $query->where('name', 'ilike', "%{$search}%"))
-                        ->orWhereHas('organization', fn (Builder $query): Builder => $query->where('name', 'ilike', "%{$search}%"))),
+                        ->whereHas('type', fn (Builder $query): Builder => $query->where(new Expression('lower(name)'), 'like', "%{$search}%"))
+                        ->orWhereHas('organization', fn (Builder $query): Builder => $query->where(new Expression('lower(name)'), 'like', "%{$search}%"))),
                 TextColumn::make('open_service_requests_count')
                     ->label('History')
                     ->badge()
