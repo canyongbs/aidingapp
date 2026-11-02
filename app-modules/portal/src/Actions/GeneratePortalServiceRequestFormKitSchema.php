@@ -37,6 +37,7 @@
 namespace AidingApp\Portal\Actions;
 
 use AidingApp\Form\Actions\GenerateFormKitSchema;
+use AidingApp\Form\Actions\ResolveBlockRegistry;
 use AidingApp\Form\Models\Submissible;
 use AidingApp\Form\Models\SubmissibleStep;
 use App\Features\StepDescriptionFeature;
@@ -45,14 +46,39 @@ use App\Features\StepDescriptionFeature;
  * @phpstan-import-type FormKitBlocks from GenerateFormKitSchema
  * @phpstan-import-type FormKitChildren from GenerateFormKitSchema
  */
-class GeneratePortalServiceRequestFormKitSchema extends GenerateFormKitSchema
+class GeneratePortalServiceRequestFormKitSchema
 {
+    /**
+     * @return array<string, mixed>
+     */
+    public function __invoke(Submissible $submissible): array
+    {
+        $submissible->loadMissing([
+            'steps' => [
+                'fields',
+            ],
+        ]);
+
+        return [
+            '$cmp' => 'FormKit',
+            'props' => [
+                'type' => 'form',
+                'id' => 'form',
+                'onSubmit' => '$submitForm',
+                'onSubmitRaw' => '$preparePasswordSubmit',
+                'plugins' => '$plugins',
+                'actions' => false,
+            ],
+            'children' => $this->wizardContent(app(ResolveBlockRegistry::class)($submissible, true), $submissible),
+        ];
+    }
+
     /**
      * @param FormKitBlocks $blocks
      *
      * @return FormKitChildren
      */
-    public function wizardContent(array $blocks, Submissible $submissible): array
+    protected function wizardContent(array $blocks, Submissible $submissible): array
     {
         $isMultiStep = $submissible->steps->count() > 1;
 
@@ -77,7 +103,7 @@ class GeneratePortalServiceRequestFormKitSchema extends GenerateFormKitSchema
                                 '$formkit' => 'group',
                                 'id' => $step->label,
                                 'name' => $step->label,
-                                'children' => $this->content(
+                                'children' => app(GenerateFormKitSchema::class)->content(
                                     $blocks,
                                     is_array($step->content) ? ($step->content['content'] ?? []) : [],
                                     $step->fields->keyBy('id'),
@@ -110,7 +136,7 @@ class GeneratePortalServiceRequestFormKitSchema extends GenerateFormKitSchema
                             [
                                 '$el' => 'div',
                                 'attrs' => [
-                                    'class' => 'step-progress',
+                                    'class' => 'step-progress not-prose',
                                     'aria-live' => 'polite',
                                     'style' => $isMultiStep ? null : 'display: none;',
                                 ],
@@ -186,7 +212,7 @@ class GeneratePortalServiceRequestFormKitSchema extends GenerateFormKitSchema
         return [
             '$el' => 'div',
             'attrs' => [
-                'class' => 'wizard-header',
+                'class' => 'wizard-header not-prose',
             ],
             'children' => [
                 [
