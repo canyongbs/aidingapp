@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Organization;
 use AidingApp\Department\Models\Department;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
@@ -44,6 +43,7 @@ use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\Pages\CreateServiceRequest;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
+use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\Secret;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
@@ -55,6 +55,7 @@ use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\CreateServiceReque
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Select;
 use Illuminate\Contracts\Encryption\DecryptException;
 use Illuminate\Support\Collection;
@@ -109,24 +110,24 @@ test('A successful action on the CreateServiceRequest page', function (): void {
         ->toEqual($request->get('category'));
 });
 
-it('omits the unaffiliated placeholder from the contact option label and includes the organization name when present', function (): void {
+it('uses a modal table select wired to the contacts table for choosing the customer contact', function (): void {
     asSuperAdmin();
 
-    $organization = Organization::factory()->create(['name' => 'Acme University']);
-    $contactWithOrganization = Contact::factory()->create(['organization_id' => $organization->getKey()]);
-    $contactWithoutOrganization = Contact::factory()->create(['organization_id' => null]);
+    $contact = Contact::factory()->create();
 
     $field = Livewire::test(CreateServiceRequest::class)
         ->assertSuccessful()
         ->instance()
         ->getSchema('form')
-        ->getComponent(fn ($component): bool => $component instanceof Select && $component->getName() === 'respondent_id');
+        ->getComponent(fn ($component): bool => $component instanceof ModalTableSelect && $component->getName() === 'respondent_id');
 
     expect($field)->not()->toBeNull()
-        ->and($field->getOptionLabelFromRecord($contactWithOrganization))
-        ->toContain('Acme University')
-        ->and($field->getOptionLabelFromRecord($contactWithoutOrganization))
-        ->not()->toContain('Unaffiliated');
+        ->and($field->getTableConfiguration())->toBe(CreateServiceRequestContactsTable::class)
+        ->and($field->isRequired())->toBeTrue();
+
+    $field->state($contact->getKey());
+
+    expect($field->getOptionLabel())->toBe($contact->full_name);
 });
 
 it('securely stores password fields on staff-created service requests', function (): void {
