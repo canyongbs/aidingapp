@@ -41,6 +41,7 @@ use AidingApp\Engagement\Models\EmailTemplate;
 use AidingApp\LicenseManagement\Models\Product;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use App\Features\EmailTemplateNameUniquenessFeature;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
@@ -458,6 +459,109 @@ describe('2026_10_26_122324_convert_service_monitoring_targets_name_to_citext_an
 
             expect(DB::table('service_monitoring_targets')->where('id', $secondId)->value('name'))->toBe('customer website')
                 ->and(ServiceMonitoringTargetNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (knowledge-base-category-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and_enforce_unique', function (): void {
+    $migrationName = '2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and_enforce_unique';
+    $migrationPath = "app-modules/knowledge-base/database/migrations/{$migrationName}.php";
+
+    $insertCategory = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null): string {
+        $id = (string) Str::uuid();
+
+        DB::table('knowledge_base_categories')->insert([
+            'id' => $id,
+            'name' => $name,
+            'slug' => Str::uuid()->toString(),
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Getting Started', now()->subMinutes(3));
+            $secondId = $insertCategory('getting started', now()->subMinutes(2));
+            $thirdId = $insertCategory('GETTING STARTED', now()->subMinute());
+            $existingSuffixedId = $insertCategory('Getting Started-2', now()->subMinutes(4));
+            $uniqueId = $insertCategory('Billing', now()->subMinutes(5));
+
+            expect(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table('knowledge_base_categories')->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Getting Started')
+                ->and($name($secondId))->toBe('getting started-3')
+                ->and($name($thirdId))->toBe('GETTING STARTED-4')
+                ->and($name($existingSuffixedId))->toBe('Getting Started-2')
+                ->and($name($uniqueId))->toBe('Billing')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $keptId = $insertCategory('Getting Started', now()->subMinutes(2));
+            $trashedId = $insertCategory('getting started', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $keptId)->value('name'))->toBe('Getting Started')
+                ->and(DB::table('knowledge_base_categories')->where('id', $trashedId)->value('name'))->toBe('getting started');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed knowledge base categories at the database level', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Getting Started', now());
+
+            expect(fn (): string => $insertCategory('GETTING STARTED', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed knowledge base category to reuse a soft-deleted name once the migration has run', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertCategory('Getting Started', now(), now());
+
+            $liveId = $insertCategory('Getting Started', now());
+
+            expect(DB::table('knowledge_base_categories')->where('id', $liveId)->value('name'))->toBe('Getting Started');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $firstId = $insertCategory('Getting Started', now()->subMinutes(2));
+            $secondId = $insertCategory('getting started', now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started-2');
+
+            DB::table('knowledge_base_categories')->where('id', $firstId)->update(['deleted_at' => now()]);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
         });
     });
 });

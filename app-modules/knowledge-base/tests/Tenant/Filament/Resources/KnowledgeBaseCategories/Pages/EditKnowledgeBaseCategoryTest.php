@@ -39,16 +39,19 @@ use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\Pages\Edi
 use AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers\SubCategoriesRelationManager;
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
 use AidingApp\KnowledgeBase\Tests\Tenant\Filament\Resources\KnowledgeBaseCategories\RequestFactories\EditKnowledgeBaseCategoryRequestFactory;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\CreateAction;
 use Filament\Actions\Testing\TestAction;
 use Filament\Forms\Components\Select;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
 use function PHPUnit\Framework\assertEquals;
+use function Tests\asSuperAdmin;
 
 // TODO: Write EditKnowledgeBaseCategory tests
 //test('A successful action on the EditKnowledgeBaseCategory page', function () {});
@@ -258,4 +261,52 @@ test('only shows the subcategories bulk delete action to a user with the setting
         'pageClass' => EditKnowledgeBaseCategory::class,
     ])
         ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+});
+
+it('does not allow updating a knowledge base category to a name matching another category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+    Livewire::test(EditKnowledgeBaseCategory::class, [
+        'record' => $knowledgeBaseCategory->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'getting started'])
+        ->call('save')
+        ->assertHasFormErrors(['name' => 'unique']);
+});
+
+it('allows updating a knowledge base category to a name freed up by a soft-deleted category case-insensitively', function (): void {
+    asSuperAdmin();
+
+    KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started'])->delete();
+    $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+    Livewire::test(EditKnowledgeBaseCategory::class, [
+        'record' => $knowledgeBaseCategory->getRouteKey(),
+    ])
+        ->fillForm(['name' => 'getting started'])
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($knowledgeBaseCategory->refresh()->name)->toBe('getting started');
+});
+
+describe('name uniqueness feature flag', function (): void {
+    it('does not apply the unique form rule when the feature is disabled', function (): void {
+        KnowledgeBaseCategoryNameUniquenessFeature::deactivate();
+
+        asSuperAdmin();
+
+        KnowledgeBaseCategory::factory()->create(['name' => 'Getting Started']);
+        $knowledgeBaseCategory = KnowledgeBaseCategory::factory()->create(['name' => 'Billing']);
+
+        expect(fn () => Livewire::test(EditKnowledgeBaseCategory::class, [
+            'record' => $knowledgeBaseCategory->getRouteKey(),
+        ])
+            ->fillForm(['name' => 'Getting Started'])
+            ->call('save'))
+            ->toThrow(UniqueConstraintViolationException::class);
+    });
 });

@@ -37,6 +37,7 @@
 namespace AidingApp\KnowledgeBase\Filament\Resources\KnowledgeBaseCategories\RelationManagers;
 
 use AidingApp\KnowledgeBase\Models\KnowledgeBaseCategory;
+use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Filament\Forms\Components\IconSelect;
 use Filament\Actions\ActionGroup;
 use Filament\Actions\AssociateAction;
@@ -58,6 +59,7 @@ use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Validation\Rules\Unique;
 
 class SubCategoriesRelationManager extends RelationManager
 {
@@ -94,7 +96,12 @@ class SubCategoriesRelationManager extends RelationManager
                 TextInput::make('name')
                     ->label('Name')
                     ->required()
-                    ->string(),
+                    ->string()
+                    // TODO: Cleanup Task (knowledge-base-category-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        KnowledgeBaseCategoryNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                    ),
                 IconSelect::make('icon'),
                 TextInput::make('slug')
                     ->regex('/^[a-zA-Z0-9]+(-[a-zA-Z0-9]+)*$/')
