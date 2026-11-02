@@ -67,12 +67,31 @@ trait FixesDuplicateNames
     {
         $lower = Str::lower($baseValue);
 
-        return [$lower, $lower . '-%'];
+        // Deduplicated values are truncated so they fit within the column length. When the base
+        // value is long enough that suffixing it would require truncation, the generated names
+        // share a truncated prefix rather than the full base value, so match on that prefix to
+        // detect pre-existing truncated duplicates.
+        $prefixLength = min(Str::length($lower), $this->maxValueLength() - 2);
+        $prefix = Str::substr($lower, 0, $prefixLength);
+
+        return [$lower, $prefix . '-%'];
     }
 
     protected function buildDeduplicatedValue(string $originalValue, int $counter): string
     {
-        return "{$originalValue}-{$counter}";
+        $suffix = "-{$counter}";
+
+        // Truncate the base value so the suffixed result never exceeds the column length. Without
+        // this, two maximum-length values differing only by case would produce an over-length
+        // replacement and abort the migration before the citext conversion.
+        $truncatedValue = Str::substr($originalValue, 0, max(0, $this->maxValueLength() - Str::length($suffix)));
+
+        return "{$truncatedValue}{$suffix}";
+    }
+
+    protected function maxValueLength(): int
+    {
+        return 255;
     }
 
     protected function deduplicatedValuePattern(): string

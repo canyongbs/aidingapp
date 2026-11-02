@@ -466,6 +466,33 @@ describe('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_uniq
                 ->toThrow(UniqueConstraintViolationException::class);
         });
     });
+
+    it('does not rename a case-variant duplicate system user onto an existing truncated name', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            // Regression: a 255-char duplicate renamed with a "-2" suffix is truncated to 253
+            // chars + "-2", which can land on an unrelated live row that already holds that exact
+            // truncated value. The de-duplicator must truncate to stay within varchar(255), detect
+            // the live collision, and pick the next free suffix instead of producing a name that
+            // breaks the new unique index.
+            $maxLengthUpper = str_repeat('A', 255);
+            $maxLengthLower = str_repeat('a', 255);
+            $truncatedCollision = str_repeat('a', 253) . '-2';
+
+            $first = SystemUser::factory()->create(['name' => $maxLengthUpper, 'created_at' => now()->subMinutes(2)]);
+            $second = SystemUser::factory()->create(['name' => $maxLengthLower, 'created_at' => now()->subMinute()]);
+            $third = SystemUser::factory()->create(['name' => $truncatedCollision, 'created_at' => now()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            // The oldest live record keeps its name.
+            expect($first->refresh()->name)->toBe($maxLengthUpper)
+                // "-2" would collide with the pre-existing truncated row, so the next suffix is used.
+                ->and($second->refresh()->name)->toBe(str_repeat('a', 253) . '-3')
+                // The pre-existing truncated row is in its own group and is left untouched.
+                ->and($third->refresh()->name)->toBe($truncatedCollision);
+        });
+    });
 });
 
 // TODO: Cleanup Task (service-monitoring-target-name-uniqueness): delete this describe and the tests within
