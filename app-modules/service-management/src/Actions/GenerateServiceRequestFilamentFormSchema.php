@@ -38,6 +38,7 @@ namespace AidingApp\ServiceManagement\Actions;
 
 use AidingApp\Form\Actions\ResolveBlockRegistry;
 use AidingApp\Form\Filament\Blocks\PasswordFormFieldBlock;
+use AidingApp\Form\Filament\Forms\StateCasts\OptionsStateCast;
 use AidingApp\Form\Models\SubmissibleField;
 use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Filament\Forms\Components\ServiceRequestPasswordInput;
@@ -205,13 +206,13 @@ class GenerateServiceRequestFilamentFormSchema
                 ->helperText($description),
             'select' => Select::make($field->getKey())
                 ->label($field->label)
-                ->options($field->config['options'] ?? [])
+                ->options(collect((new OptionsStateCast())->get($field->config['options'] ?? []))->pluck('label', 'value')->all())
                 ->placeholder($field->config['placeholder'] ?? null)
                 ->required($field->is_required)
                 ->helperText($description),
             'radio' => Radio::make($field->getKey())
                 ->label($field->label)
-                ->options($field->config['options'] ?? [])
+                ->options(collect((new OptionsStateCast())->get($field->config['options'] ?? []))->pluck('label', 'value')->all())
                 ->required($field->is_required)
                 ->helperText($description),
             'checkbox' => Checkbox::make($field->getKey())
