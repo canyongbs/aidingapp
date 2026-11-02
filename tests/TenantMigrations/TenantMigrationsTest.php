@@ -826,22 +826,26 @@ describe('2026_11_02_120000_convert_service_request_type_categories_name_to_cite
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertCategory): void {
+    it('leaves deduplicated and pre-existing suffixed names unchanged on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
             $firstId = $insertCategory('Support', now()->subMinutes(2));
             $secondId = $insertCategory('support', now()->subMinute());
+            // A pre-existing, user-authored name ending in `-2` with no matching `Level`. The migration must
+            // not touch it on the way up, and rollback must not strip its suffix either.
+            $preExistingSuffixedId = $insertCategory('Level-2', now()->subMinutes(3));
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
 
-            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2');
-
-            DB::table('service_request_type_categories')->where('id', $firstId)->update(['deleted_at' => now()]);
+            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2')
+                ->and(DB::table('service_request_type_categories')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Level-2');
 
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support')
+            expect(DB::table('service_request_type_categories')->where('id', $firstId)->value('name'))->toBe('Support')
+                ->and(DB::table('service_request_type_categories')->where('id', $secondId)->value('name'))->toBe('support-2')
+                ->and(DB::table('service_request_type_categories')->where('id', $preExistingSuffixedId)->value('name'))->toBe('Level-2')
                 ->and(ServiceRequestTypeCategoryNameUniquenessFeature::active())->toBeFalse();
         });
     });
