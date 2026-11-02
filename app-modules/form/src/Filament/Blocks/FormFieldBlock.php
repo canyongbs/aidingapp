@@ -65,29 +65,42 @@ abstract class FormFieldBlock extends RichContentCustomBlock
 
     public static function configureEditorAction(Action $action): Action
     {
-        return $action->schema([
-            Hidden::make('fieldId'),
-            TextInput::make('label')
-                ->required()
-                ->string()
-                ->maxLength(255),
-            Checkbox::make('isRequired')
-                ->label('Required'),
-            TextInput::make('description')
-                ->label('Field Description')
-                ->string()
-                ->maxLength(255),
-            ...static::fields(),
-        ]);
+        return $action
+            ->slideOver()
+            ->schema([
+                Hidden::make('fieldId'),
+                TextInput::make('label')
+                    ->required()
+                    ->string()
+                    ->maxLength(255),
+                Checkbox::make('isRequired')
+                    ->label('Required'),
+                TextInput::make('description')
+                    ->label('Field Description')
+                    ->string()
+                    ->maxLength(255),
+                ...static::fields(),
+            ]);
     }
 
+    /**
+     * The rich editor header always shows the block's type (e.g. "Text input"),
+     * never the user-configured field label, so it isn't duplicated with the
+     * label already rendered inside the block's own preview below it.
+     */
     public static function getPreviewLabel(array $config): string
     {
-        return $config['label'] ?? static::getLabel();
+        return static::getLabel();
     }
 
     public static function toPreviewHtml(array $config): ?string
     {
+        // Preview blades reference $label and $isRequired directly, so guarantee they
+        // exist even when the block is previewed before its config has been filled
+        // (e.g. dragging a new block in). getLabel() supplies the block default.
+        $config['label'] ??= static::getLabel();
+        $config['isRequired'] ??= false;
+
         return view(static::previewView(), $config)->render();
     }
 

@@ -33,12 +33,16 @@
 */
 import { createInput } from '@formkit/vue';
 import OneTimePassword from './OneTimePassword.vue';
+import RadioWithOther from './RadioWithOther.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
 export default {
     otp: createInput(OneTimePassword, {
         props: ['digits'],
+    }),
+    radioWithOther: createInput(RadioWithOther, {
+        props: ['options', 'fieldLabel', 'description'],
     }),
     signature: createInput(Signature, {
         props: [],
