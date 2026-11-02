@@ -474,6 +474,7 @@ describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and
         DB::table('knowledge_base_categories')->insert([
             'id' => $id,
             'name' => $name,
+            'public_id' => Str::random(8),
             'slug' => Str::uuid()->toString(),
             'created_at' => $createdAt,
             'updated_at' => $createdAt,
