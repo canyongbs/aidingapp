@@ -33,6 +33,7 @@
 */
 import { createInput } from '@formkit/vue';
 import Password from './Password.vue';
+import RadioWithOther from './RadioWithOther.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
@@ -40,6 +41,9 @@ export default {
     password: createInput(Password, {
         family: 'text',
         props: ['storeUrl'],
+    }),
+    radioWithOther: createInput(RadioWithOther, {
+        props: ['options', 'fieldLabel', 'description'],
     }),
     signature: createInput(Signature, {
         props: [],

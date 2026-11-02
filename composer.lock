@@ -3827,7 +3827,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-10-26T16:16:54+00:00"
+            "time": "2026-10-26T16:16:54+00:00",
+            "published-time": "2026-10-26T16:17:04+00:00"
         },
         {
             "name": "filament/forms",
@@ -4100,7 +4101,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-10-26T16:24:04+00:00"
+            "time": "2026-10-26T16:24:04+00:00",
+            "published-time": "2026-10-26T16:24:14+00:00"
         },
         {
             "name": "filament/spatie-laravel-settings-plugin",
@@ -4144,7 +4146,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-10-26T16:35:24+00:00"
+            "time": "2026-10-26T16:35:24+00:00",
+            "published-time": "2026-10-26T16:35:39+00:00"
         },
         {
             "name": "filament/support",
@@ -4204,7 +4207,8 @@
                 "issues": "https://github.com/filamentphp/filament/issues",
                 "source": "https://github.com/filamentphp/filament"
             },
-            "time": "2026-10-26T16:35:49+00:00"
+            "time": "2026-10-26T16:35:49+00:00",
+            "published-time": "2026-10-26T16:36:00+00:00"
         },
         {
             "name": "filament/tables",

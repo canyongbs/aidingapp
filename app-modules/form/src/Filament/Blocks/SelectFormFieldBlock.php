@@ -36,8 +36,9 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
+use AidingApp\Form\Filament\Forms\Components\OptionsKeyValue;
+use AidingApp\Form\Filament\Forms\StateCasts\OptionsStateCast;
 use AidingApp\Form\Models\SubmissibleField;
-use Filament\Forms\Components\KeyValue;
 use Filament\Forms\Components\TextInput;
 use Filament\Schemas\Components\Component;
 
@@ -56,9 +57,7 @@ class SelectFormFieldBlock extends FormFieldBlock
         return [
             TextInput::make('placeholder')
                 ->string(),
-            KeyValue::make('options')
-                ->keyLabel('Value')
-                ->valueLabel('Label')
+            OptionsKeyValue::make('options')
                 ->required(),
         ];
     }
@@ -74,7 +73,7 @@ class SelectFormFieldBlock extends FormFieldBlock
             'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
             'placeholder' => $field->config['placeholder'] ?? null,
-            'options' => $field->config['options'],
+            'options' => (new OptionsStateCast())->get($field->config['options']),
 
             ...self::getDescriptionSectionsSchema($field),
         ];
@@ -85,10 +84,24 @@ class SelectFormFieldBlock extends FormFieldBlock
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
+        $values = collect((new OptionsStateCast())->get($field->config['options']))->pluck('value');
+
         return [
             'string',
-            'in:' . collect((array) $field->config['options'])->keys()->join(','),
+            'in:' . $values->join(','),
         ];
+    }
+
+    /**
+     * The editor ignores key order when comparing a block's config, so reordering options alone would leave a stale edit button.
+     * A hidden marker of the order changes the preview, which forces the block to refresh.
+     */
+    public static function toPreviewHtml(array $config): ?string
+    {
+        $values = collect((new OptionsStateCast())->get($config['options'] ?? []))->pluck('value')->all();
+        $order = e(json_encode($values));
+
+        return parent::toPreviewHtml($config) . "<span hidden data-options-order=\"{$order}\"></span>";
     }
 
     protected static function renderedView(): string

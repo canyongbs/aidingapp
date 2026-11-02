@@ -38,3 +38,4 @@
 
 import './chartTickAffix';
 import './richContentCodeBlocks';
+import './richEditorCustomBlockBadges';

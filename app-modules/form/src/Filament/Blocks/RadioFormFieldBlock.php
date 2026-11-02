@@ -36,11 +36,10 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
+use AidingApp\Form\Filament\Forms\Components\OptionsKeyValue;
 use AidingApp\Form\Models\SubmissibleField;
 use Filament\Actions\Action;
-use Filament\Forms\Components\Repeater;
-use Filament\Forms\Components\Repeater\TableColumn;
-use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Checkbox;
 use Filament\Schemas\Components\Component;
 use Filament\Support\Enums\Width;
 
@@ -63,18 +62,9 @@ class RadioFormFieldBlock extends FormFieldBlock
     public static function fields(): array
     {
         return [
-            Repeater::make('options')
-                ->table([
-                    TableColumn::make('Value'),
-                    TableColumn::make('Label'),
-                ])
-                ->schema([
-                    TextInput::make('value')->required(),
-                    TextInput::make('label')->required(),
-                ])
-                ->columns(2)
-                ->reorderable()
-                ->addActionLabel('Add option'),
+            Checkbox::make('hasOtherOption')
+                ->label('Include Other'),
+            OptionsKeyValue::make('options'),
         ];
     }
 
@@ -83,6 +73,18 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
+        if ($field->config['hasOtherOption'] ?? false) {
+            return [
+                '$formkit' => 'radioWithOther',
+                'fieldLabel' => $field->label,
+                'validationLabel' => $field->label,
+                'name' => $field->id,
+                ...($field->is_required ? ['validation' => 'required'] : []),
+                'options' => $field->config['options'],
+                ...(! empty($field->config['description']) ? ['description' => $field->config['description']] : []),
+            ];
+        }
+
         return [
             '$formkit' => 'radio',
             'label' => $field->label,
@@ -98,6 +100,10 @@ class RadioFormFieldBlock extends FormFieldBlock
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
+        if ($field->config['hasOtherOption'] ?? false) {
+            return ['string'];
+        }
+
         /** @var array<array-key, mixed> $options */
         $options = $field->config['options'] ?? [];
 
