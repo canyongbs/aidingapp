@@ -45,6 +45,7 @@ use App\Features\MaintenanceProviderNameUniquenessFeature;
 use App\Features\ProductNameUniquenessFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Features\ServiceRequestFileUploadTypeFeature;
+use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
 use Carbon\CarbonInterface;
@@ -364,6 +365,105 @@ describe('2026_10_23_134410_convert_products_name_to_citext_and_enforce_unique',
 
             expect($second->refresh()->name)->toBe('aiding app')
                 ->and(ProductNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+});
+
+// TODO: Cleanup Task (system-user-name-uniqueness): delete this describe and the tests within
+describe('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function (): void {
+    $migrationPath = 'database/migrations/2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique.php';
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest and activates the feature flag', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $first = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(3)]);
+            $second = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinutes(2)]);
+            $third = SystemUser::factory()->create(['name' => 'INTEGRATION SERVICE', 'created_at' => now()->subMinute()]);
+            $unique = SystemUser::factory()->create(['name' => 'Reporting Service', 'created_at' => now()->subMinutes(4)]);
+
+            expect(SystemUserNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($first->refresh()->name)->toBe('Integration Service')
+                ->and($second->refresh()->name)->toBe('integration service-2')
+                ->and($third->refresh()->name)->toBe('INTEGRATION SERVICE-3')
+                ->and($unique->refresh()->name)->toBe('Reporting Service')
+                ->and(SystemUserNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $kept = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(2)]);
+            $trashed = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinute()]);
+            $trashed->delete();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($kept->refresh()->name)->toBe('Integration Service')
+                ->and($trashed->refresh()->name)->toBe('integration service');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed system users at the database level', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect(fn () => SystemUser::factory()->create(['name' => 'INTEGRATION SERVICE']))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a non-trashed system user to reuse a soft-deleted name once the migration has run', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service'])->delete();
+
+            $live = SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect($live->refresh()->name)->toBe('Integration Service');
+        });
+    });
+
+    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $first = SystemUser::factory()->create(['name' => 'Integration Service', 'created_at' => now()->subMinutes(2)]);
+            $second = SystemUser::factory()->create(['name' => 'integration service', 'created_at' => now()->subMinute()]);
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('integration service-2');
+
+            $first->delete();
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect($second->refresh()->name)->toBe('integration service')
+                ->and(SystemUserNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('restores the case-sensitive unique constraint on rollback', function () use ($migrationPath): void {
+        isolatedMigration('2026_11_02_120000_convert_system_users_name_to_citext_and_enforce_unique', function () use ($migrationPath): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            SystemUser::factory()->create(['name' => 'Integration Service']);
+
+            expect(fn () => SystemUser::factory()->create(['name' => 'Integration Service']))
+                ->toThrow(UniqueConstraintViolationException::class);
         });
     });
 });
