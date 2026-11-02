@@ -61,7 +61,6 @@ return new class () extends Migration {
     public function up(): void
     {
         DB::transaction(function (): void {
-
             DB::statement("LOCK TABLE {$this->table} IN ACCESS EXCLUSIVE MODE");
 
             $this->fixDuplicates();
@@ -85,7 +84,6 @@ return new class () extends Migration {
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
         });
     }
 };
