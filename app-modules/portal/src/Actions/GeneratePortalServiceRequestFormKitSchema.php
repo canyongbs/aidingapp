@@ -43,13 +43,18 @@ use AidingApp\Form\Models\SubmissibleStep;
 use App\Features\StepDescriptionFeature;
 
 /**
- * @phpstan-import-type FormKitBlocks from GenerateFormKitSchema
+ * @phpstan-import-type FormKitNode from GenerateFormKitSchema
  * @phpstan-import-type FormKitChildren from GenerateFormKitSchema
+ * @phpstan-import-type FormKitBlocks from GenerateFormKitSchema
  */
 class GeneratePortalServiceRequestFormKitSchema
 {
+    public function __construct(
+        protected GenerateFormKitSchema $generateFormKitSchema,
+    ) {}
+
     /**
-     * @return array<string, mixed>
+     * @return FormKitNode
      */
     public function __invoke(Submissible $submissible): array
     {
@@ -74,6 +79,9 @@ class GeneratePortalServiceRequestFormKitSchema
     }
 
     /**
+     * Renders each step with a title and description header, followed by Back / Next
+     * navigation around a "Step X of Y" progress label, in place of the shared step tabs.
+     *
      * @param FormKitBlocks $blocks
      *
      * @return FormKitChildren
@@ -103,7 +111,7 @@ class GeneratePortalServiceRequestFormKitSchema
                                 '$formkit' => 'group',
                                 'id' => $step->label,
                                 'name' => $step->label,
-                                'children' => app(GenerateFormKitSchema::class)->content(
+                                'children' => $this->generateFormKitSchema->content(
                                     $blocks,
                                     is_array($step->content) ? ($step->content['content'] ?? []) : [],
                                     $step->fields->keyBy('id'),
@@ -112,10 +120,9 @@ class GeneratePortalServiceRequestFormKitSchema
                         ],
                     ]),
                     [
-                        '$el' => 'nav',
+                        '$el' => 'div',
                         'attrs' => [
                             'class' => 'step-nav',
-                            'aria-label' => 'Form steps',
                         ],
                         'children' => [
                             [
@@ -205,13 +212,13 @@ class GeneratePortalServiceRequestFormKitSchema
     }
 
     /**
-     * The step title and description are bound through a `for` loop over a literal array, because
-     * FormKit evaluates any string child beginning with `$` as an expression rather than plain text.
-     *
-     * @return array<string, mixed>
+     * @return FormKitNode
      */
     protected function stepHeader(SubmissibleStep $step): array
     {
+        $title = $step->getAttribute('display_label');
+        $description = StepDescriptionFeature::active() ? $step->description : null;
+
         return [
             '$el' => 'div',
             'attrs' => [
@@ -220,19 +227,17 @@ class GeneratePortalServiceRequestFormKitSchema
             'children' => [
                 [
                     '$el' => 'h2',
-                    'for' => ['stepTitle', [$step->label]],
                     'attrs' => [
                         'class' => 'wizard-title',
                     ],
-                    'children' => '$stepTitle',
+                    'children' => is_string($title) && filled($title) ? $title : $step->label,
                 ],
-                ...((StepDescriptionFeature::active() && filled($step->description)) ? [[
+                ...(filled($description) ? [[
                     '$el' => 'p',
-                    'for' => ['stepDescription', [$step->description]],
                     'attrs' => [
                         'class' => 'wizard-description',
                     ],
-                    'children' => '$stepDescription',
+                    'children' => $description,
                 ]] : []),
             ],
         ];

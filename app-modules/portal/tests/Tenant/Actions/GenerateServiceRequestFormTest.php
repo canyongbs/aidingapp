@@ -39,7 +39,6 @@ use AidingApp\Portal\Actions\GenerateServiceRequestForm;
 use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\StepDescriptionFeature;
 
 /**
  * @return array<string, mixed>
@@ -183,7 +182,7 @@ it('combines only the first step of a multi-step custom form into Main, keeping 
         ->and($result->steps->last()->label)->toBe('Step Two');
 });
 
-it('carries the combined first step description onto the Main step', function () use ($serviceRequestFormStepContent): void {
+it('lends the combined step title and description to the Main step while keeping its `Main` label', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
@@ -191,7 +190,7 @@ it('carries the combined first step description onto the Main step', function ()
         ->create(['is_first_step_combined' => true]);
 
     $form->steps()->create([
-        'label' => 'Step One',
+        'label' => 'Personal details',
         'description' => 'Tell us about yourself.',
         'sort' => 0,
         'content' => $serviceRequestFormStepContent('Preferred name'),
@@ -202,20 +201,19 @@ it('carries the combined first step description onto the Main step', function ()
     $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
     expect($result->steps->first()->label)->toBe('Main')
-        ->and($result->steps->first()->description)->toBe('Tell us about yourself.');
+        ->and($result->steps->first()->description)->toBe('Tell us about yourself.')
+        ->and($result->steps->first()->getAttribute('display_label'))->toBe('Personal details');
 });
 
-it('does not carry the combined first step description onto the Main step when the `StepDescriptionFeature` flag is inactive', function () use ($serviceRequestFormStepContent): void {
-    StepDescriptionFeature::deactivate();
-
+it('does not give the Main step a title or description when no step is combined into it', function () use ($serviceRequestFormStepContent): void {
     $type = ServiceRequestType::factory()->create();
 
     $form = ServiceRequestForm::factory()
         ->for($type, 'type')
-        ->create(['is_first_step_combined' => true]);
+        ->create(['is_first_step_combined' => false]);
 
     $form->steps()->create([
-        'label' => 'Step One',
+        'label' => 'Personal details',
         'description' => 'Tell us about yourself.',
         'sort' => 0,
         'content' => $serviceRequestFormStepContent('Preferred name'),
@@ -226,5 +224,7 @@ it('does not carry the combined first step description onto the Main step when t
     $result = app(GenerateServiceRequestForm::class)->execute($type, $uploadsMediaCollection, shouldCombineFirstStepIfEnabled: true);
 
     expect($result->steps->first()->label)->toBe('Main')
-        ->and($result->steps->first()->description)->toBeNull();
+        ->and($result->steps->first()->description)->toBeNull()
+        ->and($result->steps->first()->getAttribute('display_label'))->toBeNull()
+        ->and($result->steps->last()->description)->toBe('Tell us about yourself.');
 });

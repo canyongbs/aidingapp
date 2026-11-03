@@ -513,30 +513,30 @@
                 </div>
 
                 <div
-                    class="prose max-w-none"
+                    class="service-request-form prose max-w-none min-w-0"
                     v-show="!isGeneratingQuestions && !isEvaluatingAiResolution && !showAiResolutionStep"
                 >
                     <div
                         v-if="user?.email"
-                        class="not-prose mb-6 flex items-center justify-between gap-4 rounded-lg border border-brand-100 bg-brand-50 px-4 py-3"
+                        class="not-prose mb-6 flex items-center justify-between gap-4 rounded-lg border border-brand-200 bg-brand-50 px-4 py-3"
                     >
                         <div class="flex min-w-0 items-center gap-3">
                             <span
-                                class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700"
+                                class="flex size-9 shrink-0 items-center justify-center rounded-full bg-gray-200 text-gray-700"
                             >
-                                <UserIcon class="h-5 w-5" />
+                                <UserIcon class="size-5" />
                             </span>
                             <div class="min-w-0 text-sm leading-tight">
                                 <p class="text-xs text-gray-500">Signed in as</p>
-                                <p class="truncate font-semibold text-gray-800">{{ user.email }}</p>
+                                <p class="truncate font-semibold text-gray-900">{{ user.email }}</p>
                             </div>
                         </div>
-                        <div class="flex items-center gap-4">
+                        <div class="flex shrink-0 items-center gap-4">
                             <span class="h-6 w-px bg-gray-300"></span>
                             <button
                                 type="button"
+                                class="cursor-pointer text-sm font-semibold text-brand-600 transition-colors hover:text-brand-700"
                                 @click="logout"
-                                class="cursor-pointer text-sm font-bold text-brand-600 transition-colors hover:text-brand-800"
                             >
                                 Sign out
                             </button>
@@ -545,9 +545,9 @@
 
                     <div v-if="totalSteps > 1" class="not-prose mb-6 border-b border-gray-200 pb-6">
                         <div class="mb-2 flex items-center justify-between">
-                            <span class="text-sm font-bold text-gray-900"
-                                >Step {{ currentStep }} of {{ totalSteps }}</span
-                            >
+                            <span class="text-sm font-bold text-gray-900">
+                                Step {{ currentStep }} of {{ totalSteps }}
+                            </span>
                             <span class="text-sm text-gray-500">{{ percentComplete }}% complete</span>
                         </div>
                         <div class="h-2 w-full rounded-full bg-gray-200">

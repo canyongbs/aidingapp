@@ -37,7 +37,6 @@
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Portal\Settings\PortalSettings;
-use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Models\ServiceRequestTypeCategory;
@@ -80,68 +79,6 @@ it('includes the priority field when the type has no configured default priority
     $response->assertOk();
 
     expect(json_encode($response->json('schema')))->toContain('priority');
-});
-
-it('includes the step title and description in the schema of a multi-step form', function (): void {
-    $type = ServiceRequestType::factory()->create();
-
-    $form = ServiceRequestForm::factory()
-        ->for($type, 'type')
-        ->create(['is_wizard' => true]);
-
-    $form->steps()->create([
-        'label' => 'Details',
-        'description' => 'Tell us about your request.',
-        'sort' => 0,
-        'content' => ['type' => 'doc', 'content' => []],
-    ]);
-
-    $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
-
-    $response->assertOk();
-
-    expect(json_encode($response->json('schema')))
-        ->toContain('wizard-header')
-        ->toContain('Tell us about your request.')
-        ->toContain('$percentComplete');
-});
-
-it('keeps the first step description on the Main step when the first step is combined', function (): void {
-    $type = ServiceRequestType::factory()->create();
-
-    $form = ServiceRequestForm::factory()
-        ->for($type, 'type')
-        ->create(['is_wizard' => true, 'is_first_step_combined' => true]);
-
-    $form->steps()->createMany([
-        [
-            'label' => 'Step One',
-            'description' => 'Tell us about yourself.',
-            'sort' => 0,
-            'content' => ['type' => 'doc', 'content' => []],
-        ],
-        [
-            'label' => 'Step Two',
-            'description' => 'Check your answers.',
-            'sort' => 1,
-            'content' => ['type' => 'doc', 'content' => []],
-        ],
-    ]);
-
-    $response = getJson(route('api.portal.service-request.create', ['type' => $type]));
-
-    $response->assertOk();
-
-    $schema = json_encode($response->json('schema'));
-
-    expect($schema)->not->toContain('Step One');
-
-    expect($schema)
-        ->toContain('"name":"Main"')
-        ->toContain('["stepTitle",["Main"]]')
-        ->toContain('["stepDescription",["Tell us about yourself."]]')
-        ->toContain('["stepTitle",["Step Two"]]')
-        ->toContain('["stepDescription",["Check your answers."]]');
 });
 
 it('blocks guests from loading the form of a visibility restricted type', function (): void {

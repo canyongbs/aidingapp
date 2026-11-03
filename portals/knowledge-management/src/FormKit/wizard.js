@@ -38,9 +38,8 @@ export default function wizard() {
     const activeStep = ref('');
     const steps = reactive({});
     const visitedSteps = ref([]);
-    const stepNames = computed(() => Object.keys(steps));
-    const currentStep = computed(() => stepNames.value.indexOf(activeStep.value) + 1);
-    const totalSteps = computed(() => stepNames.value.length);
+    const currentStep = computed(() => Object.keys(steps).indexOf(activeStep.value) + 1);
+    const totalSteps = computed(() => Object.keys(steps).length);
 
     watch(activeStep, (newStep, oldStep) => {
         if (oldStep && !visitedSteps.value.includes(oldStep)) {

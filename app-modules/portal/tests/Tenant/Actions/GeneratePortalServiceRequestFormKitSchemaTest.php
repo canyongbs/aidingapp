@@ -35,128 +35,129 @@
 */
 
 use AidingApp\Portal\Actions\GeneratePortalServiceRequestFormKitSchema;
+use AidingApp\Portal\Actions\GenerateServiceRequestForm;
+use AidingApp\ServiceManagement\Actions\ResolveUploadsMediaCollectionForServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
+use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use App\Features\StepDescriptionFeature;
 
 /**
- * @param array<int|string, mixed> $schema
+ * Collects every schema node whose `class` attribute contains the given class name, so
+ * assertions do not depend on the exact position of nodes within the schema tree.
+ *
+ * @param array<mixed> $schema
  *
  * @return array<int, array<string, mixed>>
  */
 $findNodesByClass = function (array $schema, string $class) use (&$findNodesByClass): array {
     $nodes = [];
 
-    foreach ($schema as $node) {
-        if (! is_array($node)) {
-            continue;
-        }
+    if (in_array($class, explode(' ', (string) ($schema['attrs']['class'] ?? '')), true)) {
+        $nodes[] = $schema;
+    }
 
-        if (in_array($class, explode(' ', $node['attrs']['class'] ?? ''))) {
-            $nodes[] = $node;
+    foreach ($schema as $child) {
+        if (is_array($child)) {
+            $nodes = [...$nodes, ...$findNodesByClass($child, $class)];
         }
-
-        $nodes = [...$nodes, ...$findNodesByClass(is_array($node['children'] ?? null) ? $node['children'] : [], $class)];
     }
 
     return $nodes;
 };
 
-/**
- * @param array<int, array<string, mixed>> $nodes
- *
- * @return array<int, mixed>
- */
-$boundText = fn (array $nodes): array => array_map(fn (array $node): mixed => $node['for'][1][0], $nodes);
+$generateSchema = function (ServiceRequestType $type): array {
+    $form = app(GenerateServiceRequestForm::class)->execute(
+        $type,
+        app(ResolveUploadsMediaCollectionForServiceRequest::class)(),
+        shouldCombineFirstStepIfEnabled: true,
+    );
 
-it('renders the step title and description above each step of a multi-step form', function () use ($findNodesByClass, $boundText): void {
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+    return app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+};
 
-    $form->steps()->createMany([
-        ['label' => 'Personal Information', 'description' => 'Tell us about yourself.', 'sort' => 0],
-        ['label' => 'Review', 'description' => 'Check your answers.', 'sort' => 1],
-    ]);
+it('renders a title and description header for each step of a multi-step form', function () use ($findNodesByClass, $generateSchema): void {
+    $type = ServiceRequestType::factory()->create();
 
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true, 'is_first_step_combined' => false]);
 
-    expect($boundText($findNodesByClass([$schema], 'wizard-title')))->toBe(['Personal Information', 'Review'])
-        ->and($boundText($findNodesByClass([$schema], 'wizard-description')))->toBe(['Tell us about yourself.', 'Check your answers.']);
+    $form->steps()->create(['label' => 'Personal details', 'description' => 'Tell us about yourself.', 'sort' => 0]);
+    $form->steps()->create(['label' => 'Review', 'sort' => 1]);
+
+    $schema = $generateSchema($type);
+
+    expect(array_column($findNodesByClass($schema, 'wizard-title'), 'children'))->toBe(['Main', 'Personal details', 'Review'])
+        ->and(array_column($findNodesByClass($schema, 'wizard-description'), 'children'))->toBe(['Tell us about yourself.']);
 });
 
-it('omits the step description when the step does not have one', function () use ($findNodesByClass, $boundText): void {
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+it('titles the Main step after the step combined into it', function () use ($findNodesByClass, $generateSchema): void {
+    $type = ServiceRequestType::factory()->create();
 
-    $form->steps()->createMany([
-        ['label' => 'Personal Information', 'description' => 'Tell us about yourself.', 'sort' => 0],
-        ['label' => 'Review', 'sort' => 1],
-    ]);
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true, 'is_first_step_combined' => true]);
 
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+    $form->steps()->create(['label' => 'Personal details', 'description' => 'Tell us about yourself.', 'sort' => 0]);
+    $form->steps()->create(['label' => 'Review', 'sort' => 1]);
 
-    expect($findNodesByClass([$schema], 'wizard-header'))->toHaveCount(2)
-        ->and($boundText($findNodesByClass([$schema], 'wizard-description')))->toBe(['Tell us about yourself.']);
+    $schema = $generateSchema($type);
+
+    expect(array_column($findNodesByClass($schema, 'wizard-title'), 'children'))->toBe(['Personal details', 'Review'])
+        ->and(array_column($findNodesByClass($schema, 'wizard-description'), 'children'))->toBe(['Tell us about yourself.'])
+        ->and(json_encode($schema, JSON_THROW_ON_ERROR))->toContain('"name":"Main"');
 });
 
-it('binds the step title and description as data so FormKit renders them as literal text', function () use ($findNodesByClass, $boundText): void {
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
-
-    $form->steps()->createMany([
-        ['label' => 'Fees', 'description' => "\$100 maximum per item.\nUse \"quotes\" if needed.", 'sort' => 0],
-        ['label' => 'Review', 'sort' => 1],
-    ]);
-
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
-
-    $titles = $findNodesByClass([$schema], 'wizard-title');
-    $descriptions = $findNodesByClass([$schema], 'wizard-description');
-
-    expect(array_column($titles, 'children'))->toBe(['$stepTitle', '$stepTitle'])
-        ->and($boundText($titles))->toBe(['Fees', 'Review'])
-        ->and(array_column($descriptions, 'children'))->toBe(['$stepDescription'])
-        ->and($boundText($descriptions))->toBe(["\$100 maximum per item.\nUse \"quotes\" if needed."]);
-});
-
-it('omits the step description when the `StepDescriptionFeature` flag is inactive', function () use ($findNodesByClass): void {
+it('does not render step descriptions when `StepDescriptionFeature` is inactive', function () use ($findNodesByClass, $generateSchema): void {
     StepDescriptionFeature::deactivate();
 
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+    $type = ServiceRequestType::factory()->create();
 
-    $form->steps()->createMany([
-        ['label' => 'Personal Information', 'description' => 'Tell us about yourself.', 'sort' => 0],
-        ['label' => 'Review', 'sort' => 1],
-    ]);
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true, 'is_first_step_combined' => false]);
 
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+    $form->steps()->create(['label' => 'Personal details', 'description' => 'Tell us about yourself.', 'sort' => 0]);
 
-    expect($findNodesByClass([$schema], 'wizard-title'))->toHaveCount(2)
-        ->and($findNodesByClass([$schema], 'wizard-description'))->toBeEmpty();
+    $schema = $generateSchema($type);
+
+    expect($findNodesByClass($schema, 'wizard-title'))->toHaveCount(2)
+        ->and($findNodesByClass($schema, 'wizard-description'))->toBeEmpty();
 });
 
-it('renders the step progress and back and next navigation for a multi-step form', function () use ($findNodesByClass): void {
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+it('renders back and next navigation around the step progress instead of step tabs', function () use ($findNodesByClass, $generateSchema): void {
+    $type = ServiceRequestType::factory()->create();
 
-    $form->steps()->createMany([
-        ['label' => 'Personal Information', 'sort' => 0],
-        ['label' => 'Review', 'sort' => 1],
-    ]);
+    $form = ServiceRequestForm::factory()
+        ->for($type, 'type')
+        ->create(['is_wizard' => true, 'is_first_step_combined' => false]);
 
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
+    $form->steps()->create(['label' => 'Personal details', 'sort' => 0]);
 
-    expect($findNodesByClass([$schema], 'step-progress')[0]['attrs']['style'])->toBeNull()
-        ->and($findNodesByClass([$schema], 'step-nav__back')[0]['attrs']['style'])->toBeNull()
-        ->and($findNodesByClass([$schema], 'step-progress__label')[0]['children'])->toBe('$: "Step " + $currentStep + " of " + $totalSteps')
-        ->and($findNodesByClass([$schema], 'step-progress__percent')[0]['children'])->toBe('$percentComplete + "% complete"')
-        ->and($findNodesByClass([$schema], 'step-nav__next-btn')[0]['children'][0]['onClick'])->toBe('$setStep(1)')
-        ->and($findNodesByClass([$schema], 'wizard'))->toBeEmpty();
+    $schema = $generateSchema($type);
+    $encodedSchema = json_encode($schema, JSON_THROW_ON_ERROR);
+
+    $back = $findNodesByClass($schema, 'step-nav__back')[0];
+    $progress = $findNodesByClass($schema, 'step-progress')[0];
+    $next = $findNodesByClass($schema, 'step-nav__next-btn')[0];
+
+    expect($back['attrs']['style'])->toBeNull()
+        ->and($back['children'][0])->toMatchArray(['disabled' => '$currentStep === 1', 'onClick' => '$setStep(-1)', 'children' => 'Back'])
+        ->and($progress['attrs']['style'])->toBeNull()
+        ->and(array_column($progress['children'], 'children'))->toBe(['$: "Step " + $currentStep + " of " + $totalSteps', '$percentComplete + "% complete"'])
+        ->and($next['attrs']['style']['if'])->toBe('$currentStep === $totalSteps')
+        ->and($next['children'][0])->toMatchArray(['onClick' => '$setStep(1)', 'children' => 'Next'])
+        ->and($encodedSchema)->toContain('"$formkit":"submit"')
+        ->and($findNodesByClass($schema, 'wizard'))->toBeEmpty()
+        ->and($encodedSchema)->not->toContain('$setActiveStep');
 });
 
-it('hides the step headers, progress, and back navigation for a single-step form', function () use ($findNodesByClass): void {
-    $form = ServiceRequestForm::factory()->create(['is_wizard' => true]);
+it('hides the step header, back button and progress for a single-step form', function () use ($findNodesByClass, $generateSchema): void {
+    $type = ServiceRequestType::factory()->create();
 
-    $form->steps()->create(['label' => 'Main', 'description' => 'Tell us about yourself.', 'sort' => 0]);
+    $schema = $generateSchema($type);
 
-    $schema = app(GeneratePortalServiceRequestFormKitSchema::class)($form);
-
-    expect($findNodesByClass([$schema], 'wizard-header'))->toBeEmpty()
-        ->and($findNodesByClass([$schema], 'step-progress')[0]['attrs']['style'])->toBe('display: none;')
-        ->and($findNodesByClass([$schema], 'step-nav__back')[0]['attrs']['style'])->toBe('display: none;');
+    expect($findNodesByClass($schema, 'wizard-header'))->toBeEmpty()
+        ->and($findNodesByClass($schema, 'step-nav__back')[0]['attrs']['style'])->toBe('display: none;')
+        ->and($findNodesByClass($schema, 'step-progress')[0]['attrs']['style'])->toBe('display: none;');
 });

@@ -41,12 +41,12 @@ use AidingApp\Form\Filament\Blocks\SelectFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextAreaFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\TextInputFormFieldBlock;
 use AidingApp\Form\Filament\Blocks\UploadFormFieldBlock;
+use AidingApp\Form\Models\SubmissibleStep;
 use AidingApp\ServiceManagement\Models\MediaCollections\UploadsMediaCollection;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use App\Features\StepDescriptionFeature;
 use Illuminate\Support\Collection;
 
 class GenerateServiceRequestForm
@@ -90,19 +90,17 @@ class GenerateServiceRequestForm
             ]),
         ]);
 
-        $mainStepDescription = null;
+        $combinedStep = null;
 
         if ($shouldCombineFirstStepIfEnabled && $form->is_first_step_combined && $form->steps->isNotEmpty()) {
-            $firstStep = $form->steps->shift();
+            $combinedStep = $form->steps->shift();
 
             /** @var array<int, array<string, mixed>> $firstStepContentData */
-            $firstStepContentData = data_get($firstStep, 'content.content', []);
+            $firstStepContentData = data_get($combinedStep, 'content.content', []);
             $content = $content->concat($firstStepContentData);
-
-            $mainStepDescription = StepDescriptionFeature::active() ? $firstStep->description : null;
         }
 
-        $form->steps->prepend($this->formatStep('Main', -1, $content, $mainStepDescription));
+        $form->steps->prepend($this->formatStep('Main', -1, $content, $combinedStep));
 
         if (app(AiClarificationSettings::class)->is_enabled
             && $type->is_ai_clarification_enabled) {
@@ -115,19 +113,26 @@ class GenerateServiceRequestForm
     }
 
     /**
+     * The `label` stays the step's submission key, so a step merged into this one only lends
+     * its title (as a display-only `display_label`) and its description.
+     *
      * @param Collection<int, array<string, mixed>> $content
      */
-    protected function formatStep(string $label, int $order, Collection $content, ?string $description = null): ServiceRequestFormStep
+    protected function formatStep(string $label, int $order, Collection $content, ?SubmissibleStep $combinedStep = null): ServiceRequestFormStep
     {
         $step = new ServiceRequestFormStep([
             'label' => $label,
-            'description' => $description,
+            'description' => $combinedStep?->description,
             'order' => $order,
             'content' => [
                 'content' => $content,
                 'type' => 'doc',
             ],
         ]);
+
+        if ($combinedStep) {
+            $step->setAttribute('display_label', $combinedStep->label);
+        }
 
         $content->each(fn (array $block) => $this->addFieldToStep($step, $block));
 

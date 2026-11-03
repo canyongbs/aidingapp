@@ -36,27 +36,15 @@
 }
 
 .wizard-title {
-    @apply mt-0.5! mb-0.5! text-xl! leading-7! font-semibold! text-gray-900 wrap-break-word;
-}
-
-.wizard-header .wizard-title:last-child {
-    @apply mb-0!;
+    @apply m-0! text-lg! leading-7! font-semibold! text-gray-900 wrap-break-word;
 }
 
 .wizard-description {
-    @apply mb-0 max-w-2xl text-sm text-gray-600 wrap-break-word whitespace-pre-line;
+    @apply mt-1 text-sm text-gray-600 wrap-break-word whitespace-pre-line;
 }
 
 .step-nav {
-    @apply grid grid-cols-3 items-center gap-3 mt-6;
-}
-
-.step-nav .formkit-outer {
-    @apply mb-0!;
-}
-
-.step-nav .formkit-wrapper {
-    @apply mb-0!;
+    @apply grid grid-cols-3 items-center gap-3 mt-6 pt-6 border-t border-gray-200;
 }
 
 .step-nav__back {
@@ -64,7 +52,7 @@
 }
 
 .step-nav__back button {
-    @apply min-w-24 px-5!;
+    @apply sm:min-w-24 px-5 border-transparent! bg-gray-200! text-gray-700! hover:bg-gray-300!;
 }
 
 .step-progress {
@@ -72,23 +60,32 @@
 }
 
 .step-progress__label {
-    @apply mb-0 text-sm font-bold text-gray-900 wrap-break-word;
+    @apply text-sm font-bold text-gray-900;
 }
 
 .step-progress__percent {
-    @apply mb-0 mt-0.5 text-xs text-gray-500 wrap-break-word;
+    @apply mt-0.5 text-xs text-gray-500;
 }
 
 .step-nav__next {
     @apply col-start-3 justify-self-end min-w-0;
 }
 
+.step-nav__next button {
+    @apply sm:min-w-24 px-5;
+}
+
 .step-nav__next-btn button {
-    @apply min-w-24 px-5! border-transparent! bg-brand-600! text-white! hover:bg-brand-500! focus-visible:ring-brand-500!;
+    @apply border-transparent! bg-brand-600! text-white! hover:bg-brand-500! focus-visible:ring-brand-500!;
 }
 
 .step-nav__next-btn button::after {
     content: '\2192';
+}
+
+.service-request-form .formkit-inner,
+.service-request-form .formkit-fieldset {
+    @apply max-w-none!;
 }
 
 .responsive-grid-2 {
