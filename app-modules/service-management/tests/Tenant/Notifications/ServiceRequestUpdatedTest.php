@@ -71,7 +71,7 @@ it('builds the database notification title with a linked service request number,
 it('shows only the contact name when the customer has no organization', function (): void {
     Notification::fake();
 
-    $type = ServiceRequestType::factory()->create();
+    $type = ServiceRequestType::factory()->create(['name' => 'Technical Support']);
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create(['full_name' => 'Jane Doe']);
     $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($contact, 'respondent')->create();
@@ -80,8 +80,10 @@ it('shows only the contact name when the customer has no organization', function
     $title = (new ServiceRequestUpdated($serviceRequestUpdate, null, DatabaseChannel::class))
         ->toDatabase(User::factory()->create())['title'];
 
+    $serviceRequestUrl = ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
     $contactUrl = ContactResource::getUrl('view', ['record' => $contact]);
 
-    expect($title)->toContain("<a href='{$contactUrl}' target='_blank' class='underline'>Jane Doe</a>.")
-        ->and($title)->not->toContain('Jane Doe (');
+    expect($title)->toBe(
+        "Service request <a href='{$serviceRequestUrl}' target='_blank' class='underline'>{$serviceRequest->service_request_number}</a> (Technical Support) has been updated for <a href='{$contactUrl}' target='_blank' class='underline'>Jane Doe</a>."
+    );
 });

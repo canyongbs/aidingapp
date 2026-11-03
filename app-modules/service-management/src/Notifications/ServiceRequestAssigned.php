@@ -113,9 +113,12 @@ class ServiceRequestAssigned extends BaseNotification implements ShouldQueue
         $typeName = $this->buildServiceRequestTypeName($this->serviceRequest);
         $customerLink = $this->buildServiceRequestCustomerLink($this->serviceRequest);
 
+        $assignee = $this->serviceRequest->assignedTo?->user;
+        $assignedTo = $assignee?->is($notifiable) ? 'you' : e($assignee?->full_name);
+
         return Notification::make()
             ->success()
-            ->title("Service request {$serviceRequestLink} ({$typeName}) for {$customerLink} has been assigned to you.")
+            ->title("Service request {$serviceRequestLink} ({$typeName}) for {$customerLink} has been assigned to {$assignedTo}.")
             ->getDatabaseMessage();
     }
 }

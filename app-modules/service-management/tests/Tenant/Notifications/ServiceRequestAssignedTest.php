@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Notification\Notifications\Channels\DatabaseChannel;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use AidingApp\ServiceManagement\Models\ServiceRequestAssignment;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestAssigned;
@@ -52,8 +53,12 @@ it('builds the database notification title with a linked service request number,
     $contact = Contact::factory()->for($organization, 'organization')->create(['full_name' => 'Jane Doe']);
     $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($contact, 'respondent')->create();
 
+    $assignee = User::factory()->create();
+    $type->managerUsers()->attach($assignee);
+    ServiceRequestAssignment::factory()->active()->for($serviceRequest, 'serviceRequest')->for($assignee, 'user')->create();
+
     $title = (new ServiceRequestAssigned($serviceRequest, null, DatabaseChannel::class))
-        ->toDatabase(User::factory()->create())['title'];
+        ->toDatabase($assignee)['title'];
 
     $serviceRequestUrl = ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
     $contactUrl = ContactResource::getUrl('view', ['record' => $contact]);
@@ -64,16 +69,56 @@ it('builds the database notification title with a linked service request number,
 });
 
 it('shows only the contact name when the customer has no organization', function (): void {
-    $type = ServiceRequestType::factory()->create();
+    $type = ServiceRequestType::factory()->create(['name' => 'Technical Support']);
     $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
     $contact = Contact::factory()->create(['full_name' => 'Jane Doe']);
     $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($contact, 'respondent')->create();
 
+    $assignee = User::factory()->create();
+    $type->managerUsers()->attach($assignee);
+    ServiceRequestAssignment::factory()->active()->for($serviceRequest, 'serviceRequest')->for($assignee, 'user')->create();
+
+    $title = (new ServiceRequestAssigned($serviceRequest, null, DatabaseChannel::class))
+        ->toDatabase($assignee)['title'];
+
+    $serviceRequestUrl = ServiceRequestResource::getUrl('view', ['record' => $serviceRequest]);
+    $contactUrl = ContactResource::getUrl('view', ['record' => $contact]);
+
+    expect($title)->toBe(
+        "Service request <a href='{$serviceRequestUrl}' target='_blank' class='underline'>{$serviceRequest->service_request_number}</a> (Technical Support) for <a href='{$contactUrl}' target='_blank' class='underline'>Jane Doe</a> has been assigned to you."
+    );
+});
+
+it('addresses the assigned user as "you" and names the assignee for other recipients', function (): void {
+    $type = ServiceRequestType::factory()->create(['name' => 'Technical Support']);
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $contact = Contact::factory()->create(['full_name' => 'Jane Doe']);
+    $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($contact, 'respondent')->create();
+
+    $assignee = User::factory()->create(['first_name' => 'John', 'last_name' => 'Smith']);
+    $type->managerUsers()->attach($assignee);
+    ServiceRequestAssignment::factory()->active()->for($serviceRequest, 'serviceRequest')->for($assignee, 'user')->create();
+
+    $notification = new ServiceRequestAssigned($serviceRequest, null, DatabaseChannel::class);
+
+    expect($notification->toDatabase($assignee)['title'])
+        ->toContain('has been assigned to you.')
+        ->and($notification->toDatabase(User::factory()->create())['title'])
+        ->toContain('has been assigned to John Smith.');
+});
+
+it('escapes HTML in the assignee name for other recipients', function (): void {
+    $type = ServiceRequestType::factory()->create();
+    $priority = ServiceRequestPriority::factory()->for($type, 'type')->create();
+    $contact = Contact::factory()->create();
+    $serviceRequest = ServiceRequest::factory()->for($priority, 'priority')->for($contact, 'respondent')->create();
+
+    $assignee = User::factory()->create(['first_name' => '<b>John</b>', 'last_name' => 'Smith']);
+    $type->managerUsers()->attach($assignee);
+    ServiceRequestAssignment::factory()->active()->for($serviceRequest, 'serviceRequest')->for($assignee, 'user')->create();
+
     $title = (new ServiceRequestAssigned($serviceRequest, null, DatabaseChannel::class))
         ->toDatabase(User::factory()->create())['title'];
 
-    $contactUrl = ContactResource::getUrl('view', ['record' => $contact]);
-
-    expect($title)->toContain("<a href='{$contactUrl}' target='_blank' class='underline'>Jane Doe</a> has been assigned to you.")
-        ->and($title)->not->toContain('Jane Doe (');
+    expect($title)->toContain('has been assigned to &lt;b&gt;John&lt;/b&gt; Smith.');
 });
