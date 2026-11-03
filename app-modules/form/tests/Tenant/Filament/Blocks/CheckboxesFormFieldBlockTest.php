@@ -95,7 +95,7 @@ it('shows which options were selected in the submission view', function () use (
         'isRequired' => false,
         'options' => $options,
         'hasOtherOption' => true,
-        'response' => ['red', 'Teal'],
+        'response' => json_encode(['red', 'Teal']),
     ])->render();
 
     expect($html)->toContain('Red')->toContain('Blue')->toContain('Other: Teal')

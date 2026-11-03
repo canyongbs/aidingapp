@@ -38,7 +38,8 @@
             ->pluck('label', 'value')
             ->all()
         : $options;
-    $responseValues = is_array($response ?? null) ? $response : [];
+    $responseValues = is_string($response ?? null) ? json_decode($response, true) : $response ?? [];
+    $responseValues = is_array($responseValues) ? $responseValues : [];
     $knownValues = array_map(fn ($value): string => strtolower((string) $value), array_keys($normalizedOptions));
 
     $selections = [];
