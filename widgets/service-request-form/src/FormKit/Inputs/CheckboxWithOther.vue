@@ -141,7 +141,6 @@
                     type="text"
                     v-model="otherText"
                     placeholder="Other"
-                    @focus="otherChecked = true"
                     class="w-full px-3 py-1.5 border rounded text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:border-primary-500"
                     :class="otherChecked ? 'border-primary-500' : 'border-gray-400'"
                 />

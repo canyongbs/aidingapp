@@ -51,16 +51,13 @@
             x-init="
                 updateRows = function () {
                     this.rows = Alpine.raw(this.state ?? []).map(({ key, value }) => ({
+                        id: this.nextRowId++,
                         key,
                         value,
                     }))
                 }
-                updateState = function () {
-                    const state = this.rows.map(({ key, value }) => ({ key, value }))
-
-                    if (JSON.stringify(this.state) !== JSON.stringify(state)) {
-                        this.state = state
-                    }
+                getState = function () {
+                    return this.rows.map(({ key, value }) => ({ key, value }))
                 }
             "
             wire:ignore

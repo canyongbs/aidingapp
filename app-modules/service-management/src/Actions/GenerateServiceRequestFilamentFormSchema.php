@@ -53,6 +53,8 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\TimePicker;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Group;
+use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\View;
 use Filament\Schemas\Components\Wizard;
 use Filament\Schemas\Components\Wizard\Step;
@@ -61,6 +63,8 @@ use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 class GenerateServiceRequestFilamentFormSchema
 {
+    protected const OTHER_OPTION = '__other__';
+
     /**
      * @return array<Component>
      */
@@ -210,16 +214,8 @@ class GenerateServiceRequestFilamentFormSchema
                 ->placeholder($field->config['placeholder'] ?? null)
                 ->required($field->is_required)
                 ->helperText($description),
-            'radio' => Radio::make($field->getKey())
-                ->label($field->label)
-                ->options(collect((new OptionsStateCast())->get($field->config['options'] ?? []))->pluck('label', 'value')->all())
-                ->required($field->is_required)
-                ->helperText($description),
-            'checkboxes' => CheckboxList::make($field->getKey())
-                ->label($field->label)
-                ->options(collect((new OptionsStateCast())->get($field->config['options'] ?? []))->pluck('label', 'value')->all())
-                ->required($field->is_required)
-                ->helperText($description),
+            'radio' => $this->choiceComponent(Radio::make($field->getKey()), $field, isMultiple: false),
+            'checkboxes' => $this->choiceComponent(CheckboxList::make($field->getKey()), $field, isMultiple: true),
             'date' => DatePicker::make($field->getKey())
                 ->label($field->label)
                 ->required($field->is_required)
@@ -250,6 +246,60 @@ class GenerateServiceRequestFilamentFormSchema
         };
 
         return $component;
+    }
+
+    /**
+     * When the field allows an Other answer, the free-text value replaces the Other option in the submitted state.
+     */
+    protected function choiceComponent(Radio|CheckboxList $component, SubmissibleField $field, bool $isMultiple): Component
+    {
+        /** @var array<string, string> $options */
+        $options = collect((new OptionsStateCast())->get($field->config['options'] ?? []))->pluck('label', 'value')->all();
+
+        $component
+            ->label($field->label)
+            ->options($options)
+            ->required($field->is_required)
+            ->helperText($field->config['description'] ?? null);
+
+        if (! ($field->config['hasOtherOption'] ?? false)) {
+            return $component;
+        }
+
+        $statePath = (string) $field->getKey();
+        $otherStatePath = $statePath . '_other';
+
+        $component
+            ->options($options + [self::OTHER_OPTION => 'Other'])
+            ->live()
+            ->dehydrateStateUsing(function (mixed $state, Get $get) use ($isMultiple, $otherStatePath): mixed {
+                $otherText = trim((string) $get($otherStatePath));
+
+                if (! $isMultiple) {
+                    return $state === self::OTHER_OPTION ? $otherText : $state;
+                }
+
+                return collect(is_array($state) ? $state : [])
+                    ->map(fn (mixed $value): mixed => $value === self::OTHER_OPTION ? $otherText : $value)
+                    ->filter(filled(...))
+                    ->values()
+                    ->all();
+            });
+
+        $otherInput = TextInput::make($otherStatePath)
+            ->label('Other')
+            ->maxLength(255)
+            ->dehydrated(false)
+            ->visible(function (Get $get) use ($isMultiple, $statePath): bool {
+                $state = $get($statePath);
+
+                return $isMultiple
+                    ? in_array(self::OTHER_OPTION, is_array($state) ? $state : [], true)
+                    : $state === self::OTHER_OPTION;
+            })
+            ->required();
+
+        return Group::make([$component, $otherInput]);
     }
 
     /**

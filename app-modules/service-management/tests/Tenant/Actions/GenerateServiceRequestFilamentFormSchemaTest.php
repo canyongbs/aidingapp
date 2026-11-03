@@ -37,8 +37,11 @@
 use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema;
 use AidingApp\ServiceManagement\Models\ServiceRequestForm;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Group;
 use Illuminate\Database\Eloquent\Collection;
 
 it('resolves stored options into value and label maps for select and radio fields', function (string $type, array $options): void {
@@ -73,4 +76,38 @@ it('resolves stored options into value and label maps for select and radio field
     'select with a legacy map' => ['select', [0 => 'No', 1 => 'Yes']],
     'select with label and value rows' => ['select', [['label' => 'No', 'value' => '0'], ['label' => 'Yes', 'value' => '1']]],
     'radio with label and value rows' => ['radio', [['label' => 'No', 'value' => '0'], ['label' => 'Yes', 'value' => '1']]],
+]);
+
+it('adds an other option and a free-text input when the field allows other answers', function (string $type, string $componentClass): void {
+    $field = new ServiceRequestFormField([
+        'type' => $type,
+        'label' => 'Choice',
+        'is_required' => false,
+        'config' => ['hasOtherOption' => true, 'options' => [['label' => 'No', 'value' => '0'], ['label' => 'Yes', 'value' => '1']]],
+    ]);
+    $field->id = (string) str()->uuid();
+
+    $form = new ServiceRequestForm([
+        'is_wizard' => false,
+        'content' => [
+            'content' => [
+                ['type' => 'customBlock', 'attrs' => ['id' => $type, 'config' => ['fieldId' => $field->id]]],
+            ],
+        ],
+    ]);
+    $form->setRelation('fields', new Collection([$field]));
+
+    $components = (new GenerateServiceRequestFilamentFormSchema())($form);
+
+    expect($components)->toHaveCount(1)->and($components[0])->toBeInstanceOf(Group::class);
+
+    [$choice, $other] = $components[0]->getDefaultChildComponents();
+
+    expect($choice)->toBeInstanceOf($componentClass)
+        ->and($choice->getOptions())->toBe([0 => 'No', 1 => 'Yes', '__other__' => 'Other'])
+        ->and($other)->toBeInstanceOf(TextInput::class)
+        ->and($other->getName())->toBe($field->id . '_other');
+})->with([
+    'radio' => ['radio', Radio::class],
+    'checkboxes' => ['checkboxes', CheckboxList::class],
 ]);
