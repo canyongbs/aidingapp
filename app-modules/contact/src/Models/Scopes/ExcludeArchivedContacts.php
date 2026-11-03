@@ -36,9 +36,9 @@
 
 namespace AidingApp\Contact\Models\Scopes;
 
-use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Constrains a contact query to contacts that have not been archived.
@@ -55,7 +55,9 @@ class ExcludeArchivedContacts
     ) {}
 
     /**
-     * @param Builder<Contact> $query
+     * @template TModel of Model
+     *
+     * @param Builder<TModel> $query
      */
     public function __invoke(Builder $query): void
     {
@@ -64,7 +66,7 @@ class ExcludeArchivedContacts
         }
 
         $query->where(function (Builder $query): void {
-            $query->withoutArchived();
+            $query->withoutArchived(); // @phpstan-ignore method.notFound
 
             if (filled($this->keepIds)) {
                 $query->orWhereKey($this->keepIds);

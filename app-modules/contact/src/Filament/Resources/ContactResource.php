@@ -62,14 +62,11 @@ class ContactResource extends Resource
     protected static bool $isGloballySearchable = true;
 
     /**
-     * @return Builder<Contact>
+     * @return Builder<Model>
      */
     public static function getEloquentQuery(): Builder
     {
-        /** @var Builder<Contact> $query */
-        $query = parent::getEloquentQuery();
-
-        return $query->tap(new ExcludeArchivedContacts());
+        return parent::getEloquentQuery()->tap(new ExcludeArchivedContacts());
     }
 
     public static function getGloballySearchableAttributes(): array
