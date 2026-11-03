@@ -49,6 +49,7 @@ class ContactNameColumn
             ->label('Contact')
             ->weight(FontWeight::Bold)
             ->searchable(['full_name', 'email'])
+            ->sortable()
             ->icon(fn (Contact $record): string => $record->presenceStatus()->getIcon())
             ->iconColor(fn (Contact $record): string => $record->presenceStatus()->getColor())
             ->tooltip(fn (Contact $record): string => 'Presence: ' . $record->presenceStatus()->getLabel())

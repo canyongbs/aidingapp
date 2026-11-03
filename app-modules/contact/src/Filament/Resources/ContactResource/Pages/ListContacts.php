@@ -87,6 +87,16 @@ class ListContacts extends ListRecords
                     ->formatStateUsing(fn (int $state): string => "{$state} Open")
                     ->color(fn (int $state): string => $state > 0 ? 'warning' : 'gray')
                     ->description(fn (Contact $record): string => "{$record->service_requests_count} Total"),
+                TextColumn::make('created_at')
+                    ->label('Created At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')
+                    ->label('Updated At')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
                 SelectFilter::make('type_id')
