@@ -62,6 +62,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
 use AidingApp\ServiceManagement\Notifications\ServiceRequestCreated;
 use App\Actions\Paths\ModulePath;
+use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Http\UploadedFile;
@@ -260,6 +261,64 @@ describe('Engagement response processing', function (): void {
         });
 
         $filesystem->assertMissing('s3_email');
+    });
+
+    it('does not match an inbound email to an archived contact', function (): void {
+        $fakeStorage = Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($fakeStorage): void {
+                Storage::set('s3', $fakeStorage);
+            }
+        );
+
+        $tenant = Tenant::query()->first();
+
+        assert($tenant instanceof Tenant);
+
+        $contact = null;
+
+        $tenant->execute(function () use (&$contact): void {
+            ContactArchivingFeature::activate();
+
+            $contact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+        });
+
+        assert($contact instanceof Contact);
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->execute(function () use ($contact): void {
+            expect($contact->engagementResponses()->count())->toBe(0);
+
+            assertDatabaseHas(UnmatchedInboundCommunication::class, [
+                'sender' => 'kevin.ullyott@canyongbs.com',
+            ]);
+        });
     });
 
     it('handles attachments properly', function (): void {

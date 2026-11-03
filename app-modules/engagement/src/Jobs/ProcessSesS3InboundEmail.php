@@ -311,6 +311,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         $tenant->execute(function () use ($parser, $content, $sender): void {
             $contacts = Contact::query()
+                ->withoutArchived()
                 ->where('email', $sender)
                 ->get();
 
