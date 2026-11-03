@@ -34,43 +34,30 @@
 </COPYRIGHT>
 */
 
-namespace AidingApp\Contact\Models\Scopes;
+namespace AidingApp\Contact\Models\Builders;
 
+use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 
 /**
- * Constrains a contact query to contacts that have not been archived.
+ * @template TModel of Contact
  *
- * Does nothing while the contact archiving feature is inactive.
+ * @extends Builder<TModel>
  */
-class ExcludeArchivedContacts
+class ContactBuilder extends Builder
 {
     /**
-     * @param array<string> $keepIds Contacts to keep in the results even when archived.
-     */
-    public function __construct(
-        protected array $keepIds = [],
-    ) {}
-
-    /**
-     * @template TModel of Model
+     * Overrides the `withoutArchived()` macro so it does nothing while the contact archiving feature is inactive.
      *
-     * @param Builder<TModel> $query
+     * TODO: Cleanup Task (contact-builder-without-archived) - delete this override so the macro applies.
      */
-    public function __invoke(Builder $query): void
+    public function withoutArchived(): static
     {
         if (! ContactArchivingFeature::active()) {
-            return;
+            return $this;
         }
 
-        $query->where(function (Builder $query): void {
-            $query->withoutArchived(); // @phpstan-ignore method.notFound (macro registered by the CanBeArchived global scope)
-
-            if (filled($this->keepIds)) {
-                $query->orWhereKey($this->keepIds);
-            }
-        });
+        return parent::__call(__FUNCTION__, []);
     }
 }

@@ -40,13 +40,15 @@ use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ListContacts;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\ViewContact;
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Scopes\ExcludeArchivedContacts;
 use App\Enums\NavigationGroup;
 use Filament\Resources\Resource;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use UnitEnum;
 
+/**
+ * @extends Resource<Contact>
+ */
 class ContactResource extends Resource
 {
     protected static ?string $model = Contact::class;
@@ -62,11 +64,11 @@ class ContactResource extends Resource
     protected static bool $isGloballySearchable = true;
 
     /**
-     * @return Builder<Model>
+     * @return Builder<Contact>
      */
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->tap(new ExcludeArchivedContacts());
+        return parent::getEloquentQuery()->withoutArchived();
     }
 
     public static function getGloballySearchableAttributes(): array

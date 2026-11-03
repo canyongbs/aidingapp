@@ -36,7 +36,7 @@
 
 namespace AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers;
 
-use AidingApp\Contact\Models\Scopes\ExcludeArchivedContacts;
+use AidingApp\Contact\Models\Builders\ContactBuilder;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DissociateAction;
@@ -44,7 +44,6 @@ use Filament\Actions\DissociateBulkAction;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -55,7 +54,7 @@ class ContactsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('full_name')
             ->inverseRelationship('organization')
-            ->modifyQueryUsing(fn (Builder $query) => $query->tap(new ExcludeArchivedContacts()))
+            ->modifyQueryUsing(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived())
             ->columns([
                 TextColumn::make('full_name'),
                 TextColumn::make('email'),

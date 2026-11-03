@@ -35,7 +35,6 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use AidingApp\Contact\Models\Scopes\ExcludeArchivedContacts;
 use App\Features\ContactArchivingFeature;
 
 it('excludes archived contacts', function (): void {
@@ -44,34 +43,8 @@ it('excludes archived contacts', function (): void {
     $contact = Contact::factory()->create();
     Contact::factory()->archived()->create();
 
-    expect(Contact::query()->tap(new ExcludeArchivedContacts())->pluck('id')->all())
+    expect(Contact::query()->withoutArchived()->pluck('id')->all())
         ->toBe([$contact->getKey()]);
-});
-
-it('keeps archived contacts whose keys are passed', function (): void {
-    ContactArchivingFeature::activate();
-
-    $contact = Contact::factory()->create();
-    $keptArchivedContact = Contact::factory()->archived()->create();
-    Contact::factory()->archived()->create();
-
-    expect(Contact::query()->tap(new ExcludeArchivedContacts([$keptArchivedContact->getKey()]))->pluck('id')->all())
-        ->toEqualCanonicalizing([$contact->getKey(), $keptArchivedContact->getKey()]);
-});
-
-it('keeps archived contacts whose keys are passed only within the rest of the query', function (): void {
-    ContactArchivingFeature::activate();
-
-    $contact = Contact::factory()->create(['full_name' => 'Matching Contact']);
-    $keptArchivedContact = Contact::factory()->archived()->create(['full_name' => 'Other Contact']);
-
-    expect(
-        Contact::query()
-            ->where('full_name', 'Matching Contact')
-            ->tap(new ExcludeArchivedContacts([$keptArchivedContact->getKey()]))
-            ->pluck('id')
-            ->all()
-    )->toBe([$contact->getKey()]);
 });
 
 it('does not filter when the contact archiving feature is inactive', function (): void {
@@ -80,9 +53,10 @@ it('does not filter when the contact archiving feature is inactive', function ()
 
     ContactArchivingFeature::deactivate();
 
-    $query = Contact::query()->tap(new ExcludeArchivedContacts());
+    $query = Contact::query()->withoutArchived();
 
     expect($query->pluck('id')->all())
-        ->toEqualCanonicalizing([$contact->getKey(), $archivedContact->getKey()])
-        ->and($query->toRawSql())->not->toContain('archived_at');
+        ->toEqualCanonicalizing([$contact->getKey(), $archivedContact->getKey()]);
+
+    expect($query->toRawSql())->not->toContain('archived_at');
 });
