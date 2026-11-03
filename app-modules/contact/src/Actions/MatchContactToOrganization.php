@@ -55,6 +55,7 @@ class MatchContactToOrganization
 
         DB::transaction(function () use ($contact, $organization): void {
             $contact = Contact::query()
+                ->withoutArchived()
                 ->whereKey($contact->getKey())
                 ->whereNull('organization_id')
                 ->lockForUpdate()
