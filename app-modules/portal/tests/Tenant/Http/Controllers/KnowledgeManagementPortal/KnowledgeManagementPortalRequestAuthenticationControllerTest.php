@@ -148,7 +148,7 @@ test('it allows registration flow when email domain matches an organization doma
         ->and($authentication?->educatable_id)->toBeNull();
 });
 
-it('offers registration to an archived contact when the organization domain matches', function (): void {
+test('it offers registration to an archived contact when the organization domain matches', function (): void {
     ContactArchivingFeature::activate();
 
     Organization::factory()->create([
@@ -172,7 +172,11 @@ it('offers registration to an archived contact when the organization domain matc
 
     expect($response->json('authentication_url'))->toContain('/api/portal/register/');
 
-    expect(PortalAuthentication::query()->latest('id')->first()?->educatable_id)->toBeNull();
+    $authentication = PortalAuthentication::query()->latest('id')->first();
+
+    expect($authentication)
+        ->not->toBeNull()
+        ->and($authentication?->educatable_id)->toBeNull();
 });
 
 test('it generates spa registration url when requested for unknown contact', function (): void {
