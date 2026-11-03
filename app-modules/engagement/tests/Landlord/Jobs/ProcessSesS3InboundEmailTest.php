@@ -319,6 +319,8 @@ describe('Engagement response processing', function (): void {
                 'sender' => 'kevin.ullyott@canyongbs.com',
             ]);
         });
+
+        $filesystem->assertMissing('s3_email');
     });
 
     it('handles attachments properly', function (): void {
