@@ -546,7 +546,7 @@ describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and
         });
     });
 
-    it('strips the numeric suffix on rollback once the original name is no longer taken', function () use ($migrationName, $migrationPath, $insertCategory): void {
+    it('leaves deduplicated names unchanged on rollback and only deactivates the feature flag', function () use ($migrationName, $migrationPath, $insertCategory): void {
         isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
             $firstId = $insertCategory('Getting Started', now()->subMinutes(2));
             $secondId = $insertCategory('getting started', now()->subMinute());
@@ -561,7 +561,25 @@ describe('2026_11_02_120000_convert_knowledge_base_categories_name_to_citext_and
             $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
             expect($rollback)->toBe(Command::SUCCESS);
 
-            expect(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started')
+            expect(DB::table('knowledge_base_categories')->where('id', $firstId)->value('name'))->toBe('Getting Started')
+                ->and(DB::table('knowledge_base_categories')->where('id', $secondId)->value('name'))->toBe('getting started-2')
+                ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
+        });
+    });
+
+    it('does not mutate an originally numbered name on rollback', function () use ($migrationName, $migrationPath, $insertCategory): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertCategory): void {
+            $numberedId = $insertCategory('ISO-27001', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $numberedId)->value('name'))->toBe('ISO-27001');
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table('knowledge_base_categories')->where('id', $numberedId)->value('name'))->toBe('ISO-27001')
                 ->and(KnowledgeBaseCategoryNameUniquenessFeature::active())->toBeFalse();
         });
     });

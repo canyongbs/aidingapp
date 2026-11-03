@@ -45,7 +45,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 return new class () extends Migration {
     /*
      * TODO: Cleanup Task (knowledge-base-category-name-uniqueness): after KnowledgeBaseCategoryNameUniquenessFeature is removed:
-     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` / `revertDuplicates()` calls
+     * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
     use FixesDuplicateNames;
@@ -82,8 +82,6 @@ return new class () extends Migration {
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
             DB::statement("ALTER TABLE {$this->table} ALTER COLUMN {$this->column} TYPE varchar(255)");
-
-            $this->revertDuplicates();
         });
     }
 };
