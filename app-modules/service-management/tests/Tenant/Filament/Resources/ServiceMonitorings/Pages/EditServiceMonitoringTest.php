@@ -45,12 +45,14 @@ use AidingApp\ServiceManagement\Filament\Resources\ServiceMonitorings\ServiceMon
 use AidingApp\ServiceManagement\Models\ServiceMonitoringReportConfiguration;
 use AidingApp\ServiceManagement\Models\ServiceMonitoringTarget;
 use AidingApp\ServiceManagement\Tests\Tenant\RequestFactories\ServiceMonitoringTargetRequestFactory;
+use App\Features\ContactArchivingFeature;
 use App\Features\ServiceMonitoringTargetNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
 use App\Settings\LicenseSettings;
 use Filament\Actions\DeleteAction;
+use Filament\Forms\Components\Select;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\Config;
 use Livewire\Livewire;
@@ -1150,4 +1152,66 @@ test('EditServiceMonitoring does not apply the unique name rule when the feature
         ->fillForm(['name' => 'Customer Website'])
         ->call('save'))
         ->toThrow(UniqueConstraintViolationException::class);
+});
+
+test('EditServiceMonitoring does not offer archived contacts as report recipients', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $activeContact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->create();
+    $archivedContact->archive();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($activeContact, $archivedContact): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($activeContact->getKey(), $options)
+                && ! array_key_exists($archivedContact->getKey(), $options);
+        });
+});
+
+test('EditServiceMonitoring keeps an archived report contact that is already selected', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $archivedContact = Contact::factory()->create();
+    $archivedContact->archive();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    $configuration = ServiceMonitoringReportConfiguration::factory()
+        ->for($serviceMonitoringTarget, 'serviceMonitoringTarget')
+        ->active()
+        ->create(['frequency' => ServiceMonitoringReportFrequency::Daily, 'is_reported_via_email' => true]);
+    $configuration->reportContacts()->attach($archivedContact->getKey());
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
+        })
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($configuration->refresh()->reportContacts()->pluck('contacts.id')->all())->toBe([$archivedContact->getKey()]);
+});
+
+test('EditServiceMonitoring offers every contact as a report recipient when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $unselectedContact = Contact::factory()->create();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($unselectedContact): bool {
+            return array_key_exists($unselectedContact->getKey(), $field->getOptions());
+        });
 });
