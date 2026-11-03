@@ -881,3 +881,68 @@ describe('archiving', function (): void {
             });
     });
 });
+
+describe('other option on choice fields', function (): void {
+    $setUp = function (string $type): array {
+        asSuperAdmin();
+
+        $serviceRequestType = ServiceRequestType::factory()->create();
+        $priority = ServiceRequestPriority::factory()->for($serviceRequestType, 'type')->create();
+        $form = ServiceRequestForm::factory()->for($serviceRequestType, 'type')->create();
+        $field = new ServiceRequestFormField([
+            'label' => 'Favorite color',
+            'type' => $type,
+            'is_required' => true,
+            'config' => ['hasOtherOption' => true, 'options' => [['label' => 'Red', 'value' => 'red'], ['label' => 'Blue', 'value' => 'blue']]],
+        ]);
+        $field->submissible()->associate($form);
+        $field->save();
+
+        $form->setAttribute('content', [
+            'type' => 'doc',
+            'content' => [[
+                'type' => 'customBlock',
+                'attrs' => ['id' => $type, 'config' => ['fieldId' => $field->getKey(), 'label' => $field->label, 'isRequired' => true]],
+            ]],
+        ]);
+        $form->save();
+
+        $request = CreateServiceRequestRequestFactory::new()->create(['priority_id' => $priority->getKey()]);
+
+        return [$serviceRequestType, $field, $request];
+    };
+
+    it('stores the free-text answer in place of the other option', function (string $type, mixed $selection, string $expectedResponse) use ($setUp): void {
+        [$serviceRequestType, $field, $request] = $setUp($type);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $serviceRequestType->getKey())
+            ->fillForm($request)
+            ->fillForm(['dynamic_fields' => [$field->getKey() => $selection, $field->getKey() . '_other' => 'Teal']])
+            ->call('create')
+            ->assertHasNoFormErrors();
+
+        $submittedField = ServiceRequest::query()->sole()->serviceRequestFormSubmission->fields()->whereKey($field)->firstOrFail();
+
+        expect($submittedField->pivot->getAttribute('response'))->toBe($expectedResponse);
+    })->with([
+        'radio' => ['radio', '__other__', 'Teal'],
+        'checkboxes' => ['checkboxes', ['red', '__other__'], '["red","Teal"]'],
+    ]);
+
+    it('requires the free-text answer when other is selected', function (string $type, mixed $selection) use ($setUp): void {
+        [$serviceRequestType, $field, $request] = $setUp($type);
+
+        Livewire::test(CreateServiceRequest::class)
+            ->set('data.type_id', $serviceRequestType->getKey())
+            ->fillForm($request)
+            ->fillForm(['dynamic_fields' => [$field->getKey() => $selection]])
+            ->call('create')
+            ->assertHasFormErrors(['dynamic_fields.' . $field->getKey() . '_other' => 'required']);
+
+        expect(ServiceRequest::query()->count())->toBe(0);
+    })->with([
+        'radio' => ['radio', '__other__'],
+        'checkboxes' => ['checkboxes', ['__other__']],
+    ]);
+});
