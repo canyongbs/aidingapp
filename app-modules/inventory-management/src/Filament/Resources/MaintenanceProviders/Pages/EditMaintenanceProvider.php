@@ -37,10 +37,12 @@
 namespace AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\Pages;
 
 use AidingApp\InventoryManagement\Filament\Resources\MaintenanceProviders\MaintenanceProviderResource;
+use App\Features\MaintenanceProviderNameUniquenessFeature;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\EditRecord;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class EditMaintenanceProvider extends EditRecord
 {
@@ -54,7 +56,12 @@ class EditMaintenanceProvider extends EditRecord
                     ->autoFocus()
                     ->string()
                     ->maxLength(255)
-                    ->required(),
+                    ->required()
+                    // TODO: Cleanup Task (maintenance-provider-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())` once the flag is removed.
+                    ->when(
+                        MaintenanceProviderNameUniquenessFeature::active(),
+                        fn (TextInput $input): TextInput => $input->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed()),
+                    ),
             ]);
     }
 

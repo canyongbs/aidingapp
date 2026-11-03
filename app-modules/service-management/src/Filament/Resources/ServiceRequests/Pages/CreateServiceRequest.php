@@ -44,7 +44,7 @@ use AidingApp\ServiceManagement\Actions\GenerateServiceRequestFilamentFormSchema
 use AidingApp\ServiceManagement\DataTransferObjects\ServiceRequestDataObject;
 use AidingApp\ServiceManagement\Enums\ServiceRequestCategory;
 use AidingApp\ServiceManagement\Filament\Resources\ServiceRequests\ServiceRequestResource;
-use AidingApp\ServiceManagement\Models\Scopes\ManagedServiceRequestTypes;
+use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\Scopes\SelectableServiceRequestStatuses;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestFormField;
@@ -52,15 +52,17 @@ use AidingApp\ServiceManagement\Models\ServiceRequestFormStep;
 use AidingApp\ServiceManagement\Models\ServiceRequestPriority;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestType;
-use AidingApp\ServiceManagement\Rules\ManagedServiceRequestType;
 use App\Models\Authenticatable;
 use App\Models\User;
 use CodeWithDennis\FilamentSelectTree\SelectTree;
+use Filament\Actions\Action;
+use Filament\Forms\Components\ModalTableSelect;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
+use Filament\Schemas\Components\Callout;
 use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Section;
@@ -79,10 +81,17 @@ class CreateServiceRequest extends CreateRecord
 
     protected ?string $heading = '';
 
+    /** @var array<string, string> */
+    protected array $inaccessibleTypeWarnings = [];
+
     public function form(Schema $schema): Schema
     {
         return $schema
             ->components([
+                Callout::make(fn (Get $get): ?string => $this->getInaccessibleTypeWarning($get('type_id')))
+                    ->warning()
+                    ->visible(fn (Get $get): bool => filled($this->getInaccessibleTypeWarning($get('type_id'))))
+                    ->columnSpanFull(),
                 Section::make('New Service Request')
                     ->schema([
                         Grid::make(6)
@@ -106,17 +115,8 @@ class CreateServiceRequest extends CreateRecord
                                     ->label('Type')
                                     ->getTreeUsing(fn (): array => ListServiceRequests::buildTypeTreeOptions(
                                         withoutArchived: true,
-                                        allowedTypeIds: ServiceRequestType::query()->withoutArchived()->when(! auth()->user()->isSuperAdmin(), function (Builder $query): void {
-                                            $user = auth()->user();
-                                            assert($user instanceof User);
-
-                                            $query->tap(new ManagedServiceRequestTypes($user));
-                                        })
-                                            ->pluck('id')
-                                            ->all(),
                                     ))
                                     ->searchable()
-                                    ->rule(new ManagedServiceRequestType())
                                     ->afterStateUpdated(function (?string $state, Set $set, CreateServiceRequest $livewire): void {
                                         $set('priority_id', null);
                                         $livewire->form->getComponent('dynamicTypeFields')?->getChildSchema()->fill();
@@ -167,23 +167,16 @@ class CreateServiceRequest extends CreateRecord
                     ]),
                 Section::make('Contact Details')
                     ->schema([
-                        Select::make('respondent_id')
-                            ->relationship(
-                                name: 'respondent',
-                                titleAttribute: 'full_name',
-                                modifyQueryUsing: fn (Builder $query) => $query->with('type')->orderBy('first_name')
-                            )
+                        ModalTableSelect::make('respondent_id')
                             ->label('Choose Customer Contact')
+                            ->tableConfiguration(CreateServiceRequestContactsTable::class)
+                            ->getOptionLabelUsing(fn (?string $value): ?string => filled($value)
+                                ? Contact::find($value)?->full_name
+                                : null)
+                            ->selectAction(fn (Action $action): Action => $action
+                                ->modalHeading('Choose Customer Contact')
+                                ->slideOver())
                             ->required()
-                            ->searchable()
-                            ->preload()
-                            ->getOptionLabelFromRecordUsing(function (Contact $record): string {
-                                $label = $record->full_name . ' (' . ($record->type->name ?? 'N/A') . ')';
-
-                                return $record->organization?->name
-                                    ? $label . "\n" . $record->organization->name
-                                    : $label;
-                            })
                             ->exists((new Contact())->getTable(), 'id'),
                     ]),
                 Section::make('Additional Information')
@@ -192,6 +185,41 @@ class CreateServiceRequest extends CreateRecord
                     ->key('dynamicTypeFields')
                     ->visible(fn (Get $get): bool => filled($get('type_id')) && ! empty($this->getDynamicFields($get('type_id')))),
             ]);
+    }
+
+    public static function inaccessibleTypeWarningMessage(string $typeName): string
+    {
+        return "This service request will be created in the catalog under {$typeName}. Since you're not a manager or auditor for this type, you won't be able to view the request's details after it's created.";
+    }
+
+    /**
+     * The warning for the selected type, or null when the user can see requests of that type.
+     * Memoized per type so the callout's visibility and content checks share one set of lookups.
+     */
+    protected function getInaccessibleTypeWarning(?string $typeId): ?string
+    {
+        if (blank($typeId)) {
+            return null;
+        }
+
+        return $this->inaccessibleTypeWarnings[$typeId] ??= $this->resolveInaccessibleTypeWarning($typeId);
+    }
+
+    protected function resolveInaccessibleTypeWarning(string $typeId): string
+    {
+        $user = auth()->user();
+
+        if (! $user instanceof User || $user->isSuperAdmin()) {
+            return '';
+        }
+
+        $type = ServiceRequestType::find($typeId);
+
+        if (is_null($type) || $type->isManagedBy($user) || $type->isAuditedBy($user)) {
+            return '';
+        }
+
+        return self::inaccessibleTypeWarningMessage($type->name);
     }
 
     /**
