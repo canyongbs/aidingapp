@@ -38,7 +38,7 @@ use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\EditChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestStatuses\RequestFactories\EditChangeRequestStatusRequestFactory;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Support\Facades\DB;
 use Livewire\Livewire;
@@ -133,10 +133,10 @@ describe('restoring', function (): void {
     });
 });
 
-// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete this describe and the tests within
+// TODO: Cleanup Task (change-request-status-name-uniqueness): delete this describe and the tests within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestStatusNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 
@@ -150,7 +150,7 @@ describe('name uniqueness feature flag', function (): void {
     });
 
     it('allows editing other fields of a record that already shares its name with another record when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestStatusNameUniquenessFeature::deactivate();
         DB::statement('DROP INDEX change_request_statuses_name_unique');
 
         asSuperAdmin();

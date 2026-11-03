@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\EditChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestTypes\RequestFactories\EditChangeRequestTypeRequestFactory;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -136,10 +136,10 @@ describe('restoring', function (): void {
     });
 });
 
-// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete this describe and the tests within
+// TODO: Cleanup Task (change-request-type-name-uniqueness): delete this describe and the tests within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestTypeNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 
@@ -153,7 +153,7 @@ describe('name uniqueness feature flag', function (): void {
     });
 
     it('allows editing other fields of a record that already shares its name with another record when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestTypeNameUniquenessFeature::deactivate();
         DB::statement('DROP INDEX change_request_types_name_unique');
 
         asSuperAdmin();

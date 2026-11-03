@@ -39,7 +39,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\P
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\ForceDeleteAction;
@@ -67,9 +67,9 @@ class EditChangeRequestStatus extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                            // TODO: Cleanup Task (change-request-status-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
                             ->when(
-                                ChangeRequestTypeAndStatusNameUniquenessFeature::active(),
+                                ChangeRequestStatusNameUniquenessFeature::active(),
                                 fn (TextInput $field): TextInput => $field->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                             ),
                         Select::make('classification')
@@ -92,9 +92,9 @@ class EditChangeRequestStatus extends EditRecord
         return [
             DeleteAction::make(),
             RestoreAction::make()
-                // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): remove the feature flag check from this `before()` hook once the flag is removed.
+                // TODO: Cleanup Task (change-request-status-name-uniqueness): remove the feature flag check from this `before()` hook once the flag is removed.
                 ->before(function (RestoreAction $action, ChangeRequestStatus $record): void {
-                    if (! ChangeRequestTypeAndStatusNameUniquenessFeature::active()) {
+                    if (! ChangeRequestStatusNameUniquenessFeature::active()) {
                         return;
                     }
 

@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\P
 
 use AidingApp\ServiceManagement\Enums\SystemChangeRequestClassification;
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\ChangeRequestStatusResource;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
@@ -61,9 +61,9 @@ class CreateChangeRequestStatus extends CreateRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                            // TODO: Cleanup Task (change-request-status-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
                             ->when(
-                                ChangeRequestTypeAndStatusNameUniquenessFeature::active(),
+                                ChangeRequestStatusNameUniquenessFeature::active(),
                                 fn (TextInput $field): TextInput => $field->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                             ),
                         Select::make('classification')

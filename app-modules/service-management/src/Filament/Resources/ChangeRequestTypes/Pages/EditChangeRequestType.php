@@ -38,7 +38,7 @@ namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Page
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Actions\Action;
@@ -68,9 +68,9 @@ class EditChangeRequestType extends EditRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                            // TODO: Cleanup Task (change-request-type-name-uniqueness): replace this `when()` with `->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
                             ->when(
-                                ChangeRequestTypeAndStatusNameUniquenessFeature::active(),
+                                ChangeRequestTypeNameUniquenessFeature::active(),
                                 fn (TextInput $field): TextInput => $field->unique(ignoreRecord: true, modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                             ),
                         Select::make('number_of_required_approvals')
@@ -101,9 +101,9 @@ class EditChangeRequestType extends EditRecord
         return [
             DeleteAction::make(),
             RestoreAction::make()
-                // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): remove the feature flag check from this `before()` hook once the flag is removed.
+                // TODO: Cleanup Task (change-request-type-name-uniqueness): remove the feature flag check from this `before()` hook once the flag is removed.
                 ->before(function (RestoreAction $action, ChangeRequestType $record): void {
-                    if (! ChangeRequestTypeAndStatusNameUniquenessFeature::active()) {
+                    if (! ChangeRequestTypeNameUniquenessFeature::active()) {
                         return;
                     }
 

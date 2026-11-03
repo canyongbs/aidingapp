@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestStatuses\Pages\CreateChangeRequestStatus;
 use AidingApp\ServiceManagement\Models\ChangeRequestStatus;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestStatuses\RequestFactories\CreateChangeRequestStatusRequestFactory;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Livewire\Livewire;
 
@@ -88,10 +88,10 @@ it('validates the inputs', function (CreateChangeRequestStatusRequestFactory $da
     'name unique case insensitive' => [CreateChangeRequestStatusRequestFactory::new()->state(['name' => 'UNDER REVIEW']), ['name' => 'unique']],
 ]);
 
-// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete this describe and the tests within
+// TODO: Cleanup Task (change-request-status-name-uniqueness): delete this describe and the tests within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestStatusNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 

@@ -37,7 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Forms\Components\Select;
@@ -62,9 +62,9 @@ class CreateChangeRequestType extends CreateRecord
                             ->required()
                             ->string()
                             ->maxLength(255)
-                            // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                            // TODO: Cleanup Task (change-request-type-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
                             ->when(
-                                ChangeRequestTypeAndStatusNameUniquenessFeature::active(),
+                                ChangeRequestTypeNameUniquenessFeature::active(),
                                 fn (TextInput $field): TextInput => $field->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
                             ),
                         Select::make('number_of_required_approvals')

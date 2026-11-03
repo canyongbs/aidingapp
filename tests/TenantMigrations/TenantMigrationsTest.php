@@ -46,7 +46,8 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
@@ -1157,8 +1158,8 @@ describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', func
     ]);
 });
 
-// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
-$defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns): void {
+// TODO: Cleanup Task (change-request-type-name-uniqueness, change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+$defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
     $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
 
     $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
@@ -1176,17 +1177,18 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
         return $id;
     };
 
-    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates only its own feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass, $otherFeatureClass): void {
             $firstId = $insertRecord('Major Change', now()->subMinutes(3));
             $secondId = $insertRecord('major change', now()->subMinutes(2));
             $thirdId = $insertRecord('MAJOR CHANGE', now()->subMinute());
             $existingSuffixedId = $insertRecord('Major Change-2', now()->subMinutes(4));
             $uniqueId = $insertRecord('Minor Change', now()->subMinutes(5));
 
-            ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+            $featureClass::deactivate();
+            $otherFeatureClass::deactivate();
 
-            expect(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeFalse();
+            expect($featureClass::active())->toBeFalse();
 
             $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
             expect($migrate)->toBe(Command::SUCCESS);
@@ -1198,7 +1200,25 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
                 ->and($name($thirdId))->toBe('MAJOR CHANGE-4')
                 ->and($name($existingSuffixedId))->toBe('Major Change-2')
                 ->and($name($uniqueId))->toBe('Minor Change')
-                ->and(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeTrue();
+                ->and($featureClass::active())->toBeTrue()
+                ->and($otherFeatureClass::active())->toBeFalse();
+        });
+    });
+
+    it('treats backslashes in names literally when choosing a numeric suffix', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $firstId = $insertRecord('Ops\\Change', now()->subMinutes(3));
+            $secondId = $insertRecord('ops\\change', now()->subMinutes(2));
+            $existingSuffixedId = $insertRecord('Ops\\Change-2', now()->subMinutes(4));
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Ops\\Change')
+                ->and($name($secondId))->toBe('ops\\change-3')
+                ->and($name($existingSuffixedId))->toBe('Ops\\Change-2');
         });
     });
 
@@ -1255,8 +1275,8 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
         });
     });
 
-    it('drops the unique index and deactivates the feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
-        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+    it('drops the unique index and deactivates its feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table, $featureClass): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table, $featureClass): void {
             $insertRecord('Major Change', now()->subMinutes(2));
             $secondId = $insertRecord('major change', now()->subMinute());
             $legitimateId = $insertRecord('Phase-2', now());
@@ -1269,7 +1289,7 @@ $defineChangeRequestNameUniquenessTests = function (string $migrationName, strin
 
             expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('major change-2')
                 ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2')
-                ->and(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeFalse();
+                ->and($featureClass::active())->toBeFalse();
 
             $insertRecord('Major Change', now());
 
@@ -1283,6 +1303,8 @@ describe('2026_11_03_100000_convert_change_request_types_name_to_citext_and_enfo
         '2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique',
         'change_request_types',
         ['number_of_required_approvals' => 1],
+        ChangeRequestTypeNameUniquenessFeature::class,
+        ChangeRequestStatusNameUniquenessFeature::class,
     );
 });
 
@@ -1291,5 +1313,7 @@ describe('2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_e
         '2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique',
         'change_request_statuses',
         ['classification' => 'new'],
+        ChangeRequestStatusNameUniquenessFeature::class,
+        ChangeRequestTypeNameUniquenessFeature::class,
     );
 });

@@ -34,7 +34,7 @@
 </COPYRIGHT>
 */
 
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestStatusNameUniquenessFeature;
 use Database\Migrations\Concerns\FixesDuplicateNames;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Query\Builder;
@@ -44,7 +44,7 @@ use Tpetry\PostgresqlEnhanced\Support\Facades\Schema;
 
 return new class () extends Migration {
     /*
-     * TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): after ChangeRequestTypeAndStatusNameUniquenessFeature is removed:
+     * TODO: Cleanup Task (change-request-status-name-uniqueness): after ChangeRequestStatusNameUniquenessFeature is removed:
      * - remove the `FixesDuplicateNames` trait, the `$chunkSize` and `$usesSoftDeletes` properties, the `buildDeduplicatedValue()` / `existingValueMatchPatterns()` overrides, and the `fixDuplicates()` call
      * - keep the citext column conversion and the unique index, they are permanent
      */
@@ -75,14 +75,14 @@ return new class () extends Migration {
                     ->where(fn (Builder $condition) => $condition->whereNull('deleted_at'));
             });
 
-            ChangeRequestTypeAndStatusNameUniquenessFeature::activate();
+            ChangeRequestStatusNameUniquenessFeature::activate();
         });
     }
 
     public function down(): void
     {
         DB::transaction(function (): void {
-            ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+            ChangeRequestStatusNameUniquenessFeature::deactivate();
 
             DB::statement("DROP INDEX IF EXISTS {$this->table}_name_unique");
 
@@ -110,6 +110,9 @@ return new class () extends Migration {
         $lower = mb_strtolower($baseValue);
 
         // Truncated candidates no longer start with the full base value, so match on a shorter prefix.
-        return [$lower, mb_substr($lower, 0, $this->maxLength - 15) . '%'];
+        // The prefix is escaped because backslash is the LIKE escape character in PostgreSQL, and `%` / `_` are wildcards.
+        $prefix = addcslashes(mb_substr($lower, 0, $this->maxLength - 15), '\\%_');
+
+        return [$lower, $prefix . '%'];
     }
 };

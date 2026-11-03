@@ -37,7 +37,7 @@
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages\CreateChangeRequestType;
 use AidingApp\ServiceManagement\Models\ChangeRequestType;
 use AidingApp\ServiceManagement\Tests\Tenant\Filament\Resources\ChangeRequestTypes\RequestFactories\CreateChangeRequestTypeRequestFactory;
-use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
+use App\Features\ChangeRequestTypeNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\Authenticatable;
 use App\Models\User;
@@ -92,10 +92,10 @@ it('validates the inputs', function (CreateChangeRequestTypeRequestFactory $data
     'name unique case insensitive' => [CreateChangeRequestTypeRequestFactory::new()->state(['name' => 'MAJOR CHANGE']), ['name' => 'unique']],
 ]);
 
-// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete this describe and the tests within
+// TODO: Cleanup Task (change-request-type-name-uniqueness): delete this describe and the tests within
 describe('name uniqueness feature flag', function (): void {
     it('does not apply the unique form rule when the feature is disabled', function (): void {
-        ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+        ChangeRequestTypeNameUniquenessFeature::deactivate();
 
         asSuperAdmin();
 
