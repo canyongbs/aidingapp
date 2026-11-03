@@ -102,7 +102,7 @@ it('leaves mail to an archived contact for the mail channel to suppress', functi
 it('suppresses a queued notification when the contact is archived before it sends', function (): void {
     ContactArchivingFeature::activate();
 
-    Queue::fake();
+    $queue = Queue::fake();
 
     $contact = Contact::factory()->create();
 
@@ -110,7 +110,7 @@ it('suppresses a queued notification when the contact is archived before it send
 
     $contact->archive();
 
-    Queue::pushed(SendQueuedNotifications::class)
+    $queue->pushed(SendQueuedNotifications::class)
         ->each(fn (SendQueuedNotifications $job) => $job->handle(app(ChannelManager::class)));
 
     expect(DatabaseMessage::query()->count())->toBe(0);
