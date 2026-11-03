@@ -60,6 +60,7 @@ use App\Models\Authenticatable;
 use App\Models\Concerns\HasPresence;
 use App\Models\Contracts\Educatable;
 use App\Models\User;
+use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use Carbon\Carbon;
 use DateTimeInterface;
 use Filament\Models\Contracts\HasName;
@@ -87,6 +88,7 @@ use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 class Contact extends Authenticatable implements Auditable, Educatable, HasFilamentResource, CanBeNotified, HasName
 {
     use AuditableTrait;
+    use CanBeArchived;
 
     /** @use HasFactory<ContactFactory> */
     use HasFactory;

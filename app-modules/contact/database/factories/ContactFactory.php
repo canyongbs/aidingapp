@@ -85,4 +85,11 @@ class ContactFactory extends Factory
             'email_bounce' => true,
         ]);
     }
+
+    public function archived(): static
+    {
+        return $this->state([
+            'archived_at' => now(),
+        ]);
+    }
 }
