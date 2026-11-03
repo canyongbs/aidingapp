@@ -38,21 +38,24 @@ namespace AidingApp\Project\Models;
 
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\Project\Database\Factories\PipelineFactory;
-use App\Models\BaseModel;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
 use CanyonGBS\Common\Models\Concerns\HasUserSaveTracking;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use OwenIt\Auditing\Contracts\Auditable;
+use Spatie\Multitenancy\Models\Concerns\UsesTenantConnection;
 
 /**
  * @mixin IdeHelperPipeline
  */
-class Pipeline extends BaseModel implements Auditable
+class Pipeline extends Model implements Auditable
 {
+    use UsesTenantConnection;
+
     /** @use HasFactory<PipelineFactory> */
     use HasFactory;
 
