@@ -39,9 +39,9 @@ namespace AidingApp\Contact\Filament\Resources\ContactResource\Schemas;
 use AidingApp\Contact\Filament\Tables\OrganizationsTable;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Rules\ContactEmailNotArchived;
 use App\Features\ContactArchivingFeature;
 use App\Filament\Forms\Components\AddressInput;
-use Closure;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TableSelect;
 use Filament\Forms\Components\TextInput;
@@ -49,7 +49,6 @@ use Filament\Schemas\Components\Component;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\Rules\Unique;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
@@ -153,21 +152,10 @@ class ContactFormSchema
                 ->maxLength(255)
                 // Stops at the first failure, so an archived match shows its own message instead of the generic unique one.
                 ->rule('bail', fn (): bool => ContactArchivingFeature::active())
-                ->rule(fn (?Contact $record): Closure => function (string $attribute, mixed $value, Closure $fail) use ($ignoreRecord, $record): void {
-                    if (! ContactArchivingFeature::active()) {
-                        return;
-                    }
-
-                    $archivedContactExists = Contact::query()
-                        ->onlyArchived()
-                        ->where('email', $value)
-                        ->when($ignoreRecord && $record instanceof Contact, fn (Builder $query) => $query->whereKeyNot($record->getKey()))
-                        ->exists();
-
-                    if ($archivedContactExists) {
-                        $fail('An archived contact with this email already exists.');
-                    }
-                })
+                ->rule(
+                    fn (?Contact $record): ContactEmailNotArchived => new ContactEmailNotArchived(ignore: $ignoreRecord ? $record : null),
+                    fn (): bool => ContactArchivingFeature::active(),
+                )
                 ->unique(ignoreRecord: $ignoreRecord, modifyRuleUsing: fn (Unique $rule) => $rule->withoutTrashed())
                 ->hintIcon(
                     fn (?Contact $record): ?string => $record?->getEmailHealthStatus()->getIcon(),
