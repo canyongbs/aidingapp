@@ -136,6 +136,10 @@ test('it allows registration flow when email domain matches an organization doma
 
     expect($response->json('authentication_url'))->toContain('/api/portal/register/');
 
+    parse_str((string) parse_url($response->json('authentication_url'), PHP_URL_QUERY), $query);
+
+    expect($query['email'] ?? null)->toBe('new.user@EXAMPLE.com');
+
     $authentication = PortalAuthentication::query()->latest('id')->first();
 
     expect($authentication)

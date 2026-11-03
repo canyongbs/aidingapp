@@ -79,7 +79,7 @@ test('it registers a new portal contact for matching organization domain', funct
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'new.contact@example.com'],
         absolute: false,
     );
 
@@ -136,7 +136,7 @@ it('unarchives and updates an archived contact with the same email', function ()
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'archived.contact@example.com'],
         absolute: false,
     );
 
@@ -196,7 +196,7 @@ it('fails to register with an archived contact\'s email when the contact archivi
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'archived.contact@example.com'],
         absolute: false,
     );
 
@@ -239,7 +239,7 @@ test('it does not rotate the csrf token shared with the admin panel', function (
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'new.contact@example.com'],
         absolute: false,
     );
 
@@ -285,7 +285,7 @@ test('it returns expired flag when portal authentication is expired', function (
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'expired.user@test.example.com'],
         absolute: false,
     );
 
@@ -322,7 +322,7 @@ test('it forbids registration when email domain does not match an enabled organi
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'user@not-allowed.com'],
         absolute: false,
     );
 
@@ -359,7 +359,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
 
     $allowedUrl = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $allowedAuthentication],
+        parameters: ['authentication' => $allowedAuthentication, 'email' => 'myemail@example.com'],
         absolute: false,
     );
 
@@ -386,7 +386,7 @@ test('it normalizes stored www domain and allows only base-domain email registra
 
     $blockedUrl = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $blockedAuthentication],
+        parameters: ['authentication' => $blockedAuthentication, 'email' => 'myemail@www.example.com'],
         absolute: false,
     );
 
@@ -417,7 +417,7 @@ test('it returns validation error when code is invalid', function (): void {
 
     $url = URL::signedRoute(
         name: 'api.portal.authenticate.register.embedded',
-        parameters: ['authentication' => $authentication],
+        parameters: ['authentication' => $authentication, 'email' => 'new.user@example.com'],
         absolute: false,
     );
 
@@ -433,6 +433,55 @@ test('it returns validation error when code is invalid', function (): void {
         ->assertStatus(422)
         ->assertJsonValidationErrors(['code']);
 });
+
+it('does not register with an email other than the one the code was sent to', function (array $signedParameters): void {
+    ContactArchivingFeature::activate();
+
+    Organization::factory()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    $archivedContact = Contact::factory()->archived()->create([
+        'email' => 'archived.contact@example.com',
+        'first_name' => 'Original',
+    ]);
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) 123456),
+        'created_at' => now(),
+    ]);
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.register.embedded',
+        parameters: ['authentication' => $authentication, ...$signedParameters],
+        absolute: false,
+    );
+
+    $contactCount = Contact::query()->count();
+
+    postJson($url, [
+        'email' => 'archived.contact@example.com',
+        'first_name' => 'Someone',
+        'last_name' => 'Else',
+        'mobile' => '+15550009999',
+        'code' => 123456,
+    ])
+        ->assertStatus(422)
+        ->assertJsonValidationErrors(['email' => 'The email must match the address the code was sent to.']);
+
+    $archivedContact->refresh();
+
+    expect(Contact::query()->count())->toBe($contactCount)
+        ->and($archivedContact->isArchived())->toBeTrue()
+        ->and($archivedContact->first_name)->toBe('Original');
+})->with([
+    'a different email' => [['email' => 'requester@example.com']],
+    'no email' => [[]],
+]);
 
 test('it generates registration url for unknown contact when organization domain matches', function (): void {
     Organization::factory()->create([
