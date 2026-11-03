@@ -58,12 +58,12 @@ class UpdateOrganizationRequest extends FormRequest
      */
     public function rules(): array
     {
+        // The route parameter is unavailable when Scramble generates the API documentation.
         $organization = $this->route('organization');
-
-        assert($organization instanceof Organization);
+        $organizationId = $organization instanceof Organization ? $organization->getKey() : null;
 
         return [
-            'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique(Organization::class, 'name')->ignore($organization->getKey())->withoutTrashed()],
+            'name' => ['sometimes', 'required', 'string', 'max:255', Rule::unique(Organization::class, 'name')->ignore($organizationId)->withoutTrashed()],
             'email' => ['nullable', 'string', 'email', 'max:255'],
             'phone_number' => ['nullable', 'string', 'max:255'],
             'website' => ['nullable', 'string', 'url', 'max:255'],
@@ -80,7 +80,7 @@ class UpdateOrganizationRequest extends FormRequest
             'facebook_url' => ['nullable', 'string', 'url', 'max:255'],
             'twitter_url' => ['nullable', 'string', 'url', 'max:255'],
             'domains' => ['nullable', 'array'],
-            'domains.*' => ['required', 'string', 'max:255', 'regex:/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', 'distinct', new UniqueOrganizationDomain($organization->getKey())],
+            'domains.*' => ['required', 'string', 'max:255', 'regex:/^(?!-)([a-zA-Z0-9-]{1,63}\.)+[a-zA-Z]{2,63}$/', 'distinct', new UniqueOrganizationDomain($organizationId)],
             'is_contact_generation_enabled' => ['sometimes', 'boolean'],
         ];
     }

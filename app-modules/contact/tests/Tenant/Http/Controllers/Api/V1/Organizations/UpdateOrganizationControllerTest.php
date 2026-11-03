@@ -34,6 +34,7 @@
 </COPYRIGHT>
 */
 
+use AidingApp\Contact\Http\Requests\Api\V1\Organizations\UpdateOrganizationRequest;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use App\Models\SystemUser;
@@ -266,4 +267,9 @@ it('returns not found for a soft deleted organization', function () use ($acting
 
     patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
         ->assertNotFound();
+});
+
+it('can build its validation rules without a bound route, as the API documentation generator does', function (): void {
+    expect((new UpdateOrganizationRequest())->rules())
+        ->toHaveKeys(['name', 'domains', 'domains.*']);
 });
