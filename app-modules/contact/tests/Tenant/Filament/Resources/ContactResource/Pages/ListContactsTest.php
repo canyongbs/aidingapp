@@ -402,9 +402,8 @@ describe('archived contacts', function (): void {
 
         $resultUrls = ContactResource::getGlobalSearchResults($archivedContact->full_name)->pluck('url');
 
-        expect($resultUrls)
-            ->toContain(ContactResource::getUrl('view', ['record' => $contact]))
-            ->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
+        expect($resultUrls)->toContain(ContactResource::getUrl('view', ['record' => $contact]));
+        expect($resultUrls)->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
     });
 });
 
