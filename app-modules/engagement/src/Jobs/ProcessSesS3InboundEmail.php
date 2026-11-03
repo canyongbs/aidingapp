@@ -710,8 +710,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             return $this->restoreArchivedContact($archivedContact, $sender, $senderName, $organization);
         }
 
-        $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-        $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+        [$firstName, $lastName] = $this->splitSenderName($senderName);
 
         $contact = Contact::query()->make([
             'email' => $sender,
@@ -737,8 +736,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         // A bare From address is parsed with the address itself as its display name.
         if ($senderName !== '' && Str::lower($senderName) !== Str::lower($sender)) {
-            $firstName = Str::before($senderName, ' ') ?: 'Unknown';
-            $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+            [$firstName, $lastName] = $this->splitSenderName($senderName);
 
             $contact->first_name = $firstName;
             $contact->last_name = $lastName;
@@ -753,6 +751,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         $contact->unarchive();
 
         return $contact;
+    }
+
+    /**
+     * @return array{string, string}
+     */
+    protected function splitSenderName(string $senderName): array
+    {
+        return [
+            Str::before($senderName, ' ') ?: 'Unknown',
+            Str::after($senderName, ' ') ?: 'Unknown',
+        ];
     }
 
     protected function handleLegacyAddress(Tenant $tenant, Parser $parser, string $sender): void
