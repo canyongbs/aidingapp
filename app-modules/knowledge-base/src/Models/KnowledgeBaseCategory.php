@@ -40,7 +40,6 @@ use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseCategoryFactory;
 use AidingApp\KnowledgeBase\Observers\KnowledgeBaseCategoryObserver;
 use App\Models\BaseModel;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -119,10 +118,5 @@ class KnowledgeBaseCategory extends BaseModel implements Auditable
         }
 
         return implode(' > ', $names);
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

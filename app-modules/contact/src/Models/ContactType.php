@@ -41,7 +41,6 @@ use AidingApp\Contact\Database\Factories\ContactTypeFactory;
 use AidingApp\Contact\Observers\ContactTypeObserver;
 use App\Models\BaseModel;
 use CanyonGBS\Common\Enums\Color;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -99,10 +98,5 @@ class ContactType extends BaseModel implements Auditable
             'color' => Color::class,
             'is_default' => 'boolean',
         ];
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

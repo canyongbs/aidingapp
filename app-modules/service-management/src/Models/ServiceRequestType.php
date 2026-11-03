@@ -54,7 +54,6 @@ use AidingApp\ServiceManagement\Observers\ServiceRequestTypeObserver;
 use App\Models\BaseModel;
 use App\Models\User;
 use CanyonGBS\Common\Models\Concerns\CanBeArchived;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Attributes\ObservedBy;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -399,10 +398,5 @@ class ServiceRequestType extends BaseModel implements Auditable
             'email_automatic_creation_contact_create_condition' => EmailAutomaticCreationContactCreateCondition::class,
             'is_visibility_restricted' => 'boolean',
         ];
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }

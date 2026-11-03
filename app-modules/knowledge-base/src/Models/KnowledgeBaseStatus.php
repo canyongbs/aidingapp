@@ -39,7 +39,6 @@ namespace AidingApp\KnowledgeBase\Models;
 use AidingApp\Audit\Models\Concerns\Auditable as AuditableTrait;
 use AidingApp\KnowledgeBase\Database\Factories\KnowledgeBaseStatusFactory;
 use App\Models\BaseModel;
-use DateTimeInterface;
 use Illuminate\Database\Eloquent\Concerns\HasVersion4Uuids as HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -68,10 +67,5 @@ class KnowledgeBaseStatus extends BaseModel implements Auditable
     public function knowledgeBaseItems(): HasMany
     {
         return $this->hasMany(KnowledgeBaseItem::class, 'status_id');
-    }
-
-    protected function serializeDate(DateTimeInterface $date): string
-    {
-        return $date->format(config('project.datetime_format') ?? 'Y-m-d H:i:s');
     }
 }
