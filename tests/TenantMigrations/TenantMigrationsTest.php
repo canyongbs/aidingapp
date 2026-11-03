@@ -46,6 +46,7 @@ use AidingApp\Project\Models\Pipeline;
 use AidingApp\Project\Models\PipelineStage;
 use AidingApp\Project\Models\Project;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
+use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
 use App\Features\EmailTemplateNameUniquenessFeature;
 use App\Features\KnowledgeBaseCategoryNameUniquenessFeature;
 use App\Features\MaintenanceProviderNameUniquenessFeature;
@@ -1154,4 +1155,141 @@ describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', func
         'missing event object' => [EmailMessageEventType::DeliveryDelay, ['mail' => ['timestamp' => '2016-10-19T23:20:52.240Z']]],
         'unparseable timestamp' => [EmailMessageEventType::Delivery, ['delivery' => ['timestamp' => 'not-a-date']]],
     ]);
+});
+
+// TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+$defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns): void {
+    $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
+
+    $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
+        $id = (string) Str::uuid();
+
+        DB::table($table)->insert([
+            'id' => $id,
+            'name' => $name,
+            ...$extraColumns,
+            'created_at' => $createdAt,
+            'updated_at' => $createdAt,
+            'deleted_at' => $deletedAt,
+        ]);
+
+        return $id;
+    };
+
+    it('rewrites case-insensitive duplicate names with a numeric suffix, keeps the oldest, and activates the feature flag', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $firstId = $insertRecord('Major Change', now()->subMinutes(3));
+            $secondId = $insertRecord('major change', now()->subMinutes(2));
+            $thirdId = $insertRecord('MAJOR CHANGE', now()->subMinute());
+            $existingSuffixedId = $insertRecord('Major Change-2', now()->subMinutes(4));
+            $uniqueId = $insertRecord('Minor Change', now()->subMinutes(5));
+
+            ChangeRequestTypeAndStatusNameUniquenessFeature::deactivate();
+
+            expect(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeFalse();
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $name = fn (string $id): string => DB::table($table)->where('id', $id)->value('name');
+
+            expect($name($firstId))->toBe('Major Change')
+                ->and($name($secondId))->toBe('major change-3')
+                ->and($name($thirdId))->toBe('MAJOR CHANGE-4')
+                ->and($name($existingSuffixedId))->toBe('Major Change-2')
+                ->and($name($uniqueId))->toBe('Minor Change')
+                ->and(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeTrue();
+        });
+    });
+
+    it('keeps renamed duplicates within the 255 character column limit', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $firstId = $insertRecord(str_repeat('A', 255), now()->subMinutes(2));
+            $secondId = $insertRecord(str_repeat('a', 255), now()->subMinute());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $secondName = DB::table($table)->where('id', $secondId)->value('name');
+
+            expect(DB::table($table)->where('id', $firstId)->value('name'))->toBe(str_repeat('A', 255))
+                ->and($secondName)->toBe(str_repeat('a', 253) . '-2')
+                ->and(mb_strlen($secondName))->toBe(255);
+        });
+    });
+
+    it('leaves soft-deleted duplicates untouched', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $keptId = $insertRecord('Major Change', now()->subMinutes(2));
+            $trashedId = $insertRecord('major change', now()->subMinute(), now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $keptId)->value('name'))->toBe('Major Change')
+                ->and(DB::table($table)->where('id', $trashedId)->value('name'))->toBe('major change');
+        });
+    });
+
+    it('enforces case-insensitive uniqueness among non-trashed records at the database level', function () use ($migrationName, $migrationPath, $insertRecord): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Major Change', now());
+
+            expect(fn (): string => $insertRecord('MAJOR CHANGE', now()))
+                ->toThrow(UniqueConstraintViolationException::class);
+        });
+    });
+
+    it('allows a name freed by a soft-deleted record to be reused at the database level', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $insertRecord('Major Change', now()->subMinute(), now());
+            $insertRecord('MAJOR CHANGE', now());
+
+            expect(DB::table($table)->count())->toBe(2);
+        });
+    });
+
+    it('drops the unique index and deactivates the feature flag on rollback without altering stored names', function () use ($migrationName, $migrationPath, $insertRecord, $table): void {
+        isolatedMigration($migrationName, function () use ($migrationPath, $insertRecord, $table): void {
+            $insertRecord('Major Change', now()->subMinutes(2));
+            $secondId = $insertRecord('major change', now()->subMinute());
+            $legitimateId = $insertRecord('Phase-2', now());
+
+            $migrate = Artisan::call('migrate', ['--path' => $migrationPath]);
+            expect($migrate)->toBe(Command::SUCCESS);
+
+            $rollback = Artisan::call('migrate:rollback', ['--path' => $migrationPath]);
+            expect($rollback)->toBe(Command::SUCCESS);
+
+            expect(DB::table($table)->where('id', $secondId)->value('name'))->toBe('major change-2')
+                ->and(DB::table($table)->where('id', $legitimateId)->value('name'))->toBe('Phase-2')
+                ->and(ChangeRequestTypeAndStatusNameUniquenessFeature::active())->toBeFalse();
+
+            $insertRecord('Major Change', now());
+
+            expect(DB::table($table)->where('name', 'Major Change')->count())->toBe(2);
+        });
+    });
+};
+
+describe('2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
+    $defineChangeRequestNameUniquenessTests(
+        '2026_11_03_100000_convert_change_request_types_name_to_citext_and_enforce_unique',
+        'change_request_types',
+        ['number_of_required_approvals' => 1],
+    );
+});
+
+describe('2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique', function () use ($defineChangeRequestNameUniquenessTests): void {
+    $defineChangeRequestNameUniquenessTests(
+        '2026_11_03_100001_convert_change_request_statuses_name_to_citext_and_enforce_unique',
+        'change_request_statuses',
+        ['classification' => 'new'],
+    );
 });
