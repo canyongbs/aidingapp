@@ -37,6 +37,7 @@
 namespace AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\Pages;
 
 use AidingApp\ServiceManagement\Filament\Resources\ChangeRequestTypes\ChangeRequestTypeResource;
+use App\Features\ChangeRequestTypeAndStatusNameUniquenessFeature;
 use App\Filament\Forms\Components\UserSelect;
 use App\Models\User;
 use Filament\Forms\Components\Select;
@@ -44,6 +45,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use Illuminate\Validation\Rules\Unique;
 
 class CreateChangeRequestType extends CreateRecord
 {
@@ -58,7 +60,13 @@ class CreateChangeRequestType extends CreateRecord
                     ->schema([
                         TextInput::make('name')
                             ->required()
-                            ->string(),
+                            ->string()
+                            ->maxLength(255)
+                            // TODO: Cleanup Task (change-request-type-and-status-name-uniqueness): replace this `when()` with `->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed())` once the flag is removed.
+                            ->when(
+                                ChangeRequestTypeAndStatusNameUniquenessFeature::active(),
+                                fn (TextInput $field): TextInput => $field->unique(modifyRuleUsing: fn (Unique $rule): Unique => $rule->withoutTrashed()),
+                            ),
                         Select::make('number_of_required_approvals')
                             ->options([
                                 '0' => '0',
