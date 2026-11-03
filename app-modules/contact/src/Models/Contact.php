@@ -170,6 +170,11 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
         return ! $this->email_bounce;
     }
 
+    public function isSuppressedByArchival(): bool
+    {
+        return ContactArchivingFeature::active() && $this->isArchived();
+    }
+
     /**
      * @return BelongsTo<User, $this>
      */

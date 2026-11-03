@@ -95,6 +95,28 @@ class MailChannel extends BaseMailChannel
 
         $emailMessage->save();
 
+        if ($notifiable instanceof CanBeNotified && $notifiable->isSuppressedByArchival()) {
+            $result = new EmailChannelResultData(
+                success: false,
+            );
+
+            try {
+                $emailMessage->events()->create([
+                    'type' => EmailMessageEventType::SuppressedByArchived,
+                    'payload' => $result->toArray(),
+                    'occurred_at' => now(),
+                ]);
+
+                if ($notification instanceof HasAfterSendHook) {
+                    $notification->afterSend($notifiable, $emailMessage, $result);
+                }
+            } catch (Throwable $exception) {
+                report($exception);
+            }
+
+            return;
+        }
+
         if ($notifiable instanceof CanBeNotified && (! $notifiable->canReceiveEmail())) {
             $result = new EmailChannelResultData(
                 success: false,
