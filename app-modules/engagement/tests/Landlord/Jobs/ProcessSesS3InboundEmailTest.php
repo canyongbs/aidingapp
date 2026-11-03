@@ -1055,7 +1055,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    $runInboundEmailForArchivedContact = function (?string $fromHeader, bool $hasOrganization = true): array {
+    $runInboundEmailForArchivedContact = function (?string $fromHeader, bool $hasOrganization = true, string $fixture = 's3_email_for_service_request', string $replacedFromHeader = 'From: Kevin Ullyott <kevin.ullyott@canyongbs.com>'): array {
         $tenant = Tenant::query()->firstOrFail();
 
         [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization] = $tenant->execute(function () use ($hasOrganization): array {
@@ -1107,10 +1107,10 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $modulePath = resolve(ModulePath::class);
 
-        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+        $content = file_get_contents($modulePath('engagement', "tests/Landlord/Fixtures/{$fixture}"));
 
         if ($fromHeader !== null) {
-            $replaced = str_replace('From: Kevin Ullyott <kevin.ullyott@canyongbs.com>', $fromHeader, $content);
+            $replaced = str_replace($replacedFromHeader, $fromHeader, $content);
 
             expect($replaced)->not->toBe($content);
 
@@ -1199,6 +1199,30 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $serviceRequest = ServiceRequest::query()->sole();
 
         expect($serviceRequest->respondent->is($archivedContact))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+    });
+
+    it('keeps an archived contact\'s names when a forwarded email\'s original sender has no name', function () use ($runInboundEmailForArchivedContact): void {
+        [
+            'archivedContact' => $archivedContact,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(
+            'From: kevin.ullyott@canyongbs.com',
+            fixture: 's3_email_forwarded_gmail',
+            replacedFromHeader: 'From: Jordan Student <student@example.com>',
+        );
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->first_name)->toBe('Old')
+            ->and($archivedContact->last_name)->toBe('Name')
+            ->and($archivedContact->full_name)->toBe('Old Name');
+
+        expect(ServiceRequest::query()->sole()->respondent->is($archivedContact))->toBeTrue();
 
         $filesystem->assertMissing('s3_email');
     });

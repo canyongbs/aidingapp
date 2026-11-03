@@ -538,7 +538,12 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                     }
                 }
 
-                $contacts = $contacts->add($this->buildContactFromSender($effectiveSender, $effectiveSenderName, $organization));
+                $contacts = $contacts->add($this->buildContactFromSender(
+                    $effectiveSender,
+                    $effectiveSenderName,
+                    $organization,
+                    restoredContactSenderName: $forwarded === null ? $effectiveSenderName : $forwarded['senderName'],
+                ));
             }
 
             $serviceRequestStatus = ServiceRequestStatus::query()
@@ -695,7 +700,10 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         return trim(implode("\n", array_slice($lines, $index)));
     }
 
-    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null): Contact
+    /**
+     * @param ?string $restoredContactSenderName The name to give a restored archived contact. Unlike `$senderName`, it never falls back to a forwarder's name.
+     */
+    protected function buildContactFromSender(string $sender, ?string $senderName, ?Organization $organization = null, ?string $restoredContactSenderName = null): Contact
     {
         $senderName = trim((string) $senderName);
 
@@ -704,7 +712,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             : null;
 
         if ($archivedContact !== null) {
-            return $this->restoreArchivedContact($archivedContact, $sender, $senderName, $organization);
+            return $this->restoreArchivedContact($archivedContact, $sender, trim((string) $restoredContactSenderName), $organization);
         }
 
         [$firstName, $lastName] = $this->splitSenderName($senderName);
