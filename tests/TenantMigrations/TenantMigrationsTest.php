@@ -1159,7 +1159,8 @@ describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', func
     ]);
 });
 
-// TODO: Cleanup Task (change-request-type-name-uniqueness, change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+// TODO: Cleanup Task (change-request-type-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
+// TODO: Cleanup Task (change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
 $defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
     assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
     assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
