@@ -61,7 +61,8 @@ class ContactsRelationManager extends RelationManager
                 TextColumn::make('mobile'),
             ])
             ->headerActions([
-                AssociateAction::make(),
+                AssociateAction::make()
+                    ->recordSelectOptionsQuery(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()),
             ])
             ->recordActions([
                 DissociateAction::make(),
