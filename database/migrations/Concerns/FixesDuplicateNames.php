@@ -67,12 +67,31 @@ trait FixesDuplicateNames
     {
         $lower = Str::lower($baseValue);
 
-        return [$lower, $lower . '-%'];
+        // Deduplicated values are truncated so they fit within the column length. When the base
+        // value is long enough that suffixing it would require truncation, the generated names
+        // share a truncated prefix rather than the full base value, so match on that prefix to
+        // detect pre-existing truncated duplicates.
+        $prefixLength = min(Str::length($lower), $this->maxValueLength() - 2);
+        $prefix = Str::substr($lower, 0, $prefixLength);
+
+        return [$lower, $prefix . '-%'];
     }
 
     protected function buildDeduplicatedValue(string $originalValue, int $counter): string
     {
-        return "{$originalValue}-{$counter}";
+        $suffix = "-{$counter}";
+
+        // Truncate the base value so the suffixed result never exceeds the column length. Without
+        // this, two maximum-length values differing only by case would produce an over-length
+        // replacement and abort the migration before the citext conversion.
+        $truncatedValue = Str::substr($originalValue, 0, max(0, $this->maxValueLength() - Str::length($suffix)));
+
+        return "{$truncatedValue}{$suffix}";
+    }
+
+    protected function maxValueLength(): int
+    {
+        return 255;
     }
 
     protected function deduplicatedValuePattern(): string
@@ -274,5 +293,118 @@ trait FixesDuplicateNames
                     });
                 }
             });
+    }
+
+    /**
+     * Reconcile case-insensitive duplicate values across every row, including soft-deleted ones, so a
+     * global (non-partial) unique constraint can be restored. The first row in each group is kept and
+     * the rest are suffixed. Live rows are preferred as the keeper, so a live row that reused a name
+     * freed up by a soft-deleted row keeps its exact value while the soft-deleted row is renamed.
+     *
+     * Intended for down() on migrations whose up() replaced a global unique index with a partial one
+     * that ignores soft-deleted rows, where the partial index permits live/soft-deleted exact-name
+     * collisions that would otherwise break the restored global constraint.
+     */
+    private function reconcileDuplicatesAcrossAllRows(): void
+    {
+        /** @var array<int, string> $groupByColumns */
+        $groupByColumns = $this->groupByColumns ?? []; // @phpstan-ignore property.notFound
+
+        $duplicates = DB::table($this->table)
+            ->select([
+                ...$groupByColumns,
+                DB::raw("LOWER({$this->column}) as lower_name"),
+            ])
+            ->groupBy([
+                ...$groupByColumns,
+                DB::raw("LOWER({$this->column})"),
+            ])
+            ->havingRaw('COUNT(*) > 1')
+            ->get();
+
+        if ($duplicates->isEmpty()) {
+            return;
+        }
+
+        foreach ($duplicates as $duplicate) {
+            $this->reconcileDuplicateGroupAcrossAllRows($duplicate->lower_name, (array) $duplicate, $groupByColumns);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $groupValues
+     * @param  array<int, string>  $groupByColumns
+     */
+    private function reconcileDuplicateGroupAcrossAllRows(string $duplicateName, array $groupValues, array $groupByColumns): void
+    {
+        $recordsQuery = DB::table($this->table)
+            ->select('id', $this->column, 'created_at', 'deleted_at')
+            ->whereRaw("LOWER({$this->column}) = ?", [$duplicateName]);
+
+        foreach ($groupByColumns as $col) {
+            $recordsQuery->where($col, $groupValues[$col]);
+        }
+
+        // Prefer a live row as the keeper so a live row that reused a freed-up name keeps its exact
+        // value; only the remaining (soft-deleted) collisions are suffixed.
+        $records = $recordsQuery
+            ->orderByRaw('deleted_at IS NULL DESC')
+            ->orderBy('created_at', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
+
+        if ($records->count() <= 1) {
+            return;
+        }
+
+        /** @var string $baseName */
+        $baseName = $records->first()->{$this->column};
+
+        $existingNamesQuery = DB::table($this->table);
+
+        foreach ($groupByColumns as $col) {
+            $existingNamesQuery->where($col, $groupValues[$col]);
+        }
+
+        [$existingExact, $existingLike] = $this->existingValueMatchPatterns($baseName);
+
+        /** @var array<string, int> $existingNames */
+        $existingNames = $existingNamesQuery
+            ->where(function (Builder $query) use ($existingExact, $existingLike) {
+                $query->whereRaw("LOWER({$this->column}) = ?", [$existingExact])
+                    ->orWhereRaw("LOWER({$this->column}) LIKE ?", [$existingLike]);
+            })
+            ->pluck($this->column)
+            /** @phpstan-ignore argument.type */
+            ->map(fn (mixed $name): string => Str::lower(strval($name)))
+            ->flip()
+            ->all();
+
+        $updates = [];
+        $counter = 2;
+
+        foreach ($records->skip(1) as $record) {
+            /** @var string $originalName */
+            $originalName = $record->{$this->column};
+            $newName = $this->buildDeduplicatedValue($originalName, $counter);
+
+            while (isset($existingNames[Str::lower($newName)])) {
+                $counter++;
+                $newName = $this->buildDeduplicatedValue($originalName, $counter);
+            }
+
+            $updates[$record->id] = $newName;
+            $existingNames[Str::lower($newName)] = true;
+            $counter++;
+
+            if (count($updates) >= $this->chunkSize) {
+                $this->batchUpdate($updates);
+                $updates = [];
+            }
+        }
+
+        if (! empty($updates)) {
+            $this->batchUpdate($updates);
+        }
     }
 }
