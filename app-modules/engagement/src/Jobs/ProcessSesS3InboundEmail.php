@@ -58,6 +58,7 @@ use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
 use AidingApp\ServiceManagement\Models\ServiceRequestUpdate;
 use AidingApp\ServiceManagement\Models\TenantServiceRequestTypeDomain;
+use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use Aws\Crypto\KmsMaterialsProviderV3;
 use Aws\Kms\KmsClient;
@@ -701,6 +702,14 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         $senderName = trim((string) $senderName);
 
+        $archivedContact = ContactArchivingFeature::active()
+            ? Contact::query()->onlyArchived()->where('email', $sender)->first()
+            : null;
+
+        if ($archivedContact !== null) {
+            return $this->restoreArchivedContact($archivedContact, $sender, $senderName, $organization);
+        }
+
         $firstName = Str::before($senderName, ' ') ?: 'Unknown';
         $lastName = Str::after($senderName, ' ') ?: 'Unknown';
 
@@ -720,6 +729,28 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
         }
 
         $contact->save();
+
+        return $contact;
+    }
+
+    protected function restoreArchivedContact(Contact $contact, string $sender, string $senderName, ?Organization $organization): Contact
+    {
+        // A bare From address is parsed with the address itself as its display name.
+        if ($senderName !== '' && Str::lower($senderName) !== Str::lower($sender)) {
+            $firstName = Str::before($senderName, ' ') ?: 'Unknown';
+            $lastName = Str::after($senderName, ' ') ?: 'Unknown';
+
+            $contact->first_name = $firstName;
+            $contact->last_name = $lastName;
+            $contact->full_name = $firstName . ' ' . $lastName;
+        }
+
+        if ($organization !== null && blank($contact->organization_id)) {
+            $contact->organization()->associate($organization);
+        }
+
+        $contact->save();
+        $contact->unarchive();
 
         return $contact;
     }

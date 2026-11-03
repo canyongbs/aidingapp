@@ -1054,6 +1054,131 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
+    $runInboundEmailForArchivedContact = function (?string $fromHeader): array {
+        $tenant = Tenant::query()->firstOrFail();
+
+        [$archivedContact, $otherOrganization, $serviceRequestType] = $tenant->execute(function (): array {
+            seed(ContactTypeSeeder::class);
+
+            ContactArchivingFeature::activate();
+
+            Organization::factory()->create([
+                'domains' => ['canyongbs.com'],
+            ]);
+
+            $otherOrganization = Organization::factory()->create([
+                'domains' => ['other-domain.test'],
+            ]);
+
+            $archivedContact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+                'first_name' => 'Old',
+                'last_name' => 'Name',
+                'full_name' => 'Old Name',
+                'organization_id' => $otherOrganization->getKey(),
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => true,
+                ]);
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
+            ]);
+
+            return [$archivedContact, $otherOrganization, $serviceRequestType];
+        });
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        if ($fromHeader !== null) {
+            $replaced = str_replace('From: Kevin Ullyott <kevin.ullyott@canyongbs.com>', $fromHeader, $content);
+
+            expect($replaced)->not->toBe($content);
+
+            $content = $replaced;
+        }
+
+        $filesystem->putFileAs('', UploadedFile::fake()->createWithContent('s3_email', $content), 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        return [$archivedContact, $otherOrganization, $serviceRequestType];
+    };
+
+    it('unarchives an archived contact instead of creating one for a service request', function () use ($runInboundEmailForArchivedContact): void {
+        [$archivedContact, $otherOrganization, $serviceRequestType] = $runInboundEmailForArchivedContact(null);
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->first_name)->toBe('Kevin')
+            ->and($archivedContact->last_name)->toBe('Ullyott')
+            ->and($archivedContact->full_name)->toBe('Kevin Ullyott')
+            ->and($archivedContact->organization->is($otherOrganization))->toBeTrue();
+
+        $serviceRequests = ServiceRequest::all();
+
+        expect($serviceRequests)->toHaveCount(1);
+
+        $serviceRequest = $serviceRequests->first();
+
+        assert($serviceRequest instanceof ServiceRequest);
+
+        expect($serviceRequest->respondent->is($archivedContact))->toBeTrue()
+            ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+    });
+
+    it('keeps an archived contact\'s names when the inbound email has no sender name', function () use ($runInboundEmailForArchivedContact): void {
+        [$archivedContact] = $runInboundEmailForArchivedContact('From: kevin.ullyott@canyongbs.com');
+
+        expect(Contact::query()->count())->toBe(1);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->first_name)->toBe('Old')
+            ->and($archivedContact->last_name)->toBe('Name')
+            ->and($archivedContact->full_name)->toBe('Old Name');
+
+        $serviceRequest = ServiceRequest::query()->sole();
+
+        expect($serviceRequest->respondent->is($archivedContact))->toBeTrue();
+    });
+
     it('properly creates a service request for a matching contact', function (): void {
         $tenant = Tenant::query()->firstOrFail();
 
