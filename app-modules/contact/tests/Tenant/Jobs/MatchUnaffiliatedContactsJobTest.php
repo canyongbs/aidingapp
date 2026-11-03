@@ -258,12 +258,16 @@ it('does not run reconciliation when another reconciliation for the tenant holds
     $job->assertNotReleased();
 });
 
-it('does not link an archived contact to an organization', function (): void {
+it('links live contacts but not archived contacts to an organization', function (): void {
     ContactArchivingFeature::activate();
 
     $organization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->archived()->create([
         'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+    $liveContact = Contact::factory()->create([
+        'email' => 'colleague@example.com',
         'organization_id' => null,
     ]);
     $organization->domains = [['domain' => 'example.com']];
@@ -272,7 +276,8 @@ it('does not link an archived contact to an organization', function (): void {
     $connection->enableQueryLog();
     $connection->flushQueryLog();
 
-    expect($contact->refresh()->organization_id)->toBeNull();
+    expect($contact->refresh()->organization_id)->toBeNull()
+        ->and($liveContact->refresh()->organization_id)->toBeNull();
 
     try {
         (new MatchUnaffiliatedContactsJob())->handle(app(MatchContactToOrganization::class), app(OrganizationEmailDomainLookup::class));
@@ -283,5 +288,6 @@ it('does not link an archived contact to an organization', function (): void {
     }
 
     expect($contact->refresh()->organization_id)->toBeNull()
-        ->and($queries->filter(fn (string $query): bool => str_contains($query, 'for update')))->toHaveCount(0);
+        ->and($liveContact->refresh()->organization_id)->toBe($organization->getKey())
+        ->and($queries->filter(fn (string $query): bool => str_contains($query, 'for update')))->toHaveCount(1);
 });
