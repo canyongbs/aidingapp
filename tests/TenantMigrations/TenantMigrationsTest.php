@@ -59,6 +59,7 @@ use App\Features\ServiceRequestFileUploadTypeFeature;
 use App\Features\SystemUserNameUniquenessFeature;
 use App\Models\SystemUser;
 use App\Models\User;
+use App\Support\AbstractFeatureFlag;
 use Carbon\CarbonInterface;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
@@ -1160,6 +1161,8 @@ describe('2026_10_30_003135_tmp_backfill_email_message_events_occurred_at', func
 
 // TODO: Cleanup Task (change-request-type-name-uniqueness, change-request-status-name-uniqueness): delete the helper below, the two describes that follow, and the tests within
 $defineChangeRequestNameUniquenessTests = function (string $migrationName, string $table, array $extraColumns, string $featureClass, string $otherFeatureClass): void {
+    assert(is_subclass_of($featureClass, AbstractFeatureFlag::class));
+    assert(is_subclass_of($otherFeatureClass, AbstractFeatureFlag::class));
     $migrationPath = "app-modules/service-management/database/migrations/{$migrationName}.php";
 
     $insertRecord = function (string $name, CarbonInterface $createdAt, ?CarbonInterface $deletedAt = null) use ($table, $extraColumns): string {
