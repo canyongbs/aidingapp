@@ -1,0 +1,235 @@
+<?php
+
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use App\Models\SystemUser;
+use Laravel\Sanctum\Sanctum;
+
+use function Pest\Laravel\patchJson;
+
+$actingAsOrganizationUpdater = function (): SystemUser {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.update');
+    Sanctum::actingAs($user, ['api']);
+
+    return $user;
+};
+
+beforeEach(function (): void {
+    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
+    config()->set('audit.enabled', false);
+});
+
+it('is gated with proper access control', function (): void {
+    $organization = Organization::factory()->create(['name' => 'Original']);
+
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.*.update');
+    Sanctum::actingAs($user, ['api']);
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertForbidden();
+
+    expect($organization->refresh()->name)->toBe('Original');
+});
+
+it('checks permissions before validating the request', function (): void {
+    $organization = Organization::factory()->create();
+
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => ''])
+        ->assertForbidden();
+});
+
+it('can update every attribute', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+    $industry = OrganizationIndustry::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
+        'name' => 'Updated Name',
+        'email' => 'updated@acme.test',
+        'phone_number' => '+15555550101',
+        'website' => 'https://updated.test',
+        'industry_id' => $industry->getKey(),
+        'description' => 'Updated description',
+        'number_of_employees' => 10,
+        'address' => '2 Road Runner Way',
+        'city' => 'Tucson',
+        'state' => 'AZ',
+        'postalcode' => '85701',
+        'country' => 'USA',
+        'linkedin_url' => 'https://linkedin.com/company/updated',
+        'facebook_url' => 'https://facebook.com/updated',
+        'twitter_url' => 'https://twitter.com/updated',
+        'domains' => ['updated.test'],
+        'is_contact_generation_enabled' => true,
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.id', $organization->getKey())
+        ->assertJsonPath('data.name', 'Updated Name')
+        ->assertJsonPath('data.industry.id', $industry->getKey())
+        ->assertJsonPath('data.domains', ['updated.test'])
+        ->assertJsonPath('data.is_contact_generation_enabled', true);
+
+    expect($organization->refresh()->only([
+        'name', 'email', 'phone_number', 'website', 'industry_id', 'description', 'number_of_employees',
+        'address', 'city', 'state', 'postalcode', 'country', 'linkedin_url', 'facebook_url', 'twitter_url',
+        'domains', 'is_contact_generation_enabled',
+    ]))->toBe([
+        'name' => 'Updated Name',
+        'email' => 'updated@acme.test',
+        'phone_number' => '+15555550101',
+        'website' => 'https://updated.test',
+        'industry_id' => $industry->getKey(),
+        'description' => 'Updated description',
+        'number_of_employees' => 10,
+        'address' => '2 Road Runner Way',
+        'city' => 'Tucson',
+        'state' => 'AZ',
+        'postalcode' => '85701',
+        'country' => 'USA',
+        'linkedin_url' => 'https://linkedin.com/company/updated',
+        'facebook_url' => 'https://facebook.com/updated',
+        'twitter_url' => 'https://twitter.com/updated',
+        'domains' => [['domain' => 'updated.test']],
+        'is_contact_generation_enabled' => true,
+    ]);
+});
+
+it('only updates the attributes that are provided', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [['domain' => 'acme.test']],
+    ]);
+    $original = $organization->only(['email', 'industry_id', 'type_id', 'city', 'domains', 'is_contact_generation_enabled']);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Only Name'])
+        ->assertOk();
+
+    $organization->refresh();
+
+    expect($organization->name)->toBe('Only Name');
+    expect($organization->only(['email', 'industry_id', 'type_id', 'city', 'domains', 'is_contact_generation_enabled']))
+        ->toBe($original);
+});
+
+it('can clear nullable attributes by providing null', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'acme.test']]]);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
+        'email' => null,
+        'industry_id' => null,
+        'type_id' => null,
+        'number_of_employees' => null,
+        'domains' => null,
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.industry', null)
+        ->assertJsonPath('data.type', null)
+        ->assertJsonPath('data.domains', []);
+
+    expect($organization->refresh()->only(['email', 'industry_id', 'type_id', 'number_of_employees', 'domains']))
+        ->toBe([
+            'email' => null,
+            'industry_id' => null,
+            'type_id' => null,
+            'number_of_employees' => null,
+            'domains' => null,
+        ]);
+});
+
+it('can clear the domains by providing an empty array', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'acme.test']]]);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['domains' => []])
+        ->assertOk()
+        ->assertJsonPath('data.domains', []);
+});
+
+it('allows an organization to keep its own name and domains', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create(['name' => 'Acme', 'domains' => [['domain' => 'acme.test']]]);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
+        'name' => 'Acme',
+        'domains' => ['acme.test', 'acme.org'],
+    ])
+        ->assertOk()
+        ->assertJsonPath('data.domains', ['acme.test', 'acme.org']);
+});
+
+it('validates the request', function (array $data, array $errors) use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), $data)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($errors);
+})->with([
+    'name cannot be null' => [['name' => null], ['name']],
+    'name must be a string' => [['name' => 123], ['name']],
+    'name is too long' => [['name' => str_repeat('a', 256)], ['name']],
+    'email must be an email' => [['email' => 'nope'], ['email']],
+    'website must be a url' => [['website' => 'nope'], ['website']],
+    'industry_id must be a uuid' => [['industry_id' => 'nope'], ['industry_id']],
+    'type_id must exist' => [['type_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['type_id']],
+    'number_of_employees must be an integer' => [['number_of_employees' => 'many'], ['number_of_employees']],
+    'domains must be valid' => [['domains' => ['not a domain']], ['domains.0']],
+    'domains must be distinct' => [['domains' => ['acme.test', 'acme.test']], ['domains.0', 'domains.1']],
+    'is_contact_generation_enabled cannot be null' => [['is_contact_generation_enabled' => null], ['is_contact_generation_enabled']],
+]);
+
+it('requires a name that is not used by another organization', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->create(['name' => 'Taken']);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'taken'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['name']);
+});
+
+it('requires domains that are not used by another organization', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->create(['domains' => [['domain' => 'taken.test']]]);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['domains' => ['taken.test']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['domains.0']);
+});
+
+it('returns not found for a soft deleted organization', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+    $organization->delete();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['name' => 'Changed'])
+        ->assertNotFound();
+});

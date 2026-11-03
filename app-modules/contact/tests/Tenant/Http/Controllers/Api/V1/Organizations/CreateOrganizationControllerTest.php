@@ -1,0 +1,215 @@
+<?php
+
+use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
+use App\Models\SystemUser;
+use Laravel\Sanctum\Sanctum;
+
+use function Pest\Laravel\postJson;
+
+$actingAsOrganizationCreator = function (): SystemUser {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.create');
+    Sanctum::actingAs($user, ['api']);
+
+    return $user;
+};
+
+beforeEach(function (): void {
+    // Disable auditing, which causes testing issues when authenticating with a fake Sanctum token.
+    config()->set('audit.enabled', false);
+});
+
+it('is gated with proper access control', function (): void {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.create');
+    Sanctum::actingAs($user, ['api']);
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertForbidden();
+
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    Sanctum::actingAs($user, ['api']);
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertForbidden();
+
+    expect(Organization::query()->count())->toBe(0);
+});
+
+it('checks permissions before validating the request', function (): void {
+    $user = SystemUser::factory()->create();
+    Sanctum::actingAs($user, ['api']);
+
+    postJson(route('api.v1.organizations.store', [], false), [])
+        ->assertForbidden();
+});
+
+it('can create an organization with only a name', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertCreated()
+        ->assertJsonPath('data.name', 'Acme')
+        ->assertJsonPath('data.domains', [])
+        ->assertJsonPath('data.is_contact_generation_enabled', false);
+
+    expect(Organization::query()->where('name', 'Acme')->exists())->toBeTrue();
+});
+
+it('can create an organization with all attributes', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    $industry = OrganizationIndustry::factory()->create();
+    $type = OrganizationType::factory()->create();
+
+    $response = postJson(route('api.v1.organizations.store', [], false), [
+        'name' => 'Acme Corporation',
+        'email' => 'hello@acme.test',
+        'phone_number' => '+15555550100',
+        'website' => 'https://acme.test',
+        'industry_id' => $industry->getKey(),
+        'type_id' => $type->getKey(),
+        'description' => 'A company that makes everything.',
+        'number_of_employees' => 250,
+        'address' => '1 Road Runner Way',
+        'city' => 'Phoenix',
+        'state' => 'AZ',
+        'postalcode' => '85001',
+        'country' => 'United States',
+        'linkedin_url' => 'https://linkedin.com/company/acme',
+        'facebook_url' => 'https://facebook.com/acme',
+        'twitter_url' => 'https://twitter.com/acme',
+        'domains' => ['acme.test', 'acme.org'],
+        'is_contact_generation_enabled' => true,
+    ]);
+
+    $response->assertCreated()
+        ->assertJsonPath('data.name', 'Acme Corporation')
+        ->assertJsonPath('data.industry.id', $industry->getKey())
+        ->assertJsonPath('data.type.id', $type->getKey())
+        ->assertJsonPath('data.domains', ['acme.test', 'acme.org'])
+        ->assertJsonPath('data.is_contact_generation_enabled', true);
+
+    $organization = Organization::query()->findOrFail($response['data']['id']);
+
+    expect($organization->only([
+        'name', 'email', 'phone_number', 'website', 'industry_id', 'type_id', 'description', 'number_of_employees',
+        'address', 'city', 'state', 'postalcode', 'country', 'linkedin_url', 'facebook_url', 'twitter_url',
+        'domains', 'is_contact_generation_enabled',
+    ]))->toBe([
+        'name' => 'Acme Corporation',
+        'email' => 'hello@acme.test',
+        'phone_number' => '+15555550100',
+        'website' => 'https://acme.test',
+        'industry_id' => $industry->getKey(),
+        'type_id' => $type->getKey(),
+        'description' => 'A company that makes everything.',
+        'number_of_employees' => 250,
+        'address' => '1 Road Runner Way',
+        'city' => 'Phoenix',
+        'state' => 'AZ',
+        'postalcode' => '85001',
+        'country' => 'United States',
+        'linkedin_url' => 'https://linkedin.com/company/acme',
+        'facebook_url' => 'https://facebook.com/acme',
+        'twitter_url' => 'https://twitter.com/acme',
+        'domains' => [['domain' => 'acme.test'], ['domain' => 'acme.org']],
+        'is_contact_generation_enabled' => true,
+    ]);
+});
+
+it('uses the default industry and type when they are not provided', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    $industry = OrganizationIndustry::factory()->create(['is_default' => true]);
+    $type = OrganizationType::factory()->create(['is_default' => true]);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertCreated()
+        ->assertJsonPath('data.industry.id', $industry->getKey())
+        ->assertJsonPath('data.type.id', $type->getKey());
+});
+
+it('does not use the default industry and type when null is explicitly provided', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    OrganizationIndustry::factory()->create(['is_default' => true]);
+    OrganizationType::factory()->create(['is_default' => true]);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'industry_id' => null, 'type_id' => null])
+        ->assertCreated()
+        ->assertJsonPath('data.industry', null)
+        ->assertJsonPath('data.type', null);
+});
+
+it('normalizes domains to lowercase', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'domains' => [' Acme.TEST ']])
+        ->assertCreated()
+        ->assertJsonPath('data.domains', ['acme.test']);
+});
+
+it('validates the request', function (array $data, array $errors) use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    postJson(route('api.v1.organizations.store', [], false), $data)
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors($errors);
+
+    expect(Organization::query()->count())->toBe(0);
+})->with([
+    'name is required' => [[], ['name']],
+    'name must be a string' => [['name' => 123], ['name']],
+    'name is too long' => [['name' => str_repeat('a', 256)], ['name']],
+    'email must be an email' => [['name' => 'Acme', 'email' => 'nope'], ['email']],
+    'website must be a url' => [['name' => 'Acme', 'website' => 'nope'], ['website']],
+    'linkedin_url must be a url' => [['name' => 'Acme', 'linkedin_url' => 'nope'], ['linkedin_url']],
+    'facebook_url must be a url' => [['name' => 'Acme', 'facebook_url' => 'nope'], ['facebook_url']],
+    'twitter_url must be a url' => [['name' => 'Acme', 'twitter_url' => 'nope'], ['twitter_url']],
+    'industry_id must be a uuid' => [['name' => 'Acme', 'industry_id' => 'nope'], ['industry_id']],
+    'industry_id must exist' => [['name' => 'Acme', 'industry_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['industry_id']],
+    'type_id must exist' => [['name' => 'Acme', 'type_id' => '7a5c0c61-5a3c-4d2b-9d7f-0d1d1f0d1d1d'], ['type_id']],
+    'number_of_employees must be an integer' => [['name' => 'Acme', 'number_of_employees' => 'many'], ['number_of_employees']],
+    'number_of_employees must not be negative' => [['name' => 'Acme', 'number_of_employees' => -1], ['number_of_employees']],
+    'domains must be an array' => [['name' => 'Acme', 'domains' => 'acme.test'], ['domains']],
+    'domains must be valid' => [['name' => 'Acme', 'domains' => ['not a domain']], ['domains.0']],
+    'domains must be distinct' => [['name' => 'Acme', 'domains' => ['acme.test', 'ACME.test']], ['domains.0', 'domains.1']],
+    'is_contact_generation_enabled must be a boolean' => [['name' => 'Acme', 'is_contact_generation_enabled' => 'maybe'], ['is_contact_generation_enabled']],
+]);
+
+it('requires a unique name', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    Organization::factory()->create(['name' => 'Acme']);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'acme'])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['name']);
+});
+
+it('allows the name of a soft deleted organization to be reused', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    Organization::factory()->create(['name' => 'Acme', 'domains' => null])->delete();
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme'])
+        ->assertCreated();
+});
+
+it('requires domains that are not used by another organization', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    Organization::factory()->create(['domains' => [['domain' => 'acme.test']]]);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'domains' => ['acme.test']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['domains.0']);
+});
