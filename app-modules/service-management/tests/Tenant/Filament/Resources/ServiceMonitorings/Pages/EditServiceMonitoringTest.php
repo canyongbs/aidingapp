@@ -1206,13 +1206,13 @@ test('EditServiceMonitoring offers every contact as a report recipient when the 
 
     asSuperAdmin();
 
-    $unselectedContact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
 
     $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->create();
 
     Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
-        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($unselectedContact): bool {
-            return array_key_exists($unselectedContact->getKey(), $field->getOptions());
+        ->assertFormFieldExists('report_configurations.daily.report_contacts', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
         });
 });
 
