@@ -386,25 +386,25 @@ describe('archived contacts', function (): void {
     it('does not list archived contacts', function (): void {
         actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
 
-        $normal = Contact::factory()->create();
-        $archived = Contact::factory()->archived()->create();
+        $contact = Contact::factory()->create();
+        $archivedContact = Contact::factory()->archived()->create();
 
         Livewire::test(ListContacts::class)
-            ->assertCanSeeTableRecords([$normal])
-            ->assertCanNotSeeTableRecords([$archived]);
+            ->assertCanSeeTableRecords([$contact])
+            ->assertCanNotSeeTableRecords([$archivedContact]);
     });
 
     it('does not find archived contacts in global search', function (): void {
         actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
 
-        $normal = Contact::factory()->create(['full_name' => 'Searchable Contact']);
-        $archived = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
+        $contact = Contact::factory()->create(['full_name' => 'Searchable Contact']);
+        $archivedContact = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
 
-        $resultUrls = ContactResource::getGlobalSearchResults($archived->full_name)->pluck('url');
+        $resultUrls = ContactResource::getGlobalSearchResults($archivedContact->full_name)->pluck('url');
 
         expect($resultUrls)
-            ->toContain(ContactResource::getUrl('view', ['record' => $normal]))
-            ->not->toContain(ContactResource::getUrl('view', ['record' => $archived]));
+            ->toContain(ContactResource::getUrl('view', ['record' => $contact]))
+            ->not->toContain(ContactResource::getUrl('view', ['record' => $archivedContact]));
     });
 });
 
