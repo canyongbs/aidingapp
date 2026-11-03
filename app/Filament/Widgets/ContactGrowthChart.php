@@ -73,6 +73,7 @@ class ContactGrowthChart extends ChartWidget
         $runningTotalPerMonth = Cache::tags(['{contacts}'])
             ->remember('contact-growth-chart-data', now()->addHour(), function (): array {
                 $totalCreatedPerMonth = Contact::query()
+                    ->withoutArchived()
                     ->toBase()
                     ->selectRaw('date_trunc(\'month\', created_at) as month')
                     ->selectRaw('count(*) as total')
@@ -82,6 +83,7 @@ class ContactGrowthChart extends ChartWidget
                     ->pluck('total', 'month');
 
                 $runningTotal = Contact::query()
+                    ->withoutArchived()
                     ->where('created_at', '<', now()->subYear())
                     ->count();
 
