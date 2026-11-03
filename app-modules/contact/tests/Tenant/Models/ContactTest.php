@@ -75,12 +75,15 @@ it('revokes tokens when archived', function (): void {
     $contact = Contact::factory()->create();
     $contact->createToken('first');
     $contact->createToken('second');
+    $otherContact = Contact::factory()->create();
+    $otherContact->createToken('other');
 
     expect($contact->tokens()->count())->toBe(2);
 
     $contact->archive();
 
-    expect($contact->tokens()->count())->toBe(0);
+    expect($contact->tokens()->count())->toBe(0)
+        ->and($otherContact->tokens()->count())->toBe(1);
 });
 
 it('keeps tokens when archived while the contact archiving feature is inactive', function (): void {
