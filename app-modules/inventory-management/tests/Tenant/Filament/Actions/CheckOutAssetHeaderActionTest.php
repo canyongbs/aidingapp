@@ -63,4 +63,7 @@ it('excludes archived contacts', function (): void {
     Livewire::test(ViewAsset::class, ['record' => $asset->getKey()])
         ->callAction('check-out', ['checked_out_to_id' => $contact->getKey()])
         ->assertHasNoActionErrors();
+
+    expect($asset->refresh()->isCheckedOut())->toBeTrue()
+        ->and($asset->latestCheckOut?->checked_out_to_id)->toBe($contact->getKey());
 });
