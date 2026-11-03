@@ -37,6 +37,7 @@ use AidingApp\Contact\Filament\Resources\ContactResource;
 use AidingApp\Contact\Filament\Resources\ContactResource\Pages\CreateContact;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Tests\Tenant\Contact\RequestFactories\CreateContactRequestFactory;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Forms\Components\TextInput;
 use Livewire\Livewire;
@@ -150,4 +151,56 @@ test('CreateContact allows reusing a soft-deleted contact email', function (): v
         ->assertHasNoFormErrors();
 
     expect(Contact::query()->where('email', 'reuse@example.com')->exists())->toBeTrue();
+});
+
+it('does not create a contact with the email of an archived contact', function (): void {
+    ContactArchivingFeature::activate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'Archived@Example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['email' => 'An archived contact with this email already exists.']);
+
+    expect($component->errors()->get('data.email'))->toBe(['An archived contact with this email already exists.']);
+
+    assertCount(1, Contact::all());
+});
+
+it('rejects the email of an archived contact with the unique message while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $user = User::factory()->create();
+    $user->givePermissionTo('contact.view-any');
+    $user->givePermissionTo('contact.create');
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $request = collect(CreateContactRequestFactory::new()->create([
+        'email' => 'archived@example.com',
+        'created_by_id' => $user->id,
+    ]));
+
+    actingAs($user);
+
+    $component = Livewire::test(CreateContact::class)
+        ->fillForm($request->toArray())
+        ->call('create')
+        ->assertHasFormErrors(['email' => 'unique']);
+
+    expect($component->errors()->get('data.email'))->not->toContain('An archived contact with this email already exists.');
+
+    assertCount(1, Contact::all());
 });
