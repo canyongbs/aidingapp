@@ -172,7 +172,7 @@ class Contact extends Authenticatable implements Auditable, Educatable, HasFilam
 
     public function isSuppressedByArchival(): bool
     {
-        return ContactArchivingFeature::active() && $this->isArchived();
+        return $this->isArchived() && ContactArchivingFeature::active();
     }
 
     /**
