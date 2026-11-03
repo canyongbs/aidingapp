@@ -1242,8 +1242,6 @@ describe('Service Request Type Service Request creation from inbound email', fun
         [$contact, $domainOrganization] = $tenant->execute(function (): array {
             seed(ContactTypeSeeder::class);
 
-            ContactArchivingFeature::activate();
-
             $domainOrganization = Organization::factory()->create([
                 'domains' => [['domain' => 'canyongbs.com']],
             ]);
