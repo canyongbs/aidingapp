@@ -505,6 +505,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
             $effectiveNotificationBody = $forwarded['body'] ?? $parser->getMessageBody('htmlEmbedded');
 
             $contacts = Contact::query()
+                ->withoutArchived()
                 ->where('email', $effectiveSender)
                 ->get();
 

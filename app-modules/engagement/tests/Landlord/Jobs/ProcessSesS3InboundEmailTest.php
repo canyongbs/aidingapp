@@ -783,6 +783,101 @@ describe('Service Request Type Service Request creation from inbound email', fun
         );
     });
 
+    it('treats an archived contact as an unknown sender for service requests', function (): void {
+        $notificationFake = Notification::fake();
+
+        Event::listen(
+            MadeTenantCurrentEvent::class,
+            function (MadeTenantCurrentEvent $event) use ($notificationFake): void {
+                Notification::swap($notificationFake);
+            }
+        );
+
+        $tenant = Tenant::query()->firstOrFail();
+
+        $archivedContact = null;
+
+        $tenant->execute(function () use (&$archivedContact): void {
+            ContactArchivingFeature::activate();
+
+            Organization::factory()->create([
+                'domains' => ['canyongbs.com'],
+            ]);
+
+            $archivedContact = Contact::factory()->archived()->create([
+                'email' => 'kevin.ullyott@canyongbs.com',
+            ]);
+
+            $serviceRequestType = ServiceRequestType::factory()
+                ->has(
+                    TenantServiceRequestTypeDomain::factory()->state([
+                        'domain' => 'help',
+                    ]),
+                    'domain'
+                )
+                ->has(
+                    ServiceRequestPriority::factory()->count(3),
+                    'priorities'
+                )
+                ->create([
+                    'is_email_automatic_creation_enabled' => true,
+                    'is_email_automatic_creation_contact_create_enabled' => false,
+                ]);
+
+            $assignedPriority = $serviceRequestType->priorities->first();
+
+            $serviceRequestType->update([
+                'email_automatic_creation_priority_id' => $assignedPriority->getKey(),
+            ]);
+        });
+
+        assert($archivedContact instanceof Contact);
+
+        Storage::fake('s3');
+        $filesystem = Storage::fake('s3-inbound-email');
+
+        $modulePath = resolve(ModulePath::class);
+
+        $content = file_get_contents($modulePath('engagement', 'tests/Landlord/Fixtures/s3_email_for_service_request'));
+
+        $file = UploadedFile::fake()->createWithContent('s3_email', $content);
+
+        $filesystem->putFileAs('', $file, 's3_email');
+
+        $mock = partialMock(ProcessSesS3InboundEmail::class, function (MockInterface $mock) use ($content): void {
+            $mock
+                ->shouldAllowMockingProtectedMethods()
+                ->shouldReceive('getContent')
+                ->once()
+                ->andReturn($content);
+        });
+
+        assert($mock instanceof ProcessSesS3InboundEmail);
+
+        invade($mock)->__set('emailFilePath', 's3_email');
+
+        $mock->handle();
+
+        $tenant->makeCurrent();
+
+        assertDatabaseEmpty(EngagementResponse::class);
+
+        assertDatabaseEmpty(ServiceRequest::class);
+
+        expect(Contact::query()->count())->toBe(1);
+
+        expect($archivedContact->refresh()->isArchived())->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
+
+        $notificationFake->assertSentOnDemand(
+            IneligibleContactSesS3InboundEmailServiceRequestNotification::class,
+            function (IneligibleContactSesS3InboundEmailServiceRequestNotification $notification, array $channels, object $notifiable): bool {
+                return $notifiable->routes['mail'] === 'kevin.ullyott@canyongbs.com';
+            }
+        );
+    });
+
     it('ineligible email includes proper bcc to provided email when set', function (): void {
         Event::fake([MessageSending::class]);
 
