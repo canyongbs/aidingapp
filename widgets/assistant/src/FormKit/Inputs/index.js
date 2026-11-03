@@ -32,12 +32,16 @@
 </COPYRIGHT>
 */
 import { createInput } from '@formkit/vue';
+import CheckboxWithOther from './CheckboxWithOther.vue';
 import Password from './Password.vue';
 import RadioWithOther from './RadioWithOther.vue';
 import Signature from './Signature.vue';
 import Upload from './Upload.vue';
 
 export default {
+    checkboxWithOther: createInput(CheckboxWithOther, {
+        props: ['options', 'fieldLabel', 'description'],
+    }),
     password: createInput(Password, {
         family: 'text',
         props: ['storeUrl'],
