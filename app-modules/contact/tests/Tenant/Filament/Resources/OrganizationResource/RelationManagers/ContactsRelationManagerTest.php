@@ -36,12 +36,32 @@
 
 use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContacts;
 use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\ContactsRelationManager;
+use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Actions\Testing\TestAction;
 use Livewire\Livewire;
 
 use function Pest\Laravel\actingAs;
+
+it('does not list archived contacts', function (): void {
+    ContactArchivingFeature::activate();
+
+    actingAs(User::factory()->create()->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any', 'contact.*.view'));
+
+    $organization = Organization::factory()->create();
+
+    $normal = Contact::factory()->for($organization)->create();
+    $archived = Contact::factory()->archived()->for($organization)->create();
+
+    Livewire::test(ContactsRelationManager::class, [
+        'ownerRecord' => $organization,
+        'pageClass' => ManageContacts::class,
+    ])
+        ->assertCanSeeTableRecords([$normal])
+        ->assertCanNotSeeTableRecords([$archived]);
+});
 
 it('only shows the associate contact action to a user with the organization.update permission', function (): void {
     $organization = Organization::factory()->create();
