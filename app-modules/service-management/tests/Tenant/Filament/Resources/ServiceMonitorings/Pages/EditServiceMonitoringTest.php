@@ -1257,3 +1257,18 @@ test('EditServiceMonitoring keeps an archived confidential contact that is alrea
 
     expect($serviceMonitoringTarget->confidentialContacts()->pluck('contacts.id')->all())->toBe([$archivedContact->getKey()]);
 });
+
+test('EditServiceMonitoring offers every contact as a confidential contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertFormFieldExists('confidentialContacts', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
+        });
+});
