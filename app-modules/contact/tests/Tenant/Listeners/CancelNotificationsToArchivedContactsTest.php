@@ -108,10 +108,10 @@ it('suppresses a queued notification when the contact is archived before it send
 
     $contact->notify(new TestDualNotification());
 
-    $contact->archive();
+    Contact::query()->findOrFail($contact->getKey())->archive();
 
     $queue->pushed(SendQueuedNotifications::class)
-        ->each(fn (SendQueuedNotifications $job) => $job->handle(app(ChannelManager::class)));
+        ->each(fn (SendQueuedNotifications $job) => unserialize(serialize($job))->handle(app(ChannelManager::class)));
 
     expect(DatabaseMessage::query()->count())->toBe(0);
 
