@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Database\Seeders\ContactTypeSeeder;
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
@@ -1134,17 +1135,33 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->makeCurrent();
 
-        return [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization];
+        return [
+            'archivedContact' => $archivedContact,
+            'otherOrganization' => $otherOrganization,
+            'serviceRequestType' => $serviceRequestType,
+            'domainOrganization' => $domainOrganization,
+            'filesystem' => $filesystem,
+        ];
     };
 
     it('unarchives an archived contact instead of creating one for a service request', function () use ($runInboundEmailForArchivedContact): void {
-        [$archivedContact, $otherOrganization, $serviceRequestType] = $runInboundEmailForArchivedContact(null);
+        [
+            'archivedContact' => $archivedContact,
+            'otherOrganization' => $otherOrganization,
+            'serviceRequestType' => $serviceRequestType,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(null);
+
+        $originalTypeId = $archivedContact->type_id;
+
+        expect($originalTypeId)->not->toBe(ContactType::resolveDefault()?->getKey());
 
         expect(Contact::query()->count())->toBe(1);
 
         $archivedContact->refresh();
 
         expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->type_id)->toBe($originalTypeId)
             ->and($archivedContact->first_name)->toBe('Kevin')
             ->and($archivedContact->last_name)->toBe('Ullyott')
             ->and($archivedContact->full_name)->toBe('Kevin Ullyott')
@@ -1160,10 +1177,15 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         expect($serviceRequest->respondent->is($archivedContact))->toBeTrue()
             ->and($serviceRequest->priority->type->is($serviceRequestType))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
     });
 
     it('keeps an archived contact\'s names when the inbound email has no sender name', function () use ($runInboundEmailForArchivedContact): void {
-        [$archivedContact] = $runInboundEmailForArchivedContact('From: kevin.ullyott@canyongbs.com');
+        [
+            'archivedContact' => $archivedContact,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact('From: kevin.ullyott@canyongbs.com');
 
         expect(Contact::query()->count())->toBe(1);
 
@@ -1177,15 +1199,23 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $serviceRequest = ServiceRequest::query()->sole();
 
         expect($serviceRequest->respondent->is($archivedContact))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
     });
 
     it('assigns the sender domain\'s organization to an archived contact without one', function () use ($runInboundEmailForArchivedContact): void {
-        [$archivedContact, , , $domainOrganization] = $runInboundEmailForArchivedContact(null, hasOrganization: false);
+        [
+            'archivedContact' => $archivedContact,
+            'domainOrganization' => $domainOrganization,
+            'filesystem' => $filesystem,
+        ] = $runInboundEmailForArchivedContact(null, hasOrganization: false);
 
         $archivedContact->refresh();
 
         expect($archivedContact->isArchived())->toBeFalse()
             ->and($archivedContact->organization->is($domainOrganization))->toBeTrue();
+
+        $filesystem->assertMissing('s3_email');
     });
 
     it('properly creates a service request for a matching contact', function (): void {
