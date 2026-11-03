@@ -1215,3 +1215,45 @@ test('EditServiceMonitoring offers every contact as a report recipient when the 
             return array_key_exists($unselectedContact->getKey(), $field->getOptions());
         });
 });
+
+test('EditServiceMonitoring does not offer archived contacts as confidential contacts', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $activeContact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->create();
+    $archivedContact->archive();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertSuccessful()
+        ->assertFormFieldExists('confidentialContacts', function (Select $field) use ($activeContact, $archivedContact): bool {
+            $options = $field->getOptions();
+
+            return array_key_exists($activeContact->getKey(), $options)
+                && ! array_key_exists($archivedContact->getKey(), $options);
+        });
+});
+
+test('EditServiceMonitoring keeps an archived confidential contact that is already selected', function (): void {
+    ContactArchivingFeature::activate();
+
+    asSuperAdmin();
+
+    $archivedContact = Contact::factory()->create();
+    $archivedContact->archive();
+
+    $serviceMonitoringTarget = ServiceMonitoringTarget::factory()->confidential()->create();
+    $serviceMonitoringTarget->confidentialContacts()->attach($archivedContact->getKey());
+
+    Livewire::test(EditServiceMonitoring::class, ['record' => $serviceMonitoringTarget->getRouteKey()])
+        ->assertFormFieldExists('confidentialContacts', function (Select $field) use ($archivedContact): bool {
+            return array_key_exists($archivedContact->getKey(), $field->getOptions());
+        })
+        ->call('save')
+        ->assertHasNoFormErrors();
+
+    expect($serviceMonitoringTarget->confidentialContacts()->pluck('contacts.id')->all())->toBe([$archivedContact->getKey()]);
+});
