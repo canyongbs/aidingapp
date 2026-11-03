@@ -31,12 +31,45 @@
     
     </COPYRIGHT>
 --}}
+@php
+    $options = $options ?? [];
+    $normalizedOptions = array_is_list($options)
+        ? collect($options)
+            ->pluck('label', 'value')
+            ->all()
+        : $options;
+    $responseValues = is_array($response ?? null) ? $response : [];
+    $knownValues = array_map(fn ($value): string => strtolower((string) $value), array_keys($normalizedOptions));
+
+    $selections = [];
+
+    foreach ($normalizedOptions as $value => $optionLabel) {
+        $selections[$optionLabel] = collect($responseValues)->contains(fn ($selected): bool => strcasecmp((string) $selected, (string) $value) === 0);
+    }
+
+    if ($hasOtherOption ?? false) {
+        foreach ($responseValues as $selected) {
+            if (! in_array(strtolower((string) $selected), $knownValues, true)) {
+                $selections['Other: ' . $selected] = true;
+            }
+        }
+    }
+@endphp
+
 <x-form::blocks.field-wrapper class="py-3" :$label :$isRequired>
-    @if (blank($response ?? null))
+    @if (blank($responseValues))
         <span class="text-gray-500">No response</span>
-    @elseif ($response)
-        <x-heroicon-o-check-circle class="text-success-500 h-6 w-6" />
     @else
-        <x-heroicon-o-x-circle class="text-danger-500 h-6 w-6" />
+        @foreach ($selections as $selectionLabel => $isSelected)
+            <div class="flex items-center space-x-2">
+                @if ($isSelected)
+                    <x-heroicon-o-check-circle class="text-success-500 h-6 w-6" />
+                @else
+                    <x-heroicon-o-x-circle class="text-danger-500 h-6 w-6" />
+                @endif
+
+                <div>{{ $selectionLabel }}</div>
+            </div>
+        @endforeach
     @endif
 </x-form::blocks.field-wrapper>

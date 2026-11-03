@@ -54,7 +54,7 @@ class FormFieldBlockRegistry
             RadioFormFieldBlock::class,
             DateFormFieldBlock::class,
             TimeFormFieldBlock::class,
-            CheckboxFormFieldBlock::class,
+            CheckboxesFormFieldBlock::class,
             SignatureFormFieldBlock::class,
             EmailFormFieldBlock::class,
             NumberFormFieldBlock::class,

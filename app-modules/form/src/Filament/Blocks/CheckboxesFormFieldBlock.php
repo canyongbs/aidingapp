@@ -36,27 +36,62 @@
 
 namespace AidingApp\Form\Filament\Blocks;
 
+use AidingApp\Form\Filament\Forms\Components\OptionsKeyValue;
 use AidingApp\Form\Models\SubmissibleField;
+use Filament\Actions\Action;
+use Filament\Forms\Components\Checkbox;
+use Filament\Schemas\Components\Component;
+use Filament\Support\Enums\Width;
 
-class CheckboxFormFieldBlock extends FormFieldBlock
+class CheckboxesFormFieldBlock extends FormFieldBlock
 {
     public static function type(): string
     {
-        return 'checkbox';
+        return 'checkboxes';
+    }
+
+    public static function configureEditorAction(Action $action): Action
+    {
+        return parent::configureEditorAction($action)
+            ->modalWidth(Width::TwoExtraLarge);
     }
 
     /**
-     * @return array<string, string>
+     * @return array<Component>
+     */
+    public static function fields(): array
+    {
+        return [
+            Checkbox::make('hasOtherOption')
+                ->label('Include Other'),
+            OptionsKeyValue::make('options'),
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
      */
     public static function getFormKitSchema(SubmissibleField $field): array
     {
+        if ($field->config['hasOtherOption'] ?? false) {
+            return [
+                '$formkit' => 'checkboxWithOther',
+                'fieldLabel' => $field->label,
+                'validationLabel' => $field->label,
+                'name' => $field->id,
+                ...($field->is_required ? ['validation' => 'required'] : []),
+                'options' => $field->config['options'],
+                ...(! empty($field->config['description']) ? ['description' => $field->config['description']] : []),
+            ];
+        }
+
         return [
             '$formkit' => 'checkbox',
             'label' => $field->label,
             'name' => $field->id,
             ...($field->is_required ? ['validation' => 'required'] : []),
-
-            ...self::getDescriptionSectionsSchema($field),
+            'options' => $field->config['options'],
+            ...self::getDescriptionSectionsSchema($field, 'legend'),
         ];
     }
 
@@ -65,16 +100,28 @@ class CheckboxFormFieldBlock extends FormFieldBlock
      */
     public static function getValidationRules(SubmissibleField $field): array
     {
-        return ['boolean'];
+        if ($field->config['hasOtherOption'] ?? false) {
+            return ['array'];
+        }
+
+        /** @var array<array-key, mixed> $options */
+        $options = $field->config['options'] ?? [];
+
+        $values = array_is_list($options) ? array_column($options, 'value') : array_keys($options);
+
+        return [
+            'array',
+            'in:' . implode(',', $values),
+        ];
     }
 
     protected static function previewView(): string
     {
-        return 'form::blocks.previews.checkbox';
+        return 'form::blocks.previews.checkboxes';
     }
 
     protected static function renderedView(): string
     {
-        return 'form::blocks.submissions.checkbox';
+        return 'form::blocks.submissions.checkboxes';
     }
 }
