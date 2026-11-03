@@ -92,7 +92,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
 
         $organization = app(FindPortalRegistrationOrganization::class)($data['email']);
 
-        if ($organization) {
+        if ($organization && blank($contact->organization_id)) {
             $contact->organization()->associate($organization);
         }
 
