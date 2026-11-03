@@ -40,8 +40,6 @@ use App\Models\User;
 use Illuminate\Support\Facades\Gate;
 
 it('denies deleting a managed contact', function (): void {
-    ContactArchivingFeature::activate();
-
     $user = User::factory()->create()->givePermissionTo('contact.*.delete');
     $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
 

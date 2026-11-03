@@ -38,8 +38,6 @@ use AidingApp\Contact\Models\Contact;
 use App\Features\ContactArchivingFeature;
 
 it('excludes archived contacts', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
     Contact::factory()->archived()->create();
 

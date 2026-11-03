@@ -154,8 +154,6 @@ test('it authenticates contact and clears guest session when code is valid', fun
 });
 
 test('it does not authenticate an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
 
     $plainCode = 654321;

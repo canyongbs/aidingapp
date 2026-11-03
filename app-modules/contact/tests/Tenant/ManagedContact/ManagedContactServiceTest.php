@@ -349,8 +349,6 @@ it('restores a soft-deleted contact when linking by email', function (): void {
 });
 
 it('unarchives an archived contact when linking by email', function (): void {
-    ContactArchivingFeature::activate();
-
     $type = ContactType::factory()->create();
 
     $existing = Contact::factory()->archived()->create(['email' => 'archived@example.com']);

@@ -54,8 +54,6 @@ it('reports a healthy email health status and can receive email when the email h
 });
 
 it('links a contact to its domain organization when it is unarchived', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->create([
         'email' => 'person@example.com',
         'organization_id' => null,
@@ -70,8 +68,6 @@ it('links a contact to its domain organization when it is unarchived', function 
 });
 
 it('revokes tokens when archived', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
     $contact->createToken('first');
     $contact->createToken('second');

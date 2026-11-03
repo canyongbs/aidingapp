@@ -36,7 +36,6 @@
 
 use AidingApp\Contact\Filament\Widgets\ContactStats;
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
@@ -46,8 +45,6 @@ $renderedContactCount = function (): string {
 };
 
 it('excludes archived contacts', function () use ($renderedContactCount): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     Contact::factory()->count(3)->create();
@@ -57,8 +54,6 @@ it('excludes archived contacts', function () use ($renderedContactCount): void {
 });
 
 it('refreshes the cached count when a contact is archived', function () use ($renderedContactCount): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $contacts = Contact::factory()->count(3)->create();
@@ -71,8 +66,6 @@ it('refreshes the cached count when a contact is archived', function () use ($re
 });
 
 it('refreshes the cached count when a contact is unarchived', function () use ($renderedContactCount): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     Contact::factory()->count(2)->create();

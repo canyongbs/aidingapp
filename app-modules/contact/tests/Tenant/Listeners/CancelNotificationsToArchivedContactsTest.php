@@ -51,8 +51,6 @@ use Illuminate\Notifications\SendQueuedNotifications;
 use Illuminate\Support\Facades\Queue;
 
 it('does not send database notifications to an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->create();
 
     $contact->notify(new TestDatabaseNotification());
@@ -61,8 +59,6 @@ it('does not send database notifications to an archived contact', function (): v
 });
 
 it('sends database notifications to a contact that is not archived', function (): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->create();
 
     $contact->notify(new TestDatabaseNotification());
@@ -81,8 +77,6 @@ it('sends database notifications to an archived contact when the contact archivi
 });
 
 it('leaves mail to an archived contact for the mail channel to suppress', function (Notification $notification): void {
-    ContactArchivingFeature::activate();
-
     $contact = Contact::factory()->archived()->create();
 
     $contact->notify($notification);
@@ -100,8 +94,6 @@ it('leaves mail to an archived contact for the mail channel to suppress', functi
 ]);
 
 it('suppresses a queued notification when the contact is archived before it sends', function (): void {
-    ContactArchivingFeature::activate();
-
     $queue = Queue::fake();
 
     $contact = Contact::factory()->create();

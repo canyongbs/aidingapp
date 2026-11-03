@@ -38,7 +38,6 @@ use AidingApp\Contact\Filament\Resources\OrganizationResource\Pages\ManageContac
 use AidingApp\Contact\Filament\Resources\OrganizationResource\RelationManagers\ContactsRelationManager;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Filament\Actions\AssociateAction;
 use Filament\Actions\Testing\TestAction;
@@ -47,8 +46,6 @@ use Livewire\Livewire;
 use function Pest\Laravel\actingAs;
 
 it('does not list archived contacts', function (): void {
-    ContactArchivingFeature::activate();
-
     $user = User::factory()
         ->create()
         ->givePermissionTo('organization.view-any', 'organization.*.view', 'contact.view-any', 'contact.*.view');
@@ -93,8 +90,6 @@ it('only shows the associate contact action to a user with the organization.upda
 });
 
 it('does not offer archived contacts to associate', function (): void {
-    ContactArchivingFeature::activate();
-
     $user = User::factory()
         ->create()
         ->givePermissionTo(

@@ -35,15 +35,12 @@
 */
 
 use AidingApp\Contact\Models\Contact;
-use App\Features\ContactArchivingFeature;
 use App\Filament\Widgets\RecentContactsList;
 use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
 it('excludes archived contacts', function (): void {
-    ContactArchivingFeature::activate();
-
     asSuperAdmin();
 
     $contacts = Contact::factory()->count(2)->create();

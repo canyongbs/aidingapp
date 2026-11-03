@@ -157,8 +157,6 @@ it('matches the current email when a stale contact is passed', function (?string
 ]);
 
 it('does not link an archived contact to an organization', function (): void {
-    ContactArchivingFeature::activate();
-
     Organization::factory()->create([
         'domains' => [['domain' => 'example.com']],
     ]);

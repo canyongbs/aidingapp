@@ -383,10 +383,6 @@ describe('search and filters', function (): void {
 });
 
 describe('archived contacts', function (): void {
-    beforeEach(function (): void {
-        ContactArchivingFeature::activate();
-    });
-
     it('does not list archived contacts', function (): void {
         actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
 
@@ -423,8 +419,6 @@ it('lists archived contacts while contact archiving is inactive', function (): v
 });
 
 it('only shows the bulk archive action to a user with the contact.delete permission', function (): void {
-    ContactArchivingFeature::activate();
-
     Contact::factory(15)->create();
 
     $user = User::factory()
@@ -474,10 +468,6 @@ it('hides the created at and updated at columns by default and allows sorting th
 })->with(['created_at', 'updated_at']);
 
 describe('archiving', function (): void {
-    beforeEach(function (): void {
-        ContactArchivingFeature::activate();
-    });
-
     it('bulk archives contacts and skips managed ones', function (): void {
         actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
 

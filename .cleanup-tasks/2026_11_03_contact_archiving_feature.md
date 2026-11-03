@@ -9,6 +9,8 @@ created: 2026-11-03
 
 ## Temporary Migrations
 
+- app-modules/contact/database/migrations/2026_11_03_151841_tmp_activate_contact_archiving_feature.php
+
 ## Additional Cleanup
 
 - Search for `TODO: Cleanup Task (contact-builder-without-archived)`

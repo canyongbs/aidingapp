@@ -39,7 +39,6 @@ use AidingApp\Contact\Jobs\MatchUnaffiliatedContactsJob;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
-use App\Features\ContactArchivingFeature;
 use App\Models\Tenant;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Events\QueryExecuted;
@@ -259,8 +258,6 @@ it('does not run reconciliation when another reconciliation for the tenant holds
 });
 
 it('links live contacts but not archived contacts to an organization', function (): void {
-    ContactArchivingFeature::activate();
-
     $organization = Organization::factory()->create(['domains' => []]);
     $contact = Contact::factory()->archived()->create([
         'email' => 'person@example.com',

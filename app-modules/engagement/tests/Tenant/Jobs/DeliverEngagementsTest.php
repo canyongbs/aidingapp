@@ -39,7 +39,6 @@ use AidingApp\Engagement\Jobs\DeliverEngagements;
 use AidingApp\Engagement\Models\Engagement;
 use AidingApp\Engagement\Notifications\EngagementNotification;
 use AidingApp\Notification\Enums\EmailMessageEventType;
-use App\Features\ContactArchivingFeature;
 use Illuminate\Support\Facades\Notification;
 
 it('will send engagements that have been scheduled for a past date and have not been dispatched', function (): void {
@@ -130,8 +129,6 @@ it('suppresses a scheduled engagement when the recipient bounces before delivery
 });
 
 it('suppresses a scheduled engagement when the recipient is archived before delivery and still marks it dispatched', function (): void {
-    ContactArchivingFeature::activate();
-
     $engagement = Engagement::factory()->create([
         'scheduled_at' => now()->subMinute(),
     ]);

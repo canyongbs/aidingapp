@@ -63,8 +63,6 @@ it('returns null for a blank email', function (): void {
 });
 
 it('does not resolve an archived contact', function (): void {
-    ContactArchivingFeature::activate();
-
     Contact::factory()->archived()->create(['email' => 'author@example.com']);
 
     expect(app(ResolveSubmissionAuthorFromEmail::class)('author@example.com'))->toBeNull();

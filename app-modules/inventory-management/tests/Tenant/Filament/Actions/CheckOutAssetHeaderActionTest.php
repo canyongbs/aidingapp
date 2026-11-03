@@ -39,14 +39,12 @@ use AidingApp\InventoryManagement\Enums\SystemAssetStatusClassification;
 use AidingApp\InventoryManagement\Filament\Resources\Assets\Pages\ViewAsset;
 use AidingApp\InventoryManagement\Models\Asset;
 use AidingApp\InventoryManagement\Models\AssetStatus;
-use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use Livewire\Livewire;
 
 use function Tests\asSuperAdmin;
 
 it('excludes archived contacts', function (): void {
-    ContactArchivingFeature::activate();
     asSuperAdmin(User::factory()->create(['timezone' => config('app.timezone')]));
 
     AssetStatus::factory()->available()->create();
