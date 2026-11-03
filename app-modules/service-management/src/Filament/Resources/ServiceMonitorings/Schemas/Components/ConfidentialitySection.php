@@ -117,7 +117,7 @@ class ConfidentialitySection
                         'confidentialContacts',
                         'full_name',
                         fn (ContactBuilder $query, ?Model $record): ContactBuilder => ContactArchivingFeature::active()
-                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->orWhereKey($record instanceof ServiceMonitoringTarget && $record->exists ? $record->confidentialContacts()->pluck('contacts.id')->all() : []))
+                            ? $query->where(fn (ContactBuilder $query): ContactBuilder => $query->withoutArchived()->when($record instanceof ServiceMonitoringTarget && $record->exists ? $record : null, fn (ContactBuilder $query, ServiceMonitoringTarget $target): ContactBuilder => $query->orWhereIn('contacts.id', $target->confidentialContacts()->select('contacts.id'))))
                             : $query,
                     )
                     ->label('Contacts')
