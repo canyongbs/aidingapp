@@ -127,6 +127,8 @@ it('unarchives and updates an archived contact with the same email', function ()
     $archivedContact = Contact::factory()->archived()->create([
         'email' => 'archived.contact@example.com',
         'type_id' => $originalType->getKey(),
+        'preferred' => 'Original Preferred',
+        'phone' => '+15550007777',
     ]);
 
     $plainCode = 123456;
@@ -167,6 +169,8 @@ it('unarchives and updates an archived contact with the same email', function ()
         ->and($archivedContact->full_name)->toBe('Returning Contact')
         ->and($archivedContact->mobile)->toBe('+15550008888')
         ->and($archivedContact->type_id)->toBe($originalType->getKey())
+        ->and($archivedContact->preferred)->toBe('Original Preferred')
+        ->and($archivedContact->phone)->toBe('+15550007777')
         ->and($archivedContact->audits()->where('event', 'unarchived')->exists())->toBeTrue()
         ->and(PersonalAccessToken::findToken($response->json('token'))?->tokenable?->is($archivedContact))->toBeTrue();
 });

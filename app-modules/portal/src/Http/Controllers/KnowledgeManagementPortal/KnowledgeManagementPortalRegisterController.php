@@ -85,7 +85,8 @@ class KnowledgeManagementPortalRegisterController extends Controller
                 ->first();
         }
 
-        $contact = $archivedContact?->fill($attributes) ?? Contact::query()->make($attributes);
+        // Optional fields left blank keep the restored contact's existing values.
+        $contact = $archivedContact?->fill(array_filter($attributes, filled(...))) ?? Contact::query()->make($attributes);
 
         $type = ContactType::resolveDefault();
 
