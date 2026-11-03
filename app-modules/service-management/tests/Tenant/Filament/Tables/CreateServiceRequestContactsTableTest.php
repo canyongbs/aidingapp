@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Filament\Tables\CreateServiceRequestContactsTable;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ContactArchivingFeature;
 use Filament\Forms\Components\TableSelect\Livewire\TableSelectLivewireComponent;
 use Filament\Tables\Columns\TextColumn;
 use Livewire\Features\SupportTesting\Testable;
@@ -133,6 +134,18 @@ it('does not show an organization description when none is associated', function
     liveCreateServiceRequestContactsTable()
         ->assertCanSeeTableRecords([$contact])
         ->assertTableColumnHasDescription('type.name', null, $contact);
+});
+
+it('excludes archived contacts', function (): void {
+    ContactArchivingFeature::activate();
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+    $archivedContact = Contact::factory()->archived()->create();
+
+    liveCreateServiceRequestContactsTable()
+        ->assertCanSeeTableRecords([$contact])
+        ->assertCanNotSeeTableRecords([$archivedContact]);
 });
 
 describe('search', function (): void {
