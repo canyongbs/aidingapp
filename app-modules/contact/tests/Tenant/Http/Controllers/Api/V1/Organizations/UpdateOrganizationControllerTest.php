@@ -37,6 +37,7 @@
 use AidingApp\Contact\Http\Requests\Api\V1\Organizations\UpdateOrganizationRequest;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
+use AidingApp\Contact\Models\OrganizationType;
 use App\Models\SystemUser;
 use Laravel\Sanctum\Sanctum;
 
@@ -272,4 +273,48 @@ it('returns not found for a soft deleted organization', function () use ($acting
 it('can build its validation rules without a bound route, as the API documentation generator does', function (): void {
     expect((new UpdateOrganizationRequest())->rules())
         ->toHaveKeys(['name', 'domains', 'domains.*']);
+});
+
+it('requires domains that differ from those of another organization only by case', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    Organization::factory()->create(['domains' => [['domain' => 'Shared.edu']]]);
+    $organization = Organization::factory()->create();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['domains' => ['shared.edu']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['domains.0']);
+});
+
+it('allows an organization to resubmit its own domains in a different case', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create(['domains' => [['domain' => 'Shared.edu']]]);
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), ['domains' => ['shared.edu']])
+        ->assertOk()
+        ->assertJsonPath('data.domains', ['shared.edu']);
+});
+
+it('rejects a soft deleted industry or type', function () use ($actingAsOrganizationUpdater): void {
+    $actingAsOrganizationUpdater();
+
+    $organization = Organization::factory()->create();
+    $originalIndustryId = $organization->industry_id;
+    $originalTypeId = $organization->type_id;
+
+    $industry = OrganizationIndustry::factory()->create();
+    $type = OrganizationType::factory()->create();
+    $industry->delete();
+    $type->delete();
+
+    patchJson(route('api.v1.organizations.update', ['organization' => $organization], false), [
+        'industry_id' => $industry->getKey(),
+        'type_id' => $type->getKey(),
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['industry_id', 'type_id']);
+
+    expect($organization->refresh()->only(['industry_id', 'type_id']))
+        ->toBe(['industry_id' => $originalIndustryId, 'type_id' => $originalTypeId]);
 });

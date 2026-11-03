@@ -247,3 +247,32 @@ it('requires domains that are not used by another organization', function () use
         ->assertUnprocessable()
         ->assertJsonValidationErrors(['domains.0']);
 });
+
+it('requires domains that differ from those of another organization only by case', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    Organization::factory()->create(['domains' => [['domain' => 'Shared.edu']]]);
+
+    postJson(route('api.v1.organizations.store', [], false), ['name' => 'Acme', 'domains' => ['shared.edu']])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['domains.0']);
+});
+
+it('rejects a soft deleted industry or type', function () use ($actingAsOrganizationCreator): void {
+    $actingAsOrganizationCreator();
+
+    $industry = OrganizationIndustry::factory()->create();
+    $type = OrganizationType::factory()->create();
+    $industry->delete();
+    $type->delete();
+
+    postJson(route('api.v1.organizations.store', [], false), [
+        'name' => 'Acme',
+        'industry_id' => $industry->getKey(),
+        'type_id' => $type->getKey(),
+    ])
+        ->assertUnprocessable()
+        ->assertJsonValidationErrors(['industry_id', 'type_id']);
+
+    expect(Organization::query()->count())->toBe(0);
+});
