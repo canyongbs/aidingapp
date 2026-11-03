@@ -50,8 +50,7 @@ it('does not retrieve an archived contact for the contact guard', function (): v
     $provider = $guard->getProvider();
 
     expect($provider->retrieveById($archived->getKey()))->toBeNull()
-        ->and($provider->retrieveById($active->getKey()))->toBeInstanceOf(Contact::class)
-        ->and($provider->retrieveById($active->getKey())->is($active))->toBeTrue();
+        ->and($provider->retrieveById($active->getKey())?->is($active))->toBeTrue();
 });
 
 it('retrieves an archived contact for the contact guard when the contact archiving feature is inactive', function (): void {
