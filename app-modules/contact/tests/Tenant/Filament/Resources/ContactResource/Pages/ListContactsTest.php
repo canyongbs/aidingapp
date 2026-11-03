@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\ServiceManagement\Models\ServiceRequest;
 use AidingApp\ServiceManagement\Models\ServiceRequestStatus;
+use App\Features\ContactArchivingFeature;
 use App\Models\User;
 use App\Settings\PresenceSettings;
 use Filament\Actions\Testing\TestAction;
@@ -375,6 +376,36 @@ describe('search and filters', function (): void {
             ->assertCanSeeTableRecords([$matchingContact])
             ->assertCanNotSeeTableRecords([$otherContact]);
     })->with(['Searchable Contact', 'searchable-contact@example.com']);
+});
+
+describe('archived contacts', function (): void {
+    beforeEach(function (): void {
+        ContactArchivingFeature::activate();
+    });
+
+    it('does not list archived contacts', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $normal = Contact::factory()->create();
+        $archived = Contact::factory()->archived()->create();
+
+        Livewire::test(ListContacts::class)
+            ->assertCanSeeTableRecords([$normal])
+            ->assertCanNotSeeTableRecords([$archived]);
+    });
+
+    it('does not find archived contacts in global search', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+        $normal = Contact::factory()->create(['full_name' => 'Searchable Contact']);
+        $archived = Contact::factory()->archived()->create(['full_name' => 'Searchable Contact']);
+
+        $resultUrls = ContactResource::getGlobalSearchResults($archived->full_name)->pluck('url');
+
+        expect($resultUrls)
+            ->toContain(ContactResource::getUrl('view', ['record' => $normal]))
+            ->not->toContain(ContactResource::getUrl('view', ['record' => $archived]));
+    });
 });
 
 it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
