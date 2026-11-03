@@ -707,12 +707,17 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
     {
         $senderName = trim((string) $senderName);
 
-        $archivedContact = ContactArchivingFeature::active()
-            ? Contact::query()->onlyArchived()->where('email', $sender)->first()
+        // Archived contacts are included here, and another worker may have unarchived this one since the caller's lookup.
+        $existingContact = ContactArchivingFeature::active()
+            ? Contact::query()->where('email', $sender)->first()
             : null;
 
-        if ($archivedContact !== null) {
-            return $this->restoreArchivedContact($archivedContact, $sender, trim((string) $restoredContactSenderName), $organization);
+        if ($existingContact !== null) {
+            if (! $existingContact->isArchived()) {
+                return $existingContact;
+            }
+
+            return $this->restoreArchivedContact($existingContact, $sender, trim((string) $restoredContactSenderName), $organization);
         }
 
         [$firstName, $lastName] = $this->splitSenderName($senderName);
