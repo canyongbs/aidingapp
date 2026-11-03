@@ -69,3 +69,11 @@ it('does not resolve an archived contact', function (): void {
 
     expect(app(ResolveSubmissionAuthorFromEmail::class)('author@example.com'))->toBeNull();
 });
+
+it('resolves an archived contact while archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create(['email' => 'author@example.com']);
+
+    expect(app(ResolveSubmissionAuthorFromEmail::class)('author@example.com')?->getKey())->toBe($contact->getKey());
+});

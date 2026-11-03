@@ -173,3 +173,24 @@ it('does not link an archived contact to an organization', function (): void {
 
     expect($contact->refresh()->organization_id)->toBeNull();
 });
+
+it('links an archived contact to an organization while archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $organization = Organization::factory()->create([
+        'domains' => [],
+    ]);
+    $contact = Contact::factory()->archived()->create([
+        'email' => 'person@example.com',
+        'organization_id' => null,
+    ]);
+
+    $organization->domains = [['domain' => 'example.com']];
+    $organization->saveQuietly();
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    app(MatchContactToOrganization::class)($contact->refresh());
+
+    expect($contact->refresh()->organization_id)->toBe($organization->getKey());
+});
