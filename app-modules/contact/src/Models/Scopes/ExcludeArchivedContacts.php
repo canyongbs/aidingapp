@@ -66,7 +66,7 @@ class ExcludeArchivedContacts
         }
 
         $query->where(function (Builder $query): void {
-            $query->withoutArchived(); // @phpstan-ignore method.notFound
+            $query->withoutArchived(); // @phpstan-ignore method.notFound (macro registered by the CanBeArchived global scope)
 
             if (filled($this->keepIds)) {
                 $query->orWhereKey($this->keepIds);
