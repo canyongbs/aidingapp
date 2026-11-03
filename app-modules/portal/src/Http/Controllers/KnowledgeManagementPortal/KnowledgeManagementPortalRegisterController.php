@@ -45,6 +45,7 @@ use AidingApp\Portal\Actions\ResolvePortalDisplayTimezone;
 use AidingApp\Portal\Http\Requests\KnowledgeManagementPortalRegisterRequest;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Http\Controllers\Controller;
 use App\Settings\LicenseSettings;
 use Illuminate\Http\JsonResponse;
@@ -65,17 +66,27 @@ class KnowledgeManagementPortalRegisterController extends Controller
 
         $data = $request->validated();
 
-        /** @var Contact $contact */
-        $contact = Contact::query()
-            ->make([
-                'email' => $data['email'],
-                'first_name' => $data['first_name'],
-                'last_name' => $data['last_name'],
-                'full_name' => "{$data['first_name']} {$data['last_name']}",
-                'preferred' => $data['preferred'] ?? null,
-                'mobile' => $data['mobile'],
-                'phone' => $data['phone'] ?? null,
-            ]);
+        $attributes = [
+            'email' => $data['email'],
+            'first_name' => $data['first_name'],
+            'last_name' => $data['last_name'],
+            'full_name' => "{$data['first_name']} {$data['last_name']}",
+            'preferred' => $data['preferred'] ?? null,
+            'mobile' => $data['mobile'],
+            'phone' => $data['phone'] ?? null,
+        ];
+
+        $archivedContact = null;
+
+        if (ContactArchivingFeature::active()) {
+            $archivedContact = Contact::query()
+                ->onlyArchived()
+                ->where('email', $data['email'])
+                ->first();
+        }
+
+        $contact = $archivedContact?->fill($attributes) ?? Contact::query()->make($attributes);
+
         $type = ContactType::resolveDefault();
 
         $organization = app(FindPortalRegistrationOrganization::class)($data['email']);
@@ -89,6 +100,10 @@ class KnowledgeManagementPortalRegisterController extends Controller
         }
 
         $contact->save();
+
+        if ($archivedContact) {
+            $contact->unarchive();
+        }
 
         $authenticatePortalContact($contact);
 
