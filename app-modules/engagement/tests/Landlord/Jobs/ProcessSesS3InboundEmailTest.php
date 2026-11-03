@@ -1054,15 +1054,15 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $filesystem->assertMissing('s3_email');
     });
 
-    $runInboundEmailForArchivedContact = function (?string $fromHeader): array {
+    $runInboundEmailForArchivedContact = function (?string $fromHeader, bool $hasOrganization = true): array {
         $tenant = Tenant::query()->firstOrFail();
 
-        [$archivedContact, $otherOrganization, $serviceRequestType] = $tenant->execute(function (): array {
+        [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization] = $tenant->execute(function () use ($hasOrganization): array {
             seed(ContactTypeSeeder::class);
 
             ContactArchivingFeature::activate();
 
-            Organization::factory()->create([
+            $domainOrganization = Organization::factory()->create([
                 'domains' => ['canyongbs.com'],
             ]);
 
@@ -1075,7 +1075,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 'first_name' => 'Old',
                 'last_name' => 'Name',
                 'full_name' => 'Old Name',
-                'organization_id' => $otherOrganization->getKey(),
+                'organization_id' => $hasOrganization ? $otherOrganization->getKey() : null,
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -1098,7 +1098,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 'email_automatic_creation_priority_id' => $serviceRequestType->priorities->first()->getKey(),
             ]);
 
-            return [$archivedContact, $otherOrganization, $serviceRequestType];
+            return [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization];
         });
 
         Storage::fake('s3');
@@ -1134,7 +1134,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->makeCurrent();
 
-        return [$archivedContact, $otherOrganization, $serviceRequestType];
+        return [$archivedContact, $otherOrganization, $serviceRequestType, $domainOrganization];
     };
 
     it('unarchives an archived contact instead of creating one for a service request', function () use ($runInboundEmailForArchivedContact): void {
@@ -1177,6 +1177,15 @@ describe('Service Request Type Service Request creation from inbound email', fun
         $serviceRequest = ServiceRequest::query()->sole();
 
         expect($serviceRequest->respondent->is($archivedContact))->toBeTrue();
+    });
+
+    it('assigns the sender domain\'s organization to an archived contact without one', function () use ($runInboundEmailForArchivedContact): void {
+        [$archivedContact, , , $domainOrganization] = $runInboundEmailForArchivedContact(null, hasOrganization: false);
+
+        $archivedContact->refresh();
+
+        expect($archivedContact->isArchived())->toBeFalse()
+            ->and($archivedContact->organization->is($domainOrganization))->toBeTrue();
     });
 
     it('properly creates a service request for a matching contact', function (): void {
