@@ -59,6 +59,21 @@ it('keeps archived contacts whose keys are passed', function (): void {
         ->toEqualCanonicalizing([$contact->getKey(), $keptArchivedContact->getKey()]);
 });
 
+it('keeps archived contacts whose keys are passed only within the rest of the query', function (): void {
+    ContactArchivingFeature::activate();
+
+    $contact = Contact::factory()->create(['full_name' => 'Matching Contact']);
+    $keptArchivedContact = Contact::factory()->archived()->create(['full_name' => 'Other Contact']);
+
+    expect(
+        Contact::query()
+            ->where('full_name', 'Matching Contact')
+            ->tap(new ExcludeArchivedContacts([$keptArchivedContact->getKey()]))
+            ->pluck('id')
+            ->all()
+    )->toBe([$contact->getKey()]);
+});
+
 it('does not filter when the contact archiving feature is inactive', function (): void {
     $contact = Contact::factory()->create();
     $archivedContact = Contact::factory()->archived()->create();
