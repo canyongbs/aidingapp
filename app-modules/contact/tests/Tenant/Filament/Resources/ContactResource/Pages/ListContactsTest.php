@@ -407,6 +407,17 @@ describe('archived contacts', function (): void {
     });
 });
 
+it('lists archived contacts while contact archiving is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view'));
+
+    $archivedContact = Contact::factory()->archived()->create();
+
+    Livewire::test(ListContacts::class)
+        ->assertCanSeeTableRecords([$archivedContact]);
+});
+
 it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
     Contact::factory(15)->create();
 
