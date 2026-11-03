@@ -38,6 +38,7 @@ use AidingApp\Contact\Models\Contact;
 use AidingApp\Notification\Enums\EmailMessageEventType;
 use AidingApp\Notification\Models\EmailMessage;
 use AidingApp\Notification\Notifications\Attributes\SystemNotification;
+use AidingApp\Notification\Notifications\Contracts\OnDemandNotification;
 use AidingApp\Notification\Notifications\Messages\MailMessage;
 use AidingApp\Notification\Tests\Fixtures\TestEmailNotification;
 use App\Features\ContactArchivingFeature;
@@ -45,6 +46,7 @@ use App\Models\Tenant;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Notifications\AnonymousNotifiable;
 use Illuminate\Notifications\Notification;
 
 it('will create an EmailMessage for the notification', function (): void {
@@ -174,6 +176,29 @@ it('records SuppressedByArchived rather than SuppressedByBounced for an archived
     expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
 });
 
+it('suppresses the send and records a SuppressedByArchived event for an on-demand notification to a contact archived before delivery', function (): void {
+    ContactArchivingFeature::activate();
+
+    $contact = Contact::factory()->create();
+
+    $notification = new TestOnDemandEmailNotification($contact);
+
+    $contact->archive();
+
+    (new AnonymousNotifiable())
+        ->route('mail', $contact->email)
+        ->notifyNow($notification);
+
+    $emailMessages = EmailMessage::query()
+        ->with('events')
+        ->get();
+
+    expect($emailMessages->count())->toBe(1);
+    expect($emailMessages->first()->recipient->is($contact))->toBeTrue();
+    expect($emailMessages->first()->events->count())->toBe(1);
+    expect($emailMessages->first()->events->first()->type)->toBe(EmailMessageEventType::SuppressedByArchived);
+});
+
 it('still dispatches to an archived contact when the contact archiving feature is inactive', function (): void {
     ContactArchivingFeature::deactivate();
 
@@ -241,5 +266,36 @@ class TestSystemNotification extends Notification implements ShouldQueue
             ->subject('Test Subject')
             ->greeting('Test Greeting')
             ->content('This is a test email');
+    }
+}
+
+class TestOnDemandEmailNotification extends Notification implements OnDemandNotification
+{
+    public function __construct(
+        public Contact $contact,
+    ) {}
+
+    /**
+     * @return list<string>
+     */
+    public function via(object $notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail(object $notifiable): MailMessage
+    {
+        return MailMessage::make()
+            ->subject('Test Subject')
+            ->greeting('Test Greeting')
+            ->content('This is a test email');
+    }
+
+    /**
+     * @return array{0: string, 1: string}
+     */
+    public function identifyRecipient(?object $notifiable = null): array
+    {
+        return [$this->contact->getKey(), $this->contact->getMorphClass()];
     }
 }

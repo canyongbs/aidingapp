@@ -95,7 +95,10 @@ class MailChannel extends BaseMailChannel
 
         $emailMessage->save();
 
-        if ($notifiable instanceof CanBeNotified && $notifiable->isSuppressedByArchival()) {
+        // An on-demand notification is routed to a bare address, so its archival state comes from the recipient it identified.
+        $archivalSubject = $notifiable instanceof CanBeNotified ? $notifiable : $emailMessage->recipient;
+
+        if ($archivalSubject instanceof CanBeNotified && $archivalSubject->isSuppressedByArchival()) {
             $result = new EmailChannelResultData(
                 success: false,
             );
