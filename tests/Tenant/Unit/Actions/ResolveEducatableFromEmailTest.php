@@ -36,6 +36,7 @@
 
 use AidingApp\Contact\Models\Contact;
 use App\Actions\ResolveEducatableFromEmail;
+use App\Features\ContactArchivingFeature;
 
 it('resolves a contact regardless of the email case', function (string $lookup): void {
     $contact = Contact::factory()->create(['email' => 'Person@Example.com']);
@@ -59,4 +60,20 @@ it('returns null when no contact matches the email', function (): void {
 
 it('returns null for a blank email', function (): void {
     expect(app(ResolveEducatableFromEmail::class)(null))->toBeNull();
+});
+
+it('does not resolve an archived contact', function (): void {
+    ContactArchivingFeature::activate();
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    expect(app(ResolveEducatableFromEmail::class)('archived@example.com'))->toBeNull();
+});
+
+it('resolves an archived contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    expect(app(ResolveEducatableFromEmail::class)('archived@example.com')?->getKey())->toBe($contact->getKey());
 });

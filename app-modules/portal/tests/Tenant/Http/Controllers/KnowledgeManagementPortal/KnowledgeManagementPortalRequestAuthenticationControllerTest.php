@@ -39,6 +39,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Notifications\AuthenticatePortalNotification;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\RateLimiter;
@@ -145,6 +146,33 @@ test('it allows registration flow when email domain matches an organization doma
     expect($authentication)
         ->not->toBeNull()
         ->and($authentication?->educatable_id)->toBeNull();
+});
+
+it('offers registration to an archived contact when the organization domain matches', function (): void {
+    ContactArchivingFeature::activate();
+
+    Organization::factory()->create([
+        'is_contact_generation_enabled' => true,
+        'domains' => [
+            ['domain' => 'example.com'],
+        ],
+    ]);
+
+    Contact::factory()->archived()->create(['email' => 'archived@example.com']);
+
+    $url = URL::signedRoute(name: 'api.portal.request-authentication', absolute: false);
+
+    $response = postJson($url, [
+        'email' => 'archived@example.com',
+    ]);
+
+    $response
+        ->assertStatus(404)
+        ->assertJsonPath('registrationAllowed', true);
+
+    expect($response->json('authentication_url'))->toContain('/api/portal/register/');
+
+    expect(PortalAuthentication::query()->latest('id')->first()?->educatable_id)->toBeNull();
 });
 
 test('it generates spa registration url when requested for unknown contact', function (): void {

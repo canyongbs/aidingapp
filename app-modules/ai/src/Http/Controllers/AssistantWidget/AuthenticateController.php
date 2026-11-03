@@ -39,6 +39,7 @@ namespace AidingApp\Ai\Http\Controllers\AssistantWidget;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Portal\Actions\AuthenticatePortalContact;
 use AidingApp\Portal\Models\PortalAuthentication;
+use App\Features\ContactArchivingFeature;
 use App\Http\Controllers\Controller;
 use App\Rules\ValidAuthenticationCode;
 use Illuminate\Http\JsonResponse;
@@ -51,7 +52,14 @@ class AuthenticateController extends Controller
         PortalAuthentication $authentication,
         AuthenticatePortalContact $authenticatePortalContact,
     ): JsonResponse {
-        if ($authentication->isExpired()) {
+        if (
+            $authentication->isExpired()
+            || (
+                ContactArchivingFeature::active()
+                && $authentication->educatable instanceof Contact
+                && $authentication->educatable->isArchived()
+            )
+        ) {
             return response()->json(['is_expired' => true], 422);
         }
 

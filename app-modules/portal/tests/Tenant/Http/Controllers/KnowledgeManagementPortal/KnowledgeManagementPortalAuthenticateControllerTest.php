@@ -40,6 +40,7 @@ use AidingApp\Portal\Enums\PortalType;
 use AidingApp\Portal\Models\PortalAuthentication;
 use AidingApp\Portal\Models\PortalGuest;
 use AidingApp\Portal\Settings\PortalSettings;
+use App\Features\ContactArchivingFeature;
 use App\Support\AuthenticationCodeRateLimiter;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\URL;
@@ -147,6 +148,70 @@ test('it authenticates contact and clears guest session when code is valid', fun
         ->assertJsonPath('assistant_widget_loader_url', null)
         ->assertJsonPath('assistant_widget_config_url', null)
         ->assertSessionMissing('guest_id');
+
+    expect($response->json('token'))->not()->toBeEmpty()
+        ->and(auth('contact')->check())->toBeTrue();
+});
+
+test('it does not authenticate an archived contact', function (): void {
+    ContactArchivingFeature::activate();
+
+    $contact = Contact::factory()->create();
+
+    $plainCode = 654321;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $contact->archive();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    postJson($url, ['code' => $plainCode])
+        ->assertOk()
+        ->assertJsonPath('is_expired', true)
+        ->assertSessionHas('guest_id');
+
+    expect(auth('contact')->guest())->toBeTrue()
+        ->and($contact->tokens()->doesntExist())->toBeTrue();
+});
+
+test('it authenticates an archived contact when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    $contact = Contact::factory()->archived()->create();
+
+    $plainCode = 654321;
+
+    $authentication = PortalAuthentication::factory()->create([
+        'portal_type' => PortalType::KnowledgeManagement,
+        'code' => Hash::make((string) $plainCode),
+        'created_at' => now(),
+    ]);
+    $authentication->educatable()->associate($contact);
+    $authentication->save();
+
+    $url = URL::signedRoute(
+        name: 'api.portal.authenticate.embedded',
+        parameters: ['authentication' => $authentication],
+        absolute: false,
+    );
+
+    $response = postJson($url, ['code' => $plainCode]);
+
+    $response
+        ->assertOk()
+        ->assertJsonPath('success', true)
+        ->assertJsonPath('user.id', $contact->getKey());
 
     expect($response->json('token'))->not()->toBeEmpty()
         ->and(auth('contact')->check())->toBeTrue();
