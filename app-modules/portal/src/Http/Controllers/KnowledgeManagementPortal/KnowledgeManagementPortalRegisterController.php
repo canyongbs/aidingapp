@@ -95,7 +95,7 @@ class KnowledgeManagementPortalRegisterController extends Controller
             $contact->organization()->associate($organization);
         }
 
-        if ($type) {
+        if ($type instanceof ContactType && ! $archivedContact) {
             $contact->type()->associate($type);
         }
 
