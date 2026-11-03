@@ -711,7 +711,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->execute(function (): void {
             Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -802,7 +802,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
             ContactArchivingFeature::activate();
 
             Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $archivedContact = Contact::factory()->archived()->create([
@@ -888,7 +888,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
         $tenant->execute(function () use ($bccEmail): void {
             Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -971,7 +971,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
             seed(ContactTypeSeeder::class);
 
             $organization = Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -1064,11 +1064,11 @@ describe('Service Request Type Service Request creation from inbound email', fun
             ContactArchivingFeature::activate();
 
             $domainOrganization = Organization::factory()->create([
-                'domains' => ['canyongbs.com'],
+                'domains' => [['domain' => 'canyongbs.com']],
             ]);
 
             $otherOrganization = Organization::factory()->create([
-                'domains' => ['other-domain.test'],
+                'domains' => [['domain' => 'other-domain.test']],
             ]);
 
             $archivedContact = Contact::factory()->archived()->create([
@@ -2146,7 +2146,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
 
             $tenant->execute(function (): void {
                 Organization::factory()->create([
-                    'domains' => ['canyongbs.com'],
+                    'domains' => [['domain' => 'canyongbs.com']],
                 ]);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -2223,7 +2223,7 @@ describe('Service Request Type Service Request creation from inbound email', fun
                 seed(ContactTypeSeeder::class);
 
                 $organization = Organization::factory()->create([
-                    'domains' => ['canyongbs.com'],
+                    'domains' => [['domain' => 'canyongbs.com']],
                 ]);
 
                 $serviceRequestType = ServiceRequestType::factory()
@@ -2581,7 +2581,7 @@ describe('Forwarded email Service Request creation', function (): void {
 
             // Organization matches the ORIGINAL sender's domain (example.com), not the forwarder's (school.edu).
             $organization = Organization::factory()->create([
-                'domains' => ['example.com'],
+                'domains' => [['domain' => 'example.com']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()
@@ -2664,7 +2664,7 @@ describe('Forwarded email Service Request creation', function (): void {
         $tenant->execute(function (): void {
             // Organization matches only the forwarder's domain, so the original sender is ineligible.
             Organization::factory()->create([
-                'domains' => ['school.edu'],
+                'domains' => [['domain' => 'school.edu']],
             ]);
 
             $serviceRequestType = ServiceRequestType::factory()

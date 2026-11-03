@@ -39,6 +39,7 @@ namespace AidingApp\Engagement\Jobs;
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
 use AidingApp\Contact\Models\Organization;
+use AidingApp\Contact\Support\OrganizationEmailDomainLookup;
 use AidingApp\Engagement\Enums\EngagementResponseType;
 use AidingApp\Engagement\Exceptions\SesS3InboundServiceRequestTypeNotFound;
 use AidingApp\Engagement\Exceptions\SesS3InboundSpamOrVirusDetected;
@@ -524,11 +525,7 @@ class ProcessSesS3InboundEmail implements ShouldQueue, ShouldBeUnique, NotTenant
                 $organization = null;
 
                 if ($serviceRequestType->email_automatic_creation_contact_create_condition === EmailAutomaticCreationContactCreateCondition::IfEligible) {
-                    $domain = Str::afterLast($effectiveSender, '@');
-
-                    $organization = Organization::query()
-                        ->whereRaw('LOWER(?) = ANY (SELECT LOWER(value) FROM jsonb_array_elements_text(domains))', [mb_strtolower($domain)])
-                        ->first();
+                    $organization = app(OrganizationEmailDomainLookup::class)->find($effectiveSender);
 
                     if (! $organization) {
                         Notification::route('mail', $effectiveSender)
