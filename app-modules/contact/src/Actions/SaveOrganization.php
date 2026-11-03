@@ -40,13 +40,24 @@ use AidingApp\Contact\DataTransferObjects\OrganizationDataObject;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Spatie\LaravelData\Optional;
 
 class SaveOrganization
 {
     /**
+     * Every writer of organization domains must hold this lock while checking and saving them. Advisory locks are
+     * scoped to the database, so each tenant gets its own lock.
+     */
+    private const string DOMAINS_LOCK_KEY = 'organization-domains';
+
+    /**
      * Creates the given organization, or updates it when an existing one is provided.
      * Only attributes present on the data object are written.
+     *
+     * @throws ValidationException When one of the domains is claimed by another organization.
      */
     public function __invoke(OrganizationDataObject $data, ?Organization $organization = null): Organization
     {
@@ -70,8 +81,38 @@ class SaveOrganization
             $organization = new Organization();
         }
 
-        $organization->fill($attributes)->save();
+        if (blank($attributes['domains'] ?? null)) {
+            $organization->fill($attributes)->save();
+
+            return $organization;
+        }
+
+        // A transaction alone does not stop two requests from both passing the domain check before either saves,
+        // so the check is repeated under a lock that is held until the organization has been committed.
+        DB::transaction(function () use ($organization, $attributes): void {
+            DB::selectOne('SELECT pg_advisory_xact_lock(hashtext(?))', [self::DOMAINS_LOCK_KEY]);
+
+            $this->ensureDomainsAreUnclaimed($organization, $attributes['domains']);
+
+            $organization->fill($attributes)->save();
+        });
 
         return $organization;
+    }
+
+    /**
+     * @param array<int, array{domain: string}> $domains
+     *
+     * @throws ValidationException
+     */
+    private function ensureDomainsAreUnclaimed(Organization $organization, array $domains): void
+    {
+        $rule = new UniqueOrganizationDomain($organization->exists ? $organization->getKey() : null);
+
+        foreach ($domains as $index => $domain) {
+            $rule->validate("domains.{$index}", $domain['domain'], function (string $message) use ($index): never {
+                throw ValidationException::withMessages(["domains.{$index}" => $message]);
+            });
+        }
     }
 }
