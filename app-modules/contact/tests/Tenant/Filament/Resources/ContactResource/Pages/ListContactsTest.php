@@ -422,7 +422,9 @@ it('lists archived contacts while contact archiving is inactive', function (): v
         ->assertCanSeeTableRecords([$archivedContact]);
 });
 
-it('only shows the bulk delete action to a user with the contact.delete permission', function (): void {
+it('only shows the bulk archive action to a user with the contact.delete permission', function (): void {
+    ContactArchivingFeature::activate();
+
     Contact::factory(15)->create();
 
     $user = User::factory()
@@ -432,12 +434,12 @@ it('only shows the bulk delete action to a user with the contact.delete permissi
     actingAs($user);
 
     Livewire::test(ListContacts::class)
-        ->assertActionHidden(TestAction::make('delete')->table()->bulk());
+        ->assertActionHidden(TestAction::make('archive')->table()->bulk());
 
     $user->givePermissionTo('contact.*.delete');
 
     Livewire::test(ListContacts::class)
-        ->assertActionVisible(TestAction::make('delete')->table()->bulk());
+        ->assertActionVisible(TestAction::make('archive')->table()->bulk());
 });
 
 it('can sort contacts by name', function (): void {
@@ -471,29 +473,43 @@ it('hides the created at and updated at columns by default and allows sorting th
         ->assertCanSeeTableRecords($contacts);
 })->with(['created_at', 'updated_at']);
 
-it('skips managed contacts when bulk deleting while the contact archiving feature is active', function (): void {
-    ContactArchivingFeature::activate();
+describe('archiving', function (): void {
+    beforeEach(function (): void {
+        ContactArchivingFeature::activate();
+    });
+
+    it('bulk archives contacts and skips managed ones', function (): void {
+        actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
+
+        $contact = Contact::factory()->create();
+        $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
+
+        Livewire::test(ListContacts::class)
+            ->selectTableRecords([$contact->getKey(), $managed->getKey()])
+            ->callAction(TestAction::make('archive')->table()->bulk());
+
+        app(NotificationMailbox::class)->flush();
+
+        $notifications = new Notifications();
+        $notifications->mount();
+        $notifications->pullNotificationsFromSession();
+
+        expect($notifications->notifications->map(fn (Notification $notification): string => (string) $notification->getBody())->all())
+            ->toContain('<p>One of the selected contacts is managed and cannot be archived.</p>');
+
+        expect($contact->refresh()->isArchived())->toBeTrue()
+            ->and($managed->refresh()->isArchived())->toBeFalse();
+    });
+});
+
+it('shows the bulk delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
 
     actingAs(User::factory()->create()->givePermissionTo('contact.view-any', 'contact.*.view', 'contact.*.delete'));
 
-    $contact = Contact::factory()->create();
-    $managed = Contact::factory()->for(User::factory(), 'managedByUser')->create();
-
     Livewire::test(ListContacts::class)
-        ->selectTableRecords([$contact->getKey(), $managed->getKey()])
-        ->callAction(TestAction::make(DeleteBulkAction::class)->table()->bulk());
-
-    app(NotificationMailbox::class)->flush();
-
-    $notifications = new Notifications();
-    $notifications->mount();
-    $notifications->pullNotificationsFromSession();
-
-    expect($notifications->notifications->map(fn (Notification $notification): string => (string) $notification->getBody())->all())
-        ->toContain('<p>One of the selected contacts is managed and cannot be archived.</p>');
-
-    expect(Contact::find($contact->getKey()))->toBeNull()
-        ->and(Contact::find($managed->getKey()))->not->toBeNull();
+        ->assertActionVisible(TestAction::make('delete')->table()->bulk())
+        ->assertActionDoesNotExist(TestAction::make('archive')->table()->bulk());
 });
 
 it('bulk deletes managed contacts when the contact archiving feature is inactive', function (): void {

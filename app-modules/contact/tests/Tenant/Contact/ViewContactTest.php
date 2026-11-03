@@ -135,6 +135,38 @@ it('returns not found for an archived contact', function (): void {
         ->assertNotFound();
 });
 
+describe('archiving', function (): void {
+    beforeEach(function (): void {
+        ContactArchivingFeature::activate();
+    });
+
+    it('archives the contact', function (): void {
+        asSuperAdmin();
+
+        $contact = Contact::factory()->create();
+
+        expect($contact->isArchived())->toBeFalse();
+
+        Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+            ->callAction('archive')
+            ->assertRedirect(ContactResource::getUrl('index'));
+
+        expect($contact->refresh()->isArchived())->toBeTrue();
+    });
+});
+
+it('shows the delete action when the contact archiving feature is inactive', function (): void {
+    ContactArchivingFeature::deactivate();
+
+    asSuperAdmin();
+
+    $contact = Contact::factory()->create();
+
+    Livewire::test(ViewContact::class, ['record' => $contact->getRouteKey()])
+        ->assertActionVisible('delete')
+        ->assertActionDoesNotExist('archive');
+});
+
 // Permission Tests
 
 test('ViewContact is gated with proper access control', function (): void {
