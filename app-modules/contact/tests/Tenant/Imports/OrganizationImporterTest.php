@@ -245,6 +245,35 @@ it('rejects a domain already used by another organization case-insensitively', f
     ]);
 })->throws(RowImportFailedException::class);
 
+it('rejects a domain that differs from one used by another organization only by www', function (string $storedDomain, string $importedDomain) use ($runOrganizationImport): void {
+    Organization::factory()->create([
+        'name' => 'Existing College',
+        'domains' => [['domain' => $storedDomain]],
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'New College',
+        'domains' => $importedDomain,
+    ]);
+})->with([
+    'www added' => ['shared.edu', 'www.shared.edu'],
+    'www removed' => ['www.Shared.edu', 'shared.edu'],
+])->throws(RowImportFailedException::class, 'is already in use by another organization');
+
+it('allows an organization to keep its own domain when it is reimported with www', function () use ($runOrganizationImport): void {
+    $organization = Organization::factory()->create([
+        'name' => 'Keep College',
+        'domains' => [['domain' => 'keep.edu']],
+    ]);
+
+    $runOrganizationImport([
+        'name' => 'Keep College',
+        'domains' => 'www.keep.edu',
+    ]);
+
+    expect($organization->refresh()->domains)->toBe([['domain' => 'www.keep.edu']]);
+});
+
 it('allows an organization to keep its own domain while adding another on update', function () use ($runOrganizationImport): void {
     $organization = Organization::factory()->create([
         'name' => 'Keep College',

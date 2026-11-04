@@ -39,13 +39,13 @@ namespace AidingApp\Contact\Imports;
 use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Models\OrganizationIndustry;
 use AidingApp\Contact\Models\OrganizationType;
+use AidingApp\Contact\Rules\UniqueOrganizationDomain;
 use AidingApp\Contact\Support\OrganizationDomainsLock;
 use Closure;
 use Filament\Actions\Imports\Exceptions\RowImportFailedException;
 use Filament\Actions\Imports\ImportColumn;
 use Filament\Actions\Imports\Importer;
 use Filament\Actions\Imports\Models\Import;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -261,17 +261,12 @@ class OrganizationImporter extends Importer
         /** @var array<int, array{domain: string}> $domains */
         $domains = $this->record->domains ?? [];
 
-        $ignoreId = $this->record->exists ? $this->record->getKey() : null;
+        $rule = new UniqueOrganizationDomain($this->record->exists ? $this->record->getKey() : null);
 
         foreach ($domains as $domain) {
-            $usedByAnotherOrganization = Organization::query()
-                ->when($ignoreId, fn (Builder $query) => $query->whereKeyNot($ignoreId))
-                ->whereRaw("EXISTS (SELECT 1 FROM jsonb_array_elements(domains) AS element WHERE lower(element->>'domain') = ?)", [$domain['domain']])
-                ->exists();
-
-            if ($usedByAnotherOrganization) {
+            $rule->validate('domains', $domain['domain'], function (string $message) use ($domain): never {
                 throw new RowImportFailedException("The domain '{$domain['domain']}' is already in use by another organization.");
-            }
+            });
         }
 
         $tag = self::domainClaimCacheTag($this->import->getKey());
