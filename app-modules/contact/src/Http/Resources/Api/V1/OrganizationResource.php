@@ -77,10 +77,11 @@ class OrganizationResource extends JsonResource
             'facebook_url' => $this->resource->facebook_url,
             'twitter_url' => $this->resource->twitter_url,
             /** @var array<int, string> */
-            'domains' => array_map(
-                fn (array $domain): string => $domain['domain'],
-                $this->resource->domains ?? [],
-            ),
+            'domains' => collect($this->resource->domains ?? [])
+                ->pluck('domain')
+                ->filter(fn (mixed $domain): bool => is_string($domain) && filled($domain))
+                ->values()
+                ->all(),
             'is_contact_generation_enabled' => $this->resource->is_contact_generation_enabled,
             'created_at' => $this->resource->created_at,
             'updated_at' => $this->resource->updated_at,

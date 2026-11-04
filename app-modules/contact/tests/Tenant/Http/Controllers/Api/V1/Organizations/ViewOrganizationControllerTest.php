@@ -99,6 +99,21 @@ it('returns the organization', function (): void {
         ->assertJsonPath('data.is_contact_generation_enabled', true);
 });
 
+it('skips stored domain entries that have no domain', function (): void {
+    $user = SystemUser::factory()->create();
+    $user->givePermissionTo('organization.view-any');
+    $user->givePermissionTo('organization.*.view');
+    Sanctum::actingAs($user, ['api']);
+
+    $organization = Organization::factory()->create([
+        'domains' => [['domain' => 'example.com'], ['domain' => null], ['domain' => ''], []],
+    ]);
+
+    getJson(route('api.v1.organizations.show', ['organization' => $organization], false))
+        ->assertOk()
+        ->assertJsonPath('data.domains', ['example.com']);
+});
+
 it('returns null relations and an empty domain list when they are not set', function (): void {
     $user = SystemUser::factory()->create();
     $user->givePermissionTo('organization.view-any');
