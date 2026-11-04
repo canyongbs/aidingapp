@@ -60,7 +60,7 @@ beforeEach(function (): void {
 });
 
 it('is gated with proper access control', function () use ($actingAsContactCreator): void {
-    $payload = ['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create()->name];
+    $payload = ['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create(['name' => 'Customer'])->name];
 
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertUnauthorized();
@@ -100,7 +100,7 @@ it('does not reveal validation details to unauthorized users', function (): void
 it('creates a contact with the provided attributes', function () use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 
-    $type = ContactType::factory()->create();
+    $type = ContactType::factory()->create(['name' => 'Customer']);
     $organization = Organization::factory()->create();
 
     $response = postJson(route('api.v1.contacts.store', [], false), [
@@ -184,6 +184,21 @@ it('rejects ambiguous contact type names', function () use ($actingAsContactCrea
     assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
 });
 
+it('reports unknown relationship names together with other validation errors', function () use ($actingAsContactCreator): void {
+    $actingAsContactCreator();
+
+    postJson(route('api.v1.contacts.store', [], false), [
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'email' => 'not-an-email',
+        'type' => 'Unknown type',
+        'organization' => 'Unknown organization',
+    ])->assertUnprocessable()
+        ->assertJsonValidationErrors(['email', 'type', 'organization']);
+
+    assertDatabaseMissing(Contact::class, ['first_name' => 'Jane']);
+});
+
 it('does not resolve deleted relationships by name', function (string $field) use ($actingAsContactCreator): void {
     $actingAsContactCreator();
 
@@ -215,7 +230,7 @@ it('does not resolve an archived organization by name', function () use ($acting
     postJson(route('api.v1.contacts.store', [], false), [
         'first_name' => 'Jane',
         'last_name' => 'Doe',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
         'organization' => $organization->name,
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['organization']);
@@ -233,7 +248,7 @@ it('resolves an archived organization by name while organization archiving is in
     postJson(route('api.v1.contacts.store', [], false), [
         'first_name' => 'Jane',
         'last_name' => 'Doe',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
         'organization' => $organization->name,
     ])->assertCreated()
         ->assertJsonPath('data.organization.id', $organization->getKey());
@@ -255,7 +270,7 @@ it('validates the request', function (array $payload, array $errors) use ($actin
     $existing = Contact::factory()->create(['email' => 'taken@example.com']);
     Contact::factory()->create()->delete();
 
-    $payload = array_merge(['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create()->name], $payload);
+    $payload = array_merge(['first_name' => 'Jane', 'last_name' => 'Doe', 'type' => ContactType::factory()->create(['name' => 'Customer'])->name], $payload);
 
     postJson(route('api.v1.contacts.store', [], false), $payload)
         ->assertUnprocessable()
@@ -284,7 +299,7 @@ it('allows an email address belonging to a deleted contact', function () use ($a
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'reused@example.com',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertCreated();
 });
 
@@ -297,7 +312,7 @@ it('explains that an archived contact reserves the email', function () use ($act
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'ARCHIVED@example.com',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertUnprocessable()
         ->assertJsonPath('errors.email', ['An archived contact with this email already exists.']);
 
@@ -319,7 +334,7 @@ it('rejects an email used by an archived contact while contact archiving is inac
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'archived@example.com',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertUnprocessable()
         ->assertJsonPath('errors.email', ['The email has already been taken.']);
 });
@@ -332,7 +347,7 @@ it('matches an organization by email domain when none is provided', function (bo
         'first_name' => 'Jane',
         'last_name' => 'Doe',
         'email' => 'jane@example.com',
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ];
 
     if (! $omitOrganization) {
@@ -361,7 +376,7 @@ it('creates a contact at the combined name length boundary', function (int $firs
     $response = postJson(route('api.v1.contacts.store', [], false), [
         'first_name' => $firstName,
         'last_name' => $lastName,
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertCreated()
         ->assertJsonPath('data.name', "{$firstName} {$lastName}");
 
@@ -380,7 +395,7 @@ it('rejects a combined name longer than the column allows', function (int $lastN
     postJson(route('api.v1.contacts.store', [], false), [
         'first_name' => str_repeat('a', 128),
         'last_name' => str_repeat('b', $lastNameLength),
-        'type' => ContactType::factory()->create()->name,
+        'type' => ContactType::factory()->create(['name' => 'Customer'])->name,
     ])->assertUnprocessable()
         ->assertJsonValidationErrors(['first_name', 'last_name'])
         ->assertJsonPath('errors.first_name.0', 'The full name may not be greater than 255 characters.')

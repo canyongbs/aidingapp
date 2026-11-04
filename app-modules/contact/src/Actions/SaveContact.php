@@ -101,8 +101,8 @@ class SaveContact
     }
 
     /**
-     * Types and organizations are referenced by name, ignoring case. Every problem is reported together.
-     *
+     * Types and organizations are referenced by name, ignoring case. The request validates the names first,
+     * so this only fails when a record changed after validation. Every problem is reported together.
      *
      * @throws ValidationException
      *

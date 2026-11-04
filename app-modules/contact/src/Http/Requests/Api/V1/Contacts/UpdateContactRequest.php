@@ -37,11 +37,15 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Rules\ContactEmailNotArchived;
+use AidingApp\Contact\Rules\ResolvableContactTypeName;
 use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 class UpdateContactRequest extends FormRequest
 {
@@ -90,8 +94,16 @@ class UpdateContactRequest extends FormRequest
             ],
             'mobile' => ['sometimes', 'nullable', 'string', 'max:255'],
             'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
-            'type' => ['sometimes', 'string', 'max:255'],
-            'organization' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'type' => ['sometimes', 'string', 'max:255', new ResolvableContactTypeName()],
+            'organization' => [
+                'sometimes',
+                'nullable',
+                'string',
+                'max:255',
+                Rule::exists(Organization::class, 'name')
+                    ->withoutTrashed()
+                    ->when(OrganizationArchivingFeature::active(), fn (Exists $rule): Exists => $rule->whereNull('archived_at')),
+            ],
             'job_title' => ['sometimes', 'nullable', 'string', 'max:255'],
             'employee_id' => ['sometimes', 'nullable', 'string', 'max:255'],
             'work_number' => ['sometimes', 'nullable', 'string', 'max:255'],

@@ -170,7 +170,7 @@ it('can change the contact type', function () use ($actingAsContactUpdater): voi
     $actingAsContactUpdater();
 
     $contact = Contact::factory()->create();
-    $type = ContactType::factory()->create();
+    $type = ContactType::factory()->create(['name' => 'Customer']);
 
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['type' => $type->name])
         ->assertOk()

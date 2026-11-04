@@ -38,11 +38,15 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Rules\ContactEmailNotArchived;
+use AidingApp\Contact\Rules\ResolvableContactTypeName;
 use App\Features\ContactArchivingFeature;
+use App\Features\OrganizationArchivingFeature;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Exists;
 
 class CreateContactRequest extends FormRequest
 {
@@ -82,8 +86,16 @@ class CreateContactRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:255',
+                new ResolvableContactTypeName(),
             ],
-            'organization' => ['nullable', 'string', 'max:255'],
+            'organization' => [
+                'nullable',
+                'string',
+                'max:255',
+                Rule::exists(Organization::class, 'name')
+                    ->withoutTrashed()
+                    ->when(OrganizationArchivingFeature::active(), fn (Exists $rule): Exists => $rule->whereNull('archived_at')),
+            ],
             'job_title' => ['nullable', 'string', 'max:255'],
             'employee_id' => ['nullable', 'string', 'max:255'],
             'work_number' => ['nullable', 'string', 'max:255'],
