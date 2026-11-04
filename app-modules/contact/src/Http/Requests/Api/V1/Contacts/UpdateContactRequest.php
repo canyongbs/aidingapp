@@ -37,9 +37,11 @@
 namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Validation\Rule;
 
-class UpdateContactRequest extends SaveContactRequest
+class UpdateContactRequest extends FormRequest
 {
     /**
      * Authorization runs before validation so unauthorized callers cannot probe
@@ -58,7 +60,8 @@ class UpdateContactRequest extends SaveContactRequest
     }
 
     /**
-     * Only the attributes present in the request are validated and updated.
+     * Every attribute is optional, and only the ones that are sent are validated and updated. The attributes
+     * a contact must always have (names and type) cannot be sent as `null`, because they are not `nullable`.
      *
      * @return array<string, array<mixed>>
      */
@@ -66,11 +69,35 @@ class UpdateContactRequest extends SaveContactRequest
     {
         $contact = $this->route('contact');
 
-        $rules = [
-            ...$this->contactRules($contact instanceof Contact ? $contact : null),
-            'type' => ['required', 'string', 'max:255'],
+        return [
+            'first_name' => ['sometimes', 'string', 'max:255'],
+            'last_name' => ['sometimes', 'string', 'max:255'],
+            'preferred_name' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'email' => [
+                'sometimes',
+                'nullable',
+                'email',
+                'max:255',
+                Rule::unique(Contact::class, 'email')->ignore($contact instanceof Contact ? $contact : null)->withoutTrashed(),
+            ],
+            'mobile' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'phone' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'type' => ['sometimes', 'string', 'max:255'],
+            'organization' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'job_title' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'employee_id' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'work_number' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'work_extension' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'student_id' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'school' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'academic_department' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'program' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'address' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'address_2' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'city' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'state' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'postal_code' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'country' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
-
-        return array_map(fn (array $fieldRules): array => ['sometimes', ...$fieldRules], $rules);
     }
 }

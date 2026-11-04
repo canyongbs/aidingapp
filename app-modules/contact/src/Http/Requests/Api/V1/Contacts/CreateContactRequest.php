@@ -38,10 +38,13 @@ namespace AidingApp\Contact\Http\Requests\Api\V1\Contacts;
 
 use AidingApp\Contact\Models\Contact;
 use AidingApp\Contact\Models\ContactType;
+use App\Features\ContactArchivingFeature;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 
-class CreateContactRequest extends SaveContactRequest
+class CreateContactRequest extends FormRequest
 {
     /**
      * Authorization runs before validation so unauthorized callers cannot probe
@@ -61,13 +64,44 @@ class CreateContactRequest extends SaveContactRequest
     public function rules(): array
     {
         return [
-            ...$this->contactRules(ignoreArchivedEmails: true),
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'preferred_name' => ['nullable', 'string', 'max:255'],
+            'email' => [
+                'nullable',
+                'email',
+                'max:255',
+                // An archived contact with the same email is restored, so it does not count as taken.
+                Rule::unique(Contact::class, 'email')
+                    ->withoutTrashed()
+                    ->when(
+                        ContactArchivingFeature::active(),
+                        fn (Unique $rule): Unique => $rule->whereNull('archived_at'),
+                    ),
+            ],
+            'mobile' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:255'],
             'type' => [
                 Rule::requiredIf(fn (): bool => ContactType::resolveDefault() === null),
                 'nullable',
                 'string',
                 'max:255',
             ],
+            'organization' => ['nullable', 'string', 'max:255'],
+            'job_title' => ['nullable', 'string', 'max:255'],
+            'employee_id' => ['nullable', 'string', 'max:255'],
+            'work_number' => ['nullable', 'string', 'max:255'],
+            'work_extension' => ['nullable', 'string', 'max:255'],
+            'student_id' => ['nullable', 'string', 'max:255'],
+            'school' => ['nullable', 'string', 'max:255'],
+            'academic_department' => ['nullable', 'string', 'max:255'],
+            'program' => ['nullable', 'string', 'max:255'],
+            'address' => ['nullable', 'string', 'max:255'],
+            'address_2' => ['nullable', 'string', 'max:255'],
+            'city' => ['nullable', 'string', 'max:255'],
+            'state' => ['nullable', 'string', 'max:255'],
+            'postal_code' => ['nullable', 'string', 'max:255'],
+            'country' => ['nullable', 'string', 'max:255'],
         ];
     }
 }

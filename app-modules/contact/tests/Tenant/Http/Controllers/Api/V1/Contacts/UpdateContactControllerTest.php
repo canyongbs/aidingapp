@@ -40,6 +40,7 @@ use AidingApp\Contact\Models\Organization;
 use AidingApp\Contact\Services\ManagedContactService;
 use App\Models\SystemUser;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Laravel\Sanctum\Sanctum;
 
 use function Pest\Laravel\assertDatabaseHas;
@@ -112,6 +113,45 @@ it('updates only the attributes included in the request', function () use ($acti
         ->and($fresh->city)->toBe('Springfield')
         ->and($fresh->full_name)->toBe($contact->full_name);
 });
+
+it('updates a single attribute without requiring the others and leaves every other column untouched', function (array $payload, array $changedColumns) use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    $organization = Organization::factory()->create(['name' => 'Original Organization', 'domains' => []]);
+    Organization::factory()->create(['name' => 'Other Organization', 'domains' => []]);
+    ContactType::factory()->create(['name' => 'Other Type']);
+
+    $contact = Contact::factory()->for($organization, 'organization')->create([
+        'first_name' => 'Jane',
+        'last_name' => 'Doe',
+        'full_name' => 'Jane Doe',
+        'preferred' => 'JD',
+        'email' => 'jane@example.com',
+        'mobile' => '555-0101',
+        'phone' => '555-0102',
+        'job_title' => 'Engineer',
+        'employee_id' => 'E-1',
+        'city' => 'Springfield',
+        'state' => 'IL',
+        'postal' => '62701',
+    ]);
+
+    $unchangedColumns = fn (): array => Arr::except($contact->fresh()->getAttributes(), [...$changedColumns, 'updated_at']);
+    $before = $unchangedColumns();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), $payload)
+        ->assertOk();
+
+    expect($unchangedColumns())->toBe($before);
+})->with([
+    'job title' => [['job_title' => 'Updated'], ['job_title']],
+    'email' => [['email' => 'new@example.com'], ['email']],
+    'phone cleared' => [['phone' => null], ['phone']],
+    'first name' => [['first_name' => 'Janet'], ['first_name', 'full_name']],
+    'last name' => [['last_name' => 'Smith'], ['last_name', 'full_name']],
+    'type' => [['type' => 'Other Type'], ['type_id']],
+    'organization' => [['organization' => 'Other Organization'], ['organization_id']],
+]);
 
 it('keeps the full name in sync with the first and last name', function () use ($actingAsContactUpdater): void {
     $actingAsContactUpdater();
@@ -267,6 +307,21 @@ it('clears an organization even when the email domain matches', function () use 
     $contact = Contact::factory()->for($organization, 'organization')->create(['email' => 'jane@example.com']);
 
     patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['organization' => null])
+        ->assertOk()
+        ->assertJsonPath('data.organization', null);
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+});
+
+it('does not assign an organization when an unrelated attribute is updated', function () use ($actingAsContactUpdater): void {
+    $actingAsContactUpdater();
+
+    Organization::factory()->create(['domains' => [['domain' => 'example.com']]]);
+    $contact = Contact::factory()->createQuietly(['email' => 'jane@example.com', 'organization_id' => null]);
+
+    expect($contact->refresh()->organization_id)->toBeNull();
+
+    patchJson(route('api.v1.contacts.update', ['contact' => $contact], false), ['job_title' => 'Updated'])
         ->assertOk()
         ->assertJsonPath('data.organization', null);
 
